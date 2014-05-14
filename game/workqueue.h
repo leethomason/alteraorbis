@@ -65,10 +65,8 @@ public:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
 	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
 	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
-//	const QueueItem*	GetJobByTaskID( int taskID );
 	const QueueItem*	GetJobByPosition(const grinliz::Vector2I& pos);
-//	void				ReleaseJob( int chitID );
-	void				ClearJobs();
+	//void				ClearJobs();
 
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
@@ -80,8 +78,10 @@ public:
 									const grinliz::Vector2I& pos, 
 									int action,
 									const Wallet& availableFunds );
-
 	bool TaskCanComplete( const WorkQueue::QueueItem& item );
+
+	bool TaskIsComplete(const WorkQueue::QueueItem& item);
+
 	static int  CalcTaskSize( const grinliz::IString& structure );
 
 private:

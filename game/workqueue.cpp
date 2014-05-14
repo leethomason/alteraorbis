@@ -14,6 +14,9 @@
 #include "../script/buildscript.h"
 #include "../script/corescript.h"
 
+#include "../ai/tasklist.h"
+#include "../game/aicomponent.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -211,13 +214,14 @@ void WorkQueue::ReleaseJob( int chitID )
 }
 */
 
+/*
 void WorkQueue::ClearJobs()
 {
 	while( queue.Size() ) {
 		RemoveItem( queue.Size()-1 );
 	}
 }
-
+*/
 /*
 const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
 {
@@ -289,6 +293,14 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 
 void WorkQueue::RemoveItem( int index )
 {
+	if (queue[index].assigned) {
+		LumosChitBag* chitBag = parentChit->Context()->chitBag;
+		Chit* chit = chitBag->GetChit(queue[index].assigned);
+		if (chit) {
+			chit->GetAIComponent()->ClearTaskList();
+		}
+	}
+
 	GLASSERT( queue[index].model );
 	RemoveImage( &queue[index] );
 	queue.Remove( index );
@@ -377,6 +389,47 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	return true;
 }
 
+bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
+{
+	const ChitContext* context = parentChit->Context();
+	const WorldGrid& wg = context->worldMap->GetWorldGrid(item.pos.x, item.pos.y);
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData(item.buildScriptID);
+
+	if (wg.IsWater()) {
+		GLASSERT(false);	// shouldn't be work here.
+		return true;	
+	}
+
+	if (BuildScript::IsClear(item.buildScriptID)) {
+		if (context->chitBag->QueryRemovable(item.pos, false)) {
+			return false; // need to clear building or plant
+		}
+		if (wg.RockHeight() || wg.Pave() ) {
+			return false; // need to clear rock or pave
+		}
+		return true;
+	}
+	else if (BuildScript::IsBuild(item.buildScriptID)) {
+		if (item.buildScriptID == BuildScript::PAVE) {
+			return wg.Pave() > 0;
+		}
+		else if (item.buildScriptID == BuildScript::ICE) {
+			return wg.RockHeight() > 0;
+		}
+		else {
+			Chit* building = context->chitBag->QueryBuilding(item.pos);
+			if (building && building->GetItem() && building->GetItem()->IName() == buildData.structure) {
+				return true;
+			}
+			return false;
+		}
+	}
+	GLASSERT(0);
+	return true;
+}
+
+
 void WorkQueue::DoTick()
 {
 	GLASSERT( parentChit );
@@ -384,15 +437,38 @@ void WorkQueue::DoTick()
 
 	for( int i=0; i<queue.Size(); ++i ) {
 
-		if ( queue[i].assigned ) {
-			if ( !chitBag->GetChit( queue[i].assigned )) {
-				queue[i].assigned = 0;
-			}
+		if (TaskIsComplete(queue[i])) {
+			RemoveItem(i);
+			--i;
+			continue;
 		}
 
-		if ( !TaskCanComplete( queue[i] )) {
-			RemoveItem( i );
+		if (!TaskCanComplete(queue[i])) {
+			RemoveItem(i);
 			--i;
+			continue;
+		}
+
+		if (queue[i].assigned) {
+			Chit* chit = chitBag->GetChit(queue[i].assigned);
+			if (!chit) {
+				queue[i].assigned = 0;
+			}
+			// Chit exists - but is it doing this WorkItem?
+			if (chit && chit->GetAIComponent()) {
+				const ai::Task* task = chit->GetAIComponent()->GoalTask();
+				if (task 
+					&& (task->action == ai::Task::TASK_BUILD) 
+					&& (task->buildScriptID == queue[i].buildScriptID) 
+					&& task->pos2i == queue[i].pos) 
+				{
+					// Looks good! This is the work queue item.
+				}
+				else {
+					// Something shifted.
+					queue[i].assigned = 0;
+				}
+			}
 		}
 	}
 }

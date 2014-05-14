@@ -6,7 +6,7 @@
 #include "../xegame/cticker.h"
 
 class Chit;
-class WorkQueue;
+//class WorkQueue;
 class WorldMap;
 class Engine;
 struct ComponentSet;
@@ -33,61 +33,61 @@ public:
 
 	Task() { Clear(); }
 	
-	static Task MoveTask( const grinliz::Vector2F& pos2, int taskID=0 ) 
+	static Task MoveTask( const grinliz::Vector2F& pos2 ) 
 	{
 		grinliz::Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
-		return MoveTask( pos2i, taskID );
+		return MoveTask( pos2i );
 	}
 
-	static Task MoveTask( const grinliz::Vector2I& pos2i, int taskID=0 )
+	static Task MoveTask( const grinliz::Vector2I& pos2i )
 	{
 		Task t;
 		t.action = TASK_MOVE;
 		t.pos2i  = pos2i;
-		t.taskID = taskID;
+//		t.taskID = taskID;
 		return t;
 	}
 	// Check and use location.
-	static Task StandTask( int time, int taskID=0 ) {
+	static Task StandTask( int time ) {
 		Task t;
 		t.action = TASK_STAND;
 		t.timer = time;
-		t.taskID = taskID;
+//		t.taskID = taskID;
 		return t;
 	}
 		
 	// Assumes move first.
-	static Task PickupTask( int chitID, int taskID=0 ) {
+	static Task PickupTask( int chitID ) {
 		Task t;
 		t.action = TASK_PICKUP;
 		t.data = chitID;
-		t.taskID = taskID;
+		//t.taskID = taskID;
 		return t;
 	}
 
-	static Task UseBuildingTask( int taskID=0 ) {
+	static Task UseBuildingTask() {
 		Task t;
 		t.action = TASK_USE_BUILDING;
-		t.taskID = taskID;
+		//t.taskID = taskID;
 		return t;
 	}
 
-	static Task RepairTask(int buildingID, int taskID = 0) {
+	static Task RepairTask(int buildingID) {
 		Task t;
 		t.action = TASK_REPAIR_BUILDING;
 		t.data = buildingID;
-		t.taskID = taskID;
+//		t.taskID = taskID;
 		return t;
 	}
 
-	static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 );
+	static Task RemoveTask( const grinliz::Vector2I& pos2i );
 
-	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int rotation, int taskID=0 ) {
+	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int rotation) {
 		Task t;
 		t.action = TASK_BUILD;
 		t.pos2i = pos2i;
 		t.buildScriptID = buildScriptID;
-		t.taskID = taskID;
+		//t.taskID = taskID;
 		t.data = rotation;
 		return t;
 	}
@@ -98,7 +98,7 @@ public:
 		timer = 0;
 		data = 0;
 		buildScriptID = 0;
-		taskID = 0;
+//		taskID = 0;
 	}
 
 	void Serialize( XStream* xs );
@@ -108,7 +108,7 @@ public:
 	grinliz::Vector2I	pos2i;
 	int					timer;
 	int					data;
-	int					taskID;		// if !0, then attached to a workqueue task
+	//int					taskID;		// if !0, then attached to a workqueue task
 };
 
 
@@ -130,14 +130,17 @@ public:
 
 	grinliz::Vector2I Pos2I() const;
 	bool Empty() const { return taskList.Empty(); }
+	const Task* GoalTask() const {
+		if (!Empty()) return &taskList[taskList.Size() - 1];
+		return 0;
+	}
 	
 	void Push( const Task& task );
 	void Clear();
 
 	bool Standing() const { return !taskList.Empty() && taskList[0].action == Task::TASK_STAND; }
 
-	// WorkQueue is optional, but connects the tasks back to the queue.
-	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
+	void DoTasks( Chit* chit, U32 delta );
 
 	grinliz::IString LastBuildingUsed() const { return lastBuildingUsed; }
 

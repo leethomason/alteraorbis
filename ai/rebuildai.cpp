@@ -63,7 +63,7 @@ void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			wi->structure = gi->IName();
 			wi->pos = chit->GetSpatialComponent()->Bounds().min;
 			wi->rot = LRint(chit->GetSpatialComponent()->GetYRotation());
-			GLOUTPUT(("Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
+			GLOUTPUT(("ReBuild: Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
 		}
 	}
 	super::OnChitMsg(chit, msg);
@@ -101,8 +101,13 @@ int RebuildAIComponent::DoTick(U32 delta)
 				BuildScript buildScript;
 				int id = 0;
 				buildScript.GetDataFromStructure(wi.structure, &id);
-				workQueue->AddAction(wi.pos, id, float(wi.rot));
-				GLOUTPUT(("Structure %s at %d,%d r=%d POP to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y, int(wi.rot)));
+				if (workQueue->AddAction(wi.pos, id, float(wi.rot))) {
+					GLOUTPUT(("ReBuild: Structure %s at %d,%d r=%d POP to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y, int(wi.rot)));
+				}
+				else {
+					GLOUTPUT(("ReBuild: Re-Push structure %s at %d,%d to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y));
+					workItems.Push(wi);
+				}
 			}
 		}
 	}

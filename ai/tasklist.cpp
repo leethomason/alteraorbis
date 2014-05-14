@@ -34,9 +34,9 @@
 using namespace grinliz;
 using namespace ai;
 
-Task Task::RemoveTask( const grinliz::Vector2I& pos2i, int taskID )
+Task Task::RemoveTask( const grinliz::Vector2I& pos2i )
 {
-	return Task::BuildTask( pos2i, BuildScript::CLEAR, 0, taskID );
+	return Task::BuildTask( pos2i, BuildScript::CLEAR, 0 );
 }
 
 
@@ -58,7 +58,7 @@ void Task::Serialize( XStream* xs )
 	XARC_SER( xs, pos2i );
 	XARC_SER( xs, timer );
 	XARC_SER( xs, data );
-	XARC_SER( xs, taskID );
+//	XARC_SER( xs, taskID );
 	XarcClose( xs );
 }
 
@@ -129,7 +129,7 @@ bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 }
 
 
-void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
+void TaskList::DoTasks( Chit* chit, U32 delta )
 {
 	if ( taskList.Empty() ) return;
 
@@ -153,7 +153,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.
 
-	if ( task->taskID ) {
+/*	if ( task->taskID ) {
 		const WorkQueue::QueueItem* queueItem = 0;
 		if ( workQueue ) {
 			queueItem = workQueue->GetJobByTaskID( task->taskID );
@@ -163,7 +163,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 			Clear();
 			return;
 		}
-	}
+	}*/
 
 	switch ( task->action ) {
 	case Task::TASK_MOVE:
@@ -317,10 +317,11 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 			}
 
 			// No matter if successful or not, we need to clear the work item.
-			// The work is done or can't be done.
-			if ( workQueue ) {
-				workQueue->Remove( pos2i );
-			}
+			// The work is done or can't be done. This will get detected by the
+			// work queue.
+//			if ( workQueue ) {
+//				workQueue->Remove( pos2i );
+//			}
 		}
 		break;
 

@@ -841,8 +841,8 @@ void AIComponent::Stand()
 
 void AIComponent::Pickup( Chit* item )
 {
-	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
-	taskList.Push( Task::PickupTask( item->ID(), 0 ));
+	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D() ));
+	taskList.Push( Task::PickupTask( item->ID() ));
 }
 
 
@@ -908,9 +908,9 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		float cost = 0;
 		if ( context->worldMap->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 			taskList.Clear();
-			taskList.Push( Task::MoveTask( end, 0 ));
-			taskList.Push( Task::StandTask( 1000, 0 ));
-			taskList.Push( Task::RemoveTask( rock, 0 ));
+			taskList.Push( Task::MoveTask( end ));
+			taskList.Push( Task::StandTask( 1000 ));
+			taskList.Push( Task::RemoveTask( rock));
 		}
 	}
 	return true;
@@ -1558,9 +1558,9 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 						if (cs) {
 							for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
 								if (!cs->HasTask(it.Pos())) {
-									taskList.Push(Task::MoveTask(it.Pos(), 0));
+									taskList.Push(Task::MoveTask(it.Pos()));
 									taskList.Push(Task::StandTask(bd->standTime));
-									taskList.Push(Task::UseBuildingTask(0));
+									taskList.Push(Task::UseBuildingTask());
 									return true;
 								}
 							}
@@ -1624,7 +1624,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 
 		if ( guardBounds.Contains( pos2i )) {
 			taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-			taskList.Push( Task::StandTask( GUARD_TIME, 0 ));
+			taskList.Push( Task::StandTask( GUARD_TIME ));
 			return true;
 		}
 	}
@@ -1636,7 +1636,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	guardBounds.DoIntersection( bounds );
 
 	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-	taskList.Push( Task::StandTask( GUARD_TIME, 0 ));
+	taskList.Push( Task::StandTask( GUARD_TIME ));
 	return true;
 }
 
@@ -1772,8 +1772,8 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 						// Do nothing; assume it is this task.
 					}
 					else {
-						taskList.Push(Task::MoveTask(fruitPos, 0));
-						taskList.Push(Task::PickupTask(fruit->ID(), 0));
+						taskList.Push(Task::MoveTask(fruitPos));
+						taskList.Push(Task::PickupTask(fruit->ID()));
 						return true;
 					}
 				}
@@ -1851,8 +1851,8 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 					Rectangle2I porch = msc->PorchPos();
 					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
 						if (!coreScript->HasTask(it.Pos())) {
-							taskList.Push(Task::MoveTask(it.Pos(), 0));
-							taskList.Push(Task::UseBuildingTask(0));
+							taskList.Push(Task::MoveTask(it.Pos()));
+							taskList.Push(Task::UseBuildingTask());
 							return true;
 						}
 					}
@@ -1879,8 +1879,8 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 					Rectangle2I porch = msc->PorchPos();
 					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
 						if (!coreScript->HasTask(it.Pos())) {
-							taskList.Push(Task::MoveTask(it.Pos(), 0));
-							taskList.Push(Task::UseBuildingTask(0));
+							taskList.Push(Task::MoveTask(it.Pos()));
+							taskList.Push(Task::UseBuildingTask());
 							return true;
 						}
 					}
@@ -1930,8 +1930,8 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 			for (Rectangle2IIterator it(repair); !it.Done(); it.Next()) {
 				if (!coreScript->HasTask(it.Pos()) 
 					&& worldMap->CalcPath( pos2, ToWorld2F(it.Pos()), 0, 0, false)) {
-					taskList.Push(Task::MoveTask(it.Pos(), 0));
-					taskList.Push(Task::StandTask(REPAIR_TIME, 0));
+					taskList.Push(Task::MoveTask(it.Pos()));
+					taskList.Push(Task::StandTask(REPAIR_TIME));
 					taskList.Push(Task::RepairTask(building->ID()));
 					return true;
 				}
@@ -2095,9 +2095,9 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( best >= 0 && needVal > 0.4 ) {
 		GLASSERT( bestPorch.x > 0 );
 
-		taskList.Push( Task::MoveTask( bestPorch, 0 ));
+		taskList.Push( Task::MoveTask( bestPorch));
 		taskList.Push( Task::StandTask( bestBD->standTime ));
-		taskList.Push( Task::UseBuildingTask( 0 ));
+		taskList.Push( Task::UseBuildingTask());
 		return true;
 	}
 	return false;
@@ -2141,8 +2141,8 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 				// Pickup and gold use different techniques. (Because of player UI. 
 				// Always want gold - not all items.)
 				if ( loot.Accept( chitArr[i] )) {
-					taskList.Push( Task::MoveTask( goldPos, 0 ));
-					taskList.Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+					taskList.Push(Task::MoveTask(goldPos));
+					taskList.Push( Task::PickupTask( chitArr[i]->ID()));
 					return true;
 				}
 				else {
@@ -2538,7 +2538,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		WorkQueue* workQueue = GetWorkQueue();
-		taskList.DoTasks(parentChit, workQueue, delta);	
+		taskList.DoTasks(parentChit, delta);	
 	}
 }
 
@@ -2568,15 +2568,15 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 				Vector2F end;
 				float cost = 0;
 				if ( context->worldMap->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-					taskList.Push( Task::MoveTask( end, item->taskID ));
-					taskList.Push( Task::StandTask( 1000, item->taskID ));
-					taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
+					taskList.Push( Task::MoveTask( end ));
+					taskList.Push( Task::StandTask( 1000 ));
+					taskList.Push( Task::RemoveTask( item->pos ));
 				}
 			}
 			else if (BuildScript::IsBuild(item->buildScriptID)) {
-				taskList.Push( Task::MoveTask( item->pos, item->taskID ));
-				taskList.Push( Task::StandTask( 1000, item->taskID ));
-				taskList.Push(Task::BuildTask(item->pos, item->buildScriptID, LRint(item->rotation), item->taskID));
+				taskList.Push( Task::MoveTask( item->pos ));
+				taskList.Push( Task::StandTask( 1000 ));
+				taskList.Push(Task::BuildTask(item->pos, item->buildScriptID, LRint(item->rotation)));
 			}
 			else {
 				GLASSERT( 0 );

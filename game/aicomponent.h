@@ -87,7 +87,9 @@ public:
 	const ai::Needs& GetNeeds() const		{ return needs; }
 	ai::Needs* GetNeedsMutable()			{ return &needs; }
 
-	void CoreDeleting()						{ taskList.Clear(); }
+	// Core deleting, WorkItem removed, etc.
+	void ClearTaskList()						{ taskList.Clear(); }
+	const ai::Task* GoalTask() const			{ return taskList.GoalTask(); }
 
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
@@ -137,8 +139,8 @@ private:
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);
-	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
+	void WorkQueueToTask(  const ComponentSet& thisComp );			// turn a work item into a task
+	void FlushTaskList( const ComponentSet& thisComp, U32 delta );	// moves tasks along, mark tasks completed, do special actions
 
 	bool AtHomeCore();
 	bool AtFriendlyOrNeutralCore();

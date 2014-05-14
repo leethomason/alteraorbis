@@ -396,7 +396,9 @@ int CoreScript::DoTick( U32 delta )
 	}
 	if ( !inUse ) {
 		// Clear the work queue - chit is gone that controls this.
-		workQueue->ClearJobs();
+		delete workQueue;
+		workQueue = new WorkQueue();
+		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
 
 		TeamGen gen;
 		ProcRenderInfo info;

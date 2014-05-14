@@ -302,7 +302,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
 		chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
 		for (int i = 0; i < queryArr.Size(); ++i) {
-			queryArr[i]->GetAIComponent()->CoreDeleting();
+			queryArr[i]->GetAIComponent()->ClearTaskList();
 		}
 
 		//chitBag->QueueDelete(core);
