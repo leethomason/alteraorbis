@@ -37,7 +37,7 @@ private:
 	void SetChannelPos(int i);
 
 	enum {
-		CHANNELS = 8		// if this is changed, the default # of channels needs to be set in Mix
+		CHANNELS = 16
 	};
 
 	struct Sound {

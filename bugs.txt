@@ -79,7 +79,7 @@ d animation generation
 	    x need a credits screen
 	    - new sounds
 		- make sure "quick gen" hacks are cleaned up for WorldGen
-		- fix code so that it doesn't need uncompressed sound
+		x fix code so that it doesn't need uncompressed sound
 
 	- Beta2
 		- auto rebuild

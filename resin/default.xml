@@ -332,10 +332,11 @@
   <data assetName="beamgunWAV"      filename="sound/Beamgun_1_22k.wav" />
   <data assetName="beamgunWAV2"     filename="sound/Beamgun_2_22k.wav" />
   <data assetName="beamgunWAV3"     filename="sound/Beamgun_3_22k.wav" />
+  <data assetName="rezWAV"          filename="sound/RezIn_22k.wav"/> 
+  <data assetName="derezWAV"        filename="sound/Rezout_22k.wav"/>
+  <data assetName="buttonWAV"       filename="sound/UI_14_22k.wav" />
 
   <data assetName="explosionWAV"    filename="sound/explosion.wav"  compress="false" />
-  <data assetName="rezWAV"          filename="sound/rez.wav" compress="false" /> 
-  <data assetName="derezWAV"        filename="sound/derez.wav" compress="false" />
 
 
   <font assetName="font" filename="font_0.png" noMip="true">

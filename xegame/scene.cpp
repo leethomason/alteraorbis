@@ -20,6 +20,8 @@
 #include "../engine/text.h"
 #include "../game/layout.h"			// used for the text height
 #include "../engine/particle.h"
+#include "../audio/xenoaudio.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -88,7 +90,8 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	}
 
 	if ( uiItem ) {
-		ItemTapped( uiItem );
+		XenoAudio::Instance()->Play(ISC::buttonWAV, 0);
+		ItemTapped(uiItem);
 	}
 	return tapCaptured;
 }

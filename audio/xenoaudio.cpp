@@ -49,6 +49,8 @@ void XenoAudio::SetAudio(bool on)
 //		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);	// default, but laggy
 		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
 		GLASSERT(error == 0);
+		int channels = Mix_AllocateChannels(CHANNELS);
+		GLASSERT(channels == CHANNELS);
 	}
 	else {
 		Mix_CloseAudio();
