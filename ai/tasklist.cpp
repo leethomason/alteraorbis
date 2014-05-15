@@ -464,7 +464,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GoExchange(thisComp, building);
 		}
 		else if ( buildingName == IStringConst::factory ) {
-			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
+			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
 			if ( !used ) supply.SetZero();
 		}
 		else if ( buildingName == IStringConst::bed ) {

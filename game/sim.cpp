@@ -757,7 +757,7 @@ void Sim::UseBuilding()
 			}
 			else if ( name == IStringConst::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
-				data->tech = cs->GetTechLevel();
+				data->tech = int(cs->GetTech());
 				data->itemComponent = ic;
 				chitBag->PushScene( LumosGame::SCENE_FORGE, data );
 			}

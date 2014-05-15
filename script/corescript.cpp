@@ -198,7 +198,9 @@ int CoreScript::NumCitizens()
 		else {
 			// Dead and gone.
 			citizens.SwapRemove( i );
-
+			// Reset the timer so that there is a little time
+			// between a dead citizen and re-spawn
+			spawnTick.Reset();
 #if 0
 			// This is annoying: seeing if cranking down the spawn rate and not
 			// destroying the sleep tube achieves success.

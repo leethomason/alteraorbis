@@ -58,6 +58,7 @@ d animation generation
 - destroy date of avatar doesn't seem to be getting entered in the Census/History
 - weather should affect fire/shock
 - shock -> plasma??
+- mouse wheel support
 
 - game
 
@@ -74,16 +75,32 @@ d animation generation
 	    x factory only fun if you build something...check that.
 	    x debug trace of the likes?
 		x model for exchange
-      -exchange should be industrial
+		x exchange should be industrial
 
 	- Beta 1b
 	    x need a credits screen
 	    - new sounds
-		- make sure "quick gen" hacks are cleaned up for WorldGen
+		x make sure "quick gen" hacks are cleaned up for WorldGen
 		x fix code so that it doesn't need uncompressed sound
+		x escape key to back out of modes
+		x tune down wanderers in 1st stage
+		x tune down social need in 1st stage
+		x population cap to # of temples
+		t document temples vs. tech - check that tech works (and not using tech cap)
+			- test distillery (continuous)
+			x test forge (discrete)
+		- denizen spawn rate. hmm..
+		x "agronomy"
+		x too much "all at once": restrict social in 1st stage?
+		- update walkthrough - start with denizens
+		- switch market over to reserve/taxation
+		- greater kills: 4x per kill?
+		- greater kill not getting shown in weapon history
 
 	- Beta2
 		- auto rebuild
+		- out of gold shouldn't cancel build orders
+		- can't cancel forge (2x2 build)
 	    - plants look repetetive
 		- hints about what you need to build
 		- walk target for the avatar

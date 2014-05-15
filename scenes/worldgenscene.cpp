@@ -345,7 +345,7 @@ void WorldGenScene::DoTick( U32 delta )
 			sim->EnableSpawn(true);
 		}
 
-		if (age > 1) {
+		if (age > 1.0f) {
 			genState.mode = GenState::SIM_DONE;
 		}
 	}

@@ -59,7 +59,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 		testScene[i].SetText( testSceneName[i] );
 	}
 
-	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", /*"Load\nEstablished",*/ "Continue" };
+	static const char* gameSceneName[NUM_GAME] = { "Generate World", "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
@@ -209,8 +209,7 @@ void TitleScene::Resize()
 	}
 	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 
-	layout.PosAbs(&gameScene[GENERATE_WORLD], -1, -1);
-	//layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
+	layout.PosAbs(&gameScene[GENERATE_WORLD], -2, -1, 2, 1);
 	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
 
 	gameScene[CONTINUE].SetEnabled( false );

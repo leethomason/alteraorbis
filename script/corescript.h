@@ -74,11 +74,11 @@ public:
 	WorkQueue* GetWorkQueue()		{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
-	int GetTechLevel() const		{ return (int)GetTech(); }
-	int AchievedTechLevel() const	{ return achievement.techLevel; }
 	const CoreAchievement& GetAchievement() const { return achievement; }
 
+	// Current tech:
 	float GetTech() const			{ return float(tech); }
+	// The number of temples+1:
 	int   MaxTech() const;
 	void  AddTech();
 
