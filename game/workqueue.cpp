@@ -26,7 +26,6 @@ WorkQueue::WorkQueue()
 {
 	parentChit = 0;
 	sector.Zero();
-//	idPool = 0;
 }
 
 
@@ -150,10 +149,7 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 
 bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation)
 {
-	if ( ToSector( pos2i ) == sector ) {
-		// okay!
-	}
-	else {
+	if ( ToSector( pos2i ) != sector ) {
 		// wrong sector.
 		return false;
 	}
@@ -162,7 +158,6 @@ bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, flo
 	item.buildScriptID = buildScriptID;
 	item.pos = pos2i;
 	item.rotation = rotation;
-	//item.taskID = ++idPool;
 
 	if ( !TaskCanComplete( item )) {
 		return false;
@@ -203,38 +198,6 @@ void WorkQueue::Assign( int id, const WorkQueue::QueueItem* item )
 }
 
 
-/*
-void WorkQueue::ReleaseJob( int chitID )
-{
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].assigned == chitID ) {
-			queue[i].assigned = 0;
-		}
-	}
-}
-*/
-
-/*
-void WorkQueue::ClearJobs()
-{
-	while( queue.Size() ) {
-		RemoveItem( queue.Size()-1 );
-	}
-}
-*/
-/*
-const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
-{
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].taskID == taskID ) {
-			GLASSERT( queue[i].model );
-			return &queue[i];
-		}
-	}
-	return 0;
-}
-*/
-
 const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -251,7 +214,6 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {
 	GLASSERT( parentChit );
 	const ChitContext* context = parentChit->Context();
-	//Engine* engine = context->engine;
 	WorldMap* worldMap = context->worldMap;
 
 	int best=-1;
@@ -480,7 +442,6 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER(xs, buildScriptID);
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
-//	XARC_SER( xs, taskID );
 	XarcClose( xs );
 }
 
@@ -490,12 +451,6 @@ void WorkQueue::Serialize( XStream* xs )
 	XarcOpen( xs, "WorkQueue" );
 	XARC_SER( xs, sector );
 	XARC_SER_CARRAY( xs, queue );
-
-//	if ( xs->Loading() ) {
-//		for( int i=0; i<queue.Size(); ++i ) {
-//			idPool = Max( idPool, queue[i].taskID+1 );
-//		}
-//	}
 	XarcClose( xs );
 }
 

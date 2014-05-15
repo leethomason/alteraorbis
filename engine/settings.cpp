@@ -96,6 +96,7 @@ void SettingsManager::Save()
 		
 		printer.OpenElement("Game");
 		printer.PushAttribute("audioOn", audioOn);
+		printer.PushAttribute("spawnDate", spawnDate);
 		printer.CloseElement();
 
 		printer.OpenElement("Debug");

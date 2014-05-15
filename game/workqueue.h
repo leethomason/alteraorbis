@@ -50,7 +50,6 @@ public:
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
-		//int					taskID;		// id # of this task
 		Model*				model;		// model used to show map work location
 		float				rotation;
 	};
@@ -66,7 +65,6 @@ public:
 	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
 	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
 	const QueueItem*	GetJobByPosition(const grinliz::Vector2I& pos);
-	//void				ClearJobs();
 
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	

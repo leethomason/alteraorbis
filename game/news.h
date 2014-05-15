@@ -35,8 +35,6 @@ public:
 		DENIZEN_KILLED,				//  killed		killer		killed
 		GREATER_MOB_CREATED,		//  created					created		
 		GREATER_MOB_KILLED,			//  killed		killer		killed
-		D_LESSER_MOB_NAMED,			//	created
-		D_LESSER_NAMED_MOB_KILLED,	//	killed		killer		killed
 		DOMAIN_CREATED,				//  domain					domain
 		DOMAIN_DESTROYED,			//  domain		killer		domain	
 
@@ -63,7 +61,6 @@ public:
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
-												|| what == D_LESSER_MOB_NAMED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
@@ -109,9 +106,9 @@ public:
 	const grinliz::CArray< NewsEvent, MAX_CURRENT >& CurrentNews() const { return current; }
 
 	struct Data {
-		Data() : bornOrNamed(0), died(0) {}
+		Data() : born(0), died(0) {}
 
-		U32 bornOrNamed;
+		U32 born;
 		U32 died;
 	};
 	const NewsEvent** Find( int itemID, bool includeSecond, int* num, Data* data );

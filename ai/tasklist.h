@@ -6,7 +6,6 @@
 #include "../xegame/cticker.h"
 
 class Chit;
-//class WorkQueue;
 class WorldMap;
 class Engine;
 struct ComponentSet;
@@ -44,7 +43,6 @@ public:
 		Task t;
 		t.action = TASK_MOVE;
 		t.pos2i  = pos2i;
-//		t.taskID = taskID;
 		return t;
 	}
 	// Check and use location.
@@ -52,7 +50,6 @@ public:
 		Task t;
 		t.action = TASK_STAND;
 		t.timer = time;
-//		t.taskID = taskID;
 		return t;
 	}
 		
@@ -61,14 +58,12 @@ public:
 		Task t;
 		t.action = TASK_PICKUP;
 		t.data = chitID;
-		//t.taskID = taskID;
 		return t;
 	}
 
 	static Task UseBuildingTask() {
 		Task t;
 		t.action = TASK_USE_BUILDING;
-		//t.taskID = taskID;
 		return t;
 	}
 
@@ -76,7 +71,6 @@ public:
 		Task t;
 		t.action = TASK_REPAIR_BUILDING;
 		t.data = buildingID;
-//		t.taskID = taskID;
 		return t;
 	}
 
@@ -87,7 +81,6 @@ public:
 		t.action = TASK_BUILD;
 		t.pos2i = pos2i;
 		t.buildScriptID = buildScriptID;
-		//t.taskID = taskID;
 		t.data = rotation;
 		return t;
 	}
@@ -98,7 +91,6 @@ public:
 		timer = 0;
 		data = 0;
 		buildScriptID = 0;
-//		taskID = 0;
 	}
 
 	void Serialize( XStream* xs );
@@ -108,7 +100,6 @@ public:
 	grinliz::Vector2I	pos2i;
 	int					timer;
 	int					data;
-	//int					taskID;		// if !0, then attached to a workqueue task
 };
 
 

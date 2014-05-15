@@ -58,7 +58,6 @@ void Task::Serialize( XStream* xs )
 	XARC_SER( xs, pos2i );
 	XARC_SER( xs, timer );
 	XARC_SER( xs, data );
-//	XARC_SER( xs, taskID );
 	XarcClose( xs );
 }
 
@@ -149,21 +148,6 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 	Vector2I sector		= ToSector( pos2i );
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
-
-	// If this is a task associated with a work item, make
-	// sure that work item still exists.
-
-/*	if ( task->taskID ) {
-		const WorkQueue::QueueItem* queueItem = 0;
-		if ( workQueue ) {
-			queueItem = workQueue->GetJobByTaskID( task->taskID );
-		}
-		if ( !queueItem ) {
-			// This task it attached to a work item that expired.
-			Clear();
-			return;
-		}
-	}*/
 
 	switch ( task->action ) {
 	case Task::TASK_MOVE:
@@ -315,13 +299,6 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 				// Plan has gone bust:
 				Clear();
 			}
-
-			// No matter if successful or not, we need to clear the work item.
-			// The work is done or can't be done. This will get detected by the
-			// work queue.
-//			if ( workQueue ) {
-//				workQueue->Remove( pos2i );
-//			}
 		}
 		break;
 

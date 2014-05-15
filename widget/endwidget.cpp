@@ -82,9 +82,9 @@ void EndGameWidget::SetBodyText()
 	str.AppendFormat(" %s has fallen.\nFounded %.2f and fell %.2f, lasting %.2f cycles.\nCiv-Tech score %d.\n\nAchievements: "
 					 "tech=%d gold=%d population=%d.",
 					 coreName.c_str(),
-					 double(data.bornOrNamed) / double(AGE_IN_MSEC),
+					 double(data.born) / double(AGE_IN_MSEC),
 					 double(data.died) / double(AGE_IN_MSEC),
-					 double(data.died - data.bornOrNamed) / double(AGE_IN_MSEC),
+					 double(data.died - data.born) / double(AGE_IN_MSEC),
 					 achievement.civTechScore,
 					 achievement.techLevel,
 					 achievement.gold,

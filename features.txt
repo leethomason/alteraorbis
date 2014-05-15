@@ -3,7 +3,9 @@ Features
 
 AI
 A rich world where you aren’t the only domain. Bring strategy to the Visitors. Places to go, people to see.
-- gob-men. neutral relationships. diplomacy. war.
+- gob-men.
+	- domain builder
+ 	- neutral relationships. diplomacy. war.
 - mantis-men
 - other denizen domains
 
@@ -32,6 +34,16 @@ Richer visual environment and biomes. Improve the world's physical diversity.
 - better object physics
 - glow around objects
 
+Mechanisms
+Build traps, gates, water flow control. Depends on "Environment". Ways
+of handling big invaders. Tendancy to go haywire and create !fun!
+- power generators
+- switches
+- gates (toggle, NO, NC)
+- power flow, track jumping, interaction with water
+- turret (fixed)
+- zapper
+
 Engine
 - better glow
 - performance
@@ -40,12 +52,12 @@ Domain
 - More buildings for needs
 - chip fabricator
 - Turrets
-- money changer
+x money changer
 
 Physics
 - water flow
 - better flying / bouncing
-- crystals disperse
+- crystals disperse, roll, etc.
 
 Gameplay
 - 3rd person view

@@ -1,5 +1,5 @@
 ? volcanos get left behind
-- batching troubles - still lots of small batches going in
+- batching troubles - still lots of small batches going in. consider dropping back to ES2
 ? resize and colors are wrong bug
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
@@ -86,29 +86,31 @@ d animation generation
 			x remove IScript and ScriptComponent
 			x linked list for components; unlimited general comps
 			- remove spatial component
-		- auto rebuild
-	    - plants look repetetive
-		- hints about what you need to build
-		- walk target for the avatar
+		t auto rebuild
 		x repair
 		x fast / threaded save
 		x new opening screen?
+		- move "Create Worker" and "Auto-Rebuild" to "Manage"
 		- abandon to tactical AI
-		- clean up history code. remove named lesser tracking.
+		x clean up history code. remove named lesser tracking.
 		- tuning
 			- farm production (high??)
 			- monster arrival. greater herd more often?
 			- time to use bar (low??)
 			- double tech decay
 			x weapon sorting not quite correct
-		- 32 bit texture support
 		x new walkthrough tutorial
-		- auto-clear not working as well as it should
 		x (web page) note that installer installs-over
 		x restore 'create world' button.
 			x pre-gen plants
 			x pre-gen volcanoes (50%?)
 			x run world sim 5 minutes?
+
+	    - plants look repetetive
+		- auto-clear not working as well as it should
+		- hints about what you need to build
+		- walk target for the avatar
+		- 32 bit texture support
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -242,7 +244,7 @@ x Troll
 	x concept
 	x model 
 	x animation
-	- spawn strategy
+	- spawn strategy : switch to arachnoid approach once there are more options
 	x item pickup / use AI
 - Dragon
 	- concept

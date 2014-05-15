@@ -298,12 +298,12 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 			NewsHistory::Data data;
 			history->Find(itemID, false, 0, &data);
 
-			if (data.bornOrNamed) {
+			if (data.born) {
 				if (data.died) {
-					str->AppendFormat(" (c%.2f d%.2f)", double(data.bornOrNamed) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
+					str->AppendFormat(" (c%.2f d%.2f)", double(data.born) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
 				}
 				else {
-					str->AppendFormat(" (c%.2f)", double(data.bornOrNamed) / double(AGE_IN_MSEC));
+					str->AppendFormat(" (c%.2f)", double(data.born) / double(AGE_IN_MSEC));
 				}
 			}
 		}
