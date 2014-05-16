@@ -94,7 +94,7 @@ d animation generation
 		x too much "all at once": restrict social in 1st stage?
 		- update walkthrough - start with denizens
 		- switch market over to reserve/taxation
-		- greater kills: 4x per kill?
+		t greater kills: 4x per kill?
 		- greater kill not getting shown in weapon history
 
 	- Beta2
