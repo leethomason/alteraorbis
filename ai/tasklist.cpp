@@ -581,6 +581,8 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+	CoreScript* cs = CoreScript::GetCore(sector);
+	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	MarketAI marketAI( market );
 
@@ -615,6 +617,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
 								market->GetItemComponent(),
+								salesTax,
 								true );
 			boughtStuff = true;
 		}
@@ -629,6 +632,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		int sold = MarketAI::Transact(gi,
 			market->GetItemComponent(),	// buyer
 			thisComp.itemComponent,		// seller
+			0,							// no sales tax when selling to the market.
 			true);
 
 		if (sold)
@@ -650,7 +654,8 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
 								market->GetItemComponent(),
-								true );
+								salesTax,
+								true);
 		}
 	}
 }

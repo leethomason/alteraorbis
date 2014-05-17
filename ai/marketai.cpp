@@ -20,17 +20,19 @@ MarketAI::MarketAI( Chit* c ) : chit(c)
 {
 	if ( value == 0 ) return 0;
 
-	int cost = int( float(value) / MARKET_COST_MULT );
+	int cost = int(float(value) * (1.0f + SALES_TAX));
 	return cost > 1 ? cost : 1;
 }
 
 
 /*static*/ int MarketAI::ValueToTrade( int value ) 
 {
-	if ( value == 0 ) return 0;
+/*	if ( value == 0 ) return 0;
 
 	int cost = int( float(value) * MARKET_COST_MULT );
 	return cost > 1 ? cost : 1;
+	*/
+	return value;
 }
 
 
@@ -60,13 +62,14 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 /*	General "transact" method because this is very tricky code to get right.
 	There's always another case or bit of logic to account for.
 */
-/*static*/ int MarketAI::Transact( const GameItem* itemToBuy, ItemComponent* buyer, ItemComponent* seller, bool doTrade )
+/*static*/ int MarketAI::Transact( const GameItem* itemToBuy, ItemComponent* buyer, ItemComponent* seller, Wallet* salesTax, bool doTrade )
 {
 	int cost = 0;
 	for( int i=1; i<seller->NumItems(); ++i ) {
 		if ( !seller->GetItem(i)->Intrinsic() ) {
 			if ( seller->GetItem(i) == itemToBuy ) {
 				cost = ValueToCost( itemToBuy->GetValue() );
+				int tax = cost - itemToBuy->GetValue();
 
 				if (    buyer->GetItem()->wallet.gold >= cost
 					 && buyer->CanAddToInventory() ) 
@@ -89,6 +92,12 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 							gi->BestName(),
 							cost,
 							sector.x, sector.y ));
+
+						if (tax && salesTax) {
+							GLASSERT(seller->GetItem()->wallet.gold > tax);
+							Transfer(salesTax, &seller->GetItem()->wallet, tax);
+							GLOUTPUT(("  tax paid: %d\n", tax));
+						}
 
 						NewsHistory* history = seller->ParentChit()->GetChitBag()->GetNewsHistory();
 						history->Add( NewsEvent( NewsEvent::PURCHASED, pos, gi, buyer->ParentChit() ));

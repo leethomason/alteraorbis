@@ -79,7 +79,6 @@ d animation generation
 
 	- Beta 1b
 	    x need a credits screen
-	    - new sounds
 		x make sure "quick gen" hacks are cleaned up for WorldGen
 		x fix code so that it doesn't need uncompressed sound
 		x escape key to back out of modes
@@ -89,13 +88,14 @@ d animation generation
 		t document temples vs. tech - check that tech works (and not using tech cap)
 			- test distillery (continuous)
 			x test forge (discrete)
-		- denizen spawn rate. hmm..
 		x "agronomy"
 		x too much "all at once": restrict social in 1st stage?
-		- update walkthrough - start with denizens
-		- switch market over to reserve/taxation
+		x switch market over to reserve/taxation
 		t greater kills: 4x per kill?
+	    - new sounds
+		- update walkthrough - start with denizens
 		- greater kill not getting shown in weapon history
+		- denizen spawn rate. hmm..
 
 	- Beta2
 		- auto rebuild

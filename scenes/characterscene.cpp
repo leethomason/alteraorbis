@@ -13,6 +13,7 @@
 #include "../script/itemscript.h"
 #include "../script/corescript.h"
 #include "../script/forgescript.h"
+#include "../ai/marketai.h"
 
 #include "../game/reservebank.h"
 
@@ -91,7 +92,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 	else if (data->IsExchange()) {
 		helpText.SetText("Avatar Au and crystal is on the left. The exchange is on the right. Tap to buy or sell. "
-			"The exchance is operater by the Reserve Bank and does not take a cut; you may trade freely.");
+			"The exchange is operater by the Reserve Bank and does not take a cut; you may trade freely.");
 		itemDescWidget.SetShortForm(true);
 	}
 
@@ -286,7 +287,7 @@ void CharacterScene::SetButtonText()
 		const GameItem* shieldItem		= shield ? shield->GetItem() : 0;
 		float costMult = 0;
 		if ( data->IsMarket() ) {
-			costMult = MARKET_COST_MULT;
+			costMult = 1.0f + SALES_TAX;
 		}
 
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
@@ -300,7 +301,7 @@ void CharacterScene::SetButtonText()
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
 			if ( data->IsMarket() )
-				lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? costMult : 1.0f / costMult );
+				lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? 0 : costMult );
 			else
 				lumosGame->ItemToButton( item, &itemButton[j][count], 0 );
 			itemButtonIndex[j][count] = src;
@@ -390,8 +391,8 @@ void CharacterScene::SetButtonText()
 		SetItemInfo( down, 0 );
 	}
 
-	int bought=0, sold=0;
-	CalcCost( &bought, &sold );
+	int bought=0, sold=0, salesTax=0;
+	CalcCost( &bought, &sold, &salesTax );
 
 	if ( data->IsMarket() ) {
 		CStr<100> str;
@@ -400,7 +401,7 @@ void CharacterScene::SetButtonText()
 					"%s: %d\n", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
 
 		int bought=0, sold=0;
-		CalcCost( &bought, &sold );
+		CalcCost( &bought, &sold, &salesTax );
 		int cost = bought - sold;
 
 		if ( bought > sold ) {
@@ -454,7 +455,7 @@ void CharacterScene::ResetInventory()
 
 void CharacterScene::Activate()
 {
-	if (data->IsExchange() && ReserveBank::Instance()) {
+	if ((data->IsExchange() || data->IsMarket()) && ReserveBank::Instance()) {
 		// The exchange works with the ReserveBank, else it
 		// would be running out of money, and have a fixed
 		// limit to the crystal/Au transaction.
@@ -468,7 +469,7 @@ void CharacterScene::Activate()
 
 void CharacterScene::DeActivate()
 {
-	if (data->IsExchange() && ReserveBank::Instance()) {
+	if ((data->IsExchange() || data->IsMarket()) && ReserveBank::Instance()) {
 		// Move all the gold to the reserve
 		Transfer(&ReserveBank::Instance()->bank, &data->storageIC->GetItem()->wallet, data->storageIC->GetItem()->wallet.gold);
 	}
@@ -479,12 +480,17 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 {
 	if ( item == &okay ) {
 		if ( data->IsMarket() ) {
-			int bought=0, sold=0;
-			CalcCost( &bought, &sold );
+			int bought=0, sold=0, salesTax=0;
+			CalcCost( &bought, &sold, &salesTax );
 
 			int cost = bought - sold;
 			data->itemComponent->GetItem(0)->wallet.AddGold( -cost );
 			data->storageIC->GetItem(0)->wallet.AddGold( cost );
+
+			if (data->taxRecipiant) {
+				GLASSERT(data->storageIC->GetItem(0)->wallet.gold > salesTax);
+				Transfer(data->taxRecipiant, &data->storageIC->GetItem(0)->wallet, salesTax);
+			}
 		}
 		lumosGame->PopScene();
 		billOfSale.SetVisible(false);	// so errant warning can't be seen.
@@ -633,17 +639,20 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 }
 
 
-void CharacterScene::CalcCost( int* bought, int* sold )
+void CharacterScene::CalcCost( int* bought, int* sold, int* salesTax )
 {
 	*bought = 0;
 	*sold = 0;
+	*salesTax = 0;
 
 	for( int i=0; i<boughtList.Size(); ++i ) {
 		int value = boughtList[i]->GetValue();
-		*bought += int( float(value) / MARKET_COST_MULT );
+		int cost = MarketAI::ValueToCost(value);
+		*bought += cost;
+		*salesTax += cost - value;
 	}
 	for( int i=0; i<soldList.Size(); ++i ) {
 		int value = soldList[i]->GetValue();
-		*sold += int( float(value) * MARKET_COST_MULT );
+		*sold += MarketAI::ValueToTrade(value);
 	}
 }
