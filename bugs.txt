@@ -62,21 +62,6 @@ d animation generation
 
 - game
 
-	- Beta 1a
-		x screenshot save dir fix
-		x clean up the chit delete loop
-		x sound checks external path first
-	    x portrait clicking sometimes doesn't work
-	    x avatar doesn't always target as expected
-	    x text description of build options
-	    x move warning down
-		x GameItem update not quite correct
-	    x test exchange
-	    x factory only fun if you build something...check that.
-	    x debug trace of the likes?
-		x model for exchange
-		x exchange should be industrial
-
 	- Beta 1b
 	    x need a credits screen
 		x make sure "quick gen" hacks are cleaned up for WorldGen
@@ -85,8 +70,8 @@ d animation generation
 		x tune down wanderers in 1st stage
 		x tune down social need in 1st stage
 		x population cap to # of temples
-		t document temples vs. tech - check that tech works (and not using tech cap)
-			- test distillery (continuous)
+		x document temples vs. tech - check that tech works (and not using tech cap)
+			x test distillery (continuous)
 			x test forge (discrete)
 		x "agronomy"
 		x too much "all at once": restrict social in 1st stage?
@@ -324,6 +309,21 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta 1a
+	x screenshot save dir fix
+	x clean up the chit delete loop
+	x sound checks external path first
+    x portrait clicking sometimes doesn't work
+    x avatar doesn't always target as expected
+    x text description of build options
+    x move warning down
+	x GameItem update not quite correct
+    x test exchange
+    x factory only fun if you build something...check that.
+    x debug trace of the likes?
+	x model for exchange
+	x exchange should be industrial
+
 x Beta1 fixes
 	x sound button doesn't work
 	x sounds to 'res' directory
