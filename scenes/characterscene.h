@@ -42,13 +42,15 @@ public:
 		EXCHANGE
 	};
 
-	CharacterSceneData( ItemComponent* ic,		// character
+	CharacterSceneData(	ItemComponent* ic,		// character
 						ItemComponent* ic2,		// vault, market, exchange
-						int _type )				// apply markup, costs
-		: SceneData(), itemComponent(ic), storageIC(ic2), type(_type) { GLASSERT(ic); }
+						int _type,				// apply markup, costs
+						Wallet* _taxRecipiant)	// who gets sales tax
+		: SceneData(), itemComponent(ic), storageIC(ic2), taxRecipiant(_taxRecipiant), type(_type) { GLASSERT(ic); }
 
 	ItemComponent*	itemComponent;
 	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
+	Wallet*			taxRecipiant;
 	int				type;
 
 	bool IsCharacter() const	{ return type == CHARACTER; }
@@ -84,7 +86,7 @@ private:
 	void SetButtonText();
 	void SetExchangeButtonText();
 	void SetItemInfo(const GameItem* item, const GameItem* user);
-	void CalcCost( int* bought, int* sold );
+	void CalcCost( int* bought, int* sold, int* salesTax );
 	void ResetInventory();
 	void CalcCrystalValue();
 

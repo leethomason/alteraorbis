@@ -163,7 +163,7 @@ void ItemComponent::AddCraftXP( int nCrystals )
 }
 
 
-void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
+void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 {
 	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
 	if ( loser->keyValues.GetIString( "mob" ) == IString() ) {
@@ -172,6 +172,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->Traits().Level();
+	int killshotLevel = killshot ? 0 : loser->Traits().Level();
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
 
 	bool isGreater = (loser->keyValues.GetIString( IStringConst::mob ) == IStringConst::greater);
@@ -185,20 +186,14 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		}
 	}
 
-	GameItem* weapon[2] = { 0, 0 };	// weapon, shield
-	if ( isMelee ) {
-		IMeleeWeaponItem*  melee  = GetMeleeWeapon();
-		if ( melee ) 
-			weapon[0] = melee->GetItem();
-	}
-	else {
-		IRangedWeaponItem* ranged = GetRangedWeapon( 0 );
-		if ( ranged )
-			weapon[0] = ranged->GetItem();
-	}
-	weapon[1] = this->GetShield() ? this->GetShield()->GetItem() : 0;
+	// credit everything in use
+	static const int NUM = 3;
+	GameItem* weapon[NUM] = { 0, 0, 0 };	// ranged, melee, shield
+	weapon[0] = this->GetRangedWeapon(0) ? this->GetRangedWeapon(0)->GetItem() : 0;
+	weapon[1] = this->GetMeleeWeapon() ? this->GetMeleeWeapon()->GetItem() : 0;
+	weapon[2] = this->GetShield() ? this->GetShield()->GetItem() : 0;
 
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < NUM; ++i) {
 		if (weapon[i]) {
 			// instrinsic parts don't level up...that is just
 			// really an extension of the main item.
@@ -209,26 +204,28 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		}
 	}
 
-	if ( killshotLevel ) {
+	if ( killshot ) {
 		// Credit the main item and weapon. (But not the shield.)
 		mainItem->historyDB.Increment( "Kills" );
 		if ( isGreater )
 			mainItem->historyDB.Increment( "Greater" );
 
-		if ( weapon[0] ) {
-			weapon[0]->historyDB.Increment( "Kills" );
-			if ( isGreater )
-				weapon[0]->historyDB.Increment( "Greater" );
+		for (int i = 0; i < NUM; ++i) {
+			if (weapon[i]) {
+				weapon[i]->historyDB.Increment("Kills");
+				if (isGreater)
+					weapon[i]->historyDB.Increment("Greater");
+			}
 		}
-
 		if ( loser ) {
 			CStr< 64 > str;
 			str.Format( "Kills: %s", loser->Name() );
 
 			mainItem->historyDB.Increment( str.c_str() );
-
-			if ( weapon[0] ) {
-				weapon[0]->historyDB.Increment( str.c_str() );
+			for (int i = 0; i < NUM; ++i) {
+				if (weapon[i]) {
+					weapon[i]->historyDB.Increment(str.c_str());
+				}
 			}
 		}
 	}
@@ -436,10 +433,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		int originID = info->originID;
 		Chit* origin = Context()->chitBag->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
-			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
-			origin->GetItemComponent()->AddBattleXP( info->isMelee, 
-													 killshot ? Max( 1, mainItem->Traits().Level()) : 0, 
-													 mainItem ); 
+			origin->GetItemComponent()->AddBattleXP( mainItem, false ); 
 		}
 		lastDamageID = originID;
 	}
@@ -475,8 +469,14 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 	}
-	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
+	else if (msg.ID() == ChitMsg::CHIT_DESTROYED_START)
 	{
+		// Report back to what killed us:
+		Chit* origin = Context()->chitBag->GetChit(lastDamageID);
+		if (origin && origin->GetItemComponent()) {
+			origin->GetItemComponent()->AddBattleXP(this->GetItem(0), true);
+		}
+
 		/* A significant GameItem will automatically set it's history in the ItemHistory
 		   database when it changes. (Some changes to the item need to be set in the
 		   history as well.) The ItemHistory stores what the item is/was not a series of
@@ -484,10 +484,15 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		   The NewsHistory is the series of events, including the creation and destruction
 		   of the item. All the dates get inferredd from that.
-		*/
-		if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
-			NewsDestroy( mainItem );
-		}
+		   */
+		NewsDestroy(mainItem);
+	}
+	else if (msg.ID() > ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END) {
+		// Note the _START is processed above.
+		// However, it's possible gold still gets added. But at the END
+		// the chit is in tear-down and the gold/items are gone.
+		// Use the intermediate time to put
+		// gold and items on the ground. This is something of a hack.
 
 		// Drop our wallet on the ground or send to the Reserve?
 		// MOBs drop items, as does anything with sub-items

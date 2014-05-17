@@ -32,9 +32,13 @@ Needs::Needs()
 
 
 
-void Needs::DoTick( U32 delta, bool inBattle, const Personality* personality )
+void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Personality* personality )
 {
+	// if 'lowerDifficulty' is true, then don't decay social.
+	//
 	double dNeed = double(delta) * 0.001 / DECAY_TIME;
+	if (lowerDifficulty)
+		dNeed *= 0.5f;
 
 	if (!personality) {
 		for (int i = 0; i < NUM_NEEDS; ++i) {

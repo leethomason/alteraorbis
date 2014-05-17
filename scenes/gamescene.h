@@ -104,8 +104,8 @@ private:
 	};
 
 	enum {
-		UI_BUILD,
 		UI_VIEW,
+		UI_BUILD,
 		NUM_UI_MODES
 	};
 

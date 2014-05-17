@@ -55,7 +55,6 @@ public:
 	};
 
 	void Serialize( XStream* xs );
-
 	// Manages what jobs there are to do:
 	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation = 0);	// add an action to do
 	void Remove( const grinliz::Vector2I& pos );

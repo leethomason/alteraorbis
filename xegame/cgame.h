@@ -75,6 +75,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_CHEAT_ELIXIR		   12
 #define GAME_HK_CHEAT_TECH			   13
 #define GAME_HK_CHEAT_HERD			   14
+#define GAME_HK_ESCAPE				   15
 
 #define GAME_HK_TOGGLE_GLOW			   20
 #define GAME_HK_TOGGLE_PARTICLE		   21

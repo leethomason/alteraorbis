@@ -445,7 +445,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GoExchange(thisComp, building);
 		}
 		else if ( buildingName == IStringConst::factory ) {
-			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
+			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
 			if ( !used ) supply.SetZero();
 		}
 		else if ( buildingName == IStringConst::bed ) {
@@ -562,6 +562,8 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+	CoreScript* cs = CoreScript::GetCore(sector);
+	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	MarketAI marketAI( market );
 
@@ -596,6 +598,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
 								market->GetItemComponent(),
+								salesTax,
 								true );
 			boughtStuff = true;
 		}
@@ -610,6 +613,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		int sold = MarketAI::Transact(gi,
 			market->GetItemComponent(),	// buyer
 			thisComp.itemComponent,		// seller
+			0,							// no sales tax when selling to the market.
 			true);
 
 		if (sold)
@@ -631,7 +635,8 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
 								market->GetItemComponent(),
-								true );
+								salesTax,
+								true);
 		}
 	}
 }

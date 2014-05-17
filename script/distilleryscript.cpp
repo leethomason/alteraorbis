@@ -67,9 +67,10 @@ int DistilleryScript::DoTick( U32 delta )
 		CoreScript* cs = CoreScript::GetCore( sector );
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");
 	
-		int tech = cs->GetTechLevel();
-		int dProg = (tech+1) * progressTick.Period() / TECH_MAX;
-		double p = double(dProg*n);
+//		int tech = cs->GetTechLevel();
+		float tech = Min(cs->GetTech(), 0.8f);
+		double dProg = double(tech) * double(progressTick.Period()) / double(TECH_MAX);
+		double p = dProg*double(n);
 		if (evalScript) {
 			p *= 0.5 + 0.5*evalScript->EvalIndustrial(false);
 		}

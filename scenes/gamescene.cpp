@@ -105,7 +105,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetVisible(false);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Visitor", "Economy", "Defense", "Industry"
+		"Utility", "Visitor", "Agronomy", "Defense", "Industry"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -141,7 +141,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	buildDescription.Init(&gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "Build", "View" };
+		static const char* TEXT[NUM_UI_MODES] = { "View", "Build" };
 		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
 		uiMode[i].SetText( TEXT[i] );
 		uiMode[0].AddToToggleGroup( &uiMode[i] );
@@ -830,7 +830,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER, 0 ));
 		}
 	}
 	else if (item == &swapWeapons) {
@@ -999,9 +999,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 			}
 		}
 	}
-//	else {
-//		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
-//	}
 }
 
 
@@ -1010,6 +1007,19 @@ void GameScene::HandleHotKey( int mask )
 {
 	if ( mask == GAME_HK_TOGGLE_FAST ) {
 		fastMode = !fastMode;
+	}
+	else if (mask == GAME_HK_ESCAPE) {
+		if (buildActive > 0) {
+			// back out of build
+			buildActive = 0;
+			buildButton[0].SetDown();
+			SetSelectionModel(tapView);
+		}
+		else if (uiMode[UI_BUILD].Down()) {
+			// return to view
+			uiMode[UI_VIEW].SetDown();
+		}
+		buildDescription.SetText("");
 	}
 	else if (mask == GAME_HK_SPACE) {
 		Chit* playerChit = sim->GetPlayerChit();
@@ -1330,7 +1340,8 @@ void GameScene::DoTick( U32 delta )
 	
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
-	swapWeapons.SetVisible(track && track == playerChit);
+	//swapWeapons.SetVisible(track && track == playerChit);
+	swapWeapons.SetVisible(false);
 	
 	str.Clear();
 
@@ -1383,7 +1394,7 @@ void GameScene::DoTick( U32 delta )
 	if (coreScript) {
 		// Enforce the sleep tube limit.
 		CStr<32> str2;
-		int techLevel = coreScript->GetTechLevel();
+		int techLevel = coreScript->MaxTech() - 1;	// use the nTemples, not the current/achieved tech.
 		int maxTubes  = 4 << techLevel;
 		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
 		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );

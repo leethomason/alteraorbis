@@ -1277,6 +1277,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	// First pass: filter on attract / repel choices.
+	// This is game difficulty logic!
 	for (int i = 0; i < rinit.Size(); ++i) {
 		Vector2I destSector = start.sector + rinit[i];
 
@@ -1292,8 +1293,9 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 				if (relate == RELATE_ENEMY) {
 					if (mob == IStringConst::lesser) {
 						if (tech <= TECH_REPELS_LESSER) {
-							if (parentChit->random.Rand(3))
+							if (parentChit->random.Rand(2) == 0) {
 								delta.Push(rinit[i]);
+							}
 						}
 						else if (tech >= TECH_ATTRACTS_LESSER) delta.Insert(0, rinit[i]);
 						else delta.Push(rinit[i]);
@@ -2811,7 +2813,10 @@ int AIComponent::DoTick( U32 deltaTime )
 	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
 		// Travel exists without needs - plenty of other things to go wrong.
 		if ( this->AtFriendlyOrNeutralCore() ) {
-			needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE, &thisComp.item->GetPersonality() );
+			CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
+			bool lowerDifficulty = cs && (cs->MaxTech() == 1);
+
+			needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, lowerDifficulty, &thisComp.item->GetPersonality());
 			if ( thisComp.chit->PlayerControlled() ) {
 				thisComp.ai->GetNeedsMutable()->SetFull();
 			}

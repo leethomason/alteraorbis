@@ -59,7 +59,7 @@ public:
 	}
 
 	// Intended to be pretty long - every second or so.
-	void DoTick( U32 delta, bool inBattle, const Personality* );
+	void DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Personality* );
 
 	// Needs to load from XML - declared in the itemdef.xml
 	void Serialize( XStream* xs );

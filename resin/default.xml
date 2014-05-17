@@ -335,8 +335,9 @@
   <data assetName="rezWAV"          filename="sound/RezIn_22k.wav"/> 
   <data assetName="derezWAV"        filename="sound/Rezout_22k.wav"/>
   <data assetName="buttonWAV"       filename="sound/UI_14_22k.wav" />
-
-  <data assetName="explosionWAV"    filename="sound/explosion.wav"  compress="false" />
+  <data assetName="explosionWAV"    filename="sound/Explo_1_22k.wav" />
+  <data assetName="explosionWAV2"   filename="sound/Explo_2_22k.wav" />
+  <data assetName="explosionWAV3"   filename="sound/Explo_3_22k.wav" />
 
 
   <font assetName="font" filename="font_0.png" noMip="true">

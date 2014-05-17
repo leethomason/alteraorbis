@@ -47,7 +47,7 @@ void XenoAudio::SetAudio(bool on)
 	audioOn = on;
 	if (audioOn) {
 //		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);	// default, but laggy
-		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
+		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);	// button response notably snappier at 1024
 		GLASSERT(error == 0);
 		int channels = Mix_AllocateChannels(CHANNELS);
 		GLASSERT(channels == CHANNELS);
