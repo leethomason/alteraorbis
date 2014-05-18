@@ -50,6 +50,7 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-1), sceneData(0), sim(s)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
+	memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
 	homeSector.Zero();
 	chitContext.chitBag = this;
 }
@@ -70,6 +71,7 @@ void LumosChitBag::Serialize( XStream* xs )
 
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeSector );
+	XARC_SER_ARR(xs, deityID, NUM_DEITY);
 	XarcClose( xs );
 }
 
@@ -324,6 +326,24 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
 	}
 
+	return chit;
+}
+
+
+Chit* LumosChitBag::GetDeity(int id)
+{
+	GLASSERT(id >= 0 && id < NUM_DEITY);
+	Chit* chit = GetChit(deityID[id]);
+	
+	if (!chit) {
+		const ChitContext* context = Context();
+		chit = NewChit();
+		deityID[id] = chit->ID();
+
+		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "BeastCore", "ShogScrift" };
+		AddItem("deity", chit, context->engine, 0, 0);
+		chit->GetItem()->SetProperName(NAME[id]);
+	}
 	return chit;
 }
 

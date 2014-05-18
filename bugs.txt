@@ -81,6 +81,7 @@ d animation generation
 		- update walkthrough - start with denizens
 		- greater kill not getting shown in weapon history
 		- denizen spawn rate. hmm..
+		- tune down fire rate
 
 	- Beta2
 		- component infrastructure

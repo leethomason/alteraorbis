@@ -213,6 +213,18 @@ public:
 						CChitArray* arr,					// optional; the matches that fit
 						IChitAccept* filter);				// optional; run this filter first
 
+	enum {
+		DEITY_MOTHER_CODE,	// master control
+		DEITY_Q_CORE,		// logistics, infrastructure
+		DEITY_R1K_CORE,		// adventures
+
+		// in progress:
+		DEITY_BEAST_CORE,	// beast-man core. name TBD
+		DEITY_SHOG_SCRIFT,	// the great evil
+		NUM_DEITY
+	};
+	Chit* GetDeity(int id);
+
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
@@ -293,6 +305,7 @@ private:
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	grinliz::Vector2I			homeSector;
 	Sim*						sim;	// if part of a simulation. can be null.
+	int							deityID[NUM_DEITY];
 
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
