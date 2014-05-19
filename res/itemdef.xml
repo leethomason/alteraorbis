@@ -67,6 +67,11 @@
         mass="35" >
   </item>
 
+  <item name="deity"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
+        mass="1000" >
+  </item>
+
   <item name="gold"
         resource="gold"
         flags="INDESTRUCTABLE CLICK_THROUGH"
@@ -470,7 +475,7 @@
         hardpoint="trigger"
         mass="2.0"
         accuracy="1.0"
-        cooldown="250"
+        cooldown="300"
         reload="3000"
         clipCap="12"
         meleeDamage="0.8"

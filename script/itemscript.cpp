@@ -155,8 +155,13 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	}
 
 	float cool = (float)item->cooldown.Threshold();
-	cool *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_COOL ));
-	item->cooldown.SetThreshold( Clamp( (int)cool, 100, 3000 ));
+	// Fire rate can get a little out of control; tune
+	// it down by a factor of 0.5
+	cool *= (0.5f + 0.5f*Dice3D6ToMult(item->Traits().Get(GameTrait::ALT_COOL)));
+	// FIXME: should be set by constants from itemdef, as these limits
+	// are pulled from that range. Fastest weapon (pulse) at 300 cooldown,
+	// so limit to 1/5 second.
+	item->cooldown.SetThreshold( Clamp( (int)cool, 200, 3000 ));
 
 	float clipCap = (float)base.clipCap;
 	clipCap *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_CAPACITY ));

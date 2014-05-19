@@ -263,15 +263,17 @@ void ItemComponent::UpdateActive()
 	bool usedHardpoint[EL_NUM_METADATA];
 
 	const GameItem* mainItem = itemArr[0];
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem->ResourceName(), false );
-	int usesWeapons = itemArr[0]->flags & GameItem::AI_USES_BUILDINGS;
+	const ModelResource* res = 0;
+	if (mainItem->ResourceName()) {
+		res = ModelResourceManager::Instance()->GetModelResource(mainItem->ResourceName(), false);
+	}
 
+	int usesWeapons = itemArr[0]->flags & GameItem::AI_USES_BUILDINGS;
 	for ( int i=0; i<EL_NUM_METADATA; ++i ) {
 		usedHardpoint[i] = !res || !( res->header.metaData[i].InUse() ) || !usesWeapons;	// set the hardpoint in use if it isn't available.
 	}
 
-	for( int i=1; i<itemArr.Size(); ++i ) {
-		
+	for( int i=1; i<itemArr.Size(); ++i ) {		
 		GameItem* item = itemArr[i];
 		bool active = false;
 
