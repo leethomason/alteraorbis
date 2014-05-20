@@ -75,6 +75,16 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	voxelVertexVBO = 0;
 	gridVertexVBO = 0;
 	newsHistory = 0;
+
+	waterfalls.Reserve(100);
+	magmaGrids.Reserve(1000);
+	treePool.Reserve(1000);
+
+	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
+			plantResource[i][j] = 0;
+		}
+	}
 }
 
 
@@ -148,13 +158,21 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 			}
 		}
 	}
+	if (e == 0) {
+		GLASSERT(engine);
+		// Tear down:
+		if (voxelVertexVBO) {
+			delete voxelVertexVBO;
+			voxelVertexVBO = 0;
+		}
+		for (Model** it = treePool.Mem(); it < treePool.End(); ++it) {
+			delete *it;
+		}
+		treePool.Clear();
+	}
+
 	engine = e;
 	iMapGridUse = imap;
-
-	if ( e == 0 && voxelVertexVBO ) {
-		delete voxelVertexVBO;
-		voxelVertexVBO = 0;
-	}
 }
 
 
@@ -704,6 +722,23 @@ void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, delta );
 		}
 	}
+}
+
+
+void WorldMap::SetPlant(int x, int y, int type, int stage, int rotation, int hp)
+{
+	int index = INDEX(x, y);
+	const WorldGrid was = grid[index];
+	GLASSERT(was.IsLand());
+
+	WorldGrid wg = grid[index];
+	wg.SetPlant(type + 1, stage, rotation);
+	wg.DeltaHP(hp);	// FIXME: what is the actual hp limit??
+
+	if (was.IsPassable() != wg.IsPassable()) {
+		ResetPather(x, y);
+	}
+	grid[index] = wg;
 }
 
 
@@ -1741,6 +1776,38 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 }
 
 
+void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, int rotation, float hpFraction)
+{
+	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
+	GLASSERT(stage >= 0 && stage < 4);
+	GLASSERT(rotation >= 0 && rotation < 4);
+
+	if (plantResource[0][0] == 0) {
+		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+			for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
+				CStr<32> str;
+				str.Format("plant%d.%d", i, j);
+				plantResource[i][j] = ModelResourceManager::Instance()->GetModelResource(str.c_str(), false);
+			}
+		}
+	}
+
+	if (treePool.Size() == nTrees) {
+		treePool.Push(new Model());
+	}
+	Model* m = treePool[nTrees];
+	nTrees++;
+
+	m->Free();
+	const ModelResource* res = plantResource[type0Based][stage];
+	GLASSERT(res);
+	m->Init(res, 0);
+	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
+	m->SetPosAndYRotation(pos, float(rotation * 90));
+	m->next = *root;
+	*root = m;
+}
+
 
 void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 {
@@ -1883,7 +1950,7 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 }
 
 
-void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
+void WorldMap::PrepVoxels( const SpaceTree* spaceTree, Model** modelRoot )
 {
 	//GRINLIZ_PERFTRACK
 	//PROFILE_FUNC();
@@ -1893,6 +1960,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 		voxelVertexVBO = new GPUVertexBuffer( 0, sizeof(Vertex)*MAX_VOXEL_QUADS*4 );
 	}
 	voxelBuffer.Clear();
+	nTrees = 0;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -1908,7 +1976,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 
 				// Check for memory exceeded and break.
 				if ( voxelBuffer.Size()+(6*4) >= voxelBuffer.Capacity() ) {
-					//GLASSERT(0);	// not a problem, but may need to adjust capacity
+					GLASSERT(0);	// not a problem, but may need to adjust capacity
 					y = b.max.y+1;
 					x = b.max.x+1;
 					break;
@@ -1920,6 +1988,12 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 				float h = 0;
 				int id = ROCK;
 				const WorldGrid& wg = grid[INDEX(x,y)];
+
+				if (wg.Plant()) {
+					float fraction = float(wg.HP()) / float(wg.TotalHP());
+					PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), wg.Rotation(), fraction);
+				}
+
 				if ( wg.Pool() ) {
 					id = POOL;
 					h = (float)POOL_HEIGHT - 0.2f;

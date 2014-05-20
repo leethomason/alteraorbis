@@ -36,6 +36,7 @@
 class Texture;
 class WorldInfo;
 class Model;
+class ModelResource;
 class ChitBag;
 class SectorData;
 class DamageDesc;
@@ -115,6 +116,7 @@ public:
 		int index = INDEX( x, y );
 		grid[index].SetPorch( id );
 	}
+	void SetPlant(int x, int y, int type, int stage, int rotation, int hp);
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 
@@ -179,7 +181,7 @@ public:
 		ICE
 	};
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
-	virtual void PrepVoxels( const SpaceTree* );
+	virtual void PrepVoxels( const SpaceTree*, Model** root );
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 	virtual void PrepGrid( const SpaceTree* spaceTree );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
@@ -258,7 +260,6 @@ private:
 	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
-	//void Tessellate();
 	void FreeVBOs();
 
 	bool Similar( const grinliz::Rectangle2I& r, int layer, const grinliz::BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap );
@@ -328,6 +329,7 @@ private:
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	void PushVoxel( int id, float x, float y, float h, const float* walls );
 	Vertex* PushVoxelQuad( int id, const grinliz::Vector3F& normal );
+	void PushTree(Model** root, int x, int y, int type0Based, int stage, int rotation, float hpFraction);
 
 	WorldGrid*					grid;
 	Engine*						engine;
@@ -362,16 +364,21 @@ private:
 	Texture*						gridTexture;
 	int								nVoxels;
 	int								nGrids;
+	int								nTrees;	// we don't necessarily use all the trees in the treePool
 
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
+	grinliz::CDynArray< Model* > treePool;
 
-	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
-	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering
+	const ModelResource* plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;
 	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
+
+	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
+	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering
+
 	// Temporary - big one - last in class
 	grinliz::CArray< Vertex, MAX_VOXEL_QUADS*4 > voxelBuffer;
 };

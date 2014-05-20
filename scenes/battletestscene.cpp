@@ -257,12 +257,14 @@ void BattleTestScene::LoadMap()
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	const GameItem& treeItem = itemDefDB->Get( "tree" );
+	//const GameItem& treeItem = itemDefDB->Get( "tree" );
 
 	for( int i=0; i<features.Size(); ++i ) {
-		Chit* chit = chitBag->NewChit();
+		//Chit* chit = chitBag->NewChit();
 		const Vector2I& v = features[i];
+		map->SetPlant(v.x, v.y, 1, 3, 0, 100);
 
+		/*
 		MapSpatialComponent* msc = new MapSpatialComponent();
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
@@ -270,6 +272,7 @@ void BattleTestScene::LoadMap()
 		chit->Add( new RenderComponent( "plant1.3" ));
 		chit->Add( new ItemComponent( treeItem ));
 		chit->Add( new HealthComponent());
+		*/
 	}
 
 	Vector2I unit = { 2, 16 };

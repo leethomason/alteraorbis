@@ -42,7 +42,7 @@ public:
 
 	void SetLightDir( const grinliz::Vector3F& light );
 	
-	Model* AllocModel( const ModelResource* );
+	Model* AllocModel( const ModelResource* );	// Allocates a model in this tree
 	void   FreeModel( Model* );
 
 	// Called whenever a model moves. (Usually called automatically be the model.)

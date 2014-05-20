@@ -277,6 +277,9 @@ public:
 	bool Empty() const		{ return size==0; }
 	const T* Mem() const	{ return mem; }
 	T* Mem()				{ return mem; }
+	const T* End() const	{ return mem + size; }	// mem never 0, because of cache
+
+	void Reserve(int n) { EnsureCap(n); }
 
 	void EnsureCap( int count ) {
 		if ( count > capacity ) {

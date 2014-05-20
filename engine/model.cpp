@@ -225,30 +225,31 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	boneFilter.Set(0,0,0,0);
 	control.Set( 1, 1, 1, 1 );
 
-	animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
-	if ( animationResource ) {	// Match the IDs.
-		if ( !auxBone ) {
-			auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
-		}
-		int type = 0;
-		// Find a sequence.
-		for( int i=0; i<ANIM_COUNT; ++i ) {
-			if ( !animationResource->GetBoneData(i).bone[i].name.empty() ) {
-				type = i;
-				break;
+	if (resource) {
+		animationResource = AnimationResourceManager::Instance()->GetResource(resource->header.animation.c_str());
+		if (animationResource) {	// Match the IDs.
+			if (!auxBone) {
+				auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
 			}
-		}
+			int type = 0;
+			// Find a sequence.
+			for (int i = 0; i < ANIM_COUNT; ++i) {
+				if (!animationResource->GetBoneData(i).bone[i].name.empty()) {
+					type = i;
+					break;
+				}
+			}
 
-		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			auxBone->animToModelMap[i] = -1;
-			const IString& str = animationResource->GetBoneData(type).bone[i].name;
-			if ( !str.empty() ) {
-				auxBone->animToModelMap[i] = this->GetBoneIndex(str);
+			for (int i = 0; i < EL_MAX_BONES; ++i) {
+				auxBone->animToModelMap[i] = -1;
+				const IString& str = animationResource->GetBoneData(type).bone[i].name;
+				if (!str.empty()) {
+					auxBone->animToModelMap[i] = this->GetBoneIndex(str);
+				}
 			}
+			this->SetAnimationRate(resource->header.animationSpeed);
 		}
-		this->SetAnimationRate(resource->header.animationSpeed);
 	}
-
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
 	rot.Zero();
@@ -273,10 +274,12 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	cachedAnim.Init();
 
 	hasParticles = false;
-	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
-		const ModelParticleEffect& effect = resource->header.effectData[i];
-		if ( !effect.name.empty() ) {
-			hasParticles = true;
+	if (resource) {
+		for (int i = 0; i < EL_MAX_MODEL_EFFECTS; ++i) {
+			const ModelParticleEffect& effect = resource->header.effectData[i];
+			if (!effect.name.empty()) {
+				hasParticles = true;
+			}
 		}
 	}
 }

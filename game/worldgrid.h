@@ -29,10 +29,12 @@ static const int POOL_HEIGHT			= 2;
 struct WorldGrid {
 
 public:
+	// 1 bit
 	unsigned extBlock			: 1;	// used by the map. prevents allocating another structure.
 private:
 	// memset(0) should work, and make it water.
 
+	// 1 + 15 = 16 bits
 	unsigned isLand				: 1;
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
@@ -45,6 +47,7 @@ private:
 	unsigned rockHeight			: 2;
 	unsigned hasPool			: 1;
 
+	// 16 + 27 = 43 bits
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned hp					: 9;	// 0-511
 
@@ -54,8 +57,13 @@ private:
 
 	unsigned path				: 10;	// 2 bits each: core, port0-3
 
+	// 43 + 8 = 51 bits
+	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
+	unsigned stage				: 2;	// 0-3
+	unsigned rotation			: 2;	// 90 * (0-3)
+
 public:
-	bool IsBlocked() const			{ return extBlock || (!isLand) || isGrid || rockHeight || hasPool; }
+	bool IsBlocked() const			{ return extBlock || (!isLand) || isGrid || rockHeight || hasPool || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 	
 	// does this and rhs render the same voxel?
@@ -204,6 +212,23 @@ public:
 
 	bool Magma() const			{ return magma != 0; }
 	void SetMagma( bool m )		{ magma = m ? 1 : 0; if ( magma ) pave = 0; }
+
+
+	// 1-based plant interpretation
+	int Plant() const { return plant; }
+	// 0-based
+	int PlantStage() const { return stage;  }
+	// 0-3
+	int Rotation() const { return rotation; }
+
+	void SetPlant(int _type1based, int _stage, int _rotation)	{
+		GLASSERT(_type1based >= 0 && _type1based <= 8);	// 0 removes the plant
+		GLASSERT(_rotation >= 0 && _rotation < 4);
+		plant = _type1based;
+		stage = _stage;
+		rotation = _rotation;
+	}
+
 
 	int TotalHP() const			{ return rockHeight * HP_PER_HEIGHT; }
 	int HP() const				{ return hp; }

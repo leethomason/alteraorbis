@@ -108,7 +108,7 @@ Model* SpaceTree::AllocModel( const ModelResource* resource )
 }
 
 
-void SpaceTree::FreeModel( Model* model )
+void SpaceTree::FreeModel(Model* model)
 {
 	if ( model == 0 )
 		return;

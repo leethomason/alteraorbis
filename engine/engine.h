@@ -127,7 +127,7 @@ public:
 
 	Model* AllocModel( const ModelResource* );
 	Model* AllocModel( const char* );
-	void FreeModel( Model* );
+	void FreeModel(Model*);
 
 	Map* GetMap()						{ return map; }
 	Texture* GetMiniMapTexture();

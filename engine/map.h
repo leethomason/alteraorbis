@@ -31,6 +31,7 @@
 
 class WorldMap;
 class SpaceTree;
+class Model;
 
 // Allows the Map to call out for the state of locations.
 // The tricky bit is to remember to call the pather->Reset()
@@ -66,7 +67,7 @@ public:
 	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
 
-	virtual void PrepVoxels( const SpaceTree* )	{}
+	virtual void PrepVoxels( const SpaceTree*, Model** root )	{}
 	virtual void PrepGrid( const SpaceTree* )	{}
 	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
 
