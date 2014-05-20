@@ -121,8 +121,8 @@ void HealthComponent::DeltaHealth()
 						chit->GetSpatialComponent()->SetPosYRot( pos, r );
 
 						GameItem* tombItem = chit->GetItem();
-						GLASSERT( item->primaryTeam != 0 );	// how would a neutral create a tombstone??
-						tombItem->keyValues.Set( "tomb_team", item->primaryTeam );
+						GLASSERT( item->team != 0 );	// how would a neutral create a tombstone??
+						tombItem->keyValues.Set( "tomb_team", item->team );
 						tombItem->keyValues.Set( "tomb_mob", mob );
 					}
 				}

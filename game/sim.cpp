@@ -168,7 +168,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &reader, "minuteClock" );
 			secondClock.Serialize( &reader, "secondClock" );
 			volcTimer.Serialize( &reader, "volcTimer" );
-			itemDB->Serialize( &reader );
+			Team::Serialize(&reader);
+			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
@@ -208,6 +209,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &writer, "minuteClock" );
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
+			Team::Serialize(&writer);
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
@@ -253,7 +255,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			Vector2I sector = ToSector(pos2i);
 			coreCreateList.Push(sector);
 
-			if (chit->PrimaryTeam() != TEAM_NEUTRAL) {
+			if (chit->Team() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
 				chitBag->GetNewsHistory()->Add(news);
 
@@ -274,17 +276,23 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 					queryArr[i]->DeRez();
 				}
 			}
-			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
-				Vector2I zero = { 0, 0 };
-				chitBag->SetHomeSector(zero);
-				if (playerID) {
-					Chit* player = GetPlayerChit();
-					if (player) player->SetPlayerControlled(false);
-				}
-				playerID = 0;	// FIXME: flag in 2 places...
+			if (chit->Team() == chitBag->GetHomeTeam()) {
+				AbandonDomain();
 			}
 		}
 	}
+}
+
+
+void Sim::AbandonDomain()
+{
+	static const Vector2I ZERO = { 0, 0 };
+	chitBag->SetHomeSector(ZERO, chitBag->GetHomeTeam());
+	if (playerID) {
+		Chit* player = GetPlayerChit();
+		if (player) player->SetPlayerControlled(false);
+	}
+	playerID = 0;	// FIXME: flag in 2 places...
 }
 
 
@@ -330,12 +338,9 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			cs->ParentChit()->GetItem()->primaryTeam = team;
+			cs->ParentChit()->GetItem()->team = team;
 			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
 			chitBag->GetNewsHistory()->Add(news);
-			if (team == TEAM_HOUSE0) {
-				chitBag->SetHomeSector(sector);
-			}
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());
 		}
@@ -348,7 +353,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 
 void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
-	Chit* chit = chitBag->NewDenizen(pos, TEAM_HOUSE0);
+	Chit* chit = chitBag->NewDenizen(pos, chitBag->GetHomeTeam());
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
 	chitBag->GetCamera( engine )->SetTrack( playerID );

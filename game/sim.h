@@ -83,6 +83,7 @@ public:
 	CoreScript* CreateCore(const grinliz::Vector2I& sector, int team);
 	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
+	void AbandonDomain();
 
 	// IChitListener.
 	// Listens for cores to be destroyed and re-creates.

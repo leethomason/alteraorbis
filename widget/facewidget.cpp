@@ -68,7 +68,7 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 {
 	if ( item ) {
 		ProcRenderInfo info;
-		HumanGen faceGen( strstr( item->ResourceName(), "emale" ) != 0, item->ID(), item->primaryTeam, false );
+		HumanGen faceGen( strstr( item->ResourceName(), "emale" ) != 0, item->ID(), item->team, false );
 		faceGen.AssignFace( &info );
 
 		RenderAtom procAtom(	(const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 

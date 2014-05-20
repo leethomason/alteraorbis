@@ -84,34 +84,34 @@ d animation generation
 		- tune down fire rate
 
 	- Beta2
-		- component infrastructure
-			x remove IScript and ScriptComponent
-			x linked list for components; unlimited general comps
-			- remove spatial component
-		t auto rebuild
-		- out of gold shouldn't cancel build orders
-		- can't cancel forge (2x2 build)
-	    - plants look repetetive
-		- hints about what you need to build
-		- walk target for the avatar
 		x repair
 		x fast / threaded save
 		x new opening screen?
-		- move "Create Worker" and "Auto-Rebuild" to "Manage"
-		- abandon to tactical AI
 		x clean up history code. remove named lesser tracking.
-		- tuning
-			- farm production (high??)
-			- monster arrival. greater herd more often?
-			- time to use bar (low??)
-			- double tech decay
-			x weapon sorting not quite correct
 		x new walkthrough tutorial
 		x (web page) note that installer installs-over
 		x restore 'create world' button.
 			x pre-gen plants
 			x pre-gen volcanoes (50%?)
 			x run world sim 5 minutes?
+		x component infrastructure
+			x remove IScript and ScriptComponent
+			x linked list for components; unlimited general comps
+			d remove spatial component
+		t auto rebuild
+		t abandon to tactical AI
+		- special plant renderer: move plants to worldgrid
+		- out of gold shouldn't cancel build orders
+		- can't cancel forge (2x2 build)
+		- hints about what you need to build
+		- walk target for the avatar
+		- move "Create Worker" and "Auto-Rebuild" to "Manage"
+		- tuning
+			- farm production (high??)
+			- monster arrival. greater herd more often?
+			- time to use bar (low??)
+			- double tech decay
+			x weapon sorting not quite correct
 
 	    - plants look repetetive
 		- auto-clear not working as well as it should

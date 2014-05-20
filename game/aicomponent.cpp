@@ -145,18 +145,6 @@ void AIComponent::OnRemove()
 }
 
 
-int AIComponent::GetTeamStatus( Chit* other )
-{
-	GameItem* thisItem  = parentChit->GetItem();
-	GameItem* otherItem = other->GetItem();
-
-	int t0  = thisItem ? thisItem->primaryTeam  : 0;
-	int t1 = otherItem ? otherItem->primaryTeam : 0;
-
-	return GetRelationship( t0, t1 );
-}
-
-
 bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
 {
 
@@ -215,7 +203,7 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 		int id = enemyIDs[i];
 		Chit* chit = Context()->chitBag->GetChit( enemyIDs[i] );
 		if ( chit ) {
-			int status = GetTeamStatus( chit );
+			int status = Team::GetRelationship( chit, parentChit );
 			if ( status == RELATE_ENEMY ) {
 				if ( enemyList.HasCap() && enemyList.Find( id ) < 0 ) {
 					enemyList.Push( id );
@@ -273,7 +261,7 @@ void AIComponent::GetFriendEnemyLists()
 
 	Context()->chitBag->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
-		int status = GetTeamStatus( chitArr[i] );
+		int status = Team::GetRelationship( parentChit, chitArr[i] );
 		if ( status == RELATE_ENEMY ) {
 			if (    enemyList.HasCap() 
 				 && ( fullSectorAware || context->worldMap->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() ))) 
@@ -317,7 +305,7 @@ void AIComponent::GetFriendEnemyLists()
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
 		for (int i = 0; i < chitArr.Size(); ++i) {
 			Chit* building = chitArr[i];
-			int status = GetTeamStatus(building);
+			int status = Team::GetRelationship(building, parentChit);
 			if (status == RELATE_ENEMY) {
 				// Note that buildings are behind walls and such, so we can't use HasStraightPath()
 				if (enemyList.HasCap()) {
@@ -889,7 +877,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	sector.y /= SECTOR_SIZE;
 
 	CoreScript* cs = CoreScript::GetCore( sector );
-	if ( cs && cs->InUse() && (cs->PrimaryTeam() != thisComp.item->primaryTeam) ) {
+	if ( cs && cs->InUse() && (cs->ParentChit()->Team() != thisComp.chit->Team()) ) {
 		// Core is in use. We can only blast away.
 		const WorldGrid& wg = context->worldMap->GetWorldGrid( rock.x, rock.y );
 		if ( wg.RockHeight() == 0 )
@@ -1286,7 +1274,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 
 			// Check repelled / attracted.
 			if (cs) {
-				int relate = GetRelationship(cs->PrimaryTeam(), thisComp.item->primaryTeam);
+				int relate = Team::GetRelationship(cs->ParentChit(), thisComp.chit);
 				int tech = cs->MaxTech();
 
 				// For enemies, apply rules to make the gameplay smoother.
@@ -1663,14 +1651,10 @@ bool AIComponent::AtFriendlyOrNeutralCore()
 
 	Vector2I sector = ToSector( sc->GetPosition2DI());
 	CoreScript* coreScript = CoreScript::GetCore( sector );
-
-	int team0 = parentChit->PrimaryTeam();
-	int team1 = 0;
-	if ( coreScript ) {
-		team1 = coreScript->ParentChit()->PrimaryTeam();
+	if (coreScript) {
+		return Team::GetRelationship(parentChit, coreScript->ParentChit()) != RELATE_ENEMY;
 	}
-
-	return GetRelationship( team0, team1 ) != RELATE_ENEMY;
+	return false;
 }
 
 
@@ -1958,7 +1942,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 
 	if ( !coreScript ) return false;
-	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
+	if ( Team::GetRelationship( parentChit, coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
 	int nElixir = coreScript->nElixir;
 
@@ -2618,7 +2602,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 		break;
 
 	case BLOODRAGE:
-		thisComp.item->primaryTeam = TEAM_CHAOS;
+		thisComp.item->team = TEAM_CHAOS;
 		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit, 0));
 		break;
 
@@ -2681,7 +2665,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				else if ( mob == IStringConst::greater )	boost = 0.20;
 				else if ( mob == IStringConst::denizen )	boost = 0.10;
 
-				int relate = GetRelationship( thisComp.chit->PrimaryTeam(), team );
+				int relate = Team::GetRelationship( thisComp.chit->Team(), team );
 				if ( relate == RELATE_ENEMY ) {
 					GetNeedsMutable()->AddMorale( boost );
 					if ( rc ) {
@@ -2731,7 +2715,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {
 		Chit* chit = chitBag->GetChit( targetDesc.id );
-		if ( !chit || (GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
+		if ( !chit || (Team::GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
 			targetDesc.Clear();
 			currentAction = 0;
 		}

@@ -278,13 +278,13 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 						worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 					}
 					else if ( task->buildScriptID == BuildScript::PAVE ) {
-						worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
+						worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->Team()%3+1 );
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
-						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->PrimaryTeam() );
+						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->Team() );
 						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
 						building->GetSpatialComponent()->SetYRotation(float(task->data));
@@ -370,7 +370,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 
 	if ( arr.Size() < 2 ) return;
 	for( int i=1; i<arr.Size(); ++i ) {
-		int status = arr[0]->GetAIComponent()->GetTeamStatus( arr[i] );
+		int status = Team::GetRelationship( arr[0], arr[i] );
 		if ( status == RELATE_ENEMY ) {
 			// one bad apple ruins the bunch.
 			return;

@@ -95,7 +95,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		hardpoint		= rhs->hardpoint;
 		mass			= rhs->mass;
 		hpRegen			= rhs->hpRegen;
-		primaryTeam		= rhs->primaryTeam;
+		team			= rhs->team;
 		meleeDamage		= rhs->meleeDamage;
 		rangedDamage	= rhs->rangedDamage;
 		absorbsDamage	= rhs->absorbsDamage;
@@ -125,7 +125,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		hardpoint  = 0;
 		mass = 1;
 		hpRegen = 0;
-		primaryTeam = 0;
+		team = 0;
 		meleeDamage = 1;
 		rangedDamage = 0;
 		absorbsDamage = 0;
@@ -155,7 +155,7 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, id );
 	XARC_SER( xs, mass );
 	XARC_SER_DEF( xs, hpRegen, 0.0f );
-	XARC_SER_DEF( xs, primaryTeam, 0 );
+	XARC_SER_DEF( xs, team, 0 );
 	XARC_SER_DEF( xs, clipCap, 0 );
 	XARC_SER_DEF( xs, rounds, 0 );
 	XARC_SER_DEF( xs, meleeDamage, 1.0f );
@@ -306,7 +306,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		}
 		READ_FLOAT_ATTR( mass )
 		READ_FLOAT_ATTR( hpRegen )
-		READ_INT_ATTR( primaryTeam )
+		READ_INT_ATTR( team )
 		READ_FLOAT_ATTR( meleeDamage )
 		READ_FLOAT_ATTR( rangedDamage )
 		READ_FLOAT_ATTR( absorbsDamage )
@@ -667,7 +667,7 @@ bool GameItem::Significant() const
 	if ( keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
 		return true;
 	}
-	if (primaryTeam && name == IStringConst::core) {
+	if (team && name == IStringConst::core) {
 		return true;
 	}
 

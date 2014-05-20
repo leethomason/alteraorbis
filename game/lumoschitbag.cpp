@@ -687,7 +687,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
 	int shooterTeam = -1;
 	if ( chitShooter && chitShooter->GetItemComponent() ) {
-		shooterTeam = chitShooter->GetItemComponent()->GetItem()->primaryTeam;
+		shooterTeam = chitShooter->GetItemComponent()->GetItem()->team;
 	}
 	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
@@ -699,7 +699,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 			if ( chitHit ) {
 				GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 				if ( chitHit->GetItemComponent() &&
-					 chitHit->GetItemComponent()->GetItem()->primaryTeam == shooterTeam ) 
+					 chitHit->GetItemComponent()->GetItem()->team == shooterTeam ) 
 				{
 					// do nothing. don't shoot own team.
 				}
@@ -759,7 +759,7 @@ GameItem* LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, i
 	if ( altRes ) {
 		item.SetResource( altRes );
 	}
-	item.primaryTeam = team;
+	item.team = team;
 	item.GetTraitsMutable()->SetExpFromLevel( level );
 	item.InitState();
 
@@ -918,7 +918,7 @@ bool MOBKeyFilter::Accept(Chit* chit)
 bool MOBIshFilter::RelateAccept( Chit* chit ) const
 {
 	if (!relateTo) return true;	// not doing the check.
-	return GetRelationship(chit, relateTo) == relationship;
+	return Team::GetRelationship(chit, relateTo) == relationship;
 }
 
 
@@ -927,7 +927,7 @@ bool MOBIshFilter::Accept(Chit* chit)
 	// If it can move and has a team...?
 	// Mostly a good metric. Doesn't account for dummy targets.
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
-	if (pmc && chit->PrimaryTeam()) {
+	if (pmc && chit->Team()) {
 		return RelateAccept(chit);
 	}
 	GameItem* item = chit->GetItem();

@@ -138,6 +138,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	autoRebuild.SetText("Auto\nRebuild");
 	autoRebuild.SetVisible(false);
 
+	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
+	abandonButton.SetText("Abandon");
+	abandonButton.SetVisible(false);
+
 	buildDescription.Init(&gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
@@ -259,6 +263,7 @@ void GameScene::Resize()
 	}
 	layout.PosAbs(&createWorkerButton, 0, 3);
 	layout.PosAbs(&autoRebuild, 1, 3);
+	layout.PosAbs(&abandonButton, 2, 3);
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
@@ -505,7 +510,8 @@ void GameScene::MoveModel( Chit* target )
 	Chit* focusedTarget = sim->GetChitBag()->GetChit( targetChit );
 	if ( target && target != focusedTarget ) {
 		AIComponent* ai = player->GetAIComponent();
-		if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
+
+		if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
@@ -535,11 +541,11 @@ void GameScene::TapModel( Chit* target )
 	AIComponent* ai = player ? player->GetAIComponent() : 0;
 	const char* setTarget = 0;
 
-	if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
+	if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
 		ai->Target( target, true );
 		setTarget = "target";
 	}
-	else if ( ai && ai->GetTeamStatus( target ) == RELATE_FRIEND ) {
+	else if ( ai && Team::GetRelationship( target, player ) == RELATE_FRIEND ) {
 		const GameItem* item = target->GetItem();
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
@@ -803,7 +809,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			Chit* coreChit = cs->ParentChit();
 			if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
 				Transfer(&ReserveBank::Instance()->bank, &coreChit->GetItem()->wallet, WORKER_BOT_COST);
-				int team = coreChit->GetItem()->primaryTeam;
+				int team = coreChit->GetItem()->team;
 				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
 			}
 		}
@@ -822,6 +828,18 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				delete rebuild;
 			}
 		}
+	}
+	else if (item == &abandonButton) {
+		// Add a rebuild, if not present, and then abandon.
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		if (cs) {
+			Chit* coreChit = cs->ParentChit();
+			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
+			if (!rebuild) {
+				coreChit->Add(new RebuildAIComponent());
+			}
+		}
+		sim->AbandonDomain();
 	}
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
@@ -1363,7 +1381,10 @@ void GameScene::DoTick( U32 delta )
 	}
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
-	autoRebuild.SetVisible(uiMode[UI_BUILD].Down());
+
+	bool visible = game->GetDebugUI();
+	autoRebuild.SetVisible(uiMode[UI_BUILD].Down() && visible);
+	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible);
 
 	str.Clear();
 
@@ -1405,6 +1426,7 @@ void GameScene::DoTick( U32 delta )
 		buildButton[sleepTubeID].SetText( str2.c_str() ); 
 	}
 	autoRebuild.SetEnabled(coreScript != 0);
+	abandonButton.SetEnabled(coreScript != 0);
 	if (coreScript) {
 		// auto rebuild
 		Component* rebuild = coreScript->ParentChit()->GetComponent("RebuildAIComponent");
@@ -1459,7 +1481,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		if (chit->GetComponent("CoreScript")) {
-			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
+			if (chit->Team() == sim->GetChitBag()->GetHomeTeam() ) {
 				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
@@ -1472,7 +1494,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUSE0 ) {
+	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->Team() == sim->GetChitBag()->GetHomeTeam() ) {
 		BuildingFilter filter;
 		if (filter.Accept(chit)) {
 			if (chit->GetComponent("CoreScript"))
@@ -1524,7 +1546,7 @@ void GameScene::CheckGameStage(U32 delta)
 			if (sd->HasCore() && arr.HasCap()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
 				CoreScript* cs = CoreScript::GetCore(sector);
-				if (cs && cs->PrimaryTeam() == TEAM_NEUTRAL) {
+				if (cs && cs->ParentChit()->Team() == TEAM_NEUTRAL) {
 					Rectangle2I bi = sd->InnerBounds();
 					Rectangle2F b = ToWorld(bi);
 					PlantFilter plantFilter(-1, 2, 3);
@@ -1565,7 +1587,9 @@ void GameScene::DialogResult(const char* name, void* data)
 		const SectorData* sd = (const SectorData*)data;
 		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
-		sim->CreateCore(ToSector(sd->x, sd->y), TEAM_HOUSE0);
+		int team = Team::GenTeam(TEAM_HOUSE);
+		sim->GetChitBag()->SetHomeSector(ToSector(sd->x, sd->y), team);
+		sim->CreateCore(ToSector(sd->x, sd->y), team);
 		ForceHerd(ToSector(sd->x, sd->y));
 
 		ReserveBank* bank = ReserveBank::Instance();

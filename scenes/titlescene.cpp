@@ -129,14 +129,14 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	engine->CameraLookAt(CAM, TARGET);
 	{
-		HumanGen gen(true, 99, TEAM_HOUSE0, false);
+		HumanGen gen(true, 99, TEAM_HOUSE, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
 		model[HUMAN_FEMALE]->SetColorMap(info.color);
 	}
 	{
-		HumanGen gen(false, 1, TEAM_HOUSE0, false);
+		HumanGen gen(false, 1, TEAM_HOUSE, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_MALE]->SetTextureXForm(info.te.uvXForm);
@@ -325,7 +325,7 @@ void TitleScene::HandleHotKey(int key)
 		seed++;
 		GLOUTPUT(("Seed=%d\n", seed));
 		if (model[HUMAN_FEMALE]) {
-			HumanGen gen(true, seed, TEAM_HOUSE0, false);
+			HumanGen gen(true, seed, TEAM_HOUSE, false);
 			ProcRenderInfo info;
 			gen.AssignSuit(&info);
 			model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);

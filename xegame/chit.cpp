@@ -297,11 +297,11 @@ void Chit::DebugStr( GLString* str )
 }
 
 
-int Chit::PrimaryTeam() const
+int Chit::Team() const
 {
 	const GameItem* item = GetItem();
 	if ( item ) 
-		return item->primaryTeam;
+		return item->team;
 	return 0;
 }
 

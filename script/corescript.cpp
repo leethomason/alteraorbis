@@ -221,17 +221,7 @@ int CoreScript::NumCitizens()
 
 bool CoreScript::InUse() const
 {
-	return PrimaryTeam() != 0;
-}
-
-
-int CoreScript::PrimaryTeam() const
-{
-	const GameItem* item = parentChit->GetItem();
-	if ( item ) {
-		return item->primaryTeam;
-	}
-	return 0;
+	return parentChit->Team() != 0;
 }
 
 
@@ -264,12 +254,8 @@ int CoreScript::DoTick( U32 delta )
 {
 	static const int RADIUS = 4;
 
-	int primaryTeam = 0;
-	if ( parentChit->GetItem() ) {
-		primaryTeam = parentChit->GetItem()->primaryTeam;
-	}
-	if ( primaryTeam != team ) {
-		team = primaryTeam;
+	if ( parentChit->Team() != team ) {
+		team = parentChit->Team();
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
@@ -388,7 +374,7 @@ int CoreScript::DoTick( U32 delta )
 				}
 				if (spawn) {
 					IString ispawn = StringPool::Intern(spawn, true);
-					int team = GetTeam(ispawn);
+					int team = Team::GetTeam(ispawn);
 					GLASSERT(team != TEAM_NEUTRAL);
 					Chit* mob = Context()->chitBag->NewMonsterChit(pf, spawn, team);
 				}

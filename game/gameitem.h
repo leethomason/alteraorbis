@@ -390,7 +390,7 @@ public:
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
-	int		primaryTeam;	// who owns this items
+	int		team;			// which team this item is aligned with
 	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
 	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half

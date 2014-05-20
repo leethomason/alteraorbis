@@ -29,6 +29,7 @@
 #include "../game/lumoschitbag.h"
 #include "../game/reservebank.h"
 #include "../game/lumosgame.h"
+#include "../game/team.h"
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
@@ -72,9 +73,11 @@ ItemComponent::~ItemComponent()
 void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
-	str->AppendFormat( "[Item] %s hp=%.1f/%d lvl=%d tm=%d ", 
+	int group = 0, id = 0;
+	Team::SplitID(item->team, &group, &id);
+	str->AppendFormat( "[Item] %s hp=%.1f/%d lvl=%d tm=%d,%d ", 
 		item->Name(), item->hp, item->TotalHP(), item->Traits().Level(),
-		item->primaryTeam );
+		group, id );
 }
 
 
@@ -1012,7 +1015,7 @@ void ItemComponent::SetHardpoints()
 	}
 	RenderComponent* rc = parentChit->GetRenderComponent();
 	bool female = strstr( itemArr[0]->Name(), "Female" ) != 0;
-	int  team   = itemArr[0]->primaryTeam;
+	int  team   = itemArr[0]->team;
 
 	for( int i=0; i<itemArr.Size(); ++i ) {
 		const GameItem* item = itemArr[i];

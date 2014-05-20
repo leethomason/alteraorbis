@@ -70,7 +70,6 @@ public:
 	int  NumCitizens();
 
 	bool InUse() const;
-	int  PrimaryTeam() const;
 
 	WorkQueue* GetWorkQueue()		{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }

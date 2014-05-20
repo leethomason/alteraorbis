@@ -3,15 +3,24 @@
 #include "../xegame/istringconst.h"
 #include "../xegame/chit.h"
 #include "../xegame/itemcomponent.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 
+int Team::idPool = 0;
 
-grinliz::IString TeamName( int team )
+grinliz::IString Team::TeamName( int team )
 {
 	IString name;
-	switch ( team ) {
-	case TEAM_HOUSE0:	name = StringPool::Intern( "House0" );	break;
+	CStr<64> str;
+	int group = 0, id = 0;
+	SplitID(team, &group, &id);
+
+	switch ( group ) {
+	case TEAM_HOUSE:
+		str.Format("House-%x", id);
+		name = StringPool::Intern( str.c_str() );	
+		break;
 
 	default:
 		break;
@@ -21,7 +30,7 @@ grinliz::IString TeamName( int team )
 }
 
 
-int GetTeam( const grinliz::IString& itemName )
+int Team::GetTeam( const grinliz::IString& itemName )
 {
 	if ( itemName == IStringConst::arachnoid ) {
 		return TEAM_RAT;
@@ -41,12 +50,17 @@ int GetTeam( const grinliz::IString& itemName )
 	{
 		return TEAM_CHAOS;
 	}
+	GLASSERT(0);
 	return TEAM_NEUTRAL;
 }
 
 
-int GetRelationship( int t0, int t1 )
+int Team::GetRelationship( int _t0, int _t1 )
 {
+	int t0 = 0, t1 = 0;
+	SplitID(_t0, &t0, 0);
+	SplitID(_t1, &t1, 0);
+
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
 
@@ -65,7 +79,7 @@ int GetRelationship( int t0, int t1 )
 		return RELATE_ENEMY;
 
 	if ( t0 == TEAM_VISITOR ) {
-		if ( t1 == TEAM_HOUSE0 )
+		if ( t1 == TEAM_HOUSE )
 			return RELATE_FRIEND;
 		else
 			return RELATE_ENEMY;
@@ -81,11 +95,19 @@ int GetRelationship( int t0, int t1 )
 }
 
 
-int GetRelationship( Chit* chit0, Chit* chit1 )
+int Team::GetRelationship( Chit* chit0, Chit* chit1 )
 {
 	if ( chit0->GetItem() && chit1->GetItem() ) {
-		return GetRelationship( chit0->GetItem()->primaryTeam,
-								chit1->GetItem()->primaryTeam );
+		return GetRelationship( chit0->GetItem()->team,
+								chit1->GetItem()->team );
 	}
 	return RELATE_NEUTRAL;
+}
+
+
+void Team::Serialize(XStream* xs)
+{
+	XarcOpen(xs,"Team");
+	XARC_SER(xs, idPool);
+	XarcClose(xs);
 }

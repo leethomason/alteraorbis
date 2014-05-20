@@ -83,7 +83,6 @@ public:
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 	int  VisitorIndex() const				{ return visitorIndex; }
 
-	int GetTeamStatus( Chit* other );
 	const ai::Needs& GetNeeds() const		{ return needs; }
 	ai::Needs* GetNeedsMutable()			{ return &needs; }
 

@@ -193,14 +193,14 @@ void MapScene::SetText()
 
 			int low=0, med=0, high=0, greater=0;
 			float playerPower = 100.0f;
-			int primaryTeam = TEAM_HOUSE0;
+			int primaryTeam = lumosChitBag->GetHomeTeam();
 			if ( player ) {
 				playerPower = player->GetItemComponent()->PowerRating();
 			}
 
 			for( int k=0; k<query.Size(); ++k ) {
 				const GameItem* item = query[k]->GetItem();
-				if ( GetRelationship( primaryTeam, item->primaryTeam ) == RELATE_ENEMY ) {
+				if ( Team::GetRelationship( primaryTeam, item->team ) == RELATE_ENEMY ) {
 
 					float power = query[k]->GetItemComponent()->PowerRating();
 
@@ -220,7 +220,7 @@ void MapScene::SetText()
 				const char* owner = "<none>";
 				CoreScript* cc = CoreScript::GetCore( sector );
 				if ( cc && cc->InUse() ) {
-					owner = TeamName( cc->PrimaryTeam() ).c_str();
+					owner = Team::TeamName( cc->ParentChit()->Team() ).c_str();
 				}
 				str.Format( "%s\n%s\n%d-%d-%d G%d", sd.name, owner, low, med, high, greater );
 			}

@@ -264,8 +264,11 @@ public:
 		return homeSector;
 	}
 
-	void SetHomeSector( const grinliz::Vector2I& home ) {
+	int GetHomeTeam() const { return homeTeam; }
+
+	void SetHomeSector( const grinliz::Vector2I& home, int team ) {
 		homeSector = home;
+		homeTeam = team;
 	}
 
 	Census census;
@@ -304,6 +307,7 @@ private:
 	SceneData*					sceneData;
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	grinliz::Vector2I			homeSector;
+	int							homeTeam;
 	Sim*						sim;	// if part of a simulation. can be null.
 	int							deityID[NUM_DEITY];
 

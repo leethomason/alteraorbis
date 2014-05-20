@@ -53,7 +53,7 @@ void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	if (   msg.ID() == ChitMsg::CHIT_DESTROYED_START 
 		&& (chit != ParentChit())
 		&& InSameSector(chit, ParentChit())
-		&& chit->PrimaryTeam() == this->ParentChit()->PrimaryTeam())
+		&& chit->Team() == this->ParentChit()->Team())
 	{
 		BuildingFilter buildingFilter;
 		if (buildingFilter.Accept(chit))
@@ -89,7 +89,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 		if (arr.Empty()) {
 			if (mainItem->wallet.gold >= WORKER_BOT_COST) {
 				Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
-				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->PrimaryTeam());
+				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
 			}
 		}
 

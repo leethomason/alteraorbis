@@ -154,7 +154,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		// Arguably, shouldn't hit neutrals either. But that
 		// keeps a rampage from going through ruins.
 		if ( filter.Accept( target ) ) {
-			if ( GetRelationship( src, target ) == RELATE_FRIEND ) {
+			if ( Team::GetRelationship( src, target ) == RELATE_FRIEND ) {
 				continue;
 			}
 		}
