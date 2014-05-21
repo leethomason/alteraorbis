@@ -41,6 +41,7 @@ class ChitBag;
 class SectorData;
 class DamageDesc;
 class NewsHistory;
+class GameItem;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -116,7 +117,7 @@ public:
 		int index = INDEX( x, y );
 		grid[index].SetPorch( id );
 	}
-	void SetPlant(int x, int y, int type, int stage, int rotation, int hp);
+	void SetPlant(int x, int y, int typeBase1, int stage);
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 
@@ -248,6 +249,7 @@ private:
 		return y*width + x; 
 	}
 	int INDEX( grinliz::Vector2I v ) const { return INDEX( v.x, v.y ); }
+	float IndexToRotation360(int index);
 
 	int ZDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height );
@@ -329,7 +331,11 @@ private:
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	void PushVoxel( int id, float x, float y, float h, const float* walls );
 	Vertex* PushVoxelQuad( int id, const grinliz::Vector3F& normal );
-	void PushTree(Model** root, int x, int y, int type0Based, int stage, int rotation, float hpFraction);
+	void PushTree(Model** root, int x, int y, int type0Based, int stage, float hpFraction);
+
+	int IntersectPlantAtVoxel( const grinliz::Vector3I& voxel,
+		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);
+	void ProcessEffect( ChitBag* chitBag );	// on slow tick
 
 	WorldGrid*					grid;
 	Engine*						engine;
@@ -366,10 +372,22 @@ private:
 	int								nGrids;
 	int								nTrees;	// we don't necessarily use all the trees in the treePool
 
+	struct PlantEffect {
+		bool operator==(const PlantEffect& rhs) const { return rhs.voxel == voxel; }
+		grinliz::Vector2I voxel;
+		bool fire;
+		bool shock;
+	};
+
+	// List of interesting things that need to be processed each frame.
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
+	grinliz::CDynArray< PlantEffect >	plantEffect;		// plants on fire/shock
+
+	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
 
+	const GameItem* plantDef[NUM_PLANT_TYPES];
 	const ModelResource* plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	// Temporaries to avoid allocation

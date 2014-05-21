@@ -24,6 +24,7 @@
 
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
+static const int HP_PER_PLANT_STAGE		= 20;	// a square in there: 20 -> 320	
 static const int POOL_HEIGHT			= 2;
 
 struct WorldGrid {
@@ -60,7 +61,6 @@ private:
 	// 43 + 8 = 51 bits
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
-	unsigned rotation			: 2;	// 90 * (0-3)
 
 public:
 	bool IsBlocked() const			{ return extBlock || (!isLand) || isGrid || rockHeight || hasPool || (plant && stage >= 2); }
@@ -218,19 +218,14 @@ public:
 	int Plant() const { return plant; }
 	// 0-based
 	int PlantStage() const { return stage;  }
-	// 0-3
-	int Rotation() const { return rotation; }
 
-	void SetPlant(int _type1based, int _stage, int _rotation)	{
+	void SetPlant(int _type1based, int _stage)	{
 		GLASSERT(_type1based >= 0 && _type1based <= 8);	// 0 removes the plant
-		GLASSERT(_rotation >= 0 && _rotation < 4);
 		plant = _type1based;
 		stage = _stage;
-		rotation = _rotation;
 	}
 
-
-	int TotalHP() const			{ return rockHeight * HP_PER_HEIGHT; }
+	int TotalHP() const			{ return plant ? ((stage + 1)*(stage + 1)) * HP_PER_PLANT_STAGE : rockHeight * HP_PER_HEIGHT; }
 	int HP() const				{ return hp; }
 	void DeltaHP( int delta ) {
 		int points = hp;

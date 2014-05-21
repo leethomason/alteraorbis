@@ -101,6 +101,8 @@ d animation generation
 		t auto rebuild
 		t abandon to tactical AI
 		- special plant renderer: move plants to worldgrid
+			- test intersection: set firegun to plant visual impact height
+			
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 		- hints about what you need to build

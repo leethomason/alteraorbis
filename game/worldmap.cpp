@@ -38,12 +38,20 @@
 #include "worldinfo.h"
 #include "gameitem.h"
 #include "lumosgame.h"
+#include "gameitem.h"
+
 #include "../script/worldgen.h"
 #include "../script/procedural.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
+
+static const float CHANCE_FIRE_NORMAL	= 0.40f;
+static const float CHANCE_FIRE_HIGH		= 0.80f;
+static const float CHANCE_FIRE_OUT		= 0.10f;
+static const float CHANCE_FIRE_SPREAD	= 0.10f;	// once it starts spreading, self reinforcing
 
 // Startup for test world
 // Baseline:				15,000
@@ -81,6 +89,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	treePool.Reserve(1000);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+		plantDef[i] = 0;
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			plantResource[i][j] = 0;
 		}
@@ -178,14 +187,60 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 
 void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 {
+	Vector2I v2 = { v.x, v.z };
 	int index = INDEX(v.x, v.z);
 	
-	GLASSERT( grid[index].RockHeight() );
+	GLASSERT( grid[index].RockHeight() || grid[index].Plant() );
 	grid[index].DeltaHP( (int)(-dd.damage) );
 	if ( grid[index].HP() == 0 ) {
 		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, 0 );
 		SetRock( v.x, v.z, 0, false, 0 );
+		SetPlant(v.x, v.z, 0, 0);
+	}
+	else if (grid[index].Plant()) {
+		if (plantDef[0] == 0) {
+			for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+				CStr<32> str;
+				str.Format("plant%d", i);
+				plantDef[i] = &ItemDefDB::Instance()->Get(str.c_str());
+			}
+		}
+		const GameItem* plant = plantDef[grid[index].Plant() - 1];
+
+		// catch fire/shock?
+		float chanceFire = 0;
+		float chanceShock = 0;
+		if (dd.effects & GameItem::EFFECT_FIRE) {
+			if (plant->flags & GameItem::IMMUNE_FIRE)
+				chanceFire = 0;
+			else if (plant->flags & GameItem::FLAMMABLE)
+				chanceFire = CHANCE_FIRE_HIGH;
+			else
+				chanceFire = CHANCE_FIRE_NORMAL;
+		}
+		if (dd.effects & GameItem::EFFECT_SHOCK) {
+			if (plant->flags & GameItem::IMMUNE_SHOCK)
+				chanceShock = 0;
+			else if (plant->flags & GameItem::SHOCKABLE)
+				chanceShock = CHANCE_FIRE_HIGH;
+			else
+				chanceShock = CHANCE_FIRE_NORMAL;
+		}
+		bool fire = random.Uniform() < chanceFire;
+		bool shock = random.Uniform() < chanceShock;
+		if (fire || shock) {
+			PlantEffect f = { v2, false, false };
+			int i = plantEffect.Find(f);
+			if (i < 0) {
+				PlantEffect pe = { v2, fire, shock };
+				plantEffect.Push(pe);
+			}
+			else {
+				plantEffect[i].fire |= fire;
+				plantEffect[i].shock |= shock;
+			}
+		}
 	}
 }
 
@@ -686,54 +741,122 @@ void WorldMap::EmitWaterfalls( U32 delta )
 	}
 }
 
-void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
+
+void WorldMap::ProcessEffect(ChitBag* chitBag)
 {
-	ProcessZone( chitBag );
-	EmitWaterfalls( delta );
+	DamageDesc dd = { EFFECT_DAMAGE_PER_SEC * SLOW_TICK / 1000, 0 };
 
-	slowTick -= (int)(delta);
+	for (int i = 0; i < plantEffect.Size(); ++i) {
+		PlantEffect* pe = &plantEffect[i];
 
-	// Send fire damage events, if needed.
-	if ( slowTick <= 0 ) {
-		slowTick = SLOW_TICK;
-		for( int i=0; i<magmaGrids.Size(); ++i ) {
-			Vector2F origin = { (float)magmaGrids[i].x+0.5f, (float)magmaGrids[i].y + 0.5f };
-			ChitEvent event = ChitEvent::EffectEvent( origin, EFFECT_RADIUS, GameItem::EFFECT_FIRE, EFFECT_ACCRUED_MAX );
-			chitBag->QueueEvent( event );
+		if (pe->fire && random.Uniform() < CHANCE_FIRE_OUT) {
+			pe->fire = false;
 		}
-	}
-
-	// Do particles every time.
-	ParticleDef pdEmber = engine->particleSystem->GetPD( "embers" );
-	ParticleDef pdSmoke = engine->particleSystem->GetPD( "smoke" );
-	for( int i=0; i<magmaGrids.Size(); ++i ) {
-		Rectangle3F r;
-		r.min.Set( (float)magmaGrids[i].x, 0, (float)magmaGrids[i].y );
-		r.max = r.min;
-		r.max.x += 1.0f; r.max.z += 1.0f;
-		
-		int index = INDEX(magmaGrids[i]);
-		if ( grid[index].IsWater() || grid[index].Pool() ) {
-			r.min.y =  r.max.y = (float)POOL_HEIGHT;
-			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, delta );
+		if (pe->shock && random.Uniform() < CHANCE_FIRE_OUT) {
+			pe->shock = false;
 		}
-		else {
-			r.min.y = r.max.y = (float)grid[index].RockHeight();
-			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, delta );
+		// if deleted OR no effect
+		if ((grid[INDEX(pe->voxel)].Plant() == 0) || (!pe->fire && !pe->shock)) {
+			plantEffect.SwapRemove(i);
+			--i;
+			continue;
+		}
+
+		// Do damage:
+		Vector2F origin = ToWorld2F(pe->voxel);
+		for (int j = 0; j < 2; ++j) {
+			if ((j == 0 && pe->fire) || (j == 1 && pe->shock)) {
+				ChitEvent event = ChitEvent::EffectEvent(origin, EFFECT_RADIUS, j == 0 ? GameItem::EFFECT_FIRE : GameItem::EFFECT_SHOCK, EFFECT_ACCRUED_MAX);
+				chitBag->QueueEvent(event);
+				Vector3I hit = { pe->voxel.x, 0, pe->voxel.y };
+				this->VoxelHit(hit, dd);
+			}
+		}
+
+		// Finally, spread!
+		static const int N = 8;
+		static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
+		DamageDesc ddSpread = { 0, 0 };
+		if (pe->fire) ddSpread.effects |= GameItem::EFFECT_FIRE;
+		if (pe->shock) ddSpread.effects |= GameItem::EFFECT_SHOCK;
+
+		for (int j = 0; j < N; ++j) {
+			int index = INDEX(pe->voxel + delta[j]);
+			if (grid[index].Plant()) {
+				if (random.Uniform() < CHANCE_FIRE_SPREAD) {
+					Vector3I hit = { pe->voxel.x + delta[j].x, 0, pe->voxel.y + delta[j].y };
+					this->VoxelHit(hit, ddSpread);
+				}
+			}
 		}
 	}
 }
 
 
-void WorldMap::SetPlant(int x, int y, int type, int stage, int rotation, int hp)
+void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
+{
+	ProcessZone(chitBag);
+	EmitWaterfalls(delta);
+
+	slowTick -= (int)(delta);
+
+	// Send fire damage events, if needed.
+	if (slowTick <= 0) {
+		slowTick = SLOW_TICK;
+
+		for (int i = 0; i < magmaGrids.Size(); ++i) {
+			Vector2F origin = ToWorld2F(magmaGrids[i]);
+			ChitEvent event = ChitEvent::EffectEvent(origin, EFFECT_RADIUS, GameItem::EFFECT_FIRE, EFFECT_ACCRUED_MAX);
+			chitBag->QueueEvent(event);
+		}
+		ProcessEffect(chitBag);
+	}
+
+	// Do particles every time.
+	//	ParticleDef pdEmber = engine->particleSystem->GetPD( "embers" );
+	ParticleDef pdSmoke = engine->particleSystem->GetPD("smoke");
+	ParticleDef pdFire = engine->particleSystem->GetPD("fire");
+	ParticleDef pdShock = engine->particleSystem->GetPD("shock");
+
+	for (int i = 0; i < magmaGrids.Size(); ++i) {
+		Rectangle3F r;
+		r.min.Set((float)magmaGrids[i].x, 0, (float)magmaGrids[i].y);
+		r.max = r.min;
+		r.max.x += 1.0f; r.max.z += 1.0f;
+
+		int index = INDEX(magmaGrids[i]);
+		if (grid[index].IsWater() || grid[index].Pool()) {
+			r.min.y = r.max.y = (float)POOL_HEIGHT;
+			engine->particleSystem->EmitPD(pdSmoke, r, V3F_UP, delta);
+		}
+		else {
+			r.min.y = r.max.y = (float)grid[index].RockHeight();
+			engine->particleSystem->EmitPD(pdSmoke, r, V3F_UP, delta);
+		}
+	}
+	for (int i = 0; i < plantEffect.Size(); ++i) {
+		Vector3F v = ToWorld3F(plantEffect[i].voxel);
+		if (plantEffect[i].fire) {
+			engine->particleSystem->EmitPD(pdSmoke, v, V3F_UP, delta);
+			//engine->particleSystem->EmitPD(pdEmber, v, V3F_UP, delta);
+			engine->particleSystem->EmitPD(pdFire, v, V3F_UP, delta);
+		}
+		if (plantEffect[i].shock) {
+			engine->particleSystem->EmitPD(pdShock, v, V3F_UP, delta);
+		}
+	}
+}
+
+
+void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 {
 	int index = INDEX(x, y);
 	const WorldGrid was = grid[index];
 	GLASSERT(was.IsLand());
 
 	WorldGrid wg = grid[index];
-	wg.SetPlant(type + 1, stage, rotation);
-	wg.DeltaHP(hp);	// FIXME: what is the actual hp limit??
+	wg.SetPlant(typeBase1, stage);
+	wg.DeltaHP(wg.TotalHP());
 
 	if (was.IsPassable() != wg.IsPassable()) {
 		ResetPather(x, y);
@@ -1180,6 +1303,31 @@ void WorldMap::PrintStateInfo( void* state )
 	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
 }
 
+int WorldMap::IntersectPlantAtVoxel(const grinliz::Vector3I& voxel,
+	const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at)
+{
+	int index = INDEX(voxel.x, voxel.z);
+	const WorldGrid& wg = grid[index];
+	if (!wg.Plant()) {
+		return REJECT;
+	}
+
+	// We only need the one tree. This isn't a rendering pass,
+	// so the nTrees doesn't matter.
+	nTrees = 0;
+	// Create the tree we need for testing.
+	PushTree(0, voxel.x, voxel.z, wg.Plant() - 1, wg.PlantStage(), 1.0f);
+	Model* m = treePool[0];
+
+	int result = m->IntersectRay(origin, dir, at);
+	if (result == INTERSECT) {
+		float lenToImpact = (*at - origin).Length();
+		if (lenToImpact <= length) return INTERSECT;
+	}
+	return REJECT;
+}
+
+
 // The paper: "A Fast Voxel Traversal Algorithm for Ray Tracing" by Amanatides and Woo
 // based on code at: http://www.xnawiki.com/index.php?title=Voxel_traversal
 
@@ -1240,8 +1388,14 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 		// The only part specific to the map.
 		if ( ibounds.Contains( cell )) {
 			const WorldGrid& wg = this->GetWorldGrid( cell.x, cell.z );
+
+			if (wg.Plant()) {
+				if (IntersectPlantAtVoxel(cell, origin, dir, length, at) == INTERSECT) {
+					return cell;
+				}
+			}
 			if (    (wg.Pool() && cell.y < POOL_HEIGHT)
-				|| (cell.y < wg.RockHeight() )) 
+					  || (cell.y < wg.RockHeight() )) 
 			{
 				Vector3F v;
 				if ( lastStep < 0 ) {
@@ -1776,11 +1930,17 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 }
 
 
-void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, int rotation, float hpFraction)
+float WorldMap::IndexToRotation360(int index)
+{
+	static const float MULT = 360.0f / 255.0f;
+	return float(Random::Hash8(index)) * MULT;
+}
+
+
+void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, float hpFraction)
 {
 	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < 4);
-	GLASSERT(rotation >= 0 && rotation < 4);
 
 	if (plantResource[0][0] == 0) {
 		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
@@ -1803,9 +1963,14 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, i
 	GLASSERT(res);
 	m->Init(res, 0);
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
-	m->SetPosAndYRotation(pos, float(rotation * 90));
-	m->next = *root;
-	*root = m;
+	float rot = IndexToRotation360(INDEX(x, y));
+	m->SetPosAndYRotation(pos, rot);
+
+	// Don't get a root if we are being used for hit testing.
+	if (root) {
+		m->next = *root;
+		*root = m;
+	}
 }
 
 
@@ -1991,7 +2156,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree, Model** modelRoot )
 
 				if (wg.Plant()) {
 					float fraction = float(wg.HP()) / float(wg.TotalHP());
-					PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), wg.Rotation(), fraction);
+					PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
 				}
 
 				if ( wg.Pool() ) {

@@ -98,7 +98,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 			if ( b.impact ) {
 				GLASSERT( !mv.at.IsZero() );
-				if ( handler ) {
+				if ( handler && !wasImpact) {
 					handler->HandleBolt( b, mv );
 				}
 				b.head = mv.at;

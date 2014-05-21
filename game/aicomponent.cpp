@@ -147,7 +147,6 @@ void AIComponent::OnRemove()
 
 bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
 {
-
 	Vector3F origin, dest;
 	GLASSERT( weapon );
 

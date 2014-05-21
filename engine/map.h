@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
+#include "../grinliz/glrandom.h"
 
 #include "../gamui/gamui.h"
 #include "../tinyxml2/tinyxml2.h"
@@ -114,6 +115,8 @@ protected:
 	Texture*			texture;
 	GPUVertexBuffer*	vbo;
 	GPUIndexBuffer*		ibo;
+	grinliz::Random		random;
+
 private:
 	float				saturation;
 };

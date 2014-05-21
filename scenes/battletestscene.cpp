@@ -262,17 +262,7 @@ void BattleTestScene::LoadMap()
 	for( int i=0; i<features.Size(); ++i ) {
 		//Chit* chit = chitBag->NewChit();
 		const Vector2I& v = features[i];
-		map->SetPlant(v.x, v.y, 1, 3, 0, 100);
-
-		/*
-		MapSpatialComponent* msc = new MapSpatialComponent();
-		msc->SetMapPosition( v.x, v.y, 1, 1 );
-		msc->SetMode( GRID_BLOCKED );
-		chit->Add( msc );
-		chit->Add( new RenderComponent( "plant1.3" ));
-		chit->Add( new ItemComponent( treeItem ));
-		chit->Add( new HealthComponent());
-		*/
+		map->SetPlant(v.x, v.y, 1+1, 3);
 	}
 
 	Vector2I unit = { 2, 16 };
@@ -529,14 +519,14 @@ void BattleTestScene::DoTick( U32 deltaTime )
 			Bolt* bolt = cb->NewBolt();
 
 			bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
-			bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
+			bolt->head.Set( 0.5f * (float)map->Width(), 1, 2 );
 			bolt->color.Set( 1, 0.1f, 0.3f, 1 );
 			bolt->damage = 20.0f;
 			bolt->effect = GameItem::EFFECT_FIRE;
 			bolt->speed = 10.0f;
 		}
 	}
-
+	map->DoTick(deltaTime, chitBag);
 	chitBag->DoTick( deltaTime );
 }
 
