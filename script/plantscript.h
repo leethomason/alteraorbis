@@ -18,55 +18,27 @@
 
 #include "../grinliz/glrandom.h"
 #include "../xegame/component.h"
-#include "../xegame/cticker.h"
+#include "../game/gamelimits.h"
 
 class WorldMap;
-class Engine;
-class Weather;
+struct ChitContext;
 class GameItem;
-class Chit;
-class Sim;
 
-class PlantScript : public Component
+class PlantScript
 {
-	typedef Component super;
 public:
-	PlantScript( int type );
-	virtual ~PlantScript()	{}
+	PlantScript(const ChitContext*);
+	void DoTick(U32 delta);
 
-	virtual void Serialize( XStream* xs );
-	virtual void OnAdd(Chit* parent, bool initialize);
-	virtual void OnRemove();
-
-	virtual int DoTick( U32 delta );
-	virtual const char* Name() const { return "PlantScript"; }
-
-	// Plant specific:
-	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
-	virtual PlantScript*  ToPlantScript()	{ return this; }
-
-	int Type() const	{ return type; }
-	int Stage() const	{ return stage; }
-
-	void SetStage( int stage );	// for debugging; not intended for general use
-
-	enum {
-		NUM_STAGE = 4,
-		MAX_HEIGHT = NUM_STAGE,
-		SHORT_PLANTS_START = 6
-	};
+	static const GameItem* PlantDef(int plant0Based);
 
 private:
-	void SetRenderComponent();
-	const GameItem* GetResource();
+	static const GameItem* plantDef[NUM_PLANT_TYPES];
 
-	grinliz::Vector2I	lightTap;		// where to check for a shadow. (only check one spot.)
-	int			type;		// 0-7, fern, tree, etc.
-	int			stage;		// 0-3
-	U32			age;
-	U32			ageAtStage;
-	CTicker		growTimer;
-	CTicker		sporeTimer;
+	U32 index;
+	const ChitContext* context;
+	grinliz::Random random;
 };
+
 
 #endif // PLANT_SCRIPT_INCLUDED

@@ -51,6 +51,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	debugGLCalls = false;
 	debugUI = false;
 	spawnDate = 0.90f;
+	worldGenDone = 1.0f;
 }
 
 
@@ -97,6 +98,7 @@ void SettingsManager::Save()
 		printer.OpenElement("Game");
 		printer.PushAttribute("audioOn", audioOn);
 		printer.PushAttribute("spawnDate", spawnDate);
+		printer.PushAttribute("worldGenDone", worldGenDone);
 		printer.CloseElement();
 
 		printer.OpenElement("Debug");
@@ -118,6 +120,7 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 		if (gameElement) {
 			gameElement->QueryAttribute("audioOn", &audioOn);
 			gameElement->QueryAttribute("spawnDate", &spawnDate);
+			gameElement->QueryAttribute("worldGenDone", &worldGenDone);
 		}
 		const XMLElement* debugElement = root->FirstChildElement("Debug");
 		if (debugElement) {

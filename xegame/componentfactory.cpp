@@ -86,9 +86,6 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	if ( name == "VolcanoScript") {
 		return glnew VolcanoScript();
 	}
-	else if (name == "PlantScript") {
-		return glnew PlantScript(0);
-	}
 	else if (name == "CoreScript") {
 		return glnew CoreScript();
 	}

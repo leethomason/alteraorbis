@@ -70,7 +70,7 @@ static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants.
 static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
-static const float	PLANT_AWARE					=  3.0f;
+static const int	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
 static const float	FRUIT_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
@@ -563,14 +563,9 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		targetOkay = target.okay;
 	}
 	else if ( !targetDesc.mapPos.IsZero() ) {
+		const WorldGrid& wg = context->worldMap->GetWorldGrid(targetDesc.mapPos);
 		// make sure we aren't swinging at an empty voxel.
-		targetOkay = context->worldMap->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
-
-		// Sometimes we do want to clear plants - check for that.
-		if ( !targetOkay ) {
-			Chit* plant = Context()->chitBag->QueryPlant( targetDesc.mapPos, 0, 0 );
-			targetOkay = plant != 0;
-		}
+		targetOkay = wg.RockHeight() || wg.Plant();
 	}
 
 	if ( !weapon || !targetOkay ) {
@@ -669,13 +664,10 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 
 		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
 			// Are we on a plant?
-			Vector2F pos = thisComp.spatial->GetPosition2D();
+			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
 			// Note that currently only support eating stage 0-1 plants.
-			CChitArray plants;
-			PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
-
-			parentChit->Context()->chitBag->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
-			if ( !plants.Empty() ) {
+			if (wg.Plant() && !wg.BlockingPlant()) {
 				// We are standing on a plant.
 				float hp = Travel( EAT_HP_PER_SEC, time );
 				ChitMsg heal( ChitMsg::CHIT_HEAL );
@@ -687,17 +679,8 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 				}
 
 				DamageDesc dd( hp, 0 );
-				ChitDamageInfo info( dd );
-
-				info.originID = parentChit->ID();
-				info.awardXP  = false;
-				info.isMelee  = true;
-				info.isExplosion = false;
-				info.originOfImpact = thisComp.spatial->GetPosition();
-
-				ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
+				Context()->worldMap->VoxelHit(pos2i, dd);
 				parentChit->SendMessage( heal, this );
-				plants[0]->SendMessage( damage );
 				return true;
 			}
 		}
@@ -1041,11 +1024,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		return;
 	}
 
-	int type, stage;
-	Chit* plant = Context()->chitBag->QueryPlant( next, &type, &stage );
-	bool plantInTheWay = plant && stage >= 2;
-
-	if ( wg1.RockHeight() || plantInTheWay ) {
+	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
 
@@ -1195,15 +1174,16 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	}
 
 	// And plants are friends.
-	Rectangle2F r;
-	r.min = r.max = origin;
+	Rectangle2I r;
+	r.min = r.max = ToWorld2I(origin);
 	r.Outset( PLANT_AWARE );
-
-	CChitArray plants;
-	PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
-	parentChit->Context()->chitBag->QuerySpatialHash( &plants, r, 0, &plantFilter );
-	for( int i=0; i<plants.Size() && i<NPLANTS; ++i ) {
-		pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
+	int nPlants = 0;
+	for (Rectangle2IIterator it(r); !it.Done() && nPlants < NPLANTS; it.Next()) {
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+		if (wg.Plant() && !wg.BlockingPlant()) {
+			++nPlants;
+			pos.Push(ToWorld2F(it.Pos()));
+		}
 	}
 
 	Vector2F mean = origin;
@@ -1449,14 +1429,20 @@ bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
 	{
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
-		CChitArray plants;
-	
-		PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
-		parentChit->Context()->chitBag->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), PLANT_AWARE, 0, &plantFilter );
-
-		Vector2F plantPos =  { 0, 0 };
-		float plantDist = 0;
-		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
+		Vector2F plantPos = { 0, 0 };
+		for (int rad = 0; rad <= PLANT_AWARE; ++rad) {
+			Rectangle2I r;
+			r.min = r.max = thisComp.spatial->GetPosition2DI();
+			r.Outset(rad);
+			for (Rectangle2IEdgeIterator it(r); !it.Done(); it.Next()) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+				if (wg.Plant() && !wg.BlockingPlant()) {
+					plantPos = ToWorld2F(it.Pos());
+					break;
+				}
+			}
+		}
+		if ( !plantPos.IsZero()) {
 			if ( ToWorld2I( plantPos ) == thisComp.spatial->GetPosition2DI() ) {
 				if ( debugFlag ) {
 					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));

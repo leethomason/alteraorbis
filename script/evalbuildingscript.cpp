@@ -80,7 +80,6 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		CChitArray arr;
 		BuildingFilter buildingFilter;
-		PlantFilter plantFilter;
 		int hasWaterfalls = worldMap->ContainsWaterfall(bounds);
 
 		LumosChitBag* chitBag = Context()->chitBag;
@@ -124,11 +123,11 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 					}
 				}
 				if (hitBuilding) break;
-
-				chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.1f, 0, &plantFilter);
-				if (arr.Size()) {
-					int type = 0, stage = 0;
-					PlantScript::IsPlant(arr[0], &type, &stage);
+				
+				const WorldGrid& wg = worldMap->GetWorldGrid(p.x, p.y);
+				if (wg.Plant()) {
+					int type = wg.Plant() - 1;
+					int stage = wg.PlantStage();
 
 					if (stage >= 2) {
 						++hitPlant;
@@ -139,7 +138,6 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 					}
 				}
 
-				const WorldGrid& wg = worldMap->GetWorldGrid(p.x, p.y);
 				if (wg.RockHeight()) {
 					++hitRock;
 					break;

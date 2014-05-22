@@ -583,6 +583,12 @@ void ItemComponent::DoSlowTick()
 		mainItem->accruedShock = 0;
 	}
 
+	// With the plants spreading fire in there own loop, this is
+	// a little less desirable. While cool in theory, I'm always
+	// a surprised when the avatar gets killed by fire when
+	// using a fire weapon. May turn this back on, but need
+	// to handle the plant voxels.
+#if 0
 	// Look around for fire or shock spread.
 	if ( mainItem->accruedFire > 0 || mainItem->accruedShock > 0 ) {
 		SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -597,6 +603,7 @@ void ItemComponent::DoSlowTick()
 			}
 		}
 	}
+#endif
 
 	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
 		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );

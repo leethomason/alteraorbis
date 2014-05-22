@@ -644,7 +644,7 @@ void Sim::CreateVolcano( int x, int y )
 }
 
 
-Chit* Sim::CreatePlant( int x, int y, int type )
+bool Sim::CreatePlant( int x, int y, int type )
 {
 	if ( !worldMap->Bounds().Contains( x, y ) ) {
 		return 0;
@@ -673,48 +673,36 @@ Chit* Sim::CreatePlant( int x, int y, int type )
 
 	// check for a plant already there.
 	if (    wg.IsPassable() 
+		 && wg.Plant() == 0
 		 && wg.Layer() == WorldGrid::LAND 
 		 && !chitBag->MapGridUse(x,y) ) 
 	{
 		if ( type < 0 ) {
 			// Scan for a good type!
-			Rectangle2F r;
-			r.min.Set( (float)x+0.5f, (float)y+0.5f );
-			r.max = r.min;
-			r.Outset( 3.0f );
-
-			PlantFilter plantFilter;
-			chitBag->QuerySpatialHash( &queryArr, r, 0, &plantFilter );
+			Rectangle2I r;
+			r.Set(x, y, x, y);
+			r.Outset(3);
 
 			float chance[NUM_PLANT_TYPES];
 			for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
 				chance[i] = 1.0f;
 			}
 
-			for( int i=0; i<queryArr.Size(); ++i ) {
-				Vector3F pos = { (float)x+0.5f, 0, (float)y+0.5f };
-				Chit* c = queryArr[i];
-
-				int stage, type;
-				GameItem* item = PlantScript::IsPlant( c, &type, &stage );
-				if ( item ) {
-					float weight = (float)((stage+1)*(stage+1));
-					chance[type] += weight;
+			for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+				const WorldGrid& wgScan = worldMap->GetWorldGrid(it.Pos());
+				if (wgScan.Plant()) {
+					// Note that in this version, only stage>0 plants
+					// change the odds of the plant type. Experimenting
+					// with a little more initial plant variety.
+					chance[wgScan.Plant() - 1] += (float)(wgScan.PlantStage()*wgScan.PlantStage());
 				}
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
-
-		Chit* chit = chitBag->NewChit();
-		MapSpatialComponent* ms = new MapSpatialComponent();
-		ms->SetMapPosition( x, y, 1, 1 );
-		chit->Add( ms );
-
-		chit->Add( new HealthComponent() );
-		chit->Add( new PlantScript( type ));
-		return chit;
+		worldMap->SetPlant(x, y, type + 1, 0);
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 

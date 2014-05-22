@@ -229,17 +229,16 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 			const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 
 			if ( task->buildScriptID == BuildScript::CLEAR ) {
-				if ( wg.RockHeight() ) {
-					DamageDesc dd( 10000, 0 );	// FIXME need constant
-					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
-					worldMap->VoxelHit( voxel, dd );
+				if ( wg.RockHeight() || wg.Plant()) {
+					worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
+					worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
 				}
-				else {
-					Chit* found = chitBag->QueryRemovable( task->pos2i, false );
-					if ( found ) {
-						found->DeRez();
-					}
-				}
+//				else {
+//					Chit* found = chitBag->QueryRemovable( task->pos2i );
+//					if ( found ) {
+//						found->DeRez();
+//					}
+//				}
 				if ( wg.Pave() ) {
 					worldMap->SetPave( task->pos2i.x, task->pos2i.y, 0 );
 				}
@@ -254,22 +253,10 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 					controller->GetItem()->wallet ))
 				{
 					// Auto-Clear plants.
-					Rectangle2F clearBounds;
-					clearBounds.Set( (float)task->pos2i.x, (float)task->pos2i.y, (float)(task->pos2i.x + buildData.size), (float)(task->pos2i.y + buildData.size));
-					CChitArray plants;
-					PlantFilter plantFilter;
-					chitBag->QuerySpatialHash( &plants, clearBounds, 0, &plantFilter );
-					for( int k=0; k<plants.Size(); ++k ) {
-						plants[k]->DeRez();
-						// Some hackery: we can't build until the plant isn't there,
-						// but the component won't get deleted until later. Remove
-						// the MapSpatialComponent to detatch it from map.
-						MapSpatialComponent* msc = GET_SUB_COMPONENT( plants[k], SpatialComponent, MapSpatialComponent );
-						GLASSERT( msc );
-						if ( msc ) {
-							plants[k]->Remove( msc );
-							delete msc;
-						}
+					Rectangle2I clearBounds;
+					clearBounds.Set(task->pos2i.x, task->pos2i.y, task->pos2i.x + buildData.size - 1, task->pos2i.y + buildData.size - 1);
+					for (Rectangle2IIterator it(clearBounds); !it.Done(); it.Next()) {
+						chit->Context()->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
 					}
 
 					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,

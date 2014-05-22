@@ -87,6 +87,7 @@ public:
 };
 
 
+#if 0
 class PlantFilter : public IChitAccept
 {
 public:
@@ -99,6 +100,7 @@ private:
 	int minStage;
 	int maxStage;
 };
+#endif
 
 
 class RemovableFilter : public IChitAccept
@@ -282,8 +284,7 @@ public:
 		return QueryBuilding( r );
 	}
 	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
-	Chit* QueryRemovable( const grinliz::Vector2I& pos, bool ignorePlants );
-	Chit* QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage );
+	Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 	//LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request

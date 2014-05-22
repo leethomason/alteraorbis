@@ -326,8 +326,11 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
 			// However, if the action is CLEAR, we need to know there is something
 			// there to remove.
-			if ( chitBag->QueryRemovable( v, action != BuildScript::CLEAR )) {
-				++removable;
+			if (worldMap->GetWorldGrid(x, y).Plant()) {
+				++removable;	// plant
+			}
+			else if (chitBag->QueryRemovable(v)) {
+				++removable;	// building
 			}
 		}
 	}
@@ -364,8 +367,11 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 	}
 
 	if (BuildScript::IsClear(item.buildScriptID)) {
-		if (context->chitBag->QueryRemovable(item.pos, false)) {
-			return false; // need to clear building or plant
+		if (wg.Plant()) {
+			return false;
+		}
+		if (context->chitBag->QueryRemovable(item.pos)) {
+			return false; // need to clear building
 		}
 		if (wg.RockHeight() || wg.Pave() ) {
 			return false; // need to clear rock or pave

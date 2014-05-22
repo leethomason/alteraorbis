@@ -101,8 +101,11 @@ d animation generation
 		t auto rebuild
 		t abandon to tactical AI
 		- special plant renderer: move plants to worldgrid
-			- test intersection: set firegun to plant visual impact height
-			
+			x test intersection: set firegun to plant visual impact height
+			- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
+			- track plant #s
+			- respect # limits
+			- check random distribution to growth curve
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 		- hints about what you need to build

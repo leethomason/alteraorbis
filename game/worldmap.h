@@ -118,8 +118,12 @@ public:
 		grid[index].SetPorch( id );
 	}
 	void SetPlant(int x, int y, int typeBase1, int stage);
+	void SetWorldGridHP(int x, int y, int hp) {
+		grid[INDEX(x, y)].SetHP(hp);
+	}
 
-	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
+	const WorldGrid& GetWorldGrid(int x, int y) { return grid[INDEX(x, y)]; }
+	const WorldGrid& GetWorldGrid(const grinliz::Vector2I& p) { return grid[INDEX(p.x, p.y)]; }
 
 	grinliz::Vector2I FindPassable( int x, int y );
 
@@ -196,7 +200,12 @@ public:
 
 	// Brings water & waterfalls current
 	void DoTick( U32 delta, ChitBag* chitBag );
-	void VoxelHit( const grinliz::Vector3I& voxel, const DamageDesc& dd );
+	void VoxelHit(const grinliz::Vector2I& voxel, const DamageDesc& dd)
+	{
+		grinliz::Vector3I v = { voxel.x, 0, voxel.y };
+		VoxelHit(v, dd);
+	}
+	void VoxelHit(const grinliz::Vector3I& voxel, const DamageDesc& dd);
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -374,6 +383,7 @@ private:
 
 	struct PlantEffect {
 		bool operator==(const PlantEffect& rhs) const { return rhs.voxel == voxel; }
+		void Serialize(XStream* xs);
 		grinliz::Vector2I voxel;
 		bool fire;
 		bool shock;
@@ -387,7 +397,6 @@ private:
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
 
-	const GameItem* plantDef[NUM_PLANT_TYPES];
 	const ModelResource* plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	// Temporaries to avoid allocation

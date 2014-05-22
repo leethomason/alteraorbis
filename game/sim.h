@@ -76,7 +76,7 @@ public:
 	void SetAllRock();
 	void CreateVolcano( int x, int y );
 	// type=-1 will scan for natural plant choice
-	Chit* CreatePlant( int x, int y, int type );
+	bool CreatePlant( int x, int y, int type );
 	
 	// If this sector has a core, create it.
 	// Will delete and replace an existing core.

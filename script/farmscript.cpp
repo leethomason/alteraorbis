@@ -117,37 +117,30 @@ int FarmScript::DoTick( U32 delta )
 
 	while ( n && msc ) {
 		--n;
-
 		ComputeFarmBound();
-
-		Rectangle2F bounds;
-		bounds.Set(float(farmBounds.min.x) - 0.1f, float(farmBounds.min.y) - 0.1f, float(farmBounds.max.x) + 0.1f, float(farmBounds.max.y) + 0.1f);
-		
-		PlantFilter filter;
-		CChitArray plantArr;
-		GLASSERT(plantArr.Capacity() >= FARM_GROW_RAD*FARM_GROW_RAD - 1);
-		Context()->chitBag->QuerySpatialHash( &plantArr, bounds, 0, &filter );
-		
 		int growth = 0;
 
-		for( int i=0; i<plantArr.Size(); ++i ) {
-			Chit* chit = plantArr[i];
-			int type = 0, stage = 0;
-			GameItem* plantItem = PlantScript::IsPlant( chit, &type, &stage );
-			GLASSERT( plantItem );
+		for (Rectangle2IIterator it(farmBounds); !it.Done(); it.Next()) {
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos().x, it.Pos().y);
 
-			int g = (stage + 1)*(stage + 1);
-			if (   (plantItem->flags & GameItem::FLAMMABLE) 
-				|| (plantItem->flags & GameItem::SHOCKABLE)) 
-			{
-				g *= 2;	// bonus for volitility
+			if (wg.Plant()) {
+				int type = wg.Plant() - 1;
+				int stage = wg.PlantStage();
+				const GameItem* plantItem = PlantScript::PlantDef(type);
+
+				int g = (stage + 1)*(stage + 1);
+				if (   (plantItem->flags & GameItem::FLAMMABLE) 
+					|| (plantItem->flags & GameItem::SHOCKABLE)) 
+				{
+					g *= 2;	// bonus for volitility
+				}
+				growth += g;
 			}
-			growth += g;
 		}
 
 		fruitGrowth += growth * timer.Period();
 		const int AREA = (FARM_GROW_RAD * 2 + 1)*(FARM_GROW_RAD * 2 + 1) - 1;
-		efficiency = 100 * growth / (PlantScript::NUM_STAGE * PlantScript::NUM_STAGE * AREA);
+		efficiency = 100 * growth / (MAX_PLANT_STAGES * MAX_PLANT_STAGES * AREA);
 	}
 
 	while ( fruitGrowth >= GROWTH_NEEDED ) {

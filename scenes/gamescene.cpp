@@ -1548,13 +1548,16 @@ void GameScene::CheckGameStage(U32 delta)
 				CoreScript* cs = CoreScript::GetCore(sector);
 				if (cs && cs->ParentChit()->Team() == TEAM_NEUTRAL) {
 					Rectangle2I bi = sd->InnerBounds();
-					Rectangle2F b = ToWorld(bi);
-					PlantFilter plantFilter(-1, 2, 3);
-					sim->GetChitBag()->QuerySpatialHash(&chitQuery, b, 0, &plantFilter);
-
+					int bioFlora = 0;
+					for (Rectangle2IIterator it(bi); !it.Done(); it.Next()) {
+						const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(it.Pos().x, it.Pos().y);
+						if (wg.Plant() && wg.PlantStage() >= 2) {	// only count the grown ones??
+							++bioFlora;
+						}
+					}
 					SectorInfo* si = arr.PushArr(1);
 					si->sectorData = sd;
-					si->bioFlora = chitQuery.Size();
+					si->bioFlora = bioFlora;
 				}
 			}
 		}
@@ -1569,7 +1572,7 @@ void GameScene::CheckGameStage(U32 delta)
 				sdarr.Push(arr[i].sectorData);
 			}
 
-			startGameWidget.SetSectorData(sdarr.Mem(), sdarr.Size(), sim->GetEngine(), sim->GetChitBag(), this);
+			startGameWidget.SetSectorData(sdarr.Mem(), sdarr.Size(), sim->GetEngine(), sim->GetChitBag(), this, sim->GetWorldMap());
 			gamui2D.PushDialog(startGameWidget.Name());
 
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());

@@ -4,6 +4,7 @@
 #include "../game/weather.h"
 #include "../game/lumosmath.h"
 #include "../game/lumoschitbag.h"
+#include "../game/worldmap.h"
 
 #include "../engine/engine.h"
 
@@ -32,7 +33,7 @@ StartGameWidget::~StartGameWidget()
 }
 
 
-void StartGameWidget::SetSectorData(const SectorData** sdArr, int n, Engine* e, ChitBag* cb, Scene* scene)
+void StartGameWidget::SetSectorData(const SectorData** sdArr, int n, Engine* e, ChitBag* cb, Scene* scene, WorldMap* wm)
 {
 	n = Min(n, sectors.Capacity());
 	sectors.Clear();
@@ -42,6 +43,7 @@ void StartGameWidget::SetSectorData(const SectorData** sdArr, int n, Engine* e, 
 	engine = e;
 	chitBag = cb;
 	iScene = scene;
+	worldMap = wm;
 
 	currentSector = 0;
 	SetBodyText();
@@ -108,21 +110,17 @@ void StartGameWidget::SetBodyText()
 		}
 	}
 
-	Rectangle2I bi = sd->InnerBounds();
-	Rectangle2F b = ToWorld(bi);
-	PlantFilter plantFilter;
-	chitBag->QuerySpatialHash(&queryArr, b, 0, &plantFilter);
-
 	int bioFlora = 0;
 	int flowers = 0;
-	for (int i = 0; i < queryArr.Size(); ++i) {
-		int type = 0;
-		int stage = 0;
-		PlantScript::IsPlant(queryArr[i], &type, &stage);
-		if (type >= PlantScript::SHORT_PLANTS_START)
-			++flowers;
-		else
-			++bioFlora;
+	Rectangle2I bi = sd->InnerBounds();
+	for (Rectangle2IIterator it(bi); !it.Done(); it.Next()) {
+		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos().x, it.Pos().y);
+		if (wg.Plant() >= 7) {
+			flowers++;
+		}
+		else if (wg.Plant()) {
+			bioFlora++;
+		}
 	}
 
 	CStr<400> str;

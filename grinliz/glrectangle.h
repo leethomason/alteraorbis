@@ -298,26 +298,30 @@ struct Rectangle2I : public Rectangle2< int >
 class Rectangle2IEdgeIterator
 {
 public:
-	Rectangle2IEdgeIterator( const Rectangle2I& r ) : bounds(r), point(r.min), dx(1), dy(0) {}
+	Rectangle2IEdgeIterator( const Rectangle2I& r ) : bounds(r), point(r.min), dx(1), dy(0), nTurns(0) {}
 
 	void Begin()	{ dx = 1; dy = 0; point = bounds.min; }
-	bool Done()		{ return bounds.Height() <= 1 || bounds.Width() <= 1 || (dy == -1 && point == bounds.min); }
-	void Next()		{ 
-		point.x += dx; point.y += dy; 
-		if ( !bounds.Contains( point )) {
-			point.x -= dx; point.y -= dy;
-			int tx = -dy;
+	bool Done()		{ return nTurns && (Pos() == bounds.min); }
+	void Next()		{
+		point.x += dx; point.y += dy;
+		while (!bounds.Contains(point) && nTurns < 4) {
+			point.x -= dx; point.y -= dy;	// back up
+			int tx = -dy;					// rotate
 			int ty = dx;
 			dx = tx; dy = ty;
-			point.x += dx; point.y += dy;
+			++nTurns;
+			if (nTurns < 4) {
+				point.x += dx; point.y += dy;	// move forward.
+			}
 		}
+		GLASSERT(nTurns < 4 || Pos() == bounds.min);
 	}
 	const Vector2I& Pos() const { return point; }
 
 private:
 	Rectangle2I bounds;
 	Vector2I point;
-	int dx, dy;
+	int dx, dy, nTurns;
 };
 
 

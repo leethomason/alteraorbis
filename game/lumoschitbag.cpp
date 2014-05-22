@@ -490,7 +490,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 }
 
 
-Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignorePlants )
+Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 {
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
@@ -501,39 +501,20 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignoreP
 	CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 	if (cs) core = cs->ParentChit();
 
+
 	// Big enough to snag buildings:
 	QuerySpatialHash(&array, pos2, 0.8f, core, &removableFilter);
 
 	Chit* found = 0;
-	PlantFilter plantFilter;
-
-	// First pass: plants & 1x1 buildings.
+	// 1x1 buildings.
 	for( int i=0; i<array.Size(); ++i ) {
 		// We are casting a wide net to get buildings.
 		if (array[i]->GetSpatialComponent()->Bounds().Contains(pos2i)) {
-			if (ignorePlants && plantFilter.Accept(array[i])) {
-				continue;
-			}
 			found = array[i];
 			break;
 		}
 	}
 	return found;
-}
-
-
-Chit* LumosChitBag::QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage )
-{
-	CChitArray plants;
-	PlantFilter plantFilter;
-	QuerySpatialHash( &plants, ToWorld2F( pos ), 0.2f, 0, &plantFilter );
-
-	if ( plants.Size() ) {
-		if ( PlantScript::IsPlant( plants[0], type, stage )) {
-			return plants[0];
-		}
-	}
-	return 0;
 }
 
 
@@ -941,31 +922,6 @@ bool MOBIshFilter::Accept(Chit* chit)
 bool BattleFilter::Accept(Chit* chit)
 {
 	return chit->GetRenderComponent() != 0;
-}
-
-
-PlantFilter::PlantFilter(int type, int min, int max)
-{
-	typeFilter = type;
-	minStage = min;
-	maxStage = max;
-}
-
-
-bool PlantFilter::Accept( Chit* chit )
-{
-	int type = 0;
-	int stage = 0;
-	bool okay = PlantScript::IsPlant( chit, &type, &stage ) != 0;
-	if ( okay ) {
-		if ( typeFilter >= 0 && (type != typeFilter)) {
-			okay = false;
-		}
-	}
-	if ( stage < minStage || stage > maxStage ) {
-		okay = false;
-	}
-	return okay;
 }
 
 

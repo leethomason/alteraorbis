@@ -43,6 +43,7 @@
 #include "../script/worldgen.h"
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
+#include "../script/plantscript.h"
 
 using namespace grinliz;
 using namespace micropather;
@@ -89,7 +90,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	treePool.Reserve(1000);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
-		plantDef[i] = 0;
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			plantResource[i][j] = 0;
 		}
@@ -199,14 +199,7 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 		SetPlant(v.x, v.z, 0, 0);
 	}
 	else if (grid[index].Plant()) {
-		if (plantDef[0] == 0) {
-			for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
-				CStr<32> str;
-				str.Format("plant%d", i);
-				plantDef[i] = &ItemDefDB::Instance()->Get(str.c_str());
-			}
-		}
-		const GameItem* plant = plantDef[grid[index].Plant() - 1];
+		const GameItem* plant = PlantScript::PlantDef( grid[index].Plant() - 1);
 
 		// catch fire/shock?
 		float chanceFire = 0;
@@ -260,6 +253,16 @@ void WorldMap::SavePNG( const char* filename )
 }
 
 
+void WorldMap::PlantEffect::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "PlantEffect");
+	XARC_SER(xs, voxel);
+	XARC_SER(xs, fire);
+	XARC_SER(xs, shock);
+	XarcClose(xs);
+}
+
+
 void WorldMap::Save( const char* filename )
 {
 	// Debug or laptap, about 4.5MClock
@@ -277,6 +280,7 @@ void WorldMap::Save( const char* filename )
 		XarcOpen( &writer, "Map" );
 		XARC_SER( &writer, width );
 		XARC_SER( &writer, height );
+		XARC_SER_CARRAY(&writer, plantEffect);
 		
 		worldInfo->Serialize( &writer );
 		XarcClose( &writer );
@@ -308,6 +312,7 @@ void WorldMap::Load( const char* filename )
 		XARC_SER(&reader, width);
 		XARC_SER( &reader, height );
 		Init( width, height );
+		XARC_SER_CARRAY(&reader, plantEffect);
 
 		worldInfo->Serialize( &reader );
 		XarcClose( &reader );

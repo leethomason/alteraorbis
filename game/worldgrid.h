@@ -216,6 +216,7 @@ public:
 
 	// 1-based plant interpretation
 	int Plant() const { return plant; }
+	bool BlockingPlant() const { return plant && stage >= 2; }
 	// 0-based
 	int PlantStage() const { return stage;  }
 
@@ -227,6 +228,7 @@ public:
 
 	int TotalHP() const			{ return plant ? ((stage + 1)*(stage + 1)) * HP_PER_PLANT_STAGE : rockHeight * HP_PER_HEIGHT; }
 	int HP() const				{ return hp; }
+	float HPFraction() const	{ return TotalHP() ? float(hp) / float(TotalHP()) : 0; }
 	void DeltaHP( int delta ) {
 		int points = hp;
 		points += delta;
@@ -234,6 +236,10 @@ public:
 		if ( points > TotalHP() ) points = TotalHP();
 		hp = points;
 		GLASSERT( hp == points );
+	}
+	void SetHP(int _hp) {
+		hp = _hp;
+		hp = grinliz::Clamp(hp, (unsigned)0, (unsigned)TotalHP());
 	}
 
 	bool DebugAdjacent() const		{ return debugAdjacent != 0; }

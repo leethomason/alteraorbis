@@ -347,7 +347,7 @@ void WorldGenScene::DoTick( U32 delta )
 
 		// Have to wait until the first age so that
 		// volcanoes don't eat your domain.
-		if (age > 1.0f) {
+		if (age > SettingsManager::Instance()->WorldGenDone() ) {
 			genState.mode = GenState::SIM_DONE;
 		}
 	}

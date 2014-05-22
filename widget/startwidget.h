@@ -8,6 +8,7 @@ class Engine;
 class ChitBag;
 class Chit;
 class Scene;
+class WorldMap;
 
 class StartGameWidget : public gamui::IWidget
 {
@@ -31,7 +32,7 @@ public:
 
 	void ItemTapped(const gamui::UIItem* item);
 
-	void SetSectorData(const SectorData** sdArr, int nData, Engine* engine, ChitBag* chitBag, Scene* callback );
+	void SetSectorData(const SectorData** sdArr, int nData, Engine* engine, ChitBag* chitBag, Scene* callback, WorldMap* map );
 
 private:
 	void SetBodyText();
@@ -41,6 +42,7 @@ private:
 	Engine*				engine;
 	ChitBag*			chitBag;
 	Scene*				iScene;
+	WorldMap*			worldMap;
 
 	gamui::LayoutCalculator calculator;
 	gamui::Image		background;
