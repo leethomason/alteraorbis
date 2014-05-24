@@ -587,8 +587,8 @@
         resource="plant5"
         flags="CLICK_THROUGH"
         mass ="4"
-        sun="0.1"
-        rain="0.6"
+        sun="0.2"
+        rain="0.8"
         temperature="0.5"
         />
 
@@ -597,9 +597,9 @@
         resource="plant6"
         flags="CLICK_THROUGH"
         mass ="1.5"
-        sun="0.8"
-        rain="0.2"
-        temperature="0.8"
+        sun="0.6"
+        rain="0.3"
+        temperature="0.7"
         nStage="2"
         />
 
@@ -608,9 +608,9 @@
         resource="plant7"
         flags="CLICK_THROUGH"
         mass ="1.5"
-        sun="0.5"
+        sun="0.4"
         rain="0.3"
-        temperature="0.5"
+        temperature="0.3"
         nStage="2"
         />
 

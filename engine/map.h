@@ -68,7 +68,7 @@ public:
 	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
 
-	virtual void PrepVoxels( const SpaceTree*, Model** root )	{}
+	virtual void PrepVoxels( const SpaceTree*, Model** root, const grinliz::Plane* planes6 )	{}
 	virtual void PrepGrid( const SpaceTree* )	{}
 	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
 

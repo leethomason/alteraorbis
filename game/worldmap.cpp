@@ -91,7 +91,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
-			plantResource[i][j] = 0;
+			plantCount[i][j] = 0;
 		}
 	}
 }
@@ -331,6 +331,10 @@ void WorldMap::Load( const char* filename )
 				grid[index].extBlock = 0;	// clear out the block. will be set by callback later.
 				const WorldGrid& wg = grid[index];
 				SetRock( i, j, -2, grid[index].Magma(), grid[index].RockType() );
+
+				if (wg.Plant()) {
+					plantCount[wg.Plant() - 1][wg.PlantStage()] += 1;
+				}
 			}
 		}
 	}
@@ -867,6 +871,13 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 		ResetPather(x, y);
 	}
 	grid[index] = wg;
+
+	if (was.Plant()) {
+		plantCount[was.Plant() - 1][was.PlantStage()] -= 1;
+	}
+	if (wg.Plant()) {
+		plantCount[wg.Plant() - 1][wg.PlantStage()] += 1;
+	}
 }
 
 
@@ -1947,16 +1958,6 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < 4);
 
-	if (plantResource[0][0] == 0) {
-		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
-			for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
-				CStr<32> str;
-				str.Format("plant%d.%d", i, j);
-				plantResource[i][j] = ModelResourceManager::Instance()->GetModelResource(str.c_str(), false);
-			}
-		}
-	}
-
 	if (treePool.Size() == nTrees) {
 		treePool.Push(new Model());
 	}
@@ -1964,7 +1965,7 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	nTrees++;
 
 	m->Free();
-	const ModelResource* res = plantResource[type0Based][stage];
+	const ModelResource* res = PlantScript::PlantRes( type0Based, stage );
 	GLASSERT(res);
 	m->Init(res, 0);
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
@@ -2120,7 +2121,7 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 }
 
 
-void WorldMap::PrepVoxels( const SpaceTree* spaceTree, Model** modelRoot )
+void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const grinliz::Plane* planes6)
 {
 	//GRINLIZ_PERFTRACK
 	//PROFILE_FUNC();
@@ -2160,8 +2161,19 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree, Model** modelRoot )
 				const WorldGrid& wg = grid[INDEX(x,y)];
 
 				if (wg.Plant()) {
+					Rectangle3F aabb;
+					aabb.Set(float(x), 0, float(y), float(x + 1), 2.5f, float(y + 1));
 					float fraction = float(wg.HP()) / float(wg.TotalHP());
-					PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
+					int accept = true;
+					for (int k = 0; k < 6; ++k) {
+						if (ComparePlaneAABB(planes6[k], aabb) == NEGATIVE) {
+							accept = false;
+							break;
+						}
+					}
+					if (accept) {
+						PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
+					}
 				}
 
 				if ( wg.Pool() ) {

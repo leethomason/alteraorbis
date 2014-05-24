@@ -106,6 +106,9 @@ d animation generation
 			- track plant #s
 			- respect # limits
 			- check random distribution to growth curve
+			- save and load testing for plants
+			- rampage not destroying plants
+			- plants in rocks
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 		- hints about what you need to build

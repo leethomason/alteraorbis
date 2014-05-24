@@ -125,16 +125,24 @@ GLString GLString::substr( unsigned pos, unsigned n ) const
 
 void GLString::Format( const char* format, ...) 
 {
-	static const int size = 200;
-	char str[size] = { 0 };	// sleazy, yes.
     va_list     va;
-
     //
     //  format and output the message..
     //
+	int len = 0;
     va_start( va, format );
 #ifdef _MSC_VER
-    int result = vsnprintf_s( str, size, _TRUNCATE, format, va );
+	len = _vscprintf(format, va);
+#else
+	len = vsnprintf(0, 0, format, va);
+#endif
+
+	va_end(va);
+	ensureSize(len);
+	va_start(va, format);
+
+#ifdef _MSC_VER
+	vsnprintf_s(m_buf, m_allocated, _TRUNCATE, format, va );
 #else
 	// Reading the spec, the size does seem correct. The man pages
 	// say it will aways be null terminated (whereas the strcpy is not.)
@@ -143,32 +151,42 @@ void GLString::Format( const char* format, ...)
 	str[size-1] = 0;
 #endif
     va_end( va );
-	*this = "";
-	this->append( str );
+	m_size = len;
+	validate();
 }
 
 
 void GLString::AppendFormat( const char* format, ...) 
 {
-	static const int size = 200;
-	char str[size] = { 0 };	// sleazy, yes.
-    va_list     va;
-
-    //
-    //  format and output the message..
-    //
-    va_start( va, format );
+	va_list     va;
+	//
+	//  format and output the message..
+	//
+	int len = 0;
+	va_start(va, format);
 #ifdef _MSC_VER
-    int result = vsnprintf_s( str, size, _TRUNCATE, format, va );
+	len = _vscprintf(format, va);
+#else
+	len = vsnprintf(0, 0, format, va);
+#endif
+
+	va_end(va);
+	ensureSize(len + m_size);
+	va_start(va, format);
+
+#ifdef _MSC_VER
+	vsnprintf_s(m_buf + m_size, m_allocated - m_size, _TRUNCATE, format, va);
 #else
 	// Reading the spec, the size does seem correct. The man pages
 	// say it will aways be null terminated (whereas the strcpy is not.)
 	// Pretty nervous about the implementation, so force a null after.
-    int result = vsnprintf( str, size, format, va );
-	str[size-1] = 0;
+	fix
+	int result = vsnprintf(str, size, format, va);
+	str[size - 1] = 0;
 #endif
-    va_end( va );
-	this->append( str );
+	va_end(va);
+	m_size += len;
+	validate();
 }
 
 

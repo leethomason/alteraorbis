@@ -24,25 +24,12 @@ class Census
 {
 public:
 	Census() {
-		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
 		normalMOBs = 0;
 		greaterMOBs = 0;
 	}
 
-	int	plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 	int	normalMOBs;		// the number of general MoBs (with AIs). Generally TYPICAL_MONSTERS
 	int greaterMOBs;	// greater mobs, generally TYPICAL_GREATER
-
-
-	int CountPlants() const {
-		int c =  0;
-		for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-			for( int j=0; j<MAX_PLANT_STAGES; ++j ) {
-				c += plants[i][j];
-			}
-		}
-		return c;
-	}
 };
 
 #endif 

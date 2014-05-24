@@ -194,7 +194,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			Vector2I mapPos = { x, y };
 			if ( InMeleeZone( engine, src, mapPos )) {
 				const WorldGrid& wg = wm->GetWorldGrid( x, y );
-				if ( wg.RockHeight() ) {
+				if ( wg.IsObject() ) {
 					Vector2F toTarget = ToWorld2F(mapPos) - srcPos;
 					toTarget.Normalize();
 					float dot = DotProduct(toTarget, srcHeading);

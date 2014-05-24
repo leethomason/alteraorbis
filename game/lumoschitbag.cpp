@@ -790,9 +790,23 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-CoreScript* LumosChitBag::GetHomeCore()	
+CoreScript* LumosChitBag::GetHomeCore()	const
 { 
-	return CoreScript::GetCore(GetHomeSector()); 
+	CoreScript* cs = CoreScript::GetCore(GetHomeSector());
+	if (cs && cs->ParentChit()->Team() != TEAM_NEUTRAL) {
+		return cs;
+	}
+	return 0;
+}
+
+
+int LumosChitBag::GetHomeTeam()	const
+{
+	CoreScript* cs = CoreScript::GetCore(GetHomeSector());
+	if (cs && cs->ParentChit()->Team() != TEAM_NEUTRAL) {
+		return cs->ParentChit()->Team();
+	}
+	return TEAM_NEUTRAL;
 }
 
 

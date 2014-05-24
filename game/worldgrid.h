@@ -178,10 +178,14 @@ public:
 		nominalRockHeight = h;
 	}
 
+	// Is this something that can be hit? Interect with?
+	bool IsObject() const { return rockHeight || plant;  }
+
 	int RockHeight() const { return rockHeight; }
 	void SetRockHeight( int h ) {
 		GLASSERT( IsLand() || (h==0) );
 		GLASSERT( h >= 0 && h <= MAX_ROCK_HEIGHT );
+		GLASSERT(h == 0 || Plant() == 0);
 		rockHeight = h;
 		if ( h > 0 ) pave = 0;	// rock clears out pavement.
 	}
@@ -213,7 +217,6 @@ public:
 	bool Magma() const			{ return magma != 0; }
 	void SetMagma( bool m )		{ magma = m ? 1 : 0; if ( magma ) pave = 0; }
 
-
 	// 1-based plant interpretation
 	int Plant() const { return plant; }
 	bool BlockingPlant() const { return plant && stage >= 2; }
@@ -221,6 +224,7 @@ public:
 	int PlantStage() const { return stage;  }
 
 	void SetPlant(int _type1based, int _stage)	{
+		GLASSERT(_type1based == 0 || rockHeight == 0);
 		GLASSERT(_type1based >= 0 && _type1based <= 8);	// 0 removes the plant
 		plant = _type1based;
 		stage = _stage;

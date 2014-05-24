@@ -309,7 +309,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( MapPrep );
 #endif
-		map->PrepVoxels(spaceTree, &modelRoot);
+		map->PrepVoxels(spaceTree, &modelRoot, planes);
 		map->PrepGrid( spaceTree );
 	}
 	

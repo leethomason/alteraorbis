@@ -76,6 +76,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
+	plantScript = new PlantScript(chitBag->Context());
 
 	DumpModel();
 }
@@ -83,6 +84,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 Sim::~Sim()
 {
+	delete plantScript;
 	delete visitors;
 	delete weather;
 	delete reserveBank;
@@ -276,7 +278,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 					queryArr[i]->DeRez();
 				}
 			}
-			if (chit->Team() == chitBag->GetHomeTeam()) {
+			if (chitBag->GetHomeTeam() && (chit->Team() == chitBag->GetHomeTeam())) {
 				AbandonDomain();
 			}
 		}
@@ -287,7 +289,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 void Sim::AbandonDomain()
 {
 	static const Vector2I ZERO = { 0, 0 };
-	chitBag->SetHomeSector(ZERO, chitBag->GetHomeTeam());
+	chitBag->SetHomeSector(ZERO);
 	if (playerID) {
 		Chit* player = GetPlayerChit();
 		if (player) player->SetPlayerControlled(false);
@@ -353,6 +355,8 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 
 void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
+	GLASSERT(chitBag->GetHomeTeam());
+	GLASSERT(chitBag->GetHomeCore());
 	Chit* chit = chitBag->NewDenizen(pos, chitBag->GetHomeTeam());
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
@@ -402,7 +406,7 @@ Texture* Sim::GetMiniMapTexture()
 void Sim::DoTick( U32 delta )
 {
 	worldMap->DoTick( delta, chitBag );
-
+	plantScript->DoTick(delta);
 	chitBag->DoTick( delta );
 
 	// From the CHIT_DESTROYED_START we have a list of
@@ -472,7 +476,17 @@ void Sim::DoTick( U32 delta )
 		}
 	}
 
-	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
+	// Cheat! Seed early on, so there is good plant variety.
+	int plantCount = worldMap->CountPlants();
+	if (worldMap->CountPlants() < TYPICAL_PLANTS / 2) {
+		// And seed lots of plants in the beginning, with extra variation in the early world.
+		for (int i = 0; i < 5; ++i) {
+			int x = random.Rand(worldMap->Width());
+			int y = random.Rand(worldMap->Height());
+			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_PLANT_TYPES) : -1;
+			CreatePlant(x, y, type);
+		}
+	}
 	DoWeatherEffects( delta );
 
 	// Special rule for player controlled chit: give money to the core.
@@ -610,7 +624,10 @@ void Sim::CreateRockInOutland()
 		if ( !sd.HasCore() ) {
 			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
 				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
-					worldMap->SetRock( i, j, -1, false, 0 );
+					if (worldMap->GetWorldGrid(i, j).IsLand()) {
+						worldMap->SetPlant(i, j, 0, 0);
+						worldMap->SetRock(i, j, -1, false, 0);
+					}
 				}
 			}
 		}
@@ -646,29 +663,28 @@ void Sim::CreateVolcano( int x, int y )
 
 bool Sim::CreatePlant( int x, int y, int type )
 {
-	if ( !worldMap->Bounds().Contains( x, y ) ) {
-		return 0;
+	// Pull in plants from edges - don't want to check
+	// growth bounds later.
+	Rectangle2I bounds = worldMap->Bounds();
+	bounds.Outset(-8);
+	if ( !bounds.Contains( x, y ) ) {
+		return false;
 	}
 	const SectorData& sd = worldMap->GetSector( x, y );
-	if ( sd.ports == 0 ) {
-		// no point to plants in the outland
-		return 0;
+	if (sd.HasCore() && sd.core.x == x && sd.core.y == y ) {
+		// no plants on cores.
+		return false;
 	}
 
 	// About 50,000 plants seems about right.
-	int count = chitBag->census.CountPlants();
-	if ( count > worldMap->Bounds().Area() / 20 ) {
-		return 0;
+	int count = worldMap->CountPlants();
+	if (count > TYPICAL_PLANTS) {
+		return false;
 	}
 
-	// And space them out a little.
-	Random r( x+y*1024 );
-	if ( r.Rand(4) == 0 )
-		return 0;
-
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.Porch() ) {
-		return 0;
+	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
+		return false;
 	}
 
 	// check for a plant already there.

@@ -1481,7 +1481,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		if (chit->GetComponent("CoreScript")) {
-			if (chit->Team() == sim->GetChitBag()->GetHomeTeam() ) {
+			if (sim->GetChitBag()->GetHomeTeam() && chit->Team() == sim->GetChitBag()->GetHomeTeam()) {
 				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
@@ -1494,7 +1494,10 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->Team() == sim->GetChitBag()->GetHomeTeam() ) {
+	else if (msg.ID() == ChitMsg::CHIT_DAMAGE 
+		&& sim->GetChitBag()->GetHomeTeam()
+		&& chit->Team() == sim->GetChitBag()->GetHomeTeam() ) 
+	{
 		BuildingFilter filter;
 		if (filter.Accept(chit)) {
 			if (chit->GetComponent("CoreScript"))
@@ -1541,7 +1544,7 @@ void GameScene::CheckGameStage(U32 delta)
 		b.max.y = b.max.x = (NUM_SECTORS / 2) + NUM_SECTORS / 4;
 
 		CArray<SectorInfo, NUM_SECTORS * NUM_SECTORS> arr;
-		for (Rectangle2IEdgeIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
+		for (Rectangle2IIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
 			if (sd->HasCore() && arr.HasCap()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
@@ -1549,8 +1552,8 @@ void GameScene::CheckGameStage(U32 delta)
 				if (cs && cs->ParentChit()->Team() == TEAM_NEUTRAL) {
 					Rectangle2I bi = sd->InnerBounds();
 					int bioFlora = 0;
-					for (Rectangle2IIterator it(bi); !it.Done(); it.Next()) {
-						const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(it.Pos().x, it.Pos().y);
+					for (Rectangle2IIterator pit(bi); !pit.Done(); pit.Next()) {
+						const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(pit.Pos().x, pit.Pos().y);
 						if (wg.Plant() && wg.PlantStage() >= 2) {	// only count the grown ones??
 							++bioFlora;
 						}
@@ -1591,7 +1594,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		int team = Team::GenTeam(TEAM_HOUSE);
-		sim->GetChitBag()->SetHomeSector(ToSector(sd->x, sd->y), team);
+		sim->GetChitBag()->SetHomeSector(ToSector(sd->x, sd->y));
 		sim->CreateCore(ToSector(sd->x, sd->y), team);
 		ForceHerd(ToSector(sd->x, sd->y));
 
@@ -1639,7 +1642,6 @@ void GameScene::Draw3D( U32 deltaTime )
 void GameScene::DrawDebugText()
 {
 	static const int x = 0;
-	//int y = (int)game->GetScreenport().UIHeight() - 160;
 	int y = 120;
 	DrawDebugTextDrawCalls( x, y, sim->GetEngine() );
 	y += 16;
@@ -1649,6 +1651,7 @@ void GameScene::DrawDebugText()
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
 	Vector3F at = { 0, 0, 0 };
+	WorldMap* worldMap = sim->GetWorldMap();
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
@@ -1678,14 +1681,14 @@ void GameScene::DrawDebugText()
 	for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
 		typeCount[i] = 0;
 		for( int j=0; j<MAX_PLANT_STAGES; ++j ) {
-			typeCount[i] += chitBag->census.plants[i][j];
+			typeCount[i] += worldMap->plantCount[i][j];
 		}
 	}
 	int stageCount[MAX_PLANT_STAGES];
 	for( int i=0; i<MAX_PLANT_STAGES; ++i ) {
 		stageCount[i] = 0;
 		for( int j=0; j<NUM_PLANT_TYPES; ++j ) {
-			stageCount[i] += chitBag->census.plants[j][i];
+			stageCount[i] += worldMap->plantCount[j][i];
 		}
 	}
 

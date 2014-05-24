@@ -186,7 +186,7 @@ public:
 		ICE
 	};
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
-	virtual void PrepVoxels( const SpaceTree*, Model** root );
+	virtual void PrepVoxels(const SpaceTree*, Model** root, const grinliz::Plane* planes6);
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 	virtual void PrepGrid( const SpaceTree* spaceTree );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
@@ -251,6 +251,16 @@ public:
 	};
 
 	virtual void CreateTexture( Texture* t );
+
+	int plantCount[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+
+	int CountPlants() const {
+		int c = 0;
+		for (int i = 0; i<NUM_PLANT_TYPES; ++i)
+			for (int j = 0; j<MAX_PLANT_STAGES; ++j)
+				c += plantCount[i][j];
+		return c;
+	}
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -396,8 +406,6 @@ private:
 
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
-
-	const ModelResource* plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;

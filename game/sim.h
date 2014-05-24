@@ -43,6 +43,7 @@ class ReserveBank;
 class NewsHistory;
 class ItemDB;
 class CoreScript;
+class PlantScript;
 
 class Sim : public IChitListener, public IUITracker
 {
@@ -106,6 +107,7 @@ private:
 	LumosChitBag*	chitBag;
 	Visitors*		visitors;
 	ItemDB*			itemDB;
+	PlantScript*	plantScript;
 
 	grinliz::Random	random;
 	int playerID;

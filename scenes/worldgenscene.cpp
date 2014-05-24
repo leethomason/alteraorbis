@@ -73,7 +73,9 @@ void WorldGenScene::Resize()
 	label.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f);
 
 	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
-	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0f);
+	float boundWidth = size - layout.GutterX()*2.0f;
+	worldText.SetBounds(boundWidth, size - layout.GutterY()*2.0f);
+	worldText.SetTab(boundWidth / 5.0f);
 }
 
 
@@ -331,14 +333,33 @@ void WorldGenScene::DoTick( U32 delta )
 		for (int i = 0; i<NUM_PLANT_TYPES; ++i) {
 			typeCount[i] = 0;
 			for (int j = 0; j<MAX_PLANT_STAGES; ++j) {
-				typeCount[i] += sim->GetChitBag()->census.plants[i][j];
+				typeCount[i] += sim->GetWorldMap()->plantCount[i][j];
 			}
 		}
-
-		simStr.Format("SIM:\nAge=%.2f\n\nOrbstalk=%d\nTree=%d\nFern=%d\nCrystalGrass=%d\nBamboo=%d\nShroom=%d\nSunBloom=%d\nMoonBloom=%d\nMOBs=%d",
-					  age, 
-					  typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-					  sim->GetChitBag()->census.normalMOBs );
+		WorldMap* swm = sim->GetWorldMap();
+		simStr.Format("SIM:\nAge=%.2f\n\nPlants=%d\n\n"
+					  "Orbstalk=%d\t\t[%d, %d, %d, %d]\n"
+					  "Tree=%d\t\t[%d, %d, %d, %d]\n"
+					  "Fern=%d\t\t[%d, %d, %d, %d]\n"
+					  "CrystalGrass=%d\t\t[%d, %d, %d, %d]\n"
+					  "Bamboo=%d\t\t[%d, %d, %d, %d]\n"
+					  "Shroom=%d\t\t[%d, %d, %d, %d]\n"
+					  "SunBloom=%d\t\t[%d, %d]\n"
+					  "MoonBloom=%d\t\t[%d, %d]\n\n"
+					  "Lesser Monsters=%d\n"
+					  "Greater Monsters=%d",
+						age,	
+						swm->CountPlants(),
+						typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
+						typeCount[1], swm->plantCount[1][0], swm->plantCount[1][1], swm->plantCount[1][2], swm->plantCount[1][3],
+						typeCount[2], swm->plantCount[2][0], swm->plantCount[2][1], swm->plantCount[2][2], swm->plantCount[2][3],
+						typeCount[3], swm->plantCount[3][0], swm->plantCount[3][1], swm->plantCount[3][2], swm->plantCount[3][3],
+						typeCount[4], swm->plantCount[4][0], swm->plantCount[4][1], swm->plantCount[4][2], swm->plantCount[4][3],
+						typeCount[5], swm->plantCount[5][0], swm->plantCount[5][1], swm->plantCount[5][2], swm->plantCount[5][3],
+						typeCount[6], swm->plantCount[6][0], swm->plantCount[6][1],
+						typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1],
+						sim->GetChitBag()->census.normalMOBs,
+						sim->GetChitBag()->census.greaterMOBs );
 		worldText.SetText(simStr.c_str());
 
 		if (age > SettingsManager::Instance()->SpawnDate()) {

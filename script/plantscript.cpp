@@ -21,6 +21,7 @@ static const int	TIME_TO_SPORE = 3 * (1000 * 60);
 static const float	HP_PER_SECOND = 1.0f;
 
 const GameItem* PlantScript::plantDef[NUM_PLANT_TYPES];
+const ModelResource* PlantScript::plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 const GameItem* PlantScript::PlantDef(int plant0Based)
 {
@@ -33,6 +34,24 @@ const GameItem* PlantScript::PlantDef(int plant0Based)
 		}
 	}
 	return plantDef[plant0Based];
+}
+
+
+const ModelResource* PlantScript::PlantRes(int plant0Based, int stage)
+{
+	GLASSERT(plant0Based >= 0 && plant0Based < NUM_PLANT_TYPES);
+	GLASSERT(stage >= 0 && stage < MAX_PLANT_STAGES);
+
+	if (plantResource[0][0] == 0) {
+		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+			for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
+				CStr<32> str;
+				str.Format("plant%d.%d", i, j);
+				plantResource[i][j] = ModelResourceManager::Instance()->GetModelResource(str.c_str(), false);
+			}
+		}
+	}
+	return plantResource[plant0Based][stage];
 }
 
 
@@ -49,7 +68,8 @@ void PlantScript::DoTick(U32 delta)
 	// This is performance regressive, so something
 	// to keep an eye on.
 	static const int MAP2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
-	static const int DELTA = 2000;	// How frequenty to tick a given plant
+	static const int DELTA = 100*1000;	// How frequenty to tick a given plant
+	static const int GROWTH_CHANCE = 8;
 	static const int N_PER_MSEC = MAP2 / DELTA;
 	static const int PRIME = 1553;
 
@@ -80,7 +100,7 @@ void PlantScript::DoTick(U32 delta)
 		Vector2F pos2f = ToWorld2F(pos2i);
 
 		// --- Light Tap --- //
-		const float	height			= (float)(wg.PlantStage() + 1) * 0.5f;	// plant height about 1/2 rock height
+		const float	height = PlantScript::PlantRes(wg.Plant() - 1, wg.PlantStage())->AABB().SizeY();
 		const float	rainBase		= weather->RainFraction(pos2f.x, pos2f.y);
 		const float sunBase			= (1.0f - rainBase);
 		const float temperatureBase	= weather->Temperature(pos2f.x, pos2f.y);
@@ -88,6 +108,7 @@ void PlantScript::DoTick(U32 delta)
 		float rain			= rainBase;
 		float sun			= sunBase;
 		float temperature	= temperatureBase;
+		float growth		= 1.0f;
 
 		Vector2I tap = pos2i + lightTap;
 
@@ -95,7 +116,7 @@ void PlantScript::DoTick(U32 delta)
 		const WorldGrid& wgTap = worldMap->GetWorldGrid(tap);
 		float tapHeight = float(wgTap.RockHeight());
 		if (wgTap.PlantStage()) {
-			tapHeight = float(wgTap.PlantStage() + 1) * 0.5f;	// plant height is about 1/2 the rock height
+			tapHeight = PlantScript::PlantRes(wgTap.Plant() - 1, wgTap.PlantStage())->AABB().SizeY();
 		}
 
 		if (tapHeight > (height + 0.1f)) {
@@ -106,9 +127,13 @@ void PlantScript::DoTick(U32 delta)
 
 		// ---- Adjacent --- //
 		static const Vector2I check[4] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		int same = 0;
 		for (int i = 0; i<GL_C_ARRAY_SIZE(check); ++i) {
 			tap = pos2i + check[i];
 			const WorldGrid& wgAdj = worldMap->GetWorldGrid(tap.x, tap.y);
+			if (wgAdj.Plant() == wg.Plant()) {
+				++same;
+			}
 
 			if (wgAdj.RockHeight()) {
 				// Water or rock runoff increase water.
@@ -116,9 +141,14 @@ void PlantScript::DoTick(U32 delta)
 			}
 			if (wgAdj.IsWater()) {
 				rain += 0.25f;	// more water
-				temperature = 0.50f * temperature + 0.50f * temperatureBase;	// moderate temperature
+				temperature = Mean(0.5f, temperature); // moderate temperature
 			}
 		}
+		// Nutrient depletion? Too packed in?
+		if (same == 4) {
+			growth *= 0.5f;
+		}
+
 		rain = Clamp(rain, 0.0f, 1.0f);
 		temperature = Clamp(temperature, 0.0f, 1.0f);
 		sun = Clamp(sun, 0.0f, 1.0f);
@@ -133,6 +163,7 @@ void PlantScript::DoTick(U32 delta)
 		item->keyValues.Get(ISC::temp, &optimal.z);
 
 		float distance = (optimal - actual).Length();
+		distance = distance / growth;
 
 		const float GROW = Lerp(0.2f, 0.1f, (float)wg.PlantStage() / (float)(MAX_PLANT_STAGES - 1));
 		const float DIE = 0.4f;
@@ -153,7 +184,7 @@ void PlantScript::DoTick(U32 delta)
 					worldMap->SetPlant(pos2i.x, pos2i.y, wg.Plant(), wg.PlantStage() + 1);
 					worldMap->SetWorldGridHP(pos2i.x, pos2i.y, hp);
 				}
-				if (random.Rand(32) < (U32)wg.PlantStage() ) {
+				if (random.Rand(GROWTH_CHANCE) < (U32)wg.PlantStage()) {
 					// Number range reflects wind direction.
 					int dx = -1 + random.Rand(4);	// [-1,2]
 					int dy = -1 + random.Rand(3);	// [-1,1]

@@ -77,6 +77,8 @@ int VolcanoScript::DoTick( U32 delta )
 			// Center on.
 			// Edge on.
 
+			// FIXME: check for buildings
+
 			// Inner off.
 			Rectangle2I rSmall = r;
 			r.Outset(-1);
@@ -85,11 +87,14 @@ int VolcanoScript::DoTick( U32 delta )
 			}
 
 			// Center on.
+			worldMap->SetPlant(pos2i.x, pos2i.y, 0, 0);
 			worldMap->SetRock(pos2i.x, pos2i.y, -1, true, 0);
 
 			// Edge on.
 			for (Rectangle2IEdgeIterator it(r); !it.Done(); it.Next()) {
-				worldMap->SetRock(it.Pos().x, it.Pos().y, -1, true, 0);
+				if (!worldMap->GetWorldGrid(it.Pos()).Plant()) {
+					worldMap->SetRock(it.Pos().x, it.Pos().y, -1, true, 0);
+				}
 			}
 		}
 	}

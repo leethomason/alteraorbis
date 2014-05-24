@@ -57,6 +57,7 @@ static const int TYPICAL_DENIZENS	= TYPICAL_DOMAINS * 20;		// fixme: not used or
 static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;		// fixme: not used or tracked
 static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
 static const int TYPICAL_GREATER	= 10;						// These guys get overwhelming fast - they can clear a domain.
+static const int TYPICAL_PLANTS		= 50 * 1000;
 
 static const int GOLD_PER_DENIZEN  = 100;
 static const int GOLD_PER_BEASTMAN =  20;
