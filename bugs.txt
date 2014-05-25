@@ -103,12 +103,12 @@ d animation generation
 		- special plant renderer: move plants to worldgrid
 			x test intersection: set firegun to plant visual impact height
 			- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
-			- track plant #s
-			- respect # limits
-			- check random distribution to growth curve
-			- save and load testing for plants
-			- rampage not destroying plants
-			- plants in rocks
+			x track plant #s
+			x respect # limits
+			x check random distribution to growth curve
+			x save and load testing for plants
+			x rampage not destroying plants
+			x plants in rocks
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 		- hints about what you need to build
@@ -1199,3 +1199,6 @@ Frame Time: 0.041667 (slow)
 	        0.030 (fast)
 	        0.035 (fast)
 	        0.038
+
+9.0
+Frustrum culling: 13
