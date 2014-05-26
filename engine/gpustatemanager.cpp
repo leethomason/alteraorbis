@@ -307,12 +307,12 @@ int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPU
 		// - simpler shader code
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES] );
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
+			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
 	else if ( flags & ShaderManager::BONE_FILTER ) {
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
+			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
 

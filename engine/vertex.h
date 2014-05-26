@@ -38,8 +38,7 @@ struct Vertex
 	grinliz::Vector3F	pos;
 	grinliz::Vector3F	normal;
 	grinliz::Vector2F	tex;
-	U16					boneID;		// 8 bits is fine; needs to be 32 bit aligned structure.
-	U16					_pad;
+	float				boneID;			// 8 bits would be fine; but GL 3.2 doesn't like int attributes. So use a float.
 
 	bool Equal( const Vertex& v ) const {
 		if (    pos == v.pos 
