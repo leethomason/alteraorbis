@@ -363,16 +363,13 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	items[1] = chitBag->AddItem( "blaster", chit, engine, 0, 0 );
 	items[2] = chitBag->AddItem( "ring", chit, engine, 0, 0 );
 
-	// Doesn't work, since QCore doesn't have a chitID.
-	// Bigger FIXME issue than thought. Probably should
-	// add dieties as actual (indestructable) chits.
-	/*
-	if (NewsHistory::Instance()) {
-		NewsEvent news(NewsEvent::FORGED, pos, shield, chit);
-		NewsHistory::Instance()->Add(news);
-		shield->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
+	NewsHistory* history = chitBag->GetNewsHistory();
+	Chit* deity = chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
+	for (int i = 0; i < 3; i++) {
+		NewsEvent news(NewsEvent::FORGED, ToWorld2F(pos), items[i], deity);
+		history->Add(news);
+		items[i]->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
 	}
-	*/
 
 	chit->GetAIComponent()->EnableDebug( true );
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );

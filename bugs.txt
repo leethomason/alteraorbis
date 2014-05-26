@@ -77,7 +77,8 @@ d animation generation
 		x too much "all at once": restrict social in 1st stage?
 		x switch market over to reserve/taxation
 		t greater kills: 4x per kill?
-	    - new sounds
+		x tune down fire rate
+	    x new sounds
 		- update walkthrough - start with denizens
 
 	- Beta 1c
