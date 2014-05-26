@@ -79,8 +79,14 @@ d animation generation
 		t greater kills: 4x per kill?
 	    - new sounds
 		- update walkthrough - start with denizens
+
+	- Beta 1c
+		- rethink menus: 
+			- group by effect
+			- disable until dependent structures built
 		- greater kill not getting shown in weapon history
 		- denizen spawn rate. hmm..
+		- slow down awareness. only notify friends we can see.
 
 	- Beta2
 		- auto rebuild

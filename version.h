@@ -1,1 +1,1 @@
-#define VERSION "Beta 1a" 
+#define VERSION "Beta 1b" 

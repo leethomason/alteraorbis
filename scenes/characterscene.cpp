@@ -301,9 +301,9 @@ void CharacterScene::SetButtonText()
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
 			if ( data->IsMarket() )
-				lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? 0 : costMult );
+				lumosGame->ItemToButton( item, &itemButton[j][count] );
 			else
-				lumosGame->ItemToButton( item, &itemButton[j][count], 0 );
+				lumosGame->ItemToButton( item, &itemButton[j][count] );
 			itemButtonIndex[j][count] = src;
 
 			// Set the "active" icons.
@@ -391,8 +391,8 @@ void CharacterScene::SetButtonText()
 		SetItemInfo( down, 0 );
 	}
 
-	int bought=0, sold=0, salesTax=0;
-	CalcCost( &bought, &sold, &salesTax );
+	int bought=0, sold=0;
+	CalcCost( &bought, &sold );
 
 	if ( data->IsMarket() ) {
 		CStr<100> str;
@@ -401,7 +401,7 @@ void CharacterScene::SetButtonText()
 					"%s: %d\n", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
 
 		int bought=0, sold=0;
-		CalcCost( &bought, &sold, &salesTax );
+		CalcCost( &bought, &sold);
 		int cost = bought - sold;
 
 		if ( bought > sold ) {
@@ -481,7 +481,7 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 	if ( item == &okay ) {
 		if ( data->IsMarket() ) {
 			int bought=0, sold=0, salesTax=0;
-			CalcCost( &bought, &sold, &salesTax );
+			CalcCost( &bought, &sold);
 
 			int cost = bought - sold;
 			data->itemComponent->GetItem(0)->wallet.AddGold( -cost );
@@ -639,20 +639,17 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 }
 
 
-void CharacterScene::CalcCost( int* bought, int* sold, int* salesTax )
+void CharacterScene::CalcCost( int* bought, int* sold )
 {
 	*bought = 0;
 	*sold = 0;
-	*salesTax = 0;
 
 	for( int i=0; i<boughtList.Size(); ++i ) {
 		int value = boughtList[i]->GetValue();
-		int cost = MarketAI::ValueToCost(value);
-		*bought += cost;
-		*salesTax += cost - value;
+		*bought += value;
 	}
 	for( int i=0; i<soldList.Size(); ++i ) {
 		int value = soldList[i]->GetValue();
-		*sold += MarketAI::ValueToTrade(value);
+		*sold += value;
 	}
 }

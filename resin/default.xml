@@ -302,6 +302,7 @@
   <data assetName="firebigWAV"      filename="sound/BigFire_1_22k.wav"  />
   <data assetName="firebigWAV2"     filename="sound/BigFire_2_22k.wav"  />
   <data assetName="firebigWAV3"     filename="sound/BigFire_3_22k.wav"  />
+  <data assetName="firebigWAV4"     filename="sound/BigFire_4_22k.wav"  />
   <data assetName="firesmallWAV"    filename="sound/SmallFire_1_22k.wav"  />
   <data assetName="firesmallWAV2"   filename="sound/SmallFire_2_22k.wav"  />
   <data assetName="firesmallWAV3"   filename="sound/SmallFire_3_22k.wav"  />
@@ -314,9 +315,9 @@
   <data assetName="meleeBigWAV"     filename="sound/BigImpact_1_22k.wav" />
   <data assetName="meleeBigWAV2"    filename="sound/BigImpact_2_22k.wav" />
   <data assetName="meleeBigWAV3"    filename="sound/BigImpact_3_22k.wav" />
-  <data assetName="ringWAV"         filename="sound/Ring_1_22k.wav" />
-  <data assetName="ringWAV2"        filename="sound/Ring_2_22k.wav" />
-  <data assetName="ringWAV3"        filename="sound/Ring_3_22k.wav" />
+  <data assetName="ringWAV"         filename="sound/Ring_1_short_22k.wav" />
+  <data assetName="ringWAV2"        filename="sound/Ring_2_short_22k.wav" />
+  <data assetName="ringWAV3"        filename="sound/Ring_3_short_22k.wav" />
   <data assetName="boltimpactWAV"   filename="sound/RangedLaserImpact_1_22k.wav" />
   <data assetName="boltimpactWAV2"  filename="sound/RangedLaserImpact_2_22k.wav" />
   <data assetName="boltimpactWAV3"  filename="sound/RangedLaserImpact_3_22k.wav" />
@@ -329,11 +330,15 @@
   <data assetName="pulseWAV"        filename="sound/Pulse_1_22k.wav" />
   <data assetName="pulseWAV2"       filename="sound/Pulse_2_22k.wav" />
   <data assetName="pulseWAV3"       filename="sound/Pulse_3_22k.wav" />
-  <data assetName="beamgunWAV"      filename="sound/Beamgun_1_22k.wav" />
-  <data assetName="beamgunWAV2"     filename="sound/Beamgun_2_22k.wav" />
-  <data assetName="beamgunWAV3"     filename="sound/Beamgun_3_22k.wav" />
-  <data assetName="rezWAV"          filename="sound/RezIn_22k.wav"/> 
-  <data assetName="derezWAV"        filename="sound/Rezout_22k.wav"/>
+  <data assetName="beamgunWAV"      filename="sound/Beamgun_1_short_22k.wav" />
+  <data assetName="beamgunWAV2"     filename="sound/Beamgun_2_short_22k.wav" />
+  <data assetName="beamgunWAV3"     filename="sound/Beamgun_3_short_22k.wav" />
+  <data assetName="rezWAV"          filename="sound/RezIn_1_22k.wav"/>
+  <data assetName="rezWAV2"         filename="sound/RezIn_2_22k.wav"/>
+  <data assetName="rezWAV3"         filename="sound/RezIn_3_22k.wav"/>
+  <data assetName="derezWAV"        filename="sound/Rezout_1_22k.wav"/>
+  <data assetName="derezWAV2"       filename="sound/Rezout_2_22k.wav"/>
+  <data assetName="derezWAV3"       filename="sound/Rezout_3_22k.wav"/>
   <data assetName="buttonWAV"       filename="sound/UI_14_22k.wav" />
   <data assetName="explosionWAV"    filename="sound/Explo_1_22k.wav" />
   <data assetName="explosionWAV2"   filename="sound/Explo_2_22k.wav" />

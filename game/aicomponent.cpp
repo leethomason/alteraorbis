@@ -2053,9 +2053,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		}
 
 		// If we have something to sell, extra interest in markets that can buy.
-		if (item->IName() == ISC::market
-			&& sellIndex
-			&& item->wallet.gold >= sellValue)
+		if (item->IName() == ISC::market && sellIndex )
 		{
 			s *= 2.0;	// sell sell sell!
 		}

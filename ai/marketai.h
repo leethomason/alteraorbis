@@ -27,9 +27,9 @@ public:
 							bool doTrade );					// If 'false', no transaction is done, but returns the cost IF the trade would succeed.
 
 	// How much it cost to buy this item.
-	static int ValueToCost( int value );
+	//static int ValueToCost( int value );
 	// How much a store will pay for this item.
-	static int ValueToTrade( int value );
+	//static int ValueToTrade( int value );
 
 private:
 	Chit* chit;

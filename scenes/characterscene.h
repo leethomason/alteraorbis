@@ -86,7 +86,7 @@ private:
 	void SetButtonText();
 	void SetExchangeButtonText();
 	void SetItemInfo(const GameItem* item, const GameItem* user);
-	void CalcCost( int* bought, int* sold, int* salesTax );
+	void CalcCost( int* bought, int* sold );
 	void ResetInventory();
 	void CalcCrystalValue();
 

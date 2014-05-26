@@ -90,7 +90,7 @@ public:
 		A_POS,			// 3 comp
 		A_NORMAL,		// 2 comp
 		A_COLOR,		// 3 comp
-		A_BONE_ID,		// int
+		A_BONE_ID,		// 1 comp (float)
 		MAX_ATTRIBUTE
 	};
 	void ClearStream();

@@ -142,10 +142,21 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);	// driver supports 2 and 3. Both crash.
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif
-#if 1
+#if 0
+	// The trickier 3.2 context.
+	// No GL_QUADs anymore.
+	// All the attributes need to be floats.
+	// No ALPHA textures.
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #endif
+#if 0
+	// In theory the minimum supported version:
+	// has instancing, and modern shader syntax
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
+
 	if (multisample) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );

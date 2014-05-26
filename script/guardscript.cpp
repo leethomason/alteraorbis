@@ -12,7 +12,7 @@
 using namespace grinliz;
 
 static const int RAD = 2;
-static const int NOTIFY_RAD = 12;
+static const int NOTIFY_RAD = 8;
 
 GuardScript::GuardScript() : timer(1000)
 {

@@ -2,6 +2,7 @@
 #include "../xegame/chit.h"
 #include "../game/gameitem.h" 
 #include "../game/news.h"
+#include "../game/reservebank.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chitbag.h"
@@ -16,7 +17,9 @@ MarketAI::MarketAI( Chit* c ) : chit(c)
 }
 
 
-/*static*/ int MarketAI::ValueToCost( int value ) 
+#if 0
+// Complexity without value.
+int MarketAI::ValueToCost( int value ) 
 {
 	if ( value == 0 ) return 0;
 
@@ -25,7 +28,7 @@ MarketAI::MarketAI( Chit* c ) : chit(c)
 }
 
 
-/*static*/ int MarketAI::ValueToTrade( int value ) 
+int MarketAI::ValueToTrade( int value ) 
 {
 /*	if ( value == 0 ) return 0;
 
@@ -34,6 +37,7 @@ MarketAI::MarketAI( Chit* c ) : chit(c)
 	*/
 	return value;
 }
+#endif
 
 
 const GameItem* MarketAI::Has( int flag, int hardpoint, int maxAuCost, int minAuValue )
@@ -43,8 +47,8 @@ const GameItem* MarketAI::Has( int flag, int hardpoint, int maxAuCost, int minAu
 		if ( !flag || (item->flags & flag) ) {
 			if ( !hardpoint || (hardpoint == item->hardpoint)) {
 				int value = item->GetValue();
-				int cost = ValueToCost( value );
-				if ( value > 0 && value >= minAuValue && cost <= maxAuCost ) {
+				//int cost = ValueToCost( value );
+				if ( value > 0 && value >= minAuValue && value <= maxAuCost ) {
 					return item;
 				}
 			}
@@ -68,8 +72,7 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 	for( int i=1; i<seller->NumItems(); ++i ) {
 		if ( !seller->GetItem(i)->Intrinsic() ) {
 			if ( seller->GetItem(i) == itemToBuy ) {
-				cost = ValueToCost( itemToBuy->GetValue() );
-				int tax = cost - itemToBuy->GetValue();
+				cost = itemToBuy->GetValue();
 
 				if (    buyer->GetItem()->wallet.gold >= cost
 					 && buyer->CanAddToInventory() ) 
@@ -93,10 +96,12 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 							cost,
 							sector.x, sector.y ));
 
-						if (tax && salesTax) {
-							GLASSERT(seller->GetItem()->wallet.gold > tax);
-							Transfer(salesTax, &seller->GetItem()->wallet, tax);
-							GLOUTPUT(("  tax paid: %d\n", tax));
+						if (salesTax && ReserveBank::Instance()) {
+							int tax = LRint(float(cost) * SALES_TAX);
+							if (tax > 0 && tax <  ReserveBank::Instance()->bank.gold ) {
+								Transfer(salesTax, &ReserveBank::Instance()->bank, tax);
+								GLOUTPUT(("  tax paid: %d\n", tax));
+							}
 						}
 
 						NewsHistory* history = seller->ParentChit()->GetChitBag()->GetNewsHistory();
