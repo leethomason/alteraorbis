@@ -1007,7 +1007,7 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if (mask == GAME_HK_SPACE) {
 		Chit* playerChit = sim->GetPlayerChit();
-
+#ifdef DEBUG
 #if 0
 		if ( playerChit ) {
 			ItemComponent* ic = playerChit->GetItemComponent();
@@ -1043,6 +1043,12 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+#if 0
+		if (playerChit) {
+			sim->GetChitBag()->AddSummoning(playerChit->GetSpatialComponent()->GetSector(), LumosChitBag::SUMMON_TECH);
+		}
+#endif
+#endif	// DEBUG
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;

@@ -68,7 +68,7 @@ int DistilleryScript::DoTick( U32 delta )
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) scriptContext->chit->GetScript("EvalBuildingScript");
 	
 //		int tech = cs->GetTechLevel();
-		float tech = Min(cs->GetTech(), 0.8f);
+		float tech = Max(cs->GetTech(), 0.8f);
 		double dProg = double(tech) * double(progressTick.Period()) / double(TECH_MAX);
 		double p = dProg*double(n);
 		if (evalScript) {
