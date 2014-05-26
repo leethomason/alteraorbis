@@ -833,7 +833,7 @@ void DrawDebugLines( U32 delta )
 		if ( dl->time > 0 ) {
 			dl->time -= delta;
 			flatShader.SetColor( dl->color.x, dl->color.y, dl->color.z );
-			GPUDevice::Instance()->DrawLine( flatShader, dl->tail, dl->head );
+			//GPUDevice::Instance()->DrawLine( flatShader, dl->tail, dl->head );
 			++i;
 		}
 		else {

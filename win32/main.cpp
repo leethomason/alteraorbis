@@ -28,6 +28,7 @@
 
 #include "../xegame/cgame.h"
 #include "../game/gamesettings.h"
+#include "../engine/platformgl.h"
 
 #include "../shared/lodepng.h"
 
@@ -141,8 +142,11 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);	// driver supports 2 and 3. Both crash.
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif
-
-	if ( multisample ) {
+#if 1
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#endif
+	if (multisample) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );
 	}
@@ -164,25 +168,35 @@ int main( int argc, char **argv )
 
 	int stencil = 0;
 	int depth = 0;
-	SDL_GL_GetAttribute( SDL_GL_STENCIL_SIZE, &stencil );
-	glGetIntegerv( GL_DEPTH_BITS, &depth );
-	GLOUTPUT_REL(( "SDL screen created. stencil=%d depthBits=%d\n", 
-					stencil, depth ));
-
+	CHECK_GL_ERROR;
+	SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil);
+	SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depth);
+	glGetError();	// the above stencil/depth query sometimes does throw an error.
+	glGetError();	// 2 queries, 2 errors.
+	CHECK_GL_ERROR;
+	GLOUTPUT_REL(("SDL screen created. stencil=%d depthBits=%d\n", stencil, depth));
+	
     /* Verify there is a surface */
     if ( !screen ) {
 	    fprintf( stderr,  "Video mode set failed: %s\n", SDL_GetError( ) );
 	    exit( 1 );
 	}
 
+	CHECK_GL_ERROR;
 	int r = glewInit();
 	GLASSERT( r == GL_NO_ERROR );
+
+	while (glGetError() != GL_NO_ERROR) {
+		// around again
+	}
+	CHECK_GL_ERROR;
 
 	const unsigned char* vendor   = glGetString( GL_VENDOR );
 	const unsigned char* renderer = glGetString( GL_RENDERER );
 	const unsigned char* version  = glGetString( GL_VERSION );
 
 	GLOUTPUT_REL(( "OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version ));
+	CHECK_GL_ERROR;
 
 	bool done = false;
 	bool zooming = false;

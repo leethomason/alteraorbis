@@ -42,7 +42,7 @@ BTexture::BTexture()
 	  doPreMult( false ),
 	  invert( true ),
 	  emissive( false ),
-	  blackAlpha0( false ),
+	  alphaTexture(false),
 	  whiteMap( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
@@ -89,7 +89,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryIntAttribute( "maxSize", &targetMax );
 	element->QueryBoolAttribute( "premult", &doPreMult );
 	element->QueryBoolAttribute( "emissive", &emissive );
-	element->QueryBoolAttribute( "blackAlpha0", &blackAlpha0 );
+	element->QueryBoolAttribute("alphaTexture", &alphaTexture);
 	element->QueryBoolAttribute( "whiteMap", &whiteMap );
 
 	return true;
@@ -130,45 +130,42 @@ bool BTexture::Load()
 		SDL_FreeSurface( alpha );
 	}
 
-	if (    isImage
-		 || ( IsPowerOf2( surface->w ) && IsPowerOf2( surface-> h ) ) )
-	{
+	if (surface->format->BitsPerPixel == 24 || surface->format->BitsPerPixel == 32) {
+	}
+	else {
+		ExitError("Texture", pathName.c_str(), assetName.c_str(), "Textures must be 24 or 32 bit.");
+	}
+		
+		
+	if (isImage || (IsPowerOf2(surface->w) && IsPowerOf2(surface->h))){
 		// no problem.
 	}
 	else {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Textures must be power of 2 dimension." );
 	}
 
-	if (    surface->format->BitsPerPixel == 24
-		 || surface->format->BitsPerPixel == 32 )	
-	{
-		if ( surface->format->Amask )
-			format = TEX_RGBA16;
-		else 
-			format = TEX_RGB16;
-	}
-	else if ( surface->format->BitsPerPixel == 8 ) {
-		format = TEX_ALPHA;
-	}
-	else {
-		GLASSERT( 0 );
-	}
+	if ( surface->format->Amask )
+		format = TEX_RGBA16;
+	else 
+		format = TEX_RGB16;
 
 	if ( emissive && format != TEX_RGBA16 ) {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Emmisive only supported on RGBA." );
 	}
-	if (format == TEX_RGBA16 && blackAlpha0) {
-		for( int y=0; y<surface->h; ++y ) {
-			for( int x=0; x<surface->w; ++x ) {
-				Color4U8 rgbC = GetPixel( surface, x, y );
-				if ( rgbC.a == 0 ) {
-					rgbC.Set( 0, 0, 0, 0 );
-				}
-				Color4U8 c = { rgbC.r, rgbC.g, rgbC.b, rgbC.a };
-				PutPixel( surface, x, y, c );
+
+	if (alphaTexture) {
+		printf("Converting to alpha texture.\n");
+		format = TEX_RGBA16;
+		SDL_Surface* alpha = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+		for (int y = 0; y<surface->h; ++y) {
+			for (int x = 0; x<surface->w; ++x) {
+				Color4U8 rgb = GetPixel(surface, x, y);
+				Color4U8 c = { 255, 255, 255, (rgb.r + rgb.g + rgb.b) / 3 };
+				PutPixel(alpha, x, y, c);
 			}
 		}
-
+		SDL_FreeSurface(surface);
+		surface = alpha;
 	}
 
 	printf( "%s Loaded: '%s' bpp=%d em=%d", 
@@ -239,6 +236,7 @@ bool BTexture::Scale()
 		saveScaled = true;
 		WhiteMap();
 	}
+	if (alphaTexture) saveScaled = true;
 
 	if ( targetMax ) {
 		targetWidth = surface->w;

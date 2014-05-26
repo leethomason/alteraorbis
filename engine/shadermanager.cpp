@@ -375,7 +375,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	header = "#version 140\n";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
-	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
 	AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
 	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
 	AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );

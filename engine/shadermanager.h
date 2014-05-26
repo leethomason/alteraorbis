@@ -51,7 +51,6 @@ public:
 	enum {				
 		// Texture state.
 		TEXTURE0			= (1<<1),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
-		TEXTURE0_ALPHA_ONLY = (1<<2),		// Texture is only alpha, which composites differently.
 		TEXTURE0_XFORM		= (1<<3),		// u' = u*x + z, v' = v*.y + w	(instanced, vec4)
 		TEXTURE0_CLIP		= (1<<4),		// clip to (x0,y0), (x1,y1) (instanced, vec4)
 		TEXTURE0_COLORMAP	= (1<<5),		// remap colors (instanced, matrix)

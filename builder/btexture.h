@@ -64,8 +64,8 @@ public:
 	bool colorMap;
 	bool doPreMult;
 	bool invert;
-	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
-	bool blackAlpha0;	// if set, all alpha=0 becomes 0,0,0,0	
+	bool emissive;		// if set, the alpha channel is emissiveness, not transparency
+	bool alphaTexture;	// if set, color converted to (1,1,1,c)
 	bool whiteMap;
 	int targetWidth;
 	int targetHeight;

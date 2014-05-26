@@ -85,7 +85,6 @@ private:
 class GPUIndexBuffer : public GPUBuffer
 {
 public:
-	static GPUIndexBuffer Create(  );
 	void Upload( const uint16_t* data, int size, int start );
 
 	GPUIndexBuffer( const uint16_t* index, int nIndex );
@@ -240,15 +239,16 @@ public:
 	const grinliz::Matrix4& TopMatrix( MatrixType type );
 	const grinliz::Matrix4& ViewMatrix();
 
-	void ResetTriCount()	{ quadsDrawn = 0; trianglesDrawn = 0; drawCalls = 0; }
+	void ResetTriCount()	{ trianglesDrawn = 0; drawCalls = 0; }
 	int TrianglesDrawn()	{ return trianglesDrawn; }
-	int QuadsDrawn()		{ return quadsDrawn; }
+	//int QuadsDrawn()		{ return quadsDrawn; }
 	int DrawCalls()			{ return drawCalls; }
 
 	grinliz::Color4F		ambient;
 	grinliz::Vector4F	directionWC;
 	grinliz::Color4F		diffuse;
 
+	// Draws indexed triangles.
 	void Draw(		const GPUState& state, 
 					const GPUStream& stream, 
 					const GPUStreamData& data, 
@@ -256,12 +256,12 @@ public:
 					int nIndex, 
 					int nInstance );
 
-	void DrawQuads( const GPUState& state,
+	// Draws triangles. (No indices.)
+	void DrawQuads(	const GPUState& state,
 					const GPUStream& stream, 
 					const GPUStreamData& data, 
-					int nQuad );
+					int nQuads );
 
-	void DrawLine(	const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 	void DrawQuad(	const GPUState& state, Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 	void DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, float width=0.4f );
 
@@ -280,7 +280,7 @@ public:
 
 private:
 	// draws a vertex-buffer-only primitive (not indexed)
-	void DrawPrimitive( int prim, const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int count );
+	//void DrawPrimitive( int prim, const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int count );
 
 	static GPUDevice* instance;
 	GPUDevice();
@@ -319,10 +319,10 @@ private:
 
 	int					primitive;
 	int					trianglesDrawn;
-	int					quadsDrawn;
 	int					drawCalls;
 	uint32_t			uid;
 	int					matrixDepth[3];
+	GPUIndexBuffer*		quadIndexBuffer;
 
 	grinliz::Matrix4	identity[EL_MAX_INSTANCE];
 	grinliz::Vector4F	defaultControl[EL_MAX_INSTANCE];
