@@ -690,7 +690,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 	// check for a plant already there.
 	if (    wg.IsPassable() 
 		 && wg.Plant() == 0
-		 && wg.Layer() == WorldGrid::LAND 
+		 && wg.Land() == WorldGrid::LAND 
 		 && !chitBag->MapGridUse(x,y) ) 
 	{
 		if ( type < 0 ) {

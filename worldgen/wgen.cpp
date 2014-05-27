@@ -97,10 +97,10 @@ int main(int argc, const char* argv[])
 				grid.SetLandAndRock( h );
 			}
 			else if ( h == WorldGen::GRID ) {
-				grid.SetGrid();
+				grid.SetLand(WorldGrid::GRID);
 			}
 			else if ( h == WorldGen::PORT ) {
-				grid.SetPort();
+				grid.SetLand(WorldGrid::PORT);
 			}
 			else if ( h == WorldGen::CORE ) {
 				grid.SetLandAndRock( WorldGen::LAND0 );

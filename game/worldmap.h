@@ -109,7 +109,7 @@ public:
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
 		const WorldGrid& wg = grid[index];
-		if ( wg.Layer() == WorldGrid::LAND && wg.Height() == 0 ) {
+		if ( wg.Land() == WorldGrid::LAND && wg.Height() == 0 ) {
 			grid[index].SetPave(pave);
 		}
 	}
@@ -283,7 +283,6 @@ private:
 	void Init( int w, int h );
 	void FreeVBOs();
 
-	bool Similar( const grinliz::Rectangle2I& r, int layer, const grinliz::BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap );
 	void CalcZone( int x, int y );
 	void DeleteAllRegions();
 

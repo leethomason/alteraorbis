@@ -1177,6 +1177,8 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	Rectangle2I r;
 	r.min = r.max = ToWorld2I(origin);
 	r.Outset( PLANT_AWARE );
+	r.DoIntersection(Context()->worldMap->Bounds());
+
 	int nPlants = 0;
 	for (Rectangle2IIterator it(r); !it.Done() && nPlants < NPLANTS; it.Next()) {
 		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());

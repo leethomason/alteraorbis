@@ -168,7 +168,6 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 		}
 	}
 	if (e == 0) {
-		GLASSERT(engine);
 		// Tear down:
 		if (voxelVertexVBO) {
 			delete voxelVertexVBO;
@@ -427,7 +426,7 @@ void WorldMap::InitCircle()
 			int r2 = (x-cx)*(x-cx) + (y-cy)*(y-cy);
 			if ( r2 < R2 ) {
 				int i = INDEX( x, y );
-				grid[i].SetLand();
+				grid[i].SetLand(WorldGrid::LAND);
 			}
 		}
 	}
@@ -458,22 +457,22 @@ bool WorldMap::InitPNG( const char* filename,
 			Color3U8 c = { pixels[i*3+0], pixels[i*3+1], pixels[i*3+2] };
 			Vector2I p = { x, y };
 			if ( c == BLACK ) {
-				grid[i].SetLand();
+				grid[i].SetLand(WorldGrid::LAND);
 				blocks->Push( p );
 			}
 			else if ( c.r == c.g && c.g == c.b ) {
-				grid[i].SetLand();
+				grid[i].SetLand(WorldGrid::LAND);
 				color = c.r;
 			}
 			else if ( c == BLUE ) {
 				grid[i].SetWater();
 			}
 			else if ( c == RED ) {
-				grid[i].SetLand();
+				grid[i].SetLand(WorldGrid::LAND);
 				wayPoints->Push( p );
 			}
 			else if ( c == GREEN ) {
-				grid[i].SetLand();
+				grid[i].SetLand(WorldGrid::LAND);
 				features->Push( p );
 			}
 			++x;
@@ -498,36 +497,19 @@ void WorldMap::MapInit( const U8* land, const U16* path )
 			grid[i].SetLandAndRock( h );
 		}
 		else if ( h == WorldGen::GRID ) {
-			grid[i].SetGrid();
+			grid[i].SetLand(WorldGrid::GRID);
 		}
 		else if ( h == WorldGen::PORT ) {
-			grid[i].SetPort();
+			grid[i].SetLand(WorldGrid::PORT);
 		}
 		else if ( h == WorldGen::CORE ) {
-			grid[i].SetLandAndRock( WorldGen::LAND0 );
+			grid[i].SetLandAndRock(1);
 		}
 		else {
 			GLASSERT( 0 );
 		}
 		grid[i].SetPath( path[i] );
 	}
-}
-
-
-bool WorldMap::Similar( const grinliz::Rectangle2I& r, int layer, const BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap )
-{
-	if ( !setmap.IsRectEmpty( r ) ) {
-		return false;
-	}
-
-	for( int y=r.min.y; y<=r.max.y; ++y ) {
-		for( int x=r.min.x; x<=r.max.x; ++x ) {
-			const WorldGrid& wg = grid[INDEX(x,y)];
-			if ( wg.Layer() != layer )
-				return false;
-		}
-	}
-	return true;
 }
 
 
@@ -591,7 +573,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
 						// FIXME: does setting a pool impact the pather?? 
 						// Or should pool be removed from the isPassable check??
-						grid[INDEX(x,y)].SetPool( false );
+						grid[INDEX(x,y)].SetPool( 0 );
 					}
 				}
 
@@ -623,7 +605,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 						int index = INDEX( x,y );
 
 						if (    grid[index].IsLand() 
-							 && grid[index].RockHeight() < POOL_HEIGHT	// need space for the pool
+							 && grid[index].RockHeight() < D_POOL_HEIGHT	// need space for the pool
 							 && color[(y-baseY)*ZONE_SIZE+(x-baseX)] == 0 )			// don't revisit
 						{
 							// Try a fill!
@@ -656,7 +638,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 									int idx = INDEX(v);
 
 									if (    grid[idx].IsLand()
-										 && grid[idx].RockHeight() < POOL_HEIGHT
+										 && grid[idx].RockHeight() < D_POOL_HEIGHT
 										 && color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] == 0 )
 									{
 										color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] = currentColor;
@@ -680,7 +662,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 
 									for (int i = 0; i < poolGrids.Size(); ++i) {
 										int idx = INDEX(poolGrids[i]);
-										grid[idx].SetPool(true);
+										grid[idx].SetPool(D_POOL_HEIGHT);
 
 										for (int k = 0; k < 4; ++k) {
 											Vector2I v = poolGrids[i] + next[k];
@@ -730,7 +712,7 @@ void WorldMap::EmitWaterfalls( U32 delta )
 		for( int j=0; j<4; ++j ) {
 			Vector2I v = wf + next[j];
 			if ( grid[INDEX(v)].IsWater() ) {
-				Vector3F v3 = { (float)wf.x + 0.5f, (float)POOL_HEIGHT, (float)wf.y + 0.5f };
+				Vector3F v3 = { (float)wf.x + 0.5f, (float)D_POOL_HEIGHT, (float)wf.y + 0.5f };
 				Vector3F half = { (float)next[j].x*0.5f, 0.0f, (float)next[j].y*0.5f };
 				v3 = v3 + half*1.2f;
 
@@ -741,7 +723,7 @@ void WorldMap::EmitWaterfalls( U32 delta )
 				static const Vector3F DOWN = { 0, -1, 0 };
 				engine->particleSystem->EmitPD( pdWater, r3, DOWN, delta ); 
 
-				r3.min.y = r3.max.y = (float)POOL_HEIGHT - 0.2f;
+				r3.min.y = r3.max.y = (float)D_POOL_HEIGHT - 0.2f;
 				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
 				r3.min.y = r3.max.y = 0.0f;
 				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
@@ -835,7 +817,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 
 		int index = INDEX(magmaGrids[i]);
 		if (grid[index].IsWater() || grid[index].Pool()) {
-			r.min.y = r.max.y = (float)POOL_HEIGHT;
+			r.min.y = r.max.y = (float)D_POOL_HEIGHT;
 			engine->particleSystem->EmitPD(pdSmoke, r, V3F_UP, delta);
 		}
 		else {
@@ -885,7 +867,6 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 {
 	Vector2I vec	= { x, y };
 	int index		= INDEX(x,y);
-	bool loading	= (h==-2);
 	const WorldGrid was = grid[index];
 
 	if ( !was.IsLand() ) {
@@ -1410,8 +1391,7 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 					return cell;
 				}
 			}
-			if (    (wg.Pool() && cell.y < POOL_HEIGHT)
-					  || (cell.y < wg.RockHeight() )) 
+			if ( cell.y < wg.Height()) 
 			{
 				Vector3F v;
 				if ( lastStep < 0 ) {
@@ -1895,7 +1875,7 @@ void WorldMap::CreateTexture( Texture* t )
 				int index = y * t->Width() + x;
 				GLASSERT(index < size);
 				if (index < size) {
-					data[index] = c[wg.Layer()];
+					data[index] = c[wg.Land()];
 				}
 			}
 		}
@@ -1971,6 +1951,7 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
 	float rot = IndexToRotation360(INDEX(x, y));
 	m->SetPosAndYRotation(pos, rot);
+	m->SetSaturation(hpFraction);
 
 	// Don't get a root if we are being used for hit testing.
 	if (root) {
@@ -1998,9 +1979,9 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + WorldGrid::NUM_PORCH;
 	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
+		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
 		{ BLACKMAG_X(1), BLACKMAG_Y(1) },	// port
-		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
 		{ BLACKMAG_X(0), BLACKMAG_Y(2) },	// pave1
 		{ BLACKMAG_X(2), BLACKMAG_Y(0) },	// pave2
 		{ BLACKMAG_X(2), BLACKMAG_Y(1) },	// pave3
@@ -2012,7 +1993,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
 	};
-	static const int PORCH = 6;
+	static const int PORCH = 7;
+	static const int PAVE = 4;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2031,11 +2013,13 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 
 				const WorldGrid& wg = grid[INDEX(x,y)];
 				if ( wg.Height() == 0 ) {
-					int layer = wg.Layer();
+					int layer = wg.Land();
 					if ( layer == WorldGrid::LAND ) {
-						layer += wg.Pave();
+						if (wg.Pave()) {
+							layer = PAVE + wg.Pave() - 1;
+						}
 						if ( wg.Porch() ) {
-							layer = PORCH + wg.Porch();
+							layer = PORCH + wg.Porch() - 1;
 						}
 					}
 
@@ -2048,10 +2032,10 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					vArr[2].pos.Set( fx+1.0f,	0, fy+1.0f );
 					vArr[3].pos.Set( fx+1.0f,	0, fy );
 
-					vArr[0].tex.Set( UV[layer].x, UV[layer].y );
-					vArr[1].tex.Set( UV[layer].x, UV[layer].y+dv );
-					vArr[2].tex.Set( UV[layer].x+du, UV[layer].y+dv );
-					vArr[3].tex.Set( UV[layer].x+du, UV[layer].y );
+					vArr[0].tex.Set( UV[layer].x,		UV[layer].y );
+					vArr[1].tex.Set( UV[layer].x,		UV[layer].y+dv );
+					vArr[2].tex.Set( UV[layer].x+du,	UV[layer].y+dv );
+					vArr[3].tex.Set( UV[layer].x+du,	UV[layer].y );
 
 					for( int i=0; i<4; ++i ) {
 						vArr[i].normal = V3F_UP;
@@ -2178,7 +2162,7 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 
 				if ( wg.Pool() ) {
 					id = POOL;
-					h = (float)POOL_HEIGHT - 0.2f;
+					h = (float)D_POOL_HEIGHT - 0.2f;
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 

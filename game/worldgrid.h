@@ -25,30 +25,42 @@
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
 static const int HP_PER_PLANT_STAGE		= 20;	// a square in there: 20 -> 320	
-static const int POOL_HEIGHT			= 2;
+static const int D_POOL_HEIGHT			= 2;
 
 struct WorldGrid {
 
 public:
 	// 1 bit
 	unsigned extBlock			: 1;	// used by the map. prevents allocating another structure.
+
+	enum {
+		ROCK,
+		ICE,
+	};
+
+	enum {
+		WATER,	// can also be magma
+		LAND,	// can still be pave, porch, or magma
+		GRID,
+		PORT,
+		NUM_LAYERS
+	};
+
 private:
 	// memset(0) should work, and make it water.
 
-	// 1 + 15 = 16 bits
-	unsigned isLand				: 1;
-	unsigned isGrid				: 1;
-	unsigned isPort				: 1;
+	// 1 + 16 = 17 bits
+	unsigned land				: 2;	// WATER, LAND, GRID...
+	unsigned rockType			: 2;	// ROCK, ICE
 	unsigned pave				: 2;	// 0-3, the pave style, if >0
 	unsigned isPorch			: 3;	// only used for rendering 0-6
 
 	unsigned nominalRockHeight	: 2;	// 0-3
-	unsigned rockType			: 1;	// ROCK, ICE
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 	unsigned rockHeight			: 2;
-	unsigned hasPool			: 1;
+	unsigned waterHeight		: 2;
 
-	// 16 + 27 = 43 bits
+	// 17 + 27 = 44 bits
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned hp					: 9;	// 0-511
 
@@ -58,41 +70,34 @@ private:
 
 	unsigned path				: 10;	// 2 bits each: core, port0-3
 
-	// 43 + 8 = 51 bits
+	// 44 + 8 = 52 bits
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
 public:
-	bool IsBlocked() const			{ return extBlock || (!isLand) || isGrid || rockHeight || hasPool || (plant && stage >= 2); }
+	bool IsBlocked() const			{ return extBlock || (land == WATER) || (land == GRID) || rockHeight || waterHeight || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 	
 	// does this and rhs render the same voxel?
 	int VoxelEqual( const WorldGrid& wg ) const {
-		return	isLand == wg.isLand &&
-				isGrid == wg.isGrid &&
-				isPort == wg.isPort &&
+		return	land == wg.land &&
 				pave   == wg.pave &&
 				isPorch == wg.isPorch &&
 				rockHeight == wg.rockHeight &&
 				magma == wg.magma &&
-				hasPool == wg.hasPool;
+				waterHeight == wg.waterHeight;
 	}
-
-	enum {
-		ROCK,
-		ICE
-	};
 
 	grinliz::Color4U8 ToColor() const {
 		grinliz::Color4U8 c = { 0, 0, 0, 255 };
-
-		if ( isGrid ) {
-			c.Set( 120, 180, 180, 255 );
+		switch (land) {
+		case WATER:		c.Set(0, 0, 200, 255);	break;
+		case LAND:		break;
+		case GRID:		c.Set(120, 180, 180, 255); break;
+		case PORT:		c.Set(180, 180, 0, 255); break;
+		default: GLASSERT(0);
 		}
-		else if ( isPort ) {
-			c.Set( 180, 180, 0, 255 );
-		}
-		else if ( isLand ) {
+		if ( land == LAND ) {
 			if ( nominalRockHeight == 0 ) {
 				c.Set( 0, 140, 0, 255 );
 			}
@@ -101,37 +106,23 @@ public:
 				c.Set( add, 100+add, add, 255 );
 			}
 		}
-		else {
-			c.Set( 0, 0, 200, 255 );
-		}
 		return c;
 	}
 
-	bool IsLand() const			{ return isLand != 0; }
-	bool IsPort() const			{ return isPort != 0; }
-	bool IsGrid() const			{ return isGrid != 0; }
+	bool IsLand() const			{ return land >= LAND; }
+	bool IsPort() const			{ return land == PORT; }
+	bool IsGrid() const			{ return land == GRID; }
 
 	enum {
-		WATER,
-		GRID,
-		PORT,
-		LAND,
-		NUM_LAYERS,
 		NUM_PAVE = 4,	// including 0, which is "no pavement"
 		NUM_PORCH = 8,	// 0: no porch, 1: basic porch, --,-,0,+,++,unreachable
 		PORCH_UNREACHABLE = 7
 	};
-	int Layer() const			{ 
-		int layer = WATER;
-		if ( isGrid ) layer = GRID;
-		else if ( isPort ) layer = PORT;
-		else if ( isLand ) layer = LAND;
-		return layer;
-	}
+	int Land() const { return land; }
 	int Pave() const { return pave; }
 	void SetPave( int p ) {
 		GLASSERT( p >=0 && p < NUM_PAVE );
-		GLASSERT( Layer() == LAND );
+		GLASSERT( Land() == LAND );
 		GLASSERT( RockHeight() == 0 );
 		pave = p;
 	}
@@ -150,25 +141,22 @@ public:
 		GLASSERT(isPorch == porch);
 	}
 
-	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
+	void SetLand( int _land )	{ 
+		land = _land;
+		GLASSERT(land >= WATER && land <= PORT);
+	}
 
-	void SetGrid()				{ isLand = 1; isGrid = 1; }
-	void SetPort()				{ isLand = 1; isPort = 1; }
 	void SetLandAndRock( U8 h )	{
+		GLASSERT(sizeof(WorldGrid) == sizeof(U32)* 2);	// WorldGrid can be any size; just make sure it is the one intended 
 		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
 		// Subtract here.
 		if ( !h ) {
 			SetWater();	
 		}
 		else {
-			SetLand();
+			SetLand(LAND);
 			SetNominalRockHeight( h-1 );
 		}
-	}
-
-	void SetLand()				{ 
-		GLASSERT( sizeof(WorldGrid) == sizeof(U32)*2 );	// WorldGrid can be any size; just make sure it is the one intended 
-		isLand = 1;
 	}
 
 	int NominalRockHeight() const { return nominalRockHeight; }
@@ -197,20 +185,18 @@ public:
 	}
 
 	int Height() const {
-		if ( Pool() ) return POOL_HEIGHT;
-		return RockHeight();
+		return grinliz::Max(waterHeight, rockHeight);
 	}
 
-	bool Pool() const { return hasPool ? true : false; }
-	void SetPool( bool p ) {
-		GLASSERT( IsLand() || (p==false) );
-		GLASSERT( !p || POOL_HEIGHT > (int)rockHeight );
-		hasPool = p ? 1 : 0;
+	bool Pool() const { return waterHeight > rockHeight; }
+	void SetPool( int height ) {
+		GLASSERT( IsLand() || (height==0) );
+		waterHeight = height;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }
 	void SetWater()				{ 
-		isLand = 0;
+		land = WATER;
 		nominalRockHeight = 0;
 	}
 

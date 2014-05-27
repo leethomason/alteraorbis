@@ -29,6 +29,7 @@
 #include "../game/worldmap.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/debugpathcomponent.h"
+#include "../game/lumoschitbag.h"
 
 
 using namespace grinliz;
@@ -78,9 +79,8 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	map->AttachEngine( engine, this );
 
 	ChitContext context;
-
 	context.Set( engine, map, 0 );
-	chitBag = new ChitBag( context );
+	chitBag = new LumosChitBag( context, 0 );
 
 	Rectangle2I b;
 	b.Set( 0, 0, map->Width()-1, map->Height()-1 );
