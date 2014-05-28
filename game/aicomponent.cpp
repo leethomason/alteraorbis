@@ -2962,11 +2962,14 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
 		Vector2I sector = sectorPort->sector;
 
-		if (chitBag->HasSummoning(LumosChitBag::SUMMON_TECH) == sector) {
+		if (   parentChit->GetItem()
+			&& parentChit->GetItem()->keyValues.GetIString( ISC::mob) == ISC::greater 
+			&& chitBag->HasSummoning(LumosChitBag::SUMMON_TECH) == sector)
+		{
 			Vector2I target = { sector.x*SECTOR_SIZE + SECTOR_SIZE / 2, sector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
 			GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+			chitBag->RemoveSummoning(sector);
 		}
-		chitBag->RemoveSummoning(sector);
 	}
 		break;
 

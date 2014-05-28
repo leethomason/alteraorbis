@@ -103,7 +103,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetVisible(false);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Visitor", "Agronomy", "Defense", "Industry"
+		"Utility", "Visitor", "Economy", "Defense", "Industry"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -1024,7 +1024,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 1
+#if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1043,7 +1043,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 0
+#if 1
 		if (playerChit) {
 			sim->GetChitBag()->AddSummoning(playerChit->GetSpatialComponent()->GetSector(), LumosChitBag::SUMMON_TECH);
 		}

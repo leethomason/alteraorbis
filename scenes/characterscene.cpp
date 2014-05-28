@@ -81,8 +81,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 	else if (data->IsMarket()) {
 		helpText.SetText("Character inventory is on the left. Market items are on the right. Dragging items from "
-			"one inventory to the other will purchase or sell the item. Prices under the items show both the sell/buy "
-			"price and the (actual value).");
+			"one inventory to the other will purchase or sell the item.");
 		itemDescWidget.SetShortForm(true);
 	}
 	else if (data->IsVault()) {
