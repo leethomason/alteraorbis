@@ -2208,16 +2208,15 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		int r = parentChit->random.Rand(4);
 
 		if (thisComp.item->keyValues.GetIString(IStringConst::mob) == IStringConst::greater) {
-			Vector2I techSector = GetLumosChitBag()->PopSummoning(LumosChitBag::SUMMON_TECH);
+			// If there is a summoning, try to go there. Don't actually pop until
+			// the Grid travel kicks in.
+			Vector2I techSector = GetLumosChitBag()->HasSummoning(LumosChitBag::SUMMON_TECH);
 			if (!techSector.IsZero()) {
 				SectorPort dest;
 				dest.sector = techSector;
 				const SectorData& destSD = context->worldMap->GetSector(dest.sector);
 				dest.port = destSD.NearestPort(pos2);
-				DoSectorHerd(thisComp, true, dest);
-
-				Vector2I target = { techSector.x*SECTOR_SIZE + SECTOR_SIZE / 2, techSector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
-				GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+				DoSectorHerd(thisComp, false, dest);
 				return;
 			}
 		}
@@ -2918,11 +2917,11 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	Vector2I mapPos = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector( mapPos );
 
-	switch ( msg.ID() ) {
+	switch (msg.ID()) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
-		if ( currentAction != WANDER ) {
+		if (currentAction != WANDER) {
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
@@ -2935,27 +2934,42 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
 
-		if ( aiMode == RAMPAGE_MODE ) {
+		if (aiMode == RAMPAGE_MODE) {
 			// Never expect move troubles in rampage mode.
 			aiMode = NORMAL_MODE;
 		}
 
 		{
 			WorkQueue* workQueue = GetWorkQueue();
-			if ( workQueue && workQueue->GetJob( parentChit->ID() )) {
-				workQueue->ReleaseJob( parentChit->ID() );
+			if (workQueue && workQueue->GetJob(parentChit->ID())) {
+				workQueue->ReleaseJob(parentChit->ID());
 				// total re-think.
 				aiMode = NORMAL_MODE;
 			}
 		}
 		taskList.Clear();
 		{
-			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-			if ( pmc ) {
+			PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+			if (pmc) {
 				pmc->Clear();	// make sure to clear the path and the queued path
 			}
 		}
 		break;
+
+	case ChitMsg::PATHMOVE_TO_GRIDMOVE:
+	{
+		LumosChitBag* chitBag = GetLumosChitBag();
+		const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
+		Vector2I sector = sectorPort->sector;
+
+		if (chitBag->HasSummoning(LumosChitBag::SUMMON_TECH) == sector) {
+			Vector2I target = { sector.x*SECTOR_SIZE + SECTOR_SIZE / 2, sector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
+			GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+		}
+		chitBag->RemoveSummoning(sector);
+	}
+		break;
+
 
 	case ChitMsg::CHIT_SECTOR_HERD:
 		{

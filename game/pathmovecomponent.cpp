@@ -491,6 +491,9 @@ int PathMoveComponent::DoTick( U32 delta )
 	ApplyBlocks( &pos, &this->blockForceApplied );
 
 	if ( portJump.IsValid() ) {
+		ChitMsg msg(ChitMsg::PATHMOVE_TO_GRIDMOVE, 0, &portJump);
+		parentChit->SendMessage(msg, this);
+
 		GridMoveComponent* gmc = new GridMoveComponent();
 		parentChit->Swap( this, gmc );
 		gmc->SetDest( portJump );
