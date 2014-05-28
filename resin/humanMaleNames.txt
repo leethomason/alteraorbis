@@ -22,6 +22,7 @@ Garrus
 Garva
 Gormun
 Khronos
+Kronoth
 Kellos
 Kelvak
 Indigo
@@ -35,6 +36,8 @@ Nemo
 Neutron
 Nikolai
 Nitros
+Prosor
+Proson
 Proton
 Protar
 Selas

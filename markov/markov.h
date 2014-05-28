@@ -73,7 +73,7 @@ public:
 
 private:
 	void FindPair( char a, char b, int* start, int* count );
-	void AnalyzeRec(char a, char b, int* options);
+	void AnalyzeRec(char* buf, int nChar, int* options);
 
 	grinliz::Random random;
 	const MarkovBuilder::Triplet* arr;

@@ -84,21 +84,23 @@ MarkovGenerator::MarkovGenerator( const char* data, int nBytes, int seed )
 // Try to check for them.
 void MarkovGenerator::Analyze()
 {
-	int* options = new int[256 * 256];
-	memset(options, 0, 256 * 256 *sizeof(int));
+//	int* options = new int[256 * 256];
+//	memset(options, 0, 256 * 256 *sizeof(int));
 
-	char a = ' ';
-	char b = ' ';
+	char buf[64] = { 0 };
+
 	GLOUTPUT(("\n"));
 	for (int i = 0; i < nTriplets; ++i) {
 		if (arr[i].value[0] == 0 ) {
-			a = arr[i].value[1];
-			b = arr[i].value[2];
+			buf[0] = arr[i].value[1];
+			buf[1] = arr[i].value[2];
+			buf[2] = 0;
 			int opt = 0;
-			AnalyzeRec(a, b, &opt);
-			options[(unsigned char)b * 256 + (unsigned char)a] += opt;
+			AnalyzeRec(buf, 2, &opt);
+			GLOUTPUT(("%c%c -> %d\n", buf[0], buf[1], opt));
 		}
 	}
+	/*
 	int over50 = 0;
 	for (int b = 0; b < 256; ++b) {
 		for (int a = 0; a < 256; ++a) {
@@ -115,22 +117,33 @@ void MarkovGenerator::Analyze()
 	}
 	GLOUTPUT(("Plus %d pairs over 50.\n", over50));
 	delete[] options;
+	*/
 }
 
 
-void MarkovGenerator::AnalyzeRec(char a, char b, int* options)
+void MarkovGenerator::AnalyzeRec(char *buf, int nChars, int* options)
 {
 	int start = 0;
 	int count = 0;
-	FindPair(a, b, &start, &count);
+
+	FindPair(buf[nChars-2], buf[nChars-1], &start, &count);
 	if (count == 0)
 		return;
 	*options += count;
 	if (*options > 100)
 		return;
 
+	int options4 = *options;
 	for (int i = start; i < start + count; ++i) {
-		AnalyzeRec(b, arr[i].value[2], options);
+		buf[nChars] = arr[i].value[2];
+		AnalyzeRec(buf, nChars+1, options);
+	}
+
+	if (nChars == 4) {
+		int result = *options - options4;
+		if (result < 10) {
+			GLOUTPUT(("    %c%c%c%c -> %d\n", buf[0], buf[1], buf[2], buf[3], result));
+		}
 	}
 }
 
