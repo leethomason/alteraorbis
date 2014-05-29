@@ -43,7 +43,7 @@ void SectorData::Serialize( XStream* xs )
 		delete pather;
 		pather = 0;
 
-		GLASSERT( !name.empty() );
+//		GLASSERT( !name.empty() );
 	}
 }
 

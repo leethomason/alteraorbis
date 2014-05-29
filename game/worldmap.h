@@ -72,6 +72,8 @@ class WorldMap : public Map,
 	             public micropather::Graph,
 				 public IDeviceLossHandler
 {
+	friend class FluidSim;
+
 public:
 	WorldMap( int width, int height );
 	~WorldMap();
@@ -105,6 +107,10 @@ public:
 		int index = INDEX( x, y );
 		WorldGrid wg = grid[index];
 		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
+	}
+	void SetEmitter(int x, int y, bool on) {
+		int index = INDEX(x, y);
+		grid[index].fluidEmitter = on ? 1 : 0;
 	}
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
@@ -206,6 +212,7 @@ public:
 		VoxelHit(v, dd);
 	}
 	void VoxelHit(const grinliz::Vector3I& voxel, const DamageDesc& dd);
+	void RunFluidSim(const grinliz::Vector2I& sector);
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -360,6 +367,7 @@ private:
 	IMapGridUse*				iMapGridUse;
 	int							slowTick;
 	NewsHistory*				newsHistory;
+	FluidSim*					fluidSim;
 
 	WorldInfo*					worldInfo;
 	grinliz::Rectangle2I		debugRegionOverlay;

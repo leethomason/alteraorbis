@@ -83,6 +83,10 @@ d animation generation
 		- denizen spawn rate. hmm..
 		- tune down fire rate
 
+	- Beta 1c
+		- hints about what you need to build
+		- menu order, menu dependencies
+
 	- Beta2
 		x repair
 		x fast / threaded save
@@ -123,7 +127,6 @@ d animation generation
 
 	    - plants look repetetive
 		- auto-clear not working as well as it should
-		- hints about what you need to build
 		- walk target for the avatar
 		- 32 bit texture support
 

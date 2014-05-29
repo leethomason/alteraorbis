@@ -75,6 +75,10 @@ private:
 	unsigned stage				: 2;	// 0-3
 
 public:
+	unsigned fluidEmitter		: 1;
+	unsigned fluidDir			: 3;
+
+public:
 	bool IsBlocked() const			{ return extBlock || (land == WATER) || (land == GRID) || rockHeight || waterHeight || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 	
@@ -188,7 +192,7 @@ public:
 		return grinliz::Max(waterHeight, rockHeight);
 	}
 
-	bool Pool() const { return waterHeight > rockHeight; }
+	int Pool() const { return waterHeight > rockHeight ? waterHeight : 0; }
 	void SetPool( int height ) {
 		GLASSERT( IsLand() || (height==0) );
 		waterHeight = height;

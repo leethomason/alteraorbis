@@ -382,6 +382,12 @@
     <ClCompile Include="..\ai\rebuildai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\fluidtestscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\worldmapfluid.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -767,6 +773,12 @@
     </ClInclude>
     <ClInclude Include="..\ai\rebuildai.h">
       <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\fluidtestscene.h">
+      <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\worldmapfluid.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -52,7 +52,9 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 													"Battle", 
 													"Animation", 
 													"Asset\nPreview",
-													"Sound" };
+													"Sound",
+													"Fluid"
+	};
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -280,26 +282,12 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if (item == &testScene[TEST_SOUND]) {
 		game->PushScene(LumosGame::SCENE_SOUND, 0);
 	}
+	else if (item == &testScene[TEST_FLUID]) {
+		game->PushScene(LumosGame::SCENE_FLUID, 0);
+	}
 	else if ( item == &gameScene[GENERATE_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
 	}
-	/*
-	else if ( item == &gameScene[DEFAULT_WORLD] ) {
-		const char* datPath = game->GamePath( "save/game_def", 0, "dat" );
-		const char* mapPath = game->GamePath( "save/map_def", 0, "dat" );
-		const char* pngPath = game->GamePath( "save/map_def", 0, "png" );
-
-		const char* targetDatPath = game->GamePath( "game", 0, "dat" );
-		const char* targetMapPath = game->GamePath( "map", 0, "dat" );
-		const char* targetPNGPath = game->GamePath( "map", 0, "png" );
-
-		lumosGame->CopyFile( datPath, targetDatPath );
-		lumosGame->CopyFile( mapPath, targetMapPath );
-		lumosGame->CopyFile( pngPath, targetPNGPath );
-
-		game->PushScene( LumosGame::SCENE_GAME, 0 );
-	}
-	*/
 	else if ( item == &gameScene[CONTINUE] ) {
 		game->PushScene( LumosGame::SCENE_GAME, 0 );
 	}

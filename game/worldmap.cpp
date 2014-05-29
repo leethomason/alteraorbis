@@ -39,6 +39,7 @@
 #include "gameitem.h"
 #include "lumosgame.h"
 #include "gameitem.h"
+#include "worldmapfluid.h"
 
 #include "../script/worldgen.h"
 #include "../script/procedural.h"
@@ -94,11 +95,13 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 			plantCount[i][j] = 0;
 		}
 	}
+	fluidSim = new FluidSim(this);
 }
 
 
 WorldMap::~WorldMap()
 {
+	delete fluidSim;
 	GLASSERT( engine == 0 );
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 
@@ -416,7 +419,7 @@ void WorldMap::InitCircle()
 {
 	memset( grid, 0, width*height*sizeof(WorldGrid) );
 
-	const int R = Min( width, height )/2;
+	const int R = Min( width, height )/2-1;
 	const int R2 = R * R;
 	const int cx = width/2;
 	const int cy = height/2;
@@ -781,6 +784,12 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 			}
 		}
 	}
+}
+
+
+void WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
+{
+	fluidSim->DoStep(sector);
 }
 
 
@@ -1992,9 +2001,11 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
 		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
+		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter
 	};
 	static const int PORCH = 7;
 	static const int PAVE = 4;
+	static const int EMITTER = 14;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2014,7 +2025,10 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 				const WorldGrid& wg = grid[INDEX(x,y)];
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Land();
-					if ( layer == WorldGrid::LAND ) {
+					if (wg.fluidEmitter) {
+						layer = EMITTER;
+					}
+					else if ( layer == WorldGrid::LAND ) {
 						if (wg.Pave()) {
 							layer = PAVE + wg.Pave() - 1;
 						}
@@ -2162,7 +2176,7 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 
 				if ( wg.Pool() ) {
 					id = POOL;
-					h = (float)D_POOL_HEIGHT - 0.2f;
+					h = (float)wg.Pool() - 0.2f;
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 

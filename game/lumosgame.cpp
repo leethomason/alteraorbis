@@ -36,6 +36,7 @@
 #include "../scenes/censusscene.h"
 #include "../scenes/soundscene.h"
 #include "../scenes/creditsscene.h"
+#include "../scenes/fluidtestscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -105,6 +106,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_CENSUS:		scene = new CensusScene( this, (CensusSceneData*)data );					break;
 	case SCENE_SOUND:		scene = new SoundScene(this);				break;
 	case SCENE_CREDITS:		scene = new CreditsScene(this);				break;
+	case SCENE_FLUID:		scene = new FluidTestScene(this);			break;
 
 	default:
 		GLASSERT( 0 );

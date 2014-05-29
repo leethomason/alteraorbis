@@ -139,6 +139,7 @@
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
+    <ClCompile Include="..\game\worldmapfluid.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\markov\markov.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="..\scenes\characterscene.cpp" />
     <ClCompile Include="..\scenes\creditsscene.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\fluidtestscene.cpp" />
     <ClCompile Include="..\scenes\forgescene.cpp" />
     <ClCompile Include="..\scenes\gamescene.cpp" />
     <ClCompile Include="..\scenes\livepreviewscene.cpp" />
@@ -264,6 +266,7 @@
     <ClInclude Include="..\game\worldgrid.h" />
     <ClInclude Include="..\game\worldinfo.h" />
     <ClInclude Include="..\game\worldmap.h" />
+    <ClInclude Include="..\game\worldmapfluid.h" />
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\markov\markov.h" />
     <ClInclude Include="..\micropather\micropather.h" />
@@ -273,6 +276,7 @@
     <ClInclude Include="..\scenes\characterscene.h" />
     <ClInclude Include="..\scenes\creditsscene.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\fluidtestscene.h" />
     <ClInclude Include="..\scenes\forgescene.h" />
     <ClInclude Include="..\scenes\gamescene.h" />
     <ClInclude Include="..\scenes\livepreviewscene.h" />
