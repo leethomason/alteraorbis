@@ -88,6 +88,8 @@ d animation generation
 		- greater kill not getting shown in weapon history
 		- denizen spawn rate. hmm..
 		- slow down awareness. only notify friends we can see.
+    - seperate land from water. re-think water texture.
+    - avatar return to base
 
 	- Beta2
 		- auto rebuild
