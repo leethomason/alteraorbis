@@ -90,6 +90,7 @@ d animation generation
 		- slow down awareness. only notify friends we can see.
     - seperate land from water. re-think water texture.
     - avatar return to base
+    - face fly in icon gen; icon into build
 
 	- Beta2
 		- auto rebuild
