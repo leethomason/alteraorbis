@@ -58,7 +58,6 @@ private:
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 	unsigned rockHeight			: 2;
-	unsigned waterHeight		: 2;
 
 	// 17 + 27 = 44 bits
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
@@ -76,10 +75,12 @@ private:
 
 public:
 	unsigned fluidEmitter		: 1;
-	unsigned fluidDir			: 3;
+	unsigned waterHeight		: 5;	// 0-15
 
 public:
-	bool IsBlocked() const			{ return extBlock || (land == WATER) || (land == GRID) || rockHeight || waterHeight || (plant && stage >= 2); }
+	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
+											 || (waterHeight>3)
+											 || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 	
 	// does this and rhs render the same voxel?
@@ -189,13 +190,13 @@ public:
 	}
 
 	int Height() const {
-		return grinliz::Max(waterHeight, rockHeight);
+		return grinliz::Max(waterHeight/4, rockHeight);
 	}
 
-	int Pool() const { return waterHeight > rockHeight ? waterHeight : 0; }
+	int Pool() const { return waterHeight/4 > rockHeight ? waterHeight/4 : 0; }
 	void SetPool( int height ) {
 		GLASSERT( IsLand() || (height==0) );
-		waterHeight = height;
+		waterHeight = height*4;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

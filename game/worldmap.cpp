@@ -914,6 +914,9 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetMagma( magma );
 	wg.SetRockType( rockType );
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
+	if (h) {
+		wg.waterHeight = 0;	// FIXME for water on rock
+	}
 
 	if ( !was.VoxelEqual( wg )) {
 		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
@@ -2174,9 +2177,10 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					}
 				}
 
-				if ( wg.Pool() ) {
+				// FIXME: pool vs. waterHeight
+				if ( wg.waterHeight ) {
 					id = POOL;
-					h = (float)wg.Pool() - 0.2f;
+					h = (float)wg.waterHeight * 0.25f;	// -0.2f;
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
