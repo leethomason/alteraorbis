@@ -20,6 +20,8 @@ private:
 		
 	WorldMap* worldMap;
 	int iteration;
+	grinliz::CDynArray<grinliz::Vector2I> emitters;
+	grinliz::CDynArray<grinliz::Vector2I> stack;
 
 	S8 water[SECTOR_SIZE*SECTOR_SIZE];
 	bool flag[SECTOR_SIZE*SECTOR_SIZE];
