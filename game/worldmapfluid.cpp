@@ -29,8 +29,6 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 	Vector2I center = bounds.Center();
 	static const int NDIR = 4;
 	static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
-	//static const int NDIR = 2;
-	//static const Vector2I DIR[NDIR] = { { -1, 0 }, { 0, -1 } };
 	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
 	memset(flag, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(flag[0]));
 
@@ -47,15 +45,15 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 			if (worldMap->grid[index].waterHeight) {
 				int debug = 1;
 			}
-			/*
-				{ 0, 1, 0 },
-				{ 1, 2, 1 },
-				{ 0, 1, 0 }
-			*/
 			
 			static const int grid[3][3] = {
+				/*
+				{ 0, 1, 0 },
+				{ 1, 1, 1 },
+				{ 0, 1, 0 }
+				*/
 				{ 0, 4, 0 },
-				{ 4, 5, 4 },
+				{ 4, 1, 4 },
 				{ 0, 4, 0 }
 			};
 
@@ -74,7 +72,7 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 					}
 				}
 			}
-			water[j*SECTOR_SIZE + i] = gridTotal ? (total + gridTotal/2) / gridTotal : 0;
+			water[j*SECTOR_SIZE + i] = gridTotal ? (total + (gridTotal+0)/2) / gridTotal : 0;
 		}
 	}
 
@@ -94,7 +92,10 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 			}
 		}
 	}
+#endif
 
+#if 0
+	// Pressure from the emitter.
 	for (int i = 0; i < emitters.Size(); ++i) {
 		Vector2I start = emitters[i];
 		stack.Clear();
@@ -124,6 +125,5 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 			}
 		}
 	}
-
 #endif
 }
