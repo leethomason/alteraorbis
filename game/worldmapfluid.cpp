@@ -33,63 +33,57 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 	memset(flag, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(flag[0]));
 
 #if 1
-	// convolution
 	for (int j = bounds.min.y + 1; j < bounds.max.y; ++j) {
 		for (int i = bounds.min.x + 1; i < bounds.max.x; ++i) {
 
+			Vector2I pos2i = { i, j };
 			int index = worldMap->INDEX(i, j);
+			WorldGrid* worldGrid = &worldMap->grid[index];
 
 			// FIXME: clean up rules.
-			if (worldMap->grid[index].RockHeight())
+			if (worldGrid->RockHeight())
 				continue;	// or grid or other stuff??
-			if (worldMap->grid[index].waterHeight) {
+			if (worldGrid->waterHeight) {
 				int debug = 1;
 			}
 			
-			static const int grid[3][3] = {
-				/*
-				{ 0, 1, 0 },
-				{ 1, 1, 1 },
-				{ 0, 1, 0 }
-				*/
-				{ 0, 4, 0 },
-				{ 4, 1, 4 },
-				{ 0, 4, 0 }
-			};
-
-			int total = 0;
-			int gridTotal = 0;
-			for (int dy = -1; dy <= 1; ++dy) {
-				for (int dx = -1; dx <= 1; ++dx) {
-					int subIndex = worldMap->INDEX(i + dx, j + dy);
-					WorldGrid* subGrid = &worldMap->grid[subIndex];
-					if (subGrid->RockHeight() == 0) {
-						if (subGrid->waterHeight || (dx == 0 && dy == 0)) {
-							int cell = grid[1 + dy][1 + dx];
-							total += subGrid->waterHeight * cell;
-							gridTotal += cell;
-						}
-					}
+			if (worldGrid->fluidEmitter) {
+				water[j*SECTOR_SIZE + i] = 4;
+				if (emitters.Find(pos2i) < 0) {
+					emitters.Push(pos2i);
 				}
 			}
-			water[j*SECTOR_SIZE + i] = gridTotal ? (total + (gridTotal+0)/2) / gridTotal : 0;
+			else {
+				int max = 0;
+				for (int k = 0; k < 4; ++k) {
+					int subIndex = worldMap->INDEX(i + DIR[k].x, j + DIR[k].y);
+					WorldGrid* subGrid = &worldMap->grid[subIndex];
+					max = Max(max, (int)subGrid->waterHeight);
+				}
+				for (int k = 0; k < 4; ++k) {
+					Vector2I dir = DIR[k] + DIR[(k + 1) % NDIR];
+					int subIndex = worldMap->INDEX(i + dir.x, j + dir.y);
+					WorldGrid* subGrid = &worldMap->grid[subIndex];
+					max = Max(max, (int)subGrid->waterHeight);
+				}
+				if (worldGrid->waterHeight && (int)worldGrid->waterHeight >= max)  {
+					water[j*SECTOR_SIZE + i] = worldGrid->waterHeight - 1;
+				}
+				else if ((int)worldGrid->waterHeight < max - 1) {
+					water[j*SECTOR_SIZE + i] = worldGrid->waterHeight + 1;
+				}
+				else {
+					water[j*SECTOR_SIZE + i] = worldGrid->waterHeight;
+				}
+			}
 		}
 	}
 
 	for (int j = 1; j < SECTOR_SIZE - 1; ++j) {
 		for (int i = 1; i < SECTOR_SIZE - 1; ++i) {
 			Vector2I pos = { bounds.min.x + i, bounds.min.y + j };
-
 			int index = worldMap->INDEX(pos);
-			if (worldMap->grid[index].fluidEmitter) {
-				worldMap->grid[index].waterHeight = 4;
-				if (emitters.Find(pos) < 0) {
-					emitters.Push(pos);
-				}
-			}
-			else {
-				worldMap->grid[index].waterHeight = water[j*SECTOR_SIZE + i];
-			}
+			worldMap->grid[index].waterHeight = water[j*SECTOR_SIZE + i];
 		}
 	}
 #endif
