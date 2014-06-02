@@ -15,16 +15,14 @@ public:
 
 private:
 	void Reset(int x, int y);
-	void SetFlag(int x, int y)	{ flag[y*SECTOR_SIZE + x] = true; }
-	bool Flag(int x, int y) { return flag[y*SECTOR_SIZE + x]; }
 		
 	WorldMap* worldMap;
 	int iteration;
 	grinliz::CDynArray<grinliz::Vector2I> emitters;
 	grinliz::CDynArray<grinliz::Vector2I> stack;
 
+	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
 	S8 water[SECTOR_SIZE*SECTOR_SIZE];
-	bool flag[SECTOR_SIZE*SECTOR_SIZE];
 };
 
 #endif // WORLDMAP_FLUID_SIM_INCLUDED
