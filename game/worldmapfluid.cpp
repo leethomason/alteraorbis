@@ -54,6 +54,7 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 				}
 			}
 			else {
+#if 0
 				int max = 0;
 				for (int k = 0; k < 4; ++k) {
 					int subIndex = worldMap->INDEX(i + DIR[k].x, j + DIR[k].y);
@@ -75,10 +76,12 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 				else {
 					water[j*SECTOR_SIZE + i] = worldGrid->waterHeight;
 				}
+#endif
 			}
 		}
 	}
 
+#if 0
 	for (int j = 1; j < SECTOR_SIZE - 1; ++j) {
 		for (int i = 1; i < SECTOR_SIZE - 1; ++i) {
 			Vector2I pos = { bounds.min.x + i, bounds.min.y + j };
@@ -87,8 +90,9 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 		}
 	}
 #endif
+#endif
 
-#if 0
+#if 1
 	// Pressure from the emitter.
 	for (int i = 0; i < emitters.Size(); ++i) {
 		Vector2I start = emitters[i];
@@ -97,23 +101,28 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 		SetFlag(start.x, start.y);
 		int area = 0;
 
-		while (!stack.Empty() && area < 20) {
-			Vector2I p = stack.Pop();
-			SetFlag(p.x, p.y);
+		while (!stack.Empty() && area < 25) {
+			Vector2I p = stack.PopFront();
 			++area;
 
 			int index = worldMap->INDEX(p);
-			if (worldMap->grid[index].waterHeight > 1) {
-				if (worldMap->grid[index].waterHeight < 4)
-					worldMap->grid[index].waterHeight++;
-			}
+			if (worldMap->grid[index].RockHeight())
+				continue;
+
+//			if (worldMap->grid[index].waterHeight > 1) {
+//				if (worldMap->grid[index].waterHeight < 4)
+//					worldMap->grid[index].waterHeight++;
+//			}
+			worldMap->grid[index].waterHeight = 4;
 
 			for (int k = 0; k < NDIR; ++k) {
 				Vector2I q = p + DIR[k];
-				int i2 = worldMap->INDEX(q);
-				if (worldMap->grid[i2].waterHeight > 1) {
+				int qIndex = worldMap->INDEX(q);
+//				if (worldMap->grid[i2].waterHeight > 1) {
+				if (worldMap->grid[qIndex].RockHeight() == 0) {
 					if (!Flag(q.x, q.y)) {
 						stack.Push(q);
+						SetFlag(q.x, q.y);
 					}
 				}
 			}
