@@ -110,7 +110,7 @@ public:
 	}
 	void SetEmitter(int x, int y, bool on) {
 		int index = INDEX(x, y);
-		grid[index].fluidEmitter = on ? 1 : 0;
+		grid[index].SetFluidEmitter(on);
 	}
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);

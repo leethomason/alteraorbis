@@ -576,7 +576,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
 						// FIXME: does setting a pool impact the pather?? 
 						// Or should pool be removed from the isPassable check??
-						grid[INDEX(x,y)].SetPool( 0 );
+						//grid[INDEX(x,y)].SetPool( 0 );
 					}
 				}
 
@@ -607,6 +607,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 						int currentColor = 1;
 						int index = INDEX( x,y );
 
+#if 0
 						if (    grid[index].IsLand() 
 							 && grid[index].RockHeight() < D_POOL_HEIGHT	// need space for the pool
 							 && color[(y-baseY)*ZONE_SIZE+(x-baseX)] == 0 )			// don't revisit
@@ -683,6 +684,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 							++currentColor;
 							poolGrids.Clear();
 						}
+#endif
 					}
 				}
 			}
@@ -705,6 +707,7 @@ int WorldMap::ContainsWaterfall(const grinliz::Rectangle2I& b) const
 
 void WorldMap::EmitWaterfalls( U32 delta )
 {
+#if 0
 	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 	for( int i=0; i<waterfalls.Size(); ++i ) {
 		const Vector2I& wf = waterfalls[i];
@@ -733,6 +736,7 @@ void WorldMap::EmitWaterfalls( U32 delta )
 			}
 		}
 	}
+#endif
 }
 
 
@@ -825,8 +829,8 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 		r.max.x += 1.0f; r.max.z += 1.0f;
 
 		int index = INDEX(magmaGrids[i]);
-		if (grid[index].IsWater() || grid[index].Pool()) {
-			r.min.y = r.max.y = (float)D_POOL_HEIGHT;
+		if (grid[index].IsWater() || grid[index].IsFluid()) {
+			r.min.y = r.max.y = grid[index].FluidHeight();
 			engine->particleSystem->EmitPD(pdSmoke, r, V3F_UP, delta);
 		}
 		else {
@@ -914,9 +918,6 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetMagma( magma );
 	wg.SetRockType( rockType );
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
-	if (h) {
-		wg.waterHeight = 0;	// FIXME for water on rock
-	}
 
 	if ( !was.VoxelEqual( wg )) {
 		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
@@ -2028,7 +2029,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 				const WorldGrid& wg = grid[INDEX(x,y)];
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Land();
-					if (wg.fluidEmitter) {
+					if (wg.IsFluidEmitter()) {
 						layer = EMITTER;
 					}
 					else if ( layer == WorldGrid::LAND ) {
@@ -2177,10 +2178,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					}
 				}
 
-				// FIXME: pool vs. waterHeight
-				if ( wg.waterHeight ) {
+				if (wg.IsFluid()) {
 					id = POOL;
-					h = (float)wg.waterHeight * 0.25f;	// -0.2f;
+					h = (float)wg.FluidHeight();
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
@@ -2201,7 +2201,7 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					static const Vector2I delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
 					for( int k=0; k<4; ++k ) {
 						const WorldGrid& next = grid[INDEX(x+delta[k].x, y+delta[k].y)];
-						if ( !next.Pool() && !next.Magma() ) {
+						if (!next.IsFluid() && !next.Magma()) {
 							// draw wall or nothing.
 							if ( next.RockHeight() < wg.RockHeight() ) {
 								wall[k] = (float)next.RockHeight();

@@ -25,9 +25,11 @@
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
 static const int HP_PER_PLANT_STAGE		= 20;	// a square in there: 20 -> 320	
-static const int D_POOL_HEIGHT			= 2;
+static const int FLUID_PER_ROCK			= 4;
+static const int FLUID_BLOCKING			= 2;
 
 struct WorldGrid {
+	friend class FluidSim;
 
 public:
 	// 1 bit
@@ -73,15 +75,16 @@ private:
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
-public:
 	unsigned fluidEmitter		: 1;
-	unsigned waterHeight		: 5;	// 0-15
+	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
 
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
-											 || (waterHeight>3)
+											 || (fluidHeight >= FLUID_BLOCKING)
 											 || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
+
+	bool FluidSink() const			{ return (land == WATER) || (land == GRID) || (land == PORT); }
 	
 	// does this and rhs render the same voxel?
 	int VoxelEqual( const WorldGrid& wg ) const {
@@ -90,7 +93,8 @@ public:
 				isPorch == wg.isPorch &&
 				rockHeight == wg.rockHeight &&
 				magma == wg.magma &&
-				waterHeight == wg.waterHeight;
+				fluidHeight == wg.fluidHeight &&
+				fluidEmitter == wg.fluidEmitter;
 	}
 
 	grinliz::Color4U8 ToColor() const {
@@ -190,13 +194,20 @@ public:
 	}
 
 	int Height() const {
-		return grinliz::Max(waterHeight/4, rockHeight);
+		return grinliz::Max(fluidHeight/FLUID_PER_ROCK, rockHeight);
 	}
 
-	int Pool() const { return waterHeight/4 > rockHeight ? waterHeight/4 : 0; }
-	void SetPool( int height ) {
-		GLASSERT( IsLand() || (height==0) );
-		waterHeight = height*4;
+	bool IsFluid() const {
+		return fluidHeight > rockHeight * FLUID_PER_ROCK;
+	}
+	float FluidHeight() const {
+		return float(fluidHeight) / float(FLUID_PER_ROCK);
+	}
+
+	bool IsFluidEmitter() const { return fluidEmitter ? true : false; }
+	void SetFluidEmitter(bool on) {
+		GLASSERT(!FluidSink());
+		fluidEmitter = on ? 1 : 0;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

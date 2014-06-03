@@ -17,8 +17,7 @@ private:
 	void Reset(int x, int y);
 		
 	WorldMap* worldMap;
-	int iteration;
-	grinliz::CDynArray<grinliz::Vector2I> emitters;
+	grinliz::CDynArray<grinliz::Vector2I> emitters;	// local; cached.
 	grinliz::CDynArray<grinliz::Vector2I> stack;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
