@@ -18,6 +18,7 @@ private:
 		
 	WorldMap* worldMap;
 	grinliz::CDynArray<grinliz::Vector2I> emitters;	// local; cached.
+	grinliz::CDynArray<int> emitterHeights;	// local; cached.
 	grinliz::CDynArray<grinliz::Vector2I> stack;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;

@@ -185,6 +185,7 @@ public:
 		GLASSERT(h == 0 || Plant() == 0);
 		rockHeight = h;
 		if ( h > 0 ) pave = 0;	// rock clears out pavement.
+		if (h*FLUID_PER_ROCK >= (int)fluidHeight) fluidHeight = 0; // and clears out water it replaces
 	}
 
 	int RockType() const { return rockType; }

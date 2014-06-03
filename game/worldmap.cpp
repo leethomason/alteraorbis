@@ -2180,10 +2180,16 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 
 				if (wg.IsFluid()) {
 					id = POOL;
-					h = (float)wg.FluidHeight();
+					h = (float)wg.FluidHeight() - 0.125f;
 					// Draw all walls:
-					wall[0] = wall[1] = wall[2] = wall[3] = 0;
+					wall[0] = wall[1] = wall[2] = wall[3] = (float)wg.RockHeight();
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
+
+					if (wg.RockHeight()) {
+						h = (float)wg.RockHeight();
+						wall[0] = wall[1] = wall[2] = wall[3] = 0;
+						PushVoxel(ROCK, (float)x, (float)y, h, wall);
+					}
 				}
 				else if ( wg.Magma() ) {
 					id = MAGMA;

@@ -32,6 +32,7 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
 	
 	emitters.Clear();
+	emitterHeights.Clear();
 
 	for (int j = bounds.min.y + 1; j < bounds.max.y; ++j) {
 		for (int i = bounds.min.x + 1; i < bounds.max.x; ++i) {
@@ -44,21 +45,33 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 				water[j*SECTOR_SIZE + i] = 0;
 			}
 			else if (worldGrid->fluidEmitter) {
-				water[j*SECTOR_SIZE + i] = 4;
-				if (emitters.Find(pos2i) < 0) {
-					emitters.Push(pos2i);
+				// Find highest rock neighbor.
+				int h = FLUID_PER_ROCK;
+				for (int k = 0; k < NDIR; ++k) {
+					h = Max(h, (int)worldMap->grid[worldMap->INDEX(i + DIR[k].x, j + DIR[k].y)].rockHeight * FLUID_PER_ROCK);
 				}
+
+				water[j*SECTOR_SIZE + i] = h;
+				emitters.Push(pos2i);
+				emitterHeights.Push(h);
 			}
 			else {
 				int max = 0;
+
 				for (int k = 0; k < NDIR; ++k) {
 					int subIndex = worldMap->INDEX(i + DIR[k].x, j + DIR[k].y);
 					const WorldGrid* subGrid = &worldMap->grid[subIndex];
-					if (subGrid->IsFluid()) {
-						max = Max(max, (int)subGrid->fluidHeight - (int)subGrid->RockHeight()*FLUID_PER_ROCK);
+					if ((int)subGrid->fluidHeight > max) {
+						max = Max(max, (int)subGrid->fluidHeight);
+
+						// Water falls as it goes over rock - adjust the
+						// effective height here.
+						if (subGrid->RockHeight() > worldGrid->RockHeight()) {
+							max -= (subGrid->RockHeight() - worldGrid->RockHeight()) * FLUID_PER_ROCK - 1;
+						}
 					}
 				}
-#if 1
+#if 0
 				for (int k = 0; k < NDIR; ++k) {
 					// Check that we have at least one path to the diagonal.
 					// Somewhat obnoxious code...but looks funny water going
@@ -76,16 +89,23 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 						Vector2I dir = dir0 + dir1;
 						int subIndex = worldMap->INDEX(i + dir.x, j + dir.y);
 						const WorldGrid* subGrid = &worldMap->grid[subIndex];
-						max = Max(max, (int)subGrid->fluidHeight - (int)subGrid->RockHeight()*FLUID_PER_ROCK);
+						int h = subGrid->RockHeight() ? 1 + (int)subGrid->fluidHeight - (int)subGrid->RockHeight()*FLUID_PER_ROCK : (int)subGrid->fluidHeight;
+						max = Max(max, h);
 					}
 
 				}
 #endif
-				if (worldGrid->fluidHeight && (int)worldGrid->fluidHeight >= max)  {
+				int wgBottom = worldGrid->RockHeight() * FLUID_PER_ROCK;
+
+				if (worldGrid->fluidHeight > 0 && (int)worldGrid->fluidHeight >= max)  {
+					// this is the higher fluid...flow down.
 					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight - 1;
 				}
-				else if ((int)worldGrid->fluidHeight < max - 1) {
-					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight + 1;
+				else if (    (int)worldGrid->fluidHeight < max - 1	// lower fluid
+					      && wgBottom < max - 1  )					// and we have space over the rock
+				{
+					// Go up, but be sure to clear the rock.
+					water[j*SECTOR_SIZE + i] = Max((int)worldGrid->fluidHeight + 1, wgBottom + 1);
 				}
 				else {
 					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight;
@@ -99,6 +119,7 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 			Vector2I pos = { bounds.min.x + i, bounds.min.y + j };
 			int index = worldMap->INDEX(pos);
 			worldMap->grid[index].fluidHeight = water[j*SECTOR_SIZE + i];
+			GLASSERT(worldMap->grid[index].fluidHeight == water[j*SECTOR_SIZE + i]);	// check for bit field errors
 		}
 	}
 
@@ -106,6 +127,7 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 	// Pressure from the emitter.
 	for (int i = 0; i < emitters.Size(); ++i) {
 		Vector2I start = emitters[i];
+		int h = emitterHeights[i];
 		flag.ClearAll();
 
 		stack.Clear();
@@ -119,16 +141,22 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 
 			int index = worldMap->INDEX(p);
 
+			if (worldMap->grid[index].FluidSink()) {
+				// done!
+				area = PRESSURE;
+				continue;
+			}
+
 			// Note that water, above, goes over
 			// rock. But pressure does not.
 			if (worldMap->grid[index].RockHeight())
 				continue;
 
 			if (worldMap->grid[index].fluidHeight > 1) {
-				if (worldMap->grid[index].fluidHeight < 4)
+				if ((int)worldMap->grid[index].fluidHeight < h) {
 					worldMap->grid[index].fluidHeight++;
+				}
 			}
-			worldMap->grid[index].fluidHeight = 4;
 
 			for (int k = 0; k < NDIR; ++k) {
 				Vector2I q = p + DIR[k];
