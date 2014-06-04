@@ -51,7 +51,7 @@ public:
 private:
 	// memset(0) should work, and make it water.
 
-	// 1 + 16 = 17 bits
+	// 1 + 14 = 15 bits
 	unsigned land				: 2;	// WATER, LAND, GRID...
 	unsigned rockType			: 2;	// ROCK, ICE
 	unsigned pave				: 2;	// 0-3, the pave style, if >0
@@ -61,7 +61,7 @@ private:
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 	unsigned rockHeight			: 2;
 
-	// 17 + 27 = 44 bits
+	// 15 + 27 = 42 bits
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned hp					: 9;	// 0-511
 
@@ -71,7 +71,7 @@ private:
 
 	unsigned path				: 10;	// 2 bits each: core, port0-3
 
-	// 44 + 8 = 52 bits
+	// 42 + 11 = 53 bits
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 

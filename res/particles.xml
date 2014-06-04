@@ -185,7 +185,7 @@
   </particle>
 
   <particle name="fallingwater"
-           time="continuous" size="0.20" count="30" config="ray"
+           time="continuous" size="0.20" count="15" config="ray"
            posFuzz="0.05" velocity="1.5" velocityFuzz="0.2" >
     <color red="1" green="1" blue="1" alpha="0.1"/>
     <colorVelocity red="0" green="0" blue="0" alpha="1.5" />
@@ -194,11 +194,11 @@
   </particle>
 
   <particle name="mist" texMin="1" texMax="2"
-            time="continuous" size="0.4" count="3" config="ray"
+            time="continuous" size="0.4" count="2" config="ray"
             posFuzz="0.1" velocity="0.1" velocityFuzz="0.1" >
     <color red="0.8" green="0.8" blue="0.8" alpha="0.1"/>
     <colorVelocity red="0" green="0" blue="0" alpha="1.0" />
-    <colorVelocity red="0" green="0" blue="0" alpha="-0.3" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-0.5" />
   </particle>
 
   <particle name="heal" size="0.1" count="15" config="ray" 

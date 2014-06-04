@@ -1,12 +1,18 @@
 #include "worldmap.h"
 #include "lumosmath.h"
 #include "worldmapfluid.h"
+#include "../engine/engine.h"
+#include "../engine/particle.h"
 
 using namespace grinliz;
 
 static const int PRESSURE = 25;
+static const int WATERFALL_HEIGHT = 3;
 
-FluidSim::FluidSim(WorldMap* wm) : worldMap(wm)
+static const int NDIR = 4;
+static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+
+FluidSim::FluidSim(WorldMap* wm, const Rectangle2I& b) : worldMap(wm), bounds(b)
 {
 }
 
@@ -17,22 +23,85 @@ FluidSim::~FluidSim()
 }
 
 
+void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
+{
+	ParticleDef pdWater = engine->particleSystem->GetPD("fallingwater");
+	ParticleDef pdMist = engine->particleSystem->GetPD("mist");
+
+	for (int i = 0; i<waterfalls.Size(); ++i) {
+		const Vector2I& wf = waterfalls[i];
+		const WorldGrid& wg = worldMap->grid[worldMap->INDEX(wf)];
+
+		for (int j = 0; j<NDIR; ++j) {
+			Vector2I v = wf + DIR[j];
+			const WorldGrid& altWG = worldMap->grid[worldMap->INDEX(v)];
+			if (HasWaterfall(wg, altWG)) {
+
+				Vector3F v3 = { (float)wf.x + 0.5f, (float)altWG.FluidHeight(), (float)wf.y + 0.5f };
+				Vector3F half = { (float)DIR[j].x*0.5f, 0.0f, (float)DIR[j].y*0.5f };
+				Vector3F right = { half.z, 0, half.x };
+
+				Rectangle3F r3;
+				r3.FromPair(v3 + half*0.8f - right, v3 + half*0.8f + right);
+
+				static const Vector3F DOWN = { 0, -1, 0 };
+				engine->particleSystem->EmitPD(pdWater, r3, DOWN, delta);
+
+				r3.min.y = r3.max.y = altWG.FluidHeight() - 0.2f;
+				engine->particleSystem->EmitPD(pdMist, r3, V3F_UP, delta);
+				r3.min.y = r3.max.y = 0.0f;
+				engine->particleSystem->EmitPD(pdMist, r3, V3F_UP, delta);
+			}
+		}
+	}
+}
+
+
+
 void FluidSim::Reset(int x, int y)
 {
 	worldMap->voxelInit.Clear(x / WorldMap::ZONE_SIZE, y / WorldMap::ZONE_SIZE);
 	worldMap->ResetPather(x, y);
 }
 
-void FluidSim::DoStep(const grinliz::Vector2I& sector)
+
+U32 FluidSim::Hash()
 {
-	Rectangle2I bounds = SectorBounds(sector);
-	Vector2I center = bounds.Center();
-	static const int NDIR = 4;
-	static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	unsigned int h = 2166136261U;
+
+	for (int j = bounds.min.y + 1; j < bounds.max.y; ++j) {
+		for (int i = bounds.min.x + 1; i < bounds.max.x; ++i) {
+			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(i, j)];
+			int value = wg.fluidHeight + 32 * wg.fluidEmitter;
+			h ^= value;
+			h *= 16777619;
+		}
+	}
+	return h;
+}
+
+
+bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG)
+{
+	if (   (altWG.IsFluid() && wg.IsFluid() && altWG.fluidHeight >= wg.fluidHeight + WATERFALL_HEIGHT)
+		|| (wg.IsWater() && altWG.fluidHeight >= WATERFALL_HEIGHT))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool FluidSim::DoStep()
+{
+	if (settled) return true;
+
 	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
+	Rectangle2I aoe;
+	aoe.SetInvalid();
 	
 	emitters.Clear();
 	emitterHeights.Clear();
+	U32 startHash = Hash();
 
 	for (int j = bounds.min.y + 1; j < bounds.max.y; ++j) {
 		for (int i = bounds.min.x + 1; i < bounds.max.x; ++i) {
@@ -118,8 +187,14 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 		for (int i = 1; i < SECTOR_SIZE - 1; ++i) {
 			Vector2I pos = { bounds.min.x + i, bounds.min.y + j };
 			int index = worldMap->INDEX(pos);
-			worldMap->grid[index].fluidHeight = water[j*SECTOR_SIZE + i];
-			GLASSERT(worldMap->grid[index].fluidHeight == water[j*SECTOR_SIZE + i]);	// check for bit field errors
+			int h = water[j*SECTOR_SIZE + i];
+			if (h) {
+				aoe.DoUnion(pos);
+			}
+			if (worldMap->grid[index].fluidHeight != h) {
+				worldMap->grid[index].fluidHeight = h;
+				GLASSERT(worldMap->grid[index].fluidHeight == water[j*SECTOR_SIZE + i]);	// check for bit field errors
+			}
 		}
 	}
 
@@ -171,4 +246,29 @@ void FluidSim::DoStep(const grinliz::Vector2I& sector)
 		}
 	}
 #endif
+	U32 endHash = Hash();
+	
+	settled = startHash == endHash;
+	if (!settled) {
+		waterfalls.Clear();
+		// Reset the pather.
+		// Scan for waterfalls.
+		aoe.Outset(1);
+		aoe.DoIntersection(bounds);
+
+		for (Rectangle2IIterator it(aoe); !it.Done(); it.Next()) {
+			Reset(it.Pos().x, it.Pos().y);
+
+			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(it.Pos())];
+			for (int k = 0; k < NDIR; ++k) {
+				const WorldGrid& altWG = worldMap->grid[worldMap->INDEX(it.Pos() + DIR[k])];
+				if (HasWaterfall(wg, altWG)) {
+					waterfalls.Push(it.Pos());
+					// Only need the initial location - not all the waterfalls.
+					break;
+				}
+			}
+		}
+	}
+	return settled;
 }

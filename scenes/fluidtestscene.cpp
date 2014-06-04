@@ -3,12 +3,13 @@
 #include "../game/worldmap.h"
 #include "../game/lumosgame.h"
 #include "../game/lumosmath.h"
+#include "../engine/text.h"
 
 using namespace gamui;
 using namespace grinliz;
 
 
-FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), fluidTicker(500)
+FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), fluidTicker(500), settled(false)
 {
 	worldMap = new WorldMap(SECTOR_SIZE, SECTOR_SIZE);
 	engine = new Engine(game->GetScreenportMutable(), game->GetDatabase(), worldMap);
@@ -142,13 +143,15 @@ void FluidTestScene::DrawDebugText()
 	static const int x = 0;
 	int y = 120;
 	DrawDebugTextDrawCalls(x, y, engine);
+	UFOText::Instance()->Draw(x, y + 16, "Settled: %s", settled ? "true" : "false");
 }
 
 
 void FluidTestScene::DoTick(U32 delta)
 {
+	Vector2I sector = { 0, 0 };
 	if (fluidTicker.Delta(delta)) {
-		Vector2I sector = { 0, 0 };
-		worldMap->RunFluidSim(sector);
+		settled = worldMap->RunFluidSim(sector);
 	}
+	worldMap->EmitFluidParticles(delta, sector, engine);
 }

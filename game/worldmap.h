@@ -20,6 +20,8 @@
 #include "worldgrid.h"
 #include "sectorport.h"
 
+#include "../xegame/cticker.h"
+
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
 #include "../engine/shadermanager.h"
@@ -212,7 +214,9 @@ public:
 		VoxelHit(v, dd);
 	}
 	void VoxelHit(const grinliz::Vector3I& voxel, const DamageDesc& dd);
-	void RunFluidSim(const grinliz::Vector2I& sector);
+	// returns true if settled
+	bool RunFluidSim(const grinliz::Vector2I& sector);
+	void EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine);
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -367,7 +371,7 @@ private:
 	IMapGridUse*				iMapGridUse;
 	int							slowTick;
 	NewsHistory*				newsHistory;
-	FluidSim*					fluidSim;
+	FluidSim*					fluidSim[NUM_SECTORS*NUM_SECTORS];
 
 	WorldInfo*					worldInfo;
 	grinliz::Rectangle2I		debugRegionOverlay;
@@ -397,6 +401,9 @@ private:
 	int								nVoxels;
 	int								nGrids;
 	int								nTrees;	// we don't necessarily use all the trees in the treePool
+
+	CTicker							fluidTicker;
+	int								fluidSector;
 
 	struct PlantEffect {
 		bool operator==(const PlantEffect& rhs) const { return rhs.voxel == voxel; }

@@ -8,17 +8,31 @@ class WorldMap;
 class FluidSim
 {
 public:
-	FluidSim(WorldMap* worldMap);
+	FluidSim(WorldMap* worldMap, const grinliz::Rectangle2I& bounds);
 	~FluidSim();
 
-	void DoStep(const grinliz::Vector2I& bounds);
+	// Call every 600ms (?)
+	bool DoStep();
+	// Particle calls
+	void EmitWaterfalls(U32 delta, Engine* engine);
+
+	bool Settled() const { return settled; }
+	void Unsettle() { settled = false; }
 
 private:
 	void Reset(int x, int y);
+	U32 Hash();
+	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent);
 		
 	WorldMap* worldMap;
-	grinliz::CDynArray<grinliz::Vector2I> emitters;	// local; cached.
-	grinliz::CDynArray<int> emitterHeights;	// local; cached.
+	grinliz::Rectangle2I bounds;
+	bool settled;
+
+	grinliz::CDynArray<grinliz::Vector2I> waterfalls;
+
+	// Local, cached: (don't want to re-allocate)
+	grinliz::CDynArray<grinliz::Vector2I> emitters;
+	grinliz::CDynArray<int> emitterHeights;
 	grinliz::CDynArray<grinliz::Vector2I> stack;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;

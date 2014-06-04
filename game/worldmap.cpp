@@ -63,7 +63,7 @@ static const float CHANCE_FIRE_SPREAD	= 0.10f;	// once it starts spreading, self
 // Bug fix: incorrect recusion   4	yes, 4
 // 
 
-WorldMap::WorldMap( int width, int height ) : Map( width, height )
+WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000)
 {
 	GLASSERT( width % ZONE_SIZE == 0 );
 	GLASSERT( height % ZONE_SIZE == 0 );
@@ -76,6 +76,9 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	Init( width, height );
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
+
+	fluidSector = 0;
+	fluidTicker.SetPeriod(600 / (NUM_SECTORS*NUM_SECTORS));
 	
 	voxelTexture = 0;
 	gridTexture = 0;
@@ -95,13 +98,21 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 			plantCount[i][j] = 0;
 		}
 	}
-	fluidSim = new FluidSim(this);
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			Rectangle2I bounds;
+			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
+			fluidSim[j*NUM_SECTORS + i] = new FluidSim(this, bounds);
+		}
+	}
 }
 
 
 WorldMap::~WorldMap()
 {
-	delete fluidSim;
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		delete fluidSim[i];
+	}
 	GLASSERT( engine == 0 );
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 
@@ -403,6 +414,10 @@ void WorldMap::Init( int w, int h )
 	}
 
 	voxelInit.ClearAll();
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		fluidSim[i]->Unsettle();
+	}
+
 	DeleteAllRegions();
 	delete [] grid;
 	this->width = w;
@@ -791,16 +806,30 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 }
 
 
-void WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
+bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
 {
-	fluidSim->DoStep(sector);
+	return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
+}
+
+
+void WorldMap::EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine)
+{
+	fluidSim[sector.y*NUM_SECTORS + sector.x]->EmitWaterfalls(delta, engine);
 }
 
 
 void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 {
+	int n = fluidTicker.Delta(delta);
+	while (n--) {
+		fluidSim[fluidSector++]->DoStep();
+	}
+
 	ProcessZone(chitBag);
-	EmitWaterfalls(delta);
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		// FIXME: call to visible area??
+		fluidSim[i]->EmitWaterfalls(delta, engine);
+	}
 
 	slowTick -= (int)(delta);
 
@@ -922,6 +951,9 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	if ( !was.VoxelEqual( wg )) {
 		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
 		grid[INDEX(x,y)] = wg;
+		
+		Vector2I sector = ToSector(x, y);
+		fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
 	}
 	if ( was.IsPassable() != wg.IsPassable() ) {
 		ResetPather( x, y );

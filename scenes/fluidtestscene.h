@@ -43,13 +43,16 @@ private:
 	};
 
 	LumosGame* lumosGame;
+	Engine*		engine;
+	WorldMap*	worldMap;
+	bool		settled;
+
+	CTicker fluidTicker;
+
 	gamui::PushButton okay;
 	gamui::ToggleButton buildButton[NUM_BUILD_BUTTONS];
 	gamui::PushButton saveButton, loadButton;
-	CTicker fluidTicker;
 
-	Engine*		engine;
-	WorldMap*	worldMap;
 };
 
 
