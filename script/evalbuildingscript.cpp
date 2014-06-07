@@ -8,6 +8,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/spatialcomponent.h"
+#include "../game/worldmapfluid.h"
 
 using namespace grinliz;
 
@@ -66,6 +67,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		}
 
 		bounds.Outset(RAD);
+		Vector2I sector = building->GetSpatialComponent()->GetSector();
 
 		WorldMap* worldMap = Context()->worldMap;
 		Rectangle2I mapBounds = worldMap->Bounds();
@@ -80,7 +82,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		CChitArray arr;
 		BuildingFilter buildingFilter;
-		int hasWaterfalls = worldMap->ContainsWaterfall(bounds);
+		const FluidSim* fluidSim = worldMap->GetFluidSim(sector);
+		bool hasWaterfalls = fluidSim->NumWaterfalls() > 0;
 
 		LumosChitBag* chitBag = Context()->chitBag;
 		Rectangle2IEdgeIterator it(bounds);
@@ -149,7 +152,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 				Rectangle2I wb;
 				wb.min = wb.max = p;
-				if (hasWaterfalls && worldMap->ContainsWaterfall(wb)) {
+				if (hasWaterfalls && fluidSim->ContainsWaterfalls(wb)) {
 					++hitWaterfall;
 					break;
 				}

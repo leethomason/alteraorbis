@@ -163,7 +163,8 @@ void WorldGenScene::SetMapBright(bool b)
 
 void WorldGenScene::DoTick( U32 delta )
 {
-	bool sendTexture = false;
+	bool sendTexture = false;		// HACK: sending the texture initializes the worldmap
+	bool generateEmitters = false;	// HACK: after initializing worldmap, generate emitters
 
 	switch (genState.mode) {
 	case GenState::NOT_STARTED:
@@ -291,6 +292,7 @@ void WorldGenScene::DoTick( U32 delta )
 				BlendLine(y);
 			}
 			sendTexture = true;
+			generateEmitters = true;
 			genState.Clear();
 			genState.mode = GenState::SIM_START;
 			label.SetText("100%");
@@ -337,7 +339,12 @@ void WorldGenScene::DoTick( U32 delta )
 			}
 		}
 		WorldMap* swm = sim->GetWorldMap();
-		simStr.Format("SIM:\nAge=%.2f\n\nPlants=%d\n\n"
+		int pools = 0, waterfalls = 0;
+		swm->FluidStats(&pools, &waterfalls);
+
+		simStr.Format("SIM:\nAge=%.2f\n\n"
+					  "Plants=%d\n"
+					  "Pools=%d Waterfalls=%d\n\n"
 					  "Orbstalk=%d\t\t[%d, %d, %d, %d]\n"
 					  "Tree=%d\t\t[%d, %d, %d, %d]\n"
 					  "Fern=%d\t\t[%d, %d, %d, %d]\n"
@@ -350,6 +357,7 @@ void WorldGenScene::DoTick( U32 delta )
 					  "Greater Monsters=%d",
 						age,	
 						swm->CountPlants(),
+						pools, waterfalls,
 						typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
 						typeCount[1], swm->plantCount[1][0], swm->plantCount[1][1], swm->plantCount[1][2], swm->plantCount[1][3],
 						typeCount[2], swm->plantCount[2][0], swm->plantCount[2][1], swm->plantCount[2][2], swm->plantCount[2][3],
@@ -402,6 +410,11 @@ void WorldGenScene::DoTick( U32 delta )
 	if ( sendTexture ) {
 		Texture* t = TextureManager::Instance()->GetTexture( "worldGenPreview" );
 		CreateTexture( t );
+		if (generateEmitters) {
+			Random random;
+			random.SetSeedFromTime();
+			worldMap->GenerateEmitters(random.Rand());
+		}
 	}
 }
 

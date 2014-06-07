@@ -104,15 +104,15 @@ d animation generation
 			d remove spatial component
 		t auto rebuild
 		t abandon to tactical AI
-		- special plant renderer: move plants to worldgrid
+		x special plant renderer: move plants to worldgrid
 			x test intersection: set firegun to plant visual impact height
-			- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
 			x track plant #s
 			x respect # limits
 			x check random distribution to growth curve
 			x save and load testing for plants
 			x rampage not destroying plants
 			x plants in rocks
+		- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 		- hints about what you need to build
@@ -124,6 +124,24 @@ d animation generation
 			- time to use bar (low??)
 			- double tech decay
 			x weapon sorting not quite correct
+		- fluids
+			- deal with infinite emitters (one in current save)
+			- cores need to by sinks
+			- rock wear
+			- move voxels to TexturePack? (need 32 bit textures...grumble)
+			- water flow over emitters?
+			x emitters should wear rock. no, seems okay
+			- land variation
+			- new physics component - account for water. more travel, travel through water.
+			x plants: impact water, take damage
+			- mobs: take damage from water
+			- buildings: account for water
+			d rain variation. flash floods. vary emitters. 
+			d shown rain variation in selection of domain
+			- water creating !passable for core...flow around cores? cores to sinks?
+			- overlapping fluid emitters shouldn't change height
+			- magma fluid
+			- shock fluid
 
 	    - plants look repetetive
 		- auto-clear not working as well as it should

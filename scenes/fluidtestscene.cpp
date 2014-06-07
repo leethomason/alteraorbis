@@ -104,7 +104,6 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				worldMap->SetRock(pos2i.x, pos2i.y, 3, false, WorldGrid::ROCK);
 			}
 			else if (buildButton[BUTTON_EMITTER].Down()) {
-				worldMap->SetRock(pos2i.x, pos2i.y, 0, false, WorldGrid::ROCK);
 				worldMap->SetEmitter(pos2i.x, pos2i.y, true);
 			}
 		}

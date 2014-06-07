@@ -115,6 +115,9 @@ public:
 				c.Set( add, 100+add, add, 255 );
 			}
 		}
+		if (fluidEmitter) {
+			c.b = 255;
+		}
 		return c;
 	}
 

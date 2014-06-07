@@ -139,6 +139,9 @@ void PlantScript::DoTick(U32 delta)
 				// Water or rock runoff increase water.
 				rain += 0.25f * rainBase;
 			}
+			if (wgAdj.IsFluid()) {
+				rain += 0.25f;	// just a lot of water.
+			}
 			if (wgAdj.IsWater()) {
 				rain += 0.25f;	// more water
 				temperature = Mean(0.5f, temperature); // moderate temperature
@@ -147,6 +150,22 @@ void PlantScript::DoTick(U32 delta)
 		// Nutrient depletion? Too packed in?
 		if (same == 4) {
 			growth *= 0.5f;
+		}
+
+		// Are we under water?
+		float fluidHeight = wg.FluidHeight();
+		if (fluidHeight > 0.01f) {
+			// Any amount of water goes to rain 100%
+			rain = 1.0f;
+			// not sure what to do with temp...assume a little cooler?
+			temperature *= 0.8f;
+
+			// blocks light...
+			float sizeY = PlantScript::PlantRes(wg.Plant() - 1, wg.PlantStage())->AABB().SizeY();
+			if (fluidHeight > sizeY)
+				sun = 0;
+			else if (fluidHeight > sizeY * 0.5f)
+				sun = sun * (1.0f - fluidHeight / sizeY);
 		}
 
 		rain = Clamp(rain, 0.0f, 1.0f);

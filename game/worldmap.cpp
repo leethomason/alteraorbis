@@ -73,7 +73,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 	engine = 0;
 	currentPather = 0;
 	worldInfo = 0;
-	Init( width, height );
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
 
@@ -89,7 +88,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 	gridVertexVBO = 0;
 	newsHistory = 0;
 
-	waterfalls.Reserve(100);
 	magmaGrids.Reserve(1000);
 	treePool.Reserve(1000);
 
@@ -105,6 +103,9 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 			fluidSim[j*NUM_SECTORS + i] = new FluidSim(this, bounds);
 		}
 	}
+
+	// --- self call: make sure memory allocated. ---
+	Init(width, height);
 }
 
 
@@ -203,8 +204,11 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 	Vector2I v2 = { v.x, v.z };
 	int index = INDEX(v.x, v.z);
 	
-	GLASSERT( grid[index].RockHeight() || grid[index].Plant() );
-	grid[index].DeltaHP( (int)(-dd.damage) );
+	GLASSERT( grid[index].Height() || grid[index].Plant()  );
+	if (grid[index].RockHeight() || grid[index].Plant()) {
+		// fluids don't take damage; rocks and plants do.
+		grid[index].DeltaHP((int)(-dd.damage));
+	}
 	if ( grid[index].HP() == 0 ) {
 		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, 0 );
@@ -558,203 +562,6 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 }
 
 
-
-void WorldMap::ProcessZone( ChitBag* cb )
-{
-	//QuickProfile qp( "WorldMap::ProcessWater" );
-	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-	const int zoneWidth  = width / ZONE_SIZE;
-	const int zoneHeight = height / ZONE_SIZE;
-
-	waterStack.Clear();
-	poolGrids.Clear();
-
-	// Walk each zone, look for something that needs update.
-	for( int zy=0; zy<zoneHeight; ++zy ) {
-		for( int zx=0; zx<zoneWidth; ++zx ) {
-			if ( !voxelInit.IsSet( zx, zy )) {
-
-				// Mark up to date. Will be after all this!
-				voxelInit.Set( zx, zy );
-
-				// Walk the zone, clear everything out.
-				// Add back in what we need.
-				const int baseX = zx*ZONE_SIZE;
-				const int baseY = zy*ZONE_SIZE;
-				Rectangle2I zbounds;
-				zbounds.Set( baseX, baseY, baseX+ZONE_SIZE-1, baseY+ZONE_SIZE-1 );
-
-				// Clear:
-				//	- Pools (in the data structure)
-				//  - Models
-				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
-					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
-						// FIXME: does setting a pool impact the pather?? 
-						// Or should pool be removed from the isPassable check??
-						//grid[INDEX(x,y)].SetPool( 0 );
-					}
-				}
-
-				// Clear the waterfalls for this zone.
-				for( int i=0; i<waterfalls.Size(); ++i ) {
-					if ( zbounds.Contains( waterfalls[i] )) {
-						waterfalls.SwapRemove( i );
-						--i;
-					}
-				}
-
-
-				// Find the waterfalls.				
-				CArray<U8, ZONE_SIZE2> color;
-				color.PushArr( ZONE_SIZE2 );
-				memset( color.Mem(), 0, ZONE_SIZE2 );
-
-				// Scan for possible pools. This is a color fill. Look
-				// for colors that don't touch the border, or too much
-				// water.
-				for( int y=baseY+1; y<baseY+ZONE_SIZE-1; ++y ) {
-					for( int x=baseX+1; x<baseX+ZONE_SIZE-1; ++x ) {
-
-						// Do a fill of everything land rockHeight < POOL_HEIGHT
-						// Note boundary conditions
-						// Determine pool.
-						
-						int currentColor = 1;
-						int index = INDEX( x,y );
-
-#if 0
-						if (    grid[index].IsLand() 
-							 && grid[index].RockHeight() < D_POOL_HEIGHT	// need space for the pool
-							 && color[(y-baseY)*ZONE_SIZE+(x-baseX)] == 0 )			// don't revisit
-						{
-							// Try a fill!
-							Vector2I start = { x, y };
-							waterStack.Push( start );
-							color[(start.y-baseY)*ZONE_SIZE + start.x-baseX] = currentColor;
-							poolGrids.Clear();
-
-							int border = 0;
-							int water = 0;
-
-							while ( !waterStack.Empty() ) {
-
-								Vector2I top = waterStack.Pop();
-								poolGrids.Push( top );
-								GLASSERT( color[(top.y-baseY)*ZONE_SIZE + top.x-baseX] == currentColor );
-
-								if (    top.x == zbounds.min.x || top.x == zbounds.max.x
-									 || top.y == zbounds.min.y || top.y == zbounds.max.y )
-								{
-									++border;
-								}
-
-								for( int i=0; i<4; ++i ) {
-									Vector2I v = top + next[i];
-
-									if ( !zbounds.Contains( v ))
-										continue;
-
-									int idx = INDEX(v);
-
-									if (    grid[idx].IsLand()
-										 && grid[idx].RockHeight() < D_POOL_HEIGHT
-										 && color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] == 0 )
-									{
-										color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] = currentColor;
-										waterStack.Push( v );
-									}
-									else if ( grid[idx].IsWater() ) {
-										++water;
-									}
-								}
-							}
-
-							int waterMax = poolGrids.Size() / 10;
-							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
-								//GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
-								
-								if ( newsHistory) {
-
-									NewsEvent poolNews( NewsEvent::POOL, ToWorld2F( poolGrids[0] ));
-
-									newsHistory->Add( poolNews );
-
-									for (int i = 0; i < poolGrids.Size(); ++i) {
-										int idx = INDEX(poolGrids[i]);
-										grid[idx].SetPool(D_POOL_HEIGHT);
-
-										for (int k = 0; k < 4; ++k) {
-											Vector2I v = poolGrids[i] + next[k];
-											GLASSERT(zbounds.Contains(v));
-											if (grid[INDEX(v)].IsWater()) {
-												waterfalls.Push(poolGrids[i]);
-
-												NewsEvent we(NewsEvent::WATERFALL, ToWorld2F(poolGrids[i]));
-												newsHistory->Add(we);
-											}
-										}
-									}
-								}
-							}
-							++currentColor;
-							poolGrids.Clear();
-						}
-#endif
-					}
-				}
-			}
-		}
-	}
-}
-
-
-int WorldMap::ContainsWaterfall(const grinliz::Rectangle2I& b) const
-{
-	int n = 0;
-	for (int i = 0; i < waterfalls.Size(); ++i) {
-		if (b.Contains(waterfalls[i]))
-			++n;
-	}
-	return n;
-}
-
-
-
-void WorldMap::EmitWaterfalls( U32 delta )
-{
-#if 0
-	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-	for( int i=0; i<waterfalls.Size(); ++i ) {
-		const Vector2I& wf = waterfalls[i];
-
-		ParticleDef pdWater = engine->particleSystem->GetPD( "fallingwater" );
-		ParticleDef pdMist  = engine->particleSystem->GetPD( "mist" );
-
-		for( int j=0; j<4; ++j ) {
-			Vector2I v = wf + next[j];
-			if ( grid[INDEX(v)].IsWater() ) {
-				Vector3F v3 = { (float)wf.x + 0.5f, (float)D_POOL_HEIGHT, (float)wf.y + 0.5f };
-				Vector3F half = { (float)next[j].x*0.5f, 0.0f, (float)next[j].y*0.5f };
-				v3 = v3 + half*1.2f;
-
-				Rectangle3F r3;
-				half.Set( half.z, half.y, half.x );
-				r3.FromPair( v3-half, v3+half );
-
-				static const Vector3F DOWN = { 0, -1, 0 };
-				engine->particleSystem->EmitPD( pdWater, r3, DOWN, delta ); 
-
-				r3.min.y = r3.max.y = (float)D_POOL_HEIGHT - 0.2f;
-				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
-				r3.min.y = r3.max.y = 0.0f;
-				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
-			}
-		}
-	}
-#endif
-}
-
-
 void WorldMap::ProcessEffect(ChitBag* chitBag)
 {
 	DamageDesc dd = { EFFECT_DAMAGE_PER_SEC * SLOW_TICK / 1000, 0 };
@@ -818,14 +625,46 @@ void WorldMap::EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, En
 }
 
 
+void WorldMap::FluidStats(int* pools, int* waterfalls)
+{
+	*pools = 0;
+	*waterfalls = 0;
+	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
+		*pools += fluidSim[i]->NumPools();
+		*waterfalls += fluidSim[i]->NumWaterfalls();
+	}
+}
+
+
+grinliz::Vector2I WorldMap::GetPoolLocation(int index)
+{
+	int pools = 0;
+
+	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
+		for (int i = 0; i < Square(NUM_SECTORS); ++i) {
+			int n = fluidSim[i]->NumPools();
+			if (pools + n > index) {
+				return fluidSim[i]->PoolLoc(index - pools);
+			}
+			pools += n;
+		}
+	}
+	Vector2I v = { 0, 0 };
+	return v;
+}
+
+
+
 void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 {
 	int n = fluidTicker.Delta(delta);
 	while (n--) {
 		fluidSim[fluidSector++]->DoStep();
+		if (fluidSector >= Square(NUM_SECTORS)) {
+			fluidSector = 0;
+		}
 	}
 
-	ProcessZone(chitBag);
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
 		// FIXME: call to visible area??
 		fluidSim[i]->EmitWaterfalls(delta, engine);
@@ -903,6 +742,15 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 		plantCount[wg.Plant() - 1][wg.PlantStage()] += 1;
 	}
 }
+
+
+void WorldMap::SetEmitter(int x, int y, bool on) {
+	int index = INDEX(x, y);
+	grid[index].SetFluidEmitter(on);
+	grinliz::Vector2I sector = ToSector(x, y);
+	fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+}
+
 
 
 void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
@@ -2335,5 +2183,77 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, boo
 		debug.SetColor( 0, 0, 1, 1 );
 		device->DrawArrow( debug, origin, zaxis, 0.3f );
 	}
+}
+
+
+void WorldMap::GenerateEmitters(U32 seed)
+{
+	Random random(seed);
+	random.Rand();
+	random.Rand();
+	int nEmitters = 0;
+
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+
+			Vector2I sector = { i, j };
+			Rectangle2I bounds = InnerSectorBounds(sector);
+			bounds.Outset(-3);
+
+			if (!Bounds().Contains(bounds)) continue;
+
+			// At this point, don't put emitters in the outland.
+			if (!GetSector(sector).HasCore()) continue;
+
+			static const int PATCH_SIZE = 8;
+			static const int NUM_PATCHES = SECTOR_SIZE / PATCH_SIZE;
+
+			for (int py = 0; py < NUM_PATCHES; ++py) {
+				for (int px = 0; px < NUM_PATCHES; ++px) {
+					Rectangle2I r;
+					r.Set(px*PATCH_SIZE + i*SECTOR_SIZE + 1, py*PATCH_SIZE + j*SECTOR_SIZE + 1,
+						(px + 1)*PATCH_SIZE + i*SECTOR_SIZE - 2, (py + 1)*PATCH_SIZE + j*SECTOR_SIZE - 2);
+
+					// ----- Find "good" emitters ---- //
+					bool found     = false;
+
+					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+						int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
+						if (h) {
+							SetEmitter(it.Pos().x, it.Pos().y, true);
+							++nEmitters;
+							found = true;
+							break;
+						}
+					}
+
+					// ---- If that doesn't work out, lay down random emitters.
+					if (!found && random.Bit()) {
+						bool okay = true;
+						int x = r.min.x + random.Rand(r.Width());
+						int y = r.min.y + random.Rand(r.Height());
+
+						Rectangle2I r2;
+						r2.Set(x, y, x, y);
+						r2.Outset(3);
+
+						for (Rectangle2IIterator it(r2); !it.Done(); it.Next()) {
+							const WorldGrid& wg = grid[INDEX(it.Pos())];
+							if (wg.FluidSink()) {
+								okay = false;
+								break;
+							}
+						}
+						if (okay) {
+							WorldGrid* wg = &grid[INDEX(x, y)];
+							SetEmitter(x, y, true);
+							++nEmitters;
+						}
+					}
+				}
+			}
+		}
+	}
+	GLOUTPUT(("Emitters created=%d\n", nEmitters));
 }
 

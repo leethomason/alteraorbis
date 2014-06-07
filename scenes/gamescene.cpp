@@ -59,6 +59,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	endTimer = 0;
 	coreWarningTimer = 0;
 	domainWarningTimer = 0;
+	poolView = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -1058,7 +1059,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 1
+#if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1077,6 +1078,13 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
+		if (loc.IsZero()) {
+			poolView = 0;
+		}
+		++poolView;
+		Vector2F lookAt = ToWorld2F(loc);
+		sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.y);
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;

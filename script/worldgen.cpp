@@ -15,6 +15,7 @@
 
 #include "../game/worldinfo.h"
 #include "../game/worldgrid.h"
+#include "../game/lumosmath.h"
 
 using namespace grinliz;
 
@@ -738,7 +739,6 @@ void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int r
 		}
 	}
 }
-
 
 void WorldGen::CalcPath( const SectorData* s )
 {

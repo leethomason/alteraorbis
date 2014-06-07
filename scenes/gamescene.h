@@ -145,6 +145,7 @@ private:
 	int					currentNews;	// index of the last news item put in the console
 	int					sleepTubeID;
 	int					coreWarningTimer, domainWarningTimer;
+	int					poolView;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
 

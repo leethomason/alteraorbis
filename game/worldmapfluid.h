@@ -19,11 +19,21 @@ public:
 	bool Settled() const { return settled; }
 	void Unsettle() { settled = false; }
 
+	int NumWaterfalls() const { return waterfalls.Size(); }
+	int NumPools() const { return emitters.Size(); }
+	grinliz::Vector2I PoolLoc(int i) const { return emitters[i]; }
+
+	int ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const;
+	
+	int FindEmitter(const grinliz::Vector2I& start, bool nominal);
+
 private:
 	void Reset(int x, int y);
 	U32 Hash();
 	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent);
-		
+	int PressureStep(const grinliz::Vector2I& start, int emitterHeight);
+	void BoundCheck(const grinliz::Vector2I& start, int h, int nominal, int *area, int* areaElevated);
+
 	WorldMap* worldMap;
 	grinliz::Rectangle2I bounds;
 	bool settled;
@@ -35,8 +45,10 @@ private:
 	grinliz::CDynArray<int> emitterHeights;
 	grinliz::CDynArray<grinliz::Vector2I> stack;
 
+	// can be shared - scratch memory.
+	static S8 water[SECTOR_SIZE*SECTOR_SIZE];
+
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
-	S8 water[SECTOR_SIZE*SECTOR_SIZE];
 };
 
 #endif // WORLDMAP_FLUID_SIM_INCLUDED

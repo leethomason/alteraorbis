@@ -110,10 +110,8 @@ public:
 		WorldGrid wg = grid[index];
 		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
 	}
-	void SetEmitter(int x, int y, bool on) {
-		int index = INDEX(x, y);
-		grid[index].SetFluidEmitter(on);
-	}
+	void SetEmitter(int x, int y, bool on);
+
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
 		const WorldGrid& wg = grid[index];
@@ -143,7 +141,6 @@ public:
 		int i = INDEX(x,y);
 		return grid[i].IsLand(); 
 	}
-	int ContainsWaterfall(const grinliz::Rectangle2I& b) const;
 	
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
@@ -214,9 +211,20 @@ public:
 		VoxelHit(v, dd);
 	}
 	void VoxelHit(const grinliz::Vector3I& voxel, const DamageDesc& dd);
+
 	// returns true if settled
 	bool RunFluidSim(const grinliz::Vector2I& sector);
 	void EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine);
+	const FluidSim* GetFluidSim(const grinliz::Vector2I& sector) { 
+		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
+		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
+	}
+	void FluidStats(int* pools, int* waterfalls);
+	grinliz::Vector2I GetPoolLocation(int index);
+
+	// This is sort of "left over" from worldGen & rockGen. The generation step
+	// should proably place the emitters, but hard to do with the limited info there.
+	void GenerateEmitters( U32 seed );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -287,9 +295,6 @@ private:
 		y /= ZONE_SIZE;
 		return (y*width/ZONE_SIZE) + x; 
 	} 
-
-	void ProcessZone( ChitBag* cb );
-	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
 	void FreeVBOs();
@@ -414,16 +419,11 @@ private:
 	};
 
 	// List of interesting things that need to be processed each frame.
-	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
 	grinliz::CDynArray< PlantEffect >	plantEffect;		// plants on fire/shock
 
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
-
-	// Temporaries to avoid allocation
-	grinliz::CDynArray< grinliz::Vector2I > waterStack;
-	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
 
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering

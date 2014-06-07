@@ -228,6 +228,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
 
+	// FIXME: remove this check, because fluid can trigger?
 	GLASSERT(context->worldMap->IsPassable(pos.x, pos.y));
 
 	MapSpatialComponent* msc = new MapSpatialComponent();

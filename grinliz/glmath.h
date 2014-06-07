@@ -46,6 +46,7 @@ inline float ToDegree( float radian ) { return radian * RAD_TO_DEG; }
 inline double ToDegree( double radian ) { return radian * RAD_TO_DEG_D; }
 inline float ToRadian( float degree ) { return degree * DEG_TO_RAD; }
 inline double ToRadian( double degree ) { return degree * DEG_TO_RAD_D; }
+template< class T > T Square(T t) { return t*t;  }
 
 void SinCosDegree( float degreeTheta, float* sinTheta, float* cosTheta );
 
