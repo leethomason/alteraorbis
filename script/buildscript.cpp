@@ -16,22 +16,22 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Ice", "ice",		0, "Build synthetic rock." },
 	// Denizen
 	{ "SleepTube", "bed",			1, "Increases population." },
-	{ "Temple", "power",			1, "Increases Tech cap, increases population cap, attracts monsters." },
-	{ "GuardPost", "guardpost",		1, "Gathering point for guards. Summons denizens if monster approach." },
+	{ "Temple", "power",			1, "Increases Tech cap, increases population cap, attracts monsters.", "Requires a SleepTube." },
+	{ "GuardPost", "guardpost",		1, "Gathering point for guards. Summons denizens if monster approach.", "Requires a Temple." },
 	// Agronomy
 	{ "Solar Farm", "farm",			2, "Harvests fruit from plants." },
-	{ "Distillery", "distillery",	2, "Converts fruit to elixir." },
-	{ "Bar", "bar",					2, "Distributes elixir." },
+	{ "Distillery", "distillery",	2, "Converts fruit to elixir.", "Requires a Solar Farm." },
+	{ "Bar", "bar",					2, "Distributes elixir.", "Requires a Distillery." },
 	// Economy
 	{ "Market", "market",			3, "Allows Denizens and Avatar to buy and sell weapons and shields." },
-	{ "Forge", "factory",			3, "Allows Denizens and Avatar to make weapons and shields." },
-	{ "Exchange", "exchange",		3, "Allows Denizens and Avatar convert between Au and Crystal." },
-	{ "Vault", "vault",				3, "Stores items for the Core and Avatar." },
+	{ "Forge", "factory",			3, "Allows Denizens and Avatar to make weapons and shields.", "Requires a Market" },
+	{ "Exchange", "exchange",		3, "Allows Denizens and Avatar convert between Au and Crystal.", "Requires a Market" },
+	{ "Vault", "vault",				3, "Stores items for the Core and Avatar.", "Requires a Market" },
 	// Visitor
-	{ "News", "kiosk.n",			4, "Attracts Visitors searching for news." },
-	{ "Media", "kiosk.m",			4, "Attracts Visitors searching for media." },
-	{ "Commerce", "kiosk.c",		4, "Attracts Visitors searching for commerce." },
-	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social." },
+	{ "News", "kiosk.n",			4, "Attracts Visitors searching for news.", "Requires a Temple" },
+	{ "Media", "kiosk.m",			4, "Attracts Visitors searching for media.", "Requires a Temple" },
+	{ "Commerce", "kiosk.c",		4, "Attracts Visitors searching for commerce.", "Requires a Temple" },
+	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social.", "Requires a Temple" },
 };
 
 

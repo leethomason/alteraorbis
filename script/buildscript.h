@@ -9,7 +9,8 @@ struct BuildData
 	const char*			cName;
 	const char*			cStructure;
 	int					group;
-	const char*			desc;
+	const char*			desc;				// what does this do?
+	const char*			requirementDesc;	// what requirements are needed to build this?
 
 	int					cost;
 	int					size;			// 1 or 2

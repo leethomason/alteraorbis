@@ -229,6 +229,13 @@ public:
 	const UIItem*	Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
 	void			GetRelativeTap( float* x, float* y );			///< Get the tap location, in item coordinates, of the last tap down. [0,1]
 
+	/** The return of a Tap...() or TapCaptured() is a valid UI Item.
+		This is a bit of an issue; what to do if you need an item tap
+		for a disabled item? (Notably to display help text.) Valid
+		from TapDown() to the next TapUp() or TapCancel().
+	*/
+	const UIItem*	DisabledTapCaptured() const { return m_disabledItemTapped; }
+ 
 	/** During (or after) a TapUp, this will return the starting object and ending object of the drag. One
 		or both may be null, and it is commonly the same object.
 	*/
@@ -255,6 +262,7 @@ private:
 	}
 
 	UIItem*							m_itemTapped;
+	UIItem*							m_disabledItemTapped;
 	RenderAtom						m_textAtomEnabled;
 	RenderAtom						m_textAtomDisabled;
 	IGamuiRenderer*					m_iRenderer;

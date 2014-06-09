@@ -727,6 +727,15 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		}
 		mapDragStart.Zero();
 	}
+	if (!uiHasTap && action == GAME_TAP_DOWN && gamui2D.DisabledTapCaptured()) {
+		for (int i = 1; i < BuildScript::NUM_OPTIONS; ++i) {
+			if (&buildButton[i] == gamui2D.DisabledTapCaptured()) {
+				BuildScript buildScript;
+				const BuildData& data = buildScript.GetData(i);
+				buildDescription.SetText(data.requirementDesc ? data.requirementDesc : "");
+			}
+		}
+	}
 }
 
 

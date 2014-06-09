@@ -82,9 +82,9 @@ d animation generation
 		- update walkthrough - start with denizens
 
 	- Beta 1c
-		- rethink menus: 
-			- group by effect
-			- disable until dependent structures built
+		x rethink menus: 
+			x group by effect
+			x disable until dependent structures built
 			Denizen:  SleepTube -> Temple -> GuardPost
 			Agronomy: Farm -> Distillery -> Bar
 			Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
