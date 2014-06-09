@@ -125,11 +125,10 @@ d animation generation
 			- double tech decay
 			x weapon sorting not quite correct
 		- fluids
-			- deal with infinite emitters (one in current save)
-			- cores need to by sinks
+			x deal with infinite emitters (one in current save)
 			- rock wear
 			- move voxels to TexturePack? (need 32 bit textures...grumble)
-			- water flow over emitters?
+			d water flow over emitters?
 			x emitters should wear rock. no, seems okay
 			- land variation
 			- new physics component - account for water. more travel, travel through water.
