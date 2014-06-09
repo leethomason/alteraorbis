@@ -103,19 +103,15 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetVisible(false);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Visitor", "Economy", "Defense", "Industry"
+		"Utility", "Denizen", "Agronomy", "Economy", "Visitor"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		modeButton[i].SetText( modeButtonText[i] );
 		modeButton[0].AddToToggleGroup( &modeButton[i] );
 	}
-	sleepTubeID = -1;
 	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
-		if ( bd.structure == ISC::bed ) {
-			sleepTubeID = i;
-		}
 
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( bd.label.safe_str() );
@@ -123,7 +119,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
-	GLASSERT( sleepTubeID >= 0 );
 	buildButton[0].SetText("UNUSED");
 
 	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
@@ -228,10 +223,10 @@ void GameScene::Resize()
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
 
-	layout.PosAbs( &useBuildingButton, 0, 2 );
+	layout.PosAbs(&useBuildingButton, 0, 2);
 
-	layout.PosAbs( &cameraHomeButton, 0, 1 );
-	layout.PosAbs( &prevUnit, 1, 1 );
+	layout.PosAbs(&cameraHomeButton, 0, 1);
+	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
 
@@ -1154,6 +1149,54 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 }
 
 
+void GameScene::SetBuildButtons()
+{
+	// Went back and forth a bit on whether this should be
+	// BuildScript. But in the end, the enable/disbale is 
+	// actually for helping the player and clarifying the
+	// UI, not core game logic.
+
+	LumosChitBag* cb = sim->GetChitBag();
+	Vector2I sector = cb->GetHomeSector();
+
+	CChitArray arr;
+	cb->FindBuildingCC(ISC::bed, sector, 0, 0, &arr, 0);
+	int nBeds = arr.Size();
+	cb->FindBuildingCC(ISC::power, sector, 0, 0, &arr, 0);
+	int nTemples = arr.Size();
+	cb->FindBuildingCC(ISC::farm, sector, 0, 0, &arr, 0);
+	int nFarms = arr.Size();
+	cb->FindBuildingCC(ISC::distillery, sector, 0, 0, &arr, 0);
+	int nDistilleries = arr.Size();
+	cb->FindBuildingCC(ISC::market, sector, 0, 0, &arr, 0);
+	int nMarkets = arr.Size();
+
+	// Enforce the sleep tube limit.
+	CStr<32> str;
+	int techLevel = Min(nTemples, 3);
+	int maxTubes  = 4 << techLevel;
+
+	BuildScript buildScript;
+	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(IStringConst::bed);
+	GLASSERT(sleepTubeData);
+
+	str.Format( "SleepTube\n%d %d/%d", sleepTubeData->cost, nBeds, maxTubes );
+	buildButton[BuildScript::SLEEPTUBE].SetText( str.c_str() ); 
+	buildButton[BuildScript::SLEEPTUBE].SetEnabled(nBeds < maxTubes);
+
+	buildButton[BuildScript::TEMPLE].SetEnabled(nBeds > 0);
+	buildButton[BuildScript::GUARDPOST].SetEnabled(nTemples > 0);
+	buildButton[BuildScript::BAR].SetEnabled(nDistilleries > 0);
+	buildButton[BuildScript::DISTILLERY].SetEnabled(nFarms > 0);
+	buildButton[BuildScript::FORGE].SetEnabled(nMarkets > 0);
+	buildButton[BuildScript::EXCHANGE].SetEnabled(nMarkets > 0);
+	buildButton[BuildScript::VAULT].SetEnabled(nMarkets > 0);
+	buildButton[BuildScript::KIOSK_N].SetEnabled(nTemples > 0);
+	buildButton[BuildScript::KIOSK_C].SetEnabled(nTemples > 0);
+	buildButton[BuildScript::KIOSK_S].SetEnabled(nTemples > 0);
+	buildButton[BuildScript::KIOSK_M].SetEnabled(nTemples > 0);
+}
+
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
@@ -1318,7 +1361,6 @@ void GameScene::DoTick( U32 delta )
 	if ( !playerChit && !coreScript ) {
 		uiMode[UI_VIEW].SetDown();
 	}
-	//chitTracking = playerChit ? playerChit->ID() : 0;
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
@@ -1365,6 +1407,7 @@ void GameScene::DoTick( U32 delta )
 	}
 
 	CheckGameStage(delta);
+	SetBuildButtons();
 
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 	{
@@ -1382,19 +1425,6 @@ void GameScene::DoTick( U32 delta )
 		str2.Format("WorkerBot\n%d %d/%d", WORKER_BOT_COST, arr.Size(), MAX_BOTS);		// FIXME: pull price from data
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
-	}
-	if (coreScript) {
-		// Enforce the sleep tube limit.
-		CStr<32> str2;
-		int techLevel = coreScript->MaxTech() - 1;	// use the nTemples, not the current/achieved tech.
-		int maxTubes  = 4 << techLevel;
-		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
-		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );
-		const BuildData* data = buildScript.GetDataFromStructure(IStringConst::bed);
-		GLASSERT(data);
-
-		str2.Format( "SleepTube\n%d %d/%d", data->cost, chitQuery.Size(), maxTubes );
-		buildButton[sleepTubeID].SetText( str2.c_str() ); 
 	}
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();

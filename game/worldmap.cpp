@@ -1458,6 +1458,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !IsPassable( starti.x, starti.y ) || !IsPassable( endi.x, endi.y ) ) {
 		return false;
 	}
+	GLASSERT(wgStart->ZoneSize());	// persistant bug: if passable, should have zone.
+	GLASSERT(wgEnd->ZoneSize());	// persistant bug: if passable, should have zone.
 
 	// Regions are convex. If in the same region, it is passable.
 	if ( wgStart->ZoneOrigin( starti.x, starti.y ) == wgEnd->ZoneOrigin( endi.x, endi.y ) ) {

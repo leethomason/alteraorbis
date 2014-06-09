@@ -85,12 +85,16 @@ d animation generation
 		- rethink menus: 
 			- group by effect
 			- disable until dependent structures built
+			Denizen:  SleepTube -> Temple -> GuardPost
+			Agronomy: Farm -> Distillery -> Bar
+			Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
+			Visitor:  Temple -> Kiosks
 		- greater kill not getting shown in weapon history
 		- denizen spawn rate. hmm..
 		- slow down awareness. only notify friends we can see.
-    - seperate land from water. re-think water texture.
-    - avatar return to base
-    - face fly in icon gen; icon into build
+    	- seperate land from water. re-think water texture.
+    	- avatar return to base
+    	- face icon generation; icon into build (mantis?)
 
 	- Beta2
 		- auto rebuild

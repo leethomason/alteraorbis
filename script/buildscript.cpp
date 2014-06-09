@@ -9,29 +9,29 @@ using namespace grinliz;
 BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "", "", 0, 0, 0 },
 	// Utility
-	{	"Cancel",	"",			0, "Cancels build orders in place." },
-	{	"Clear",	"",			0, "Clear rock, plants, and buildings." },
-	{	"Rotate",	"",			0, "Rotate a building and position its porch." },
-	{	"Pave",		"pave",		0, "Create path paving that blocks plant growth." },
-	{	"Ice",		"ice",		0, "Build synthetic rock." },
-	// Visitor stuff
-	{	"News",		"kiosk.n",	1, "Attracts Visitors searching for news." },
-	{	"Media",	"kiosk.m",	1, "Attracts Visitors searching for media." },
-	{	"Commerce",	"kiosk.c",	1, "Attracts Visitors searching for commerce." },
-	{	"Social",	"kiosk.s",	1, "Attracts Visitors searching for social." },
-	{	"Temple",	"power",	1, "Increases Tech cap, increases population cap, attracts monsters." },
+	{ "Cancel", "",		0, "Cancels build orders in place." },
+	{ "Clear", "",		0, "Clear rock, plants, and buildings." },
+	{ "Rotate", "",		0, "Rotate a building and position its porch." },
+	{ "Pave", "pave",	0, "Create path paving that blocks plant growth." },
+	{ "Ice", "ice",		0, "Build synthetic rock." },
+	// Denizen
+	{ "SleepTube", "bed",			1, "Increases population." },
+	{ "Temple", "power",			1, "Increases Tech cap, increases population cap, attracts monsters." },
+	{ "GuardPost", "guardpost",		1, "Gathering point for guards. Summons denizens if monster approach." },
+	// Agronomy
+	{ "Solar Farm", "farm",			2, "Harvests fruit from plants." },
+	{ "Distillery", "distillery",	2, "Converts fruit to elixir." },
+	{ "Bar", "bar",					2, "Distributes elixir." },
 	// Economy
-	{	"Solar Farm", "farm",	2, "Harvests fruit from plants." },
-	{	"SleepTube", "bed",		2, "Increases population." },
-	{	"Market",	"market",	2, "Allows Denizens and Avatar to buy and sell weapons and shields." },
-	{	"Bar",		"bar",		2, "Distributes elixir." },
-	// Defense
-	{	"GuardPost","guardpost",3, "Gathering point for guards. Summons denizens if monster approach." },
-	// Industry
-	{	"Vault",		"vault",		4, "Stores items for the Core and Avatar." },
-	{	"Distillery",	"distillery",	4, "Converts fruit to elixir." },
-	{	"Forge",		"factory",		4, "Allows Denizens and Avatar to make weapons and shields." },
-	{	"Exchange",		"exchange",		4, "Allows Denizens and Avatar convert between Au and Crystal." },
+	{ "Market", "market",			3, "Allows Denizens and Avatar to buy and sell weapons and shields." },
+	{ "Forge", "factory",			3, "Allows Denizens and Avatar to make weapons and shields." },
+	{ "Exchange", "exchange",		3, "Allows Denizens and Avatar convert between Au and Crystal." },
+	{ "Vault", "vault",				3, "Stores items for the Core and Avatar." },
+	// Visitor
+	{ "News", "kiosk.n",			4, "Attracts Visitors searching for news." },
+	{ "Media", "kiosk.m",			4, "Attracts Visitors searching for media." },
+	{ "Commerce", "kiosk.c",		4, "Attracts Visitors searching for commerce." },
+	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social." },
 };
 
 
