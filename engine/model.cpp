@@ -157,6 +157,8 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 
 	int iOffset = 0;
 	int vOffset = 0;
+	Vector3<double> centroid[EL_MAX_BONES] = { 0 };
+	int centroidCount[EL_MAX_BONES] = { 0 };
 
 	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
@@ -164,7 +166,15 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		
 		atom->vertex = new Vertex[atom->nVertex];
 		for( unsigned j=0; j<atom->nVertex; ++j ) {
-			atom->vertex[j] = vBuffer[j+vOffset];
+			const Vertex& vertex = vBuffer[j+vOffset];
+			atom->vertex[j] = vertex;
+
+			int boneID = LRint(vertex.boneID);
+			GLASSERT(boneID < EL_MAX_BONES);
+			centroid[boneID].x += vertex.pos.x;
+			centroid[boneID].y += vertex.pos.y;
+			centroid[boneID].z += vertex.pos.z;
+			centroidCount[boneID]++;
 		}
 		
 		atom->index  = new U16[atom->nIndex];
@@ -173,6 +183,16 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		}
 		vOffset += atom->nVertex;
 		iOffset += atom->nIndex;
+	}
+
+	for (int i = 0; i < EL_MAX_BONES; ++i) {
+		if (centroidCount[i]) {
+			double c = double(centroidCount[i]);
+			centroid[i].x /= c;
+			centroid[i].y /= c;
+			centroid[i].z /= c;
+		}
+		res->header.boneCentroid[i].Set((float)centroid[i].x, (float)centroid[i].y, (float)centroid[i].z);
 	}
 }
 
