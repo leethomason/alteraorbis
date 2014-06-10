@@ -79,7 +79,6 @@ d animation generation
 		t greater kills: 4x per kill?
 		x tune down fire rate
 	    x new sounds
-		- update walkthrough - start with denizens
 
 	- Beta 1c
 		x rethink menus: 
@@ -89,12 +88,14 @@ d animation generation
 			Agronomy: Farm -> Distillery -> Bar
 			Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
 			Visitor:  Temple -> Kiosks
-		- greater kill not getting shown in weapon history
+		t greater kill not getting shown in weapon history
+		t enemies don't distract from buildings
 		- denizen spawn rate. hmm..
 		- slow down awareness. only notify friends we can see.
     	- seperate land from water. re-think water texture.
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
+		- update walkthrough - start with denizens
 
 	- Beta2
 		- auto rebuild

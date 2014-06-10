@@ -791,3 +791,16 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 
 	return true;
 }
+
+
+bool TaskList::UsingBuilding() const
+{
+	if (taskList.Size() >= 2) {
+		if (taskList[0].action == Task::TASK_STAND
+			&& taskList[1].action == Task::TASK_USE_BUILDING)
+		{
+			return true;
+		}
+	}
+	return false;
+}

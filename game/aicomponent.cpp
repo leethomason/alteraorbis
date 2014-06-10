@@ -2753,7 +2753,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		focus = FOCUS_NONE;
 	}
 
-	if ( feTicker.Delta( deltaTime )) {
+	if ( !taskList.UsingBuilding() && feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
 	}
 
