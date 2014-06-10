@@ -10,6 +10,37 @@ class ItemComponent;
 class ChitBag;
 class GameItem;
 
+struct ItemHistoryScore
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.score == b.score; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score > b.score; }
+};
+
+
+struct ItemHistoryKills
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.kills == b.kills; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.kills > b.kills; }
+};
+
+
+struct ItemHistoryGreaterKills
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.greater == b.greater; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.greater > b.greater; }
+};
+
+
+struct ItemHistoryCrafting
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.crafted == b.crafted; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.crafted > b.crafted; }
+};
+
 
 class CensusSceneData : public SceneData
 {
@@ -65,13 +96,11 @@ private:
 		ITEM_COUNT
 	};
 
-	ItemHistory killsActive,
-		killsAny,
-		greaterKillsActive,
-		greaterKillsAny,
-		craftedActive,
-		craftedAny;
-	grinliz::CArray<ItemHistory, 4> domains;
+	void AddToHistory(const ItemHistory& h);
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryScore> domains;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryKills> kills;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryGreaterKills> greaterKills;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryCrafting> crafted;
 
 	struct Info {
 		const GameItem*			item;
