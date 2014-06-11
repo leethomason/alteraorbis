@@ -54,6 +54,8 @@ public:
 
 class CensusScene : public Scene
 {
+	typedef Scene super;
+
 public:
 	CensusScene( LumosGame* game, CensusSceneData* data );
 	virtual ~CensusScene();
@@ -65,19 +67,11 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void HandleHotKey( int value );
 
 private:
 	void Scan();
 	void ScanItem( ItemComponent* ic, const GameItem* );
-
-	LumosGame*			lumosGame;
-	ChitBag*			chitBag;
-	gamui::PushButton	okay;
-	gamui::TextLabel	text;
-
-	// stuff to scan for:
-	Wallet	allWallet, 
-			mobWallet;
 
 	enum {
 		MOB_DENIZEN,
@@ -95,6 +89,22 @@ private:
 		ITEM_SHIELD,
 		ITEM_COUNT
 	};
+
+	enum {
+		MAX_ROWS = 4,
+		MAX_BUTTONS = ITEM_COUNT + MOB_COUNT + 4 * MAX_ROWS + 5
+	};
+
+	LumosGame*			lumosGame;
+	ChitBag*			chitBag;
+	gamui::PushButton	okay;
+	gamui::PushButton	link[MAX_BUTTONS];
+	gamui::TextLabel	group[MAX_BUTTONS];
+	gamui::TextLabel	label[MAX_BUTTONS];
+
+	// stuff to scan for:
+	Wallet	allWallet, 
+			mobWallet;
 
 	void AddToHistory(const ItemHistory& h);
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryScore> domains;

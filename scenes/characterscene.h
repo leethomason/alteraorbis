@@ -36,7 +36,8 @@ class CharacterSceneData : public SceneData
 {
 public:
 	enum {
-		CHARACTER,
+		AVATAR,
+		CHARACTER_ITEM,
 		VAULT,
 		MARKET,
 		EXCHANGE
@@ -53,7 +54,10 @@ public:
 	Wallet*			taxRecipiant;
 	int				type;
 
-	bool IsCharacter() const	{ return type == CHARACTER; }
+	bool IsAvatar() const		{ return type == AVATAR; }
+	bool IsCharacterItem() const	{ return type == CHARACTER_ITEM; }
+	bool IsAvatarCharacterItem() const			{ return type == AVATAR || type == CHARACTER_ITEM; }
+
 	bool IsVault() const		{ return type == VAULT; }
 	bool IsMarket() const		{ return type == MARKET; }
 	bool IsExchange() const		{ return type == EXCHANGE;  }

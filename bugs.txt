@@ -90,12 +90,14 @@ d animation generation
 			Visitor:  Temple -> Kiosks
 		t greater kill not getting shown in weapon history
 		t enemies don't distract from buildings
-		- denizen spawn rate. hmm..
-		- slow down awareness. only notify friends we can see.
+		x update walkthrough - start with denizens
     	- seperate land from water. re-think water texture.
+
+	- Beta 1d
+		- slow down awareness. only notify friends we can see.
+		- denizen spawn rate. hmm..
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
-		- update walkthrough - start with denizens
 
 	- Beta2
 		- auto rebuild
@@ -137,8 +139,8 @@ d animation generation
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
 		- money checks optional
-		- greatest smith
-		- greatest monsters
+		x greatest smith
+		x greatest monsters
 		- needs to feel interactive
 		x # kills
 		- browsing of items/people
@@ -193,9 +195,9 @@ d animation generation
 			x effects do something
 		x drop cash or return to vault
 		- balance battles
-		- history events
-		- item history
-			- created 
+		x history events
+		x item history
+			x created 
 			x kills
 			x winning names
 		- real health bars & check visibility
@@ -209,7 +211,7 @@ d animation generation
 		- external constant file
 		- aging of stone
 		- consider moving ground to voxel gen system, so that ground can vary?
-		- teams. friend-enemy-neutral logic.
+		x teams. friend-enemy-neutral logic.
 		- monster ecology
 		x visitors
 		x inventory screen

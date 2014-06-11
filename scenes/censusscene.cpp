@@ -9,6 +9,7 @@
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
 #include "../engine/engine.h"
+#include "characterscene.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -25,10 +26,16 @@ using namespace grinliz;
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)
 {
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
-	text.Init( &gamui2D );
 
 	memset( mobActive, 0, sizeof(*mobActive)*MOB_COUNT );
 	memset( itemActive, 0, sizeof(*itemActive)*ITEM_COUNT );
+
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		link[i].Init(&gamui2D, game->GetButtonLook(0));
+		label[i].Init(&gamui2D);
+		label[i].SetTab(100);
+		group[i].Init(&gamui2D);
+	}
 
 	Scan();
 }
@@ -46,12 +53,21 @@ void CensusScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	const Screenport& port = lumosGame->GetScreenport();
 
-	layout.PosAbs( &text, 0, 0 );
-	float dx = text.X();
-	float dy = text.Y();
+//	layout.PosAbs( &text, 0, 0 );
+//	float dx = text.X();
+//	float dy = text.Y();
 
-	text.SetBounds( port.UIWidth() - dx*2.0f, port.UIHeight() - dy*2.0f );
-	text.SetTab( text.Width() * 0.3f );
+//	text.SetBounds( port.UIWidth() - dx*2.0f, port.UIHeight() - dy*2.0f );
+//	text.SetTab( text.Width() * 0.3f );
+
+	// --- half size --- //
+	layout.SetSize(layout.Width(), 0.5f*layout.Height());
+
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		layout.PosAbs(&group[i], 1, i + 1);
+		layout.PosAbs(&link[i], 2, i + 1);
+		layout.PosAbs(&label[i], 3, i + 1);
+	}
 }
 
 
@@ -103,6 +119,7 @@ void CensusScene::ScanItem(ItemComponent* ic, const GameItem* item)
 
 	ItemHistory h;
 	h.Set(item);
+	h.tempID = ic->ParentChit()->ID();
 	AddToHistory(h);
 }
 
@@ -178,31 +195,71 @@ void CensusScene::Scan()
 	debug.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
 	debug.append( "\n" );
 
-	str.append( "Kills:\n" );
-	for (int i = 0; i < Min(kills.Size(), 4); ++i) {
-		str.append("\t");					kills[i].AppendDesc(&str, history); str.append("\n");
-	}
-	str.append( "Greater Kills:\n" );
-	for (int i = 0; i < Min(greaterKills.Size(), 4); ++i) {
-		str.append("\t");					greaterKills[i].AppendDesc(&str, history); str.append("\n");
-	}
-	str.append( "Crafting:\n" );
-	for (int i = 0; i < Min(crafted.Size(), 4); ++i) {
-		str.append("\t");					crafted[i].AppendDesc(&str, history); str.append("\n");
-	}
-	str.append("\nDomains:\n");
-	for (int i = 0; i < Min(domains.Size(), 4); ++i) {
-		str.append("\t");					domains[i].AppendDesc(&str, history); str.append("\n");
-	}
-	str.append( "\nNotable:\n" );
+	int count = 0;
 
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		group[i].SetVisible(false);
+		link[i].SetVisible(false);
+	}
+
+	group[count].SetText("Kills:");
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(kills.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		kills[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(kills[i].tempID > 0);
+		count++;
+	}
+
+	++count;
+	group[count].SetText( "Greater Kills:" );
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(greaterKills.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		greaterKills[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(greaterKills[i].tempID > 0);
+		++count;
+	}
+
+	++count;
+	group[count].SetText( "Crafting:" );
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(crafted.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		crafted[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(crafted[i].tempID > 0);
+		++count;
+	}
+
+	++count;
+	group[count].SetText("Domains:");
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(domains.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		domains[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(domains[i].tempID > 0);
+		++count;
+	}
+
+	++count;
+	group[count].SetText("Notable:");
+	group[count].SetVisible(true);
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
 		if ( mobActive[i].item ) {
 			ItemHistory h;
 			h.Set( mobActive[i].item );
 			
-			str.AppendFormat( "  %s\t", NAME[i] );
+			str = "";
+			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str, history );
 
 			Chit* chit = mobActive[i].ic->ParentChit();
@@ -214,8 +271,10 @@ void CensusScene::Scan()
 				const SectorData& sd = map->GetSector( sector );
 				str.AppendFormat( " at %s", sd.name.safe_str() );
 			}
-
-			str.append( "\n" );
+			label[count].SetText(str.c_str());
+			link[count].SetVisible(true);
+			link[count].SetEnabled(h.tempID > 0);
+			++count;
 		}
 	}
 
@@ -225,6 +284,7 @@ void CensusScene::Scan()
 			ItemHistory h;
 			h.Set( itemActive[i].item );
 
+			str = "";
 			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str, history );
 
@@ -233,13 +293,39 @@ void CensusScene::Scan()
 			if ( !mob.empty() ) {
 				str.AppendFormat( " wielded by %s", mainItem->BestName() );
 			}
-			str.append( "\n" );
+			label[count].SetText(str.c_str());
+			link[count].SetVisible(true);
+			link[count].SetEnabled(h.tempID > 0);
+			++count;
 		}
 	}
 
-	text.SetText( str.safe_str() );
+//	text.SetText( str.safe_str() );
+	GLASSERT(count <= MAX_BUTTONS);
+	for (int i = count; i < MAX_BUTTONS; ++i) {
+		label[i].SetVisible(false);
+	}
 
 	GLOUTPUT(("%s", debug.safe_str()));
+}
+
+
+void CensusScene::HandleHotKey(int value)
+{
+	if (value == GAME_HK_SPACE) {
+		for (int i = 0; i < greaterKills.Size(); ++i) {
+			int id = greaterKills[i].tempID;
+			Chit* chit = chitBag->GetChit(id);
+			if (chit && chit->GetItemComponent()) {
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
+				break;
+			}
+		}
+	}
+	else {
+		super::HandleHotKey(value);
+	}
 }
 
 

@@ -37,7 +37,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	game->InitStd( &gamui2D, &okay, &cancel );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
-	dropButton.SetVisible( data->IsCharacter() );
+	dropButton.SetVisible( data->IsAvatar() );
 
 	reset.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	reset.SetText( "Reset" );
@@ -47,7 +47,11 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	billOfSale.SetVisible( data->IsMarket() );
 
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0 );
-	faceWidget.SetFace( &uiRenderer, data->itemComponent->GetItem(0) );
+	const GameItem* mainItem = data->itemComponent->GetItem(0);
+	faceWidget.SetFace( &uiRenderer, mainItem );
+	if (mainItem->keyValues.GetIString(ISC::mob) != ISC::denizen) {
+		faceWidget.SetVisible(false);
+	}
 
 	desc.Init(&gamui2D);
 	
@@ -75,7 +79,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	moneyWidget[1].SetVisible( false );
 
 	helpText.Init(&gamui2D);
-	if (data->IsCharacter()) {
+	if (data->IsAvatar()) {
 		helpText.SetText("Character inventory is on the left. You can order items by dragging. The gun, "
 			"ring, and shield you want the character to use should be on the top row.");
 	}
@@ -156,7 +160,7 @@ void CharacterScene::Resize()
 	layout.PosAbs( &reset, -1, -2 );
 	layout.PosAbs(&helpText, 1, -3);
 	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
-	if (data->IsCharacter()) {
+	if (data->IsAvatar()) {
 		// Need space for the history text
 		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
 	}
@@ -167,7 +171,7 @@ void CharacterScene::Resize()
 	}
 	cancel.SetVisible(!data->IsExchange());
 
-	if (data->IsCharacter()) {
+	if (data->IsAvatarCharacterItem()) {
 		layout.PosAbs(&desc, -4, 0);
 		layout.PosAbs(&itemDescWidget, -4, 1);
 	}
@@ -630,7 +634,7 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 	}
 
 
-	if ( data->IsCharacter() && start && startIndex && end == &dropButton ) {
+	if ( data->IsAvatar() && start && startIndex && end == &dropButton ) {
 		data->itemComponent->Drop( data->itemComponent->GetItem( startIndex ));
 	}
 
