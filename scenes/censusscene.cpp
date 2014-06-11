@@ -53,13 +53,6 @@ void CensusScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	const Screenport& port = lumosGame->GetScreenport();
 
-//	layout.PosAbs( &text, 0, 0 );
-//	float dx = text.X();
-//	float dy = text.Y();
-
-//	text.SetBounds( port.UIWidth() - dx*2.0f, port.UIHeight() - dy*2.0f );
-//	text.SetTab( text.Width() * 0.3f );
-
 	// --- half size --- //
 	layout.SetSize(layout.Width(), 0.5f*layout.Height());
 
@@ -75,6 +68,16 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		lumosGame->PopScene();
+	}
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		if (item == &link[i]) {
+			Chit* chit = chitBag->GetChit((int)link[i].userData);
+			if (chit && chit->GetItemComponent()) {
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
+				break;
+			}
+		}
 	}
 }
 
@@ -210,6 +213,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(kills[i].tempID > 0);
+		link[count].userData = (const void*)kills[i].tempID;
 		count++;
 	}
 
@@ -222,6 +226,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(greaterKills[i].tempID > 0);
+		link[count].userData = (const void*)greaterKills[i].tempID;
 		++count;
 	}
 
@@ -234,6 +239,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(crafted[i].tempID > 0);
+		link[count].userData = (const void*)crafted[i].tempID;
 		++count;
 	}
 
@@ -246,6 +252,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(domains[i].tempID > 0);
+		link[count].userData = (const void*)domains[i].tempID;
 		++count;
 	}
 
@@ -257,7 +264,8 @@ void CensusScene::Scan()
 		if ( mobActive[i].item ) {
 			ItemHistory h;
 			h.Set( mobActive[i].item );
-			
+			h.tempID = mobActive[i].ic ? mobActive[i].ic->ParentChit()->ID() : 0;
+
 			str = "";
 			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str, history );
@@ -274,6 +282,7 @@ void CensusScene::Scan()
 			label[count].SetText(str.c_str());
 			link[count].SetVisible(true);
 			link[count].SetEnabled(h.tempID > 0);
+			link[count].userData = (const void*)h.tempID;
 			++count;
 		}
 	}
@@ -283,6 +292,7 @@ void CensusScene::Scan()
 		if ( itemActive[i].item ) {
 			ItemHistory h;
 			h.Set( itemActive[i].item );
+			h.tempID = itemActive[i].ic ? itemActive[i].ic->ParentChit()->ID() : 0;
 
 			str = "";
 			str.AppendFormat( "%s\t", NAME[i] );
@@ -296,6 +306,7 @@ void CensusScene::Scan()
 			label[count].SetText(str.c_str());
 			link[count].SetVisible(true);
 			link[count].SetEnabled(h.tempID > 0);
+			link[count].userData = (const void*)h.tempID;
 			++count;
 		}
 	}

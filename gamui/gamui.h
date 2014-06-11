@@ -428,6 +428,8 @@ public:
 	ToggleButton* SuperItem() const		  { return m_superItem; }
 	void DoPreLayout();
 
+	const void* userData;
+
 private:
 	UIItem( const UIItem& );			// private, not implemented.
 	void operator=( const UIItem& );	// private, not implemented.

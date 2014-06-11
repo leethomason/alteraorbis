@@ -91,7 +91,8 @@ void Matrix::SetZRotation( float theta )
 
 
 UIItem::UIItem( int p_level ) 
-	: m_x( 0 ),
+	: userData(0),
+	  m_x( 0 ),
 	  m_y( 0 ),
 	  m_level( p_level ),
 	  m_visible( true ),
