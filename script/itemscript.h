@@ -62,12 +62,13 @@ private:
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
-	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0), score(0) {}
+	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0), score(0), tempID(0) {}
 
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
 	int					itemID;
+	int					tempID;		// only used by census scene - generally 0
 	grinliz::IString	titledName;
 	U16					level;
 	U16					value;

@@ -123,6 +123,10 @@ struct ModelHeader
 	   be at uniformMat[5].
 	*/
 	grinliz::IString		modelBoneName[EL_MAX_BONES];
+
+	/* Matches the bone names; the average location. */
+	grinliz::Vector3F		boneCentroid[EL_MAX_BONES];
+
 	/*	The armature uses different IDs. This maps from
 	    the model IDs to the armature IDs so the armature
 		mats can be re-ordered.

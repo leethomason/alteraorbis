@@ -91,7 +91,8 @@ void Matrix::SetZRotation( float theta )
 
 
 UIItem::UIItem( int p_level ) 
-	: m_x( 0 ),
+	: userData(0),
+	  m_x( 0 ),
 	  m_y( 0 ),
 	  m_level( p_level ),
 	  m_visible( true ),
@@ -1238,6 +1239,7 @@ void DigitalBar::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Verte
 
 Gamui::Gamui()
 	:	m_itemTapped( 0 ),
+		m_disabledItemTapped(0),
 		m_iText( 0 ),
 		m_orderChanged( true ),
 		m_modified( true ),
@@ -1258,6 +1260,7 @@ Gamui::Gamui(	IGamuiRenderer* renderer,
 				const RenderAtom& textDisabled,
 				IGamuiText* iText ) 
 	:	m_itemTapped( 0 ),
+		m_disabledItemTapped(0),
 		m_iText( 0 ),
 		m_orderChanged( true ),
 		m_modified( true ),
@@ -1303,6 +1306,9 @@ void Gamui::Remove( UIItem* item )
 	if (m_itemTapped == item) {
 		m_itemTapped = 0;
 	}
+	if (m_disabledItemTapped == item) {
+		m_disabledItemTapped = 0;
+	}
 	int index = m_itemArr.Find( item );
 	GAMUIASSERT( index >= 0 );
 	if ( index >= 0 ) {
@@ -1330,22 +1336,27 @@ void Gamui::TapDown( float x, float y )
 {
 	GAMUIASSERT( m_itemTapped == 0 );
 	m_itemTapped = 0;
+	m_disabledItemTapped = 0;
 
 	for( int i=0; i<m_itemArr.Size(); ++i ) {
 		UIItem* item = m_itemArr[i];
 
 		if (	item->CanHandleTap()    
-			 && item->Enabled() 
 			 && ((item->DialogID() == 0) || (!m_dialogStack.Empty() && m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID()))
 			 && item->Visible()
 			 && x >= item->X() && x < item->X()+item->Width()
 			 && y >= item->Y() && y < item->Y()+item->Height() )
 		{
-			if ( item->HandleTap( UIItem::TAP_DOWN, x, y ) ) {
-				m_itemTapped = item;
-				m_relativeX = (x - item->X()) / item->Width();
-				m_relativeY = (y - item->Y()) / item->Height();
-				break;
+			if (item->Enabled()) {
+				if (item->HandleTap(UIItem::TAP_DOWN, x, y)) {
+					m_itemTapped = item;
+					m_relativeX = (x - item->X()) / item->Width();
+					m_relativeY = (y - item->Y()) / item->Height();
+					break;
+				}
+			}
+			else {
+				m_disabledItemTapped = item;
 			}
 		}
 	}
@@ -1362,6 +1373,7 @@ const UIItem* Gamui::TapUp( float x, float y )
 			result = m_itemTapped;
 	}
 	m_itemTapped = 0;
+	m_disabledItemTapped = 0;
 
 	m_dragEnd = 0;
 	for( int i=0; i<m_itemArr.Size(); ++i ) {
@@ -1388,7 +1400,7 @@ void Gamui::TapCancel()
 		m_itemTapped->HandleTap( UIItem::TAP_CANCEL, 0, 0 );
 	}
 	m_itemTapped = 0;
-
+	m_disabledItemTapped = 0;
 }
 
 int Gamui::SortItems( const void* _a, const void* _b )

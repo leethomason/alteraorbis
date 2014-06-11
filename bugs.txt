@@ -77,11 +77,27 @@ d animation generation
 		x too much "all at once": restrict social in 1st stage?
 		x switch market over to reserve/taxation
 		t greater kills: 4x per kill?
-	    - new sounds
-		- update walkthrough - start with denizens
-		- greater kill not getting shown in weapon history
+		x tune down fire rate
+	    x new sounds
+
+	- Beta 1c
+		x rethink menus: 
+			x group by effect
+			x disable until dependent structures built
+			Denizen:  SleepTube -> Temple -> GuardPost
+			Agronomy: Farm -> Distillery -> Bar
+			Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
+			Visitor:  Temple -> Kiosks
+		t greater kill not getting shown in weapon history
+		t enemies don't distract from buildings
+		x update walkthrough - start with denizens
+    	- seperate land from water. re-think water texture.
+
+	- Beta 1d
+		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
-		- tune down fire rate
+    	- avatar return to base
+    	- face icon generation; icon into build (mantis?)
 
 	- Beta 1c
 		- hints about what you need to build
@@ -160,8 +176,8 @@ d animation generation
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
 		- money checks optional
-		- greatest smith
-		- greatest monsters
+		x greatest smith
+		x greatest monsters
 		- needs to feel interactive
 		x # kills
 		- browsing of items/people
@@ -216,9 +232,9 @@ d animation generation
 			x effects do something
 		x drop cash or return to vault
 		- balance battles
-		- history events
-		- item history
-			- created 
+		x history events
+		x item history
+			x created 
 			x kills
 			x winning names
 		- real health bars & check visibility
@@ -232,7 +248,7 @@ d animation generation
 		- external constant file
 		- aging of stone
 		- consider moving ground to voxel gen system, so that ground can vary?
-		- teams. friend-enemy-neutral logic.
+		x teams. friend-enemy-neutral logic.
 		- monster ecology
 		x visitors
 		x inventory screen

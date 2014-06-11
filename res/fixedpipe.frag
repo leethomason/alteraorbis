@@ -36,9 +36,7 @@ void main()
 			sample = sample.r*v_colorMap[0] + sample.g*v_colorMap[1] + sample.b*v_colorMap[2] + sample.a*v_colorMap[3];
 		#endif
 
-		#if TEXTURE0_ALPHA_ONLY == 1
-			color.a *= sample.a;
-		#elif EMISSIVE == 1
+		#if EMISSIVE == 1
 			// Basically, the alpha color is used to
 			// modulate the incoming fragment color, which
 			// is the result of lighting.

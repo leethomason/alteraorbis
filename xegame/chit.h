@@ -73,7 +73,7 @@ class ChitMsg
 {
 public:
 	enum {
-		// ---- Chit --- //		   Broadcast?
+		//                          Broadcast?
 		CHIT_DESTROYED_START,	//	Yes		sender: health. *starts* the countdown sequence.
 								//			After this components start going away - the best msg to listen for if 
 								//			GetItem() still needs to work.
@@ -85,11 +85,11 @@ public:
 								//					ptr = &SectorPort
 		CHIT_TRACKING_ARRIVED,	//			A tracking component arrived at its target.
 								//					ptr = Chit* that arrived
-		// ---- Component ---- //
+
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
+		PATHMOVE_TO_GRIDMOVE,	//			ptr=&SectorPort
 
-		// XE
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 		WORKQUEUE_UPDATE,
 	};

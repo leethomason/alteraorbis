@@ -23,6 +23,7 @@
 #include "../game/news.h"
 #include "../xarchive/glstreamer.h"
 #include "../xegame/cgame.h"
+#include "corescript.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
@@ -285,7 +286,11 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 	}
 	else {
 		GLASSERT( !titledName.empty() );
-		str->AppendFormat( "[%d] %s", itemID, titledName.c_str() );
+		if (score)
+			str->AppendFormat("[%d] %s %s", itemID, CoreAchievement::CivTechDescription(score), titledName.c_str());
+		else
+			str->AppendFormat( "[%d] %s", itemID, titledName.c_str() );
+
 		if ( level )
 			str->AppendFormat( " Level=%d", level );
 		if ( value )
@@ -302,6 +307,7 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 		if (history) {
 			NewsHistory::Data data;
 			history->Find(itemID, false, 0, &data);
+			//GLASSERT(data.bornOrNamed);	// lessers don't have create/destroy dates.
 
 			if (data.born) {
 				if (data.died) {

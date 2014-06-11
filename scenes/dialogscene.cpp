@@ -135,7 +135,7 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &sceneButtons[CHARACTER] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::CHARACTER, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::AVATAR, 0 ));
 	}
 	else if ( item == &sceneButtons[VAULT] ) {
 		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, CharacterSceneData::VAULT, 0 ));

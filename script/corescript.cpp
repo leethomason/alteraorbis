@@ -46,6 +46,19 @@ using namespace grinliz;
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 
+const char* CoreAchievement::CivTechDescription(int score)
+{
+	const char* result = "none";
+	if (score > 3200)			result = "The mighty empire";
+	else if (score > 1600)		result = "The empire";
+	else if (score > 800)		result = "The noted domain";
+	else if (score > 400)		result = "The domain";
+	else if (score > 100)		result = "The outpost";
+	else if (score > 50)		result = "The prototype";
+	else						result = "The proto test";
+	return result;
+}
+
 void CoreAchievement::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "CoreAchievement");

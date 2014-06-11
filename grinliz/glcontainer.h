@@ -162,7 +162,7 @@ public:
 	NOTE: The array may move around in memory; classes that contain
 	      pointers to their own memory will be corrupted.
 */
-template < class T, class SEM=ValueSem >
+template < class T, class SEM=ValueSem, class KCOMPARE=CompValue >
 class CDynArray
 {
 	enum { CACHE = 4 };
@@ -302,12 +302,12 @@ public:
 
 		while (low < high) {
 			int mid = low + (high - low) / 2;
-			if ( mem[mid] < t )
+			if ( KCOMPARE::Less(mem[mid],t ))
 				low = mid + 1; 
 			else
 				high = mid; 
 		}
-		if ((low < Size() ) && ( mem[low] == t))
+		if ((low < Size()) && KCOMPARE::Equal(mem[low], t))
 			return low;
 
 		return -1;
@@ -328,8 +328,8 @@ protected:
 };
 
 
-template < class T, class SEM=ValueSem >
-class SortedDynArray : public CDynArray< T, SEM >
+template < class T, class SEM=ValueSem, class KCOMPARE=CompValue >
+class SortedDynArray : public CDynArray< T, SEM, KCOMPARE >
 {
 public:
 	void Add( const T& t ) {
@@ -342,7 +342,7 @@ public:
 			EnsureCap( size+1 );
 
 			int i = size;
-			while ( (i>0) && ( t < mem[i-1] )) {
+			while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
 				mem[i] = mem[i-1];
 				--i;
 			}

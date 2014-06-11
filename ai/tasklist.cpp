@@ -552,6 +552,12 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
+	// Transfer money from reserve to market:
+	if (!ReserveBank::Instance() || ReserveBank::Instance()->bank.gold < 1500) {
+		return;
+	}
+	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->bank, 1000);
+
 	MarketAI marketAI( market );
 
 	// Should be sorted, but just in case:
@@ -590,42 +596,45 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			boughtStuff = true;
 		}
 	}
-	if (boughtStuff) return;
 
-	// Sell the extras.
-	int itemToSell = 0;
-	while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
-		GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
-		int value = gi->GetValue();
-		int sold = MarketAI::Transact(gi,
-			market->GetItemComponent(),	// buyer
-			thisComp.itemComponent,		// seller
-			0,							// no sales tax when selling to the market.
-			true);
+	if (!boughtStuff) {
+		// Sell the extras.
+		int itemToSell = 0;
+		while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
+			GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
+			int value = gi->GetValue();
+			int sold = MarketAI::Transact(gi,
+				market->GetItemComponent(),	// buyer
+				thisComp.itemComponent,		// seller
+				0,							// no sales tax when selling to the market.
+				true);
 
-		if (sold)
-			boughtStuff = true;
-		else
-			break;
-	}
-	if (boughtStuff) return;
-
-	// Upgrades! Don't set ranged, shield, etc. because we don't want a critical followed 
-	// by a non-critical. Also, personality probably should factor in to purchasing decisions.
-	for( int i=0; i<3; ++i ) {
-		const GameItem* purchase = 0;
-		if ( i == 0 && ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, ranged->GetValue() * 2 );
-		if ( i == 1 && shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, shield->GetValue() * 2 );
-		if ( i == 2 && melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, melee->GetValue()  * 2 );
-		if ( purchase ) {
-			
-			MarketAI::Transact(	purchase,
-								thisComp.itemComponent,
-								market->GetItemComponent(),
-								salesTax,
-								true);
+			if (sold)
+				boughtStuff = true;
+			else
+				break;
 		}
 	}
+
+	if (!boughtStuff) {
+		// Upgrades! Don't set ranged, shield, etc. because we don't want a critical followed 
+		// by a non-critical. Also, personality probably should factor in to purchasing decisions.
+		for (int i = 0; i < 3; ++i) {
+			const GameItem* purchase = 0;
+			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.gold, ranged->GetValue() * 2);
+			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.gold, shield->GetValue() * 2);
+			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.gold, melee->GetValue() * 2);
+			if (purchase) {
+
+				MarketAI::Transact(purchase,
+					thisComp.itemComponent,
+					market->GetItemComponent(),
+					salesTax,
+					true);
+			}
+		}
+	}
+	Transfer(&ReserveBank::Instance()->bank, &market->GetItem()->wallet, market->GetItem()->wallet);
 }
 
 
@@ -749,4 +758,17 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 
 	return true;
+}
+
+
+bool TaskList::UsingBuilding() const
+{
+	if (taskList.Size() >= 2) {
+		if (taskList[0].action == Task::TASK_STAND
+			&& taskList[1].action == Task::TASK_USE_BUILDING)
+		{
+			return true;
+		}
+	}
+	return false;
 }

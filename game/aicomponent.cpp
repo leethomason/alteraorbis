@@ -2026,9 +2026,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		}
 
 		// If we have something to sell, extra interest in markets that can buy.
-		if (item->IName() == ISC::market
-			&& sellIndex
-			&& item->wallet.gold >= sellValue)
+		if (item->IName() == ISC::market && sellIndex )
 		{
 			s *= 2.0;	// sell sell sell!
 		}
@@ -2183,16 +2181,17 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		int r = parentChit->random.Rand(4);
 
 		if (thisComp.item->keyValues.GetIString(IStringConst::mob) == IStringConst::greater) {
-			Vector2I techSector = Context()->chitBag->PopSummoning(LumosChitBag::SUMMON_TECH);
+			// If there is a summoning, try to go there. Don't actually pop until
+			// the Grid travel kicks in.
+			Vector2I techSector = Context()->chitBag->HasSummoning(LumosChitBag::SUMMON_TECH);
 			if (!techSector.IsZero()) {
 				SectorPort dest;
 				dest.sector = techSector;
 				const SectorData& destSD = context->worldMap->GetSector(dest.sector);
 				dest.port = destSD.NearestPort(pos2);
-				DoSectorHerd(thisComp, true, dest);
 
-				Vector2I target = { techSector.x*SECTOR_SIZE + SECTOR_SIZE / 2, techSector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
-				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+				// The announcement of an incoming greater is made later.
+				DoSectorHerd(thisComp, false, dest);
 				return;
 			}
 		}
@@ -2729,7 +2728,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		focus = FOCUS_NONE;
 	}
 
-	if ( feTicker.Delta( deltaTime )) {
+	if ( !taskList.UsingBuilding() && feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
 	}
 
@@ -2893,11 +2892,11 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	Vector2I mapPos = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector( mapPos );
 
-	switch ( msg.ID() ) {
+	switch (msg.ID()) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
-		if ( currentAction != WANDER ) {
+		if (currentAction != WANDER) {
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
@@ -2918,12 +2917,30 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		taskList.Clear();
 		{
-			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-			if ( pmc ) {
+			PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+			if (pmc) {
 				pmc->Clear();	// make sure to clear the path and the queued path
 			}
 		}
 		break;
+
+	case ChitMsg::PATHMOVE_TO_GRIDMOVE:
+	{
+		LumosChitBag* chitBag = Context()->chitBag;
+		const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
+		Vector2I sector = sectorPort->sector;
+
+		if (   parentChit->GetItem()
+			&& parentChit->GetItem()->keyValues.GetIString( ISC::mob) == ISC::greater 
+			&& chitBag->HasSummoning(LumosChitBag::SUMMON_TECH) == sector)
+		{
+			Vector2I target = { sector.x*SECTOR_SIZE + SECTOR_SIZE / 2, sector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
+			Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+			chitBag->RemoveSummoning(sector);
+		}
+	}
+		break;
+
 
 	case ChitMsg::CHIT_SECTOR_HERD:
 		{

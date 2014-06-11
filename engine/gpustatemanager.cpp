@@ -139,7 +139,6 @@ GPUDevice::GPUDevice()
 	currentStencilMode	= STENCIL_OFF;
 	primitive			= GL_TRIANGLES;
 	trianglesDrawn		= 0;
-	quadsDrawn			= 0;
 	drawCalls			= 0;
 	uid					= 0;
 	for( int i=0; i<3; ++i ) matrixDepth[i] = 0;
@@ -164,6 +163,7 @@ GPUDevice::GPUDevice()
 		quadBuffer[i] = new GPUVertexBuffer( 0, 1024 );
 	}
 	ResetState();
+	quadIndexBuffer = 0;
 }
 
 GPUDevice::~GPUDevice()
@@ -175,6 +175,7 @@ GPUDevice::~GPUDevice()
 	for( int i=0; i<NUM_QUAD_BUFFERS; ++i ) {
 		delete quadBuffer[i];
 	}
+	delete quadIndexBuffer;
 	instance = 0;
 }
 
@@ -306,12 +307,12 @@ int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPU
 		// - simpler shader code
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES] );
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
+			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
 	else if ( flags & ShaderManager::BONE_FILTER ) {
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
+			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
 
@@ -349,7 +350,6 @@ void GPUDevice::Weld( const GPUState& state, const GPUStream& stream, const GPUS
 	int flags = 0;
 	// State Flags
 	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
-	flags |= (data.texture0 && (data.texture0->Format() == TEX_ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
 
 	flags |= state.HasLighting();
 
@@ -517,27 +517,43 @@ void GPUDevice::SetCameraTransform( const grinliz::Matrix4& camera )
 }
 
 
-void GPUDevice::DrawQuads( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int nQuad )
+void GPUDevice::DrawQuads( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int nQuads )
 {
-	quadsDrawn += nQuad;
+	static const int N = 6 * (96 * 1024 / 6);
+	if (!quadIndexBuffer) {
+		U16* mem = new U16[N];
+		U16 b = 0;
+		for ( int i = 0; i < N; i+=6, b+=4) {
+			// 0 1 2
+			// 0 2 3
+			mem[i + 0] = b+0;
+			mem[i + 1] = b+1;
+			mem[i + 2] = b+2;
+			mem[i + 3] = b+0;
+			mem[i + 4] = b+2;
+			mem[i + 5] = b+3;
+		}
+		quadIndexBuffer = new GPUIndexBuffer(mem, N);
+		delete[] mem;
+	}
+	GLASSERT(data.indexBuffer == 0);
+	GPUStreamData d2 = data;
+	d2.indexBuffer = quadIndexBuffer->ID();
 
-	//glDisable( GL_CULL_FACE );
-	DrawPrimitive( GL_QUADS, state, stream, data, nQuad*4 );
-}
-
-
-void GPUDevice::DrawPrimitive( int prim, const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int count )
-{
+	int nIndex = nQuads * 6;
+	GLASSERT(nIndex < N);
+	trianglesDrawn += nIndex / 3;
 	++drawCalls;
 
-	//glDisable( GL_CULL_FACE );
-	GLASSERT( data.vertexBuffer );
+	glBindBufferX(GL_ARRAY_BUFFER, d2.vertexBuffer);
+	glBindBufferX(GL_ELEMENT_ARRAY_BUFFER, d2.indexBuffer);
 
-	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-	Weld( state, stream, data );
-	Upload( state, stream, data, 0, 1 );
-	glDrawArrays( prim, 0, count );
-	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+	Weld(state, stream, d2);
+	Upload(state, stream, d2, 0, 1);
+	glDrawElements(GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, 0);
+
+	glBindBufferX(GL_ARRAY_BUFFER, 0);
+	glBindBufferX(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
@@ -588,13 +604,13 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 	};
 	
 	if ( !positive ) {
-		pos[1].pos.Set( p0.x, p1.y, p1.z );
-		pos[2].pos.Set( p1.x, p1.y, p1.z );
-		pos[3].pos.Set( p1.x, p0.y, p0.z );
-
-		pos[1].tex.Set( 0, 1 );
-		pos[2].tex.Set( 1, 1 );
-		pos[3].tex.Set( 1, 0 );
+		pos[1].pos.Set(p0.x, p1.y, p1.z);
+		pos[2].pos.Set(p1.x, p1.y, p1.z);
+		pos[3].pos.Set(p1.x, p0.y, p0.z);
+		
+		pos[1].tex.Set(0, 1);
+		pos[2].tex.Set(1, 1);
+		pos[3].tex.Set(1, 0);
 	}
 
 	quadBuffer[currentQuadBuf]->Upload( pos, 4*sizeof(PTVertex), 0 );
@@ -613,26 +629,6 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 }
 
 
-void GPUDevice::DrawLine( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
-{
-	Vector3F v[2] = { p0, p1 };
-
-	quadBuffer[currentQuadBuf]->Upload( v, 2*sizeof(PTVertex), 0 );
-
-	GPUStream stream;
-	stream.stride = sizeof(Vector3F);
-	GPUStreamData data;
-	data.vertexBuffer = quadBuffer[currentQuadBuf]->ID();
-
-	DrawPrimitive( GL_LINES, state, stream, data, 2 );
-	++currentQuadBuf;
-	if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-		//GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
-		currentQuadBuf = 0;
-	}
-}
-
-
 void GPUDevice::DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, float width )
 {
 	const Vector3F UP = { 0, 1, 0 };
@@ -642,17 +638,18 @@ void GPUDevice::DrawArrow( const GPUState& state, const grinliz::Vector3F p0, co
 		normal.Normalize();
 		normal = normal * width;
 
-		PTVertex v[3] = { 
+		PTVertex v[4] = { 
 			{ p0-normal, { 0, 0 } },
 			{ p1, { 1, 1 } },
-			{ p0+normal, { 1, 0 } },
+			{ p1, { 1, 1 } },
+			{ p0 + normal, { 1, 0 } },
 		};
-		quadBuffer[currentQuadBuf]->Upload(v, 3 * sizeof(PTVertex), 0);
+		quadBuffer[currentQuadBuf]->Upload(v, 4 * sizeof(PTVertex), 0);
 		GPUStream stream(v[0]);
 		GPUStreamData data;
 		data.vertexBuffer = quadBuffer[currentQuadBuf]->ID();
 
-		DrawPrimitive( GL_TRIANGLES, state, stream, data, 3 );
+		DrawQuads(state, stream, data, 1);
 		++currentQuadBuf;
 		if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
 			//GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU

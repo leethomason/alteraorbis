@@ -78,7 +78,8 @@ private:
 	void ClearTargetFlags();
 	void SetSelectionModel( const grinliz::Vector2F& view );
 
-	void SetPickupButtons();
+	void SetPickupButtons();	// if the avatar can pick things up
+	void SetBuildButtons();		// enable / disable menu items
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
@@ -143,7 +144,6 @@ private:
 	int					buildActive;	// which build button is active. 0 if none.
 	int					chitTracking;
 	int					currentNews;	// index of the last news item put in the console
-	int					sleepTubeID;
 	int					coreWarningTimer, domainWarningTimer;
 	int					poolView;
 	grinliz::Vector2F	mapDragStart;

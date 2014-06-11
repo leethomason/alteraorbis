@@ -150,7 +150,6 @@ public:
 		switch ( format ) {
 		case TEX_RGBA16:	c = CalcRGBA16( GetTex16( x, y ));	break;
 		case TEX_RGB16:		c = CalcRGB16( GetTex16( x, y ));	break;
-		case TEX_ALPHA:		c.a = pixels[y*w+x];				break;
 		default:		GLASSERT( 0 );
 		}
 		return c;
@@ -163,7 +162,6 @@ public:
 		switch ( format ) {
 		case TEX_RGBA16:	SetTex16( x, y, CalcRGBA16( c ) );	break;
 		case TEX_RGB16:		SetTex16( x, y, CalcRGB16( c ) );	break;
-		case TEX_ALPHA:		pixels[y*w+x] = c.a;				break;
 		default:		GLASSERT( 0 );
 		}
 	}

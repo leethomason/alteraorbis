@@ -110,9 +110,6 @@ void Surface::BlitImg(	const grinliz::Rectangle2I& target,
 	else if ( grinliz::StrEqual( "RGB16", formatString ) ) {
 		return TEX_RGB16;
 	}
-	else if ( grinliz::StrEqual( "ALPHA", formatString ) ) {
-		return TEX_ALPHA;
-	}
 	GLASSERT( 0 );
 	return TEX_RGB16;
 }

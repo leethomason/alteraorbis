@@ -40,6 +40,8 @@ struct CoreAchievement
 	void Clear() { techLevel = 0; gold = 0; population = 0; civTechScore = 0; }
 	void Serialize(XStream* xs);
 
+	static const char* CivTechDescription(int score);
+
 	int			techLevel;
 	int			gold;
 	int			population;

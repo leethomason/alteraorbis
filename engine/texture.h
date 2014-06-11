@@ -72,7 +72,7 @@ public:
 	bool Empty() const			{ return creator == 0 && item == 0 && glID == 0 && name.empty(); }
 
 	int BytesInImage() const	{ return w*h*BytesPerPixel(); }
-	int BytesPerPixel() const	{ return (format == TEX_ALPHA) ? 1 : 2; }
+	int BytesPerPixel() const	{ return TextureBytesPerPixel(format); }
 
 	U32 GLID();
 

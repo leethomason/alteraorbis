@@ -67,13 +67,7 @@ void EndGameWidget::SetBodyText()
 {
 	CStr<400> str = "--CORE DESTROYED--\n";
 
-	if		(achievement.civTechScore > 3200)		str.Format("The mighty empire");
-	else if (achievement.civTechScore > 1600)		str.Format("The empire");
-	else if (achievement.civTechScore >  800)		str.Format("The noted domain");
-	else if (achievement.civTechScore >  400)		str.Format("The domain");
-	else if (achievement.civTechScore >  100)		str.Format("The outpost");
-	else if (achievement.civTechScore >   50)		str.Format("The prototype");
-	else											str.Format("The proto test");
+	str = CoreAchievement::CivTechDescription(achievement.civTechScore);
 
 	int num;
 	NewsHistory::Data data;

@@ -210,8 +210,8 @@ void WorldGenScene::DoTick( U32 delta )
 				worldGen->DoLandAndWater(genState.y++);
 			}
 		}
-		CStr<16> str;
-		str.Format("Land: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+		CStr<32> str;
+		str.Format("Stage 1/3 Land: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
 		label.SetText(str.c_str());
 		GLString name;
 
@@ -277,8 +277,8 @@ void WorldGenScene::DoTick( U32 delta )
 				genState.y++;
 			}
 		}
-		CStr<16> str;
-		str.Format("Rock: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+		CStr<32> str;
+		str.Format("Stage 2/3 Rock: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
 		label.SetText(str.c_str());
 
 		if (genState.y == WorldGen::SIZE) {
@@ -295,7 +295,6 @@ void WorldGenScene::DoTick( U32 delta )
 			generateEmitters = true;
 			genState.Clear();
 			genState.mode = GenState::SIM_START;
-			label.SetText("100%");
 		}
 	}
 		break;
@@ -370,6 +369,10 @@ void WorldGenScene::DoTick( U32 delta )
 						sim->GetChitBag()->census.greaterMOBs );
 		worldText.SetText(simStr.c_str());
 
+		CStr<32> str;
+		str.Format("Stage 3/3 Simulation: %d%%", int(100.0f * age / 1.0f));
+		label.SetText(str.c_str());
+
 		if (age > SettingsManager::Instance()->SpawnDate()) {
 			sim->EnableSpawn(true);
 		}
@@ -391,6 +394,7 @@ void WorldGenScene::DoTick( U32 delta )
 
 		genState.mode = GenState::DONE;
 		simStr.AppendFormat("\n\nDONE!");
+		label.SetText("DONE");
 		worldText.SetText(simStr.c_str());
 	}
 		break;

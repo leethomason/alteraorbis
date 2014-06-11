@@ -3,6 +3,10 @@ Beta 1
 
 grinninglizard.com/altera
 
+How to Play
+-----------
+http://alteraorbis.wikispaces.com/
+
 
 About
 -----
@@ -19,6 +23,17 @@ Altera Orbis is in Beta, and will be until it's ready;
 thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
+Changes in 1b
+-------------
+- Sounds! Big thanks to Justin Prymowicz. 
+- the escape key now backs out of menus
+- Sound engine improvements, improved latency
+- re-tune wandering monsters
+- population cap now controlled by # of temples
+- forge and distilleries controlled by current tech level
+- the market now run by the reserve bank, pays a cut to the core
+- bug fixes in history tracking
+- fix many OpenGL bugs on old drivers
 
 Changes in 1a
 -------------
@@ -30,10 +45,6 @@ Changes in 1a
 - ui tweaks
 - added Exchange to convert between Au and Crystal
 - tweaked Denizen AI, Forge, and Exchange to be self sustaining 
-
-How to Play
------------
-http://alteraorbis.wikispaces.com/
 
 
 FAQ

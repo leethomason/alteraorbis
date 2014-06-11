@@ -38,8 +38,7 @@ struct Vertex
 	grinliz::Vector3F	pos;
 	grinliz::Vector3F	normal;
 	grinliz::Vector2F	tex;
-	U16					boneID;		// 8 bits is fine; needs to be 32 bit aligned structure.
-	U16					_pad;
+	float				boneID;			// 8 bits would be fine; but GL 3.2 doesn't like int attributes. So use a float.
 
 	bool Equal( const Vertex& v ) const {
 		if (    pos == v.pos 
@@ -62,36 +61,6 @@ struct Vertex
 		return false;
 	}
 };
-
-/*
-struct InstVertex
-{
-	enum {
-		POS_OFFSET = 0,
-		NORMAL_OFFSET = 12,
-		TEXTURE_OFFSET = 24,
-		BONE_ID_OFFSET  = 32,
-		INSTANCE_OFFSET = 34
-	};
-
-	void From( const Vertex& rhs ) {
-		GLASSERT( ((const U8*)&boneID) - ((const U8*)this) == BONE_ID_OFFSET );
-		GLASSERT( ((const U8*)&instanceID) - ((const U8*)this) == INSTANCE_OFFSET );
-
-		this->pos = rhs.pos;
-		this->normal = rhs.normal;
-		this->tex = rhs.tex;
-		this->boneID = rhs.boneID;
-		instanceID = 0;
-	}
-
-	grinliz::Vector3F	pos;
-	grinliz::Vector3F	normal;
-	grinliz::Vector2F	tex;
-	U16					boneID;
-	U16					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
-};
-*/
 	
 
 struct PTVertex
@@ -103,6 +72,7 @@ struct PTVertex
 
 	grinliz::Vector3F	pos;
 	grinliz::Vector2F	tex;
+
 };
 
 

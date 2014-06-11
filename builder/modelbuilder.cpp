@@ -75,7 +75,7 @@ void ModelBuilder::AddTri( const Vertex& v0, const Vertex& v1, const Vertex& v2 
 		// tex
 		vX[i].tex = vIn[i].tex;
 		// BoneID
-		vX[i].boneID = boneID;
+		vX[i].boneID = float(boneID);
 
 		// Atlas conversion, if being used.
 		if ( currentSubTex ) {

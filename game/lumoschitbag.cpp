@@ -1047,11 +1047,20 @@ void LumosChitBag::AddSummoning(const grinliz::Vector2I& sector, int reason)
 }
 
 
-grinliz::Vector2I LumosChitBag::PopSummoning(int reason)
+grinliz::Vector2I LumosChitBag::HasSummoning(int reason)
 {
 	Vector2I v = { 0, 0 };
 	if (summoningArr.Size()) {
-		v = summoningArr.Pop();
+		v = summoningArr[0];
 	}
 	return v;
+}
+
+
+void LumosChitBag::RemoveSummoning(const grinliz::Vector2I& sector)
+{
+	int i = 0;
+	while ((i = summoningArr.Find(sector)) >= 0) {
+		summoningArr.Remove(i);
+	}
 }

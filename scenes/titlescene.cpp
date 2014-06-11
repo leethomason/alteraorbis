@@ -68,9 +68,8 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 
 	note.Init( &gamui2D );
-	//note.SetText( "Thanks for playing this alpha-of-the-beta of Altera! The domain "
-	//			  "vs. world part of the game is in place. "
-	//			  "Please see the README.txt for information and a link to the game wiki." );
+	note.SetText( "Thanks for playing this beta of Altera!"
+				  "Please see the README.txt for information and a link to the 'how to play' game wiki." );
 
 	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	if (SettingsManager::Instance()->AudioOn()) {
@@ -229,7 +228,7 @@ void TitleScene::Resize()
 		fclose(fp);
 	}
 
-	layout.PosAbs( &note, 0, 1 );
+	layout.PosAbs( &note, 0, -2 );
 	note.SetVisible(!visible);
 	note.SetBounds( port.UIWidth() / 2, 0 );
 
@@ -311,6 +310,7 @@ void TitleScene::HandleHotKey(int key)
 {
 	if (key == GAME_HK_SPACE) {
 		seed++;
+#if 0
 		GLOUTPUT(("Seed=%d\n", seed));
 		if (model[HUMAN_FEMALE]) {
 			HumanGen gen(true, seed, TEAM_HOUSE, false);
@@ -319,6 +319,27 @@ void TitleScene::HandleHotKey(int key)
 			model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
 			model[HUMAN_FEMALE]->SetColorMap(info.color);
 		}
+#endif
+
+		model[0]->SetYRotation(0);
+
+		const ModelResource* res = model[0]->GetResource();
+		Vector3F head = { 0, 0, 0 };
+		for (int i = 0; i < EL_MAX_BONES; ++i) {
+			if (res->header.modelBoneName[i] == "head") {
+				head = res->header.boneCentroid[i];
+				break;
+			}
+		}
+		Matrix4 xform = model[0]->XForm();
+		Vector3F local = xform * head;
+
+		float x = model[0]->Pos().x;
+
+		const Vector3F CAM    = { local.x, local.y, local.z + 3.0f };
+		const Vector3F TARGET = { local.x, local.y, local.z };
+
+		engine->CameraLookAt(CAM, TARGET);
 	}
 	else {
 		super::HandleHotKey(key);

@@ -289,11 +289,13 @@ public:
 	bool PopScene( int* id, SceneData** data );
 	bool IsScenePushed() const { return sceneID >= 0; }
 
+	// FIXME: sketchy partial implementation. 'reason' not used.
 	enum {
 		SUMMON_TECH
 	};
 	void AddSummoning(const grinliz::Vector2I& sector, int reason);
-	grinliz::Vector2I PopSummoning(int reason);
+	grinliz::Vector2I HasSummoning(int reason);
+	void RemoveSummoning(const grinliz::Vector2I& sector);
 
 private:
 

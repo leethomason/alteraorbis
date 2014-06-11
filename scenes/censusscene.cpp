@@ -9,31 +9,25 @@
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
 #include "../engine/engine.h"
+#include "characterscene.h"
 
 using namespace gamui;
 using namespace grinliz;
 
-/*	
-	Money in world.
-	Money in MOBs.
-	Highest [Living, Dead] [MOB, Greater, Lesser, Denizen] by [Level,Age]
-	Highest [Living, Dead] [Pistol, Blaster, Pulse, Beamgun, Shield, Ring] by [Level]
-
-*/
-
-struct ItemHistoryScore
-{
-	// sort descending
-	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score > b.score; }
-};
 
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)
 {
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
-	text.Init( &gamui2D );
 
 	memset( mobActive, 0, sizeof(*mobActive)*MOB_COUNT );
 	memset( itemActive, 0, sizeof(*itemActive)*ITEM_COUNT );
+
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		link[i].Init(&gamui2D, game->GetButtonLook(0));
+		label[i].Init(&gamui2D);
+		label[i].SetTab(100);
+		group[i].Init(&gamui2D);
+	}
 
 	Scan();
 }
@@ -51,12 +45,14 @@ void CensusScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	const Screenport& port = lumosGame->GetScreenport();
 
-	layout.PosAbs( &text, 0, 0 );
-	float dx = text.X();
-	float dy = text.Y();
+	// --- half size --- //
+	layout.SetSize(layout.Width(), 0.5f*layout.Height());
 
-	text.SetBounds( port.UIWidth() - dx*2.0f, port.UIHeight() - dy*2.0f );
-	text.SetTab( text.Width() * 0.3f );
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		layout.PosAbs(&group[i], 1, i);
+		layout.PosAbs(&link[i], 2, i);
+		layout.PosAbs(&label[i], 3, i);
+	}
 }
 
 
@@ -65,25 +61,35 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		lumosGame->PopScene();
 	}
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		if (item == &link[i]) {
+			Chit* chit = chitBag->GetChit((int)link[i].userData);
+			if (chit && chit->GetItemComponent()) {
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
+				break;
+			}
+		}
+	}
 }
 
 
 
-void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
+void CensusScene::ScanItem(ItemComponent* ic, const GameItem* item)
 {
-	if ( item->Intrinsic() ) return;
+	if (item->Intrinsic()) return;
 
-	IString mobIStr = item->keyValues.GetIString( "mob" );
-	if ( !mobIStr.empty() ) {
-		mobWallet.Add( item->wallet );
+	IString mobIStr = item->keyValues.GetIString("mob");
+	if (!mobIStr.empty()) {
+		mobWallet.Add(item->wallet);
 
 		int slot = -1;
-		if      ( mobIStr == ISC::denizen ) slot = MOB_DENIZEN;
-		else if ( mobIStr == ISC::greater ) slot = MOB_GREATER;
-		else if ( mobIStr == ISC::lesser )  slot = MOB_LESSER;
+		if (mobIStr == ISC::denizen) slot = MOB_DENIZEN;
+		else if (mobIStr == ISC::greater) slot = MOB_GREATER;
+		else if (mobIStr == ISC::lesser)  slot = MOB_LESSER;
 
-		if ( slot >= 0 ) {
-			if ( !mobActive[slot].item || item->Traits().Level() > mobActive[slot].item->Traits().Level() ) {
+		if (slot >= 0) {
+			if (!mobActive[slot].item || item->Traits().Level() > mobActive[slot].item->Traits().Level()) {
 				mobActive[slot].item = item;
 				mobActive[slot].ic = ic;
 			}
@@ -92,41 +98,39 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 
 	IString itemIStr = item->IName();
 	int slot = -1;
-	if (      itemIStr == ISC::pistol )  slot = ITEM_PISTOL;
-	else if ( itemIStr == ISC::blaster ) slot = ITEM_BLASTER;
-	else if ( itemIStr == ISC::pulse )   slot = ITEM_PULSE;
-	else if ( itemIStr == ISC::beamgun ) slot = ITEM_BEAMGUN;
-	else if ( itemIStr == ISC::ring )    slot = ITEM_RING;
-	else if ( itemIStr == ISC::shield )  slot = ITEM_SHIELD;
+	if (itemIStr == ISC::pistol)  slot = ITEM_PISTOL;
+	else if (itemIStr == ISC::blaster) slot = ITEM_BLASTER;
+	else if (itemIStr == ISC::pulse)   slot = ITEM_PULSE;
+	else if (itemIStr == ISC::beamgun) slot = ITEM_BEAMGUN;
+	else if (itemIStr == ISC::ring)    slot = ITEM_RING;
+	else if (itemIStr == ISC::shield)  slot = ITEM_SHIELD;
 
-	if ( slot >= 0 ) {
-		if ( !itemActive[slot].item || item->GetValue() > itemActive[slot].item->GetValue() ) {
+	if (slot >= 0) {
+		if (!itemActive[slot].item || item->GetValue() > itemActive[slot].item->GetValue()) {
 			itemActive[slot].item = item;
 			itemActive[slot].ic = ic;
 		}
 	}
 
 	ItemHistory h;
-	h.Set( item );
+	h.Set(item);
+	h.tempID = ic->ParentChit()->ID();
+	AddToHistory(h);
+}
 
-	if ( h.kills > killsActive.kills ) {
-		killsActive.Set( item );
+void CensusScene::AddToHistory(const ItemHistory& h)
+{
+	if ( h.kills ) {
+		kills.Add(h);
 	}
-	if ( h.greater > greaterKillsActive.greater ) {
-		greaterKillsActive.Set( item );
+	if ( h.greater ) {
+		greaterKills.Add(h);
 	}
-	if ( h.crafted > craftedActive.crafted ) {
-		craftedActive.Set( item );
+	if ( h.crafted ) {
+		crafted.Add(h);
 	}
 	if (h.score) {
-		if (domains.HasCap()) {
-			domains.Push(h);
-			Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
-		}
-		else if (h.score > domains[0].score) {
-			domains[0] = h;
-			Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
-		}
+		domains.Add(h);
 	}
 }
 
@@ -149,15 +153,7 @@ void CensusScene::Scan()
 				if (!item) continue;
 
 				allWallet.Add(item->wallet);
-
-				// Optimization: causes bugs if forget to update, and does it help??
-//				if (   item->ToWeapon()
-//					|| item->ToShield()
-//					|| !item->keyValues.GetIString(IStringConst::mob).empty()
-//					|| item->IName() == IStringConst::core )
-//				{
-					ScanItem(ic, item);
-//				}
+				ScanItem(ic, item);
 			}
 		}
 	}
@@ -171,67 +167,103 @@ void CensusScene::Scan()
 			// still alive.
 			continue;
 		}
-
-		if ( h.kills > killsAny.kills ) {
-			killsAny = h;
-		}
-		if ( h.greater > greaterKillsAny.greater ) {
-			greaterKillsAny = h;
-		}
-		if ( h.crafted > craftedAny.crafted ) {
-			craftedAny = h;
-		}
-		if (h.score) {
-			if (domains.HasCap()) {
-				domains.Push(h);
-				Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
-			}
-			else if (h.score > domains[0].score) {
-				domains[0] = h;
-				Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
-			}
-		}
+		AddToHistory(h);
 	}
 
 	ReserveBank* reserve = ReserveBank::Instance();
 	const Wallet& reserveWallet = reserve->bank;
 	NewsHistory* history = chitBag->GetNewsHistory();
 
+	GLString debug;
 	GLString str;
-	str.Format( "Chits: %d\n", nChits );
-	str.AppendFormat( "Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
-	str.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
-	str.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
-	str.AppendFormat( "Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
+	debug.Format( "Chits: %d\n", nChits );
+	debug.AppendFormat( "Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
+	debug.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
+	debug.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
+	debug.AppendFormat( "Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
 		allWallet.gold + reserveWallet.gold, 
 		allWallet.crystal[0] + reserveWallet.crystal[0], 
 		allWallet.crystal[1] + reserveWallet.crystal[1], 
 		allWallet.crystal[2] + reserveWallet.crystal[2], 
 		allWallet.crystal[3] + reserveWallet.crystal[3] );
 
-	str.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
-	str.append( "\n" );
-	str.append( "Kills:\n" );
-	str.append( "  Total\t" );				killsActive.AppendDesc( &str, history );	str.append( "\n" );
-	str.append( "\t" );						killsAny.AppendDesc( &str, history );	str.append( "\n" );
-	str.append( "  Greater\t" );			greaterKillsActive.AppendDesc( &str, history );	str.append( "\n" );
-	str.append( "\t" );						greaterKillsAny.AppendDesc( &str, history );	str.append( "\n" );
-	str.append( "\nCrafting:\n" );
-	str.append( "\t" );						craftedActive.AppendDesc( &str, history );str.append( "\n" );
-	str.append( "\t" );						craftedAny.AppendDesc( &str, history );	str.append( "\n" );
-	str.append("\nDomains:\n");
-	for (int i = 0; i < domains.Size(); ++i) {
-		str.append("\t");					domains[i].AppendDesc(&str, history); str.append("\n");
-	}
-	str.append( "\nNotable:\n" );
+	debug.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
+	debug.append( "\n" );
 
+	int count = 0;
+
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		group[i].SetVisible(false);
+		link[i].SetVisible(false);
+	}
+
+	group[count].SetText("Kills:");
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(kills.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		kills[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(kills[i].tempID > 0);
+		//link[count].SetText(kills[i].tempID ? "link" : "");
+		link[count].userData = (const void*)kills[i].tempID;
+		count++;
+	}
+
+	++count;
+	group[count].SetText( "Greater Kills:" );
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(greaterKills.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		greaterKills[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(greaterKills[i].tempID > 0);
+		link[count].userData = (const void*)greaterKills[i].tempID;
+		//link[count].SetText(greaterKills[i].tempID ? "link" : "");
+		++count;
+	}
+
+	++count;
+	group[count].SetText( "Crafting:" );
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(crafted.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		crafted[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(crafted[i].tempID > 0);
+		link[count].userData = (const void*)crafted[i].tempID;
+		//link[count].SetText(crafted[i].tempID ? "link" : "");
+		++count;
+	}
+
+	++count;
+	group[count].SetText("Domains:");
+	group[count].SetVisible(true);
+	for (int i = 0; i < Min(domains.Size(), (int)MAX_ROWS); ++i) {
+		str = "";
+		domains[i].AppendDesc(&str, history);
+		label[count].SetText(str.c_str());
+		link[count].SetVisible(true);
+		link[count].SetEnabled(domains[i].tempID > 0);
+		//link[count].SetText(domains[i].tempID ? "link" : "");
+		link[count].userData = (const void*)domains[i].tempID;
+		++count;
+	}
+
+	++count;
+	group[count].SetText("Notable:");
+	group[count].SetVisible(true);
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
 		if ( mobActive[i].item ) {
 			ItemHistory h;
 			h.Set( mobActive[i].item );
-			
-			str.AppendFormat( "  %s\t", NAME[i] );
+			h.tempID = mobActive[i].ic ? mobActive[i].ic->ParentChit()->ID() : 0;
+
+			str = "";
+			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str, history );
 
 			Chit* chit = mobActive[i].ic->ParentChit();
@@ -243,8 +275,12 @@ void CensusScene::Scan()
 				const SectorData& sd = map->GetSector( sector );
 				str.AppendFormat( " at %s", sd.name.safe_str() );
 			}
-
-			str.append( "\n" );
+			label[count].SetText(str.c_str());
+			link[count].SetVisible(true);
+			link[count].SetEnabled(h.tempID > 0);
+			//link[count].SetText(h.tempID ? "link" : "");
+			link[count].userData = (const void*)h.tempID;
+			++count;
 		}
 	}
 
@@ -253,7 +289,9 @@ void CensusScene::Scan()
 		if ( itemActive[i].item ) {
 			ItemHistory h;
 			h.Set( itemActive[i].item );
+			h.tempID = itemActive[i].ic ? itemActive[i].ic->ParentChit()->ID() : 0;
 
+			str = "";
 			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str, history );
 
@@ -262,11 +300,41 @@ void CensusScene::Scan()
 			if ( !mob.empty() ) {
 				str.AppendFormat( " wielded by %s", mainItem->BestName() );
 			}
-			str.append( "\n" );
+			label[count].SetText(str.c_str());
+			link[count].SetVisible(true);
+			link[count].SetEnabled(h.tempID > 0);
+			//link[count].SetText(h.tempID ? "link" : "");
+			link[count].userData = (const void*)h.tempID;
+			++count;
 		}
 	}
 
-	text.SetText( str.safe_str() );
+//	text.SetText( str.safe_str() );
+	GLASSERT(count <= MAX_BUTTONS);
+	for (int i = count; i < MAX_BUTTONS; ++i) {
+		label[i].SetVisible(false);
+	}
+
+	GLOUTPUT(("%s", debug.safe_str()));
+}
+
+
+void CensusScene::HandleHotKey(int value)
+{
+	if (value == GAME_HK_SPACE) {
+		for (int i = 0; i < greaterKills.Size(); ++i) {
+			int id = greaterKills[i].tempID;
+			Chit* chit = chitBag->GetChit(id);
+			if (chit && chit->GetItemComponent()) {
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
+				break;
+			}
+		}
+	}
+	else {
+		super::HandleHotKey(value);
+	}
 }
 
 

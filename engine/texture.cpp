@@ -257,10 +257,15 @@ void TextureManager::CalcOpenGL( int format, int* glFormat, int* glType )
 			*glType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 
+			/*
 		case TEX_ALPHA:
+			// GL_ALPHA not supported in some contexts. Is in others.
+			// Oh GL, you have become unusable. 
+			// http://stackoverflow.com/questions/9355869/invalid-enumerant-when-creating-16-bit-texture
 			*glFormat = GL_ALPHA;
 			*glType = GL_UNSIGNED_BYTE;
 			break;
+			*/
 
 		default:
 			GLASSERT( 0 );

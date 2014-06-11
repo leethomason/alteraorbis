@@ -9,7 +9,8 @@ struct BuildData
 	const char*			cName;
 	const char*			cStructure;
 	int					group;
-	const char*			desc;
+	const char*			desc;				// what does this do?
+	const char*			requirementDesc;	// what requirements are needed to build this?
 
 	int					cost;
 	int					size;			// 1 or 2
@@ -34,23 +35,26 @@ public:
 		ROTATE,
 		PAVE,
 		ICE,
+
+		SLEEPTUBE,
+		TEMPLE,
+		GUARDPOST,
+
+		FARM,
+		DISTILLERY,
+		BAR,
+
+		MARKET,
+		FORGE,
+		EXCHANGE,
+		VAULT,
+
 		KIOSK_N,
 		KIOSK_M,
 		KIOSK_C,
 		KIOSK_S,
-		VAULT,
-		FACTORY,
-		POWER,
-		BED,
-		MARKET,
-		BAR,
-		GUARDPOST,
-		FARM,
-		DISTILLERY,
-		EXCHANGE,
-		NUM_OPTIONS,
 
-		NUM_GROUPS = 4,
+		NUM_OPTIONS,
 
 		GROUP_UTILITY = 0,
 		GROUP_VISITOR,

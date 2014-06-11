@@ -279,6 +279,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		//GLOUTPUT(( "View set. Camera at (%.1f,%.1f,%.1f) looking at (%.1f,%.1f,%.1f)\n",
 		//	camera.PosWC().x, camera.PosWC().y, camera.PosWC().z,
 		//	at.x, at.y, at.z ));
+#if 0	// turn back on if camera problems
 		if (map) {
 			Rectangle2I b = map->Bounds();
 			b.Outset(20);
@@ -286,6 +287,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 				GLASSERT(0);	// looking at nothing.
 			}
 		}
+#endif
 	}
 #endif
 
@@ -833,7 +835,7 @@ void DrawDebugLines( U32 delta )
 		if ( dl->time > 0 ) {
 			dl->time -= delta;
 			flatShader.SetColor( dl->color.x, dl->color.y, dl->color.z );
-			GPUDevice::Instance()->DrawLine( flatShader, dl->tail, dl->head );
+			//GPUDevice::Instance()->DrawLine( flatShader, dl->tail, dl->head );
 			++i;
 		}
 		else {

@@ -130,6 +130,8 @@ public:
 	void Clear();
 
 	bool Standing() const { return !taskList.Empty() && taskList[0].action == Task::TASK_STAND; }
+	// Using is a building is actually instantaneous: is the AI standing in order to use the building?
+	bool UsingBuilding() const;
 
 	void DoTasks( Chit* chit, U32 delta );
 

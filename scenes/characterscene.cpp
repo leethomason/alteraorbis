@@ -37,7 +37,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	game->InitStd( &gamui2D, &okay, &cancel );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
-	dropButton.SetVisible( data->IsCharacter() );
+	dropButton.SetVisible( data->IsAvatar() );
 
 	reset.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	reset.SetText( "Reset" );
@@ -47,7 +47,11 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	billOfSale.SetVisible( data->IsMarket() );
 
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0 );
-	faceWidget.SetFace( &uiRenderer, data->itemComponent->GetItem(0) );
+	const GameItem* mainItem = data->itemComponent->GetItem(0);
+	faceWidget.SetFace( &uiRenderer, mainItem );
+	if (mainItem->keyValues.GetIString(ISC::mob) != ISC::denizen) {
+		faceWidget.SetVisible(false);
+	}
 
 	desc.Init(&gamui2D);
 	
@@ -75,14 +79,13 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	moneyWidget[1].SetVisible( false );
 
 	helpText.Init(&gamui2D);
-	if (data->IsCharacter()) {
+	if (data->IsAvatar()) {
 		helpText.SetText("Character inventory is on the left. You can order items by dragging. The gun, "
 			"ring, and shield you want the character to use should be on the top row.");
 	}
 	else if (data->IsMarket()) {
 		helpText.SetText("Character inventory is on the left. Market items are on the right. Dragging items from "
-			"one inventory to the other will purchase or sell the item. Prices under the items show both the sell/buy "
-			"price and the (actual value).");
+			"one inventory to the other will purchase or sell the item.");
 		itemDescWidget.SetShortForm(true);
 	}
 	else if (data->IsVault()) {
@@ -157,7 +160,7 @@ void CharacterScene::Resize()
 	layout.PosAbs( &reset, -1, -2 );
 	layout.PosAbs(&helpText, 1, -3);
 	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
-	if (data->IsCharacter()) {
+	if (data->IsAvatar()) {
 		// Need space for the history text
 		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
 	}
@@ -168,7 +171,7 @@ void CharacterScene::Resize()
 	}
 	cancel.SetVisible(!data->IsExchange());
 
-	if (data->IsCharacter()) {
+	if (data->IsAvatarCharacterItem()) {
 		layout.PosAbs(&desc, -4, 0);
 		layout.PosAbs(&itemDescWidget, -4, 1);
 	}
@@ -301,9 +304,9 @@ void CharacterScene::SetButtonText()
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
 			if ( data->IsMarket() )
-				lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? 0 : costMult );
+				lumosGame->ItemToButton( item, &itemButton[j][count] );
 			else
-				lumosGame->ItemToButton( item, &itemButton[j][count], 0 );
+				lumosGame->ItemToButton( item, &itemButton[j][count] );
 			itemButtonIndex[j][count] = src;
 
 			// Set the "active" icons.
@@ -391,8 +394,8 @@ void CharacterScene::SetButtonText()
 		SetItemInfo( down, 0 );
 	}
 
-	int bought=0, sold=0, salesTax=0;
-	CalcCost( &bought, &sold, &salesTax );
+	int bought=0, sold=0;
+	CalcCost( &bought, &sold );
 
 	if ( data->IsMarket() ) {
 		CStr<100> str;
@@ -401,7 +404,7 @@ void CharacterScene::SetButtonText()
 					"%s: %d\n", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
 
 		int bought=0, sold=0;
-		CalcCost( &bought, &sold, &salesTax );
+		CalcCost( &bought, &sold);
 		int cost = bought - sold;
 
 		if ( bought > sold ) {
@@ -481,7 +484,7 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 	if ( item == &okay ) {
 		if ( data->IsMarket() ) {
 			int bought=0, sold=0, salesTax=0;
-			CalcCost( &bought, &sold, &salesTax );
+			CalcCost( &bought, &sold);
 
 			int cost = bought - sold;
 			data->itemComponent->GetItem(0)->wallet.AddGold( -cost );
@@ -631,7 +634,7 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 	}
 
 
-	if ( data->IsCharacter() && start && startIndex && end == &dropButton ) {
+	if ( data->IsAvatar() && start && startIndex && end == &dropButton ) {
 		data->itemComponent->Drop( data->itemComponent->GetItem( startIndex ));
 	}
 
@@ -639,20 +642,17 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 }
 
 
-void CharacterScene::CalcCost( int* bought, int* sold, int* salesTax )
+void CharacterScene::CalcCost( int* bought, int* sold )
 {
 	*bought = 0;
 	*sold = 0;
-	*salesTax = 0;
 
 	for( int i=0; i<boughtList.Size(); ++i ) {
 		int value = boughtList[i]->GetValue();
-		int cost = MarketAI::ValueToCost(value);
-		*bought += cost;
-		*salesTax += cost - value;
+		*bought += value;
 	}
 	for( int i=0; i<soldList.Size(); ++i ) {
 		int value = soldList[i]->GetValue();
-		*sold += MarketAI::ValueToTrade(value);
+		*sold += value;
 	}
 }

@@ -10,6 +10,37 @@ class ItemComponent;
 class ChitBag;
 class GameItem;
 
+struct ItemHistoryScore
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.score == b.score; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score > b.score; }
+};
+
+
+struct ItemHistoryKills
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.kills == b.kills; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.kills > b.kills; }
+};
+
+
+struct ItemHistoryGreaterKills
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.greater == b.greater; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.greater > b.greater; }
+};
+
+
+struct ItemHistoryCrafting
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.crafted == b.crafted; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.crafted > b.crafted; }
+};
+
 
 class CensusSceneData : public SceneData
 {
@@ -23,6 +54,8 @@ public:
 
 class CensusScene : public Scene
 {
+	typedef Scene super;
+
 public:
 	CensusScene( LumosGame* game, CensusSceneData* data );
 	virtual ~CensusScene();
@@ -34,19 +67,11 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void HandleHotKey( int value );
 
 private:
 	void Scan();
 	void ScanItem( ItemComponent* ic, const GameItem* );
-
-	LumosGame*			lumosGame;
-	ChitBag*			chitBag;
-	gamui::PushButton	okay;
-	gamui::TextLabel	text;
-
-	// stuff to scan for:
-	Wallet	allWallet, 
-			mobWallet;
 
 	enum {
 		MOB_DENIZEN,
@@ -65,13 +90,27 @@ private:
 		ITEM_COUNT
 	};
 
-	ItemHistory killsActive,
-		killsAny,
-		greaterKillsActive,
-		greaterKillsAny,
-		craftedActive,
-		craftedAny;
-	grinliz::CArray<ItemHistory, 4> domains;
+	enum {
+		MAX_ROWS = 4,
+		MAX_BUTTONS = ITEM_COUNT + MOB_COUNT + 4 * MAX_ROWS + 5
+	};
+
+	LumosGame*			lumosGame;
+	ChitBag*			chitBag;
+	gamui::PushButton	okay;
+	gamui::PushButton	link[MAX_BUTTONS];
+	gamui::TextLabel	group[MAX_BUTTONS];
+	gamui::TextLabel	label[MAX_BUTTONS];
+
+	// stuff to scan for:
+	Wallet	allWallet, 
+			mobWallet;
+
+	void AddToHistory(const ItemHistory& h);
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryScore> domains;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryKills> kills;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryGreaterKills> greaterKills;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryCrafting> crafted;
 
 	struct Info {
 		const GameItem*			item;
