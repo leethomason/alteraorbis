@@ -780,4 +780,7 @@
   <ItemGroup>
     <ResourceCompile Include="lumos.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
+  </ItemGroup>
 </Project>
