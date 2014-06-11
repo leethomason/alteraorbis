@@ -14,14 +14,6 @@
 using namespace gamui;
 using namespace grinliz;
 
-/*	
-	Money in world.
-	Money in MOBs.
-	Highest [Living, Dead] [MOB, Greater, Lesser, Denizen] by [Level,Age]
-	Highest [Living, Dead] [Pistol, Blaster, Pulse, Beamgun, Shield, Ring] by [Level]
-
-*/
-
 
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)
 {
@@ -57,9 +49,9 @@ void CensusScene::Resize()
 	layout.SetSize(layout.Width(), 0.5f*layout.Height());
 
 	for (int i = 0; i < MAX_BUTTONS; ++i) {
-		layout.PosAbs(&group[i], 1, i + 1);
-		layout.PosAbs(&link[i], 2, i + 1);
-		layout.PosAbs(&label[i], 3, i + 1);
+		layout.PosAbs(&group[i], 1, i);
+		layout.PosAbs(&link[i], 2, i);
+		layout.PosAbs(&label[i], 3, i);
 	}
 }
 
@@ -213,6 +205,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(kills[i].tempID > 0);
+		//link[count].SetText(kills[i].tempID ? "link" : "");
 		link[count].userData = (const void*)kills[i].tempID;
 		count++;
 	}
@@ -227,6 +220,7 @@ void CensusScene::Scan()
 		link[count].SetVisible(true);
 		link[count].SetEnabled(greaterKills[i].tempID > 0);
 		link[count].userData = (const void*)greaterKills[i].tempID;
+		//link[count].SetText(greaterKills[i].tempID ? "link" : "");
 		++count;
 	}
 
@@ -240,6 +234,7 @@ void CensusScene::Scan()
 		link[count].SetVisible(true);
 		link[count].SetEnabled(crafted[i].tempID > 0);
 		link[count].userData = (const void*)crafted[i].tempID;
+		//link[count].SetText(crafted[i].tempID ? "link" : "");
 		++count;
 	}
 
@@ -252,6 +247,7 @@ void CensusScene::Scan()
 		label[count].SetText(str.c_str());
 		link[count].SetVisible(true);
 		link[count].SetEnabled(domains[i].tempID > 0);
+		//link[count].SetText(domains[i].tempID ? "link" : "");
 		link[count].userData = (const void*)domains[i].tempID;
 		++count;
 	}
@@ -282,6 +278,7 @@ void CensusScene::Scan()
 			label[count].SetText(str.c_str());
 			link[count].SetVisible(true);
 			link[count].SetEnabled(h.tempID > 0);
+			//link[count].SetText(h.tempID ? "link" : "");
 			link[count].userData = (const void*)h.tempID;
 			++count;
 		}
@@ -306,6 +303,7 @@ void CensusScene::Scan()
 			label[count].SetText(str.c_str());
 			link[count].SetVisible(true);
 			link[count].SetEnabled(h.tempID > 0);
+			//link[count].SetText(h.tempID ? "link" : "");
 			link[count].userData = (const void*)h.tempID;
 			++count;
 		}
