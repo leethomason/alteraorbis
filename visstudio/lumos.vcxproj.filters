@@ -777,4 +777,7 @@
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="lumos.rc" />
+  </ItemGroup>
 </Project>
