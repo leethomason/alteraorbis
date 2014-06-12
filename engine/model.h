@@ -124,9 +124,6 @@ struct ModelHeader
 	*/
 	grinliz::IString		modelBoneName[EL_MAX_BONES];
 
-	/* Matches the bone names; the average location. */
-	grinliz::Vector3F		boneCentroid[EL_MAX_BONES];
-
 	/*	The armature uses different IDs. This maps from
 	    the model IDs to the armature IDs so the armature
 		mats can be re-ordered.
@@ -167,6 +164,9 @@ public:
 	grinliz::Rectangle3F	invariantBounds;	// build y rotation in, so that bounds can
 												// be generated with simple addition, without
 												// causing the call to Model::XForm 
+	/* Matches the bone names; the average location. */
+	grinliz::Vector3F		boneCentroid[EL_MAX_BONES];
+
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
 

@@ -171,10 +171,12 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 
 			int boneID = LRint(vertex.boneID);
 			GLASSERT(boneID < EL_MAX_BONES);
-			centroid[boneID].x += vertex.pos.x;
-			centroid[boneID].y += vertex.pos.y;
-			centroid[boneID].z += vertex.pos.z;
-			centroidCount[boneID]++;
+			if (boneID >= 0 && boneID < EL_MAX_BONES) {
+				centroid[boneID].x += vertex.pos.x;
+				centroid[boneID].y += vertex.pos.y;
+				centroid[boneID].z += vertex.pos.z;
+				centroidCount[boneID]++;
+			}
 		}
 		
 		atom->index  = new U16[atom->nIndex];
@@ -192,7 +194,7 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 			centroid[i].y /= c;
 			centroid[i].z /= c;
 		}
-		res->header.boneCentroid[i].Set((float)centroid[i].x, (float)centroid[i].y, (float)centroid[i].z);
+		res->boneCentroid[i].Set((float)centroid[i].x, (float)centroid[i].y, (float)centroid[i].z);
 	}
 }
 
