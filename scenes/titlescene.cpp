@@ -339,7 +339,7 @@ void TitleScene::HandleHotKey(int key)
 		Vector3F head = { 0, 0, 0 };
 		for (int i = 0; i < EL_MAX_BONES; ++i) {
 			if (res->header.modelBoneName[i] == "head") {
-				head = res->header.boneCentroid[i];
+				head = res->boneCentroid[i];
 				break;
 			}
 		}
