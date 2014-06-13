@@ -91,13 +91,13 @@ d animation generation
 		t greater kill not getting shown in weapon history
 		t enemies don't distract from buildings
 		x update walkthrough - start with denizens
-    	- seperate land from water. re-think water texture.
 
 	- Beta 1d
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
+    	- seperate land from water. re-think water texture.
 
 	- Beta 1c
 		- hints about what you need to build

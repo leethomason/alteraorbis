@@ -23,6 +23,17 @@ Altera Orbis is in Beta, and will be until it's ready;
 thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
+
+Changes in 1c
+-------------
+- From ShroomArts: new GuardPost and Exchange, new money icons. Thanks!
+- menus re-ordered (again). Order of build enforced by
+  disabling dependent structures. Goal is to make getting
+  started much easier.
+- bug fixes. bug fixes. bug fixes.
+- links on census screen. another baby step in the direction
+  of full history browsing.
+
 Changes in 1b
 -------------
 - Sounds! Big thanks to Justin Prymowicz. 
