@@ -78,6 +78,10 @@ private:
 	unsigned fluidEmitter		: 1;
 	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
 
+	// state:
+	unsigned plantOnFire		: 1;	// NOTE: matches 
+	unsigned plantOnShock		: 1;
+
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
 											 || (fluidHeight >= FLUID_BLOCKING)
@@ -235,6 +239,13 @@ public:
 		plant = _type1based;
 		stage = _stage;
 	}
+
+	void SetOn(bool onFire, bool onShock) {
+		plantOnFire = onFire ? 1 : 0;
+		plantOnShock = onShock ? 1 : 0;
+	}
+	bool PlantOnFire() const { return plantOnFire > 0; }
+	bool PlantOnShock() const { return plantOnShock > 0; }
 
 	int TotalHP() const			{ return plant ? ((stage + 1)*(stage + 1)) * HP_PER_PLANT_STAGE : rockHeight * HP_PER_HEIGHT; }
 	int HP() const				{ return hp; }

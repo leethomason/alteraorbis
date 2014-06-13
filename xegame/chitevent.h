@@ -27,7 +27,7 @@ class ChitEvent
 {
 public:
 	enum { 
-		EFFECT					// data: EFFECT_xyz, factor: strength of effect at AOE center
+		//EFFECT					// data: EFFECT_xyz, factor: strength of effect at AOE center
 	};
 
 	int		data;				// if there is obvious data
@@ -41,6 +41,7 @@ public:
 	int ID() const										{ return id; }
 
 	// Utility:
+	/*
 	static ChitEvent EffectEvent( const grinliz::Vector2F origin, float radius, int effect, float strength ) {
 		grinliz::Rectangle2F r;
 		r.min = r.max = origin;
@@ -50,7 +51,7 @@ public:
 		event.factor = strength;
 		return event;
 	}
-
+	*/
 
 private:
 	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast

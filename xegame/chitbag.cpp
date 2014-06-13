@@ -513,3 +513,13 @@ void ChitBag::QuerySpatialHash(	CChitArray* arr,
 		arr->Push( cachedQuery[i] );
 	}
 }
+
+
+void ChitBag::SetTickNeeded(const grinliz::Rectangle2F& bounds)
+{
+	ChitAcceptAll all;
+	QuerySpatialHash(&cachedQuery, bounds, 0, &all);
+	for (int i = 0; i < cachedQuery.Size(); ++i) {
+		cachedQuery[i]->SetTickNeeded();
+	}
+}

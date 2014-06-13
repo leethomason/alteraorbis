@@ -401,10 +401,10 @@ public:
 	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
 	// ------- current --------
-	float	hp;				// current hp for this item
+	double	hp;				// current hp for this item. concerned float isn't enough if small time slices in use
 	int		rounds;			// current rounds in the clip
-	float	accruedFire;	// how much fire damage built up, not yet applied
-	float	accruedShock;	// how much shock damage built up, not yet applied
+	int		fireTime;		// time to fire goes out
+	int  	shockTime;		// time to shock goes out
 
 	// These are the same, except for use. 'keyValues' are used
 	// for simple dynamic extension. speed=2.0 for example.
@@ -420,9 +420,9 @@ public:
 	}
 
 	void InitState() {
-		hp = TotalHPF();
-		accruedFire = 0;
-		accruedShock = 0;
+		hp = double(TotalHP());
+		fireTime = 0;
+		shockTime = 0;
 		cooldown.ResetReady();
 		reload.ResetReady();
 		rounds = clipCap;
@@ -472,17 +472,15 @@ public:
 		return rounds || clipCap == 0; 
 	}
 	void UseRound();
-	bool OnFire() const  { return (!(flags & IMMUNE_FIRE)) && accruedFire > 0; }
-	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
+	bool OnFire() const  { return fireTime > 0; }
+	bool OnShock() const { return shockTime > 0; }
 
 	// Note that the current HP, if it has one, 
 	int   TotalHP() const	{ return grinliz::Max( 1, (int)grinliz::LRintf( mass*traits.Toughness())); }
-	float TotalHPF() const	{ return (float)TotalHP(); }
 
-	float HPFraction() const	{ 
-		float f = hp / TotalHPF(); 
-		//GLASSERT( f >= 0 && f <= 1 );
-		f = grinliz::Clamp( f, 0.0f, 1.0f ); // FIXME: hack in hp calc
+	double HPFraction() const	{ 
+		double f = hp / double(TotalHP()); 
+		f = grinliz::Clamp( f, 0.0, 1.0 ); // FIXME: hack in hp calc
 		return f;
 	} 
 
@@ -515,9 +513,6 @@ public:
 
 private:
 	void CopyFrom( const GameItem* rhs );
-	float Delta( U32 delta, float v ) {
-		return v * (float)delta * 0.001f;
-	}
 
 	GameTrait	traits;
 	Personality personality;

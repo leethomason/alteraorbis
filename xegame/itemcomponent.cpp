@@ -30,6 +30,8 @@
 #include "../game/reservebank.h"
 #include "../game/lumosgame.h"
 #include "../game/team.h"
+#include "../game/worldmap.h"
+#include "../game/weather.h"
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
@@ -157,7 +159,7 @@ void ItemComponent::AddCraftXP( int nCrystals )
 	mainItem->GetTraitsMutable()->AddCraftXP( nCrystals );
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
-		mainItem->hp = mainItem->TotalHPF();
+		mainItem->hp = double(mainItem->TotalHP());
 		NameItem( mainItem );
 		if ( parentChit->GetRenderComponent() ) {
 			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
@@ -182,7 +184,7 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
-		mainItem->hp = mainItem->TotalHPF();
+		mainItem->hp = double(mainItem->TotalHP());
 		NameItem( mainItem );
 		if ( parentChit->GetRenderComponent() ) {
 			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
@@ -448,8 +450,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLASSERT( heal >= 0 );
 
 		mainItem->hp += heal;
-		if ( mainItem->hp > mainItem->TotalHPF() ) {
-			mainItem->hp = mainItem->TotalHPF();
+		if ( mainItem->hp > double(mainItem->TotalHP()) ) {
+			mainItem->hp = double(mainItem->TotalHP());
 		}
 
 		if ( parentChit->GetSpatialComponent() ) {
@@ -548,62 +550,102 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 void ItemComponent::OnChitEvent( const ChitEvent& event )
 {
-	if ( event.ID() == ChitEvent::EFFECT ) {
-		// It's important to remember this event could be
-		// coming from ourselves: which is how fire / shock
-		// grows, but don't want a positive feedback loop
-		// for normal-susceptible.
+}
 
-		if (    parentChit->random.Rand(12) == 0
-			 && parentChit->GetSpatialComponent() ) 
-		{
-			DamageDesc dd( event.factor, event.data );
-			ChitDamageInfo info( dd );
 
-			info.originID = parentChit->ID();
-			info.awardXP  = false;
-			info.isMelee  = true;
-			info.isExplosion = false;
-			info.originOfImpact.Zero();
+int ItemComponent::ProcessEffect(int delta)
+{
+	// ItemComponent tick frequency much higher than the
+	// water sim in WorldMap. Multiply to reduce the frequency.
+	static const float CHANCE_FIRE_NORMAL_IC = CHANCE_FIRE_NORMAL * 0.1f;
+	static const float CHANCE_FIRE_HIGH_IC   = CHANCE_FIRE_HIGH * 0.1f;
+	static const float CHANCE_FIRE_SPREAD_IC = CHANCE_FIRE_SPREAD * 0.1f;
 
-			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &info );
-			parentChit->SendMessage( msg );
-			parentChit->SetTickNeeded();
+	const float deltaF = float(delta) * 0.001f;
+
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	if (!sc) return VERY_LONG_TICK;
+
+	Vector2F pos2 = sc->GetPosition2D();
+	Vector2I pos2i = ToWorld2I(pos2);
+	GameItem* mainItem = itemArr[0];
+
+	// Look around at map, weather, etc. and sum up
+	// the chances of fire, shock, & water
+	static const int NDIR = 5;
+	static const Vector2I DIR[NDIR] = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+
+	float fire = 0;
+	float shock = 0;
+	float water = 0;
+
+	for (int i = 0; i < NDIR; ++i) {
+		// FIXME: return water when out of bounds??
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i + DIR[i]);
+		float mult = (i == 0) ? 2.0f : 1.0f;	// how much more likely of effect if we are standing on it?
+
+		if (wg.Magma()) fire += mult;
+		if ((i == 0) && wg.IsFluid()) water += 1.0;
+		if (wg.PlantOnFire()) fire += mult;
+		if (wg.PlantOnShock()) shock += mult;
+	}
+	if ( Weather::Instance() && Weather::Instance()->IsRaining(pos2.x, pos2.y)) {
+		water += 1;
+	}
+
+	float chanceFire = 0, chanceShock = 0;
+
+	if (mainItem->flags & GameItem::IMMUNE_FIRE)		chanceFire = 0;
+	else if (mainItem->flags & GameItem::FLAMMABLE)		chanceFire = CHANCE_FIRE_HIGH_IC;
+	else												chanceFire = CHANCE_FIRE_NORMAL_IC;
+
+	if (mainItem->flags & GameItem::IMMUNE_SHOCK)		chanceShock = 0;
+	else if (mainItem->flags & GameItem::SHOCKABLE)		chanceShock = CHANCE_FIRE_HIGH_IC;
+	else												chanceShock = CHANCE_FIRE_NORMAL_IC;
+
+	float cF = (fire - water) * chanceFire;
+	float cS = (shock * (water + 1.0f)) * chanceShock;
+
+	if (cF > 0 || cS > 0) {
+		if (parentChit->random.Uniform() < cF)
+			mainItem->fireTime = EFFECT_MAX_TIME;
+		if (parentChit->random.Uniform() < cS)
+			mainItem->shockTime = EFFECT_MAX_TIME;
+	}
+
+	if (water) {
+		// If water==1, this will just do a Travel(delta, EFFECT_MAX_TIME) which
+		// halves the effect time, because the time will also be reduced in
+		// GameItem::DoTick();
+		mainItem->fireTime -= int(float(delta) * water);
+		if (mainItem->fireTime < 0) mainItem->fireTime = 0;
+	}
+
+	// NOTE: Don't do damage to self. This is
+	// done by the GameItem ticker. Just need to be sure
+	// the fireTime and/or shockTime is set.
+
+	// Push state back to the environment
+	if (mainItem->fireTime || mainItem->shockTime) {
+		if (parentChit->random.Uniform() < CHANCE_FIRE_SPREAD_IC) {
+			DamageDesc ddSpread = { 0, 0 };
+			if (mainItem->fireTime) ddSpread.effects |= GameItem::EFFECT_FIRE;
+			if (mainItem->shockTime) ddSpread.effects |= GameItem::EFFECT_SHOCK;
+
+			for (int j = 0; j < NDIR; ++j) {
+				Vector2I hit2 = pos2i + DIR[j];
+				Vector3I hit = { hit2.x, 0, hit2.y };
+				Context()->worldMap->VoxelHit(hit, ddSpread);
+			}
 		}
 	}
+	return (fire > 0 || shock > 0 ) ? 0 : VERY_LONG_TICK;
 }
 
 
 void ItemComponent::DoSlowTick()
 {
 	GameItem* mainItem = itemArr[0];
-
-	if (mainItem->flags & GameItem::INDESTRUCTABLE) {
-		mainItem->accruedFire = 0;
-		mainItem->accruedShock = 0;
-	}
-
-	// With the plants spreading fire in there own loop, this is
-	// a little less desirable. While cool in theory, I'm always
-	// a surprised when the avatar gets killed by fire when
-	// using a fire weapon. May turn this back on, but need
-	// to handle the plant voxels.
-#if 0
-	// Look around for fire or shock spread.
-	if ( mainItem->accruedFire > 0 || mainItem->accruedShock > 0 ) {
-		SpatialComponent* sc = parentChit->GetSpatialComponent();
-		if ( sc ) {
-			if ( mainItem->accruedFire ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, mainItem->accruedFire );
-				Context()->chitBag->QueueEvent( event );
-			}
-			if ( mainItem->accruedShock ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, mainItem->accruedShock );
-				Context()->chitBag->QueueEvent( event );
-			}
-		}
-	}
-#endif
 
 	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
 		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
@@ -658,6 +700,7 @@ int ItemComponent::DoTick( U32 delta )
 		DoSlowTick();
 	}
 	int tick = VERY_LONG_TICK;
+	tick = Min(tick, ProcessEffect(delta));
 
 	for( int i=0; i<itemArr.Size(); ++i ) {	
 		int t = itemArr[i]->DoTick( delta );
@@ -739,12 +782,12 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 	ComponentSet compSet( parentChit, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
 
 	if ( compSet.okay ) {
-		if ( it.accruedFire > 0 ) {
+		if ( it.fireTime > 0 ) {
 			ps->EmitPD( "fire", compSet.spatial->GetPosition(), V3F_UP, delta );
 			ps->EmitPD( "smoke", compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}
-		if ( it.accruedShock > 0 ) {
+		if ( it.shockTime > 0 ) {
 			ps->EmitPD( "shock", compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}

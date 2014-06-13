@@ -50,10 +50,6 @@ using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
 
-static const float CHANCE_FIRE_NORMAL	= 0.40f;
-static const float CHANCE_FIRE_HIGH		= 0.80f;
-static const float CHANCE_FIRE_OUT		= 0.10f;
-static const float CHANCE_FIRE_SPREAD	= 0.10f;	// once it starts spreading, self reinforcing
 
 // Startup for test world
 // Baseline:				15,000
@@ -96,13 +92,8 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 			plantCount[i][j] = 0;
 		}
 	}
-	for (int j = 0; j < NUM_SECTORS; ++j) {
-		for (int i = 0; i < NUM_SECTORS; ++i) {
-			Rectangle2I bounds;
-			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
-			fluidSim[j*NUM_SECTORS + i] = new FluidSim(this, bounds);
-		}
-	}
+
+	memset(fluidSim, 0, sizeof(FluidSim*)*NUM_SECTORS*NUM_SECTORS);
 
 	// --- self call: make sure memory allocated. ---
 	Init(width, height);
@@ -250,6 +241,7 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 				plantEffect[i].fire |= fire;
 				plantEffect[i].shock |= shock;
 			}
+			grid[index].SetOn(fire, shock);
 		}
 	}
 }
@@ -407,6 +399,26 @@ void WorldMap::DeleteAllRegions()
 }
 
 
+void WorldMap::InitFluidSim()
+{
+	Rectangle2I thisBounds = Bounds();
+
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			const int index = j*NUM_SECTORS + i;
+			delete fluidSim[index];
+			fluidSim[index] = 0;
+ 
+			Rectangle2I bounds;
+			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
+			bounds.DoIntersection(thisBounds);
+			if (bounds.IsValid())
+				fluidSim[index] = new FluidSim(this, bounds);
+		}
+	}
+}
+
+
 void WorldMap::Init( int w, int h )
 {
 	// Reset the voxels
@@ -418,9 +430,6 @@ void WorldMap::Init( int w, int h )
 	}
 
 	voxelInit.ClearAll();
-	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		fluidSim[i]->Unsettle();
-	}
 
 	DeleteAllRegions();
 	delete [] grid;
@@ -431,6 +440,8 @@ void WorldMap::Init( int w, int h )
 	
 	delete worldInfo;
 	worldInfo = new WorldInfo( grid, width, height );
+
+	InitFluidSim();
 }
 
 
@@ -562,6 +573,16 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 }
 
 
+/*
+	2 systems in place:
+	1. The worldmap voxel system (WorldMap::ProcessEffect())
+	2. The ItemComponent (MOB) system (ItemComponent::ProcessEffect())
+
+	Rules:
+	1. map can catch MOB and map on fire
+	2. MOB can catch map on fire
+	3. MOB does NOT catch MOB on fire (too surprising in gameplay)
+*/
 void WorldMap::ProcessEffect(ChitBag* chitBag)
 {
 	DamageDesc dd = { EFFECT_DAMAGE_PER_SEC * SLOW_TICK / 1000, 0 };
@@ -569,29 +590,38 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 	for (int i = 0; i < plantEffect.Size(); ++i) {
 		PlantEffect* pe = &plantEffect[i];
 
+		// flammability is reflected in the chance
+		// of it catching fire; once on fire, everything
+		// has the same chance of the fire going out.
 		if (pe->fire && random.Uniform() < CHANCE_FIRE_OUT) {
 			pe->fire = false;
 		}
 		if (pe->shock && random.Uniform() < CHANCE_FIRE_OUT) {
 			pe->shock = false;
 		}
+
+		int index = INDEX(pe->voxel);
+		if (grid[index].Plant() == 0)
+			grid[index].SetOn(false, false);
+		else
+			grid[index].SetOn(pe->fire, pe->shock);
+
 		// if deleted OR no effect
-		if ((grid[INDEX(pe->voxel)].Plant() == 0) || (!pe->fire && !pe->shock)) {
+		if ((grid[index].Plant() == 0) || (!pe->fire && !pe->shock)) {
 			plantEffect.SwapRemove(i);
 			--i;
 			continue;
 		}
 
-		// Do damage:
+		// Make sure MOBs look around to ProcessEffects().
+		// They aren't damaged directly, they scan the area 
+		// around them.
 		Vector2F origin = ToWorld2F(pe->voxel);
-		for (int j = 0; j < 2; ++j) {
-			if ((j == 0 && pe->fire) || (j == 1 && pe->shock)) {
-				ChitEvent event = ChitEvent::EffectEvent(origin, EFFECT_RADIUS, j == 0 ? GameItem::EFFECT_FIRE : GameItem::EFFECT_SHOCK, EFFECT_ACCRUED_MAX);
-				chitBag->QueueEvent(event);
-				Vector3I hit = { pe->voxel.x, 0, pe->voxel.y };
-				this->VoxelHit(hit, dd);
-			}
-		}
+		chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
+
+		// Damage this item:
+		Vector3I hit = { pe->voxel.x, 0, pe->voxel.y };
+		this->VoxelHit(hit, dd);
 
 		// Finally, spread!
 		static const int N = 8;
@@ -615,13 +645,16 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 
 bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
 {
-	return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
+	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
+		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
+	return true;
 }
 
 
 void WorldMap::EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine)
 {
-	fluidSim[sector.y*NUM_SECTORS + sector.x]->EmitWaterfalls(delta, engine);
+	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
+		fluidSim[sector.y*NUM_SECTORS + sector.x]->EmitWaterfalls(delta, engine);
 }
 
 
@@ -630,8 +663,10 @@ void WorldMap::FluidStats(int* pools, int* waterfalls)
 	*pools = 0;
 	*waterfalls = 0;
 	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
-		*pools += fluidSim[i]->NumPools();
-		*waterfalls += fluidSim[i]->NumWaterfalls();
+		if (fluidSim[i]) {
+			*pools += fluidSim[i]->NumPools();
+			*waterfalls += fluidSim[i]->NumWaterfalls();
+		}
 	}
 }
 
@@ -642,11 +677,13 @@ grinliz::Vector2I WorldMap::GetPoolLocation(int index)
 
 	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
 		for (int i = 0; i < Square(NUM_SECTORS); ++i) {
-			int n = fluidSim[i]->NumPools();
-			if (pools + n > index) {
-				return fluidSim[i]->PoolLoc(index - pools);
+			if (fluidSim[i]) {
+				int n = fluidSim[i]->NumPools();
+				if (pools + n > index) {
+					return fluidSim[i]->PoolLoc(index - pools);
+				}
+				pools += n;
 			}
-			pools += n;
 		}
 	}
 	Vector2I v = { 0, 0 };
@@ -659,7 +696,10 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 {
 	int n = fluidTicker.Delta(delta);
 	while (n--) {
-		fluidSim[fluidSector++]->DoStep();
+		if (fluidSim[fluidSector]) {
+			fluidSim[fluidSector]->DoStep();
+		}
+		fluidSector++;
 		if (fluidSector >= Square(NUM_SECTORS)) {
 			fluidSector = 0;
 		}
@@ -667,7 +707,9 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
 		// FIXME: call to visible area??
-		fluidSim[i]->EmitWaterfalls(delta, engine);
+		if (fluidSim[i]) {
+			fluidSim[i]->EmitWaterfalls(delta, engine);
+		}
 	}
 
 	slowTick -= (int)(delta);
@@ -678,8 +720,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 
 		for (int i = 0; i < magmaGrids.Size(); ++i) {
 			Vector2F origin = ToWorld2F(magmaGrids[i]);
-			ChitEvent event = ChitEvent::EffectEvent(origin, EFFECT_RADIUS, GameItem::EFFECT_FIRE, EFFECT_ACCRUED_MAX);
-			chitBag->QueueEvent(event);
+			chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 		}
 		ProcessEffect(chitBag);
 	}
@@ -748,7 +789,9 @@ void WorldMap::SetEmitter(int x, int y, bool on) {
 	int index = INDEX(x, y);
 	grid[index].SetFluidEmitter(on);
 	grinliz::Vector2I sector = ToSector(x, y);
-	fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+	if (fluidSim[sector.y*NUM_SECTORS + sector.x]) {
+		fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+	}
 }
 
 
@@ -801,7 +844,9 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		grid[INDEX(x,y)] = wg;
 		
 		Vector2I sector = ToSector(x, y);
-		fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+		if (fluidSim[sector.y*NUM_SECTORS + sector.x]) {
+			fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+		}
 	}
 	if ( was.IsPassable() != wg.IsPassable() ) {
 		ResetPather( x, y );

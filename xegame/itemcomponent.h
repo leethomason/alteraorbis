@@ -127,6 +127,7 @@ private:
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
+	int ProcessEffect( int delta);	// look around for environment that effects this itemComp, and apply those effects
 
 	// Not serialized:
 	bool				hardpointsModified;

@@ -134,6 +134,7 @@ d animation generation
 		- hints about what you need to build
 		- walk target for the avatar
 		- move "Create Worker" and "Auto-Rebuild" to "Manage"
+		- re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
 		- tuning
 			- farm production (high??)
 			- monster arrival. greater herd more often?

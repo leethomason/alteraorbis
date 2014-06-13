@@ -108,8 +108,8 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		wallet			= rhs->wallet;
 
 		hp				= rhs->hp;
-		accruedFire		= rhs->accruedFire;
-		accruedShock	= rhs->accruedShock;
+		fireTime		= rhs->fireTime;
+		shockTime		= rhs->shockTime;
 
 		keyValues		= rhs->keyValues;
 		historyDB		= rhs->historyDB;
@@ -137,9 +137,9 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		keyValues.Clear();
 		historyDB.Clear();
 
-		hp = TotalHPF();
-		accruedFire = 0;
-		accruedShock = 0;
+		hp = double(TotalHP());
+		fireTime = 0;
+		shockTime = 0;
 		value			= -1;
 	}
 }
@@ -161,8 +161,8 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER_DEF( xs, meleeDamage, 1.0f );
 	XARC_SER_DEF( xs, rangedDamage, 0.0f );
 	XARC_SER_DEF( xs, absorbsDamage, 0 );
-	XARC_SER_DEF( xs, accruedFire, 0 );
-	XARC_SER_DEF( xs, accruedShock, 0 );
+	XARC_SER_DEF( xs, fireTime, 0 );
+	XARC_SER_DEF( xs, shockTime, 0 );
 
 	XARC_SER_DEF( xs, hardpoint, 0 );
 	XARC_SER( xs, hp );
@@ -312,8 +312,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLOAT_ATTR( absorbsDamage )
 		READ_INT_ATTR( clipCap )
 		READ_INT_ATTR( rounds )
-		READ_FLOAT_ATTR( accruedFire )
-		READ_FLOAT_ATTR( accruedShock )
+		READ_INT_ATTR( fireTime )
+		READ_INT_ATTR( shockTime )
 		else {
 			// What is it??? Tricky stuff.
 			int integer=0;
@@ -352,8 +352,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		GLASSERT( hardpoint > 0 );
 	}
 
-	hp = this->TotalHPF();
-	ele->QueryFloatAttribute( "hp", &hp );
+	hp = double(this->TotalHP());
+	ele->QueryAttribute( "hp", &hp );
 	GLASSERT( hp <= TotalHP() );
 
 	GLASSERT( TotalHP() > 0 );
@@ -398,11 +398,10 @@ void GameItem::UseRound() {
 }
 
 
-// FIXME: pass in items affecting this one:
-// The body affects the claw. Environment (water) affects the body.
 int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
+	float deltaF = float(delta) * 0.001f;
 
 	cooldown.Tick( delta );
 	if ( reload.Tick( delta ) ) {
@@ -413,32 +412,31 @@ int GameItem::DoTick( U32 delta )
 		tick = 0;
 	}
 
-	float savedHP = hp;
-	if ( flags & IMMUNE_FIRE )
-		accruedFire = 0;
-	if ( flags & IMMUNE_SHOCK )
-		accruedShock = 0;
+	double savedHP = hp;
+	if ( flags & IMMUNE_FIRE )		fireTime = 0;
+	if ( flags & IMMUNE_SHOCK )		shockTime = 0;
 
-	accruedFire  = Min( accruedFire,  EFFECT_ACCRUED_MAX );
-	accruedShock = Min( accruedShock, EFFECT_ACCRUED_MAX );
+	if (fireTime || shockTime) {
+		fireTime = Min(fireTime, EFFECT_MAX_TIME);
+		shockTime = Min(shockTime, EFFECT_MAX_TIME);
 
-	float maxEffectDamage = Delta( delta, EFFECT_DAMAGE_PER_SEC );
-	hp -= Min( accruedFire, maxEffectDamage );
-	hp -= Min( accruedShock, maxEffectDamage );
+		double effectDamage = Travel(EFFECT_DAMAGE_PER_SEC,  delta);
 
-	accruedFire -= maxEffectDamage * ((flags & FLAMMABLE) ? 0.1f : 1.0f);
-	accruedFire = Max( 0.0f, accruedFire );
-	
-	accruedShock -= maxEffectDamage * ((flags & SHOCKABLE) ? 0.5f : 1.0f);
-	accruedShock = Max( 0.0f, accruedShock );
+		if (fireTime) hp -= effectDamage;
+		if (shockTime) hp -= effectDamage;
 
-	if ( hp > 0 ) {
-		hp += Delta( delta, hpRegen );
+		shockTime -= delta;
+		fireTime -= delta;
+		if (fireTime < 0) fireTime = 0;
+		if (shockTime < 0) shockTime = 0;
 	}
-	hp = Clamp( hp, 0.0f, TotalHPF() );
+	if ( hp > 0 ) {
+		hp += Travel( hpRegen, delta);
+	}
+	hp = Clamp( hp, 0.0, double(TotalHP()) );
 
 	if ( flags & INDESTRUCTABLE ) {
-		hp = TotalHPF();
+		hp = double(TotalHP());
 	}
 
 	if ( savedHP != hp ) {
@@ -490,10 +488,9 @@ void GameItem::AbsorbDamage( bool inInventory,
 
 	if ( !inInventory ) {
 		// just regular item getting hit, that takes damage.
-		if ( dd.effects & EFFECT_FIRE )
-			accruedFire += dd.damage;
-		if ( dd.effects & EFFECT_SHOCK )
-			accruedShock += dd.damage;
+		if (dd.effects & EFFECT_FIRE) fireTime = EFFECT_MAX_TIME;
+		if (dd.effects & EFFECT_SHOCK) shockTime = EFFECT_MAX_TIME;
+
 		hp -= dd.damage;
 		if ( hp < 0 ) hp = 0;
 	}

@@ -297,6 +297,7 @@ private:
 	} 
 
 	void Init( int w, int h );
+	void InitFluidSim();
 	void FreeVBOs();
 
 	void CalcZone( int x, int y );

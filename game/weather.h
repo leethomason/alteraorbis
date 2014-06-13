@@ -28,6 +28,10 @@ public:
 	Weather( int p_width, int p_height ) : width((float)p_width), height((float)p_height) { PushInstance( this ); }
 	~Weather() { PopInstance( this ); }
 
+	bool IsRaining(float x, float y) {
+		return RainFraction(x, y) > 0.5f;
+	}
+
 	float RainFraction( float x, float y ) {
 
 		static const float MIN_RAIN = 0.05f;

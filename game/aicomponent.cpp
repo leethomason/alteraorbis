@@ -653,7 +653,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 	}
 
 	int itemFlags			= item->flags;
-	float totalHP			= item->TotalHPF();
+	double totalHP			= double(item->TotalHP());
 	int tick = 400;
 	const ChitContext* context = Context();
 
@@ -1427,7 +1427,7 @@ bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
 	GLASSERT( thisComp.item );
 	// Plant eater
 	if (    (thisComp.item->flags & GameItem::AI_EAT_PLANTS) 
-		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f ))  
+		 && (thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 ))  
 	{
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
@@ -1465,7 +1465,7 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 {
 	// Core healer
 	if (    (thisComp.item->flags & GameItem::AI_HEAL_AT_CORE) 
-		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f )) 
+		 && (thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 )) 
 	{
 		const ChitContext* context = Context();
 

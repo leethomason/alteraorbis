@@ -207,7 +207,7 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 					if (b.Contains(pos2i)) {
 						ComponentSet comp(building, ComponentSet::IS_ALIVE | Chit::ITEM_BIT);
 						if (comp.okay) {
-							comp.item->hp = comp.item->TotalHPF();
+							comp.item->hp = double(comp.item->TotalHP());
 							RenderComponent* rc = building->GetRenderComponent();
 							if (rc) {
 								rc->AddDeco("repair", STD_DECO);
@@ -467,11 +467,11 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		}
 		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
 
-		float heal = float(supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * float(scale);
-		heal = Clamp( heal, 0.f, 1.f );
+		double heal = (supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * scale;
+		heal = Clamp( heal, 0.0, 1.0 );
 
-		thisComp.item->hp += thisComp.item->TotalHPF() * heal;
-		thisComp.item->hp = Min( thisComp.item->hp, thisComp.item->TotalHPF() );
+		thisComp.item->hp += double(thisComp.item->TotalHP()) * heal;
+		thisComp.item->hp = Min( thisComp.item->hp, double(thisComp.item->TotalHP()) );
 	}
 }
 

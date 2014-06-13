@@ -104,7 +104,7 @@ int DebugStateComponent::DoTick( U32 delta )
 			weapon = iweapon->GetItem();
 	}
 
-	healthBar.SetRange( pItem->HPFraction() );
+	healthBar.SetRange( (float) pItem->HPFraction() );
 
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	

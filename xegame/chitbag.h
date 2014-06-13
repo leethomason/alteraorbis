@@ -195,6 +195,16 @@ public:
 		QuerySpatialHash( array, r, ignoreMe, accept );
 	}
 
+	// Tell all the Chits in an area to tick; event has happened
+	// and they need to look around.
+	void SetTickNeeded(const grinliz::Rectangle2F& bounds);
+	void SetTickNeeded(const grinliz::Vector2F& origin, float rad) {
+		grinliz::Rectangle2F r;
+		r.min = r.max = origin;
+		r.Outset(rad);
+		SetTickNeeded(r);
+	}
+
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 

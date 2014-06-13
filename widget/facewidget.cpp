@@ -116,7 +116,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 		const GameItem* item = ic->GetItem(0);
 
 		if ( flags & LEVEL_BAR ) {
-			bar[BAR_HP].SetRange( item->HPFraction() );
+			bar[BAR_HP].SetRange(float(item->HPFraction()));
 
 			int lev = item->Traits().Level();
 			int xp  = item->Traits().Experience();

@@ -111,9 +111,14 @@ static const U32   COOLDOWN_TIME	= 750;
 static const float EXPLOSIVE_RANGE	= 1.5f;			// explosions go through walls. Make this too big,
 													// that becomes an issue. Too small, explosions aren't fun.
 static const float LONGEST_WEAPON_RANGE = 20.0f;	// effects AI logic, queries
-static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
+static const float EFFECT_DAMAGE_PER_SEC = 10.0f;
 static const float EFFECT_RADIUS = 1.5f;
-static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
+static const int   EFFECT_MAX_TIME = 2000;
+
+static const float CHANCE_FIRE_NORMAL	= 0.40f;
+static const float CHANCE_FIRE_HIGH		= 0.80f;
+static const float CHANCE_FIRE_OUT		= 0.10f;
+static const float CHANCE_FIRE_SPREAD	= 0.10f;	// once it starts spreading, self reinforcing
 
 static const float SALES_TAX = 0.15f;
 static const int   WORKER_BOT_COST = 20;
