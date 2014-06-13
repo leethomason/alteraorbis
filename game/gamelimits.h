@@ -66,8 +66,8 @@ static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN
 							+ TYPICAL_BEASTMEN*GOLD_PER_BEASTMAN
 							+ TYPICAL_MONSTERS*GOLD_PER_MONSTER;
 
-static const int MAX_LESSER_GOLD	= GOLD_PER_MONSTER *  5;
-static const int MAX_GREATER_GOLD	= GOLD_PER_MONSTER * 40;
+static const int MAX_LESSER_GOLD	= GOLD_PER_MONSTER *  10;
+static const int MAX_GREATER_GOLD	= GOLD_PER_MONSTER * 100;
 static const int MAX_LESSER_MOB_CRYSTAL = 4;
 static const int MAX_GREATER_MOB_CRYSTAL = 12;
 
@@ -118,7 +118,7 @@ static const int   EFFECT_MAX_TIME = 2000;
 static const float CHANCE_FIRE_NORMAL	= 0.40f;
 static const float CHANCE_FIRE_HIGH		= 0.80f;
 static const float CHANCE_FIRE_OUT		= 0.10f;
-static const float CHANCE_FIRE_SPREAD	= 0.10f;	// once it starts spreading, self reinforcing
+static const float CHANCE_FIRE_SPREAD	= 0.20f;	// once it starts spreading, self reinforcing
 
 static const float SALES_TAX = 0.15f;
 static const int   WORKER_BOT_COST = 20;

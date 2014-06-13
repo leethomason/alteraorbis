@@ -408,33 +408,45 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
 
-		// Run through the inventory, looking for modifiers.
-		// Be cautious there is no order dependency here (except the
-		// inverse order to do the mainItem last)
 		DamageDesc dd = ddorig;
-		for( int i=itemArr.Size()-1; i>=0; --i ) {
-			if ( i==0 || ItemActive(i) ) {
-				itemArr[i]->AbsorbDamage( i>0, dd, &dd, this->GetMeleeWeapon(), parentChit );
+		IShield* iShield = this->GetShield();
+		GameItem* shield = iShield ? iShield->GetItem() : 0;
 
-				if ( itemArr[i]->ToShield() ) {
-					GameItem* shield = itemArr[i]->ToShield()->GetItem();
-					
-					RenderComponent* rc = parentChit->GetRenderComponent();
-					if ( rc && shield->RoundsFraction() > 0 ) {
-						ParticleDef def = context->engine->particleSystem->GetPD( "shield" );
-						Vector3F shieldPos = { 0, 0, 0 };
-						rc->GetMetaData( HARDPOINT_SHIELD, &shieldPos );
-					
-						float f = shield->RoundsFraction();
-						def.color.x *= f;
-						def.color.y *= f;
-						def.color.z *= f;
-						context->engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, 0 );
-					}
-				}
+		// Check for a shield. Block or reduce damage.
+		if (shield && shield->HasRound()) {
+			if (shield->flags & GameItem::EFFECT_FIRE)	dd.effects &= (~GameItem::EFFECT_FIRE);
+			if (shield->flags & GameItem::EFFECT_SHOCK)	dd.effects &= (~GameItem::EFFECT_SHOCK);
 
+			float rounds = (float)shield->rounds;
+			IMeleeWeaponItem* melee = this->GetMeleeWeapon();
+			if (melee) {
+				// A shield boost effectively reduces the % of damage.
+				// (Which means the melee weapons "powers up" the shield.)
+				dd.damage /= BattleMechanics::ComputeShieldBoost(melee);
+			}
+
+			if (float(shield->rounds) >= dd.damage) {
+				dd.damage = 0;
+				shield->rounds -= LRint(dd.damage);
+				if (shield->rounds < 0) shield->rounds = 0;
+			}
+			else {
+				dd.damage -= (float)shield->rounds;
+				shield->rounds = 0;
+			}
+			shield->reload.ResetUnready();
+			shield->GetTraitsMutable()->AddXP(1);
+
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			if (rc) {
+				ParticleDef def = context->engine->particleSystem->GetPD("shield");
+				Vector3F shieldPos = { 0, 0, 0 };
+				rc->GetMetaData(HARDPOINT_SHIELD, &shieldPos);
+				context->engine->particleSystem->EmitPD(def, shieldPos, V3F_UP, 0);
 			}
 		}
+
+		itemArr[0]->AbsorbDamage( dd );
 
 		// report XP back to what hit us.
 		int originID = info->originID;
@@ -443,6 +455,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			origin->GetItemComponent()->AddBattleXP( mainItem, false ); 
 		}
 		lastDamageID = originID;
+
+		parentChit->SetTickNeeded();
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_HEAL ) {
 		parentChit->SetTickNeeded();
@@ -569,6 +583,8 @@ int ItemComponent::ProcessEffect(int delta)
 	Vector2F pos2 = sc->GetPosition2D();
 	Vector2I pos2i = ToWorld2I(pos2);
 	GameItem* mainItem = itemArr[0];
+	IShield* iShield = this->GetShield();
+	const GameItem* shield = iShield ? iShield->GetItem() : 0;
 
 	// Look around at map, weather, etc. and sum up
 	// the chances of fire, shock, & water
@@ -606,6 +622,18 @@ int ItemComponent::ProcessEffect(int delta)
 	float cF = (fire - water) * chanceFire;
 	float cS = (shock * (water + 1.0f)) * chanceShock;
 
+	// Shields offer a lot of environmental protection.
+	if (shield) {
+		if (shield->HasRound()) {
+			cF = 0;
+			cS = 0;
+		}
+		if (shield->flags & GameItem::EFFECT_FIRE)
+			cF *= 0.5f;	// even if shield depleted!
+		if (shield->flags & GameItem::EFFECT_SHOCK)
+			cS *= 0.5f;
+	}
+
 	if (cF > 0 || cS > 0) {
 		if (parentChit->random.Uniform() < cF)
 			mainItem->fireTime = EFFECT_MAX_TIME;
@@ -620,6 +648,7 @@ int ItemComponent::ProcessEffect(int delta)
 		mainItem->fireTime -= int(float(delta) * water);
 		if (mainItem->fireTime < 0) mainItem->fireTime = 0;
 	}
+
 
 	// NOTE: Don't do damage to self. This is
 	// done by the GameItem ticker. Just need to be sure

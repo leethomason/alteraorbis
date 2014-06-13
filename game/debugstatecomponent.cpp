@@ -24,6 +24,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/xegamelimits.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/chitbag.h"
 
 
 using namespace gamui;
@@ -33,21 +34,8 @@ static const float SIZE_X = 0.8f;
 static const float SIZE_Y = 0.2f;
 static const Vector2F OFFSET = { -0.5f, -0.5f };
 
-DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
+DebugStateComponent::DebugStateComponent()
 {
-	RenderAtom a1 = LumosGame::CalcPaletteAtom( 1, 3 );	
-	RenderAtom a2 = LumosGame::CalcPaletteAtom( 1, 1 );
-	healthBar.Init( &map->overlay0, 10, a1, a2 ); 
-	healthBar.SetVisible( false );
-
-	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-	ammoBar.Init( &map->overlay0, 10, blue, blue );
-	ammoBar.SetVisible( false );
-
-	RenderAtom purple = LumosGame::CalcPaletteAtom( 10, 0 );
-	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-	shieldBar.Init( &map->overlay0, 10, purple, grey );
-	shieldBar.SetVisible( false );
 }
 
 
@@ -61,6 +49,23 @@ void DebugStateComponent::Serialize( XStream* xs )
 void DebugStateComponent::OnAdd( Chit* chit, bool init )
 {
 	super::OnAdd( chit, init );
+
+	WorldMap* map = Context()->worldMap;
+
+	RenderAtom a1 = LumosGame::CalcPaletteAtom(1, 3);
+	RenderAtom a2 = LumosGame::CalcPaletteAtom(1, 1);
+	healthBar.Init(&map->overlay0, 10, a1, a2);
+	healthBar.SetVisible(false);
+
+	RenderAtom blue = LumosGame::CalcPaletteAtom(8, 0);
+	ammoBar.Init(&map->overlay0, 10, blue, blue);
+	ammoBar.SetVisible(false);
+
+	RenderAtom purple = LumosGame::CalcPaletteAtom(10, 0);
+	RenderAtom grey = LumosGame::CalcPaletteAtom(0, 6);
+	shieldBar.Init(&map->overlay0, 10, purple, grey);
+	shieldBar.SetVisible(false);
+
 	map->overlay0.Add( &healthBar );
 
 	healthBar.SetSize( SIZE_X, SIZE_Y );
@@ -78,7 +83,8 @@ void DebugStateComponent::OnAdd( Chit* chit, bool init )
 
 void DebugStateComponent::OnRemove()
 {
-	map->overlay0.Remove( &healthBar );
+	WorldMap* map = Context()->worldMap;
+	map->overlay0.Remove(&healthBar);
 	map->overlay0.Remove( &ammoBar );
 	map->overlay0.Remove( &shieldBar );
 	super::OnRemove();
@@ -133,6 +139,14 @@ int DebugStateComponent::DoTick( U32 delta )
 	ammoBar.SetVisible( true );
 	shieldBar.SetVisible( true );
 	healthBar.SetVisible( true );
+
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	if (sc) {
+		Vector2F pos = sc->GetPosition2D();
+		ammoBar.SetPos(	 pos.x-0.5f, pos.y);
+		shieldBar.SetPos(pos.x-0.5f, pos.y+0.2f);
+		healthBar.SetPos(pos.x-0.5f, pos.y+0.4f);
+	}
 
 	return VERY_LONG_TICK;
 }

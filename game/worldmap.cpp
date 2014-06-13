@@ -195,7 +195,6 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 	Vector2I v2 = { v.x, v.z };
 	int index = INDEX(v.x, v.z);
 	
-	GLASSERT( grid[index].Height() || grid[index].Plant()  );
 	if (grid[index].RockHeight() || grid[index].Plant()) {
 		// fluids don't take damage; rocks and plants do.
 		grid[index].DeltaHP((int)(-dd.damage));
@@ -765,7 +764,7 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 {
 	int index = INDEX(x, y);
 	const WorldGrid was = grid[index];
-	GLASSERT(was.IsLand());
+	GLASSERT(typeBase1 == 0 || was.IsLand());
 
 	WorldGrid wg = grid[index];
 	wg.SetPlant(typeBase1, stage);

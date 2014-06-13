@@ -82,7 +82,7 @@ void HealthComponent::DeltaHealth()
 		item = parentChit->GetItem();
 	}
 	if ( item ) {
-		if ( item->hp == 0 ) {
+		if ( item->hp == 0 && !parentChit->Destroyed() ) {
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_START), this );
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
 			parentChit->SetDestroyed(this, 1);

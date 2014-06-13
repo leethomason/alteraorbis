@@ -198,10 +198,14 @@ bool FluidSim::DoStep()
 		}
 	}
 
-	for (int j = 1; j < SECTOR_SIZE - 1; ++j) {
-		for (int i = 1; i < SECTOR_SIZE - 1; ++i) {
-			Vector2I pos = { bounds.min.x + i, bounds.min.y + j };
+	for (int y = bounds.min.y + 1; y < bounds.max.y; ++y) {
+		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
+			Vector2I pos = { x, y };
 			int index = worldMap->INDEX(pos);
+
+			int i = x - bounds.min.x;
+			int j = y - bounds.min.y;
+
 			int h = water[j*SECTOR_SIZE + i];
 			if (h) {
 				aoe.DoUnion(pos);

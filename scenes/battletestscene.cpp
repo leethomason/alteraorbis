@@ -400,10 +400,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	ai->SetSectorAwareness( true );
 	chit->Add( ai );
 	chit->Add( new HealthComponent());
-	chit->Add( new DebugStateComponent(map));
+	chit->Add( new DebugStateComponent());
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
-//	chit->GetItemComponent()->SetHardpoints(); automatic
 
 	return chit;
 }

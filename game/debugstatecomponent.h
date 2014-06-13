@@ -28,7 +28,7 @@ private:
 	typedef Component super;
 
 public:
-	DebugStateComponent( WorldMap* _map );
+	DebugStateComponent();
 	~DebugStateComponent()	{}
 
 	virtual const char* Name() const { return "DebugStateComponent"; }
@@ -41,7 +41,6 @@ public:
 	virtual int DoTick( U32 delta );
 
 private:
-	WorldMap* map;
 	gamui::DigitalBar healthBar;
 	gamui::DigitalBar ammoBar;
 	gamui::DigitalBar shieldBar;

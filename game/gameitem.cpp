@@ -472,71 +472,14 @@ double GameItem::GetBuildingIndustrial( bool create ) const
 }
 
 
-void GameItem::AbsorbDamage( bool inInventory, 
-							 DamageDesc dd, 
-							 DamageDesc* _remain, 
-							 const IMeleeWeaponItem* booster, 
-							 Chit* parentChit )
+void GameItem::AbsorbDamage( const DamageDesc& dd )
 {
-	DamageDesc* remain = _remain;
-	DamageDesc temp;
-	if ( !remain ) {
-		remain = &temp;
-	}
+	// just regular item getting hit, that takes damage.
+	if (dd.effects & EFFECT_FIRE) fireTime = EFFECT_MAX_TIME;
+	if (dd.effects & EFFECT_SHOCK) shockTime = EFFECT_MAX_TIME;
 
-	*remain = dd;
-
-	if ( !inInventory ) {
-		// just regular item getting hit, that takes damage.
-		if (dd.effects & EFFECT_FIRE) fireTime = EFFECT_MAX_TIME;
-		if (dd.effects & EFFECT_SHOCK) shockTime = EFFECT_MAX_TIME;
-
-		hp -= dd.damage;
-		if ( hp < 0 ) hp = 0;
-	}
-	else {
-		// Items in the inventory don't take damage. They
-		// may reduce damage for their parent.
-		if ( ToShield() ) {
-			reload.ResetUnready();
-
-			if ( rounds ) {
-				float canAbsorb = Min( dd.damage * absorbsDamage, (float)rounds );
-			
-				float boost = BattleMechanics::ComputeShieldBoost( booster );
-				float cost = canAbsorb / boost;
-
-				rounds -= LRintf( cost );
-				if ( rounds < 0 ) rounds = 0;
-
-				remain->damage -= canAbsorb;
-				if ( remain->damage < 0 ) remain->damage = 0;
-				
-				this->GetTraitsMutable()->AddXP( 1 );	// don't really need a bunch of extra code;
-														// shields quietly level up, etc. Don't get 
-														// named or kill tracking.
-			}
-			// Shields absorb damage, which prevent fire & shock.
-			// So the bonuses are only useful if they remove effects
-			// even if the shield is out of rounds...which makes them
-			// maybe too powerful.
-			if ( flags & EFFECT_FIRE )
-				remain->effects &= (~EFFECT_FIRE);
-			if ( flags & EFFECT_SHOCK )
-				remain->effects &= (~EFFECT_SHOCK);
-		}
-		else if ( absorbsDamage > 0 ) {
-			// Something that straight up reduces damage.
-			remain->damage *= (1.0f - absorbsDamage);
-			if ( flags & EFFECT_FIRE )
-				remain->effects &= (~EFFECT_FIRE);
-			if ( flags & EFFECT_SHOCK )
-				remain->effects &= (~EFFECT_SHOCK);
-		}
-	}
-	if ( parentChit ) {
-		parentChit->SetTickNeeded();
-	}
+	hp -= dd.damage;
+	if ( hp < 0 ) hp = 0;
 }
 
 

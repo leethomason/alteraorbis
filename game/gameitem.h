@@ -499,7 +499,7 @@ public:
 	}
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const IMeleeWeaponItem* booster, Chit* parent );
+	void AbsorbDamage( const DamageDesc& dd );
 
 	static int idPool;
 

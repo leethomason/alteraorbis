@@ -689,7 +689,7 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		static const Vector3F DOWN = { 0, -1, 0 };
 		static const Vector3F RIGHT = { 1, 0, 0 };
 		context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, 0 );
-		context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, 0 );
+		//context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, 0 );
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;

@@ -48,7 +48,7 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 		return glnew ItemComponent( 0 );
 	}
 	else if ( name == "DebugStateComponent" ) {
-		return glnew DebugStateComponent( context->worldMap );
+		return glnew DebugStateComponent();
 	}
 	else if ( name == "DebugPathComponent" ) {
 		return glnew DebugPathComponent();
