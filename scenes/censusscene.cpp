@@ -203,8 +203,8 @@ void CensusScene::Scan()
 		str = "";
 		kills[i].AppendDesc(&str, history);
 		label[count].SetText(str.c_str());
-		link[count].SetVisible(true);
-		link[count].SetEnabled(kills[i].tempID > 0);
+		link[count].SetVisible(kills[i].tempID > 0);
+		//link[count].SetEnabled(kills[i].tempID > 0);
 		//link[count].SetText(kills[i].tempID ? "link" : "");
 		link[count].userData = (const void*)kills[i].tempID;
 		count++;
@@ -217,8 +217,8 @@ void CensusScene::Scan()
 		str = "";
 		greaterKills[i].AppendDesc(&str, history);
 		label[count].SetText(str.c_str());
-		link[count].SetVisible(true);
-		link[count].SetEnabled(greaterKills[i].tempID > 0);
+		link[count].SetVisible(greaterKills[i].tempID > 0);
+		//link[count].SetEnabled(greaterKills[i].tempID > 0);
 		link[count].userData = (const void*)greaterKills[i].tempID;
 		//link[count].SetText(greaterKills[i].tempID ? "link" : "");
 		++count;
@@ -231,8 +231,8 @@ void CensusScene::Scan()
 		str = "";
 		crafted[i].AppendDesc(&str, history);
 		label[count].SetText(str.c_str());
-		link[count].SetVisible(true);
-		link[count].SetEnabled(crafted[i].tempID > 0);
+		link[count].SetVisible(crafted[i].tempID > 0);
+		//link[count].SetEnabled(crafted[i].tempID > 0);
 		link[count].userData = (const void*)crafted[i].tempID;
 		//link[count].SetText(crafted[i].tempID ? "link" : "");
 		++count;
@@ -245,8 +245,8 @@ void CensusScene::Scan()
 		str = "";
 		domains[i].AppendDesc(&str, history);
 		label[count].SetText(str.c_str());
-		link[count].SetVisible(true);
-		link[count].SetEnabled(domains[i].tempID > 0);
+		link[count].SetVisible(domains[i].tempID > 0);
+		//link[count].SetEnabled(domains[i].tempID > 0);
 		//link[count].SetText(domains[i].tempID ? "link" : "");
 		link[count].userData = (const void*)domains[i].tempID;
 		++count;
@@ -276,8 +276,8 @@ void CensusScene::Scan()
 				str.AppendFormat( " at %s", sd.name.safe_str() );
 			}
 			label[count].SetText(str.c_str());
-			link[count].SetVisible(true);
-			link[count].SetEnabled(h.tempID > 0);
+			link[count].SetVisible(h.tempID > 0);
+			//link[count].SetEnabled(h.tempID > 0);
 			//link[count].SetText(h.tempID ? "link" : "");
 			link[count].userData = (const void*)h.tempID;
 			++count;
@@ -301,8 +301,8 @@ void CensusScene::Scan()
 				str.AppendFormat( " wielded by %s", mainItem->BestName() );
 			}
 			label[count].SetText(str.c_str());
-			link[count].SetVisible(true);
-			link[count].SetEnabled(h.tempID > 0);
+			link[count].SetVisible(h.tempID > 0);
+			//link[count].SetEnabled(h.tempID > 0);
 			//link[count].SetText(h.tempID ? "link" : "");
 			link[count].userData = (const void*)h.tempID;
 			++count;

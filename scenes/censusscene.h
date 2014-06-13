@@ -91,7 +91,7 @@ private:
 	};
 
 	enum {
-		MAX_ROWS = 4,
+		MAX_ROWS = 3,
 		MAX_BUTTONS = ITEM_COUNT + MOB_COUNT + 4 * MAX_ROWS + 5
 	};
 

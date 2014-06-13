@@ -2753,12 +2753,12 @@ int AIComponent::DoTick( U32 deltaTime )
 		focus = FOCUS_NONE;
 	}
 
-	if ( !taskList.UsingBuilding() && feTicker.Delta( deltaTime )) {
+	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
 	}
 
 	// High level mode switch, in/out of battle?
-	if ( focus != FOCUS_MOVE ) {
+	if (focus != FOCUS_MOVE &&  !taskList.UsingBuilding()) {
 		CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
 		bool goesToBattle = (thisComp.item->IName() != IStringConst::worker)

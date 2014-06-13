@@ -1449,7 +1449,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	//}
 
 	// But do flush the current region.
-	CalcZone( starti.x, starti.x );
+	CalcZone( starti.x, starti.y );
 	CalcZone( endi.x,   endi.y );
 
 	WorldGrid* wgStart = grid + INDEX( starti.x, starti.y );
