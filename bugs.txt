@@ -62,36 +62,6 @@ d animation generation
 
 - game
 
-	- Beta 1b
-	    x need a credits screen
-		x make sure "quick gen" hacks are cleaned up for WorldGen
-		x fix code so that it doesn't need uncompressed sound
-		x escape key to back out of modes
-		x tune down wanderers in 1st stage
-		x tune down social need in 1st stage
-		x population cap to # of temples
-		x document temples vs. tech - check that tech works (and not using tech cap)
-			x test distillery (continuous)
-			x test forge (discrete)
-		x "agronomy"
-		x too much "all at once": restrict social in 1st stage?
-		x switch market over to reserve/taxation
-		t greater kills: 4x per kill?
-		x tune down fire rate
-	    x new sounds
-
-	- Beta 1c
-		x rethink menus: 
-			x group by effect
-			x disable until dependent structures built
-			Denizen:  SleepTube -> Temple -> GuardPost
-			Agronomy: Farm -> Distillery -> Bar
-			Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
-			Visitor:  Temple -> Kiosks
-		t greater kill not getting shown in weapon history
-		t enemies don't distract from buildings
-		x update walkthrough - start with denizens
-
 	- Beta 1d
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
@@ -131,7 +101,8 @@ d animation generation
 		- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
-		- hints about what you need to build
+	    - plants look repetetive
+		x hints about what you need to build
 		- walk target for the avatar
 		- move "Create Worker" and "Auto-Rebuild" to "Manage"
 		- re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
@@ -196,7 +167,7 @@ d animation generation
 		x citizens *don't* pick stuff up in their own domain
 		x coin changer. junk item breakdown?
 		x gold & crystal market
-		- flammability / shockability very agressive
+		x flammability / shockability very agressive
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
 		x cyclops attracted by tech?
@@ -364,6 +335,42 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+	x (web page) note that installer installs-over
+	x restore 'create world' button.
+		x pre-gen plants
+		x pre-gen volcanoes (50%?)
+		x run world sim 5 minutes?
+
+x Beta 1c
+	x rethink menus: 
+		x group by effect
+		x disable until dependent structures built
+		Denizen:  SleepTube -> Temple -> GuardPost
+		Agronomy: Farm -> Distillery -> Bar
+		Economy:  Market -> Forge, Exchange, Vault (Market unlocks all 3)
+		Visitor:  Temple -> Kiosks
+	x greater kill not getting shown in weapon history
+	x enemies don't distract from buildings
+	x update walkthrough - start with denizens
+
+x Beta 1b
+	x need a credits screen
+	x make sure "quick gen" hacks are cleaned up for WorldGen
+	x fix code so that it doesn't need uncompressed sound
+	x escape key to back out of modes
+	x tune down wanderers in 1st stage
+	x tune down social need in 1st stage
+	x population cap to # of temples
+	x document temples vs. tech - check that tech works (and not using tech cap)
+		x test distillery (continuous)
+		x test forge (discrete)
+	x "agronomy"
+	x too much "all at once": restrict social in 1st stage?
+	x switch market over to reserve/taxation
+	t greater kills: 4x per kill?
+	x tune down fire rate
+	x new sounds
+
 x Beta 1a
 	x screenshot save dir fix
 	x clean up the chit delete loop
