@@ -190,10 +190,14 @@ public:
 		MAGMA,
 		ICE
 	};
+	// 2D voxels
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
+	virtual void PrepGrid( const SpaceTree* spaceTree );
+
+	// 3D voxels
 	virtual void PrepVoxels(const SpaceTree*, Model** root, const grinliz::Plane* planes6);
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
-	virtual void PrepGrid( const SpaceTree* spaceTree );
+
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
 	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
 												const grinliz::Vector3F& dir,
