@@ -115,7 +115,7 @@ d animation generation
 		- fluids
 			x deal with infinite emitters (one in current save)
 			- rock wear
-			- move voxels to TexturePack? (need 32 bit textures...grumble)
+			d move voxels to TexturePack? (need 32 bit textures...grumble)
 			d water flow over emitters?
 			x emitters should wear rock. no, seems okay
 			- land variation
