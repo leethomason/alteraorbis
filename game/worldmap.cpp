@@ -194,16 +194,19 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 {
 	Vector2I v2 = { v.x, v.z };
 	int index = INDEX(v.x, v.z);
+	const WorldGrid wasWG = grid[index];
 	
 	if (grid[index].RockHeight() || grid[index].Plant()) {
 		// fluids don't take damage; rocks and plants do.
 		grid[index].DeltaHP((int)(-dd.damage));
 	}
 	if ( grid[index].HP() == 0 ) {
-		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
-		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, 0 );
-		SetRock( v.x, v.z, 0, false, 0 );
-		SetPlant(v.x, v.z, 0, 0);
+		if (wasWG.HP()) {
+			Vector3F pos = { (float)v.x + 0.5f, (float)v.y + 0.5f, (float)v.z + 0.5f };
+			engine->particleSystem->EmitPD("derez", pos, V3F_UP, 0);
+			SetRock(v.x, v.z, 0, false, 0);
+			SetPlant(v.x, v.z, 0, 0);
+		}
 	}
 	else if (grid[index].Plant()) {
 		const GameItem* plant = PlantScript::PlantDef( grid[index].Plant() - 1);
@@ -588,6 +591,10 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 
 	for (int i = 0; i < plantEffect.Size(); ++i) {
 		PlantEffect* pe = &plantEffect[i];
+		int index = INDEX(pe->voxel);
+
+		GLASSERT(grid[index].PlantOnFire() == pe->fire);
+		GLASSERT(grid[index].PlantOnShock() == pe->shock);
 
 		// flammability is reflected in the chance
 		// of it catching fire; once on fire, everything
@@ -599,7 +606,6 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 			pe->shock = false;
 		}
 
-		int index = INDEX(pe->voxel);
 		if (grid[index].Plant() == 0)
 			grid[index].SetOn(false, false);
 		else

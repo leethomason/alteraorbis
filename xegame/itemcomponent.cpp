@@ -600,10 +600,14 @@ int ItemComponent::ProcessEffect(int delta)
 		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i + DIR[i]);
 		float mult = (i == 0) ? 2.0f : 1.0f;	// how much more likely of effect if we are standing on it?
 
-		if (wg.Magma()) fire += mult;
-		if ((i == 0) && wg.IsFluid()) water += 1.0;
-		if (wg.PlantOnFire()) fire += mult;
-		if (wg.PlantOnShock()) shock += mult;
+		if (wg.Magma()) 
+			fire += mult;
+		if ((i == 0) && wg.IsFluid()) 
+			water += 1.0;
+		if (wg.PlantOnFire()) 
+			fire += mult;
+		if (wg.PlantOnShock()) 
+			shock += mult;
 	}
 	if ( Weather::Instance() && Weather::Instance()->IsRaining(pos2.x, pos2.y)) {
 		water += 1;
@@ -654,6 +658,11 @@ int ItemComponent::ProcessEffect(int delta)
 	// done by the GameItem ticker. Just need to be sure
 	// the fireTime and/or shockTime is set.
 
+#if 1
+	/* Pushing damage back to the environment is SUPER
+	   COOL. Also hard to debug.
+	*/
+
 	// Push state back to the environment
 	if (mainItem->fireTime || mainItem->shockTime) {
 		if (parentChit->random.Uniform() < CHANCE_FIRE_SPREAD_IC) {
@@ -668,6 +677,7 @@ int ItemComponent::ProcessEffect(int delta)
 			}
 		}
 	}
+#endif
 	return (fire > 0 || shock > 0 ) ? 0 : VERY_LONG_TICK;
 }
 
