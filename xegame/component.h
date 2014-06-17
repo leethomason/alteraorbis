@@ -118,10 +118,12 @@ public:
 	virtual TrackingMoveComponent*	ToTrackingMoveComponent()	{ return 0; }
 	virtual GridMoveComponent*		ToGridMoveComponent()		{ return 0; }
 
-	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI
-	virtual void CalcVelocity( grinliz::Vector3F* v ) { v->Set( 0,0,0 ); }
+	virtual grinliz::Vector3F Velocity() = 0;
+	bool IsMoving()								{ return Velocity().LengthSquared() > 0; }
 	virtual bool ShouldAvoid() const			{ return true; }
+
+protected:
 };
 
 

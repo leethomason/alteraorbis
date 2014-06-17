@@ -71,6 +71,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if ( name == "GridMoveComponent" ) {
 		return glnew GridMoveComponent();
 	}
+	else if (name == "GameMoveComponent") {
+		return glnew GameMoveComponent();
+	}
 	else if ( name == "VisitorStateComponent" ) {
 		return glnew VisitorStateComponent();
 	}

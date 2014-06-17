@@ -394,7 +394,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 		// The avoider only avoids things with move components. Makes sense and yet
 		// stretches this. (Note: BLOCKS are an entirely different matter. The pather
 		// handles those just fine.)
-		chit->Add( new MoveComponent());
+		chit->Add( new GameMoveComponent());
 	}
 	AIComponent* ai = new AIComponent();
 	ai->SetSectorAwareness( true );

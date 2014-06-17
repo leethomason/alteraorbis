@@ -1955,8 +1955,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	// HARDCODE black magic values.
 	static const float du = 0.25;
 	static const float dv = 0.125;
-	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
-	#define BLACKMAG_Y(y)   float( 0.875 - double(y*256 + y*32 + 16) / 2048.0)
+	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 1024.0)
+	#define BLACKMAG_Y(y)   float( 0.875 - double(y*288 + 16) / 2048.0)
 
 	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + WorldGrid::NUM_PORCH;
 	static const Vector2F UV[NUM] = {
@@ -2034,30 +2034,36 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	}
 	gridVertexVBO->Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
 	nGrids = voxelBuffer.Size() / 4;
+#undef BLACKMAG_X
 }
 
 
 Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
 {
 	Vertex* vArr = voxelBuffer.PushArr( 4 );
-	const float u = 2.0f*(float)id / 8.0f;
-	static const float du = 0.125f;
 
-	vArr[0].tex.Set( u, 0 );
-	vArr[1].tex.Set( u, 1 );
-	vArr[2].tex.Set( u+du, 1 );
-	vArr[3].tex.Set( u+du, 0 );
+	// HARDCODE black magic values.
+	static const float du = 0.125;
+	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 2048.0)
+
+	float u = BLACKMAG_X(id);
+
+	vArr[0].tex.Set(u, 0);
+	vArr[1].tex.Set(u, 1);
+	vArr[2].tex.Set(u + du, 1);
+	vArr[3].tex.Set(u + du, 0);
 
 	for( int i=0; i<4; ++i ) {
 		vArr[i].normal = normal;
 		vArr[i].boneID = 0;
 	}
 	return vArr;
+#undef BLACKMAG_X
 }
 
 void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls )
 {
-	Vertex* v = PushVoxelQuad( id, V3F_UP );
+	Vertex* v = PushVoxelQuad(id, V3F_UP);
 	v[0].pos.Set( x, h, z );
 	v[1].pos.Set( x, h, z+1.f );
 	v[2].pos.Set( x+1.f, h, z+1.f );

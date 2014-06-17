@@ -30,7 +30,7 @@ private:
 	typedef MoveComponent super;
 
 public:
-	GameMoveComponent()				{}
+	GameMoveComponent()				{ velocity.Zero(); }
 	virtual ~GameMoveComponent()	{}
 
 	virtual const char* Name() const { return "GameMoveComponent"; }
@@ -40,6 +40,7 @@ public:
 	virtual bool ShouldAvoid() const			{ return false; }	// FIXME: base on mass, or item properties??
 	virtual void Serialize( XStream* xs );
 	virtual int DoTick( U32 delta );
+	virtual grinliz::Vector3F Velocity()		{ return velocity; }
 
 protected:
 	// Apply fluid effects
@@ -49,6 +50,9 @@ protected:
 	bool ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floating);
 	// Keep from hitting world objects.
 	void ApplyBlocks( grinliz::Vector2F* pos, bool* forceApplied );
+
+private:
+	grinliz::Vector3F velocity;
 };
 
 

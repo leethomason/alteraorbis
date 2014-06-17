@@ -45,6 +45,7 @@ int GameMoveComponent::DoTick(U32 delta)
 		pos.z = pos2.y;
 	}
 
+	velocity = (pos - start) * (1000.0f / float(delta));
 	if (start != pos) {
 		sc->SetPosition(pos);
 		return 0;
@@ -99,35 +100,6 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 		grad = grad + delta * v;
 	}
 
-	/*
-	float v0 = wg[0].FluidHeight();
-	float vPos1 = wg[1].IsFluid() ? wg[1].FluidHeight() : v0;
-	float vNeg1 = wg[3].IsFluid() ? wg[3].FluidHeight() : v0;
-	grad.x = ((vPos1 - v0) + (v0 - vNeg1)) * 0.5f;
-
-	vPos1 = wg[2].IsFluid() ? wg[2].FluidHeight() : v0;
-	vNeg1 = wg[4].IsFluid() ? wg[4].FluidHeight() : v0;
-	grad.y = ((vPos1 - v0) + (v0 - vNeg1)) * 0.5f;
-	*/
-	/*
-	float dx = pos->x - (float(pos2i.x) + 0.5f);
-	float dy = pos->z - (float(pos2i.y) + 0.5f);
-
-	float a, b, c;
-	float v0 = wg[0].FluidHeight();
-	float vPos1 = wg[1].IsFluid() ? wg[1].FluidHeight() : v0;
-	float vNeg1 = wg[3].IsFluid() ? wg[3].FluidHeight() : v0;
-	
-	// a2v + bv + c
-	QuadCurveFit11(vNeg1, wg[0].FluidHeight(), vPos1, &a, &b, &c);
-	// 1st deriv: 2av + b
-	grad.x = 2.0f*a*dx + b;
-
-	vPos1 = wg[2].IsFluid() ? wg[2].FluidHeight() : v0;
-	vNeg1 = wg[4].IsFluid() ? wg[4].FluidHeight() : v0;
-	QuadCurveFit11(vNeg1, v0, vPos1, &a, &b, &c);
-	grad.y = 2.0f*a*dy + b;
-	*/
 	// Floating??
 	*floating = false;
 	float h = 0;

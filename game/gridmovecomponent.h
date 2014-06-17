@@ -39,7 +39,7 @@ public:
 	virtual void OnRemove();
 	virtual int DoTick( U32 delta );
 	virtual bool IsMoving() const;
-	virtual void CalcVelocity( grinliz::Vector3F* v ) { *v = velocity; }
+	virtual grinliz::Vector3F Velocity() { return velocity; }
 
 	void SetDest( const SectorPort& sp );
 	// Always does; may need to restore as an option.
@@ -55,7 +55,6 @@ private:
 	};
 	int					state;
 	SectorPort			destSectorPort;
-	//bool				deleteWhenDone;
 	float				speed;
 
 	// Not serialized:

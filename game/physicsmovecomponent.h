@@ -38,7 +38,7 @@ public:
 	virtual void OnRemove();
 	virtual int DoTick( U32 delta );
 	virtual bool IsMoving() const;
-	virtual void CalcVelocity( grinliz::Vector3F* v )	{ *v = velocity; }
+	virtual grinliz::Vector3F Velocity( grinliz::Vector3F* v )	{ return velocity; }
 
 	void Set( const grinliz::Vector3F& _velocity, float _rotation );
 	void Add( const grinliz::Vector3F& _velocity, float _rotation );
@@ -69,7 +69,7 @@ public:
 	virtual void Serialize( XStream* xs );
 	virtual int  DoTick( U32 since );
 	virtual bool IsMoving();
-	virtual void CalcVelocity( grinliz::Vector3F* v );
+	virtual grinliz::Vector3F Velocity();
 
 	void SetTarget( int chitID )				{ target = chitID; }
 	virtual bool ShouldAvoid() const			{ return false; }

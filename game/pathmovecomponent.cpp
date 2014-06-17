@@ -98,13 +98,14 @@ float GameMoveComponent::Speed() const
 }
 
 
-void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
+Vector3F PathMoveComponent::Velocity()
 {
-	v->Zero();
+	Vector3F v = { 0, 0, 0 };
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( spatial && this->IsMoving() ) {
-		*v = spatial->GetHeading() * Speed();
+		v = spatial->GetHeading() * Speed();
 	}
+	return v;
 }
 
 

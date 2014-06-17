@@ -55,7 +55,7 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual bool ShouldAvoid() const			{ return true; }
 
-	virtual void CalcVelocity( grinliz::Vector3F* v );
+	virtual grinliz::Vector3F Velocity();
 
 	void QueueDest( const grinliz::Vector2F& dest,
 					const grinliz::Vector2F* heading=0,	// if !zero, the rotation we wish to get to

@@ -451,7 +451,7 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 	}
 
 	if ( target->GetMoveComponent() ) {
-		target->GetMoveComponent()->CalcVelocity( &v );
+		v = target->GetMoveComponent()->Velocity();
 	}
 
 	GameItem* item = origin->GetItem();

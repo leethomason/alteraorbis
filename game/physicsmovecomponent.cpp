@@ -146,20 +146,21 @@ void TrackingMoveComponent::Serialize( XStream* xs )
 }
 
 
-void TrackingMoveComponent::CalcVelocity( grinliz::Vector3F* v )
+Vector3F TrackingMoveComponent::Velocity()
 {
-	v->Zero();
+	Vector3F v = { 0, 0, 0 };
 
 	Chit* chit = Context()->chitBag->GetChit( target );
 	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
-		return;
+		return v;
 
 	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
 	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 
 	Vector3F delta = targetPos - pos;
 	delta.Normalize();
-	*v = delta * TRACK_SPEED;
+	v = delta * TRACK_SPEED;
+	return v;
 }
 
 
