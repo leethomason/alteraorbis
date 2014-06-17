@@ -138,8 +138,6 @@ public:
 	// dir: optional, vectors to adjacent
 	void GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count, grinliz::Vector2I* dir );
 
-	grinliz::Vector2I FindPassable( int x, int y );
-
 	void ResetPather( int x, int y );
 	void UpdateBlock( int x, int y );	// tell the map to check for blocks. will call ResetPather() if needed
 	bool IsPassable( int x, int y ) const;
@@ -176,7 +174,6 @@ public:
 	enum BlockResult {
 		NO_EFFECT,
 		FORCE_APPLIED,
-		STUCK
 	};
 
 	enum BlockType {
@@ -392,6 +389,7 @@ private:
 	int IntersectPlantAtVoxel( const grinliz::Vector3I& voxel,
 		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);
 	void ProcessEffect( ChitBag* chitBag );	// on slow tick
+	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
 
 	WorldGrid*					grid;
 	Engine*						engine;

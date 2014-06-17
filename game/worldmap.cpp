@@ -59,6 +59,38 @@ using namespace tinyxml2;
 // Bug fix: incorrect recusion   4	yes, 4
 // 
 
+static const Vector2I DIR_I8[8] = {
+	{ 1, 0 },
+	{ 1, 1 },
+	{ 0, 1 },
+	{ -1, 1 },
+	{ -1, 0 },
+	{ -1, -1 },
+	{ 0, -1 },
+	{ 1, -1 }
+};
+
+static const Vector2F DIR_F8[8] = {
+	{ 1, 0 },
+	{ 1, 1 },
+	{ 0, 1 },
+	{ -1, 1 },
+	{ -1, 0 },
+	{ -1, -1 },
+	{ 0, -1 },
+	{ 1, -1 }
+};
+
+
+static const float LEN_F8[8] = {
+	1, SQRT2, 1, SQRT2, 1, SQRT2, 1, SQRT2
+};
+
+static const float INV_LEN_F8[8] = {
+	1, INV_SQRT2, 1, INV_SQRT2, 1, INV_SQRT2, 1, INV_SQRT2
+};
+
+
 WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000)
 {
 	GLASSERT( width % ZONE_SIZE == 0 );
@@ -909,16 +941,6 @@ void WorldMap::UpdateBlock( int x, int y )
 
 void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count, Vector2I* dirArr)
 {
-	static const Vector2I DIR[8] = {
-		{ 1, 0 },
-		{ 1, 1 },
-		{ 0, 1 },
-		{ -1, 1 },
-		{ -1, 0 },
-		{ -1, -1},
-		{ 0, -1 },
-		{ 1, -1 }
-	};
 	int step = 1;
 	int n = 0;
 
@@ -940,9 +962,9 @@ void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count
 
 	// Adjacent:
 	for (int i = 0; i < 8; i += step) {
-		arr[n] = grid[INDEX(p+DIR[i])];
+		arr[n] = grid[INDEX(p+DIR_I8[i])];
 		if (dirArr)
-			dirArr[n] = DIR[i];
+			dirArr[n] = DIR_I8[i];
 		n++;
 	}
 }
@@ -999,103 +1021,50 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 													BlockType type,
 													grinliz::Vector2F* force )
 {
-	Vector2I blockPos = { (int)pos.x, (int)pos.y };
+	Vector2I pos2i = ToWorld2I(pos);
+	GLASSERT(rad <= MAX_BASE_RADIUS);
 
-	// could be further optimized by doing a radius-squared check first
-	Rectangle2I b = Bounds();
-	static const float EPSILON = 0.0001f;
+	Rectangle2I bounds = Bounds();
+	static const float EPSILON = 0.01f;
 
-	Vector2I delta[4] = {{ 0, 0 }};
-	int nDelta = 1;
-	static const float MAX_M1 = 1.0f-MAX_BASE_RADIUS;
+	force->Zero();
+	float smallest = 1.0f;
 
-	float dx = pos.x - (float)blockPos.x;
-	float dy = pos.y - (float)blockPos.y;
-	if ( dx < MAX_BASE_RADIUS ) {
-		if ( dy < MAX_BASE_RADIUS ) {
-			delta[nDelta++].Set( -1,  0 );
-			delta[nDelta++].Set( -1, -1 );	
-			delta[nDelta++].Set(  0, -1 );
-		}
-		else if ( dy > MAX_M1 ) {
-			delta[nDelta++].Set( -1, 0 );	
-			delta[nDelta++].Set( -1, 1 );
-			delta[nDelta++].Set(  0, 1 );
-		}
-		else {
-			delta[nDelta++].Set( -1, 0 );
-		}
-	}
-	else if ( dx > MAX_M1 ) {
-		if ( dy < MAX_BASE_RADIUS ) {
-			delta[nDelta++].Set(  1,  0 );
-			delta[nDelta++].Set(  1, -1 );	
-			delta[nDelta++].Set(  0, -1 );
-		}
-		else if ( dy > MAX_M1 ) {
-			delta[nDelta++].Set(  1, 0 );	
-			delta[nDelta++].Set(  1, 1 );
-			delta[nDelta++].Set(  0, 1 );
-		}
-		else {
-			delta[nDelta++].Set( -1, 0 );
-		}
-	}
-	else {
-		if ( dy < MAX_BASE_RADIUS ) {
-			delta[nDelta++].Set(  0, -1 );
-		}
-		else if ( dy > MAX_M1 ) {
-			delta[nDelta++].Set(  0, 1 );
-		}
-	}
-	GLASSERT( nDelta <= 4 );
+	static const Vector2F origin = { 0.5f, 0.5f };
+	double d0, d1;
+	const Vector2F fract = { (float)modf(pos.x, &d0), (float)modf(pos.y, &d1) };
 
-	for( int i=0; i<nDelta; ++i ) {
-		Vector2I block = blockPos + delta[i];
-		if (!b.Contains(block)) continue;
+	for (int i = 0; i < 8; ++i) {
 
-		bool blocked = false;
-		if (type == BT_PASSABLE)   blocked = !IsPassable(block.x, block.y);
-		else if (type == BT_FLUID) blocked = !grid[INDEX(block)].IsFluid() && !IsPassable(block.x, block.y);
+		Vector2F v = pos + DIR_F8[i] * rad;
+		Vector2I block = ToWorld2I(v);
 
-		if (blocked) {
-			// Will find the smallest overlap, and apply.
-			Vector2F c = { (float)block.x+0.5f, (float)block.y+0.5f };	// block center.
-			Vector2F p = pos - c;										// translate pos to origin
-			Vector2F n = p; 
-			if ( n.LengthSquared() )
-				n.Normalize();
-			else
-				n.Set( 1, 0 );
+		if (block == pos2i) continue;	// same block
 
-			if ( p.x > fabsf(p.y) && (p.x-rad < 0.5f) ) {				// east quadrant
-				float dx = 0.5f - (p.x-rad) + EPSILON;
-				GLASSERT( dx > 0 );
-				*force = n * (dx/fabsf(n.x));
-				return FORCE_APPLIED;
-			}
-			if ( -p.x > fabsf(p.y) && (p.x+rad > -0.5f) ) {				// west quadrant
-				float dx = 0.5f + (p.x+rad) + EPSILON;
-				*force = n * (dx/fabsf(n.x));
-				GLASSERT( dx > 0 );
-				return FORCE_APPLIED;
-			}
-			if ( p.y > fabsf(p.x) && (p.y-rad < 0.5f) ) {				// north quadrant
-				float dy = 0.5f - (p.y-rad) + EPSILON;
-				*force = n * (dy/fabsf(n.y));
-				GLASSERT( dy > 0 );
-				return FORCE_APPLIED;
-			}
-			if ( -p.y > fabsf(p.x) && (p.y+rad > -0.5f) ) {				// south quadrant
-				float dy = 0.5f + (p.y+rad) + EPSILON;
-				*force = n * (dy/fabsf(n.y));
-				GLASSERT( dy > 0 );
-				return FORCE_APPLIED;
+		bool blocked = !bounds.Contains(block);
+		if (!blocked) {
+			if (type == BT_PASSABLE)   blocked = !IsPassable(block.x, block.y);
+			else if (type == BT_FLUID) blocked = !grid[INDEX(block)].IsFluid() && !IsPassable(block.x, block.y);
+		}
+		if (!blocked) continue;
+
+		// Treat block as infinite plane. Calc distance to plane,
+		// projection of delta onto normal.
+		Vector2F corner = origin + 0.5f * DIR_F8[i];		// the corner, in local (0,0)-(1,1) coordinates.
+		Vector2F normal = DIR_F8[i] * INV_LEN_F8[i];		// normal in the direction
+		float d = DotProduct(normal, corner - fract);		// distance projection, treating the block as a plane. corner blocks are 45deg planes.
+
+		Vector2F f = { 0, 0 };
+		if (d < rad) {
+			f = -normal * (rad - d + EPSILON);
+
+			if (f.LengthSquared() < smallest) {
+				smallest = f.LengthSquared();
+				*force = f;
 			}
 		}
 	}
-	return NO_EFFECT;
+	return force->IsZero() ? NO_EFFECT : FORCE_APPLIED;
 }
 
 
@@ -1105,20 +1074,30 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 													Vector2F* outPos )
 {
 	*outPos = inPos;
+
+	// If blocked on input, no fixing that:
+	Vector2I pos2i = ToWorld2I(inPos);
+	if (grid[INDEX(pos2i)].IsBlocked()) {
+		*outPos = ToWorld2F(FindPassable(pos2i.x, pos2i.y));
+		return FORCE_APPLIED;
+	}
+
 	Vector2F force = { 0, 0 };
 
 	// Can't think of a case where it's possible to overlap more than 2,
 	// but there probably is. Don't worry about it. Go with fast & 
 	// usually good enough.
 	//for( int i=0; i<2; ++i ) {
-		BlockResult result = CalcBlockEffect( *outPos, radius, type, &force );
-		if ( result == STUCK )
-			return STUCK;
-		if ( result == FORCE_APPLIED )
-			*outPos += force;	
-		//if ( result == NO_EFFECT )
-		//	break;
+	BlockResult result = CalcBlockEffect( *outPos, radius, type, &force );
+	*outPos += force;	
 	//}
+
+	pos2i = ToWorld2I(*outPos);
+	if (grid[INDEX(pos2i)].IsBlocked()) {
+		GLASSERT(false);	// shouldn't happen - we weren't blocked at start of function.
+		*outPos = ToWorld2F(FindPassable(pos2i.x, pos2i.y));
+	}
+
 	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
 }
 

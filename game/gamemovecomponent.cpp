@@ -9,6 +9,7 @@
 
 using namespace grinliz;
 
+// Multiplied by a gradient: not actually this fast.
 static const float FLUID_SPEED = DEFAULT_MOVE_SPEED * 0.5f;
 
 void GameMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
@@ -67,32 +68,19 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 
 	const ChitContext* context = Context();
 
-	WorldMap::BlockResult result = context->worldMap->ApplyBlockEffect( *pos, radius, WorldMap::BT_PASSABLE, &newPos );
-	if ( forceApplied ) *forceApplied = ( result == WorldMap::FORCE_APPLIED );
-	bool isStuck = ( result == WorldMap::STUCK );
-
-	if ( forceApplied || isStuck ) {
-		int x = (int)newPos.x;
-		int y = (int)newPos.y;
-
-		if ( !context->worldMap->IsPassable( x, y )) {
-  			Vector2I out = context->worldMap->FindPassable( x, y );
-			newPos.x = (float)out.x + 0.5f;
-			newPos.y = (float)out.y + 0.5f;
-		}
-	}
-	
+	context->worldMap->ApplyBlockEffect( *pos, radius, WorldMap::BT_PASSABLE, &newPos );
 	*pos = newPos;
 }
 
 
 bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floating)
 {
-	WorldGrid wg[5];
+	static const int N = 9;
+	WorldGrid wg[N];
 	Vector2I pos2i = ToWorld2I(*pos);
-	Vector2I dir[5];
+	Vector2I dir[N];
 
-	Context()->worldMap->GetWorldGrid(pos2i, wg, 5, dir);
+	Context()->worldMap->GetWorldGrid(pos2i, wg, N, dir);
 	if (!wg[0].IsFluid()) {
 		return false;
 	}
@@ -101,6 +89,18 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 	Vector2F grad = { 0, 0 };
 
 	float v0 = wg[0].FluidHeight();
+	
+	for (int i = 1; i < N; ++i) {
+		Vector2F delta = { (float)dir[i].x, (float)dir[i].y };
+		if (dir[i].x && dir[i].y) delta = delta * 0.7f;
+
+		float v = (wg[i].IsFluid() || wg[i].Height() == 0) ? wg[i].FluidHeight() : v0;
+
+		grad = grad + delta * v;
+	}
+
+	/*
+	float v0 = wg[0].FluidHeight();
 	float vPos1 = wg[1].IsFluid() ? wg[1].FluidHeight() : v0;
 	float vNeg1 = wg[3].IsFluid() ? wg[3].FluidHeight() : v0;
 	grad.x = ((vPos1 - v0) + (v0 - vNeg1)) * 0.5f;
@@ -108,7 +108,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 	vPos1 = wg[2].IsFluid() ? wg[2].FluidHeight() : v0;
 	vNeg1 = wg[4].IsFluid() ? wg[4].FluidHeight() : v0;
 	grad.y = ((vPos1 - v0) + (v0 - vNeg1)) * 0.5f;
-
+	*/
 	/*
 	float dx = pos->x - (float(pos2i.x) + 0.5f);
 	float dy = pos->z - (float(pos2i.y) + 0.5f);

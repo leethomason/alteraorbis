@@ -41,6 +41,8 @@ const double RAD_TO_DEG_D = ( 360.0 / ( 2.0 * PI_D ) );
 const double DEG_TO_RAD_D = ( ( 2.0 * PI_D ) / 360.0 );
 const float SQRT2 = 1.4142135623730950488016887242097f;
 const float SQRT2OVER2 = float( 1.4142135623730950488016887242097 / 2.0 );
+const float INV_SQRT2 = 0.70710678118654752440084436210485f;
+
 
 inline float ToDegree( float radian ) { return radian * RAD_TO_DEG; }
 inline double ToDegree( double radian ) { return radian * RAD_TO_DEG_D; }
