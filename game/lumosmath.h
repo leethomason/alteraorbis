@@ -105,6 +105,10 @@ inline float Travel(float rate, U32 msecTime) {
 }
 
 
+inline float Travel(float rate, int msecTime) {
+	return rate * ((float)msecTime) * 0.001f;
+}
+
 inline float Travel(float rate, float secTime) {
 	return rate * secTime;
 }

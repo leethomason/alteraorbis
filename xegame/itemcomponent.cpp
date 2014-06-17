@@ -569,6 +569,8 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 
 int ItemComponent::ProcessEffect(int delta)
 {
+	// FIXME: buggy for 2x2 items. Only using one grid.
+
 	// ItemComponent tick frequency much higher than the
 	// water sim in WorldMap. Multiply to reduce the frequency.
 	static const float CHANCE_FIRE_NORMAL_IC = CHANCE_FIRE_NORMAL * 0.1f;
@@ -594,6 +596,25 @@ int ItemComponent::ProcessEffect(int delta)
 	float fire = 0;
 	float shock = 0;
 	float water = 0;
+	bool underWater = false;
+
+	if (mainItem->flags & GameItem::DAMAGE_UNDER_WATER) {
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+		if (wg.IsFluid()) {
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			if (rc) {
+				Rectangle3F aabb = rc->MainModel()->AABB();
+				float deep = 0.75f * aabb.max.y + 0.25f * aabb.min.y;
+
+				if (wg.FluidHeight() > deep) {
+					underWater = true;
+
+					DamageDesc dd = { Travel(float(EFFECT_DAMAGE_PER_SEC), delta), 0 };
+					mainItem->AbsorbDamage(dd);
+				}
+			}
+		}
+	}
 
 	for (int i = 0; i < NDIR; ++i) {
 		// FIXME: return water when out of bounds??
@@ -678,7 +699,7 @@ int ItemComponent::ProcessEffect(int delta)
 		}
 	}
 #endif
-	return (fire > 0 || shock > 0 ) ? 0 : VERY_LONG_TICK;
+	return (fire > 0 || shock > 0 || underWater ) ? 0 : VERY_LONG_TICK;
 }
 
 

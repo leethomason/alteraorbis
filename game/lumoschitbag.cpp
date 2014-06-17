@@ -607,6 +607,8 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 	chit->Add( new SpatialComponent());
 	AddItem( name, chit, context->engine, 0, 0 );
 	chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
+	chit->Add(new GameMoveComponent());
+
 	chit->GetSpatialComponent()->SetPosition( pos );
 	
 	Wallet w;

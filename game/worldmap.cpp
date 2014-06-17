@@ -431,7 +431,7 @@ void WorldMap::Init( int w, int h )
 		AttachEngine( savedEngine, savedIMap );
 	}
 
-	voxelInit.ClearAll();
+//	voxelInit.ClearAll();
 
 	DeleteAllRegions();
 	delete [] grid;
@@ -651,7 +651,7 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
 {
 	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
-		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
+		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep(0);
 	return true;
 }
 
@@ -702,7 +702,19 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 	int n = fluidTicker.Delta(delta);
 	while (n--) {
 		if (fluidSim[fluidSector]) {
-			fluidSim[fluidSector]->DoStep();
+			Rectangle2I aoe;
+			aoe.SetInvalid();
+			fluidSim[fluidSector]->DoStep(&aoe);
+
+			if (aoe.IsValid()) {
+				// Need to tick everything in the 
+				// area of effect. Physics changes
+				// may apply to the world objects.
+				Rectangle2F aoeF = ToWorld(aoe);
+				if (chitBag) {
+					chitBag->SetTickNeeded(aoeF);
+				}
+			}
 		}
 		fluidSector++;
 		if (fluidSector >= Square(NUM_SECTORS)) {
@@ -845,7 +857,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
 
 	if ( !was.VoxelEqual( wg )) {
-		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
+//		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
 		grid[INDEX(x,y)] = wg;
 		
 		Vector2I sector = ToSector(x, y);
@@ -891,6 +903,47 @@ void WorldMap::UpdateBlock( int x, int y )
 			wg->extBlock = 0;
 			ResetPather( x, y );
 		}
+	}
+}
+
+
+void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count, Vector2I* dirArr)
+{
+	static const Vector2I DIR[8] = {
+		{ 1, 0 },
+		{ 1, 1 },
+		{ 0, 1 },
+		{ -1, 1 },
+		{ -1, 0 },
+		{ -1, -1},
+		{ 0, -1 },
+		{ 1, -1 }
+	};
+	int step = 1;
+	int n = 0;
+
+	switch (count) {
+		case 4: step = 2; break;
+		case 5: step = 2; break;
+		case 8: step = 1; break;
+		case 9: step = 1; break;
+		default: GLASSERT(0); break;
+	}
+
+	// Zero entry:
+	if (count & 1) {
+		arr[n] = grid[INDEX(p)];
+		if (dirArr)
+			dirArr[n].Zero();
+		n++;
+	}
+
+	// Adjacent:
+	for (int i = 0; i < 8; i += step) {
+		arr[n] = grid[INDEX(p+DIR[i])];
+		if (dirArr)
+			dirArr[n] = DIR[i];
+		n++;
 	}
 }
 
@@ -943,13 +996,13 @@ Vector2I WorldMap::FindPassable( int x, int y )
 
 WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 													float rad,
+													BlockType type,
 													grinliz::Vector2F* force )
 {
 	Vector2I blockPos = { (int)pos.x, (int)pos.y };
 
 	// could be further optimized by doing a radius-squared check first
 	Rectangle2I b = Bounds();
-	//static const Vector2I delta[9] = { {0,0}, {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
 	static const float EPSILON = 0.0001f;
 
 	Vector2I delta[4] = {{ 0, 0 }};
@@ -1000,9 +1053,13 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 
 	for( int i=0; i<nDelta; ++i ) {
 		Vector2I block = blockPos + delta[i];
-		if (    b.Contains(block) 
-			&& !IsPassable(block.x, block.y) ) 
-		{
+		if (!b.Contains(block)) continue;
+
+		bool blocked = false;
+		if (type == BT_PASSABLE)   blocked = !IsPassable(block.x, block.y);
+		else if (type == BT_FLUID) blocked = !grid[INDEX(block)].IsFluid() && !IsPassable(block.x, block.y);
+
+		if (blocked) {
 			// Will find the smallest overlap, and apply.
 			Vector2F c = { (float)block.x+0.5f, (float)block.y+0.5f };	// block center.
 			Vector2F p = pos - c;										// translate pos to origin
@@ -1044,6 +1101,7 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 
 WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos, 
 													float radius, 
+													BlockType type,
 													Vector2F* outPos )
 {
 	*outPos = inPos;
@@ -1053,7 +1111,7 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 	// but there probably is. Don't worry about it. Go with fast & 
 	// usually good enough.
 	//for( int i=0; i<2; ++i ) {
-		BlockResult result = CalcBlockEffect( *outPos, radius, &force );
+		BlockResult result = CalcBlockEffect( *outPos, radius, type, &force );
 		if ( result == STUCK )
 			return STUCK;
 		if ( result == FORCE_APPLIED )

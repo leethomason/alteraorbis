@@ -9,7 +9,7 @@
   <item name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
-		flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
+		flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
@@ -28,7 +28,7 @@
   <item name="humanMale"
         resource="humanMale"
         uiIcon="human"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
@@ -45,7 +45,7 @@
 
   <item name="worker"
         resource="worker"
-        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP"
+        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP FLOAT"
         mass="20" >
     <intrinsics>
       <item name="claw"
@@ -62,7 +62,7 @@
 
   <item name="visitor"
         resource="visitor"
-        flags="CLICK_THROUGH"
+        flags="CLICK_THROUGH DAMAGE_UNDER_WATER"
         speed="1.0"
         mass="35" >
   </item>
@@ -74,17 +74,17 @@
 
   <item name="gold"
         resource="gold"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
         mass="10">
   </item>
 
   <item name="crystal_green"
         resource="crystal_green"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
         mass="1" />
   <item name="crystal_red"
         resource="crystal_red"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
         mass="1" />
   <item name="crystal_blue"
         resource="crystal_blue"
@@ -101,6 +101,7 @@
 
   <item name="kiosk.m"
         resource="kiosk.m"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
@@ -108,6 +109,7 @@
 
   <item name="kiosk.n"
         resource="kiosk.n"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
@@ -115,6 +117,7 @@
 
   <item name="kiosk.c"
         resource="kiosk.c"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
@@ -122,6 +125,7 @@
 
   <item name="kiosk.s"
         resource="kiosk.s"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
@@ -136,12 +140,13 @@
 
   <item name="ruins"
         resource="ruins1.0"
-        flags="CLICK_THROUGH"
+        flags="CLICK_THROUGH DAMAGE_UNDER_WATER"
         mass="100"
         />
 
   <item name="vault"
         resource="vault"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
@@ -158,6 +163,7 @@
   <!-- kick the fun up quite high, but add a check in the AI for crystal -->
   <item name="factory"
         resource="factory"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
@@ -172,6 +178,7 @@
 
   <item name="power"
         resource="pyramid0"
+        flags="DAMAGE_UNDER_WATER"
         porch="0"
         procedural="team"
         size="2"
@@ -181,6 +188,7 @@
 
   <item name="guardpost"
         resource="guardpost"
+        flags="DAMAGE_UNDER_WATER"
         procedural="team"
         size="1"
         mass="100"
@@ -190,6 +198,7 @@
 
   <item name="bed"
         resource="sleep"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="1"
@@ -203,6 +212,7 @@
 
   <item name="market"
         resource="market"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
@@ -215,18 +225,19 @@
         need.social="0.2"
         />
 
-    <item   name="exchange"
-            resource="exchange"
-            porch="1"
-            procedural="team"
-            size="1"
-            mass="100"
-            cost="80"
-            zoneCreate="industrial"
-            zoneConsume="industrial"
+  <item name="exchange"
+        resource="exchange"
+        flags="DAMAGE_UNDER_WATER"
+        porch="1"
+        procedural="team"
+        size="1"
+        mass="100"
+        cost="80"
+        zoneCreate="industrial"
+        zoneConsume="industrial"
 
-            need.time="1.5"
-            need.fun="0.4"
+        need.time="1.5"
+        need.fun="0.4"
         />
 
   <!-- comlpex needs: gives social if others there, 
@@ -234,6 +245,7 @@
   -->
   <item name="bar"
         resource="bar"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
@@ -261,6 +273,7 @@
   
   <item name="distillery"
         resource="distillery"
+        flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
@@ -273,7 +286,7 @@
 
   <item name="arachnoid"
         resource="arachnoid"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE FLOAT"
         mob="lesser"
         nameGen="monster"
         mass="10">
@@ -289,7 +302,7 @@
 
   <item name="mantis"
         resource="mantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP ITEM_PICKUP"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP ITEM_PICKUP DAMAGE_UNDER_WATER"
         mob="lesser"
         nameGen="monster"
         mass="40">
@@ -305,7 +318,7 @@
 
   <item name="redMantis"
         resource="redmantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP DAMAGE_UNDER_WATER"
         mob="lesser"
         nameGen="monster"
         mass="30">
@@ -331,7 +344,7 @@
 
   <item name="troll"
         resource="troll"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE AI_USES_BUILDINGS HAS_PERSONALITY"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE AI_USES_BUILDINGS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="monster"
         mob="lesser"
         mass ="40">
@@ -348,7 +361,7 @@
 
   <item name="cyclops"
         resource="cyclops"
-        flags="GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
+        flags="GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
         mass="400">
@@ -363,7 +376,7 @@
 
    <item name="fireCyclops"
         resource="firecyclops"
-        flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
+        flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
         mass="400">
@@ -388,7 +401,7 @@
  
    <item name="shockCyclops"
         resource="shockcyclops"
-        flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
+        flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
         mass="400">
@@ -419,7 +432,7 @@
   <item name="ring"
         resource="ring"
         uiIcon="ring"
-        flags="MELEE_WEAPON CLICK_THROUGH"
+        flags="MELEE_WEAPON CLICK_THROUGH FLOAT"
 		procedural="ring"
         nameGen="vikingFemale"
         hardpoint="trigger"
@@ -433,7 +446,7 @@
   <item name="pistol"
         resource="pistol"
         uiIcon="pistol"
-        flags="RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
         accuracy="0.6"
@@ -452,7 +465,7 @@
   <item name="blaster"
         resource="blaster"
         uiIcon="blaster"
-        flags="RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
         accuracy="0.8"
@@ -471,7 +484,7 @@
   <item name="pulse"
         resource="pulse"
         uiIcon="pulse"
-        flags="RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="2.0"
         accuracy="1.0"
@@ -490,7 +503,7 @@
   <item name="beamgun"
         resource="beamgun"
         uiIcon="beamgun"
-        flags="RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
         accuracy="1.4"
@@ -509,7 +522,7 @@
   <item name="shield"
         resource="shield"
         uiIcon="shield"
-        flags="HELD_AT_HARDPOINT CLICK_THROUGH"
+        flags="HELD_AT_HARDPOINT CLICK_THROUGH FLOAT"
         hardpoint="shield"
         reload ="3000"
         clipCap="20"
@@ -531,6 +544,8 @@
        A plant standing alone will have sun+rain = 1.0 in the absense of other effects.
 
        CLICK_THROUGH is debatable. Sometimes you do want to shoot a tree.
+
+       Don't need DAMAGE_UNDER_WATER: handled by the PlantSim
   -->
   <item name="plant0"
         desc="Orbstalk"

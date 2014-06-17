@@ -7,7 +7,7 @@
 
 class LumosGame;
 class WorldMap;
-
+class LumosChitBag;
 
 class FluidTestScene : public Scene
 {
@@ -39,10 +39,13 @@ private:
 		BUTTON_ROCK2,
 		BUTTON_ROCK3,
 		BUTTON_EMITTER,
+		BUTTON_GREEN,
+		BUTTON_VIOLET,
 		NUM_BUILD_BUTTONS
 	};
 
-	LumosGame* lumosGame;
+	LumosGame*  lumosGame;
+	LumosChitBag* chitBag;
 	Engine*		engine;
 	WorldMap*	worldMap;
 	bool		settled;

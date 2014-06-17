@@ -26,7 +26,11 @@ static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
 static const int HP_PER_PLANT_STAGE		= 20;	// a square in there: 20 -> 320	
 static const int FLUID_PER_ROCK			= 4;
-static const int FLUID_BLOCKING			= 2;
+
+/*	Fluid Blocking creates all kinds of problems: what happens when it goes over buildings? Cores? 
+	May have to solve that, but for now, try to deal with it via MoveComponent and effects.
+*/
+//static const int FLUID_BLOCKING			= 2;
 
 struct WorldGrid {
 	friend class FluidSim;
@@ -46,6 +50,16 @@ public:
 		GRID,
 		PORT,
 		NUM_LAYERS
+	};
+
+	enum {
+		FLUID_WATER = 0,
+		FLUID_LAVA,
+		FLUID_SHOCK,
+
+		EMITTER_NONE = 0,
+		EMITTER_WATER,
+		EMITTER_LAVA
 	};
 
 private:
@@ -71,20 +85,21 @@ private:
 
 	unsigned path				: 10;	// 2 bits each: core, port0-3
 
-	// 42 + 11 = 53 bits
+	// 42 + 14 = 56 bits
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
-	unsigned fluidEmitter		: 1;
+	unsigned fluidEmitter		: 2;	// 0 not emitter, 1: fluid, 2: lava
 	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
+	unsigned fluidType			: 2;	// types of fluids: 0:water, 1:lava, 2:shock
 
-	// state:
-	unsigned plantOnFire		: 1;	// NOTE: matches 
+	// 56 + 2 = 58 bits
+	unsigned plantOnFire		: 1;	// NOTE: matches the array in the FluidSim
 	unsigned plantOnShock		: 1;
 
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
-											 || (fluidHeight >= FLUID_BLOCKING)
+											 //|| (fluidHeight >= FLUID_BLOCKING) 
 											 || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 
@@ -93,12 +108,15 @@ public:
 	// does this and rhs render the same voxel?
 	int VoxelEqual( const WorldGrid& wg ) const {
 		return	land == wg.land &&
-				pave   == wg.pave &&
-				isPorch == wg.isPorch &&
-				rockHeight == wg.rockHeight &&
-				magma == wg.magma &&
-				fluidHeight == wg.fluidHeight &&
-				fluidEmitter == wg.fluidEmitter;
+			pave == wg.pave &&
+			isPorch == wg.isPorch &&
+			rockHeight == wg.rockHeight &&
+			magma == wg.magma &&
+			fluidEmitter == wg.fluidEmitter &&
+			fluidHeight == wg.fluidHeight &&
+			fluidType == wg.fluidType &&
+			plantOnFire == wg.plantOnFire &&
+			plantOnShock == wg.plantOnShock;
 	}
 
 	grinliz::Color4U8 ToColor() const {
@@ -210,6 +228,9 @@ public:
 	}
 	float FluidHeight() const {
 		return float(fluidHeight) / float(FLUID_PER_ROCK);
+	}
+	int FluidHeightI() const {
+		return fluidHeight;
 	}
 
 	bool IsFluidEmitter() const { return fluidEmitter ? true : false; }

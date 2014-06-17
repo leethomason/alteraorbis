@@ -98,7 +98,7 @@ d animation generation
 			x save and load testing for plants
 			x rampage not destroying plants
 			x plants in rocks
-		- change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
+		x change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 	    - plants look repetetive
@@ -114,21 +114,26 @@ d animation generation
 			x weapon sorting not quite correct
 		- fluids
 			x deal with infinite emitters (one in current save)
-			- rock wear
 			d move voxels to TexturePack? (need 32 bit textures...grumble)
 			d water flow over emitters?
 			x emitters should wear rock. no, seems okay
-			- land variation
-			- new physics component - account for water. more travel, travel through water.
 			x plants: impact water, take damage
-			- mobs: take damage from water
-			- buildings: account for water
 			d rain variation. flash floods. vary emitters. 
 			d shown rain variation in selection of domain
-			- water creating !passable for core...flow around cores? cores to sinks?
-			- overlapping fluid emitters shouldn't change height
 			- magma fluid
 			- shock fluid
+
+			- Water gradient moves MOBs
+			- GameMoveComponent does nothing but turn on basic water physics move.
+
+			- rock wear
+			- land variation
+			t mobs: take damage from water
+			t buildings: account for water
+			t water creating !passable for core...flow around cores? cores to sinks?
+			t overlapping fluid emitters shouldn't change height
+
+			d new physics component - account for water. more travel, travel through water.
 
 	    - plants look repetetive
 		- auto-clear not working as well as it should

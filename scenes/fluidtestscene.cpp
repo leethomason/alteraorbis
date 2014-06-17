@@ -3,6 +3,7 @@
 #include "../game/worldmap.h"
 #include "../game/lumosgame.h"
 #include "../game/lumosmath.h"
+#include "../game/lumoschitbag.h"
 #include "../engine/text.h"
 
 using namespace gamui;
@@ -16,15 +17,19 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->LoadConfigFiles("./res/particles.xml", "./res/lighting.xml");
 
 	worldMap->InitCircle();
-
 	lumosGame->InitStd(&gamui2D, &okay, 0);
+
+	ChitContext context;
+	context.Set( engine, worldMap, lumosGame );
+	chitBag = new LumosChitBag( context, 0 );
+	worldMap->AttachEngine(engine, chitBag);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
 	engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Emitter" };
+	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Emitter", "Green", "Violet" };
 	for (int i = 0; i < NUM_BUILD_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -39,6 +44,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 
 FluidTestScene::~FluidTestScene()
 {
+	worldMap->AttachEngine(0, 0);
+	delete chitBag;
 	delete worldMap;
 	delete engine;
 }
@@ -106,6 +113,12 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			else if (buildButton[BUTTON_EMITTER].Down()) {
 				worldMap->SetEmitter(pos2i.x, pos2i.y, true);
 			}
+			else if (buildButton[BUTTON_GREEN].Down()) {
+				chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
+			}
+			else if (buildButton[BUTTON_VIOLET].Down()) {
+				chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
+			}
 		}
 	}
 }
@@ -149,8 +162,11 @@ void FluidTestScene::DrawDebugText()
 void FluidTestScene::DoTick(U32 delta)
 {
 	Vector2I sector = { 0, 0 };
-	if (fluidTicker.Delta(delta)) {
-		settled = worldMap->RunFluidSim(sector);
-	}
-	worldMap->EmitFluidParticles(delta, sector, engine);
+
+//	if (fluidTicker.Delta(delta)) {
+//		settled = worldMap->RunFluidSim(sector);
+//	}
+	worldMap->DoTick(delta, chitBag);
+	chitBag->DoTick(delta);
+//	worldMap->EmitFluidParticles(delta, sector, engine);
 }

@@ -196,7 +196,7 @@ void PathMoveComponent::ComputeDest()
 	// Make sure the 'dest' is actually a point we can get to.
 	float radius = thisComp.render->RadiusOfBase();
 	Vector2F d = dest.pos;
-	if ( context->worldMap->ApplyBlockEffect( d, radius, &dest.pos ) ) {
+	if ( context->worldMap->ApplyBlockEffect( d, radius, WorldMap::BT_PASSABLE, &dest.pos ) ) {
 #ifdef DEBUG_PMC
 		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.pos.x, dest.pos.y ));
 #endif

@@ -130,6 +130,13 @@ public:
 
 	const WorldGrid& GetWorldGrid(int x, int y) { return grid[INDEX(x, y)]; }
 	const WorldGrid& GetWorldGrid(const grinliz::Vector2I& p) { return grid[INDEX(p.x, p.y)]; }
+	// count: +x, +y, -x, -y
+	//	4 get neighbors
+	//	5 center & neighbors, center is at index 0
+	//	8
+	//	9 center at index 0
+	// dir: optional, vectors to adjacent
+	void GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count, grinliz::Vector2I* dir );
 
 	grinliz::Vector2I FindPassable( int x, int y );
 
@@ -172,14 +179,21 @@ public:
 		STUCK
 	};
 
+	enum BlockType {
+		BT_PASSABLE,	// search for passable, !blocked
+		BT_FLUID		// stay on fluids
+	};
+
 	// Calculate the effect of walls on 'pos'. Note that
 	// there can be multiple walls, and this takes multiple calls.
 	BlockResult CalcBlockEffect(	const grinliz::Vector2F& pos,
 									float radius,
+									BlockType type,
 									grinliz::Vector2F* force );
 	// Call CalcBlockEffect and return the result.
 	BlockResult ApplyBlockEffect(	const grinliz::Vector2F inPos, 
 									float radius, 
+									BlockType type,
 									grinliz::Vector2F* outPos );
 
 	// ---- Map ---- //
@@ -207,7 +221,6 @@ public:
 	// ---- Device Loss --- //
 	virtual void DeviceLoss();
 
-	// Brings water & waterfalls current
 	void DoTick( U32 delta, ChitBag* chitBag );
 	void VoxelHit(const grinliz::Vector2I& voxel, const DamageDesc& dd)
 	{
@@ -223,6 +236,10 @@ public:
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
 		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
 	}
+	// Return the gradient of fluid flow at the point.
+	//grinliz::Vector2F FluidGradient(const grinliz::Vector2F& pos) const;
+
+	// Map information, debugging of pools and waterfalls:
 	void FluidStats(int* pools, int* waterfalls);
 	grinliz::Vector2I GetPoolLocation(int index);
 
@@ -431,7 +448,6 @@ private:
 	grinliz::CDynArray< Model* > treePool;
 
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
-	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering
 
 	// Temporary - big one - last in class
 	grinliz::CArray< Vertex, MAX_VOXEL_QUADS*4 > voxelBuffer;

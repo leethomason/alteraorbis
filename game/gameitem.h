@@ -382,7 +382,10 @@ public:
 		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
 		HAS_NEEDS			= (1<<25),		// ai should use needs
 
-		CLICK_THROUGH		= (1<<27),		// model is created with flags to ignore world clicking
+		DAMAGE_UNDER_WATER  = (1<<26),		// if set, takes damage if submerged
+		FLOAT				= (1<<27),		// technically less dense than water...but sort of a "move on top of water" flag
+
+		CLICK_THROUGH		= (1<<28),		// model is created with flags to ignore world clicking
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.

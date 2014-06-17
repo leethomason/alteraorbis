@@ -33,7 +33,7 @@ private:
 	typedef GameMoveComponent super;
 public:
 
-	PathMoveComponent()				// required; used to avoids blocks when moving. 
+	PathMoveComponent()
 		: GameMoveComponent(), pathPos( 0 ), pathDebugging( false ), forceCount( 0 )
 	{ 
 		queued.Clear();
@@ -53,6 +53,7 @@ public:
 	virtual void OnRemove();
 	virtual int DoTick( U32 delta );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual bool ShouldAvoid() const			{ return true; }
 
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 

@@ -12,7 +12,7 @@ public:
 	~FluidSim();
 
 	// Call every 600ms (?)
-	bool DoStep();
+	bool DoStep(grinliz::Rectangle2I* aoe);
 	// Particle calls
 	void EmitWaterfalls(U32 delta, Engine* engine);
 

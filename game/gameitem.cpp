@@ -192,6 +192,8 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, GOLD_PICKUP );
 		APPEND_FLAG( flags, f, ITEM_PICKUP );
 		APPEND_FLAG( flags, f, HAS_NEEDS );
+		APPEND_FLAG( flags, f, DAMAGE_UNDER_WATER );
+		APPEND_FLAG( flags, f, FLOAT );
 		APPEND_FLAG( flags, f, CLICK_THROUGH );
 
 		xs->Saving()->Set( "flags", f.c_str() );
@@ -223,6 +225,8 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, GOLD_PICKUP );
 			READ_FLAG( flags, f, ITEM_PICKUP );
 			READ_FLAG( flags, f, HAS_NEEDS );
+			READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
+			READ_FLAG( flags, f, FLOAT );
 			READ_FLAG( flags, f, CLICK_THROUGH );
 		}
 	}
@@ -285,6 +289,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, GOLD_PICKUP );
 		READ_FLAG( flags, f, ITEM_PICKUP );
 		READ_FLAG( flags, f, HAS_NEEDS );
+		READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
+		READ_FLAG( flags, f, FLOAT );
 		READ_FLAG( flags, f, CLICK_THROUGH );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
@@ -425,8 +431,8 @@ int GameItem::DoTick( U32 delta )
 		if (fireTime) hp -= effectDamage;
 		if (shockTime) hp -= effectDamage;
 
-		shockTime -= delta;
-		fireTime -= delta;
+		shockTime -= (flags & SHOCKABLE) ? delta/2 : delta;
+		fireTime  -= (flags & FLAMMABLE) ? delta/2 : delta;
 		if (fireTime < 0) fireTime = 0;
 		if (shockTime < 0) shockTime = 0;
 	}
@@ -439,7 +445,7 @@ int GameItem::DoTick( U32 delta )
 		hp = double(TotalHP());
 	}
 
-	if ( savedHP != hp ) {
+	if ( savedHP != hp || fireTime || shockTime ) {
 		tick = 0;
 	}
 	return tick;	

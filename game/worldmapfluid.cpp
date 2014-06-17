@@ -64,7 +64,7 @@ void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 
 void FluidSim::Reset(int x, int y)
 {
-	worldMap->voxelInit.Clear(x / WorldMap::ZONE_SIZE, y / WorldMap::ZONE_SIZE);
+//	worldMap->voxelInit.Clear(x / WorldMap::ZONE_SIZE, y / WorldMap::ZONE_SIZE);
 	worldMap->ResetPather(x, y);
 }
 
@@ -108,7 +108,7 @@ int FluidSim::ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const
 }
 
 
-bool FluidSim::DoStep()
+bool FluidSim::DoStep(Rectangle2I* _aoe)
 {
 	if (settled) return true;
 
@@ -244,6 +244,7 @@ bool FluidSim::DoStep()
 
 	U32 endHash = Hash();
 	settled = (startHash == endHash);
+	if (_aoe) *_aoe = aoe;
 	return settled;
 }
 

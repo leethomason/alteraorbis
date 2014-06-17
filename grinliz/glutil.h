@@ -137,6 +137,22 @@ inline T Lerp( const T& x0, const T& x1, double t )
 }
 
 
+template <class T>
+inline void QuadCurveFit11(T vNeg1, T v0, T v1, T* a, T* b, T* c)
+{
+	// ax^2 + bx + c = v
+	*c = v0;
+
+	// at -1: a - b = -c + vN1
+	// at 1:  a + b = -c + v1
+	//        a = (-2c + vN1 + v1) / 2
+	//		  b = -c + v1 - a
+
+	*a = (T(-2)*(*c) + vNeg1 + v1) / T(2);
+	*b = -(*c) + v1 - (*a);
+}
+
+
 // Cubic fade (hermite)
 // Use: Lerp( a, b, Fade3( t ));
 inline float Fade3( float t )
