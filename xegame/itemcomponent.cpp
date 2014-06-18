@@ -617,7 +617,7 @@ int ItemComponent::ProcessEffect(int delta)
 		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i + DIR[i]);
 		float mult = (i == 0) ? 2.0f : 1.0f;	// how much more likely of effect if we are standing on it?
 
-		if (wg.Magma()) 
+		if (wg.Magma() || (wg.IsFluid() && wg.FluidType() == WorldGrid::FLUID_LAVA))
 			fire += mult;
 		if ((i == 0) && wg.IsFluid()) 
 			water += 1.0;

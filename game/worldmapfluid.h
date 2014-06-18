@@ -30,9 +30,10 @@ public:
 private:
 	void Reset(int x, int y);
 	U32 Hash();
-	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent);
+	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent, int* type);
 	int PressureStep(const grinliz::Vector2I& start, int emitterHeight);
 	void BoundCheck(const grinliz::Vector2I& start, int h, int nominal, int *area, int* areaElevated);
+	grinliz::Vector2I MaxAdjacentWater(int i, int j);
 
 	WorldMap* worldMap;
 	grinliz::Rectangle2I bounds;

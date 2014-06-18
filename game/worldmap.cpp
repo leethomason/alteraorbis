@@ -620,6 +620,7 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 void WorldMap::ProcessEffect(ChitBag* chitBag)
 {
 	DamageDesc dd = { EFFECT_DAMAGE_PER_SEC * SLOW_TICK / 1000, 0 };
+	voxelHits.Clear();
 
 	for (int i = 0; i < plantEffect.Size(); ++i) {
 		PlantEffect* pe = &plantEffect[i];
@@ -671,11 +672,23 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 			int index = INDEX(pe->voxel + delta[j]);
 			if (grid[index].Plant()) {
 				if (random.Uniform() < CHANCE_FIRE_SPREAD) {
-					Vector3I hit = { pe->voxel.x + delta[j].x, 0, pe->voxel.y + delta[j].y };
-					this->VoxelHit(hit, ddSpread);
+
+					/* Can't call this! VoxelHit can mutate the plantEffect array.
+					   Bad things happen. Weird bug madness.
+					*/
+					//Vector3I hit = { pe->voxel.x + delta[j].x, 0, pe->voxel.y + delta[j].y };
+					//this->VoxelHit(hit, ddSpread);
+					VHit vHit = { pe->voxel + delta[j], ddSpread.effects };
+					voxelHits.Push(vHit);
 				}
 			}
 		}
+	}
+	while (!voxelHits.Empty()) {
+		VHit vHit = voxelHits.Pop();
+		Vector3I hit = { vHit.voxel.x, 0, vHit.voxel.y };
+		DamageDesc dd = { 0, vHit.effect };
+		this->VoxelHit(hit, dd);
 	}
 }
 
@@ -834,9 +847,9 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 }
 
 
-void WorldMap::SetEmitter(int x, int y, bool on) {
+void WorldMap::SetEmitter(int x, int y, bool on, int type) {
 	int index = INDEX(x, y);
-	grid[index].SetFluidEmitter(on);
+	grid[index].SetFluidEmitter(on, type);
 	grinliz::Vector2I sector = ToSector(x, y);
 	if (fluidSim[sector.y*NUM_SECTORS + sector.x]) {
 		fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
@@ -1958,7 +1971,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.875 - double(y*288 + 16) / 2048.0)
 
-	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + WorldGrid::NUM_PORCH;
+	static const int NUM = 16;
 	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
@@ -1974,7 +1987,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
 		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
-		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter
+		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter - water
+		{ BLACKMAG_X(1), BLACKMAG_Y(5) },	// emitter - lava
 	};
 	static const int PORCH = 7;
 	static const int PAVE = 4;
@@ -1999,7 +2013,10 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Land();
 					if (wg.IsFluidEmitter()) {
-						layer = EMITTER;
+						if (wg.FluidType() == WorldGrid::FLUID_WATER)
+							layer = EMITTER;
+						else
+							layer = EMITTER + 1;	// lava
 					}
 					else if ( layer == WorldGrid::LAND ) {
 						if (wg.Pave()) {
@@ -2154,7 +2171,7 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 				}
 
 				if (wg.IsFluid()) {
-					id = POOL;
+					id = (wg.FluidType() == WorldGrid::FLUID_WATER) ? POOL : MAGMA;;
 					h = (float)wg.FluidHeight() - 0.125f;
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = (float)wg.RockHeight();
@@ -2315,7 +2332,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 						int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
 						if (h) {
-							SetEmitter(it.Pos().x, it.Pos().y, true);
+							SetEmitter(it.Pos().x, it.Pos().y, true, WorldGrid::FLUID_WATER);
 							++nEmitters;
 							found = true;
 							break;
@@ -2341,7 +2358,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 						}
 						if (okay) {
 							WorldGrid* wg = &grid[INDEX(x, y)];
-							SetEmitter(x, y, true);
+							SetEmitter(x, y, true, WorldGrid::FLUID_WATER);
 							++nEmitters;
 						}
 					}

@@ -30,7 +30,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Emitter", "Green", "Violet", "Mantis" };
+	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis" };
 	for (int i = 0; i < NUM_BUILD_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -112,7 +112,10 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				worldMap->SetRock(pos2i.x, pos2i.y, 3, false, WorldGrid::ROCK);
 			}
 			else if (buildButton[BUTTON_EMITTER].Down()) {
-				worldMap->SetEmitter(pos2i.x, pos2i.y, true);
+				worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_WATER);
+			}
+			else if (buildButton[BUTTON_LAVA_EMITTER].Down()) {
+				worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
 			}
 			else if (buildButton[BUTTON_GREEN].Down()) {
 				chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);

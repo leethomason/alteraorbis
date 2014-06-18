@@ -581,7 +581,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		AddItem( "gold", chit, context->engine, 0, 0 );
 		chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
 		chit->GetSpatialComponent()->SetPosition( pos );
-
+		chit->Add(new GameMoveComponent());
 	}
 	chit->GetItem()->wallet.AddGold( amount );
 	return chit;
@@ -648,6 +648,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 	chit->Add( new SpatialComponent());
 	chit->Add( new ItemComponent( orphanItem ));
 	chit->Add( new RenderComponent( orphanItem->ResourceName() ));
+	chit->Add(new GameMoveComponent());
 
 	if ( onGround ) {
 		const ModelResource* res = chit->GetRenderComponent()->MainResource();

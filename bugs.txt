@@ -120,21 +120,17 @@ d animation generation
 			x plants: impact water, take damage
 			d rain variation. flash floods. vary emitters. 
 			d shown rain variation in selection of domain
-			- magma fluid
-			- shock fluid
-
-			- Water gradient moves MOBs
-			- GameMoveComponent does nothing but turn on basic water physics move.
-
-			- rock wear
-			- land variation
+			x Water gradient moves MOBs
+			x GameMoveComponent does nothing but turn on basic water physics move.
 			t mobs: take damage from water
 			t buildings: account for water
 			t water creating !passable for core...flow around cores? cores to sinks?
 			t overlapping fluid emitters shouldn't change height
-
 			d new physics component - account for water. more travel, travel through water.
-
+			t magma fluid
+			d shock fluid
+			- rock wear
+			- land variation
 	    - plants look repetetive
 		- auto-clear not working as well as it should
 		- walk target for the avatar

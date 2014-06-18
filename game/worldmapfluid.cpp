@@ -29,7 +29,8 @@ FluidSim::~FluidSim()
 
 void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 {
-	ParticleDef pdWater = engine->particleSystem->GetPD("fallingwater");
+	ParticleDef pdWater = engine->particleSystem->GetPD("fallingWater");
+	ParticleDef pdLava = engine->particleSystem->GetPD("fallingLava");
 	ParticleDef pdMist = engine->particleSystem->GetPD("mist");
 
 	for (int i = 0; i<waterfalls.Size(); ++i) {
@@ -39,7 +40,8 @@ void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 		for (int j = 0; j<NDIR; ++j) {
 			Vector2I v = wf + DIR[j];
 			const WorldGrid& altWG = worldMap->grid[worldMap->INDEX(v)];
-			if (HasWaterfall(wg, altWG)) {
+			int type = 0;
+			if (HasWaterfall(wg, altWG, &type)) {
 
 				Vector3F v3 = { (float)wf.x + 0.5f, (float)altWG.FluidHeight(), (float)wf.y + 0.5f };
 				Vector3F half = { (float)DIR[j].x*0.5f, 0.0f, (float)DIR[j].y*0.5f };
@@ -49,7 +51,10 @@ void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 				r3.FromPair(v3 + half*0.8f - right, v3 + half*0.8f + right);
 
 				static const Vector3F DOWN = { 0, -1, 0 };
-				engine->particleSystem->EmitPD(pdWater, r3, DOWN, delta);
+				if (type == WorldGrid::FLUID_WATER)
+					engine->particleSystem->EmitPD(pdWater, r3, DOWN, delta);
+				else
+					engine->particleSystem->EmitPD(pdLava, r3, DOWN, delta);
 
 				r3.min.y = r3.max.y = altWG.FluidHeight() - 0.2f;
 				engine->particleSystem->EmitPD(pdMist, r3, V3F_UP, delta);
@@ -76,7 +81,7 @@ U32 FluidSim::Hash()
 	for (int j = bounds.min.y + 1; j < bounds.max.y; ++j) {
 		for (int i = bounds.min.x + 1; i < bounds.max.x; ++i) {
 			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(i, j)];
-			int value = wg.fluidHeight + 32 * wg.fluidEmitter;
+			int value = wg.fluidHeight + 32 * wg.fluidEmitter + 256 * wg.fluidType;
 			h ^= value;
 			h *= 16777619;
 		}
@@ -85,11 +90,14 @@ U32 FluidSim::Hash()
 }
 
 
-bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG)
+bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG, int* type)
 {
 	if (   (altWG.IsFluid() && wg.IsFluid() && altWG.fluidHeight >= wg.fluidHeight + WATERFALL_HEIGHT)
 		|| (wg.IsWater() && altWG.fluidHeight >= WATERFALL_HEIGHT))
 	{
+		if (type) {
+			*type = altWG.FluidType();
+		}
 		return true;
 	}
 	return false;
@@ -105,6 +113,27 @@ int FluidSim::ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const
 		}
 	}
 	return count;
+}
+
+
+grinliz::Vector2I FluidSim::MaxAdjacentWater(int i, int j)
+{
+	Vector2I v = { i, j };
+	Rectangle2I b;
+	b.Set(0, 0, SECTOR_SIZE - 1, SECTOR_SIZE - 1);
+
+	int maxH = 0;
+
+	for (int k = 0; k < NDIR; ++k) {
+		Vector2I p = { i + DIR[k].x, j + DIR[k].y };
+		if (b.Contains(p)) {
+			if (water[p.y*SECTOR_SIZE + p.x] > maxH) {
+				maxH = water[p.y*SECTOR_SIZE + p.x];
+				v = p;
+			}
+		}
+	}
+	return v;
 }
 
 
@@ -136,30 +165,15 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 			}
 			else if (worldGrid->fluidEmitter) {
 				// Are we emitting? If not, should we be?
-				// Find highest rock neighbor.
-				/*if (worldGrid->IsFluid()) 
-				{
-					GLASSERT(worldGrid->fluidHeight % FLUID_PER_ROCK == 0);	// nothing should change emitter.
-					// just keep emitting. Once the emitter 'fires' it doesn't stop
-					// until rock is built on it.
-					// FIXME: infinite emitters. Volcanos should clear emitters.
-					int h = worldGrid->fluidHeight;
+				int hRock = FindEmitter(pos2i, false);
+				if (hRock) {
+					int h = FLUID_PER_ROCK * hRock;
 					water[j*SECTOR_SIZE + i] = h;
 					emitters.Push(pos2i);
 					emitterHeights.Push(h);
 				}
-				else */
-				{
-					int hRock = FindEmitter(pos2i, false);
-					if (hRock) {
-						int h = FLUID_PER_ROCK * hRock;
-						water[j*SECTOR_SIZE + i] = h;
-						emitters.Push(pos2i);
-						emitterHeights.Push(h);
-					}
-					else if (worldGrid->IsFluid()) {
-						water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight - 1;
-					}
+				else if (worldGrid->IsFluid()) {
+					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight - 1;
 				}
 			}
 			else {
@@ -202,6 +216,7 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
 			Vector2I pos = { x, y };
 			int index = worldMap->INDEX(pos);
+			const WorldGrid& wg = worldMap->grid[index];
 
 			int i = x - bounds.min.x;
 			int j = y - bounds.min.y;
@@ -210,7 +225,15 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 			if (h) {
 				aoe.DoUnion(pos);
 			}
-			if (worldMap->grid[index].fluidHeight != h) {
+			if (wg.fluidHeight != h) {
+				if (wg.fluidHeight == 0) {
+					// Check for fluid type.
+					// Can't set the emitter, but that
+					// will be handled in the SetFluidType()
+					Vector2I waterIJ = MaxAdjacentWater(i, j);
+					int fluidType = worldMap->grid[worldMap->INDEX(bounds.min + waterIJ)].FluidType();
+					worldMap->grid[index].SetFluidType(fluidType);
+				}
 				worldMap->grid[index].fluidHeight = h;
 				GLASSERT(worldMap->grid[index].fluidHeight == water[j*SECTOR_SIZE + i]);	// check for bit field errors
 			}
@@ -234,7 +257,7 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 		const WorldGrid& wg = worldMap->grid[worldMap->INDEX(it.Pos())];
 		for (int k = 0; k < NDIR; ++k) {
 			const WorldGrid& altWG = worldMap->grid[worldMap->INDEX(it.Pos() + DIR[k])];
-			if (HasWaterfall(wg, altWG)) {
+			if (HasWaterfall(wg, altWG, 0)) {
 				waterfalls.Push(it.Pos());
 				// Only need the initial location - not all the waterfalls.
 				break;

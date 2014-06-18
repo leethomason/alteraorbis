@@ -110,7 +110,7 @@ public:
 		WorldGrid wg = grid[index];
 		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
 	}
-	void SetEmitter(int x, int y, bool on);
+	void SetEmitter(int x, int y, bool on, int type);
 
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
@@ -233,9 +233,6 @@ public:
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
 		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
 	}
-	// Return the gradient of fluid flow at the point.
-	//grinliz::Vector2F FluidGradient(const grinliz::Vector2F& pos) const;
-
 	// Map information, debugging of pools and waterfalls:
 	void FluidStats(int* pools, int* waterfalls);
 	grinliz::Vector2I GetPoolLocation(int index);
@@ -441,6 +438,13 @@ private:
 	// List of interesting things that need to be processed each frame.
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
 	grinliz::CDynArray< PlantEffect >	plantEffect;		// plants on fire/shock
+
+	struct VHit
+	{
+		grinliz::Vector2I voxel;
+		int effect;
+	};
+	grinliz::CDynArray< VHit > voxelHits;
 
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;

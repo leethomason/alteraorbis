@@ -55,11 +55,6 @@ public:
 	enum {
 		FLUID_WATER = 0,
 		FLUID_LAVA,
-		FLUID_SHOCK,
-
-		EMITTER_NONE = 0,
-		EMITTER_WATER,
-		EMITTER_LAVA
 	};
 
 private:
@@ -89,9 +84,9 @@ private:
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
-	unsigned fluidEmitter		: 2;	// 0 not emitter, 1: fluid, 2: lava
+	unsigned fluidEmitter		: 1;	// is emitter. type determined by 'fluidType'
 	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
-	unsigned fluidType			: 2;	// types of fluids: 0:water, 1:lava, 2:shock
+	unsigned fluidType			: 1;	// types of fluids: 0:water, 1:lava
 
 	// 56 + 2 = 58 bits
 	unsigned plantOnFire		: 1;	// NOTE: matches the array in the FluidSim
@@ -234,9 +229,17 @@ public:
 	}
 
 	bool IsFluidEmitter() const { return fluidEmitter ? true : false; }
-	void SetFluidEmitter(bool on) {
+	void SetFluidEmitter(bool on, int type) {
 		GLASSERT(!FluidSink());
 		fluidEmitter = on ? 1 : 0;
+		fluidType = type;
+	}
+
+	int FluidType() const { return fluidType; }
+	void SetFluidType(int type) {
+		if (!fluidEmitter) {
+			fluidType = type;
+		}
 	}
 
 	bool IsWater() const		{ return !IsLand(); }
