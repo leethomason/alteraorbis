@@ -42,8 +42,6 @@ public:
 	virtual grinliz::Vector3F Velocity() { return velocity; }
 
 	void SetDest( const SectorPort& sp );
-	// Always does; may need to restore as an option.
-	//void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
 	enum {

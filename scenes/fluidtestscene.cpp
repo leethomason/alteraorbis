@@ -4,6 +4,7 @@
 #include "../game/lumosgame.h"
 #include "../game/lumosmath.h"
 #include "../game/lumoschitbag.h"
+#include "../game/team.h"
 #include "../engine/text.h"
 
 using namespace gamui;
@@ -29,7 +30,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Emitter", "Green", "Violet" };
+	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Emitter", "Green", "Violet", "Mantis" };
 	for (int i = 0; i < NUM_BUILD_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -118,6 +119,9 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			}
 			else if (buildButton[BUTTON_VIOLET].Down()) {
 				chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
+			}
+			else if (buildButton[BUTTON_MANTIS].Down()) {
+				chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			}
 		}
 	}

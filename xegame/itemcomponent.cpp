@@ -386,18 +386,21 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 				// Ony apply for phyisics or pathmove
 				PhysicsMoveComponent* physics  = GET_SUB_COMPONENT( parentChit, MoveComponent, PhysicsMoveComponent );
-				PathMoveComponent*    pathMove = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+				MoveComponent* move = parentChit->GetMoveComponent();
 
-				if ( knockback && (physics || pathMove) ) {
+				if ( knockback && (physics || move) ) {
 					rc->PlayAnimation( ANIM_IMPACT );
 
 					// Rotation
 					float r = -300.0f + (float)chit->random.Rand( 600 );
 
-					if ( pathMove ) {
-						physics = new PhysicsMoveComponent( true );
-						parentChit->Remove( pathMove );
-						Context()->chitBag->DeferredDelete( pathMove );
+					if ( !physics ) {
+						physics = new PhysicsMoveComponent();
+						if (move) {
+							parentChit->Remove(move);
+							physics->RestoreWhenDone(StringPool::Intern(move->Name()));
+							Context()->chitBag->DeferredDelete(move);
+						}
 						parentChit->Add( physics );
 					}
 					static const float FORCE = 4.0f;
@@ -721,6 +724,13 @@ void ItemComponent::DoSlowTick()
 				TrackingMoveComponent* tc = GET_SUB_COMPONENT( gold, MoveComponent, TrackingMoveComponent );
 				if ( !tc ) {
 					tc = new TrackingMoveComponent();
+					MoveComponent* move = gold->GetMoveComponent();
+					if (move) {
+						gold->Remove(move);
+						tc->RestoreWhenDone(StringPool::Intern(move->Name()));
+						Context()->chitBag->DeferredDelete(move);
+					}
+
 					tc->SetTarget( parentChit->ID() );
 					gold->Add( tc );
 				}

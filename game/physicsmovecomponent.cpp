@@ -14,7 +14,7 @@ using namespace grinliz;
 
 static const float TRACK_SPEED	= DEFAULT_MOVE_SPEED * 4.0f;
 
-PhysicsMoveComponent::PhysicsMoveComponent( bool _deleteWhenDone ) : GameMoveComponent(), deleteWhenDone( _deleteWhenDone )
+PhysicsMoveComponent::PhysicsMoveComponent()
 {
 	rotation = 0;
 	velocity.Zero();
@@ -31,7 +31,6 @@ void PhysicsMoveComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, rotation );
-	XARC_SER( xs, deleteWhenDone );
 	XARC_SER( xs, velocity );
 	this->EndSerialize( xs );
 }
@@ -118,6 +117,7 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 		thisComp.spatial->SetPosYRot( pos, rot );
 	}
 	bool isMoving = IsMoving();
+
 	if ( !isMoving && deleteWhenDone ) {
 		Chit* chit = parentChit;
 		chit->Remove( this );

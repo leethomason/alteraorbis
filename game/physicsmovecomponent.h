@@ -25,7 +25,7 @@ class PhysicsMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	PhysicsMoveComponent( bool deleteWhenDone );
+	PhysicsMoveComponent();
 	virtual ~PhysicsMoveComponent() {}
 
 	virtual const char* Name() const { return "PhysicsMoveComponent"; }
@@ -43,12 +43,9 @@ public:
 	void Set( const grinliz::Vector3F& _velocity, float _rotation );
 	void Add( const grinliz::Vector3F& _velocity, float _rotation );
 
-	void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
-
 private:
 	grinliz::Vector3F velocity;
 	float rotation;
-	bool deleteWhenDone;
 };
 
 

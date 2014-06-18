@@ -443,6 +443,19 @@ int PathMoveComponent::DoTick( U32 delta )
 	isMoving = false;
 	SectorPort portJump;
 	int time = VERY_LONG_TICK;
+	bool floating = false;
+
+	// Start with the physics move:
+	Vector3F pos3 = parentChit->GetSpatialComponent()->GetPosition();
+	bool fluid = ApplyFluid(delta, &pos3, &floating );
+	if (fluid) {
+		parentChit->GetSpatialComponent()->SetPosition(pos3);
+		++forceCount;
+		if (floating)
+			return 0;
+		time = 0;
+	}
+
 
 	Vector2F pos, heading;
 	GetPosRot( &pos, &heading );

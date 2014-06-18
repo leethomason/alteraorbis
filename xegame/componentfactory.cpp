@@ -81,7 +81,7 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 		return glnew TrackingMoveComponent();
 	}
 	else if ( name == "PhysicsMoveComponent" ) {
-		return glnew PhysicsMoveComponent( true );
+		return glnew PhysicsMoveComponent();
 	}
 	else if ( name == "TowComponent" ) {
 		return glnew TowComponent();

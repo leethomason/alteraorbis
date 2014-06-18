@@ -365,7 +365,10 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 
 	chit->Add( new HealthComponent());
 
-	Wallet w = ReserveBank::Instance()->WithdrawMonster();
+	Wallet w;
+	if (ReserveBank::Instance()) {
+		w = ReserveBank::Instance()->WithdrawMonster();
+	}
 	if ( chit->GetItem()->keyValues.GetIString( ISC::mob ) == ISC::greater ) {
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
