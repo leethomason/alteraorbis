@@ -118,11 +118,8 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 	}
 	bool isMoving = IsMoving();
 
-	if ( !isMoving && deleteWhenDone ) {
-		Chit* chit = parentChit;
-		chit->Remove( this );
-		chit->Add( new PathMoveComponent());
-		delete this;
+	if ( !isMoving && parentChit->StackedMoveComponent() ) {
+		Context()->chitBag->QueueRemoveAndDeleteComponent(this);
 	}
 	return isMoving ? 0 : VERY_LONG_TICK;
 }

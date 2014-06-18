@@ -110,6 +110,16 @@ void Chit::Serialize(XStream* xs)
 }
 
 
+bool Chit::StackedMoveComponent() const
+{
+	for (int i = 0; i < NUM_GENERAL; ++i) {
+		if (general[i] && general[i]->ToMoveComponent())
+			return true;
+	}
+	return false;
+}
+
+
 void Chit::Add( Component* c, bool loading )
 {
 	if ( c->ToSpatialComponent()) {
@@ -117,7 +127,18 @@ void Chit::Add( Component* c, bool loading )
 		spatialComponent = c->ToSpatialComponent();
 	}
 	else if ( c->ToMoveComponent()) {
-		GLASSERT( moveComponent == 0 );
+		// Move components are special: they can 
+		// be stacked.
+		if (moveComponent) {
+			int i = 0;
+			for (i = 0; i < NUM_GENERAL; ++i) {
+				if (general[i] == 0) {
+					general[i] = moveComponent;
+					break;
+				}
+			}
+			GLASSERT(i < NUM_GENERAL);
+		}
 		moveComponent = c->ToMoveComponent();
 	}
 	else if ( c->ToItemComponent()) {
@@ -158,6 +179,16 @@ void Chit::Remove( Component* c )
 		if ( slot[i] == c ) {
 			c->OnRemove();
 			slot[i] = 0;
+
+			// Special handling for move:
+			if (i == MOVE_SLOT) {
+				for (int i = NUM_GENERAL - 1; i >= 0; --i) {
+					if (general[i] && general[i]->ToMoveComponent()) {
+						slot[i] = general[i];
+						general[i] = 0;
+					}
+				}
+			}
 			return;
 		}
 	}
@@ -194,11 +225,19 @@ void Chit::DoTick()
 {
 	timeToTick = VERY_LONG_TICK;
 	GLASSERT( timeSince >= 0 );
+	bool hasMove = moveComponent != 0;
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) { 
 			GLASSERT( swapOut == 0 );
 			GLASSERT( swapIn == 0 );
+
+			// Look for an inactive move component:
+			if (hasMove && i >= GENERAL_SLOT && i < GENERAL_SLOT + NUM_GENERAL) {
+				if (slot[i]->ToMoveComponent())
+					continue;
+			}
+
 			int t = slot[i]->DoTick( timeSince );
 			timeToTick = Min( timeToTick, t );
 

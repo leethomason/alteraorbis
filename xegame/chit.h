@@ -159,6 +159,8 @@ public:
 	Component* GetComponent( int id );
 	Component* GetComponent( const char* name );
 
+	bool StackedMoveComponent() const;
+
 	const ChitContext* Context() const;
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
@@ -214,7 +216,9 @@ public:
 	};
 
 private:
-	enum { NUM_SLOTS = 10, 
+	enum { MOVE_SLOT = 1,
+		   GENERAL_SLOT = 5,
+		   NUM_SLOTS = 10, 
 		   NUM_GENERAL = 4 };
 	union {
 		// Update ordering is tricky. Defined by the order of the slots;

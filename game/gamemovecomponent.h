@@ -43,12 +43,6 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual grinliz::Vector3F Velocity()		{ return velocity; }
 
-	void RestoreWhenDone(grinliz::IString r)	{
-		GLASSERT(!restore.empty());
-		restore = r;
-	}
-	grinliz::IString PopRestore() { grinliz::IString temp = restore; restore = grinliz::IString(); return temp; }
-
 protected:
 	// Apply fluid effects
 	// return: true if in fluid
@@ -60,9 +54,6 @@ protected:
 
 private:
 	grinliz::Vector3F velocity;
-
-protected:
-	grinliz::IString restore;
 };
 
 

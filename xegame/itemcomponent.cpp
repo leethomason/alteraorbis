@@ -377,8 +377,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				rc->CalcTarget( &target );
 				Vector3F v = (target - info->originOfImpact); 
 				float len = v.Length();
-				DamageDesc dd = ddorig;
-				dd.damage = Lerp( dd.damage, dd.damage*0.5f, len / EXPLOSIVE_RANGE );
 				v.Normalize();
 
 				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
@@ -396,12 +394,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 					if ( !physics ) {
 						physics = new PhysicsMoveComponent();
-						if (move) {
-							parentChit->Remove(move);
-							physics->RestoreWhenDone(StringPool::Intern(move->Name()));
-							Context()->chitBag->DeferredDelete(move);
-						}
-						parentChit->Add( physics );
+						parentChit->Add( physics );	// move components can be stacked (unlike any other component)
 					}
 					static const float FORCE = 4.0f;
 					physics->Add( v*FORCE, r );
@@ -429,9 +422,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 
 			if (float(shield->rounds) >= dd.damage) {
-				dd.damage = 0;
 				shield->rounds -= LRint(dd.damage);
 				if (shield->rounds < 0) shield->rounds = 0;
+				dd.damage = 0;
 			}
 			else {
 				dd.damage -= (float)shield->rounds;
@@ -724,13 +717,6 @@ void ItemComponent::DoSlowTick()
 				TrackingMoveComponent* tc = GET_SUB_COMPONENT( gold, MoveComponent, TrackingMoveComponent );
 				if ( !tc ) {
 					tc = new TrackingMoveComponent();
-					MoveComponent* move = gold->GetMoveComponent();
-					if (move) {
-						gold->Remove(move);
-						tc->RestoreWhenDone(StringPool::Intern(move->Name()));
-						Context()->chitBag->DeferredDelete(move);
-					}
-
 					tc->SetTarget( parentChit->ID() );
 					gold->Add( tc );
 				}

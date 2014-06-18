@@ -3,6 +3,7 @@
 #include "gamelimits.h"
 #include "worldmap.h"
 #include "pathmovecomponent.h"
+#include "lumoschitbag.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -90,7 +91,7 @@ int GridMoveComponent::DoTick( U32 delta )
 {
 	const ChitContext* context = Context();
 	if ( state == DONE ) {
-		parentChit->Swap( this, new PathMoveComponent());
+		Context()->chitBag->QueueRemoveAndDeleteComponent(this);
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {
