@@ -383,10 +383,11 @@ public:
 		HAS_NEEDS			= (1<<25),		// ai should use needs
 
 		DAMAGE_UNDER_WATER  = (1<<26),		// if set, takes damage if submerged
-		FLOAT				= (1<<27),		// technically less dense than water...but sort of a "move on top of water" flag
+		FLOAT				= (1<<27),		// floats on water and moves with the water flow
 		SUBMARINE			= (1<<28),		// isn't moved by the fluid when walking.
+		EXPLODES			= (1<<29),		// explodes when destroyed. hell yeah!
 
-		CLICK_THROUGH		= (1<<29),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<30),		// model is created with flags to ignore world clicking
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.

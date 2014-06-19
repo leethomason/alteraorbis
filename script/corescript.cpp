@@ -448,7 +448,7 @@ int CoreScript::MaxTech()
 {
 	Vector2I sector = ToSector( parentChit->GetSpatialComponent()->GetPosition2DI() );
 	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC( IStringConst::power, sector, 0, 0, &chitArr, 0 );
+	Context()->chitBag->FindBuildingCC( IStringConst::temple, sector, 0, 0, &chitArr, 0 );
 	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
 }
 

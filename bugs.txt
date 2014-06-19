@@ -131,6 +131,7 @@ d animation generation
 			d shock fluid
 			x update world-gen code to place lava emitters
 		- circuits
+			- implement explosion
 			- circuit class. new rendering overlay. (gamui layer? seperate?)
 			- circuits: 4 bits type(15) + rot(2) = 6 bits?
 				- switch (rot)

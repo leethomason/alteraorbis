@@ -220,6 +220,27 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 }
 
 
+Color4F WeaponGen::GetEffectColor(int flags)
+{
+	Vector2I effect = { 0, 0 };
+	float alpha = 0.0;
+
+	switch ( flags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK)) {
+	case 0:													effect.Set( 1, PAL_GREEN ); 					break;
+	case GameItem::EFFECT_FIRE:								effect.Set( 1, PAL_RED );		alpha=0.7f;		break;
+	case GameItem::EFFECT_SHOCK:							effect.Set( 1, PAL_BLUE );		alpha=1.0f;		break;
+	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	effect.Set( PAL_PURPLE*2+1, PAL_GRAY );	alpha=0.7f;		break;
+	default:
+		GLASSERT( 0 );
+		break;
+	}
+
+	const Game::Palette* palette = Game::GetMainPalette();
+	Color4F effectColor = palette->Get4F( effect.x, effect.y );
+	return effectColor;
+}
+
+
 void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 {
 	// red for fire
@@ -240,21 +261,9 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 
 	i = abs(i) % NUM_COLORS;
 
-	Vector2I effect = c[i*3+2];
-	float alpha = 0.0;
-
-	switch ( flags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK)) {
-	case 0:													effect.Set( 1, PAL_GREEN ); 					break;
-	case GameItem::EFFECT_FIRE:								effect.Set( 1, PAL_RED );		alpha=0.7f;		break;
-	case GameItem::EFFECT_SHOCK:							effect.Set( 1, PAL_BLUE );		alpha=1.0f;		break;
-	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	effect.Set( PAL_PURPLE*2+1, PAL_GRAY );	alpha=0.7f;		break;
-	default:
-		GLASSERT( 0 );
-		break;
-	}
-
+	Color4F effectColor = GetEffectColor(flags);
+	float alpha = effectColor.a;
 	const Game::Palette* palette = Game::GetMainPalette();
-	Color4F effectColor = palette->Get4F( effect.x, effect.y );
 
 	// Add in explosive as a modifying color to the main 2.
 	// At the time of this code being written, I don't

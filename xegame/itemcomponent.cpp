@@ -40,6 +40,8 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
 
+#include "../audio/xenoaudio.h"
+
 using namespace grinliz;
 
 
@@ -488,6 +490,26 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if (msg.ID() == ChitMsg::CHIT_DESTROYED_START)
 	{
+		// Exploding!
+		if ((mainItem->flags & GameItem::EXPLODES) && parentChit->GetSpatialComponent()) {
+			int effect = 0;
+			if (mainItem->fireTime) effect |= GameItem::EFFECT_FIRE;
+			if (mainItem->shockTime) effect |= GameItem::EFFECT_SHOCK;
+
+			Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+
+			DamageDesc dd( MASS_TO_EXPLOSION_DAMAGE * float(mainItem->mass), effect );
+			BattleMechanics::GenerateExplosionMsgs(dd, pos, parentChit->ID(), Context()->engine, Context()->chitBag);
+			if (XenoAudio::Instance()) {
+				XenoAudio::Instance()->PlayVariation(ISC::explosionWAV, parentChit->random.Rand(), &pos);
+			}
+			ParticleSystem* ps = Context()->engine->particleSystem;
+			ParticleDef def = ps->GetPD( "explosion" );
+			Color4F color = WeaponGen::GetEffectColor(effect);
+			def.color = { color.r, color.g, color.b, 1.0f };
+			ps->EmitPD( def, pos, V3F_UP, 0 );
+		}
+
 		// Report back to what killed us:
 		Chit* origin = Context()->chitBag->GetChit(lastDamageID);
 		if (origin && origin->GetItemComponent()) {
@@ -501,7 +523,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		   The NewsHistory is the series of events, including the creation and destruction
 		   of the item. All the dates get inferredd from that.
-		   */
+		*/
 		NewsDestroy(mainItem);
 	}
 	else if (msg.ID() > ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END) {

@@ -177,7 +177,7 @@
         need.fun="0.8"
         />
 
-  <item name="power"
+  <item name="temple"
         resource="pyramid0"
         flags="DAMAGE_UNDER_WATER"
         porch="0"
@@ -186,6 +186,16 @@
         mass="150"
         cost="60"
         zoneCreate="natural" />
+
+  <item name="power"
+        resource="power"
+        flags="DAMAGE_UNDER_WATER EFFECT_EXPLOSIVE SHOCKABLE"
+        porch="0"
+        procedural="team"
+        size="1"
+        mass="150"
+        cost="40"
+        zoneCreate="industrial" />
 
   <item name="guardpost"
         resource="guardpost"

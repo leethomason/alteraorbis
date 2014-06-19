@@ -64,7 +64,6 @@ public:
 	static grinliz::IString vault;
 	static grinliz::IString factory;
 	static grinliz::IString forge;
-	static grinliz::IString power;
 	static grinliz::IString temple;
 	static grinliz::IString bed;
 	static grinliz::IString market;

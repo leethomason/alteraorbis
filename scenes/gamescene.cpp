@@ -1215,7 +1215,7 @@ void GameScene::SetBuildButtons()
 	CChitArray arr;
 	cb->FindBuildingCC(ISC::bed, sector, 0, 0, &arr, 0);
 	int nBeds = arr.Size();
-	cb->FindBuildingCC(ISC::power, sector, 0, 0, &arr, 0);
+	cb->FindBuildingCC(ISC::temple, sector, 0, 0, &arr, 0);
 	int nTemples = arr.Size();
 	cb->FindBuildingCC(ISC::farm, sector, 0, 0, &arr, 0);
 	int nFarms = arr.Size();

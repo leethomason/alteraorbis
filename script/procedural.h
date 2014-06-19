@@ -110,6 +110,9 @@ public:
 	void AssignGun( ProcRenderInfo* info );
 	void AssignShield( ProcRenderInfo* info );
 
+	// Only weapon-gen specific in that the alpha is set.
+	static grinliz::Color4F GetEffectColor(int effect);
+
 private:
 	void GetColors( int i, int effectFlags, grinliz::Color4F* array );
 	enum {

@@ -114,6 +114,7 @@ static const float LONGEST_WEAPON_RANGE = 20.0f;	// effects AI logic, queries
 static const float EFFECT_DAMAGE_PER_SEC = 10.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const int   EFFECT_MAX_TIME = 2000;
+static const float MASS_TO_EXPLOSION_DAMAGE = 0.40f;
 
 static const float CHANCE_FIRE_NORMAL	= 0.40f;
 static const float CHANCE_FIRE_HIGH		= 0.80f;
