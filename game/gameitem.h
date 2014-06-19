@@ -384,8 +384,9 @@ public:
 
 		DAMAGE_UNDER_WATER  = (1<<26),		// if set, takes damage if submerged
 		FLOAT				= (1<<27),		// technically less dense than water...but sort of a "move on top of water" flag
+		SUBMARINE			= (1<<28),		// isn't moved by the fluid when walking.
 
-		CLICK_THROUGH		= (1<<28),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<29),		// model is created with flags to ignore world clicking
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.

@@ -105,7 +105,7 @@ d animation generation
 		x hints about what you need to build
 		- walk target for the avatar
 		- move "Create Worker" and "Auto-Rebuild" to "Manage"
-		- re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
+		x re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
 		- tuning
 			- farm production (high??)
 			- monster arrival. greater herd more often?
@@ -129,18 +129,11 @@ d animation generation
 			t new physics component - account for water. more travel, travel through water.
 			t magma fluid
 			d shock fluid
-			- land variation:
-				- cold dry (rocky)
-				- hot dry (sandy)
-				- cold wet (icy)
-				- hot wet (greener)
-				- randomization pattern
-			- rock wear
-			- rotation of grid and voxel elements (experiment)
 			x update world-gen code to place lava emitters
 		- circuits
 			- circuit class. new rendering overlay. (gamui layer? seperate?)
 
+		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetive
 		- auto-clear not working as well as it should
 		- walk target for the avatar
@@ -229,12 +222,18 @@ d animation generation
 
 	- Fauna 2
 		- external constant file
-		- aging of stone
 		- consider moving ground to voxel gen system, so that ground can vary?
 		x teams. friend-enemy-neutral logic.
 		- monster ecology
 		x visitors
 		x inventory screen
+		- land variation:
+			- cold dry (rocky)
+			- hot dry (sandy)
+			- cold wet (icy)
+			- hot wet (greener)
+			- randomization pattern
+		- rock wear / stone aging
 	- Building
 		x domain building
     	- turrets

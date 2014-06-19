@@ -194,6 +194,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, HAS_NEEDS );
 		APPEND_FLAG( flags, f, DAMAGE_UNDER_WATER );
 		APPEND_FLAG( flags, f, FLOAT );
+		APPEND_FLAG( flags, f, SUBMARINE );
 		APPEND_FLAG( flags, f, CLICK_THROUGH );
 
 		xs->Saving()->Set( "flags", f.c_str() );
@@ -227,6 +228,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, HAS_NEEDS );
 			READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
 			READ_FLAG( flags, f, FLOAT );
+			READ_FLAG( flags, f, SUBMARINE );
 			READ_FLAG( flags, f, CLICK_THROUGH );
 		}
 	}
@@ -291,6 +293,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, HAS_NEEDS );
 		READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
 		READ_FLAG( flags, f, FLOAT );
+		READ_FLAG( flags, f, SUBMARINE );
 		READ_FLAG( flags, f, CLICK_THROUGH );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();

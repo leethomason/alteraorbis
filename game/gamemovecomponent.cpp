@@ -112,13 +112,20 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 		}
 	}
 
+	bool submarine = false;
+	if (parentChit->GetItem()) {
+		submarine = (parentChit->GetItem()->flags & GameItem::SUBMARINE) != 0;
+	}
+
 	float SPEED = *floating ? FLUID_SPEED : FLUID_SPEED * 0.5f;
 	float speed = Travel(SPEED, delta);
 
-	// Move in 2 steps to stay in fluid:
-	pos->x += -speed * grad.x;
-	pos->y = 0;
-	pos->z += -speed * grad.y;
+	if (!submarine) {
+		// Move in 2 steps to stay in fluid:
+		pos->x += -speed * grad.x;
+		pos->y = 0;
+		pos->z += -speed * grad.y;
+	}
 
 	Vector2F pos2 = { pos->x, pos->z };
 	Context()->worldMap->ApplyBlockEffect(pos2, MAX_BASE_RADIUS, *floating ? WorldMap::BT_FLUID : WorldMap::BT_PASSABLE, &pos2);

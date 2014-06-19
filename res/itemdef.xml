@@ -43,9 +43,10 @@
     </intrinsics>
   </item>
 
+  <!-- workers are immune to fire and SUBMARINE so that they can build/fix ppols. -->
   <item name="worker"
         resource="worker"
-        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP FLOAT"
+        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE"
         mass="20" >
     <intrinsics>
       <item name="claw"
