@@ -39,7 +39,7 @@
 #include "gameitem.h"
 #include "lumosgame.h"
 #include "gameitem.h"
-#include "worldmapfluid.h"
+#include "fluidsim.h"
 
 #include "../script/worldgen.h"
 #include "../script/procedural.h"

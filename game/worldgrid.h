@@ -60,9 +60,9 @@ public:
 private:
 	// memset(0) should work, and make it water.
 
-	// 1 + 14 = 15 bits
+	// 1 + 13 = 14 bits
 	unsigned land				: 2;	// WATER, LAND, GRID...
-	unsigned rockType			: 2;	// ROCK, ICE
+	unsigned rockType			: 1;	// ROCK, ICE
 	unsigned pave				: 2;	// 0-3, the pave style, if >0
 	unsigned isPorch			: 3;	// only used for rendering 0-6
 
@@ -70,7 +70,7 @@ private:
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 	unsigned rockHeight			: 2;
 
-	// 15 + 27 = 42 bits
+	// 14 + 27 = 41 bits
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned hp					: 9;	// 0-511
 
@@ -80,7 +80,7 @@ private:
 
 	unsigned path				: 10;	// 2 bits each: core, port0-3
 
-	// 42 + 14 = 56 bits
+	// 41 + 12 = 53 bits
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
@@ -88,9 +88,12 @@ private:
 	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
 	unsigned fluidType			: 1;	// types of fluids: 0:water, 1:lava
 
-	// 56 + 2 = 58 bits
+	// 53 + 2 = 55 bits
 	unsigned plantOnFire		: 1;	// NOTE: matches the array in the FluidSim
 	unsigned plantOnShock		: 1;
+
+	unsigned circuit			: 4;
+	unsigned circuitRot			: 2;
 
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 

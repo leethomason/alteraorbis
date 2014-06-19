@@ -385,7 +385,7 @@
     <ClCompile Include="..\scenes\fluidtestscene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\worldmapfluid.cpp">
+    <ClCompile Include="..\game\fluidsim.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
   </ItemGroup>
@@ -777,7 +777,7 @@
     <ClInclude Include="..\scenes\fluidtestscene.h">
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\worldmapfluid.h">
+    <ClInclude Include="..\game\fluidsim.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>

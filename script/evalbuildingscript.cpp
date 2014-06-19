@@ -8,7 +8,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/spatialcomponent.h"
-#include "../game/worldmapfluid.h"
+#include "../game/fluidsim.h"
 
 using namespace grinliz;
 

@@ -132,6 +132,17 @@ d animation generation
 			x update world-gen code to place lava emitters
 		- circuits
 			- circuit class. new rendering overlay. (gamui layer? seperate?)
+			- circuits: 4 bits type(15) + rot(2) = 6 bits?
+				- switch (rot)
+				- battery (rot)
+				- zapper
+
+				- bend (rot)
+				- 3 split (rot?)
+				- crossover
+				- gate
+				- turret (or not circuit? building? similar to battery...) (rot)
+				- cage
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetive

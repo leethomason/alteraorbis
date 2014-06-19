@@ -139,7 +139,7 @@
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
-    <ClCompile Include="..\game\worldmapfluid.cpp" />
+    <ClCompile Include="..\game\fluidsim.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\markov\markov.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
@@ -266,7 +266,7 @@
     <ClInclude Include="..\game\worldgrid.h" />
     <ClInclude Include="..\game\worldinfo.h" />
     <ClInclude Include="..\game\worldmap.h" />
-    <ClInclude Include="..\game\worldmapfluid.h" />
+    <ClInclude Include="..\game\fluidsim.h" />
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\markov\markov.h" />
     <ClInclude Include="..\micropather\micropather.h" />

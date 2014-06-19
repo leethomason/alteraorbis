@@ -1,6 +1,6 @@
 #include "worldmap.h"
 #include "lumosmath.h"
-#include "worldmapfluid.h"
+#include "fluidsim.h"
 #include "news.h"
 
 #include "../engine/engine.h"
