@@ -137,7 +137,7 @@ d animation generation
 				- randomization pattern
 			- rock wear
 			- rotation of grid and voxel elements (experiment)
-			- update world-gen code to place lava emitters
+			x update world-gen code to place lava emitters
 		- circuits
 			- circuit class. new rendering overlay. (gamui layer? seperate?)
 

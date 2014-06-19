@@ -145,7 +145,6 @@ public:
 	void DoTick();
 
 	void OnChitEvent( const ChitEvent& event );
-	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
 
 	SpatialComponent*	GetSpatialComponent()			{ return spatialComponent; }
 	const SpatialComponent*	GetSpatialComponent() const	{ return spatialComponent; }
@@ -233,9 +232,6 @@ private:
 		};
 		Component*			slot[NUM_SLOTS];
 	};
-
-	static Component* swapOut;
-	static Component* swapIn;
 };
 
 // Utility (not quite sure where this should live)

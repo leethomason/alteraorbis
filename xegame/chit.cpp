@@ -234,9 +234,6 @@ Component* Chit::GetComponent( int id )
 }
 
 
-Component* Chit::swapOut = 0;
-Component* Chit::swapIn  = 0;
-
 void Chit::DoTick()
 {
 	timeToTick = VERY_LONG_TICK;
@@ -245,8 +242,6 @@ void Chit::DoTick()
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) { 
-			GLASSERT( swapOut == 0 );
-			GLASSERT( swapIn == 0 );
 
 			// Look for an inactive move component:
 			if (hasMove && i >= GENERAL_SLOT && i < GENERAL_SLOT + NUM_GENERAL) {
@@ -256,14 +251,6 @@ void Chit::DoTick()
 
 			int t = slot[i]->DoTick( timeSince );
 			timeToTick = Min( timeToTick, t );
-
-			if ( swapOut ) {
-				GLASSERT( swapIn );
-				this->Remove( swapOut );
-				delete swapOut;
-				this->Add( swapIn );
-				swapOut = swapIn = 0;
-			}
 		}
 	}
 
