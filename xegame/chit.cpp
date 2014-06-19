@@ -19,6 +19,8 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 #include "itemcomponent.h"
+#include "../game/aicomponent.h"
+#include "../game/healthcomponent.h"
 #include "componentfactory.h"
 //#include "../script/scriptcomponent.h"	// FIXME: should be in xegame directory
 
@@ -169,6 +171,13 @@ void Chit::Add( Component* c, bool loading )
 	}
 	c->OnAdd( this, !loading );
 	timeToTick = 0;
+
+	GLASSERT(!spatialComponent || spatialComponent->ToSpatialComponent());
+	GLASSERT(!moveComponent || moveComponent->ToMoveComponent());
+	GLASSERT(!itemComponent || itemComponent->ToItemComponent());
+	GLASSERT(!aiComponent || aiComponent->ToAIComponent());
+	GLASSERT(!healthComponent || healthComponent->ToHealthComponent());
+	GLASSERT(!renderComponent || renderComponent->ToRenderComponent());
 }
 
 
@@ -182,13 +191,20 @@ void Chit::Remove( Component* c )
 
 			// Special handling for move:
 			if (i == MOVE_SLOT) {
-				for (int i = NUM_GENERAL - 1; i >= 0; --i) {
-					if (general[i] && general[i]->ToMoveComponent()) {
-						slot[i] = general[i];
-						general[i] = 0;
+				for (int k = NUM_GENERAL - 1; k >= 0; --k) {
+					if (general[k] && general[k]->ToMoveComponent()) {
+						slot[i] = general[k];
+						general[k] = 0;
+						break;
 					}
 				}
 			}
+			GLASSERT(!spatialComponent || spatialComponent->ToSpatialComponent());
+			GLASSERT(!moveComponent || moveComponent->ToMoveComponent());
+			GLASSERT(!itemComponent || itemComponent->ToItemComponent());
+			GLASSERT(!aiComponent || aiComponent->ToAIComponent());
+			GLASSERT(!healthComponent || healthComponent->ToHealthComponent());
+			GLASSERT(!renderComponent || renderComponent->ToRenderComponent());
 			return;
 		}
 	}

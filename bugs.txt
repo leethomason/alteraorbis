@@ -114,8 +114,8 @@ d animation generation
 			x weapon sorting not quite correct
 		- fluids
 			x deal with infinite emitters (one in current save)
-			d move voxels to TexturePack? (need 32 bit textures...grumble)
-			d water flow over emitters?
+			x move voxels to TexturePack? (need 32 bit textures...grumble). not doing: sticking with 2 special sets.
+			x water flow over emitters?
 			x emitters should wear rock. no, seems okay
 			x plants: impact water, take damage
 			d rain variation. flash floods. vary emitters. 
@@ -126,11 +126,21 @@ d animation generation
 			t buildings: account for water
 			t water creating !passable for core...flow around cores? cores to sinks?
 			t overlapping fluid emitters shouldn't change height
-			d new physics component - account for water. more travel, travel through water.
+			t new physics component - account for water. more travel, travel through water.
 			t magma fluid
 			d shock fluid
+			- land variation:
+				- cold dry (rocky)
+				- hot dry (sandy)
+				- cold wet (icy)
+				- hot wet (greener)
+				- randomization pattern
 			- rock wear
-			- land variation
+			- rotation of grid and voxel elements (experiment)
+			- update world-gen code to place lava emitters
+		- circuits
+			- circuit class. new rendering overlay. (gamui layer? seperate?)
+
 	    - plants look repetetive
 		- auto-clear not working as well as it should
 		- walk target for the avatar

@@ -994,9 +994,19 @@ void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count
 		n++;
 	}
 
+	Rectangle2I bounds = Bounds();
+
 	// Adjacent:
 	for (int i = 0; i < 8; i += step) {
-		arr[n] = grid[INDEX(p+DIR_I8[i])];
+		const Vector2I v = p + DIR_I8[i];
+		if (bounds.Contains(v)) {
+			arr[n] = grid[INDEX(v)];
+		}
+		else {
+			// return water if out of bounds. much
+			// simpler than a bunch of upstream checks.
+			memset(&arr[n], 0, sizeof(WorldGrid));
+		}
 		if (dirArr)
 			dirArr[n] = DIR_I8[i];
 		n++;
@@ -2353,7 +2363,10 @@ void WorldMap::GenerateEmitters(U32 seed)
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 						int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
 						if (h) {
-							SetEmitter(it.Pos().x, it.Pos().y, true, WorldGrid::FLUID_WATER);
+							int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
+							int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
+
+							SetEmitter(it.Pos().x, it.Pos().y, true, fluidType);
 							++nEmitters;
 							found = true;
 							break;

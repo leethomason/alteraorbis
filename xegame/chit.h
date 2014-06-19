@@ -147,7 +147,7 @@ public:
 	void OnChitEvent( const ChitEvent& event );
 	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
 
-	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
+	SpatialComponent*	GetSpatialComponent()			{ return spatialComponent; }
 	const SpatialComponent*	GetSpatialComponent() const	{ return spatialComponent; }
 
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }

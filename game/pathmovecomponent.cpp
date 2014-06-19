@@ -509,8 +509,8 @@ int PathMoveComponent::DoTick( U32 delta )
 		parentChit->SendMessage(msg, this);
 
 		GridMoveComponent* gmc = new GridMoveComponent();
-		parentChit->Swap( this, gmc );
 		gmc->SetDest( portJump );
+		parentChit->Add(gmc);
 		return 0;
 	}
 

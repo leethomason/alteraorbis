@@ -70,6 +70,7 @@ bool PhysicsMoveComponent::IsMoving() const
 
 int PhysicsMoveComponent::DoTick( U32 delta )
 {
+	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT );
 	if ( thisComp.okay ) {
 		Vector3F pos = thisComp.spatial->GetPosition();
@@ -177,6 +178,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 {
 	Chit* chit = Context()->chitBag->GetChit(target);
 	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent()) {
+		GLASSERT(parentChit->StackedMoveComponent());
 		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 		return VERY_LONG_TICK;
 	}
@@ -194,6 +196,8 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 		parentChit->GetSpatialComponent()->SetPosition( targetPos );
 		ChitMsg msg( ChitMsg::CHIT_TRACKING_ARRIVED, 0, parentChit );
 		chit->SendMessage( msg );
+
+		GLASSERT(parentChit->StackedMoveComponent());
 		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 	}
 	else {

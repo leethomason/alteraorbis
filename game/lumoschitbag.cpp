@@ -481,6 +481,8 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 	Vector3F pos = { (float)context->worldMap->Width()*0.5f, 0.0f, (float)context->worldMap->Height()*0.5f };
 	chit->GetSpatialComponent()->SetPosition( pos );
 
+	PathMoveComponent* pmc = new PathMoveComponent();
+	chit->Add(pmc);
 	GridMoveComponent* gmc = new GridMoveComponent();
 	chit->Add( gmc );
 
