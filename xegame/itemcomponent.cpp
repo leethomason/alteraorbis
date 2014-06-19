@@ -562,7 +562,8 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 {
 }
 
-
+// Note that changes here should be echoed
+// in the WorldMap::ProcessEffect()
 int ItemComponent::ProcessEffect(int delta)
 {
 	// FIXME: buggy for 2x2 items. Only using one grid.

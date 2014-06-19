@@ -237,6 +237,28 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 				worldMap->grid[index].fluidHeight = h;
 				GLASSERT(worldMap->grid[index].fluidHeight == water[j*SECTOR_SIZE + i]);	// check for bit field errors
 			}
+
+			// Where water and lava hit, convert the lava to rock, if
+			// possible. This probably needs some work. But will do for now.
+			if (   h 
+				&& h == wg.fluidHeight 
+				&& wg.FluidType() == WorldGrid::FLUID_LAVA) 
+			{
+				// Is there water beside it? Can we turn into rock?
+				if (worldMap->IsPassable(x, y)) {
+					for (int k = 0; k < 4; ++k) {
+						const WorldGrid& wgAdj = worldMap->grid[worldMap->INDEX(x + DIR[k].x, y + DIR[k].y)];
+
+						if (   wgAdj.IsFluid() 
+							//&& ((int)wgAdj.fluidHeight >= h) 
+							&& wgAdj.FluidType() == WorldGrid::FLUID_WATER) 
+						{
+							worldMap->SetRock(x, y, (h + 3) / FLUID_PER_ROCK, false, 0);
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 

@@ -59,6 +59,13 @@ using namespace tinyxml2;
 // Bug fix: incorrect recusion   4	yes, 4
 // 
 
+static const Vector2I DIR_I4[4] = {
+	{ 1, 0 },
+	{ 0, 1 },
+	{ -1, 0 },
+	{ 0, -1 },
+};
+
 static const Vector2I DIR_I8[8] = {
 	{ 1, 0 },
 	{ 1, 1 },
@@ -758,6 +765,20 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 				Rectangle2F aoeF = ToWorld(aoe);
 				if (chitBag) {
 					chitBag->SetTickNeeded(aoeF);
+				}
+				// Run through and look for lava:
+				for (Rectangle2IIterator it(aoe); !it.Done(); it.Next()) {
+					const WorldGrid& wg = grid[INDEX(it.Pos())];
+					if (wg.IsFluid() && wg.FluidType() == WorldGrid::FLUID_LAVA) {
+						for (int i = 0; i < 4; ++i) {
+							if (random.Uniform() < CHANCE_FIRE_SPREAD) {
+								DamageDesc dd(0, GameItem::EFFECT_FIRE);
+								Vector2I v = it.Pos() + DIR_I4[i];
+								Vector3I v3 = { v.x, 0, v.y };
+								this->VoxelHit(v3, dd);
+							}
+						}
+					}
 				}
 			}
 		}
