@@ -57,7 +57,7 @@ private:
 
 	// Not serialized:
 	grinliz::Vector3F velocity;
-	grinliz::CDynArray< GridEdge > path;
+	grinliz::CDynArray< GridBlock > path;
 };
 
 #endif // GRID_MOVE_COMPONENT_INCLUDED

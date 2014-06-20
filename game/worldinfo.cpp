@@ -25,10 +25,12 @@ WorldInfo::~WorldInfo()
 }
 
 
-int WorldInfo::Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path )
+int WorldInfo::Solve( GridBlock start, GridBlock end, grinliz::CDynArray<GridBlock>* path )
 {
-	GLASSERT( HasGridEdge( start.x, start.y ));
-	GLASSERT( HasGridEdge( end.x, end.y ));
+	GLASSERT(!start.IsZero());
+	GLASSERT(!end.IsZero());
+	GLASSERT(worldGrid[INDEX(start)].IsGrid());
+	GLASSERT(worldGrid[INDEX(end)].IsGrid());
 
 	path->Clear();
 	float cost = 0;
@@ -52,36 +54,29 @@ void WorldInfo::Serialize( XStream* xs )
 }
 
 
-bool WorldInfo::HasGridEdge( int geX, int geY ) const
-{
-	GridEdge e = { geX, geY };
-	Vector2I m = GridEdgeToMap( e );
-	return worldGrid[m.y*mapWidth + m.x].IsGrid();
-}
-
-
-GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) const
+GridBlock WorldInfo::GetGridBlock( const grinliz::Vector2I& sector, int port ) const
 {
 	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS );
 	const SectorData& sd = sectorData[sector.y*NUM_SECTORS+sector.x];
-	GridEdge g = { 0, 0 };
+	GridBlock g = { 0, 0 };
+	static const int HALF_SIZE = SECTOR_SIZE / 2;
 
 	if ( sd.ports & port ) {
 		if ( port == SectorData::NEG_X ) {
-			g.x = sector.x*2;
-			g.y = sector.y*2 + 1;
+			g.x = sector.x * SECTOR_SIZE;
+			g.y = sector.y * SECTOR_SIZE + HALF_SIZE;
 		}
 		else if ( port == SectorData::POS_X ) {
-			g.x = (sector.x+1)*2;
-			g.y = sector.y*2 + 1;
+			g.x = (sector.x+1)*SECTOR_SIZE;
+			g.y = sector.y * SECTOR_SIZE + HALF_SIZE;
 		}
 		else if ( port == SectorData::NEG_Y ) {
-			g.x = sector.x*2 + 1;
-			g.y = sector.y*2;
+			g.x = sector.x * SECTOR_SIZE + HALF_SIZE;
+			g.y = sector.y * SECTOR_SIZE;
 		}
 		else if ( port == SectorData::POS_Y ) {
-			g.x = sector.x*2 + 1;
-			g.y = (sector.y+1)*2;
+			g.x = sector.x * SECTOR_SIZE + HALF_SIZE;
+			g.y = (sector.y+1)*SECTOR_SIZE;
 		}
 		else {
 			GLASSERT( 0 );
@@ -89,32 +84,6 @@ GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) con
 	}
 	return g;
 }
-
-
-/*
-int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const
-{
-	const SectorData& sd = GetSector( sector );
-	Vector2I pi = { LRintf( p.x ), LRintf( p.y ) };
-
-	int best = 0;
-	if ( sd.ports ) {
-		int shortest = INT_MAX;
-
-		for( int i=0; i<4; ++i ) {
-			int port = 1<<i;
-			if ( sd.ports & port ) {
-				int len2 = (sd.GetPortLoc(port).Center() - pi).LengthSquared();
-				if ( len2 < shortest ) {
-					shortest = len2;
-					best = port;
-				}
-			}
-		}
-	}
-	return best;
-}
-*/
 
 
 const SectorData& WorldInfo::GetSectorInfo( float fx, float fy ) const
@@ -127,11 +96,11 @@ const SectorData& WorldInfo::GetSectorInfo( float fx, float fy ) const
 
 float WorldInfo::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
-	GridEdge start = FromState( stateStart );	
-	GridEdge end   = FromState( stateEnd );
+	GridBlock start = FromState( stateStart );	
+	GridBlock end   = FromState( stateEnd );
 
-	GLASSERT( HasGridEdge( start ));
-	GLASSERT( HasGridEdge( end ));
+	GLASSERT(worldGrid[INDEX(start)].IsGrid());
+	GLASSERT(worldGrid[INDEX(end)].IsGrid());
 
 	int len = abs( start.x - end.x ) + abs( start.y - end.y );
 	return (float)len;
@@ -141,19 +110,49 @@ float WorldInfo::LeastCostEstimate( void* stateStart, void* stateEnd )
 void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
 {
 	adjacent->clear();
-	const GridEdge g = FromState( state );
-	GLASSERT( HasGridEdge( g ));
+	const GridBlock g = FromState( state );
+	GLASSERT(worldGrid[INDEX(g)].IsGrid());
 
-	const GridEdge alt[] = {
-		{ g.x + 1, g.y },
-		{ g.x - 1, g.y },
-		{ g.x, g.y + 1 },
-		{ g.x, g.y - 1 } };
+	// If we are not at a Port or Corner, then the next step is
+	// to the 2 near Ports/Corners. That's a one way move.
+	// If we are Port or Corner, connect to the next Corner or Port.
 
-	for( int i=0; i<4; ++i ) {
-		if ( HasGridEdge( alt[i] )) {
-			micropather::StateCost sc = { ToState( alt[i] ), 0.5f };
-			adjacent->push_back( sc );
+	static const int HALF = SECTOR_SIZE / 2;
+	Rectangle2I bounds;
+	bounds.Set(0, 0, mapWidth - 1, mapHeight - 1);
+	CArray<Vector2I, 4> adj;
+
+	int modX = g.x % SECTOR_SIZE;
+	int modY = g.y % SECTOR_SIZE;
+	Vector2I sector = { g.x / SECTOR_SIZE, g.y / SECTOR_SIZE };
+
+	if (modX == 0 && modY == 0) {
+		// Corner.
+		adj.PushArr(4);
+		adj[0].Set(g.x + HALF, g.y);
+		adj[1].Set(g.x, g.y + HALF);
+		adj[2].Set(g.x - HALF, g.y);
+		adj[3].Set(g.x, g.y - HALF);
+	}
+	else if (modX && modY == 0) {
+		// Port (east-west)
+		adj.PushArr(2);
+		adj[0].Set(sector.x * SECTOR_SIZE, g.y);
+		adj[1].Set((sector.x + 1) * SECTOR_SIZE, g.y);
+	}
+	else {		//if (modX == 0 && modY) {
+		// Port (north-south)
+		adj.PushArr(2);
+		adj[0].Set(g.x, sector.y * SECTOR_SIZE);
+		adj[1].Set(g.x, (sector.y + 1) * SECTOR_SIZE);
+	}
+
+	for (int i = 0; i < adj.Size(); ++i) {
+		Vector2I v = { adj[i].x, adj[i].y };
+		GridBlock vgb = { adj[i].x, adj[i].y };
+		if (bounds.Contains(v) && worldGrid[INDEX(vgb)].IsGrid()) {
+			micropather::StateCost sc = { ToState(vgb), HALF };
+			adjacent->push_back(sc);
 		}
 	}
 }
@@ -161,7 +160,7 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 
 void  WorldInfo::PrintStateInfo( void* state )
 {
-	GridEdge v = FromState( state );
+	GridBlock v = FromState( state );
 	GLOUTPUT(( "%d,%d ", v.x, v.y ));
 }
 

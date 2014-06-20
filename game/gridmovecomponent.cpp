@@ -13,6 +13,7 @@ using namespace grinliz;
 
 static const float GRID_ACCEL = 1.0f;
 
+
 GridMoveComponent::GridMoveComponent() : GameMoveComponent()
 {
 	state = NOT_INIT;
@@ -133,10 +134,10 @@ int GridMoveComponent::DoTick( U32 delta )
 			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y );
 			int port = sd.NearestPort( pos );
 			Vector2I sector = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
-			GridEdge gridEdge = worldInfo.GetGridEdge( sector, port );
-			GLASSERT( worldInfo.HasGridEdge( gridEdge ));
+			GridBlock gridBlock = worldInfo.GetGridBlock( sector, port );
+			GLASSERT(!gridBlock.IsZero());
 
-			dest = worldInfo.GridEdgeToMapF( gridEdge );
+			dest.Set((float)gridBlock.x, (float)gridBlock.y);
 			stateIfDestReached = TRAVELLING;
 		}
 		break;
@@ -154,9 +155,9 @@ int GridMoveComponent::DoTick( U32 delta )
 	case TRAVELLING:
 		{	
 			GLASSERT( destSectorPort.IsValid() );
-			GridEdge destEdge = worldInfo.GetGridEdge( destSectorPort.sector, destSectorPort.port );
-			GLASSERT( worldInfo.HasGridEdge( destEdge ));
-			Vector2F destPt   = worldInfo.GridEdgeToMapF( destEdge ); 
+			GridBlock destBlock = worldInfo.GetGridBlock( destSectorPort.sector, destSectorPort.port );
+			GLASSERT(!destBlock.IsZero());
+			Vector2F destPt = { (float)destBlock.x, (float)destBlock.y };
 			
 			Rectangle2F destRect;
 			destRect.min = destRect.max = destPt;
@@ -168,17 +169,16 @@ int GridMoveComponent::DoTick( U32 delta )
 			}
 			else {
 				if ( path.Size() == 0 ) {
-					Vector2I mapPos = { (int)pos.x, (int)pos.y };
-					GridEdge current = context->worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
-					GLASSERT( context->worldMap->GetWorldInfo().HasGridEdge( current ));
-					int result = context->worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
+					GridBlock current = MapToGridBlock(pos.x, pos.y);
+
+					int result = context->worldMap->GetWorldInfoMutable()->Solve( current, destBlock, &path );
 					if ( result == micropather::MicroPather::START_END_SAME ) {
 						path.Clear();
 						path.Push( current );
 					}
 					else if ( result != micropather::MicroPather::SOLVED ) {
 						path.Clear();
-						path.Push( destEdge );
+						path.Push(destBlock);
 					}
 					else {
 						GLASSERT( result == micropather::MicroPather::SOLVED );
@@ -187,8 +187,8 @@ int GridMoveComponent::DoTick( U32 delta )
 
 				float travel = Travel( speed, delta );
 				while ( travel > 0 && !path.Empty() ) {
-					GridEdge ge   = path[0];
-					Vector2F target = worldInfo.GridEdgeToMapF( ge );
+					GridBlock gb   = path[0];
+					Vector2F target = { (float)gb.x, (float)gb.y };
 
 					Vector2F delta = target - pos;
 					float len = delta.Length();

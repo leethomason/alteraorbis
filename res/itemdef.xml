@@ -189,7 +189,7 @@
 
   <item name="power"
         resource="power"
-        flags="DAMAGE_UNDER_WATER EFFECT_EXPLOSIVE SHOCKABLE"
+        flags="DAMAGE_UNDER_WATER EXPLODES SHOCKABLE"
         porch="0"
         procedural="team"
         size="1"

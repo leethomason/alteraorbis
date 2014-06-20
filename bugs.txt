@@ -145,6 +145,10 @@ d animation generation
 				- turret (or not circuit? building? similar to battery...) (rot)
 				- cage
 
+		- grid travel shouldn't walk
+		- emitters to close to Grid
+		- ports or grid should mark fluid unbounded
+
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetive
 		- auto-clear not working as well as it should

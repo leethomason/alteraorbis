@@ -85,16 +85,15 @@ public:
 	static grinliz::Vector2F PortPos( const grinliz::Rectangle2I portBounds, U32 seed );
 };
 
-/*
-	Double the sector coordinates.
-	2 3 4
-	+---+
-	|1,1|
-	|	|
-	+---+
 
-*/
-typedef grinliz::Vector2<S16> GridEdge;
+typedef grinliz::Vector2<S16> GridBlock;
+
+inline GridBlock MapToGridBlock(float x, float y)
+{
+	// x: 32,32 is the gridblock. [31.0, 33.0)->32
+	GridBlock gb = { int(x + 1.0) & (~1), int(y + 1.0) & (~1) };
+	return gb;
+}
 
 class WorldInfo : public micropather::Graph, 
 				  public StackedSingleton< WorldInfo >
@@ -111,7 +110,7 @@ public:
 	virtual void  AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
 	virtual void  PrintStateInfo( void* state );
 
-	int Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path );
+	int Solve( GridBlock start, GridBlock end, grinliz::CDynArray<GridBlock>* path );
 
 	// Get the current sector from the grid coordinates.
 	const SectorData& GetSector( const grinliz::Vector2I& sector ) const {
@@ -121,54 +120,24 @@ public:
 
 	// Get the grid edge from the sector and the port.
 	// Return 0,0 if it doesn't exist.
-	GridEdge GetGridEdge( const grinliz::Vector2I& sector, int port ) const;
+	GridBlock GetGridBlock( const grinliz::Vector2I& sector, int port ) const;
 
 	// Get the cx, cy of the sector from an arbitrary coordinate.
 	const SectorData& GetSectorInfo( float x, float y ) const;
-
-	grinliz::Vector2I GridEdgeToSector( GridEdge e ) const {
-		grinliz::Vector2I s = { e.x/2, e.y/2 };
-		GLASSERT( s.x >= 0 && s.x < NUM_SECTORS && s.y >=0 && s.y < NUM_SECTORS );
-		return s;
-	}
-
-	grinliz::Vector2I GridEdgeToMap( GridEdge e ) const {
-		grinliz::Vector2I m = { e.x * SECTOR_SIZE / 2, e.y * SECTOR_SIZE / 2 };
-		GLASSERT( m.x >= 0 && m.x < MAX_MAP_SIZE && m.y >= 0 && m.y < MAX_MAP_SIZE );
-		return m;
-	}
-
-	grinliz::Vector2F GridEdgeToMapF( GridEdge e ) const {
-		grinliz::Vector2I m = GridEdgeToMap( e );
-		grinliz::Vector2F v = { (float)m.x, (float)m.y };
-		return v;
-	}
-
-	GridEdge MapToGridEdge( int x, int y ) const {
-		GridEdge ge;
-
-		ge.x = 2*x / SECTOR_SIZE;
-		ge.y = 2*y / SECTOR_SIZE;
-
-		return ge;
-	}
-
-	bool HasGridEdge( const GridEdge& ge ) const {
-		return HasGridEdge( ge.x, ge.y );
-	}
-	bool HasGridEdge( int geX, int geY ) const;
 
 	const SectorData* SectorDataMem() const { return sectorData; }
 	SectorData* SectorDataMemMutable()		{ return sectorData; }
 
 private:
+	int INDEX(int x, int y) const { return y*mapWidth + x; }
+	int INDEX(const GridBlock& gb) const { return gb.y*mapWidth + gb.x; }
 
-	GridEdge FromState( void* state ) {
-		GLASSERT( sizeof(GridEdge) == sizeof(void*) );
-		GridEdge v = *((GridEdge*)&state);
+	GridBlock FromState( void* state ) {
+		GLASSERT( sizeof(GridBlock) == sizeof(void*) );
+		GridBlock v = *((GridBlock*)&state);
 		return v;
 	}
-	void* ToState( GridEdge v ) {
+	void* ToState( GridBlock v ) {
 		void* r = (void*)(*((U32*)&v));
 		return r;
 	}
