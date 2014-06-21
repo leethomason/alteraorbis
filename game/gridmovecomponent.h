@@ -38,7 +38,7 @@ public:
 	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual int DoTick( U32 delta );
-	virtual bool IsMoving() const;
+	virtual bool IsMoving() const		 { return false; }		// being moved is not moving....
 	virtual grinliz::Vector3F Velocity() { return velocity; }
 
 	void SetDest( const SectorPort& sp );

@@ -127,6 +127,9 @@ public:
 	void SetWorldGridHP(int x, int y, int hp) {
 		grid[INDEX(x, y)].SetHP(hp);
 	}
+	void SetCircuit(int x, int y, int circuit) {
+		grid[INDEX(x, y)].SetCircuit(circuit);
+	}
 
 	const WorldGrid& GetWorldGrid(int x, int y) { return grid[INDEX(x, y)]; }
 	const WorldGrid& GetWorldGrid(const grinliz::Vector2I& p) { return grid[INDEX(p.x, p.y)]; }

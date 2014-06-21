@@ -131,7 +131,7 @@ d animation generation
 			d shock fluid
 			x update world-gen code to place lava emitters
 		- circuits
-			- implement explosion
+			x implement EXPLODES
 			- circuit class. new rendering overlay. (gamui layer? seperate?)
 			- circuits: 4 bits type(15) + rot(2) = 6 bits?
 				- switch (rot)
@@ -145,12 +145,13 @@ d animation generation
 				- turret (or not circuit? building? similar to battery...) (rot)
 				- cage
 
-		- grid travel shouldn't walk
-		- emitters to close to Grid
-		- ports or grid should mark fluid unbounded
+		x grid travel shouldn't walk
+		x emitters too close to Grid
+		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
+		x mini map texture colors incorrect
 
 		- rotation of grid and voxel elements (experiment)
-	    - plants look repetetive
+	    - plants look repetetivoe
 		- auto-clear not working as well as it should
 		- walk target for the avatar
 		- 32 bit texture support

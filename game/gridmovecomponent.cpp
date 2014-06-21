@@ -58,16 +58,6 @@ void GridMoveComponent::OnRemove()
 }
 
 
-bool GridMoveComponent::IsMoving() const
-{
-	// This is something of a problem. Are we moving
-	// if on transit? Mainly used by the animation system,
-	// so the answer is 'no', but not quite what you
-	// might expect.
-	return false;
-}
-
-
 void GridMoveComponent::SetDest( const SectorPort& sp )
 {
 	switch( state ) {

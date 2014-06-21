@@ -120,7 +120,7 @@ public:
 
 	// approximate, may lag, etc. useful for AI
 	virtual grinliz::Vector3F Velocity() = 0;
-	bool IsMoving()								{ return Velocity().LengthSquared() > 0; }
+	virtual bool IsMoving()						{ return Velocity().LengthSquared() > 0; }
 	virtual bool ShouldAvoid() const			{ return true; }
 
 protected:

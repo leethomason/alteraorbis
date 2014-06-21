@@ -46,7 +46,7 @@ public:
 
 	enum {
 		WATER,	// can also be magma
-		LAND,	// can still be pave, porch, or magma
+		LAND,	// can still be pave, porch, circuit, or magma
 		GRID,
 		PORT,
 		NUM_LAYERS
@@ -55,6 +55,13 @@ public:
 	enum {
 		FLUID_WATER = 0,
 		FLUID_LAVA,
+	};
+
+	enum {
+		CIRCUIT_NONE,
+		CIRCUIT_SWITCH,
+		CIRCUIT_BATTERY,
+		CIRCUIT_ZAPPER,
 	};
 
 private:
@@ -118,25 +125,22 @@ public:
 	}
 
 	grinliz::Color4U8 ToColor() const {
+		// Hardcoded palette values!
 		grinliz::Color4U8 c = { 0, 0, 0, 255 };
 		switch (land) {
-		case WATER:		c.Set(0, 0, 200, 255);	break;
-		case LAND:		break;
-		case GRID:		c.Set(120, 180, 180, 255); break;
-		case PORT:		c.Set(180, 180, 0, 255); break;
+		case WATER:		c.Set(0, 51, 178, 255);	break;
+		case LAND:		c.Set(38, 98, 45, 255);		break;
+		case GRID:		c.Set(16, 67, 34, 255); break;
+		case PORT:		c.Set(232, 149, 0, 255); break;
 		default: GLASSERT(0);
 		}
-		if ( land == LAND ) {
-			if ( nominalRockHeight == 0 ) {
-				c.Set( 0, 140, 0, 255 );
-			}
-			else {
-				int add = nominalRockHeight*40;
-				c.Set( add, 100+add, add, 255 );
-			}
-		}
-		if (fluidEmitter) {
-			c.b = 255;
+		if ( land == LAND && nominalRockHeight) {
+			if (nominalRockHeight == 1)
+				c.Set( 126, 126, 126, 255 );
+			else if (nominalRockHeight == 2)
+				c.Set( 181, 181, 181, 255 );
+			else
+				c.Set( 235, 235, 235, 255 );
 		}
 		return c;
 	}
@@ -151,12 +155,27 @@ public:
 		PORCH_UNREACHABLE = 7
 	};
 	int Land() const { return land; }
+
 	int Pave() const { return pave; }
 	void SetPave( int p ) {
 		GLASSERT( p >=0 && p < NUM_PAVE );
 		GLASSERT( Land() == LAND );
 		GLASSERT( RockHeight() == 0 );
 		pave = p;
+	}
+
+	int Circuit() const { return circuit; }
+	int CircuitRot() const { return circuitRot; }
+	void SetCircuit(int id) {
+		circuit = 0;
+		if (id) {
+			pave = 0;
+			circuit = id;
+			GLASSERT(circuit == id);
+		}
+	}
+	void SetCircuitRot(int rot) {
+		circuitRot = rot;
 	}
 
 	int Porch() const		{ return isPorch; }

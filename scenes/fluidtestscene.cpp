@@ -30,8 +30,9 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUILD_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis" };
-	for (int i = 0; i < NUM_BUILD_BUTTONS; ++i) {
+	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
+											 "Switch", "Battery", "Zapper" };
+	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
 		buildButton[0].AddToToggleGroup(&buildButton[i]);
@@ -56,8 +57,11 @@ void FluidTestScene::Resize()
 {
 	lumosGame->PositionStd(&okay, 0);
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	for (int i = 0; i < NUM_BUILD_BUTTONS; ++i) {
-		layout.PosAbs(&buildButton[i], i, -2);
+	for (int i = 0; i < NUM_BUTTONS; ++i) {
+		if (i < NUM_BUILD_BUTTONS)
+			layout.PosAbs(&buildButton[i], i, -3);
+		else
+			layout.PosAbs(&buildButton[i], i - NUM_BUILD_BUTTONS, -2);
 	}
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&loadButton, 2, -1);
@@ -125,6 +129,15 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			}
 			else if (buildButton[BUTTON_MANTIS].Down()) {
 				chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+			}
+			else if (buildButton[BUTTON_SWITCH].Down()) {
+				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_SWITCH);
+			}
+			else if (buildButton[BUTTON_BATTERY].Down()) {
+				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_BATTERY);
+			}
+			else if (buildButton[BUTTON_ZAPPER].Down()) {
+				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_ZAPPER);
 			}
 		}
 	}

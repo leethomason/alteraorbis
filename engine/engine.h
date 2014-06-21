@@ -211,7 +211,6 @@ private:
 	void CalcCameraRotation( grinliz::Matrix4* );
 
 	void Blur();
-	void CreateMiniMap();
 	void QueueSet(	EngineShaders* engineShaders, Model* root, 
 					int requiredModelFlag,  int excludedModelFlag,
 					int requiredShaderFlag, int excludedShaderFlag );

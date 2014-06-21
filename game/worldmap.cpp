@@ -1890,9 +1890,9 @@ void WorldMap::CreateTexture( Texture* t )
 
 		U16 c[WorldGrid::NUM_LAYERS] = {
 			Surface::CalcRGB16( cWater ),
+			Surface::CalcRGB16( cLand ),
 			Surface::CalcRGB16( cGrid ),
 			Surface::CalcRGB16( cPort ),
-			Surface::CalcRGB16( cLand )
 		};
 
 		for( int y=0; y<t->Height(); ++y ) {
@@ -2002,7 +2002,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.875 - double(y*288 + 16) / 2048.0)
 
-	static const int NUM = 16;
+	static const int NUM = 19;
 	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
@@ -2020,10 +2020,14 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
 		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter - water
 		{ BLACKMAG_X(1), BLACKMAG_Y(5) },	// emitter - lava
+		{ BLACKMAG_X(2), BLACKMAG_Y(5) },	// circuit: switch
+		{ BLACKMAG_X(0), BLACKMAG_Y(6) },	// circuit: battery
+		{ BLACKMAG_X(1), BLACKMAG_Y(6) },	// circuit: zapper		
 	};
 	static const int PORCH = 7;
 	static const int PAVE = 4;
 	static const int EMITTER = 14;
+	static const int CIRCUIT = 16;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2041,6 +2045,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 				}
 
 				const WorldGrid& wg = grid[INDEX(x,y)];
+				int rotation = 0;
+
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Land();
 					if (wg.IsFluidEmitter()) {
@@ -2053,8 +2059,12 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 						if (wg.Pave()) {
 							layer = PAVE + wg.Pave() - 1;
 						}
-						if ( wg.Porch() ) {
+						else if ( wg.Porch() ) {
 							layer = PORCH + wg.Porch() - 1;
+						}
+						else if (wg.Circuit()) {
+							layer = CIRCUIT + wg.Circuit() - 1;
+							rotation = wg.CircuitRot();
 						}
 					}
 
@@ -2067,10 +2077,10 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					vArr[2].pos.Set( fx+1.0f,	0, fy+1.0f );
 					vArr[3].pos.Set( fx+1.0f,	0, fy );
 
-					vArr[0].tex.Set( UV[layer].x,		UV[layer].y );
-					vArr[1].tex.Set( UV[layer].x,		UV[layer].y+dv );
-					vArr[2].tex.Set( UV[layer].x+du,	UV[layer].y+dv );
-					vArr[3].tex.Set( UV[layer].x+du,	UV[layer].y );
+					vArr[(0 + rotation)&3].tex.Set( UV[layer].x,		UV[layer].y );
+					vArr[(1 + rotation)&3].tex.Set( UV[layer].x,		UV[layer].y+dv );
+					vArr[(2 + rotation)&3].tex.Set( UV[layer].x+du,	UV[layer].y+dv );
+					vArr[(3 + rotation)&3].tex.Set( UV[layer].x+du,	UV[layer].y );
 
 					for( int i=0; i<4; ++i ) {
 						vArr[i].normal = V3F_UP;
@@ -2341,8 +2351,6 @@ void WorldMap::GenerateEmitters(U32 seed)
 
 			Vector2I sector = { i, j };
 			Rectangle2I bounds = InnerSectorBounds(sector);
-			bounds.Outset(-3);
-
 			if (!Bounds().Contains(bounds)) continue;
 
 			// At this point, don't put emitters in the outland.
@@ -2351,8 +2359,10 @@ void WorldMap::GenerateEmitters(U32 seed)
 			static const int PATCH_SIZE = 8;
 			static const int NUM_PATCHES = SECTOR_SIZE / PATCH_SIZE;
 
-			for (int py = 0; py < NUM_PATCHES; ++py) {
-				for (int px = 0; px < NUM_PATCHES; ++px) {
+			// Inset by 1 unit; keep emitters away from the world edge.
+
+			for (int py = 1; py < NUM_PATCHES-1; ++py) {
+				for (int px = 1; px < NUM_PATCHES-1; ++px) {
 					Rectangle2I r;
 					r.Set(px*PATCH_SIZE + i*SECTOR_SIZE + 1, py*PATCH_SIZE + j*SECTOR_SIZE + 1,
 						(px + 1)*PATCH_SIZE + i*SECTOR_SIZE - 2, (py + 1)*PATCH_SIZE + j*SECTOR_SIZE - 2);

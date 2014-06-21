@@ -43,7 +43,12 @@ private:
 		BUTTON_GREEN,
 		BUTTON_VIOLET,
 		BUTTON_MANTIS,
-		NUM_BUILD_BUTTONS
+		NUM_BUILD_BUTTONS,
+
+		BUTTON_SWITCH = NUM_BUILD_BUTTONS,
+		BUTTON_BATTERY,
+		BUTTON_ZAPPER,
+		NUM_BUTTONS
 	};
 
 	LumosGame*  lumosGame;
@@ -55,7 +60,7 @@ private:
 	CTicker fluidTicker;
 
 	gamui::PushButton okay;
-	gamui::ToggleButton buildButton[NUM_BUILD_BUTTONS];
+	gamui::ToggleButton buildButton[NUM_BUTTONS];
 	gamui::PushButton saveButton, loadButton;
 
 };
