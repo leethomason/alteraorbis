@@ -75,6 +75,7 @@ class WorldMap : public Map,
 				 public IDeviceLossHandler
 {
 	friend class FluidSim;
+	friend class CircuitSim;
 
 public:
 	WorldMap( int width, int height );
@@ -236,6 +237,7 @@ public:
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
 		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
 	}
+
 	// Map information, debugging of pools and waterfalls:
 	void FluidStats(int* pools, int* waterfalls);
 	grinliz::Vector2I GetPoolLocation(int index);

@@ -388,6 +388,9 @@
     <ClCompile Include="..\game\fluidsim.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\circuitsim.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -778,6 +781,9 @@
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\game\fluidsim.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\circuitsim.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>

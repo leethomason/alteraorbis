@@ -117,6 +117,7 @@
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\engine\vertex.cpp" />
     <ClCompile Include="..\game\aicomponent.cpp" />
+    <ClCompile Include="..\game\circuitsim.cpp" />
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
     <ClCompile Include="..\game\debugstatecomponent.cpp" />
     <ClCompile Include="..\game\gameitem.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="..\engine\vertex.h" />
     <ClInclude Include="..\game\aicomponent.h" />
     <ClInclude Include="..\game\census.h" />
+    <ClInclude Include="..\game\circuitsim.h" />
     <ClInclude Include="..\game\debugpathcomponent.h" />
     <ClInclude Include="..\game\debugstatecomponent.h" />
     <ClInclude Include="..\game\gameitem.h" />

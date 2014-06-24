@@ -149,6 +149,7 @@ d animation generation
 		x emitters too close to Grid
 		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
 		x mini map texture colors incorrect
+		- remove ruins; go to just unknown, and decay?
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe

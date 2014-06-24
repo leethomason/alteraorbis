@@ -5,6 +5,7 @@
 #include "../game/lumosmath.h"
 #include "../game/lumoschitbag.h"
 #include "../game/team.h"
+#include "../game/circuitsim.h"
 #include "../engine/text.h"
 
 using namespace gamui;
@@ -24,6 +25,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	context.Set( engine, worldMap, lumosGame );
 	chitBag = new LumosChitBag( context, 0 );
 	worldMap->AttachEngine(engine, chitBag);
+
+	circuitSim = new CircuitSim(worldMap, engine);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
@@ -46,6 +49,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 
 FluidTestScene::~FluidTestScene()
 {
+	delete circuitSim;
 	worldMap->AttachEngine(0, 0);
 	delete chitBag;
 	delete worldMap;
@@ -103,41 +107,48 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 	if (result == INTERSECT) {
 		Vector2I pos2i = ToWorld2I(at);
 		if (worldMap->Bounds().Contains(pos2i)) {
-			if (buildButton[BUTTON_ROCK0].Down()) {
-				worldMap->SetRock(pos2i.x, pos2i.y, 0, false, WorldGrid::ROCK);
+
+			const WorldGrid& wg = worldMap->GetWorldGrid(pos2i);
+			if (wg.Circuit() == WorldGrid::CIRCUIT_SWITCH) {
+				circuitSim->Activate(pos2i);
 			}
-			else if (buildButton[BUTTON_ROCK1].Down()) {
-				worldMap->SetRock(pos2i.x, pos2i.y, 1, false, WorldGrid::ROCK);
-			}
-			else if (buildButton[BUTTON_ROCK2].Down()) {
-				worldMap->SetRock(pos2i.x, pos2i.y, 2, false, WorldGrid::ROCK);
-			}
-			else if (buildButton[BUTTON_ROCK3].Down()) {
-				worldMap->SetRock(pos2i.x, pos2i.y, 3, false, WorldGrid::ROCK);
-			}
-			else if (buildButton[BUTTON_EMITTER].Down()) {
-				worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_WATER);
-			}
-			else if (buildButton[BUTTON_LAVA_EMITTER].Down()) {
-				worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
-			}
-			else if (buildButton[BUTTON_GREEN].Down()) {
-				chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
-			}
-			else if (buildButton[BUTTON_VIOLET].Down()) {
-				chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
-			}
-			else if (buildButton[BUTTON_MANTIS].Down()) {
-				chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
-			}
-			else if (buildButton[BUTTON_SWITCH].Down()) {
-				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_SWITCH);
-			}
-			else if (buildButton[BUTTON_BATTERY].Down()) {
-				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_BATTERY);
-			}
-			else if (buildButton[BUTTON_ZAPPER].Down()) {
-				worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_ZAPPER);
+			else {
+				if (buildButton[BUTTON_ROCK0].Down()) {
+					worldMap->SetRock(pos2i.x, pos2i.y, 0, false, WorldGrid::ROCK);
+				}
+				else if (buildButton[BUTTON_ROCK1].Down()) {
+					worldMap->SetRock(pos2i.x, pos2i.y, 1, false, WorldGrid::ROCK);
+				}
+				else if (buildButton[BUTTON_ROCK2].Down()) {
+					worldMap->SetRock(pos2i.x, pos2i.y, 2, false, WorldGrid::ROCK);
+				}
+				else if (buildButton[BUTTON_ROCK3].Down()) {
+					worldMap->SetRock(pos2i.x, pos2i.y, 3, false, WorldGrid::ROCK);
+				}
+				else if (buildButton[BUTTON_EMITTER].Down()) {
+					worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_WATER);
+				}
+				else if (buildButton[BUTTON_LAVA_EMITTER].Down()) {
+					worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
+				}
+				else if (buildButton[BUTTON_GREEN].Down()) {
+					chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
+				}
+				else if (buildButton[BUTTON_VIOLET].Down()) {
+					chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
+				}
+				else if (buildButton[BUTTON_MANTIS].Down()) {
+					chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+				}
+				else if (buildButton[BUTTON_SWITCH].Down()) {
+					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_SWITCH);
+				}
+				else if (buildButton[BUTTON_BATTERY].Down()) {
+					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_BATTERY);
+				}
+				else if (buildButton[BUTTON_ZAPPER].Down()) {
+					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_ZAPPER);
+				}
 			}
 		}
 	}
@@ -181,12 +192,7 @@ void FluidTestScene::DrawDebugText()
 
 void FluidTestScene::DoTick(U32 delta)
 {
-	Vector2I sector = { 0, 0 };
-
-//	if (fluidTicker.Delta(delta)) {
-//		settled = worldMap->RunFluidSim(sector);
-//	}
 	worldMap->DoTick(delta, chitBag);
+	circuitSim->DoTick(delta);
 	chitBag->DoTick(delta);
-//	worldMap->EmitFluidParticles(delta, sector, engine);
 }

@@ -8,6 +8,7 @@
 class LumosGame;
 class WorldMap;
 class LumosChitBag;
+class CircuitSim;
 
 class FluidTestScene : public Scene
 {
@@ -55,6 +56,7 @@ private:
 	LumosChitBag* chitBag;
 	Engine*		engine;
 	WorldMap*	worldMap;
+	CircuitSim*	circuitSim;
 	bool		settled;
 
 	CTicker fluidTicker;

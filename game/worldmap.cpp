@@ -40,6 +40,7 @@
 #include "lumosgame.h"
 #include "gameitem.h"
 #include "fluidsim.h"
+#include "circuitsim.h"
 
 #include "../script/worldgen.h"
 #include "../script/procedural.h"
