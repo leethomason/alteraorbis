@@ -170,6 +170,12 @@
     <colorVelocity red="0" green="0" blue="0" alpha="-2" />
   </particle>
 
+  <particle name="sparkExplosion" size="0.15" count="10" config="hemi"
+            velocity="0" velocityFuzz="0">
+    <color red="1" green="0.3" blue="0" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-2" />
+  </particle>
+
   <particle name="smoketrail" size="0.3" count="1" config="hemi"
             velocity="0" velocityFuzz="0.1"
             texMin="1" texMax="2">

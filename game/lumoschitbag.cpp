@@ -725,15 +725,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 		Vector3F origin = mv.at - bolt.dir * rewind;
 
 		DamageDesc dd( bolt.damage, bolt.effect );
-		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, context->engine, this );
-
-		if (XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(ISC::explosionWAV, random.Rand(), &origin);
-		}
-
-		if ( mv.VoxelHit() ) {
-			context->worldMap->VoxelHit( mv.voxel, dd );
-		}
+		BattleMechanics::GenerateExplosion( dd, origin, bolt.chitID, context->engine, this, context->worldMap );
 	}
 }
 

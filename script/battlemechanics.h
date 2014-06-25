@@ -28,6 +28,7 @@ class Chit;
 class Engine;
 class ChitBag;
 class DamageDesc;
+class WorldMap;
 
 class BattleMechanics
 {
@@ -87,13 +88,20 @@ public:
 
 	// Other --------------------- //
 
+	static void GenerateExplosion(	const DamageDesc& dd, 
+									const grinliz::Vector3F& origin, 
+									int originID, 
+									Engine* engine,
+									ChitBag* chitBag,
+									WorldMap* worldMap);
+
+private:
 	static void GenerateExplosionMsgs(	const DamageDesc& dd, 
 										const grinliz::Vector3F& origin, 
 										int originID, 
 										Engine* engine,
 										ChitBag* chitBag );
 
-private:
 	static grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
 
 	static grinliz::Vector3F ComputeLeadingShot(	const grinliz::Vector3F& origin,

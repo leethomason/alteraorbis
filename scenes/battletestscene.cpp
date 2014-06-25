@@ -481,7 +481,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			at.y = 0.01f;
 
 			DamageDesc dd( 20, 0 );
-			BattleMechanics::GenerateExplosionMsgs( dd, at, 0, engine, chitBag );
+			BattleMechanics::GenerateExplosion( dd, at, 0, engine, chitBag, map );
 #endif		
 		}
 	}

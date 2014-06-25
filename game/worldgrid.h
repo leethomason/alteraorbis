@@ -57,13 +57,6 @@ public:
 		FLUID_LAVA,
 	};
 
-	enum {
-		CIRCUIT_NONE,
-		CIRCUIT_SWITCH,
-		CIRCUIT_BATTERY,
-		CIRCUIT_ZAPPER,
-	};
-
 private:
 	// memset(0) should work, and make it water.
 

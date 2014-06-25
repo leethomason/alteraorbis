@@ -9,24 +9,26 @@
 class WorldMap;
 class Engine;
 class Model;
+class LumosChitBag;
+
+enum {
+	CIRCUIT_NONE,
+	CIRCUIT_SWITCH,
+	CIRCUIT_BATTERY,
+	CIRCUIT_POWER_UP,
+};
+
 
 class CircuitSim
 {
 public:
-	CircuitSim(WorldMap* worldMap, Engine* engine);
+	CircuitSim(WorldMap* worldMap, Engine* engine, LumosChitBag* chitBag);
 	~CircuitSim();
 
 	void Activate(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
 
 private:
-	void CreateSpark(const grinliz::Vector2I& pos, int rot4);
-	bool SparkArrives(const grinliz::Vector2I& pos);
-	void EmitSparkExplosion(const grinliz::Vector2F& pos);
-
-	WorldMap* worldMap;
-	Engine* engine;
-
 	struct Electron {
 		int charge;	// 0: spark, 1: charge
 		int dir;
@@ -35,7 +37,19 @@ private:
 		Model* model;
 	};
 
+	void CreateElectron(const grinliz::Vector2I& pos, int dir4, int charge);
+	// Returns 'true' if the original charge/spark is consumed.
+	bool ElectronArrives(Electron*);
+	void EmitSparkExplosion(const grinliz::Vector2F& pos);
+	void Explosion(const grinliz::Vector2I& pos, int charge, bool circuitDestroyed);
+	void ApplyPowerUp(const grinliz::Vector2I& pos, int charge);
+
+	WorldMap* worldMap;
+	Engine* engine;
+	LumosChitBag* chitBag;
+
 	grinliz::CDynArray< Electron > electrons;	// sparks and charges
+	grinliz::CDynArray< Electron > electronsCopy;	// sparks and charges
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

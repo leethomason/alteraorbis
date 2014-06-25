@@ -1,13 +1,18 @@
 #include "circuitsim.h"
 #include "worldmap.h"
 #include "lumosmath.h"
+#include "lumoschitbag.h"
 
 #include "../engine/engine.h"
 #include "../engine/model.h"
+#include "../engine/particle.h"
+
+#include "../script/battlemechanics.h"
 
 using namespace grinliz;
 
 static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 1.0f;
+static const float DAMAGE_PER_CHARGE = 15.0f;
 
 static const Vector2F DIR_F4[4] = {
 	{ 1, 0 },
@@ -24,12 +29,14 @@ static const Vector2I DIR_I4[4] = {
 };
 
 
-CircuitSim::CircuitSim(WorldMap* p_worldMap, Engine* p_engine)
+CircuitSim::CircuitSim(WorldMap* p_worldMap, Engine* p_engine, LumosChitBag* p_chitBag)
 {
 	worldMap = p_worldMap;
 	engine = p_engine;
+	chitBag = p_chitBag;
 	GLASSERT(worldMap);
 	GLASSERT(engine);
+	// the chitBag can be null.
 }
 
 
@@ -46,15 +53,15 @@ void CircuitSim::Activate(const grinliz::Vector2I& pos)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
 
-	if (wg.Circuit() == WorldGrid::CIRCUIT_SWITCH) {
-		CreateSpark(pos, wg.CircuitRot());
+	if (wg.Circuit() == CIRCUIT_SWITCH) {
+		CreateElectron(pos, wg.CircuitRot(), 0);
 	}
 }
 
 
-void CircuitSim::CreateSpark(const grinliz::Vector2I& pos, int rot4)
+void CircuitSim::CreateElectron(const grinliz::Vector2I& pos, int rot4, int charge)
 {
-	Model* model = engine->AllocModel("spark");
+	Model* model = engine->AllocModel( charge ? "charge" : "spark");
 	Vector2F start = ToWorld2F(pos) + 0.1f * DIR_F4[rot4];
 	model->SetPos(ToWorld3F(pos));
 
@@ -65,8 +72,15 @@ void CircuitSim::CreateSpark(const grinliz::Vector2I& pos, int rot4)
 
 void CircuitSim::DoTick(U32 delta)
 {
-	for (int i = 0; i < electrons.Size(); ++i) {
-		Electron* pe = &electrons[i];
+	// This is a giant "mutate what we are iterating" problem.
+	// Copy for now; worry about perf later.
+	electronsCopy.Clear();
+	while (!electrons.Empty()) {
+		electronsCopy.Push(electrons.Pop());
+	}
+
+	for (int i = 0; i < electronsCopy.Size(); ++i) {
+		Electron* pe = &electronsCopy[i];
 
 		float travel = Travel(ELECTRON_SPEED, delta);
 		bool electronDone = false;
@@ -84,7 +98,7 @@ void CircuitSim::DoTick(U32 delta)
 					// Hit center!
 					travel -= fabs(pe->t);
 					pe->t = 0;
-					electronDone = SparkArrives(pe->pos);
+					electronDone = ElectronArrives(pe);
 					if (electronDone) travel = 0;
 				}
 			}
@@ -117,24 +131,92 @@ void CircuitSim::DoTick(U32 delta)
 		}
 		if (electronDone) {
 			engine->FreeModel(pe->model);
-			electrons.SwapRemove(i); --i;
+			// just don't push back to the 'electrons' array to delete it.
 		}
 		else {
 			Vector2F p2 = ToWorld2F(pe->pos) + pe->t * DIR_F4[pe->dir];
 			Vector3F p3 = { p2.x, 0, p2.y };
+
+			const char* resName = pe->charge ? "charge" : "spark";
+			if (!StrEqual(pe->model->GetResource()->Name(), resName)) {
+				engine->FreeModel(pe->model);
+				pe->model = engine->AllocModel(resName);
+			}
+
 			pe->model->SetPos(p3);
+			electrons.Push(*pe);
 		}
 	}
 }
 
 
-bool CircuitSim::SparkArrives(const grinliz::Vector2I& pos)
+bool CircuitSim::ElectronArrives(Electron* pe)
 {
-	return false;
+	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pe->pos)];
+	bool sparkConsumed = false;
+	int dir = (pe->dir - wg.CircuitRot() + 4) & 3; // Test: correct?
+
+	switch (wg.Circuit()) {
+		case CIRCUIT_SWITCH: {
+			// Activates the switch., consumes the charge.
+			Activate(pe->pos);
+			sparkConsumed = true;
+		}
+		break;
+
+		case CIRCUIT_BATTERY: {
+			if (dir == 0) {
+				// The working direction.
+				if (chitBag) {
+					GLASSERT(0);	// need to check for charge. code not written!
+				}
+				else {
+					pe->charge += 4;
+				}
+			}
+			if (pe->charge > 8 || (dir && pe->charge)) {
+				Explosion(pe->pos, pe->charge, false);	// if destroyed, removed by building
+				sparkConsumed = true;
+			}
+		}
+		break;
+
+		case CIRCUIT_POWER_UP: {
+			ApplyPowerUp(pe->pos, pe->charge);
+			sparkConsumed = true;
+		}
+		break;
+
+		default:
+		break;
+	}
+
+	return sparkConsumed;
 }
 
 
 void CircuitSim::EmitSparkExplosion(const grinliz::Vector2F& pos)
 {
-
+	Vector3F p3 = { pos.x, 0, pos.y };
+	engine->particleSystem->EmitPD("sparkExplosion", p3, V3F_UP, 0);
 }
+
+
+void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
+{
+	if (chitBag) {
+		GLASSERT(0);	// code not written: look for turret or gate, etc. or find mobs to zap
+	}
+}
+
+
+void CircuitSim::Explosion(const grinliz::Vector2I& pos, int charge, bool circuitDestroyed)
+{
+	Vector3F pos3 = ToWorld3F(pos);
+	DamageDesc dd = { float(charge) * DAMAGE_PER_CHARGE, GameItem::EFFECT_SHOCK };
+	BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
+	if (circuitDestroyed) {
+		worldMap->SetCircuit(pos.x, pos.y, 0);
+	}
+}
+

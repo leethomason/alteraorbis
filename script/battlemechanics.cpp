@@ -15,6 +15,7 @@
 
 #include "battlemechanics.h"
 #include "worldscript.h"
+#include "procedural.h"
 
 #include "../game/gameitem.h"
 #include "../game/gamelimits.h"
@@ -637,3 +638,37 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 	GLLOG(( "</Explosion>\n" ));
 }
 
+void BattleMechanics::GenerateExplosion(const DamageDesc& dd,
+										const grinliz::Vector3F& pos,
+										int originID,
+										Engine* engine,
+										ChitBag* chitBag,
+										WorldMap* worldMap)
+{
+	// Audio:
+	int seed = int(pos.x + pos.y + pos.z) + originID;
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->PlayVariation(ISC::explosionWAV, Random::Hash8(seed), &pos);
+	}
+
+	// Particles:
+	ParticleSystem* ps = engine->particleSystem;
+	ParticleDef def = ps->GetPD( "explosion" );
+
+	Color4F color = WeaponGen::GetEffectColor(dd.effects);
+	def.color = { color.r, color.g, color.b, 1.0f };
+	ps->EmitPD( def, pos, V3F_UP, 0 );
+
+	// Physics:
+	GenerateExplosionMsgs(dd, pos, originID, engine, chitBag);
+
+	// Physics, voxel:
+	if (pos.z < EXPLOSIVE_RANGE) {
+		Rectangle2I r2i;
+		r2i.Set(LRint(pos.x - EXPLOSIVE_RANGE), LRint(pos.y - EXPLOSIVE_RANGE), LRint(pos.x + EXPLOSIVE_RANGE), LRint(pos.y + EXPLOSIVE_RANGE));
+		for (Rectangle2IIterator it(r2i); !it.Done(); it.Next()) {
+			Vector3I voxel = { it.Pos().x, 0, it.Pos().y };
+			worldMap->VoxelHit(voxel, dd);
+		}
+	}
+}

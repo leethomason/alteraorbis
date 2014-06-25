@@ -26,7 +26,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	chitBag = new LumosChitBag( context, 0 );
 	worldMap->AttachEngine(engine, chitBag);
 
-	circuitSim = new CircuitSim(worldMap, engine);
+	circuitSim = new CircuitSim(worldMap, engine, 0);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
@@ -109,7 +109,7 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 		if (worldMap->Bounds().Contains(pos2i)) {
 
 			const WorldGrid& wg = worldMap->GetWorldGrid(pos2i);
-			if (wg.Circuit() == WorldGrid::CIRCUIT_SWITCH) {
+			if (wg.Circuit() == CIRCUIT_SWITCH) {
 				circuitSim->Activate(pos2i);
 			}
 			else {
@@ -141,13 +141,13 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 				}
 				else if (buildButton[BUTTON_SWITCH].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_SWITCH);
+					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_SWITCH);
 				}
 				else if (buildButton[BUTTON_BATTERY].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_BATTERY);
+					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_BATTERY);
 				}
 				else if (buildButton[BUTTON_ZAPPER].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, WorldGrid::CIRCUIT_ZAPPER);
+					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_POWER_UP);
 				}
 			}
 		}
