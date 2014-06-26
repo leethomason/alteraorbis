@@ -131,6 +131,12 @@ public:
 	void SetCircuit(int x, int y, int circuit) {
 		grid[INDEX(x, y)].SetCircuit(circuit);
 	}
+	int CircuitRotation(int x, int y) {
+		return grid[INDEX(x, y)].CircuitRot();
+	}
+	void SetCircuitRotation(int x, int y, int r) {
+		grid[INDEX(x, y)].SetCircuitRot(r & 3);
+	}
 
 	const WorldGrid& GetWorldGrid(int x, int y) { return grid[INDEX(x, y)]; }
 	const WorldGrid& GetWorldGrid(const grinliz::Vector2I& p) { return grid[INDEX(p.x, p.y)]; }

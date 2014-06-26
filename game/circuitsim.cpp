@@ -8,24 +8,25 @@
 #include "../engine/particle.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/batterycomponent.h"
 
 using namespace grinliz;
 
-static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 1.0f;
+static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 4.0f;
 static const float DAMAGE_PER_CHARGE = 15.0f;
 
 static const Vector2F DIR_F4[4] = {
 	{ 1, 0 },
-	{ 0, 1 },
-	{ -1, 0 },
 	{ 0, -1 },
+	{ -1, 0 },
+	{ 0, 1 },
 };
 
 static const Vector2I DIR_I4[4] = {
 	{ 1, 0 },
-	{ 0, 1 },
-	{ -1, 0 },
 	{ 0, -1 },
+	{ -1, 0 },
+	{ 0, 1 },
 };
 
 
@@ -168,14 +169,25 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 			if (dir == 0) {
 				// The working direction.
 				if (chitBag) {
-					GLASSERT(0);	// need to check for charge. code not written!
+					Chit* power = chitBag->QueryBuilding(pe->pos);
+					if (power) {
+						BatteryComponent* battery = (BatteryComponent*)power->GetComponent("BatteryComponent");
+						if (battery) {
+							pe->charge = battery->UseCharge();
+						}
+					}
 				}
 				else {
 					pe->charge += 4;
 				}
 			}
 			if (pe->charge > 8 || (dir && pe->charge)) {
+				// too much power, or power from the side.
 				Explosion(pe->pos, pe->charge, false);	// if destroyed, removed by building
+				sparkConsumed = true;
+			}
+			else if (dir && pe->charge == 0) {
+				// sideways spark.
 				sparkConsumed = true;
 			}
 		}
@@ -206,6 +218,9 @@ void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 {
 	if (chitBag) {
 		GLASSERT(0);	// code not written: look for turret or gate, etc. or find mobs to zap
+	}
+	else {
+		engine->particleSystem->EmitPD("sparkPowerUp", ToWorld3F(pos), V3F_UP, 0);
 	}
 }
 

@@ -34,7 +34,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
 	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
-											 "Switch", "Battery", "Zapper" };
+											 "Switch", "Battery", "Zapper", "Rotate" };
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -109,7 +109,11 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 		if (worldMap->Bounds().Contains(pos2i)) {
 
 			const WorldGrid& wg = worldMap->GetWorldGrid(pos2i);
-			if (wg.Circuit() == CIRCUIT_SWITCH) {
+			if (buildButton[BUTTON_ROTATE].Down()) {
+				int rot = worldMap->CircuitRotation(pos2i.x, pos2i.y);
+				worldMap->SetCircuitRotation(pos2i.x, pos2i.y, rot+1);
+			}
+			else if (wg.Circuit() == CIRCUIT_SWITCH) {
 				circuitSim->Activate(pos2i);
 			}
 			else {

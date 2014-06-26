@@ -192,6 +192,7 @@
         flags="DAMAGE_UNDER_WATER EXPLODES SHOCKABLE"
         porch="0"
         procedural="team"
+        script="BatteryComponent"
         size="1"
         mass="150"
         cost="40"

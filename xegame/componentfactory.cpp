@@ -22,6 +22,7 @@
 #include "../script/distilleryscript.h"
 #include "../script/evalbuildingscript.h"
 #include "../script/guardscript.h"
+#include "../script/batterycomponent.h"
 
 #include "../ai/rebuildai.h"
 
@@ -109,6 +110,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	}
 	else if (name == "RebuildAIComponent") {
 		return glnew RebuildAIComponent();
+	}
+	else if (name == "BatteryComponent") {
+		return glnew BatteryComponent();
 	}
 
 

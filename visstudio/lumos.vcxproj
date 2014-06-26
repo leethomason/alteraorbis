@@ -161,6 +161,7 @@
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\scenes\soundscene.cpp" />
     <ClCompile Include="..\scenes\worldgenscene.cpp" />
+    <ClCompile Include="..\script\batterycomponent.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\buildscript.cpp" />
     <ClCompile Include="..\script\corescript.cpp" />
@@ -290,6 +291,7 @@
     <ClInclude Include="..\scenes\soundscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\scenes\worldgenscene.h" />
+    <ClInclude Include="..\script\batterycomponent.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\buildscript.h" />
     <ClInclude Include="..\script\corescript.h" />
