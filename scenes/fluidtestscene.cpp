@@ -34,7 +34,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
 	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
-											 "Switch", "Battery", "Zapper", "Rotate" };
+											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Transistor", "Rotate" };
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -117,6 +117,12 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				circuitSim->Activate(pos2i);
 			}
 			else {
+				for (int i = BUTTON_SWITCH; i < NUM_BUTTONS; ++i) {
+					if (buildButton[i].Down()) {
+						int circuit = i - BUTTON_SWITCH + 1;
+						worldMap->SetCircuit(pos2i.x, pos2i.y, circuit);
+					}
+				}
 				if (buildButton[BUTTON_ROCK0].Down()) {
 					worldMap->SetRock(pos2i.x, pos2i.y, 0, false, WorldGrid::ROCK);
 				}
@@ -143,15 +149,6 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				}
 				else if (buildButton[BUTTON_MANTIS].Down()) {
 					chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
-				}
-				else if (buildButton[BUTTON_SWITCH].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_SWITCH);
-				}
-				else if (buildButton[BUTTON_BATTERY].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_BATTERY);
-				}
-				else if (buildButton[BUTTON_ZAPPER].Down()) {
-					worldMap->SetCircuit(pos2i.x, pos2i.y, CIRCUIT_POWER_UP);
 				}
 			}
 		}

@@ -66,7 +66,7 @@ void CircuitSim::CreateElectron(const grinliz::Vector2I& pos, int rot4, int char
 	Vector2F start = ToWorld2F(pos) + 0.1f * DIR_F4[rot4];
 	model->SetPos(ToWorld3F(pos));
 
-	Electron e = { 0, rot4, 0.01f, pos, model };
+	Electron e = { charge, rot4, 0.01f, pos, model };
 	electrons.Push(e);
 }
 
@@ -166,8 +166,8 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		break;
 
 		case CIRCUIT_BATTERY: {
-			if (dir == 0) {
-				// The working direction.
+			if (dir == 0 || pe->charge == 0) {
+				// The working direction, or a spark from anywhere.
 				if (chitBag) {
 					Chit* power = chitBag->QueryBuilding(pe->pos);
 					if (power) {
@@ -186,16 +186,50 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 				Explosion(pe->pos, pe->charge, false);	// if destroyed, removed by building
 				sparkConsumed = true;
 			}
-			else if (dir && pe->charge == 0) {
-				// sideways spark.
-				sparkConsumed = true;
-			}
 		}
 		break;
 
 		case CIRCUIT_POWER_UP: {
 			ApplyPowerUp(pe->pos, pe->charge);
 			sparkConsumed = true;
+		}
+		break;
+
+		/* in the voxel map: (remember these are DIRECTIONS...opposite of location)
+			    3
+			<-2  0->
+			    1
+		*/
+		case CIRCUIT_BEND:
+		if (dir == 0) pe->dir = ((pe->dir + 3) & 3);
+		else if (dir == 1) pe->dir = ((pe->dir + 1) & 3);
+		break;
+
+		case CIRCUIT_FORK_2:
+		{
+			if (pe->charge == 0 || pe->charge > 1) {
+				CreateElectron(pe->pos, ((pe->dir + 1) & 3), pe->charge/2);
+				CreateElectron(pe->pos, ((pe->dir + 3) & 3), pe->charge/2);
+				sparkConsumed = true;
+			}
+		}
+		break;
+
+		case CIRCUIT_TRANSISTOR_A:
+		case CIRCUIT_TRANSISTOR_B:
+		{
+			if (dir == 0) {
+				worldMap->SetCircuit(pe->pos.x, pe->pos.y, 
+									(wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? CIRCUIT_TRANSISTOR_B : CIRCUIT_TRANSISTOR_A);
+				sparkConsumed = true;
+			}
+			else if (pe->charge && dir == 2) {
+				pe->dir = pe->dir + ((wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? 1 : 3);
+				pe->dir = pe->dir & 3;
+			}
+			else {
+				sparkConsumed = true;
+			}
 		}
 		break;
 

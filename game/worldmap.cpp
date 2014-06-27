@@ -1998,13 +1998,12 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	voxelBuffer.Clear();
 
 	// HARDCODE black magic values.
-	static const float du = 0.25;
+	static const float du = 0.125;
 	static const float dv = 0.125;
-	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 1024.0)
+	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 2048.0)
 	#define BLACKMAG_Y(y)   float( 0.875 - double(y*288 + 16) / 2048.0)
 
-	static const int NUM = 19;
-	static const Vector2F UV[NUM] = {
+	static const Vector2F UV[] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
@@ -2024,7 +2023,13 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(5) },	// circuit: switch
 		{ BLACKMAG_X(0), BLACKMAG_Y(6) },	// circuit: battery
 		{ BLACKMAG_X(1), BLACKMAG_Y(6) },	// circuit: zapper		
+		{ BLACKMAG_X(3), BLACKMAG_Y(0) },	// circuit: bend		
+		{ BLACKMAG_X(6), BLACKMAG_Y(0) },	// circuit: fork2		
+		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
+		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B		
 	};
+	static const int NUM = GL_C_ARRAY_SIZE(UV);
+
 	static const int PORCH = 7;
 	static const int PAVE = 4;
 	static const int EMITTER = 14;
