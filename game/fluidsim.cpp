@@ -245,7 +245,7 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 				&& wg.FluidType() == WorldGrid::FLUID_LAVA) 
 			{
 				// Is there water beside it? Can we turn into rock?
-				if (worldMap->IsPassable(x, y) && wg.Plant() == 0) {
+				if ((wg.RockHeight() || worldMap->IsPassable(x, y)) && wg.Plant() == 0) {
 					for (int k = 0; k < 4; ++k) {
 						const WorldGrid& wgAdj = worldMap->grid[worldMap->INDEX(x + DIR[k].x, y + DIR[k].y)];
 
