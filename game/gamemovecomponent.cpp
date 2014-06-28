@@ -128,6 +128,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 	}
 
 	Vector2F pos2 = { pos->x, pos->z };
+	GLASSERT(Context()->worldMap->BoundsF().Contains(pos2));
 	Context()->worldMap->ApplyBlockEffect(pos2, MAX_BASE_RADIUS, *floating ? WorldMap::BT_FLUID : WorldMap::BT_PASSABLE, &pos2);
 	pos->x = pos2.x;
 	pos->z = pos2.y;

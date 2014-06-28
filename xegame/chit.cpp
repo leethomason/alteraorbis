@@ -131,17 +131,38 @@ void Chit::Add( Component* c, bool loading )
 	else if ( c->ToMoveComponent()) {
 		// Move components are special: they can 
 		// be stacked.
-		if (moveComponent) {
-			int i = 0;
-			for (i = 0; i < NUM_GENERAL; ++i) {
-				if (general[i] == 0) {
-					general[i] = moveComponent;
-					break;
+		// BUT, on load, don't stack so we
+		// don't change the order.
+		if (!loading) {
+			if (moveComponent) {
+				// NOT loading, push new move component.
+				int i = 0;
+				for (i = 0; i < NUM_GENERAL; ++i) {
+					if (general[i] == 0) {
+						general[i] = moveComponent;
+						break;
+					}
 				}
+				GLASSERT(i < NUM_GENERAL);
 			}
-			GLASSERT(i < NUM_GENERAL);
+			moveComponent = c->ToMoveComponent();
 		}
-		moveComponent = c->ToMoveComponent();
+		else {
+			if (moveComponent) {
+				// Loading, put in general.
+				int i = 0;
+				for (i = 0; i < NUM_GENERAL; ++i) {
+					if (general[i] == 0) {
+						general[i] = c;
+						break;
+					}
+				}
+				GLASSERT(i < NUM_GENERAL);
+			}
+			else {
+				moveComponent = c->ToMoveComponent();
+			}
+		}
 	}
 	else if ( c->ToItemComponent()) {
 		GLASSERT( itemComponent == 0 );
@@ -242,7 +263,6 @@ void Chit::DoTick()
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) { 
-
 			// Look for an inactive move component:
 			if (hasMove && i >= GENERAL_SLOT && i < GENERAL_SLOT + NUM_GENERAL) {
 				if (slot[i]->ToMoveComponent())

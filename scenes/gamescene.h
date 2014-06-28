@@ -96,12 +96,7 @@ private:
 		NUM_BUILD_MARKS = 100
 	};
 	enum {
-		BUILD_XFORM,
-		BUILD_TECH0,
-		BUILD_TECH1,
-		BUILD_TECH2,
-		BUILD_TECH3,
-		NUM_BUILD_MODES
+		NUM_BUILD_MODES = 6
 	};
 
 	enum {

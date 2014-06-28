@@ -1213,6 +1213,8 @@ void AIComponent::GoSectorHerd(bool focus)
 									   Chit::ITEM_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
+	if (!thisComp.okay) return;
+
 	SectorHerd( thisComp, focus );
 }
 

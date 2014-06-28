@@ -60,23 +60,26 @@ void PathMoveComponent::OnAdd( Chit* chit, bool init )
 	avoidForceApplied = false;
 	forceCount = 0;
 	path.Clear();
-	
+
 	// Serialization case:
-	// if there is a queue location, use that, else use the current location.
-	if ( queued.pos.x > 0 ) {
-		QueueDest( queued.pos, &queued.heading, &queued.sectorPort );
-	}
-	else if ( dest.pos.x > 0 ) {
-		QueueDest( dest.pos, &dest.heading, &dest.sectorPort );
+	// If there is a queue location, use that, else use the current location.
+	// But only do this if we are the main component.
+	if (parentChit->GetMoveComponent() == this) {
+		if (queued.pos.x > 0) {
+			QueueDest(queued.pos, &queued.heading, &queued.sectorPort);
+		}
+		else if (dest.pos.x > 0) {
+			QueueDest(dest.pos, &dest.heading, &dest.sectorPort);
+		}
 	}
 }
 
 
 void PathMoveComponent::OnRemove()
 {
-	if ( !path.Empty() ) {
-		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
-	}
+//	if ( !path.Empty() ) {
+//		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
+//	}
 	super::OnRemove();
 }
 

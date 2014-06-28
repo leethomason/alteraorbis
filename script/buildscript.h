@@ -54,6 +54,14 @@ public:
 		KIOSK_C,
 		KIOSK_S,
 
+		CIRCUIT_FAB,
+		SWITCH,
+		POWER,
+		ZAPPER,
+		BEND,
+		SPLIT,
+		TRANSISTOR,
+
 		NUM_OPTIONS,
 
 		GROUP_UTILITY = 0,

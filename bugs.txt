@@ -145,6 +145,7 @@ d animation generation
 				- turret (or not circuit? building? similar to battery...) (rot)
 				- cage
 				- circuit art
+				- trigger plate
 
 				- fab plant
 				- circuit building ui

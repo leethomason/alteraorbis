@@ -106,7 +106,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetVisible(false);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Denizen", "Agronomy", "Economy", "Visitor"
+		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );

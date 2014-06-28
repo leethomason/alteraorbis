@@ -32,6 +32,14 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Media", "kiosk.m",			4, "Attracts Visitors searching for media.", "Requires a Temple" },
 	{ "Commerce", "kiosk.c",		4, "Attracts Visitors searching for commerce.", "Requires a Temple" },
 	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social.", "Requires a Temple" },
+	// Circuits
+	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
+	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab" },
+	{ "Power", "power",				5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
+	{ "Zapper", "",					5, "FIXME.", "Requires a Circuit Fab" },
+	{ "Bend", "",					5, "FIXME.", "Requires a Circuit Fab" },
+	{ "Split", "",					5, "FIXME.", "Requires a Circuit Fab" },
+	{ "Transistor", "",				5, "FIXME.", "Requires a Circuit Fab" },
 };
 
 

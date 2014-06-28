@@ -178,7 +178,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 {
 	Chit* chit = Context()->chitBag->GetChit(target);
 	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent()) {
-		GLASSERT(parentChit->StackedMoveComponent());
+		GLASSERT(parentChit->StackedMoveComponent()); // not required, but should have a GameMoveComponent??
 		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 		return VERY_LONG_TICK;
 	}

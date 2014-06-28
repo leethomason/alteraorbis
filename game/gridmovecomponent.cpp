@@ -36,6 +36,12 @@ void GridMoveComponent::DebugStr( grinliz::GLString* str )
 
 void GridMoveComponent::Serialize( XStream* xs )
 {
+	if (state == TRAVELLING) {
+		if (Context() && parentChit && parentChit->GetSpatialComponent()) {
+			GLASSERT(Context()->worldMap->GetWorldGrid(parentChit->GetSpatialComponent()->GetPosition2DI()).IsGrid());
+		}
+	}
+
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, state );
 	XARC_SER( xs, destSectorPort.sector );
@@ -148,6 +154,7 @@ int GridMoveComponent::DoTick( U32 delta )
 			GridBlock destBlock = worldInfo.GetGridBlock( destSectorPort.sector, destSectorPort.port );
 			GLASSERT(!destBlock.IsZero());
 			Vector2F destPt = { (float)destBlock.x, (float)destBlock.y };
+			GLASSERT(Context()->worldMap->GetWorldGrid(sc->GetPosition2DI()).IsGrid());
 			
 			Rectangle2F destRect;
 			destRect.min = destRect.max = destPt;

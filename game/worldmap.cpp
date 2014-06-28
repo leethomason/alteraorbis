@@ -1118,6 +1118,7 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 													BlockType type,
 													Vector2F* outPos )
 {
+	GLASSERT(BoundsF().Contains(inPos));
 	*outPos = inPos;
 
 	// If blocked on input, no fixing that:
@@ -1142,6 +1143,7 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 		GLASSERT(false);	// shouldn't happen - we weren't blocked at start of function.
 		*outPos = ToWorld2F(FindPassable(pos2i.x, pos2i.y));
 	}
+	GLASSERT(BoundsF().Contains(*outPos));
 
 	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
 }
@@ -2227,7 +2229,7 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					if (wg.RockHeight()) {
 						h = (float)wg.RockHeight();
 						wall[0] = wall[1] = wall[2] = wall[3] = 0;
-						PushVoxel(ROCK, (float)x, (float)y, h, wall);
+						PushVoxel((wg.RockType() == WorldGrid::ROCK ? ROCK : ICE), (float)x, (float)y, h, wall);
 					}
 				}
 				else if ( wg.Magma() ) {

@@ -198,6 +198,15 @@
         cost="40"
         zoneCreate="industrial" />
 
+  <item name="circuitFab"
+        resource="circuitFab"
+        flags="DAMAGE_UNDER_WATER"
+        procedural="team"
+        size="1"
+        mass="100"
+        cost="100"
+        zoneCreate="industrial" />
+
   <item name="guardpost"
         resource="guardpost"
         flags="DAMAGE_UNDER_WATER"
