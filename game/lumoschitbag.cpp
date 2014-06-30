@@ -234,7 +234,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
-	msc->SetBuilding(true, porch != 0);
+	msc->SetBuilding(true, porch != 0, 0);
 	chit->Add(msc);
 
 	chit->Add(new RenderComponent(rootItem.ResourceName()));
