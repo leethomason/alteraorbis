@@ -149,7 +149,7 @@ void PlantScript::DoTick(U32 delta)
 		}
 		// Nutrient depletion? Too packed in?
 		if (same == 4) {
-			growth *= 0.5f;
+			growth *= 0.4f;
 		}
 
 		// Are we under water?

@@ -112,7 +112,6 @@
   <model filename="kiosk.ac" modelName="kiosk.s"    origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model assetName="vault"   filename="vault2.ac"   origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
   <model assetName="factory" filename="factory.ac"  origin="0 0 0"         shading="flat" polyRemoval="pre" />
-  <model assetName="power"   filename="power1.ac"    origin="0 0 0"        shading="flat" polyRemoval="pre" />
   <model modelName="pyramid0" filename="pyramid.ac"    origin="-1 0 -1"    shading="flat" polyRemoval="pre" />
   <model modelName="pyramid1" filename="pyramid.ac"    origin="2 0 -1"     shading="flat" polyRemoval="pre" />
   <model modelName="pyramid2" filename="pyramid.ac"    origin="5 0 -1"     shading="flat" polyRemoval="pre" />
@@ -133,6 +132,10 @@
 
   <model filename="spark.ac"    assetName="spark"                          shading="flat" />
   <model filename="electron.ac" assetName="charge"                         shading="flat" />
+  <model filename="gateOpen.ac"                                            shading="flat" />
+  <model filename="gateClosed.ac"                                          shading="flat" />
+  <model filename="turret2.ac"                                             shading="flat" />
+  <model assetName="power"   filename="power1.ac"    origin="0 0 0"        shading="flat" />
 
   <!-- animation v2
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
