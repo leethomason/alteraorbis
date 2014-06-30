@@ -39,7 +39,7 @@ public:
 
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y, int cx, int cy );
-	void SetBuilding( bool b, bool hasPorch );
+	void SetBuilding( bool b, bool hasPorch, int circuit );
 	// -- end before OnAdd warning --
 
 	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
@@ -54,6 +54,7 @@ public:
 	grinliz::Rectangle2I PorchPos() const;
 	bool HasPorch() const { return hasPorch > 0; }
 	int PorchType() const { return hasPorch;  }
+	int CircuitType() const { return hasCircuit; }
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;
@@ -66,6 +67,7 @@ private:
 	int						mode;
 	bool					building;	// is this a building?
 	int						hasPorch;	// if a building, does it have a porch?
+	int						hasCircuit;	
 	grinliz::Rectangle2I	bounds;
 };
 

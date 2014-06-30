@@ -67,11 +67,12 @@ void MapSpatialComponent::SetMode( int newMode )
 }
 
 
-void MapSpatialComponent::SetBuilding( bool b, bool p )
+void MapSpatialComponent::SetBuilding( bool b, bool p, int circuit )
 {
 	GLASSERT( !parentChit );
 	building = b;
 	hasPorch = p ? 1 : 0;
+	hasCircuit = circuit;
 }
 
 
@@ -130,6 +131,10 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 	if ( parentChit ) {
 		UpdatePorch(false);
 	}
+	if (hasCircuit) {
+		Vector2I p = this->GetPosition2DI();
+		Context()->worldMap->SetCircuitRotation(p.x, p.y, LRint(this->GetYRotation() / 90.0f));
+	}
 }
 
 
@@ -144,6 +149,10 @@ void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 	if ( mode == GRID_BLOCKED ) {
 		UpdateBlock( Context()->worldMap );
 	}
+	if (hasCircuit) {
+		Vector2I p = this->GetPosition2DI();
+		Context()->worldMap->SetCircuit(p.x, p.y, hasCircuit);
+	}
 }
 
 
@@ -152,6 +161,10 @@ void MapSpatialComponent::OnRemove()
 	const ChitContext* context = Context();
 	LumosChitBag* chitBag = context->chitBag;
 	
+	if (hasCircuit) {
+		Vector2I p = this->GetPosition2DI();
+		Context()->worldMap->SetCircuit(p.x, p.y, 0);
+	}
 	if ( building ) {
 		Vector2I pos = GetPosition2DI();
 		chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
@@ -175,6 +188,7 @@ void MapSpatialComponent::Serialize( XStream* xs )
 	XARC_SER( xs, mode );
 	XARC_SER( xs, building );
 	XARC_SER( xs, hasPorch );
+	XARC_SER(xs, hasCircuit);
 	XARC_SER( xs, bounds );
 	super::Serialize( xs );
 	this->EndSerialize( xs );
