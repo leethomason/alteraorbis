@@ -131,6 +131,9 @@ public:
 	void SetCircuit(int x, int y, int circuit) {
 		grid[INDEX(x, y)].SetCircuit(circuit);
 	}
+	int Circuit(int x, int y) {
+		return grid[INDEX(x, y)].Circuit();
+	}
 	int CircuitRotation(int x, int y) {
 		return grid[INDEX(x, y)].CircuitRot();
 	}

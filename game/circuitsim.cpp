@@ -71,6 +71,14 @@ void CircuitSim::CreateElectron(const grinliz::Vector2I& pos, int rot4, int char
 }
 
 
+int CircuitSim::NameToID(grinliz::IString name)
+{
+	if (name == "battery") return CIRCUIT_BATTERY;
+	else if (name == "powerUp") return CIRCUIT_POWER_UP;
+	return CIRCUIT_NONE;
+}
+
+
 void CircuitSim::DoTick(U32 delta)
 {
 	// This is a giant "mutate what we are iterating" problem.

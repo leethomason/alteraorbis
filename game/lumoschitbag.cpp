@@ -16,6 +16,7 @@
 #include "visitorstatecomponent.h"
 #include "lumosmath.h"
 #include "lumosgame.h"	// FIXME: namegen should be in script
+#include "circuitsim.h"
 
 #include "../scenes/characterscene.h"
 
@@ -227,6 +228,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	rootItem.keyValues.Get(ISC::size, &cx);
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
+	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
 
 	// FIXME: remove this check, because fluid can trigger?
 	GLASSERT(context->worldMap->IsPassable(pos.x, pos.y));
@@ -234,7 +236,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
-	msc->SetBuilding(true, porch != 0, 0);
+	msc->SetBuilding(true, porch != 0, circuit);
 	chit->Add(msc);
 
 	chit->Add(new RenderComponent(rootItem.ResourceName()));

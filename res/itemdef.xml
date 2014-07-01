@@ -193,6 +193,7 @@
         porch="0"
         procedural="team"
         script="BatteryComponent"
+        circuit="battery"
         size="1"
         mass="150"
         cost="40"

@@ -654,6 +654,8 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 		}
 		else if (buildActive == BuildScript::ROTATE) {
 			Chit* chit = sim->GetChitBag()->QueryBuilding(pos2i);
+			int circuit = sim->GetWorldMap()->Circuit(pos2i.x, pos2i.y);
+
 			if (chit) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 				if (msc && msc->Building()) {
@@ -662,6 +664,9 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 					r = NormalizeAngleDegrees(r);
 					msc->SetYRotation(r);
 				}
+			}
+			else if (circuit) {
+				sim->GetWorldMap()->SetCircuitRotation(pos2i.x, pos2i.y, sim->GetWorldMap()->CircuitRotation(pos2i.x, pos2i.y) + 1);
 			}
 		}
 		else {

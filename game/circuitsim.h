@@ -5,12 +5,14 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 
 class WorldMap;
 class Engine;
 class Model;
 class LumosChitBag;
 
+// WARNING: partiall duplicated in BuildScript.h
 enum {
 	CIRCUIT_NONE,
 	CIRCUIT_SWITCH,
@@ -20,6 +22,7 @@ enum {
 	CIRCUIT_FORK_2,
 	CIRCUIT_TRANSISTOR_A,
 	CIRCUIT_TRANSISTOR_B,
+	NUM_CIRCUITS
 };
 
 
@@ -31,6 +34,8 @@ public:
 
 	void Activate(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
+
+	static int NameToID(grinliz::IString name);
 
 private:
 	struct Electron {

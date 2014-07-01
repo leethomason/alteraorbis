@@ -366,7 +366,11 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 		return true;	
 	}
 
-	if (BuildScript::IsClear(item.buildScriptID)) {
+	if (BuildScript::IsCircuit(item.buildScriptID)) {
+		GLASSERT(buildData.circuit);
+		return (wg.Circuit() == buildData.circuit);
+	}
+	else if (BuildScript::IsClear(item.buildScriptID)) {
 		if (wg.Plant()) {
 			return false;
 		}

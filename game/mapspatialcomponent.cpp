@@ -27,6 +27,7 @@ MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 	mode = GRID_IN_USE;
 	building = false;
 	hasPorch = 0;
+	hasCircuit = 0;
 	nextBuilding = 0;
 }
 

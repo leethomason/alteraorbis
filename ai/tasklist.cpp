@@ -12,6 +12,7 @@
 #include "../game/team.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/reservebank.h"
+#include "../game/circuitsim.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -266,6 +267,9 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 					}
 					else if ( task->buildScriptID == BuildScript::PAVE ) {
 						worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->Team()%3+1 );
+					}
+					else if (buildData.circuit) {
+						worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the

@@ -108,14 +108,10 @@ void NavTest2Scene::LoadMap()
 		chit->Add( msc );
 		chit->Add( new RenderComponent( "unitCube" ));
 	}
+
 	for( int i=0; i<features.Size(); ++i ) {
-		Chit* chit = chitBag->NewChit();
 		const Vector2I& v = features[i];
-		MapSpatialComponent* msc = new MapSpatialComponent();
-		msc->SetMapPosition( v.x, v.y, 1, 1 );
-		msc->SetMode( GRID_BLOCKED );
-		chit->Add( msc );
-		chit->Add( new RenderComponent( "tree" ));
+		map->SetPlant(v.x, v.y, 4, 3);
 	}
 
 	clock_t start = clock();

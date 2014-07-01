@@ -107,6 +107,7 @@ public:
 	static grinliz::IString size;
 	static grinliz::IString accuracy;
 	static grinliz::IString porch;
+	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
 
 	// double underscore -> '.'

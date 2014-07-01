@@ -1,5 +1,6 @@
 #include "buildscript.h"
 #include "itemscript.h"
+#include "../game/circuitsim.h"
 
 #include "../grinliz/glstringutil.h"
 
@@ -34,12 +35,12 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social.", "Requires a Temple" },
 	// Circuits
 	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
-	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab" },
+	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
 	{ "Power", "power",				5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
-	{ "Zapper", "",					5, "FIXME.", "Requires a Circuit Fab" },
-	{ "Bend", "",					5, "FIXME.", "Requires a Circuit Fab" },
-	{ "Split", "",					5, "FIXME.", "Requires a Circuit Fab" },
-	{ "Transistor", "",				5, "FIXME.", "Requires a Circuit Fab" },
+	{ "Zapper", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
+	{ "Bend", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_BEND },
+	{ "Split", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
+	{ "Transistor", "",				5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
 };
 
 

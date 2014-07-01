@@ -76,6 +76,7 @@ IString IStringConst::cost;
 IString IStringConst::size;
 IString IStringConst::accuracy;
 IString IStringConst::porch;
+IString IStringConst::circuit;
 IString IStringConst::nameGen;
 IString IStringConst::kiosk__n;
 IString IStringConst::kiosk__m;
@@ -158,6 +159,7 @@ void IStringConst::Init()
 	size = StringPool::Intern( "size", true );
 	accuracy = StringPool::Intern( "accuracy", true );
 	porch = StringPool::Intern( "porch", true );
+	circuit = StringPool::Intern( "circuit", true );
 	nameGen = StringPool::Intern( "nameGen", true );
 	kiosk__n = StringPool::Intern( "kiosk.n", true );
 	kiosk__m = StringPool::Intern( "kiosk.m", true );
