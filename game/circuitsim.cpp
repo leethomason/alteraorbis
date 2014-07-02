@@ -15,18 +15,19 @@ using namespace grinliz;
 static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 4.0f;
 static const float DAMAGE_PER_CHARGE = 15.0f;
 
-static const Vector2F DIR_F4[4] = {
-	{ 1, 0 },
+static const Vector2I DIR_I4[4] = {
 	{ 0, -1 },
 	{ -1, 0 },
 	{ 0, 1 },
+	{ 1, 0 },
 };
 
-static const Vector2I DIR_I4[4] = {
-	{ 1, 0 },
-	{ 0, -1 },
-	{ -1, 0 },
-	{ 0, 1 },
+
+static const Vector2F DIR_F4[4] = {
+	{ (float)DIR_I4[0].x, (float)DIR_I4[0].y },
+	{ (float)DIR_I4[1].x, (float)DIR_I4[1].y },
+	{ (float)DIR_I4[2].x, (float)DIR_I4[2].y },
+	{ (float)DIR_I4[3].x, (float)DIR_I4[3].y },
 };
 
 
@@ -63,7 +64,7 @@ void CircuitSim::Activate(const grinliz::Vector2I& pos)
 void CircuitSim::CreateElectron(const grinliz::Vector2I& pos, int rot4, int charge)
 {
 	Model* model = engine->AllocModel( charge ? "charge" : "spark");
-	Vector2F start = ToWorld2F(pos) + 0.1f * DIR_F4[rot4];
+	Vector2F start = ToWorld2F(pos);
 	model->SetPos(ToWorld3F(pos));
 
 	Electron e = { charge, rot4, 0.01f, pos, model };
@@ -163,7 +164,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pe->pos)];
 	bool sparkConsumed = false;
-	int dir = (pe->dir - wg.CircuitRot() + 4) & 3; // Test: correct?
+	int dir = (pe->dir - wg.CircuitRot() + 4) & 3;
 
 	switch (wg.Circuit()) {
 		case CIRCUIT_SWITCH: {
@@ -203,23 +204,16 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		}
 		break;
 
-		/* in the voxel map: (remember these are DIRECTIONS...opposite of location)
-			    3
-			<-2  0->
-			    1
-		*/
 		case CIRCUIT_BEND:
-		if (dir == 0) pe->dir = ((pe->dir + 3) & 3);
-		else if (dir == 1) pe->dir = ((pe->dir + 1) & 3);
+		if (dir == 0) pe->dir = ((pe->dir + 1) & 3);
+		else if (dir == 3) pe->dir = ((pe->dir + 3) & 3);
 		break;
 
 		case CIRCUIT_FORK_2:
 		{
-			if (pe->charge == 0 || pe->charge > 1) {
-				CreateElectron(pe->pos, ((pe->dir + 1) & 3), pe->charge/2);
-				CreateElectron(pe->pos, ((pe->dir + 3) & 3), pe->charge/2);
-				sparkConsumed = true;
-			}
+			CreateElectron(pe->pos, ((pe->dir + 1) & 3), pe->charge/2);
+			CreateElectron(pe->pos, ((pe->dir + 3) & 3), pe->charge/2);
+			sparkConsumed = true;
 		}
 		break;
 
@@ -232,7 +226,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 				sparkConsumed = true;
 			}
 			else if (pe->charge && dir == 2) {
-				pe->dir = pe->dir + ((wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? 1 : 3);
+				pe->dir = pe->dir + ((wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? 3 : 1);
 				pe->dir = pe->dir & 3;
 			}
 			else {
