@@ -335,6 +335,8 @@ void Chit::DeRez()
 	GameItem* item = GetItem();
 	if (item) {
 		if ((item->flags & GameItem::INDESTRUCTABLE) == 0) {
+			// Since this is removing...don't blow up.
+			item->flags &= ~GameItem::EXPLODES;
 			item->hp = 0;
 			SetTickNeeded();
 			return;

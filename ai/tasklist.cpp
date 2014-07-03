@@ -230,18 +230,14 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 			const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 
 			if ( task->buildScriptID == BuildScript::CLEAR ) {
-				if ( wg.RockHeight() || wg.Plant()) {
-					worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
-					worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
-				}
-//				else {
-//					Chit* found = chitBag->QueryRemovable( task->pos2i );
-//					if ( found ) {
-//						found->DeRez();
-//					}
-//				}
-				if ( wg.Pave() ) {
-					worldMap->SetPave( task->pos2i.x, task->pos2i.y, 0 );
+				worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
+				worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
+				worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
+				worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
+
+				Chit* found = chitBag->QueryRemovable( task->pos2i );
+				if ( found ) {
+					found->DeRez();
 				}
 				Remove();
 			}

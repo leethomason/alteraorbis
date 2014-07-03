@@ -342,7 +342,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	if ( action == BuildScript::CLEAR ) {
 		if ( passable == size*size && removable == 0 ) {
 			// nothing to clear. (unless paved)
-			return wg.Pave() > 0;
+			return wg.Pave() || wg.Circuit();
 		}
 	}
 	else {
@@ -377,7 +377,7 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 		if (context->chitBag->QueryRemovable(item.pos)) {
 			return false; // need to clear building
 		}
-		if (wg.RockHeight() || wg.Pave() ) {
+		if (wg.RockHeight() || wg.Pave() || wg.Circuit()) {
 			return false; // need to clear rock or pave
 		}
 		return true;
