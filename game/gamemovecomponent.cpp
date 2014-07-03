@@ -77,6 +77,8 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floating)
 {
 	static const int N = 9;
+	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
+
 	WorldGrid wg[N];
 	Vector2I pos2i = ToWorld2I(*pos);
 	Vector2I dir[N];

@@ -126,9 +126,10 @@ void PlantScript::DoTick(U32 delta)
 		}
 
 		// ---- Adjacent --- //
-		static const Vector2I check[4] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		static const int NADJ = 4;
+		static const Vector2I check[NADJ] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 		int same = 0;
-		for (int i = 0; i<GL_C_ARRAY_SIZE(check); ++i) {
+		for (int i = 0; i<NADJ; ++i) {
 			tap = pos2i + check[i];
 			const WorldGrid& wgAdj = worldMap->GetWorldGrid(tap.x, tap.y);
 			if (wgAdj.Plant() == wg.Plant()) {
@@ -148,8 +149,8 @@ void PlantScript::DoTick(U32 delta)
 			}
 		}
 		// Nutrient depletion? Too packed in?
-		if (same == 4) {
-			growth *= 0.4f;
+		if (same == NADJ) {
+			growth *= 0.25f;
 		}
 
 		// Are we under water?
