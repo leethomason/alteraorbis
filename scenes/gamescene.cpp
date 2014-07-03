@@ -105,6 +105,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
+
+	//placeFlag.Init(&gamui2D, game->GetButtonLook(0));
+	//placeFlag.SetText("Flag");
+	//placeFlag.SetVisible(false);
+
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
 	};
@@ -141,7 +146,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	buildDescription.Init(&gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "View", "Build" };
+		static const char* TEXT[NUM_UI_MODES] = { "View", "Build", "Control" };
 		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
 		uiMode[i].SetText( TEXT[i] );
 		uiMode[0].AddToToggleGroup( &uiMode[i] );
@@ -236,6 +241,7 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+	//layout.PosAbs(&placeFlag, 4, 1);
 
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
@@ -1529,6 +1535,7 @@ void GameScene::DoTick( U32 delta )
 	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
 	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
 	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
+	//placeFlag.SetVisible(uiMode[UI_VIEW].Down());
 
 	sim->GetEngine()->RestrictCamera( 0 );
 

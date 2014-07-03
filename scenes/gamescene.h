@@ -102,6 +102,7 @@ private:
 	enum {
 		UI_VIEW,
 		UI_BUILD,
+		UI_CONTROL,
 		NUM_UI_MODES
 	};
 
