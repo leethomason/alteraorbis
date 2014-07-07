@@ -302,6 +302,7 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	case ChitMsg::CHIT_DESTROYED_START:
 	case ChitMsg::CHIT_DESTROYED_END:
 	case ChitMsg::CHIT_DAMAGE:
+	case ChitMsg::TRIGGER_DETECTOR_CIRCUIT:
 		Context()->chitBag->SendMessage(this, msg);
 		break;
 

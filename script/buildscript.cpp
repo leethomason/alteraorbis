@@ -40,6 +40,10 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Zapper", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
 	{ "Bend", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_BEND },
 	{ "Split", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
+	{ "Gate", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_ICE },
+	{ "Stop", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_STOP },
+	{ "Small Detector", "",			5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_DETECT_SMALL_ENEMY },
+	{ "Large Detector", "",			5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_DETECT_LARGE_ENEMY },
 	{ "Transistor", "",				5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
 };
 

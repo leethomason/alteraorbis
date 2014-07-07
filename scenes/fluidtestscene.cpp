@@ -34,7 +34,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), lumosGame(game), 
 	engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
 	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
-											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Transistor", "Rotate" };
+											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Ice", "Stop", "Detect\nSmall", "Detect\nLarge", "Transistor", "Rotate" };
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -114,7 +114,10 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				worldMap->SetCircuitRotation(pos2i.x, pos2i.y, rot+1);
 			}
 			else if (wg.Circuit() == CIRCUIT_SWITCH) {
-				circuitSim->Activate(pos2i);
+				circuitSim->TriggerSwitch(pos2i);
+			}
+			else if (wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY || wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY) {
+				circuitSim->TriggerDetector(pos2i);
 			}
 			else {
 				for (int i = BUTTON_SWITCH; i < NUM_BUTTONS; ++i) {

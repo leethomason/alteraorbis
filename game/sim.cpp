@@ -37,6 +37,7 @@
 #include "reservebank.h"
 #include "team.h"
 #include "lumosmath.h"
+#include "circuitsim.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -75,6 +76,8 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	avatarTimer = 0;
 	currentVisitor = 0;
 
+	circuitSim  = new CircuitSim(worldMap, engine, chitBag);
+
 	random.SetSeedFromTime();
 	plantScript = new PlantScript(chitBag->Context());
 
@@ -84,6 +87,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 Sim::~Sim()
 {
+	delete circuitSim;
 	delete plantScript;
 	delete visitors;
 	delete weather;
@@ -407,6 +411,7 @@ void Sim::DoTick( U32 delta )
 {
 	worldMap->DoTick( delta, chitBag );
 	plantScript->DoTick(delta);
+	circuitSim->DoTick(delta);
 	chitBag->DoTick( delta );
 
 	// From the CHIT_DESTROYED_START we have a list of

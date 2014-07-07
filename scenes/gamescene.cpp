@@ -105,7 +105,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
-
 	//placeFlag.Init(&gamui2D, game->GetButtonLook(0));
 	//placeFlag.SetText("Flag");
 	//placeFlag.SetVisible(false);
@@ -597,15 +596,16 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	Vector3F atModel = { 0, 0, 0 };
 	Vector3F plane = { 0, 0, 0 };
 	ModelVoxel mv = ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
-	if (plane.x > 0 && plane.z > 0 && plane.x < float(map->Width()) && plane.z < float(map->Width())) {
-		// okay
-	}
-	else {
-		return;	// outside of world. don't do testing.
-	}
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
+	if (!map->Bounds().Contains(plane2i)) return;
+
 	const BuildData& buildData = buildScript.GetData(buildActive);
 	BuildAction(plane2i);
+
+	if (coreScript && uiMode[UI_CONTROL].Down()) {
+		coreScript->ToggleFlag(plane2i);
+		return;
+	}
 
 	if (mv.VoxelHit()) {
 		if (AvatarSelected()) {

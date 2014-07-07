@@ -10,9 +10,11 @@
 #include "../script/battlemechanics.h"
 #include "../script/batterycomponent.h"
 
+#include "../xegame/spatialcomponent.h"
+
 using namespace grinliz;
 
-static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 4.0f;
+static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 6.0f;
 static const float DAMAGE_PER_CHARGE = 15.0f;
 
 static const Vector2I DIR_I4[4] = {
@@ -39,6 +41,9 @@ CircuitSim::CircuitSim(WorldMap* p_worldMap, Engine* p_engine, LumosChitBag* p_c
 	GLASSERT(worldMap);
 	GLASSERT(engine);
 	// the chitBag can be null.
+	if (chitBag) {
+		chitBag->AddListener(this);
+	}
 }
 
 
@@ -48,14 +53,37 @@ CircuitSim::~CircuitSim()
 		engine->FreeModel(electrons[i].model);
 	}
 	electrons.Clear();
+	if (chitBag) {
+		chitBag->RemoveListener(this);
+	}
 }
 
 
-void CircuitSim::Activate(const grinliz::Vector2I& pos)
+void CircuitSim::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	if (msg.ID() == ChitMsg::TRIGGER_DETECTOR_CIRCUIT) {
+		if (chit->GetSpatialComponent()) {
+			TriggerSwitch(chit->GetSpatialComponent()->GetPosition2DI());
+		}
+	}
+}
+
+
+void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
 
 	if (wg.Circuit() == CIRCUIT_SWITCH) {
+		CreateElectron(pos, wg.CircuitRot(), 0);
+	}
+}
+
+
+void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
+{
+	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
+
+	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
 		CreateElectron(pos, wg.CircuitRot(), 0);
 	}
 }
@@ -169,7 +197,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 	switch (wg.Circuit()) {
 		case CIRCUIT_SWITCH: {
 			// Activates the switch., consumes the charge.
-			Activate(pe->pos);
+			TriggerSwitch(pe->pos);
 			sparkConsumed = true;
 		}
 		break;
@@ -182,13 +210,15 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 					if (power) {
 						BatteryComponent* battery = (BatteryComponent*)power->GetComponent("BatteryComponent");
 						if (battery) {
-							pe->charge = battery->UseCharge();
+							pe->charge += battery->UseCharge();
 						}
 					}
 				}
 				else {
 					pe->charge += 4;
 				}
+				pe->dir = wg.CircuitRot();
+				dir = 0;	// so we don't go into the "explode" case.
 			}
 			if (pe->charge > 8 || (dir && pe->charge)) {
 				// too much power, or power from the side.
@@ -213,6 +243,22 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		{
 			CreateElectron(pe->pos, ((pe->dir + 1) & 3), pe->charge/2);
 			CreateElectron(pe->pos, ((pe->dir + 3) & 3), pe->charge/2);
+			sparkConsumed = true;
+		}
+		break;
+
+		case CIRCUIT_ICE:
+		{
+			sparkConsumed = true;
+			if (pe->charge) {
+				const WorldGrid& wg = worldMap->GetWorldGrid(pe->pos);
+				worldMap->SetRock(pe->pos.x, pe->pos.y, wg.RockHeight() ? 0 : 1, false, WorldGrid::ICE);
+			}
+		}
+		break;
+
+		case CIRCUIT_STOP:
+		{
 			sparkConsumed = true;
 		}
 		break;
@@ -265,7 +311,9 @@ void CircuitSim::Explosion(const grinliz::Vector2I& pos, int charge, bool circui
 {
 	Vector3F pos3 = ToWorld3F(pos);
 	DamageDesc dd = { float(charge) * DAMAGE_PER_CHARGE, GameItem::EFFECT_SHOCK };
-	BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
+	if (chitBag) {
+		BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
+	}
 	if (circuitDestroyed) {
 		worldMap->SetCircuit(pos.x, pos.y, 0);
 	}

@@ -6,13 +6,16 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../xegame/chit.h"
 
 class WorldMap;
 class Engine;
 class Model;
 class LumosChitBag;
 
-// WARNING: partiall duplicated in BuildScript.h
+// WARNING: partial duplicate in BuildScript.h
+// WARNING: partial duplicate in FluidTestScene.h
+// WARNING: also need to add rendering in the WorldMap.cpp
 enum {
 	CIRCUIT_NONE,
 	CIRCUIT_SWITCH,
@@ -20,20 +23,27 @@ enum {
 	CIRCUIT_POWER_UP,
 	CIRCUIT_BEND,
 	CIRCUIT_FORK_2,
-	CIRCUIT_TRANSISTOR_A,
+	CIRCUIT_ICE,
+	CIRCUIT_STOP,
+	CIRCUIT_DETECT_SMALL_ENEMY,
+	CIRCUIT_DETECT_LARGE_ENEMY,
+	CIRCUIT_TRANSISTOR_A,	// needs to be last: some special code that there is one transistor in 2 states.
 	CIRCUIT_TRANSISTOR_B,
 	NUM_CIRCUITS
 };
 
 
-class CircuitSim
+class CircuitSim : public IChitListener
 {
 public:
 	CircuitSim(WorldMap* worldMap, Engine* engine, LumosChitBag* chitBag);
 	~CircuitSim();
 
-	void Activate(const grinliz::Vector2I& pos);
+	void TriggerSwitch(const grinliz::Vector2I& pos);
+	void TriggerDetector(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
+
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	static int NameToID(grinliz::IString name);
 

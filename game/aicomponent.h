@@ -135,6 +135,7 @@ private:
 	bool ThinkFruitCollect( const ComponentSet& thisComp );
 	bool ThinkDelivery( const ComponentSet& thisComp );
 	bool ThinkRepair(const ComponentSet& thisComp);
+	bool ThinkFlag(const ComponentSet& thisComp);
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);

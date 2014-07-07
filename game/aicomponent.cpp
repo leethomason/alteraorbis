@@ -24,6 +24,7 @@
 #include "sectorport.h"
 #include "workqueue.h"
 #include "team.h"
+#include "circuitsim.h"
 
 // move to tasklist file
 #include "lumoschitbag.h"
@@ -1759,6 +1760,30 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::ThinkFlag(const ComponentSet& thisComp)
+{
+	if (parentChit->PlayerControlled()) {
+		return false;
+	}
+
+	// Flags are done by denizens, NOT workers.
+	bool usesBuilding = (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) != 0;
+	if (usesBuilding) {
+		CoreScript* coreScript = CoreScript::GetCore(thisComp.spatial->GetSector());
+		if (coreScript && coreScript->IsCitizen(parentChit->ID())) {
+			Vector2I flag = coreScript->GetFlag();
+			if (!flag.IsZero()) {
+				if (!coreScript->HasTask(flag)) {
+					taskList.Push(Task::MoveTask(flag));
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
 bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
 {
 	if ( parentChit->PlayerControlled() ) {
@@ -1981,6 +2006,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		Vector2I porch = { 0, 0 };
 		Rectangle2I porchRect = msc->PorchPos();
 		for (Rectangle2IIterator it(porchRect); !it.Done(); it.Next()) {
+			// FIXME: is this the correct coreScript? The home core vs. the local core.
 			if (!coreScript->HasTask(it.Pos())) {
 				porch = it.Pos();
 				break;
@@ -2624,9 +2650,22 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 }
 
 
-
 void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 {
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+
+	// Circuits.
+	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
+	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
+		float mass = thisComp.item->mass;
+		if ((wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY) || (mass > 100)) {
+			ChitMsg msg(ChitMsg::TRIGGER_DETECTOR_CIRCUIT);
+			parentChit->SendMessage(msg);
+		}
+	}
+
+	// Check for morale-changing items (tombstones, at this writing.)
 	if ( aiMode == NORMAL_MODE ) {
 		if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
 			RenderComponent* rc = parentChit->GetRenderComponent();

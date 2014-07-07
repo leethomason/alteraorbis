@@ -24,6 +24,7 @@ class WorldMap;
 class WorkQueue;
 class LumosChitBag;
 class CoreScript;
+class Model;
 
 struct CoreInfo
 {
@@ -71,6 +72,11 @@ public:
 	int    FindCitizenIndex( Chit* chit ); 
 	int  NumCitizens();
 
+	void AddFlag(const grinliz::Vector2I& pos);
+	void RemoveFlag(const grinliz::Vector2I& pos);
+	void ToggleFlag(const grinliz::Vector2I& pos);
+	grinliz::Vector2I GetFlag();
+
 	bool InUse() const;
 
 	WorkQueue* GetWorkQueue()		{ return workQueue; }
@@ -86,7 +92,7 @@ public:
 
 	int nElixir;
 
-	// Testing: each task pushes a position for that task,
+	// Each task pushes a position for that task,
 	// and removes it when done/cancelled. (Some careful
 	// code there.) May be a simpler way to see if
 	// someone is assigned to a task at location. However,
@@ -127,6 +133,15 @@ private:
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
 	grinliz::CDynArray< grinliz::Vector2I > tasks;
+	
+	struct Flag {
+		grinliz::Vector2I pos;
+		Model* model;				// Not serialized!
+
+		void Serialize(XStream* xs);
+		const bool operator==(const Flag& rhs) { return rhs.pos == pos; }
+	};
+	grinliz::CDynArray< Flag > flags;
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 };

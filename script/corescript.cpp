@@ -4,6 +4,7 @@
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
+#include "../engine/loosequadtree.h"
 
 #include "../game/census.h"
 #include "../game/lumoschitbag.h"
@@ -92,6 +93,13 @@ CoreScript::~CoreScript()
 }
 
 
+void CoreScript::Flag::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "Flag");
+	XARC_SER(xs, pos);
+	XarcClose(xs);
+}
+
 
 void CoreScript::Serialize(XStream* xs)
 {
@@ -114,6 +122,7 @@ void CoreScript::Serialize(XStream* xs)
 		XarcSet(xs, "citizens.size", citizens.Size());
 	}
 	XARC_SER_ARR(xs, citizens.Mem(), citizens.Size());
+	XARC_SER_CARRAY(xs, flags);
 
 	spawnTick.Serialize(xs, "spawn");
 	scoreTicker.Serialize(xs, "score");
@@ -145,6 +154,12 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	coreInfoArr[index].coreScript = this;
 
 	aiTicker.Randomize(parentChit->random.Rand());
+
+	for (int i = 0; i < flags.Size(); ++i) {
+		Model* m = Context()->engine->AllocModel("flag");
+		m->SetPos(ToWorld3F(flags[i].pos));
+		flags[i].model = m;
+	}
 }
 
 
@@ -156,6 +171,12 @@ void CoreScript::OnRemove()
 
 	delete workQueue;
 	workQueue = 0;
+
+	for (int i = 0; i < flags.Size(); ++i) {
+		Context()->engine->FreeModel(flags[i].model);
+		flags[i].model = 0;
+	}
+
 	super::OnRemove();
 }
 
@@ -229,6 +250,51 @@ int CoreScript::NumCitizens()
 		}
 	}
 	return count;
+}
+
+
+void CoreScript::AddFlag(const Vector2I& pos)
+{
+	Flag f = { pos, 0 };
+	if (flags.Find(f) < 0) {
+		f.model = Context()->engine->AllocModel("flag");
+		f.model->SetPos(ToWorld3F(pos));
+		flags.Push(f);
+	}
+}
+
+
+void CoreScript::ToggleFlag(const Vector2I& pos)
+{
+	Flag f = { pos, 0 };
+	int i = flags.Find(f);
+	if (i >= 0) 
+		RemoveFlag(pos);
+	else 
+		AddFlag(pos);
+}
+
+
+void CoreScript::RemoveFlag(const Vector2I& pos)
+{
+	Flag f = { pos, 0 };
+	int i = flags.Find(f);
+	if (i >= 0) {
+		Context()->engine->FreeModel(flags[i].model);
+		flags.Remove(i);
+	}
+}
+
+
+Vector2I CoreScript::GetFlag()
+{
+	for (int i = 0; i < flags.Size(); ++i) {
+		if (tasks.Find(flags[i].pos) < 0) {
+			return flags[i].pos;
+		}
+	}
+	Vector2I v = { 0, 0 };
+	return v;
 }
 
 

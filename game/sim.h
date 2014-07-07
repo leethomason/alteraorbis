@@ -44,6 +44,7 @@ class NewsHistory;
 class ItemDB;
 class CoreScript;
 class PlantScript;
+class CircuitSim;
 
 class Sim : public IChitListener, public IUITracker
 {
@@ -108,6 +109,7 @@ private:
 	Visitors*		visitors;
 	ItemDB*			itemDB;
 	PlantScript*	plantScript;
+	CircuitSim*		circuitSim;
 
 	grinliz::Random	random;
 	int playerID;

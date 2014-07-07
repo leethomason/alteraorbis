@@ -353,7 +353,8 @@ int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal)
 			BoundCheck(pos2i, h / FLUID_PER_ROCK, nominal, &area, &areaElevated);
 			// Don't start an emitter unless it is enclosed.
 			// "water patties" look pretty silly.
-			if (area > 5 && area < PRESSURE) {
+			//if (area > 5 && area < PRESSURE) {	// the area > 5 is aesthetically nice, but unexpected when building traps.
+			if (area < PRESSURE) {
 				return hRock;
 			}
 		}
