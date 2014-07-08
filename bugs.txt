@@ -59,6 +59,7 @@ d animation generation
 - weather should affect fire/shock
 - shock -> plasma??
 - mouse wheel support
+- cage trap
 
 - game
 
@@ -141,12 +142,10 @@ d animation generation
 				x bend (rot)
 				x 3 split (rot?)
 				x crossover
-				- gate
+				x gate
 				- turret (or not circuit? building? similar to battery...) (rot)
-				- cage
 				- circuit art
-				- trigger plate
-
+				x trigger plate
 				- fab plant
 				- circuit building ui
 				- switch activation ui

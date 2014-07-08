@@ -11,6 +11,8 @@
 #include "../script/batterycomponent.h"
 
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
+#include "../audio/xenoaudio.h"
 
 using namespace grinliz;
 
@@ -299,7 +301,40 @@ void CircuitSim::EmitSparkExplosion(const grinliz::Vector2F& pos)
 void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 {
 	if (chitBag) {
-		GLASSERT(0);	// code not written: look for turret or gate, etc. or find mobs to zap
+		DamageDesc dd(float(5 * charge), GameItem::EFFECT_SHOCK);
+
+		Chit* building = chitBag->QueryBuilding(pos);
+		if (building && building->GetItem() && building->GetItem()->IName() == ISC::turret && building->GetRenderComponent()) {
+			Vector3F straight = building->GetRenderComponent()->MainModel()->XForm() * V3F_OUT;
+			RenderComponent* rc = building->GetRenderComponent();
+			Vector3F trigger = { 0, 0, 0 };
+			rc->CalcTrigger(&trigger, 0);
+
+			XenoAudio::Instance()->PlayVariation(ISC::blaster, building->ID(), &trigger);
+
+			chitBag->NewBolt(trigger, straight, dd.effects, building->ID(),
+							 dd.damage,
+							 8.0f,
+							 false);
+		}
+		else {
+			CChitArray arr;
+			MOBIshFilter filter;
+			chitBag->QuerySpatialHash(&arr, ToWorld2F(pos), 0.5f, 0, &filter);
+
+			ChitDamageInfo info( dd );
+			info.originID = building->ID();
+			info.awardXP  = false;
+			info.isMelee  = false;
+			info.isExplosion = false;
+			info.originOfImpact = V3F_ZERO;
+
+			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &info );
+
+			for (int i = 0; i < arr.Size(); ++i) {
+				arr[i]->SendMessage(msg, 0);
+			}
+		}
 	}
 	else {
 		engine->particleSystem->EmitPD("sparkPowerUp", ToWorld3F(pos), V3F_UP, 0);

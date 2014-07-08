@@ -123,6 +123,7 @@
   <model assetName="farm"       filename="solarpanel.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="distillery" filename="distillery.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="exchange" filename="exchange.ac"                       shading="flat" polyRemoval="pre" />
+  <model assetName="circuitFab" filename="circuitFab.ac"                   shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />
@@ -133,9 +134,9 @@
 
   <model filename="spark.ac"    assetName="spark"                          shading="flat" />
   <model filename="electron.ac" assetName="charge"                         shading="flat" />
-  <model filename="gateOpen.ac"                                            shading="flat" />
-  <model filename="gateClosed.ac"                                          shading="flat" />
-  <model filename="turret2.ac"                                             shading="flat" />
+  <model assetName="turret" filename="turret2.ac"                          shading="flat" >
+    <meta name="trigger" pos="0 0.50 0.33" />
+  </model>
   <model assetName="power"   filename="power1.ac"    origin="0 0 0"        shading="flat" />
 
   <!-- animation v2

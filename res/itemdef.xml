@@ -199,6 +199,17 @@
         cost="40"
         zoneCreate="industrial" />
 
+  <item name="turret"
+        resource="turret"
+        flags="DAMAGE_UNDER_WATER"
+        porch="0"
+        procedural="team"
+        circuit="powerUp"
+        size="1"
+        mass="100"
+        cost="40"
+        zoneCreate="industrial" />
+
   <item name="circuitFab"
         resource="circuitFab"
         flags="DAMAGE_UNDER_WATER"

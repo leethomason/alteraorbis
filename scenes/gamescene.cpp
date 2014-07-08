@@ -240,7 +240,6 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
-	//layout.PosAbs(&placeFlag, 4, 1);
 
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
@@ -251,10 +250,15 @@ void GameScene::Resize()
 			level = bd.group;
 			start = i;
 		}
-		if (bd.group == 0)
+		if (bd.group == 0) {
 			layout.PosAbs(&buildButton[i], i - start - 1, 2);
-		else
-			layout.PosAbs(&buildButton[i], i - start, 2);
+		}
+		else {
+			int ld = i - start;
+			int lx = ld % 6;
+			int ly = ld / 6;
+			layout.PosAbs(&buildButton[i], lx, ly + 2);
+		}
 	}
 //	buildButton[0].SetVisible(false);	// the "none" button. Not working - perhaps bug in sub-selection.
 	buildButton[0].SetPos(-100, -100);
@@ -265,6 +269,7 @@ void GameScene::Resize()
 	layout.PosAbs(&createWorkerButton, 0, 3);
 	layout.PosAbs(&autoRebuild, 1, 3);
 	layout.PosAbs(&abandonButton, 2, 3);
+
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
@@ -1458,11 +1463,12 @@ void GameScene::DoTick( U32 delta )
 		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
 	}
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
-	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
+	static const int CIRCUIT_MODE = NUM_BUILD_MODES - 1;
+	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
 	bool visible = game->GetDebugUI();
-	autoRebuild.SetVisible(uiMode[UI_BUILD].Down() && visible);
-	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible);
+	autoRebuild.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
+	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
 
 	str.Clear();
 

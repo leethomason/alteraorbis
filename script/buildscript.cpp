@@ -35,16 +35,17 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social.", "Requires a Temple" },
 	// Circuits
 	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
-	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
 	{ "Power", "power",				5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
-	{ "Zapper", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
-	{ "Bend", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_BEND },
-	{ "Split", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
-	{ "Gate", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_ICE },
-	{ "Stop", "",					5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_STOP },
-	{ "Small Detector", "",			5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_DETECT_SMALL_ENEMY },
-	{ "Large Detector", "",			5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_DETECT_LARGE_ENEMY },
-	{ "Transistor", "",				5, "FIXME.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
+	{ "Turret", "turret",			5, "Fires weapon when charge applied.", "Requires a Circuit Fab" },
+	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
+	{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
+	{ "Bend", "",					5, "Routes electrons.", "Requires a Circuit Fab", CIRCUIT_BEND },
+	{ "Split", "",					5, "Splits electrons.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
+	{ "Gate", "",					5, "Uses a charge to toggle ICE.", "Requires a Circuit Fab", CIRCUIT_ICE },
+	{ "Stop", "",					5, "Absorbs a charge or spark.", "Requires a Circuit Fab", CIRCUIT_STOP },
+	{ "Small\nDetector", "",		5, "Sparks for enemies of any mass.", "Requires a Circuit Fab", CIRCUIT_DETECT_SMALL_ENEMY },
+	{ "Large\nDetector", "",		5, "Sparks for enemies of 100 kg or greater.", "Requires a Circuit Fab", CIRCUIT_DETECT_LARGE_ENEMY },
+	{ "Transistor", "",				5, "Digital toggle switch.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
 };
 
 
