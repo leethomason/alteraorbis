@@ -73,24 +73,22 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	textLabel.Init( &gamui2D );
 
-	map = new WorldMap( SIZE, SIZE );
-	map->InitCircle();
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
-	map->AttachEngine( engine, this );
+	context.worldMap = new WorldMap( SIZE, SIZE );
+	context.worldMap->InitCircle();
+	context.engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), context.worldMap );
+	context.worldMap->AttachEngine( context.engine, this );
 
-	ChitContext context;
-	context.Set( engine, map, 0 );
-	chitBag = new LumosChitBag( context, 0 );
+	context.chitBag = new LumosChitBag( context, 0 );
 
 	Rectangle2I b;
-	b.Set( 0, 0, map->Width()-1, map->Height()-1 );
-	map->ShowRegionOverlay( b );
+	b.Set( 0, 0, context.worldMap->Width()-1, context.worldMap->Height()-1 );
+	context.worldMap->ShowRegionOverlay( b );
 
-	engine->CameraLookAt( 10, 10, 40 );
+	context.engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
 
 	for( int i=0; i<NUM_CHITS; ++i ) {
-		chit[i] = chitBag->NewChit();
+		chit[i] = context.chitBag->NewChit();
 		chit[i]->Add( new SpatialComponent() );
 		chit[i]->Add( new RenderComponent( "humanFemale" ) );
 		chit[i]->Add( new PathMoveComponent() );
@@ -102,10 +100,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 NavTestScene::~NavTestScene()
 {
-	delete chitBag;
-	delete engine;
-	map->AttachEngine( 0, 0 );
-	delete map;
+	delete context.chitBag;
+	delete context.engine;
+	context.worldMap->AttachEngine( 0, 0 );
+	delete context.worldMap;
 }
 
 
@@ -129,27 +127,27 @@ void NavTestScene::Resize()
 void NavTestScene::Zoom( int style, float delta )
 {
 	if ( style == GAME_ZOOM_PINCH )
-		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
+		context.engine->SetZoom( context.engine->GetZoom() *( 1.0f+delta) );
 	else
-		engine->SetZoom( engine->GetZoom() + delta );
+		context.engine->SetZoom( context.engine->GetZoom() + delta );
 }
 
 
 void NavTestScene::MoveCamera(float dx, float dy)
 {
-	MoveImpl(dx, dy, engine);
+	MoveImpl(dx, dy, context.engine);
 }
 
 
 void NavTestScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
-	Process3DTap(action, view, world, engine);
+	Process3DTap(action, view, world, context.engine);
 }
 
 
 void NavTestScene::Rotate( float degrees ) 
 {
-	engine->camera.Orbit( degrees );
+	context.engine->camera.Orbit( degrees );
 }
 
 
@@ -174,11 +172,11 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 		Matrix4 mvpi;
 		Ray ray;
 		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-		engine->RayFromViewToYPlane( view, mvpi, &ray, &tapMark );
+		context.engine->RayFromViewToYPlane( view, mvpi, &ray, &tapMark );
 		tapMark.y += 0.1f;
 
 		char buf[40];
-		SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, -1 ); //map->NumRegions() );
+		SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, -1 ); //context.worldMap->NumRegions() );
 		textLabel.SetText( buf );
 
 		if ( toggleBlock.Down() ) {
@@ -187,7 +185,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 				blocks.Clear( d.x, d.y );
 			else
 				blocks.Set( d.x, d.y );
-			map->UpdateBlock( d.x, d.y );
+			context.worldMap->UpdateBlock( d.x, d.y );
 		}
 		else {
 			// Move to the marked location.
@@ -198,7 +196,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 		}
 
 		if ( showAdjacent.Down() ) {
-			map->ShowAdjacentRegions( tapMark.x, tapMark.z );
+			context.worldMap->ShowAdjacentRegions( tapMark.x, tapMark.z );
 		}
 	}
 }
@@ -225,21 +223,21 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &showOverlay ) {
 		Rectangle2I b;
 		if ( showOverlay.Down() )
-			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+			b.Set( 0, 0, context.worldMap->Width()-1, context.worldMap->Height()-1 );
 		else
 			b.Set( 0, 0, 0, 0 );
 
-		map->ShowRegionOverlay( b );
+		context.worldMap->ShowRegionOverlay( b );
 	}
 
 	while ( makeBlocks ) {
-		Rectangle2I b = map->Bounds();
+		Rectangle2I b = context.worldMap->Bounds();
 		int x = random.Rand( b.Width() );
 		int y = random.Rand( b.Height() );
-		if ( map->IsLand( x, y ) && !blocks.IsSet(x,y) ) {
+		if ( context.worldMap->IsLand( x, y ) && !blocks.IsSet(x,y) ) {
 			blocks.Set( x, y );
 			--makeBlocks;
-			map->UpdateBlock( x, y );
+			context.worldMap->UpdateBlock( x, y );
 		}
 	}
 }
@@ -247,7 +245,7 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 
 void NavTestScene::DoTick( U32 deltaTime )
 {
-	chitBag->DoTick( deltaTime );
+	context.chitBag->DoTick( deltaTime );
 }
 
 
@@ -255,7 +253,7 @@ void NavTestScene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay.direction, debugRay.origin, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
+		Model* root = context.engine->IntersectModel( debugRay.direction, debugRay.origin, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 16;
 		for ( ; root; root=root->next ) {
 			Chit* chit = root->userData;
@@ -272,7 +270,7 @@ void NavTestScene::DrawDebugText()
 
 void NavTestScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime );
+	context.engine->Draw( deltaTime );
 
 	FlatShader flat;
 	flat.SetColor( 1, 0, 0 );

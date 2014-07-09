@@ -116,8 +116,7 @@ private:
 	gamui::TextLabel label[2];
 	static const ButtonDef buttonDef[NUM_BUTTONS];
 
-	Engine*		engine;
-	WorldMap*	map;
+	ChitContext context;
 	bool		battleStarted;
 	U32			boltTimer;
 	bool		fireTestGun;
@@ -127,8 +126,6 @@ private:
 	grinliz::CDynArray<grinliz::Vector2I> waypoints[3];
 	grinliz::Ray debugRay;
 	grinliz::CDynArray<Chit*> chitArr;
-	
-	LumosChitBag*	chitBag;
 };
 
 

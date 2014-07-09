@@ -86,7 +86,6 @@ public:
 		CHIT_TRACKING_ARRIVED,	//			A tracking component arrived at its target.
 								//					ptr = Chit* that arrived
 
-		TRIGGER_DETECTOR_CIRCUIT, // Yes	This chit triggered a detector circuit.
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
 		PATHMOVE_TO_GRIDMOVE,	//			ptr=&SectorPort

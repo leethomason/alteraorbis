@@ -59,8 +59,7 @@ private:
 						showOverlay,
 						toggleBlock;
 
-	Engine* engine;
-	WorldMap* map;
+	ChitContext		context;
 	grinliz::Random random;
 	grinliz::Vector3F tapMark;
 	grinliz::Ray debugRay;
@@ -69,7 +68,6 @@ private:
 	enum { SIZE = 32 };
 	Chit* chit[NUM_CHITS];
 
-	ChitBag* chitBag;
 	grinliz::BitArray< SIZE, SIZE, 1 > blocks;
 };
 

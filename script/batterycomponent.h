@@ -10,7 +10,7 @@ private:
 	typedef Component super;
 
 public:
-	BatteryComponent() : charge(0), ticker(1000)	{}
+	BatteryComponent() : charge(0), ticker(2000)	{}
 	virtual ~BatteryComponent()	{}
 
 	virtual const char* Name() const { return "BatteryComponent"; }
@@ -24,7 +24,7 @@ public:
 	virtual int DoTick( U32 delta );
 
 	int Charge() const { return charge; }
-	int UseCharge() { int c = charge; charge = 0; return c; }
+	int UseCharge() { int c = charge; charge = 0; ticker.Reset();  return c; }
 
 private:
 	int charge;

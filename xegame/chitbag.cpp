@@ -33,7 +33,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-ChitBag::ChitBag( const ChitContext& c )
+ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 {
 	idPool = 0;
 	bagTime = 0;
@@ -41,7 +41,6 @@ ChitBag::ChitBag( const ChitContext& c )
 	memset( mobSpatialHash, 0, sizeof(*mobSpatialHash)*SIZE2 );
 	memRoot = 0;
 	activeCamera = 0;
-	chitContext = c;
 	newsHistory = new NewsHistory(this);
 }
 

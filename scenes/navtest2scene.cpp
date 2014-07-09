@@ -54,17 +54,13 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
-	engine = 0;
-	map = 0;
 	data = _data;
 
-	map = new WorldMap( 64, 64 );
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+	context.worldMap = new WorldMap( 64, 64 );
+	context.engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), context.worldMap);	
 
-	ChitContext context;
-	context.Set( engine, map, 0 );
-	chitBag = new LumosChitBag( context, 0 );
-	map->AttachEngine( 0, chitBag );	// connect up the pather, but we do the render.
+	context.chitBag = new LumosChitBag( context, 0 );
+	context.worldMap->AttachEngine( 0, context.chitBag );	// connect up the pather, but we do the render.
 
 	LoadMap();
 
@@ -76,10 +72,10 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 NavTest2Scene::~NavTest2Scene()
 {
-	chitBag->DeleteAll();
-	delete chitBag;
-	delete engine;
-	delete map;
+	context.chitBag->DeleteAll();
+	delete context.chitBag;
+	delete context.engine;
+	delete context.worldMap;
 }
 
 
@@ -97,10 +93,10 @@ void NavTest2Scene::Resize()
 void NavTest2Scene::LoadMap()
 {
 	grinliz::CDynArray<Vector2I> blocks, features;
-	map->InitPNG( data->worldFilename, &blocks, &waypoints, &features );
+	context.worldMap->InitPNG( data->worldFilename, &blocks, &waypoints, &features );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
-		Chit* chit = chitBag->NewChit();
+		Chit* chit = context.chitBag->NewChit();
 		const Vector2I& v = blocks[i];
 		MapSpatialComponent* msc = new MapSpatialComponent();
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
@@ -111,7 +107,7 @@ void NavTest2Scene::LoadMap()
 
 	for( int i=0; i<features.Size(); ++i ) {
 		const Vector2I& v = features[i];
-		map->SetPlant(v.x, v.y, 4, 3);
+		context.worldMap->SetPlant(v.x, v.y, 4, 3);
 	}
 
 	clock_t start = clock();
@@ -122,7 +118,7 @@ void NavTest2Scene::LoadMap()
 	//Performance::SetSampling( false );
 	clock_t end = clock();
 	GLOUTPUT(( "Create chit startup: %d msec\n", (end - start) ));
-	engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
+	context.engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
 }
 
 
@@ -130,7 +126,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 {
 	//GRINLIZ_PERFTRACK;
 
-	Chit* chit = chitBag->NewChit();
+	Chit* chit = context.chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 
 	const char* asset = "humanFemale";
@@ -155,7 +151,7 @@ void NavTest2Scene::DrawDebugText()
 	micropather::CacheData cacheData;
 
 	Vector2I sector = { 0, 0 };
-	map->PatherCacheHitMiss( sector, &cacheData );
+	context.worldMap->PatherCacheHitMiss( sector, &cacheData );
 
 	ufoText->Draw( 0, 16, "PathCache mem%%=%d hit%%=%d walkers=%d", 
 		(int)(cacheData.memoryFraction * 100.0f),
@@ -163,7 +159,7 @@ void NavTest2Scene::DrawDebugText()
 		chits.Size() );	
 
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
+		Model* root = context.engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 32;
 		for ( ; root; root=root->next ) {
 			Chit* chit = root->userData;
@@ -181,7 +177,7 @@ void NavTest2Scene::DrawDebugText()
 void NavTest2Scene::DoCheck()
 {
 	for (int i = 0; i < chits.Size(); ++i) {
-		Chit* chit = chitBag->GetChit(chits[i]);
+		Chit* chit = context.chitBag->GetChit(chits[i]);
 		if (chit) {
 			PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 			if (pmc && pmc->Stopped()) {
@@ -203,27 +199,27 @@ void NavTest2Scene::DoCheck()
 void NavTest2Scene::Zoom( int style, float delta )
 {
 	if ( style == GAME_ZOOM_PINCH )
-		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
+		context.engine->SetZoom( context.engine->GetZoom() *( 1.0f+delta) );
 	else
-		engine->SetZoom( engine->GetZoom() + delta );
+		context.engine->SetZoom( context.engine->GetZoom() + delta );
 }
 
 
 void NavTest2Scene::Rotate( float degrees ) 
 {
-	engine->camera.Orbit( degrees );
+	context.engine->camera.Orbit( degrees );
 }
 
 
 void NavTest2Scene::MoveCamera(float dx, float dy)
 {
-	MoveImpl(dx, dy, engine);
+	MoveImpl(dx, dy, context.engine);
 }
 
 
 void NavTest2Scene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
-	Process3DTap(action, view, world, engine);
+	Process3DTap(action, view, world, context.engine);
 }
 
 
@@ -247,17 +243,17 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &regionButton ) {
 		Rectangle2I b;
 		if ( regionButton.Down() )
-			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+			b.Set( 0, 0, context.worldMap->Width()-1, context.worldMap->Height()-1 );
 		else
 			b.Set( 0, 0, 0, 0 );
-		map->ShowRegionOverlay( b );
+		context.worldMap->ShowRegionOverlay( b );
 	}
 }
 
 
 void NavTest2Scene::DoTick( U32 deltaTime )
 {
-	chitBag->DoTick( deltaTime );
+	context.chitBag->DoTick( deltaTime );
 	++creationTick;
 	DoCheck();
 	
@@ -272,6 +268,6 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 
 void NavTest2Scene::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime );
+	context.engine->Draw( deltaTime );
 }
 

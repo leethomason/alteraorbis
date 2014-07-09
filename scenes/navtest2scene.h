@@ -63,8 +63,7 @@ private:
 	gamui::PushButton okay;
 	gamui::ToggleButton regionButton;
 
-	Engine* engine;
-	WorldMap* map;
+	ChitContext context;
 	const NavTest2SceneData* data;
 
 	grinliz::Random random;
@@ -73,8 +72,6 @@ private:
 	grinliz::Ray debugRay;
 	
 	int creationTick;
-
-	LumosChitBag* chitBag;
 };
 
 

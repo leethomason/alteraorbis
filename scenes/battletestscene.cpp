@@ -106,10 +106,11 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	battleStarted = false;
 	fireTestGun = false;
 
-	game->InitStd( &gamui2D, &okay, 0 );
-	LayoutCalculator layout = game->DefaultLayout();
+	context.game = game;
+	context.game->InitStd( &gamui2D, &okay, 0 );
+	LayoutCalculator layout = context.game->DefaultLayout();
 
-	const ButtonLook& look = game->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
+	const ButtonLook& look = context.game->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 
 	goButton.Init( &gamui2D, look );
 	goButton.SetText( "Go!" );
@@ -142,8 +143,8 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	label[1].Init( &gamui2D );
 	label[1].SetText( "Team Tangerine" );
 
-	engine = 0;
-	map = 0;
+	context.engine = 0;
+	context.worldMap = 0;
 
 	LoadMap();
 }
@@ -151,10 +152,10 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 
 BattleTestScene::~BattleTestScene()
 {
-	map->AttachEngine( 0, 0 );
-	delete chitBag;
-	delete engine;
-	delete map;
+	context.worldMap->AttachEngine( 0, 0 );
+	delete context.chitBag;
+	delete context.engine;
+	delete context.worldMap;
 }
 
 
@@ -162,8 +163,8 @@ void BattleTestScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 
-	const Screenport& port = lumosGame->GetScreenport();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	const Screenport& port = context.game->GetScreenport();
+	LayoutCalculator layout = context.game->DefaultLayout();
 
 	layout.PosAbs( &okay, 0, -1 );
 	layout.PosAbs( &goButton, 0, -2 );
@@ -216,25 +217,23 @@ int BattleTestScene::ButtonDownID( int group )
 
 void BattleTestScene::LoadMap()
 {
-	delete engine;
-	delete map;
+	delete context.engine;
+	delete context.worldMap;
 
-	map = new WorldMap( 32, 32 );
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+	context.worldMap = new WorldMap( 32, 32 );
+	context.engine = new Engine( context.game->GetScreenportMutable(), context.game->GetDatabase(), context.worldMap );	
 
-	ChitContext context;
-	context.Set( engine, map, game->ToLumosGame() );
-	chitBag = new LumosChitBag( context, 0 );
+	context.chitBag = new LumosChitBag( context, 0 );
 
 	grinliz::CDynArray<Vector2I> blocks, features, wp;
-	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
+	context.worldMap->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
 
 	for( int i=0; i<wp.Size(); ++i ) {
 		Vector2I v = wp[i];
-		if ( v.x < map->Width() / 3 ) {
+		if ( v.x < context.worldMap->Width() / 3 ) {
 			waypoints[LEFT].Push( v );
 		}
-		else if ( v.x > map->Width()*2/3 ) {
+		else if ( v.x > context.worldMap->Width()*2/3 ) {
 			waypoints[RIGHT].Push( v );
 		}
 		else {
@@ -248,21 +247,21 @@ void BattleTestScene::LoadMap()
 	ShuffleArray( waypoints[LEFT].Mem(),  waypoints[LEFT].Size(),  &random );
 	ShuffleArray( waypoints[MID].Mem(),   waypoints[MID].Size(),   &random );
 
-	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
-	map->AttachEngine( engine, chitBag );
+	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
+	context.worldMap->AttachEngine( context.engine, context.chitBag );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		const Vector2I& v = blocks[i];
-		map->SetRock( v.x, v.y, 1, false, 0 );
+		context.worldMap->SetRock( v.x, v.y, 1, false, 0 );
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	//const GameItem& treeItem = itemDefDB->Get( "tree" );
 
 	for( int i=0; i<features.Size(); ++i ) {
-		//Chit* chit = chitBag->NewChit();
+		//Chit* chit = context.chitBag->NewChit();
 		const Vector2I& v = features[i];
-		map->SetPlant(v.x, v.y, 1+1, 3);
+		context.worldMap->SetPlant(v.x, v.y, 1+1, 3);
 	}
 
 	Vector2I unit = { 2, 16 };
@@ -272,7 +271,7 @@ void BattleTestScene::LoadMap()
 	dummy.Set( 16, 17 );
 	CreateChit( dummy, DUMMY, NO_WEAPON, MID, 0 );
 
-	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
+	context.engine->CameraLookAt( (float)context.worldMap->Width()/2, (float)context.worldMap->Height()/2, 
 		                  22.f,		// height
 						  225.f );	// rotation
 }
@@ -296,14 +295,14 @@ void BattleTestScene::GoScene()
 	GLLOG(( "---- GO ---- \n" ));
 	battleStarted = true;
 	Rectangle2F b;
-	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+	b.Set( 0, 0, (float)context.worldMap->Width(), (float)context.worldMap->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
 	ChitAcceptAll acceptAll;
-	chitBag->QuerySpatialHash( &chitArr, b, 0, &acceptAll );
+	context.chitBag->QuerySpatialHash( &chitArr, b, 0, &acceptAll );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		if ( chitArr[i]->GetMoveComponent() ) {
-			chitBag->DeleteChit( chitArr[i] );
+			context.chitBag->DeleteChit( chitArr[i] );
 		}
 	}
 
@@ -356,35 +355,35 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	itemDefDB->Get( itemName, &itemDefArr );
 	GLASSERT( itemDefArr.Size() > 0 );
 
-	Chit* chit = chitBag->NewChit();
+	Chit* chit = context.chitBag->NewChit();
 
 	chit->Add( new SpatialComponent());
 	const char* resourceName = itemDefArr[0]->ResourceName();
 	RenderComponent* rc = new RenderComponent( resourceName );
 	chit->Add( rc );
 
-	chitBag->AddItem( itemName, chit, engine, team, level );
+	context.chitBag->AddItem( itemName, chit, context.engine, team, level );
 
 	if ( type == HUMAN ) {
-		chitBag->AddItem( "shield",		chit, engine, 0, level );
+		context.chitBag->AddItem( "shield",		chit, context.engine, 0, level );
 		if ( loadout == MELEE_WEAPON || loadout == BLASTER_AND_GUN )
-			chitBag->AddItem( "ring",	chit, engine, 0, level );
+			context.chitBag->AddItem( "ring",	chit, context.engine, 0, level );
 		if ( loadout == BLASTER || loadout == BLASTER_AND_GUN )
-			chitBag->AddItem( "blaster", chit, engine, 0, level );
+			context.chitBag->AddItem( "blaster", chit, context.engine, 0, level );
 		else if ( loadout == PISTOL)
-			chitBag->AddItem("pistol", chit, engine, 0, level);
+			context.chitBag->AddItem("pistol", chit, context.engine, 0, level);
 		else if (loadout == PULSE)
-			chitBag->AddItem("pulse", chit, engine, 0, level);
+			context.chitBag->AddItem("pulse", chit, context.engine, 0, level);
 		else if (loadout == BEAMGUN)
-			chitBag->AddItem("beamgun", chit, engine, 0, level);
+			context.chitBag->AddItem("beamgun", chit, context.engine, 0, level);
 	}
 	if ( type == TROLL ) {
 		if ( random.Bit() )
-			chitBag->AddItem( "shield",  chit, engine, 0, level );
+			context.chitBag->AddItem( "shield",  chit, context.engine, 0, level );
 		if ( random.Bit() )
-			chitBag->AddItem( "ring",    chit, engine, 0, level );
+			context.chitBag->AddItem( "ring",    chit, context.engine, 0, level );
 		if ( random.Bit() )
-			chitBag->AddItem( "blaster", chit, engine, 0, level );
+			context.chitBag->AddItem( "blaster", chit, context.engine, 0, level );
 	}
 
 	if ( type != DUMMY ) {
@@ -414,19 +413,19 @@ void BattleTestScene::DrawDebugText()
 
 	micropather::CacheData cacheData;
 	Vector2I sector = { 0, 0 };
-	map->PatherCacheHitMiss( sector, &cacheData );
+	context.worldMap->PatherCacheHitMiss( sector, &cacheData );
 
 	ufoText->Draw( 0, 16, "PathCache mem=%%=%d hit%%=%d chits:ticked/total=%d/%d regions=%d", 
 		(int)(cacheData.memoryFraction * 100.0f),
 		(int)(cacheData.hitFraction * 100.f),
-		chitBag->NumTicked(), chitBag->NumChits(),
-		map->CalcNumRegions() );
+		context.chitBag->NumTicked(), context.chitBag->NumChits(),
+		context.worldMap->CalcNumRegions() );
 
 	if ( debugRay.direction.x ) {
-		ModelVoxel mv = engine->IntersectModelVoxel( debugRay.origin, debugRay.direction, 1000.0f, TEST_TRI, 0, 0, 0 );
+		ModelVoxel mv = context.engine->IntersectModelVoxel( debugRay.origin, debugRay.direction, 1000.0f, TEST_TRI, 0, 0, 0 );
 
 		if ( mv.Hit() ) {
-			engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, 0 );
+			context.engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, 0 );
 
 			GLString str;
 			if ( mv.ModelHit() ) {
@@ -452,28 +451,28 @@ void BattleTestScene::DrawDebugText()
 void BattleTestScene::Zoom( int style, float delta )
 {
 	if ( style == GAME_ZOOM_PINCH )
-		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
+		context.engine->SetZoom( context.engine->GetZoom() *( 1.0f+delta) );
 	else
-		engine->SetZoom( engine->GetZoom() + delta );
+		context.engine->SetZoom( context.engine->GetZoom() + delta );
 }
 
 
 void BattleTestScene::Rotate( float degrees ) 
 {
-	engine->camera.Orbit( degrees );
+	context.engine->camera.Orbit( degrees );
 }
 
 
 void BattleTestScene::MoveCamera(float dx, float dy)
 {
-	MoveImpl(dx, dy, engine);
+	MoveImpl(dx, dy, context.engine);
 }
 
 void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
-		bool tap = Process3DTap( action, view, world, engine );
+		bool tap = Process3DTap( action, view, world, context.engine );
 		if ( action == GAME_TAP_DOWN ) {
 #if 1
 			Vector3F at;
@@ -481,7 +480,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			at.y = 0.01f;
 
 			DamageDesc dd( 20, 0 );
-			BattleMechanics::GenerateExplosion( dd, at, 0, engine, chitBag, map );
+			BattleMechanics::GenerateExplosion( dd, at, 0, context.engine, context.chitBag, context.worldMap);
 #endif		
 		}
 	}
@@ -491,7 +490,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
-		game->PopScene();
+		context.game->PopScene();
 	}
 	else if ( item == &goButton ) {
 		GoScene();
@@ -499,10 +498,10 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &regionButton ) {
 		Rectangle2I b;
 		if ( regionButton.Down() )
-			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+			b.Set( 0, 0, context.worldMap->Width()-1, context.worldMap->Height()-1 );
 		else
 			b.Set( 0, 0, 0, 0 );
-		map->ShowRegionOverlay( b );
+		context.worldMap->ShowRegionOverlay( b );
 	}
 }
 
@@ -514,24 +513,24 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		boltTimer += deltaTime;
 		if ( boltTimer > 500 ) {
 			boltTimer = 0;
-			ChitBag* cb = chitBag;
+			ChitBag* cb = context.chitBag;
 			Bolt* bolt = cb->NewBolt();
 
 			bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
-			bolt->head.Set( 0.5f * (float)map->Width(), 1, 2 );
+			bolt->head.Set( 0.5f * (float)context.worldMap->Width(), 1, 2 );
 			bolt->color.Set( 1, 0.1f, 0.3f, 1 );
 			bolt->damage = 20.0f;
 			bolt->effect = GameItem::EFFECT_FIRE;
 			bolt->speed = 10.0f;
 		}
 	}
-	map->DoTick(deltaTime, chitBag);
-	chitBag->DoTick( deltaTime );
+	context.worldMap->DoTick(deltaTime, context.chitBag);
+	context.chitBag->DoTick( deltaTime );
 }
 
 
 void BattleTestScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
+	context.engine->Draw( deltaTime, context.chitBag->BoltMem(), context.chitBag->NumBolts() );
 }
 

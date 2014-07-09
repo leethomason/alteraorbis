@@ -53,7 +53,6 @@ LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
 	homeSector.Zero();
-	chitContext.chitBag = this;
 }
 
 

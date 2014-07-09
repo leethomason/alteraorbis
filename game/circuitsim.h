@@ -33,7 +33,7 @@ enum {
 };
 
 
-class CircuitSim : public IChitListener
+class CircuitSim
 {
 public:
 	CircuitSim(WorldMap* worldMap, Engine* engine, LumosChitBag* chitBag);
@@ -42,8 +42,6 @@ public:
 	void TriggerSwitch(const grinliz::Vector2I& pos);
 	void TriggerDetector(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
-
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	static int NameToID(grinliz::IString name);
 

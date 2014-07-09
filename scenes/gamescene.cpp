@@ -403,15 +403,17 @@ void GameScene::Rotate( float degrees )
 void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	// --- Info and debugging info. ---
-	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, 0 );
+	Vector3F at = { 0, 0, 0 };
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
 	MoveModel( mv.model ? mv.model->userData : 0 );
 
 	if ( mv.model && mv.model->userData ) {
 		infoID = mv.model->userData->ID();
 	}
-	if ( mv.VoxelHit() ) {
-		voxelInfoID = mv.Voxel2();
-	}
+//	if ( mv.VoxelHit() ) {
+//		voxelInfoID = mv.Voxel2();
+//	}
+	voxelInfoID = ToWorld2I(at);
 
 	SetSelectionModel( view );
 }
@@ -1731,7 +1733,7 @@ void GameScene::Draw3D( U32 deltaTime )
 void GameScene::DrawDebugText()
 {
 	static const int x = 0;
-	int y = 120;
+	int y = 200;
 	DrawDebugTextDrawCalls( x, y, sim->GetEngine() );
 	y += 16;
 
@@ -1809,7 +1811,7 @@ void GameScene::DrawDebugText()
 	}
 	if ( !voxelInfoID.IsZero() ) {
 		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( voxelInfoID.x, voxelInfoID.y );
-		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP() );
+		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d circuit=%d circRot=%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Circuit(), wg.CircuitRot() );
 		y += 16;
 	}
 }

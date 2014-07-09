@@ -136,7 +136,7 @@ void AIComponent::OnAdd( Chit* chit, bool init )
 		feTicker.SetPeriod(750 + (chit->ID() & 128));
 	}
 	const ChitContext* context = Context();
-	taskList.Init( context->worldMap, context->engine, context->chitBag );
+	taskList.Init( context );
 }
 
 
@@ -1775,6 +1775,7 @@ bool AIComponent::ThinkFlag(const ComponentSet& thisComp)
 			if (!flag.IsZero()) {
 				if (!coreScript->HasTask(flag)) {
 					taskList.Push(Task::MoveTask(flag));
+					taskList.Push(Task::FlagTask());
 					return true;
 				}
 			}
@@ -2176,27 +2177,29 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		ranged->GetItem()->Reload( parentChit );
 	}
 
-	if ( ThinkWanderEatPlants( thisComp ))
+	if (ThinkWanderEatPlants(thisComp))
 		return;
-	if ( ThinkWanderHealAtCore( thisComp ))
+	if (ThinkWanderHealAtCore(thisComp))
 		return;
-	if ( ThinkLoot( thisComp ))
+	if (ThinkLoot(thisComp))
 		return;
-	if ( ThinkCriticalShopping( thisComp ))
+	if (ThinkCriticalShopping(thisComp))
 		return;
-	if ( ThinkHungry( thisComp )) 
+	if (ThinkHungry(thisComp))
 		return;
 	if (ThinkFruitCollect(thisComp))
 		return;
-	if ( ThinkDelivery( thisComp ))
+	if (ThinkDelivery(thisComp))
+		return;
+	if (ThinkFlag(thisComp))
 		return;
 	if (ThinkNeeds(thisComp))
 		return;
 	if (ThinkRepair(thisComp))
 		return;
-	if ( ThinkGuard( thisComp ))
-		return;	
-	if ( ThinkDoRampage( thisComp ))
+	if (ThinkGuard(thisComp))
+		return;
+	if (ThinkDoRampage(thisComp))
 		return;
 
 	// Wander....
@@ -2660,8 +2663,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
 		float mass = thisComp.item->mass;
 		if ((wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY) || (mass > 100)) {
-			ChitMsg msg(ChitMsg::TRIGGER_DETECTOR_CIRCUIT);
-			parentChit->SendMessage(msg);
+			Context()->circuitSim->TriggerDetector(pos2i);
 		}
 	}
 

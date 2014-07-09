@@ -51,35 +51,33 @@ Sim* StackedSingleton<Sim>::instance			= 0;
 
 Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
 {
-	lumosGame = g;
+	context.game = g;
 	spawnEnabled = true;
-	Screenport* port = lumosGame->GetScreenportMutable();
-	const gamedb::Reader* database = lumosGame->GetDatabase();
+	Screenport* port = context.game->GetScreenportMutable();
+	const gamedb::Reader* database = context.game->GetDatabase();
 
 	itemDB		= new ItemDB();
-	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
-	engine		= new Engine( port, database, worldMap );
+	context.worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
+	context.engine		= new Engine( port, database, context.worldMap );
 	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	reserveBank = new ReserveBank();
 	visitors	= new Visitors();
 
-	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
+	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	ChitContext context;
-	context.Set( engine, worldMap, g );
-	chitBag = new LumosChitBag( context, this );
-	chitBag->AddListener(this);
+	context.chitBag = new LumosChitBag( context, this );
+	context.chitBag->AddListener(this);
 
-	worldMap->AttachEngine( engine, chitBag );
-	worldMap->AttachHistory(chitBag->GetNewsHistory());
+	context.worldMap->AttachEngine( context.engine, context.chitBag );
+	context.worldMap->AttachHistory(context.chitBag->GetNewsHistory());
 	playerID = 0;
 	avatarTimer = 0;
 	currentVisitor = 0;
 
-	circuitSim  = new CircuitSim(worldMap, engine, chitBag);
+	context.circuitSim = new CircuitSim(context.worldMap, context.engine, context.chitBag);
 
 	random.SetSeedFromTime();
-	plantScript = new PlantScript(chitBag->Context());
+	plantScript = new PlantScript(context.chitBag->Context());
 
 	DumpModel();
 }
@@ -87,23 +85,23 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 Sim::~Sim()
 {
-	delete circuitSim;
+	delete context.circuitSim;
 	delete plantScript;
 	delete visitors;
 	delete weather;
 	delete reserveBank;
-	worldMap->AttachEngine( 0, 0 );
-	worldMap->AttachHistory(0);
-	chitBag->RemoveListener(this);
-	delete chitBag;
-	delete engine;
-	delete worldMap;
+	context.worldMap->AttachEngine( 0, 0 );
+	context.worldMap->AttachHistory(0);
+	context.chitBag->RemoveListener(this);
+	delete context.chitBag;
+	delete context.engine;
+	delete context.worldMap;
 	delete itemDB;
 }
 
 
-int    Sim::AgeI() const { return chitBag->AbsTime() / AGE_IN_MSEC; }
-double Sim::AgeD() const { return double(chitBag->AbsTime()) / double(AGE_IN_MSEC); }
+int    Sim::AgeI() const { return context.chitBag->AbsTime() / AGE_IN_MSEC; }
+double Sim::AgeD() const { return double(context.chitBag->AbsTime()) / double(AGE_IN_MSEC); }
 float  Sim::AgeF() const { return float(AgeD()); }
 
 void Sim::DumpModel()
@@ -148,8 +146,8 @@ void Sim::DumpModel()
 
 void Sim::Load( const char* mapDAT, const char* gameDAT )
 {
-	chitBag->DeleteAll();
-	worldMap->Load( mapDAT );
+	context.chitBag->DeleteAll();
+	context.worldMap->Load( mapDAT );
 
 	if ( !gameDAT ) {
 		// Fresh start
@@ -178,16 +176,16 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
-			engine->camera.Serialize( &reader );
-			chitBag->Serialize( &reader );
+			context.engine->camera.Serialize( &reader );
+			context.chitBag->Serialize( &reader );
 
 			XarcClose( &reader );
 
 			fclose( fp );
 		}
 	}
-	if ( chitBag->GetChit( playerID )) {
-		Chit* player = chitBag->GetChit( playerID );
+	if ( context.chitBag->GetChit( playerID )) {
+		Chit* player = context.chitBag->GetChit( playerID );
 		// Mark as player controlled so it reacts as expected to player input.
 		// This is the primary avatar, and has some special rules.
 		player->SetPlayerControlled( true );
@@ -197,7 +195,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 
 void Sim::Save( const char* mapDAT, const char* gameDAT )
 {
-	worldMap->Save( mapDAT );
+	context.worldMap->Save( mapDAT );
 
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
@@ -219,8 +217,8 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
-			engine->camera.Serialize( &writer );
-			chitBag->Serialize( &writer );
+			context.engine->camera.Serialize( &writer );
+			context.chitBag->Serialize( &writer );
 
 			XarcClose( &writer );
 			fclose( fp );
@@ -263,12 +261,12 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 			if (chit->Team() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
-				chitBag->GetNewsHistory()->Add(news);
+				context.chitBag->GetNewsHistory()->Add(news);
 
 				// All the buildings become neutral. Some become ruins...
 				BuildingFilter filter;
 				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
-				chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
+				context.chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
 				for (int i = 0; i < queryArr.Size(); ++i) {
 
 					// Make an ornamental copy.
@@ -276,13 +274,13 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 					if (item && queryArr[i]->GetRenderComponent()) {
 						Vector2I pos = queryArr[i]->GetSpatialComponent()->Bounds().min;
 						float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
-						Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
+						Chit* c = context.chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
 						c->GetSpatialComponent()->SetYRotation(yrot);
 					}
 					queryArr[i]->DeRez();
 				}
 			}
-			if (chitBag->GetHomeTeam() && (chit->Team() == chitBag->GetHomeTeam())) {
+			if (context.chitBag->GetHomeTeam() && (chit->Team() == context.chitBag->GetHomeTeam())) {
 				AbandonDomain();
 			}
 		}
@@ -293,7 +291,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 void Sim::AbandonDomain()
 {
 	static const Vector2I ZERO = { 0, 0 };
-	chitBag->SetHomeSector(ZERO);
+	context.chitBag->SetHomeSector(ZERO);
 	if (playerID) {
 		Chit* player = GetPlayerChit();
 		if (player) player->SetPlayerControlled(false);
@@ -314,25 +312,25 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		// Tell all the AIs the core is going away.
 		ChitHasAIComponent filter;
 		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
-		chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
+		context.chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
 		for (int i = 0; i < queryArr.Size(); ++i) {
 			queryArr[i]->GetAIComponent()->ClearTaskList();
 		}
 
-		//chitBag->QueueDelete(core);
+		//context.chitBag->QueueDelete(core);
 		// QueueDelete is safer, but all kinds of asserts fire (correctly)
 		// if 2 cores are in the same place. This may cause an issue
 		// if CreateCore is called during the DoTick()
-		chitBag->DeleteChit(core);
+		context.chitBag->DeleteChit(core);
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	const GameItem& coreItem = itemDefDB->Get("core");
 
-	const SectorData* sectorDataArr = worldMap->GetSectorData();
+	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
 	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
 	if (sd.HasCore()) {
-		Chit* chit = chitBag->NewBuilding(sd.core, "core", 0);
+		Chit* chit = context.chitBag->NewBuilding(sd.core, "core", 0);
 
 		// 'in use' instead of blocking.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
@@ -346,7 +344,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		if (team != TEAM_NEUTRAL) {
 			cs->ParentChit()->GetItem()->team = team;
 			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
-			chitBag->GetNewsHistory()->Add(news);
+			context.chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());
 		}
@@ -359,20 +357,20 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 
 void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
-	GLASSERT(chitBag->GetHomeTeam());
-	GLASSERT(chitBag->GetHomeCore());
-	Chit* chit = chitBag->NewDenizen(pos, chitBag->GetHomeTeam());
+	GLASSERT(context.chitBag->GetHomeTeam());
+	GLASSERT(context.chitBag->GetHomeCore());
+	Chit* chit = context.chitBag->NewDenizen(pos, context.chitBag->GetHomeTeam());
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
-	chitBag->GetCamera( engine )->SetTrack( playerID );
+	context.chitBag->GetCamera( context.engine )->SetTrack( playerID );
 
 	GameItem* items[3] = { 0, 0, 0 };
-	items[0] = chitBag->AddItem( "shield", chit, engine, 0, 0 );
-	items[1] = chitBag->AddItem( "blaster", chit, engine, 0, 0 );
-	items[2] = chitBag->AddItem( "ring", chit, engine, 0, 0 );
+	items[0] = context.chitBag->AddItem( "shield", chit, context.engine, 0, 0 );
+	items[1] = context.chitBag->AddItem( "blaster", chit, context.engine, 0, 0 );
+	items[2] = context.chitBag->AddItem( "ring", chit, context.engine, 0, 0 );
 
-	NewsHistory* history = chitBag->GetNewsHistory();
-	Chit* deity = chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
+	NewsHistory* history = context.chitBag->GetNewsHistory();
+	Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
 	for (int i = 0; i < 3; i++) {
 		NewsEvent news(NewsEvent::FORGED, ToWorld2F(pos), items[i], deity);
 		history->Add(news);
@@ -397,22 +395,22 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 
 Chit* Sim::GetPlayerChit()
 {
-	return chitBag->GetChit( playerID );
+	return context.chitBag->GetChit( playerID );
 }
 
 
 Texture* Sim::GetMiniMapTexture()
 {
-	return engine->GetMiniMapTexture();
+	return context.engine->GetMiniMapTexture();
 }
 
 
 void Sim::DoTick( U32 delta )
 {
-	worldMap->DoTick( delta, chitBag );
+	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
-	circuitSim->DoTick(delta);
-	chitBag->DoTick( delta );
+	context.circuitSim->DoTick(delta);
+	context.chitBag->DoTick( delta );
 
 	// From the CHIT_DESTROYED_START we have a list of
 	// Cores that will be going away...check them here,
@@ -444,9 +442,9 @@ void Sim::DoTick( U32 delta )
 
 	while( volcano-- ) {
 		for( int i=0; i<5; ++i ) {
-			int x = random.Rand(worldMap->Width());
-			int y = random.Rand(worldMap->Height());
-			if ( worldMap->IsLand( x, y ) ) {
+			int x = random.Rand(context.worldMap->Width());
+			int y = random.Rand(context.worldMap->Height());
+			if ( context.worldMap->IsLand( x, y ) ) {
 				// Don't destroy opporating domains. Crazy annoying.
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
@@ -464,14 +462,14 @@ void Sim::DoTick( U32 delta )
 
 		// Check if the visitor is still in the world.
 		if ( visitorData[currentVisitor].id ) {
-			if ( !chitBag->GetChit( visitorData[currentVisitor].id )) {
+			if ( !context.chitBag->GetChit( visitorData[currentVisitor].id )) {
 				visitorData[currentVisitor].id = 0;
 			}
 		}
 
 		if (this->SpawnEnabled()) {
 			if (visitorData[currentVisitor].id == 0) {
-				Chit* chit = chitBag->NewVisitor(currentVisitor);
+				Chit* chit = context.chitBag->NewVisitor(currentVisitor);
 				visitorData[currentVisitor].id = chit->ID();
 			}
 		}
@@ -482,12 +480,12 @@ void Sim::DoTick( U32 delta )
 	}
 
 	// Cheat! Seed early on, so there is good plant variety.
-	int plantCount = worldMap->CountPlants();
-	if (worldMap->CountPlants() < TYPICAL_PLANTS / 2) {
+	int plantCount = context.worldMap->CountPlants();
+	if (context.worldMap->CountPlants() < TYPICAL_PLANTS / 2) {
 		// And seed lots of plants in the beginning, with extra variation in the early world.
 		for (int i = 0; i < 5; ++i) {
-			int x = random.Rand(worldMap->Width());
-			int y = random.Rand(worldMap->Height());
+			int x = random.Rand(context.worldMap->Width());
+			int y = random.Rand(context.worldMap->Height());
 			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_PLANT_TYPES) : -1;
 			CreatePlant(x, y, type);
 		}
@@ -495,14 +493,14 @@ void Sim::DoTick( U32 delta )
 	DoWeatherEffects( delta );
 
 	// Special rule for player controlled chit: give money to the core.
-	CoreScript* cs = chitBag->GetHomeCore();
+	CoreScript* cs = context.chitBag->GetHomeCore();
 	Chit* player   = this->GetPlayerChit();
 	if ( cs && player ) {
 		GameItem* item = player->GetItem();
 		// Don't clear the avatar's wallet if a scene is pushed - the avatar
 		// may be about to use the wallet!
 		if ( item && !item->wallet.IsEmpty() ) {
-			if ( !lumosGame->IsScenePushed() && !chitBag->IsScenePushed() ) {
+			if ( !context.game->IsScenePushed() && !context.chitBag->IsScenePushed() ) {
 				Wallet w = item->wallet.EmptyWallet();
 				cs->ParentChit()->GetItem()->wallet.Add( w );
 			}
@@ -517,7 +515,7 @@ void Sim::DoTick( U32 delta )
 		else {
 			avatarTimer -= delta;
 			if (avatarTimer <= 0) {
-				if (chitBag->GetHomeCore()) {
+				if (context.chitBag->GetHomeCore()) {
 					CreateAvatar(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
 				}
 				avatarTimer = 0;
@@ -530,15 +528,15 @@ void Sim::DoTick( U32 delta )
 void Sim::DoWeatherEffects( U32 delta )
 {
 	Vector3F at;
-	engine->CameraLookingAt( &at );
+	context.engine->CameraLookingAt( &at );
 
 	float rain = weather->RainFraction( at.x, at.z );
 
 	if ( rain > 0.5f ) {
 		float rainEffect = (rain-0.5f)*2.0f;	// 0-1
 
-		ParticleDef pd = engine->particleSystem->GetPD( "splash" );
-		const float rad = (at - engine->camera.PosWC()).Length() * sinf( ToRadian( EL_FOV ));
+		ParticleDef pd = context.engine->particleSystem->GetPD( "splash" );
+		const float rad = (at - context.engine->camera.PosWC()).Length() * sinf( ToRadian( EL_FOV ));
 		const float RAIN_AREA = rad * rad;
 		pd.count = (int)(RAIN_AREA * rainEffect * 0.05f );
 
@@ -550,15 +548,15 @@ void Sim::DoWeatherEffects( U32 delta )
 
 		Rectangle3F rainBounds;
 		rainBounds.Set( at.x-rad, 0.02f, at.z-rad, at.x+rad, 0.02f, at.z+rad );
-		worldMap->SetSaturation( 1.0f - 0.50f*rainEffect );
+		context.worldMap->SetSaturation( 1.0f - 0.50f*rainEffect );
 
-		engine->particleSystem->EmitPD( pd, rainBounds, V3F_UP, delta );
+		context.engine->particleSystem->EmitPD( pd, rainBounds, V3F_UP, delta );
 	}
 	else {
-		worldMap->SetSaturation( 1 );
+		context.worldMap->SetSaturation( 1 );
 	}
 	float normalTemp = weather->Temperature( at.x, at.z ) * 2.0f - 1.0f;
-	engine->SetTemperature( normalTemp );
+	context.engine->SetTemperature( normalTemp );
 }
 
 
@@ -579,7 +577,7 @@ void Sim::UpdateUIElements(const Model* models[], int n)
 	}
 	// Everything remaining in the uiChits is no longer in use:
 	for (int i = 0; i < uiChits.Size(); ++i) {
-		Chit* chit = chitBag->GetChit(uiChits[i]);
+		Chit* chit = context.chitBag->GetChit(uiChits[i]);
 		if (chit && chit->GetRenderComponent()) {
 			chit->GetRenderComponent()->PositionIcons(false);	// now off-screen
 		}
@@ -599,7 +597,7 @@ void Sim::UpdateUIElements(const Model* models[], int n)
 
 void Sim::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts(), this );
+	context.engine->Draw( deltaTime, context.chitBag->BoltMem(), context.chitBag->NumBolts(), this );
 	
 #if 0
 	// Debug port locations.
@@ -608,7 +606,7 @@ void Sim::Draw3D( U32 deltaTime )
 		CompositingShader debug( BLEND_NORMAL );
 		debug.SetColor( 1, 1, 1, 0.5f );
 		CChitArray arr;
-		chitBag->FindBuilding(	IStringConst::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
+		context.chitBag->FindBuilding(	IStringConst::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
 								0, LumosChitBag::NEAREST, &arr );
 		for( int i=0; i<arr.Size(); ++i ) {
 			Rectangle2I p = GET_SUB_COMPONENT( arr[i], SpatialComponent, MapSpatialComponent )->PorchPos();
@@ -623,15 +621,15 @@ void Sim::Draw3D( U32 deltaTime )
 
 void Sim::CreateRockInOutland()
 {
-	const SectorData* sectorDataArr = worldMap->GetSectorData();
+	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
 	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
 		const SectorData& sd = sectorDataArr[i];
 		if ( !sd.HasCore() ) {
 			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
 				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
-					if (worldMap->GetWorldGrid(i, j).IsLand()) {
-						worldMap->SetPlant(i, j, 0, 0);
-						worldMap->SetRock(i, j, -1, false, 0);
+					if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
+						context.worldMap->SetPlant(i, j, 0, 0);
+						context.worldMap->SetRock(i, j, -1, false, 0);
 					}
 				}
 			}
@@ -642,9 +640,9 @@ void Sim::CreateRockInOutland()
 
 void Sim::SetAllRock()
 {
-	for( int j=0; j<worldMap->Height(); ++j ) {
-		for( int i=0; i<worldMap->Width(); ++i ) {
-			worldMap->SetRock( i, j, -1, false, 0 );
+	for( int j=0; j<context.worldMap->Height(); ++j ) {
+		for( int i=0; i<context.worldMap->Width(); ++i ) {
+			context.worldMap->SetRock( i, j, -1, false, 0 );
 		}
 	}
 }
@@ -652,13 +650,13 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y )
 {
-	const SectorData& sd = worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSector( x, y );
 	if ( sd.ports == 0 ) {
 		// no point to volcanoes in the outland
 		return;
 	}
 
-	Chit* chit = chitBag->NewChit();
+	Chit* chit = context.chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 	chit->Add( new VolcanoScript());
 
@@ -670,24 +668,24 @@ bool Sim::CreatePlant( int x, int y, int type )
 {
 	// Pull in plants from edges - don't want to check
 	// growth bounds later.
-	Rectangle2I bounds = worldMap->Bounds();
+	Rectangle2I bounds = context.worldMap->Bounds();
 	bounds.Outset(-8);
 	if ( !bounds.Contains( x, y ) ) {
 		return false;
 	}
-	const SectorData& sd = worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSector( x, y );
 	if (sd.HasCore() && sd.core.x == x && sd.core.y == y ) {
 		// no plants on cores.
 		return false;
 	}
 
 	// About 50,000 plants seems about right.
-	int count = worldMap->CountPlants();
+	int count = context.worldMap->CountPlants();
 	if (count > TYPICAL_PLANTS) {
 		return false;
 	}
 
-	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
+	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
 	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
 		return false;
 	}
@@ -696,7 +694,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 	if (    wg.IsPassable() 
 		 && wg.Plant() == 0
 		 && wg.Land() == WorldGrid::LAND 
-		 && !chitBag->MapGridUse(x,y) ) 
+		 && !context.chitBag->MapGridUse(x,y) ) 
 	{
 		if ( type < 0 ) {
 			// Scan for a good type!
@@ -710,7 +708,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 			}
 
 			for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-				const WorldGrid& wgScan = worldMap->GetWorldGrid(it.Pos());
+				const WorldGrid& wgScan = context.worldMap->GetWorldGrid(it.Pos());
 				if (wgScan.Plant()) {
 					// Note that in this version, only stage>0 plants
 					// change the odds of the plant type. Experimenting
@@ -720,7 +718,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
-		worldMap->SetPlant(x, y, type + 1, 0);
+		context.worldMap->SetPlant(x, y, type + 1, 0);
 		return true;
 	}
 	return false;
@@ -735,7 +733,7 @@ void Sim::UseBuilding()
 	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = ToSector( pos2i );
 
-	Chit* building = chitBag->QueryPorch( pos2i,0 );
+	Chit* building = context.chitBag->QueryPorch( pos2i,0 );
 	if ( building && building->GetItem() ) {
 		IString name = building->GetItem()->IName();
 		ItemComponent* ic = player->GetItemComponent();
@@ -750,23 +748,23 @@ void Sim::UseBuilding()
 
 		if ( cs && ic ) {
 			if ( name == IStringConst::vault ) {
-				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0 ));
 			}
 			else if ( name == IStringConst::market ) {
 				// The avatar doesn't pay sales tax.
-				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0 ));
 			}
 			else if (name == IStringConst::exchange) {
-				chitBag->PushScene(LumosGame::SCENE_CHARACTER,
+				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
 					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0));
 			}
 			else if ( name == IStringConst::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
 				data->tech = int(cs->GetTech());
 				data->itemComponent = ic;
-				chitBag->PushScene( LumosGame::SCENE_FORGE, data );
+				context.chitBag->PushScene( LumosGame::SCENE_FORGE, data );
 			}
 		}
 	}

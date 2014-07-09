@@ -99,16 +99,11 @@ private:
 
 class WorldMap;
 class LumosGame;
+class CircuitSim;
 
 struct ChitContext
 {
-	ChitContext() : engine(0), worldMap(0), game(0), chitBag(0) {}
-	void Set( Engine* e, WorldMap* wm, LumosGame* g) {
-		this->engine = e;
-		this->worldMap = wm;
-		this->game = g;
-		//this->chitBag = cb;	// set when added
-	}
+	ChitContext() : engine(0), worldMap(0), game(0), chitBag(0), circuitSim(0) {}
 
 	// cross-engine
 	Engine*		engine;
@@ -117,6 +112,7 @@ struct ChitContext
 	WorldMap*	worldMap;
 	LumosGame*	game;
 	LumosChitBag* chitBag;
+	CircuitSim*	circuitSim;
 };
 
 
@@ -239,7 +235,7 @@ public:
 	}
 
 protected:
-	ChitContext chitContext;
+	const ChitContext& chitContext;
 
 private:
 	void ProcessDeleteList();

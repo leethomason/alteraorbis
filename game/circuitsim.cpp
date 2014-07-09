@@ -20,10 +20,10 @@ static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 6.0f;
 static const float DAMAGE_PER_CHARGE = 15.0f;
 
 static const Vector2I DIR_I4[4] = {
-	{ 0, -1 },
-	{ -1, 0 },
 	{ 0, 1 },
 	{ 1, 0 },
+	{ 0, -1 },
+	{ -1, 0 },
 };
 
 
@@ -42,10 +42,6 @@ CircuitSim::CircuitSim(WorldMap* p_worldMap, Engine* p_engine, LumosChitBag* p_c
 	chitBag = p_chitBag;
 	GLASSERT(worldMap);
 	GLASSERT(engine);
-	// the chitBag can be null.
-	if (chitBag) {
-		chitBag->AddListener(this);
-	}
 }
 
 
@@ -55,20 +51,8 @@ CircuitSim::~CircuitSim()
 		engine->FreeModel(electrons[i].model);
 	}
 	electrons.Clear();
-	if (chitBag) {
-		chitBag->RemoveListener(this);
-	}
 }
 
-
-void CircuitSim::OnChitMsg(Chit* chit, const ChitMsg& msg)
-{
-	if (msg.ID() == ChitMsg::TRIGGER_DETECTOR_CIRCUIT) {
-		if (chit->GetSpatialComponent()) {
-			TriggerSwitch(chit->GetSpatialComponent()->GetPosition2DI());
-		}
-	}
-}
 
 
 void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
@@ -237,8 +221,8 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		break;
 
 		case CIRCUIT_BEND:
-		if (dir == 0) pe->dir = ((pe->dir + 1) & 3);
-		else if (dir == 3) pe->dir = ((pe->dir + 3) & 3);
+		if (dir == 2) pe->dir = ((pe->dir + 3) & 3);
+		else if (dir == 3) pe->dir = ((pe->dir + 1) & 3);
 		break;
 
 		case CIRCUIT_FORK_2:
@@ -268,13 +252,13 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		case CIRCUIT_TRANSISTOR_A:
 		case CIRCUIT_TRANSISTOR_B:
 		{
-			if (dir == 0) {
+			if (dir == 2) {
 				worldMap->SetCircuit(pe->pos.x, pe->pos.y, 
 									(wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? CIRCUIT_TRANSISTOR_B : CIRCUIT_TRANSISTOR_A);
 				sparkConsumed = true;
 			}
-			else if (pe->charge && dir == 2) {
-				pe->dir = pe->dir + ((wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? 3 : 1);
+			else if (dir == 0) {
+				pe->dir = pe->dir + ((wg.Circuit() == CIRCUIT_TRANSISTOR_A) ? 1 : 3);
 				pe->dir = pe->dir & 3;
 			}
 			else {
@@ -305,7 +289,10 @@ void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 
 		Chit* building = chitBag->QueryBuilding(pos);
 		if (building && building->GetItem() && building->GetItem()->IName() == ISC::turret && building->GetRenderComponent()) {
-			Vector3F straight = building->GetRenderComponent()->MainModel()->XForm() * V3F_OUT;
+			Quaternion q = building->GetRenderComponent()->MainModel()->GetRotation();
+			Matrix4 rot;
+			q.ToMatrix(&rot);
+			Vector3F straight = rot * V3F_OUT;
 			RenderComponent* rc = building->GetRenderComponent();
 			Vector3F trigger = { 0, 0, 0 };
 			rc->CalcTrigger(&trigger, 0);

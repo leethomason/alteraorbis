@@ -156,12 +156,14 @@ d animation generation
 		x mini map texture colors incorrect
 		- remove ruins; go to just unknown, and decay?
 		- no emmitter in the core area
+		- no emitter beside water (?? how did this crop back up??)
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe
 		- auto-clear not working as well as it should
 		- walk target for the avatar
 		- 32 bit texture support
+		- denizens getting stuck pathing
 
 	- Census
 		x coolest stuff, past and present, by category

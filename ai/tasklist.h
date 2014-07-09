@@ -10,6 +10,7 @@ class WorldMap;
 class Engine;
 struct ComponentSet;
 class ChitBag;
+struct ChitContext;
 
 namespace ai {
 
@@ -27,7 +28,8 @@ public:
 		TASK_BUILD,		// any BuildScript action
 		TASK_PICKUP,
 		TASK_USE_BUILDING,
-		TASK_REPAIR_BUILDING
+		TASK_REPAIR_BUILDING,
+		TASK_FLAG
 	};
 
 	Task() { Clear(); }
@@ -74,6 +76,12 @@ public:
 		return t;
 	}
 
+	static Task FlagTask() {
+		Task t;
+		t.action = TASK_FLAG;
+		return t;
+	}
+
 	static Task RemoveTask( const grinliz::Vector2I& pos2i );
 
 	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int rotation) {
@@ -108,13 +116,11 @@ public:
 class TaskList
 {
 public:
-	TaskList()	: worldMap(0), engine(0), chitBag(0), socialTicker(2000) {}
+	TaskList()	: context(0), socialTicker(2000) {}
 	~TaskList()	{ Clear();  }
 
-	void Init( WorldMap* _map, Engine* _engine, ChitBag* _cb ) {
-		worldMap = _map;
-		engine = _engine;
-		chitBag = _cb;
+	void Init(const ChitContext* c) {
+		context = c;
 	}
 
 	void Serialize( XStream* xs );
@@ -151,9 +157,7 @@ private:
 	// Remove the 1st task.
 	void Remove();
 
-	WorldMap*			worldMap;
-	Engine*				engine;
-	ChitBag*			chitBag;
+	const ChitContext* context;
 	grinliz::IString	lastBuildingUsed;	// should probably be serialized, if TaskList was serialized.
 	CTicker				socialTicker;
 	grinliz::CDynArray<Task> taskList;

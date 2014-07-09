@@ -4,6 +4,7 @@
 #include "../gamui/gamui.h"
 #include "../xegame/scene.h"
 #include "../xegame/cticker.h"
+#include "../xegame/chitbag.h"
 
 class LumosGame;
 class WorldMap;
@@ -60,11 +61,7 @@ private:
 		NUM_BUTTONS
 	};
 
-	LumosGame*  lumosGame;
-	LumosChitBag* chitBag;
-	Engine*		engine;
-	WorldMap*	worldMap;
-	CircuitSim*	circuitSim;
+	ChitContext	context;
 	bool		settled;
 
 	CTicker fluidTicker;

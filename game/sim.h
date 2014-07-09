@@ -28,6 +28,7 @@
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
 #include "../xegame/stackedsingleton.h"
+#include "../xegame/chitbag.h"
 
 #include "../engine/engine.h"
 
@@ -63,9 +64,9 @@ public:
 	Chit*			GetPlayerChit();
 
 	// use with caution: not a clear separation between sim and game
-	Engine*			GetEngine()		{ return engine; }
-	LumosChitBag*	GetChitBag()	{ return chitBag; }
-	WorldMap*		GetWorldMap()	{ return worldMap; }
+	Engine*			GetEngine()		{ return context.engine; }
+	LumosChitBag*	GetChitBag()	{ return context.chitBag; }
+	WorldMap*		GetWorldMap()	{ return context.worldMap; }
 
 	int    AgeI() const;
 	double AgeD() const;
@@ -100,16 +101,12 @@ private:
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
 	
-	Engine*			engine;
-	LumosGame*		lumosGame;
-	WorldMap*		worldMap;
+	ChitContext		context;
 	Weather*		weather;
 	ReserveBank*	reserveBank;
-	LumosChitBag*	chitBag;
 	Visitors*		visitors;
 	ItemDB*			itemDB;
 	PlantScript*	plantScript;
-	CircuitSim*		circuitSim;
 
 	grinliz::Random	random;
 	int playerID;

@@ -129,37 +129,37 @@ bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 }
 
 
-void TaskList::DoTasks( Chit* chit, U32 delta )
+void TaskList::DoTasks(Chit* chit, U32 delta)
 {
-	if ( taskList.Empty() ) return;
+	if (taskList.Empty()) return;
 
-	ComponentSet thisComp( chit, Chit::MOVE_BIT | Chit::SPATIAL_BIT | Chit::AI_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent );
+	ComponentSet thisComp(chit, Chit::MOVE_BIT | Chit::SPATIAL_BIT | Chit::AI_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE);
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 
-	if ( !pmc || !thisComp.okay ) {
+	if (!pmc || !thisComp.okay) {
 		Clear();
 		return;
 	}
 
 	LumosChitBag* chitBag = chit->Context()->chitBag;
-	Task* task			= &taskList[0];
-	Vector2I pos2i		= thisComp.spatial->GetPosition2DI();
-	Vector2F taskPos2	= { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-	Vector3F taskPos3	= { taskPos2.x, 0, taskPos2.y };
-	Vector2I sector		= ToSector( pos2i );
+	Task* task = &taskList[0];
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
+	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
 
-	switch ( task->action ) {
-	case Task::TASK_MOVE:
+	switch (task->action) {
+		case Task::TASK_MOVE:
 		if (task->timer == 0) {
 			// Need to start the move.
 			Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-			thisComp.ai->Move( dest, false );
+			thisComp.ai->Move(dest, false);
 			task->timer = delta;
 		}
-		else if ( pmc->Stopped() ) {
-			if ( pos2i == task->pos2i ) {
+		else if (pmc->Stopped()) {
+			if (pos2i == task->pos2i) {
 				// arrived!
 				Remove();
 			}
@@ -173,31 +173,31 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 		}
 		break;
 
-	case Task::TASK_STAND:
-		if ( pmc->Stopped() ) {
+		case Task::TASK_STAND:
+		if (pmc->Stopped()) {
 			thisComp.ai->Stand();
-			DoStanding( thisComp, delta );
+			DoStanding(thisComp, delta);
 
-			if ( taskList.Size() >= 2 ) {
+			if (taskList.Size() >= 2) {
 				int action = taskList[1].action;
-				if ( action == Task::TASK_BUILD ) {
-					Vector3F pos = ToWorld3F( taskList[1].pos2i );
+				if (action == Task::TASK_BUILD) {
+					Vector3F pos = ToWorld3F(taskList[1].pos2i);
 					pos.y = 0.5f;
-					engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD("construction", pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
-				else if ( action == Task::TASK_USE_BUILDING ) {
+				else if (action == Task::TASK_USE_BUILDING) {
 					Vector3F pos = thisComp.spatial->GetPosition();
-					engine->particleSystem->EmitPD( "useBuilding", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD("useBuilding", pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_REPAIR_BUILDING) {
 					Vector3F pos = thisComp.spatial->GetPosition();
-					engine->particleSystem->EmitPD("repair", pos, V3F_UP, 30);	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD("repair", pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 			}
 		}
 		break;
 
-	case Task::TASK_REPAIR_BUILDING:
+		case Task::TASK_REPAIR_BUILDING:
 		{
 			Chit* building = chitBag->GetChit(task->data);
 			if (building) {
@@ -221,57 +221,57 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 		}
 		break;
 
-	case Task::TASK_BUILD:
+		case Task::TASK_BUILD:
 		{
 			// "BUILD" just refers to a BuildScript task. Do some special case handling
 			// up front for rocks. (Which aren't handled by the general code.)
 			// Although a small kludge, way better than things used to be.
 
-			const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+			const WorldGrid& wg = context->worldMap->GetWorldGrid(task->pos2i.x, task->pos2i.y);
 
-			if ( task->buildScriptID == BuildScript::CLEAR ) {
-				worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
-				worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
-				worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
-				worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
+			if (task->buildScriptID == BuildScript::CLEAR) {
+				context->worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
+				context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
+				context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
+				context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
 
-				Chit* found = chitBag->QueryRemovable( task->pos2i );
-				if ( found ) {
+				Chit* found = chitBag->QueryRemovable(task->pos2i);
+				if (found) {
 					found->DeRez();
 				}
 				Remove();
 			}
-			else if ( controller && controller->GetItem() ) {
+			else if (controller && controller->GetItem()) {
 				BuildScript buildScript;
-				const BuildData& buildData	= buildScript.GetData( task->buildScriptID );
+				const BuildData& buildData = buildScript.GetData(task->buildScriptID);
 
-				if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i,
+				if (WorkQueue::TaskCanComplete(context->worldMap, context->chitBag, task->pos2i,
 					task->buildScriptID,
-					controller->GetItem()->wallet ))
+					controller->GetItem()->wallet))
 				{
 					// Auto-Clear plants.
 					Rectangle2I clearBounds;
 					clearBounds.Set(task->pos2i.x, task->pos2i.y, task->pos2i.x + buildData.size - 1, task->pos2i.y + buildData.size - 1);
 					for (Rectangle2IIterator it(clearBounds); !it.Done(); it.Next()) {
-						chit->Context()->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
+						context->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
 					}
 
 					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,
 					// but the plant will be de-rezzed at the next tick.
-					if ( task->buildScriptID == BuildScript::ICE ) {
-						worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
+					if (task->buildScriptID == BuildScript::ICE) {
+						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE);
 					}
-					else if ( task->buildScriptID == BuildScript::PAVE ) {
-						worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->Team()%3+1 );
+					else if (task->buildScriptID == BuildScript::PAVE) {
+						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, chit->Team() % 3 + 1);
 					}
 					else if (buildData.circuit) {
-						worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
+						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
-						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->Team() );
+						Chit* building = chitBag->NewBuilding(task->pos2i, buildData.cStructure, chit->Team());
 						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
 						building->GetSpatialComponent()->SetYRotation(float(task->data));
@@ -289,37 +289,37 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 		}
 		break;
 
-	case Task::TASK_PICKUP:
+		case Task::TASK_PICKUP:
 		{
 			int chitID = task->data;
-			Chit* itemChit = chitBag->GetChit( chitID );
-			if (    itemChit 
-				 && itemChit->GetSpatialComponent()
-				 && (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
-				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
+			Chit* itemChit = chitBag->GetChit(chitID);
+			if (itemChit
+				&& itemChit->GetSpatialComponent()
+				&& (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
+				&& itemChit->GetItemComponent()->NumItems() == 1)	// doesn't have sub-items / intrinsic
 			{
-				if ( thisComp.itemComponent->CanAddToInventory() ) {
+				if (thisComp.itemComponent->CanAddToInventory()) {
 					ItemComponent* ic = itemChit->GetItemComponent();
-					itemChit->Remove( ic );
-					chit->GetItemComponent()->AddToInventory( ic );
-					chitBag->DeleteChit( itemChit );
+					itemChit->Remove(ic);
+					chit->GetItemComponent()->AddToInventory(ic);
+					chitBag->DeleteChit(itemChit);
 				}
 			}
 			Remove();
 		}
 		break;
 
-	case Task::TASK_USE_BUILDING:
+		case Task::TASK_USE_BUILDING:
 		{
-			Chit* building	= chitBag->QueryPorch( pos2i, 0 );
-			if ( building ) {
+			Chit* building = chitBag->QueryPorch(pos2i, 0);
+			if (building) {
 				IString buildingName = building->GetItem()->IName();
 
-				if ( chit->PlayerControlled() ) {
+				if (chit->PlayerControlled()) {
 					// Not sure how this happened. But do nothing.
 				}
 				else {
-					UseBuilding( thisComp, building, buildingName );
+					UseBuilding(thisComp, building, buildingName);
 					lastBuildingUsed = buildingName;
 				}
 			}
@@ -327,8 +327,20 @@ void TaskList::DoTasks( Chit* chit, U32 delta )
 		}
 		break;
 
-	default:
-		GLASSERT( 0 );
+		case Task::TASK_FLAG:
+		{
+			const WorldGrid wg = context->worldMap->GetWorldGrid(pos2i);
+			if (wg.Circuit() == CIRCUIT_SWITCH) {
+				context->circuitSim->TriggerSwitch(pos2i);
+			}
+			// FIXME: what about flags in other domains?
+			coreScript->RemoveFlag(pos2i);
+			Remove();
+		}
+		break;
+
+		default:
+		GLASSERT(0);
 		break;
 
 	}

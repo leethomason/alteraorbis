@@ -1145,7 +1145,10 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 	}
 	GLASSERT(BoundsF().Contains(*outPos));
 
-	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
+	// This seems like a good idea, but leads to cases where
+	// the in == out and the pather is stuck. 
+	//return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
+	return result;
 }
 
 
