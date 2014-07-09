@@ -142,6 +142,8 @@ private:
 	int					currentNews;	// index of the last news item put in the console
 	int					coreWarningTimer, domainWarningTimer;
 	int					poolView;
+	float				savedCameraHeight;
+	grinliz::Quaternion	savedCameraRotation;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
 

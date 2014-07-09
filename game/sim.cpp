@@ -176,6 +176,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
+			context.circuitSim->Serialize(&reader);
 			context.engine->camera.Serialize( &reader );
 			context.chitBag->Serialize( &reader );
 
@@ -217,6 +218,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
+			context.circuitSim->Serialize(&writer);
 			context.engine->camera.Serialize( &writer );
 			context.chitBag->Serialize( &writer );
 

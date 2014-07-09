@@ -68,11 +68,12 @@ d animation generation
 		- denizen spawn rate. hmm..
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
-    	- seperate land from water. re-think water texture.
+    	d seperate land from water. re-think water texture.
+    	- 32 bit textures
 
-	- Beta 1c
-		- hints about what you need to build
-		- menu order, menu dependencies
+	x Beta 1c
+		x hints about what you need to build
+		x menu order, menu dependencies
 
 	- Beta2
 		x repair
@@ -143,27 +144,29 @@ d animation generation
 				x 3 split (rot?)
 				x crossover
 				x gate
-				- turret (or not circuit? building? similar to battery...) (rot)
+				x turret (or not circuit? building? similar to battery...) (rot)
 				- circuit art
 				x trigger plate
 				- fab plant
 				- circuit building ui
-				- switch activation ui
+				x switch activation ui
 
 		x grid travel shouldn't walk
 		x emitters too close to Grid
 		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
 		x mini map texture colors incorrect
 		- remove ruins; go to just unknown, and decay?
-		- no emmitter in the core area
-		- no emitter beside water (?? how did this crop back up??)
+		x no emmitter in the core area
+		- no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
+		- circuitFab isn't enabling/disabling other choices
+		- circuit view - toggle rock and buildings? top down?
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe
 		- auto-clear not working as well as it should
 		- walk target for the avatar
 		- 32 bit texture support
-		- denizens getting stuck pathing
+		x denizens getting stuck pathing
 
 	- Census
 		x coolest stuff, past and present, by category

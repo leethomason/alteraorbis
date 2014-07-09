@@ -54,6 +54,24 @@ CircuitSim::~CircuitSim()
 }
 
 
+void CircuitSim::Electron::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "Electron");
+	XARC_SER(xs, charge);
+	XARC_SER(xs, dir);
+	XARC_SER(xs, t);
+	XARC_SER(xs, pos);
+	XarcClose(xs);
+}
+
+
+void CircuitSim::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "CircuitSim");
+	XARC_SER_CARRAY(xs, electrons);
+	XarcClose(xs);
+}
+
 
 void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 {
@@ -96,6 +114,8 @@ int CircuitSim::NameToID(grinliz::IString name)
 
 void CircuitSim::DoTick(U32 delta)
 {
+	int ePerSector[NUM_SECTORS*NUM_SECTORS] = { 0 };
+
 	// This is a giant "mutate what we are iterating" problem.
 	// Copy for now; worry about perf later.
 	electronsCopy.Clear();
@@ -108,6 +128,16 @@ void CircuitSim::DoTick(U32 delta)
 
 		float travel = Travel(ELECTRON_SPEED, delta);
 		bool electronDone = false;
+
+		Vector2I sector = ToSector(pe->pos);
+		int sectorIndex = sector.y*NUM_SECTORS + sector.x;
+		ePerSector[sectorIndex] += 1;
+		if (ePerSector[sectorIndex] > 10) {
+			// Very easy to create infinite loops, infinite
+			// generators, etc. Even good reason to do so.
+			electronDone = true;
+			travel = 0;
+		}
 
 		while (travel > 0) {
 			if (pe->t < 0) {
@@ -162,7 +192,7 @@ void CircuitSim::DoTick(U32 delta)
 			Vector3F p3 = { p2.x, 0, p2.y };
 
 			const char* resName = pe->charge ? "charge" : "spark";
-			if (!StrEqual(pe->model->GetResource()->Name(), resName)) {
+			if (!pe->model || !StrEqual(pe->model->GetResource()->Name(), resName)) {
 				engine->FreeModel(pe->model);
 				pe->model = engine->AllocModel(resName);
 			}

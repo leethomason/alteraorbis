@@ -48,6 +48,7 @@ void Camera::TiltRotationToQuat( float tilt, float yRotation )
 	// Done in world: we tilt it down, turn it around y, then move it.
 	Matrix4 m = rotationY * rotationTilt;
 	quat.FromRotationMatrix( m );
+	valid = false;
 }
 
 

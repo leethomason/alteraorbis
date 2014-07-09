@@ -2381,20 +2381,25 @@ void WorldMap::GenerateEmitters(U32 seed)
 					Rectangle2I r;
 					r.Set(px*PATCH_SIZE + i*SECTOR_SIZE + 1, py*PATCH_SIZE + j*SECTOR_SIZE + 1,
 						(px + 1)*PATCH_SIZE + i*SECTOR_SIZE - 2, (py + 1)*PATCH_SIZE + j*SECTOR_SIZE - 2);
+					
+					// Don't up emitters too close to Cores. It's annoying.
+					if (r.Contains(GetSector(sector).core)) continue;
 
 					// ----- Find "good" emitters ---- //
 					bool found     = false;
 
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
-						if (h) {
-							int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-							int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
+						if (!grid[INDEX(it.Pos())].FluidSink()) {
+							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
+							if (h) {
+								int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
+								int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
 
-							SetEmitter(it.Pos().x, it.Pos().y, true, fluidType);
-							++nEmitters;
-							found = true;
-							break;
+								SetEmitter(it.Pos().x, it.Pos().y, true, fluidType);
+								++nEmitters;
+								found = true;
+								break;
+							}
 						}
 					}
 

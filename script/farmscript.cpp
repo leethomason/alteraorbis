@@ -21,7 +21,6 @@
 using namespace grinliz;
 using namespace gamui;
 
-static const int	FARM_SCRIPT_CHECK = 2000;
 static const int	FRUIT_SELF_DESTRUCT = 60*1000;
 
 FarmScript::FarmScript() : timer( 2000 )

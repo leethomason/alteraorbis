@@ -69,7 +69,11 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 
 	const ChitContext* context = Context();
 
-	context->worldMap->ApplyBlockEffect( *pos, radius, WorldMap::BT_PASSABLE, &newPos );
+	WorldMap::BlockResult br = context->worldMap->ApplyBlockEffect( *pos, radius, WorldMap::BT_PASSABLE, &newPos );
+	if (forceApplied) {
+		*forceApplied = (br == WorldMap::FORCE_APPLIED) ? true : false;
+	}
+
 	*pos = newPos;
 }
 

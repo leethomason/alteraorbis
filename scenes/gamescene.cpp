@@ -1102,6 +1102,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+#if 0
 		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
 		if (loc.IsZero()) {
 			poolView = 0;
@@ -1109,12 +1110,35 @@ void GameScene::HandleHotKey( int mask )
 		++poolView;
 		Vector2F lookAt = ToWorld2F(loc);
 		sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.y);
+#endif
 #if 0
 		if (playerChit) {
 			sim->GetChitBag()->AddSummoning(playerChit->GetSpatialComponent()->GetSector(), LumosChitBag::SUMMON_TECH);
 		}
 #endif
 #endif	// DEBUG
+	}
+	else if (mask == GAME_HK_CAMERA_TOGGLE) {
+		Vector3F at = V3F_ZERO;
+		sim->GetEngine()->CameraLookingAt(&at);
+
+		// Toggle high/low.
+		Camera* camera = &sim->GetEngine()->camera;
+
+		if (camera->EyeDir3()->y < -0.90f) {
+			// currently high
+			camera->SetQuat(savedCameraRotation);
+			camera->SetPosWC(camera->PosWC().x, savedCameraHeight, camera->PosWC().z);
+			sim->GetEngine()->CameraLookAt(at.x, at.z);
+		}
+		else {
+			// currently low
+			savedCameraRotation = camera->Quat();
+			savedCameraHeight = camera->PosWC().y;
+			camera->TiltRotationToQuat(-80, 0);
+			camera->SetPosWC(camera->PosWC().x, Min(EL_CAMERA_MAX, savedCameraHeight*2.0f), camera->PosWC().z);
+			sim->GetEngine()->CameraLookAt(at.x, at.z);
+		}
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;

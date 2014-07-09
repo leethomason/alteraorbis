@@ -47,6 +47,7 @@
   <item name="worker"
         resource="worker"
         flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE"
+        hpRegen="0.5"
         mass="20" >
     <intrinsics>
       <item name="claw"

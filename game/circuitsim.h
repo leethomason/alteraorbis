@@ -12,6 +12,7 @@ class WorldMap;
 class Engine;
 class Model;
 class LumosChitBag;
+class XStream;
 
 // WARNING: partial duplicate in BuildScript.h
 // WARNING: partial duplicate in FluidTestScene.h
@@ -39,6 +40,8 @@ public:
 	CircuitSim(WorldMap* worldMap, Engine* engine, LumosChitBag* chitBag);
 	~CircuitSim();
 
+	void Serialize(XStream* xs);
+
 	void TriggerSwitch(const grinliz::Vector2I& pos);
 	void TriggerDetector(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
@@ -51,7 +54,9 @@ private:
 		int dir;
 		float t;
 		grinliz::Vector2I pos;
-		Model* model;
+		Model* model;		// not serialized (on demand)
+
+		void Serialize(XStream* xs);
 	};
 
 	void CreateElectron(const grinliz::Vector2I& pos, int dir4, int charge);

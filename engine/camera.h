@@ -42,15 +42,30 @@ public:
 	void Orbit( float delta );
 
 	// Position in world coordinates.
-	const grinliz::Vector3F& PosWC() const			{ return posWC; }
-	void SetPosWC( const grinliz::Vector3F& value )	{ posWC = value; valid = false; }
-	void SetPosWC( float x, float y, float z )		{ posWC.Set( x, y, z ); valid = false; }
-	void DeltaPosWC( float x, float y, float z )	{ posWC.x += x; posWC.y += y; posWC.z += z; valid = false; }
+	const grinliz::Vector3F& PosWC() const			{
+		return posWC;
+	}
+	void SetPosWC(const grinliz::Vector3F& value)	{
+		posWC = value;
+		valid = false;
+	}
+	void SetPosWC(float x, float y, float z)		{
+		posWC.Set(x, y, z);
+		valid = false;
+	}
+	void DeltaPosWC(float x, float y, float z)	{
+		posWC.x += x; posWC.y += y; posWC.z += z;
+		valid = false;
+	}
 
 	const grinliz::Matrix4& ViewMatrix()			{ if ( !valid ) CalcWorldXForm();
 													  return viewMatrix;
 													}
 	const grinliz::Quaternion& Quat() const			{ return quat; }
+	void SetQuat(const grinliz::Quaternion& q)		{
+		quat = q;
+		valid = false;
+	}
 								
 	enum {
 		NORMAL,
