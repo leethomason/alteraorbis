@@ -2032,8 +2032,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(6), BLACKMAG_Y(0) },	// circuit: fork2		
 		{ BLACKMAG_X(2), BLACKMAG_Y(6) },	// circuit: ice		
 		{ BLACKMAG_X(3), BLACKMAG_Y(1) },	// circuit: stop		
-		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_small_enemy
-		{ BLACKMAG_X(5), BLACKMAG_Y(1) },	// circuit: detect_large_enemy
+		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_enemy
 		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
 		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B		
 	};

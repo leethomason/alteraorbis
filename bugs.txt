@@ -148,7 +148,7 @@ d animation generation
 				- circuit art
 				x trigger plate
 				- fab plant
-				- circuit building ui
+				x circuit building ui
 				x switch activation ui
 
 		x grid travel shouldn't walk
@@ -158,15 +158,19 @@ d animation generation
 		- remove ruins; go to just unknown, and decay?
 		x no emmitter in the core area
 		- no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
-		- circuitFab isn't enabling/disabling other choices
-		- circuit view - toggle rock and buildings? top down?
+		x circuitFab isn't enabling/disabling other choices
+		x circuit view - toggle rock and buildings? top down?
+		x remove enemy detector variants
+		x denizens getting stuck pathing
+		- better spark / charge effects. new colors, particle trail
+		- fix particles. much too stressed.
+		- battery logic isn't correct
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe
 		- auto-clear not working as well as it should
 		- walk target for the avatar
 		- 32 bit texture support
-		x denizens getting stuck pathing
 
 	- Census
 		x coolest stuff, past and present, by category

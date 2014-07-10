@@ -26,8 +26,7 @@ enum {
 	CIRCUIT_FORK_2,
 	CIRCUIT_ICE,
 	CIRCUIT_STOP,
-	CIRCUIT_DETECT_SMALL_ENEMY,
-	CIRCUIT_DETECT_LARGE_ENEMY,
+	CIRCUIT_DETECT_ENEMY,
 	CIRCUIT_TRANSISTOR_A,	// needs to be last: some special code that there is one transistor in 2 states.
 	CIRCUIT_TRANSISTOR_B,
 	NUM_CIRCUITS

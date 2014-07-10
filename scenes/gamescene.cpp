@@ -1083,7 +1083,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 0
+#if 1
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1265,6 +1265,8 @@ void GameScene::SetBuildButtons()
 	int nDistilleries = arr.Size();
 	cb->FindBuildingCC(ISC::market, sector, 0, 0, &arr, 0);
 	int nMarkets = arr.Size();
+	cb->FindBuildingCC(ISC::circuitFab, sector, 0, 0, &arr, 0);
+	int nCircuitFab = arr.Size();
 
 	// Enforce the sleep tube limit.
 	CStr<32> str;
@@ -1290,6 +1292,17 @@ void GameScene::SetBuildButtons()
 	buildButton[BuildScript::KIOSK_C].SetEnabled(nTemples > 0);
 	buildButton[BuildScript::KIOSK_S].SetEnabled(nTemples > 0);
 	buildButton[BuildScript::KIOSK_M].SetEnabled(nTemples > 0);
+
+	buildButton[BuildScript::BATTERY].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::TURRET].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_SWITCH].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_ZAPPER].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_BEND].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUTI_FORK_2].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_ICE].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_STOP].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_DETECT_ENEMY].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_TRANSISTOR].SetEnabled(nCircuitFab > 0);
 }
 
 void GameScene::SetPickupButtons()

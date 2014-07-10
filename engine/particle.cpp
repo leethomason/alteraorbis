@@ -67,11 +67,11 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 	float alphaCutoff = 0.0f;
 
 	if ( nParticles > MAX_PARTICLES/2 ) {
-		alphaCutoff = 0.1f;
+		alphaCutoff = 0.05f;
 	}
 	if ( nParticles > MAX_PARTICLES*3/4 ) {
 		RAD2 /= 2;
-		alphaCutoff = 0.2f;
+		alphaCutoff = 0.10f;
 	}
 
 	time += delta;

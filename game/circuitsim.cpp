@@ -87,7 +87,7 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
 
-	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
+	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY ) {
 		CreateElectron(pos, wg.CircuitRot(), 0);
 	}
 }
@@ -245,7 +245,9 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		break;
 
 		case CIRCUIT_POWER_UP: {
-			ApplyPowerUp(pe->pos, pe->charge);
+			if (pe->charge) {
+				ApplyPowerUp(pe->pos, pe->charge);
+			}
 			sparkConsumed = true;
 		}
 		break;

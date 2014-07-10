@@ -2660,9 +2660,9 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	// Circuits.
 	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
 	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
-		float mass = thisComp.item->mass;
-		if ((wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY) || (mass > 100)) {
+	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
+		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
+		if (cs && Team::GetRelationship(cs->ParentChit(), parentChit) == RELATE_ENEMY) {
 			Context()->circuitSim->TriggerDetector(pos2i);
 		}
 	}

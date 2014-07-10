@@ -24,7 +24,7 @@ public:
 	virtual int DoTick( U32 delta );
 
 	int Charge() const { return charge; }
-	int UseCharge() { int c = charge; charge = 0; ticker.Reset();  return c; }
+	int UseCharge();
 
 private:
 	int charge;

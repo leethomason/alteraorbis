@@ -73,6 +73,7 @@ public:
 	static grinliz::IString distillery;
 	static grinliz::IString exchange;
 	static grinliz::IString turret;
+	static grinliz::IString circuitFab;
 
 	static grinliz::IString zoneCreate;
 	static grinliz::IString zoneConsume;
