@@ -290,23 +290,23 @@ void Chit::OnChitEvent( const ChitEvent& event )
 
 void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
+	switch (msg.ID()) {
+		case ChitMsg::CHIT_DESTROYED_START:
+		case ChitMsg::CHIT_DESTROYED_END:
+		case ChitMsg::CHIT_DAMAGE:
+		Context()->chitBag->SendMessage(this, msg);
+		break;
+
+		default:
+		break;
+	}
+
 	// Components
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i] != exclude ) {
 			slot[i]->OnChitMsg( this, msg );
 			//GLOUTPUT(( "return\n" ));
 		}
-	}
-
-	switch (msg.ID()) {
-	case ChitMsg::CHIT_DESTROYED_START:
-	case ChitMsg::CHIT_DESTROYED_END:
-	case ChitMsg::CHIT_DAMAGE:
-		Context()->chitBag->SendMessage(this, msg);
-		break;
-
-	default:
-		break;
 	}
 }
 

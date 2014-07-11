@@ -1245,7 +1245,6 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	const Vector2F pos = thisComp.spatial->GetPosition2D();
 	const SectorPort start = context->worldMap->NearestPort(pos);
 	IString mob = thisComp.item->keyValues.GetIString("mob");
-	const CoreInfo* coreInfoArr = CoreScript::GetCoreInfoArr();
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	// First pass: filter on attract / repel choices.

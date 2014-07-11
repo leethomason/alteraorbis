@@ -365,9 +365,7 @@ void CircuitSim::Explosion(const grinliz::Vector2I& pos, int charge, bool circui
 {
 	Vector3F pos3 = ToWorld3F(pos);
 	DamageDesc dd = { float(charge) * DAMAGE_PER_CHARGE, GameItem::EFFECT_SHOCK };
-	if (chitBag) {
-		BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
-	}
+	BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
 	if (circuitDestroyed) {
 		worldMap->SetCircuit(pos.x, pos.y, 0);
 	}

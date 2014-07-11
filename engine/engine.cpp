@@ -263,6 +263,11 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	// -------- Camera & Frustum -------- //
 	screenport->SetView(camera.ViewMatrix());	// Draw the camera
 
+	Rectangle3F particleClip;
+	particleClip.Set(camera.PosWC().x - EL_FAR, -10.0f, camera.PosWC().z - EL_FAR,
+					 camera.PosWC().x + EL_FAR,  100.0f, camera.PosWC().z + EL_FAR);
+	particleSystem->SetClip(particleClip);
+
 	if (XenoAudio::Instance()) {
 		Vector3F lookingAt = { 0, 0, 0 };
 		this->CameraLookingAt(&lookingAt);

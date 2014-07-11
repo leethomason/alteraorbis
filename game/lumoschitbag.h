@@ -259,14 +259,12 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 
-	// Get the core for this sector.
+	int GetHomeTeam() const	{ return homeTeam; }
+	// Don't set to NEUTRAL: it's important to know that we're in the
+	// state where the home team is gone and hasn't been re-created.
+	void SetHomeTeam(int t)	{ GLASSERT(t);  homeTeam = t; }
 	CoreScript* GetHomeCore() const;
-	int GetHomeTeam() const;
-	grinliz::Vector2I GetHomeSector() const { return homeSector; }
-
-	void SetHomeSector( const grinliz::Vector2I& home ) {
-		homeSector = home;
-	}
+	grinliz::Vector2I GetHomeSector() const;
 
 	Census census;
 
@@ -305,6 +303,7 @@ private:
 	SceneData*					sceneData;
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	grinliz::Vector2I			homeSector;
+	int							homeTeam;	
 	Sim*						sim;	// if part of a simulation. can be null.
 	int							deityID[NUM_DEITY];
 

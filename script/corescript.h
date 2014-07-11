@@ -110,7 +110,7 @@ public:
 	static CoreScript* GetCore(const grinliz::Vector2I& sector) {
 		return GetCoreInfo(sector).coreScript;
 	}
-	static const CoreInfo* GetCoreInfoArr() { return coreInfoArr; }
+	static CoreScript* GetCoreFromTeam(int team);
 
 private:
 	void UpdateAI();

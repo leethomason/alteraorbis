@@ -2388,7 +2388,16 @@ void WorldMap::GenerateEmitters(U32 seed)
 					bool found     = false;
 
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						if (!grid[INDEX(it.Pos())].FluidSink()) {
+						// Also annoying: emitters beside water. (Can only
+						// happen with diagonals, but it's a fine early-out.)
+						bool besideWater = false;
+						for(int k = 0; k < 8; ++k) {
+							if (grid[INDEX(it.Pos() + DIR_I8[k])].FluidSink()) {
+								besideWater = true;
+								break;
+							}
+						}
+						if ( !besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
 							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
 							if (h) {
 								int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);

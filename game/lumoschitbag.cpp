@@ -52,7 +52,7 @@ LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
-	homeSector.Zero();
+	homeTeam = 0;
 }
 
 
@@ -794,21 +794,21 @@ int LumosChitBag::MapGridUse( int x, int y )
 
 CoreScript* LumosChitBag::GetHomeCore()	const
 { 
-	CoreScript* cs = CoreScript::GetCore(GetHomeSector());
-	if (cs && cs->ParentChit()->Team() != TEAM_NEUTRAL) {
-		return cs;
+	if (homeTeam) {
+		return CoreScript::GetCoreFromTeam(homeTeam);
 	}
 	return 0;
 }
 
 
-int LumosChitBag::GetHomeTeam()	const
-{
-	CoreScript* cs = CoreScript::GetCore(GetHomeSector());
-	if (cs && cs->ParentChit()->Team() != TEAM_NEUTRAL) {
-		return cs->ParentChit()->Team();
+Vector2I LumosChitBag::GetHomeSector()	const
+{ 
+	grinliz::Vector2I v = { 0, 0 };
+	CoreScript* home = GetHomeCore();
+	if (home && home->ParentChit() && home->ParentChit()->GetSpatialComponent()) {
+		v = home->ParentChit()->GetSpatialComponent()->GetSector();
 	}
-	return TEAM_NEUTRAL;
+	return v;
 }
 
 

@@ -551,3 +551,18 @@ bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 }
 
 
+CoreScript* CoreScript::GetCoreFromTeam(int team)
+{
+	static int last = 0;
+	if (coreInfoArr[last].coreScript && coreInfoArr[last].coreScript->ParentChit()->Team() == team) {
+		return coreInfoArr[last].coreScript;
+	}
+
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		if (coreInfoArr[i].coreScript && coreInfoArr[i].coreScript->ParentChit()->Team() == team) {
+			last = i;
+			return coreInfoArr[i].coreScript;
+		}
+	}
+	return 0;
+}
