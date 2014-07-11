@@ -197,6 +197,8 @@ void CircuitSim::DoTick(U32 delta)
 				pe->model = engine->AllocModel(resName);
 			}
 
+			ParticleDef pd = engine->particleSystem->GetPD("electron");
+			engine->particleSystem->EmitPD(pd, pe->model->Pos(), V3F_UP, 0);
 			pe->model->SetPos(p3);
 			electrons.Push(*pe);
 		}

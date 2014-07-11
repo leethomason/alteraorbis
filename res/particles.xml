@@ -170,6 +170,12 @@
     <colorVelocity red="0" green="0" blue="0" alpha="-2" />
   </particle>
 
+  <particle name="electron" size="0.2" count="1" config="hemi"
+            velocity="0" velocityFuzz="0">
+    <color red="0" green="1" blue="0" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-1.8" />
+  </particle>
+
   <particle name="sparkExplosion" 
             time="once" size="0.05" count="20" config="hemi" 
             posFuzz="0.0" velocity="1.0" velocityFuzz="0.1" >

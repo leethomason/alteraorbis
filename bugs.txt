@@ -139,7 +139,6 @@ d animation generation
 				x switch (rot)
 				x battery (rot)
 				x zapper
-
 				x bend (rot)
 				x 3 split (rot?)
 				x crossover
@@ -155,7 +154,7 @@ d animation generation
 		x emitters too close to Grid
 		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
 		x mini map texture colors incorrect
-		- remove ruins; go to just unknown, and decay?
+		t remove ruins; go to just unknown, and decay?
 		x no emmitter in the core area
 		t no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
 		x circuitFab isn't enabling/disabling other choices
