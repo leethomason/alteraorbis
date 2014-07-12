@@ -660,7 +660,9 @@ void BattleMechanics::GenerateExplosion(const DamageDesc& dd,
 	ps->EmitPD( def, pos, V3F_UP, 0 );
 
 	// Physics:
-	GenerateExplosionMsgs(dd, pos, originID, engine, chitBag);
+	if (chitBag) {
+		GenerateExplosionMsgs(dd, pos, originID, engine, chitBag);
+	}
 
 	// Physics, voxel:
 	if (pos.z < EXPLOSIVE_RANGE) {

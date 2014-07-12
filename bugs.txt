@@ -139,7 +139,6 @@ d animation generation
 				x switch (rot)
 				x battery (rot)
 				x zapper
-
 				x bend (rot)
 				x 3 split (rot?)
 				x crossover
@@ -148,25 +147,30 @@ d animation generation
 				- circuit art
 				x trigger plate
 				x fab plant
-				- circuit building ui
+				x circuit building ui
 				x switch activation ui
 
 		x grid travel shouldn't walk
 		x emitters too close to Grid
 		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
 		x mini map texture colors incorrect
-		- remove ruins; go to just unknown, and decay?
+		t remove ruins; go to just unknown, and decay?
 		x no emmitter in the core area
-		- no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
-		- circuitFab isn't enabling/disabling other choices
-		- circuit view - toggle rock and buildings? top down?
+		t no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
+		x circuitFab isn't enabling/disabling other choices
+		x circuit view - toggle rock and buildings? top down?
+		x remove enemy detector variants
+		x denizens getting stuck pathing
+		- better spark / charge effects. new colors, particle trail
+		x fix particles. much too stressed.
+		t battery logic isn't correct - seems okay in the Fluid Test
+		- above ground water needs differentiation
 
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe
 		- auto-clear not working as well as it should
 		- walk target for the avatar
 		- 32 bit texture support
-		x denizens getting stuck pathing
 
 	- Census
 		x coolest stuff, past and present, by category

@@ -32,6 +32,7 @@ ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	vbo = 0;
+	clip.Zero();
 }
 
 
@@ -66,12 +67,16 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 	float RAD2 = EL_FAR*EL_FAR;
 	float alphaCutoff = 0.0f;
 
-	if ( nParticles > MAX_PARTICLES/2 ) {
-		alphaCutoff = 0.1f;
+	if (nParticles > MAX_PARTICLES * 7 / 8) {
+		alphaCutoff = 0.10f;
+		RAD2 /= 4;
 	}
-	if ( nParticles > MAX_PARTICLES*3/4 ) {
+	else if ( nParticles > MAX_PARTICLES*3/4 ) {
+		alphaCutoff = 0.08f;
 		RAD2 /= 2;
-		alphaCutoff = 0.2f;
+	}
+	else if ( nParticles > MAX_PARTICLES/2 ) {
+		alphaCutoff = 0.05f;
 	}
 
 	time += delta;
@@ -92,7 +97,7 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 		*pd = *srcPD;
 		Vector4F color = srcPS->color + pd->colorVel * deltaF;
 
-		if (    color.w <= alphaCutoff
+		if (    (pd->colorVel.w < 0 && color.w <= alphaCutoff)
 			 || ((pd->pos - origin).LengthSquared() > RAD2)
 			 || (pd->velocity.y < 0 && pd->pos.y < 0 )
 			 || (pd->velocity.y > 0 && pd->pos.y > EL_CAMERA_MAX) )
@@ -221,6 +226,13 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 		if ( nParticles < MAX_PARTICLES ) {
 			ParticleData* pd = &particleData[nParticles];
 
+			Vector3F pos = region->CalcPoint( &random );
+
+			// Don't even emit if we'll never see it.
+			if (clip.Volume() && !clip.Contains(pos)) {
+				continue;
+			}
+
 			// For (hemi) sperical distributions, recompute a random direction.
 			if ( def.config == ParticleSystem::PARTICLE_HEMISPHERE || def.config == ParticleSystem::PARTICLE_SPHERE ) {
 				Vector3F n = { 0, 0, 0 };
@@ -252,7 +264,6 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 
 			Vector3F pFuzz;
 			random.NormalVector3D( &pFuzz.x );
-			Vector3F pos = region->CalcPoint( &random );
 			pos = pos + pFuzz*def.posFuzz;
 			pd->pos = pos;
 

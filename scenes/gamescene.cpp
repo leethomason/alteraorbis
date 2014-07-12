@@ -598,7 +598,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 
-	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	Vector3F atModel = { 0, 0, 0 };
 	Vector3F plane = { 0, 0, 0 };
@@ -652,7 +652,7 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
-	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 	if (coreScript && buildActive) {
 		WorkQueue* wq = coreScript->GetWorkQueue();
 		GLASSERT(wq);
@@ -886,7 +886,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim->UseBuilding();
 	}
 	else if ( item == &cameraHomeButton ) {
-		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 		if ( coreScript ) {
 			Chit* chit = coreScript->ParentChit();
 			if ( chit && chit->GetSpatialComponent() ) {
@@ -902,7 +902,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if (item == &prevUnit) bias = -1;
 		if (item == &nextUnit) bias = 1;
 
-		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 		if ( coreScript && coreScript->NumCitizens() ) {
 			if (item == &avatarUnit) {
 				chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
@@ -1083,7 +1083,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 0
+#if 1
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1208,7 +1208,7 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_CHEAT_TECH ) {
 		Chit* player = sim->GetPlayerChit();
 
-		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 		if (coreScript) {
 			for (int i = 0; i < 10; ++i) {
 				coreScript->AddTech();
@@ -1265,6 +1265,8 @@ void GameScene::SetBuildButtons()
 	int nDistilleries = arr.Size();
 	cb->FindBuildingCC(ISC::market, sector, 0, 0, &arr, 0);
 	int nMarkets = arr.Size();
+	cb->FindBuildingCC(ISC::circuitFab, sector, 0, 0, &arr, 0);
+	int nCircuitFab = arr.Size();
 
 	// Enforce the sleep tube limit.
 	CStr<32> str;
@@ -1290,6 +1292,17 @@ void GameScene::SetBuildButtons()
 	buildButton[BuildScript::KIOSK_C].SetEnabled(nTemples > 0);
 	buildButton[BuildScript::KIOSK_S].SetEnabled(nTemples > 0);
 	buildButton[BuildScript::KIOSK_M].SetEnabled(nTemples > 0);
+
+	buildButton[BuildScript::BATTERY].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::TURRET].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_SWITCH].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_ZAPPER].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_BEND].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUTI_FORK_2].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_ICE].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_STOP].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_DETECT_ENEMY].SetEnabled(nCircuitFab > 0);
+	buildButton[BuildScript::BUILD_CIRCUIT_TRANSISTOR].SetEnabled(nCircuitFab > 0);
 }
 
 void GameScene::SetPickupButtons()
@@ -1448,7 +1461,7 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Date %.2f\n%s", sim->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
-	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
@@ -1596,7 +1609,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		if (chit->GetComponent("CoreScript")) {
-			if (sim->GetChitBag()->GetHomeTeam() && chit->Team() == sim->GetChitBag()->GetHomeTeam()) {
+			if (sim->GetChitBag()->GetHomeTeam() && (chit->Team() == sim->GetChitBag()->GetHomeTeam())) {
 				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
@@ -1709,7 +1722,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		int team = Team::GenTeam(TEAM_HOUSE);
-		sim->GetChitBag()->SetHomeSector(ToSector(sd->x, sd->y));
+		sim->GetChitBag()->SetHomeTeam(team);
 		sim->CreateCore(ToSector(sd->x, sd->y), team);
 		ForceHerd(ToSector(sd->x, sd->y));
 

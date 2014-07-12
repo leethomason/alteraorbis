@@ -27,6 +27,18 @@ void BatteryComponent::OnRemove()
 }
 
 
+int BatteryComponent::UseCharge()
+{
+	int c = charge; 
+	if (charge) {
+		charge = 0;
+		ticker.Reset();
+	}
+	parentChit->SetTickNeeded();
+	return c; 
+}
+
+
 int BatteryComponent::DoTick(U32 delta)
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();

@@ -195,6 +195,7 @@ public:
 
 	const ParticleDef& GetPD( const char* name );
 
+	void SetClip(const grinliz::Rectangle3F& clip) { this->clip = clip; }
 	void Update( U32 deltaTime, Camera* camera );
 	void Draw();
 	void Clear();
@@ -214,6 +215,7 @@ private:
 	grinliz::Random random;
 	Texture* texture;
 	U32 time;
+	grinliz::Rectangle3F clip;
 
 	GPUVertexBuffer* vbo;
 

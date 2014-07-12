@@ -87,7 +87,7 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
 
-	if (wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY || wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY) {
+	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY ) {
 		CreateElectron(pos, wg.CircuitRot(), 0);
 	}
 }
@@ -197,6 +197,8 @@ void CircuitSim::DoTick(U32 delta)
 				pe->model = engine->AllocModel(resName);
 			}
 
+			ParticleDef pd = engine->particleSystem->GetPD("electron");
+			engine->particleSystem->EmitPD(pd, pe->model->Pos(), V3F_UP, 0);
 			pe->model->SetPos(p3);
 			electrons.Push(*pe);
 		}
@@ -245,7 +247,9 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 		break;
 
 		case CIRCUIT_POWER_UP: {
-			ApplyPowerUp(pe->pos, pe->charge);
+			if (pe->charge) {
+				ApplyPowerUp(pe->pos, pe->charge);
+			}
 			sparkConsumed = true;
 		}
 		break;
@@ -363,9 +367,7 @@ void CircuitSim::Explosion(const grinliz::Vector2I& pos, int charge, bool circui
 {
 	Vector3F pos3 = ToWorld3F(pos);
 	DamageDesc dd = { float(charge) * DAMAGE_PER_CHARGE, GameItem::EFFECT_SHOCK };
-	if (chitBag) {
-		BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
-	}
+	BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
 	if (circuitDestroyed) {
 		worldMap->SetCircuit(pos.x, pos.y, 0);
 	}

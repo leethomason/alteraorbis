@@ -115,7 +115,7 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			else if (wg.Circuit() == CIRCUIT_SWITCH) {
 				context.circuitSim->TriggerSwitch(pos2i);
 			}
-			else if (wg.Circuit() == CIRCUIT_DETECT_LARGE_ENEMY || wg.Circuit() == CIRCUIT_DETECT_SMALL_ENEMY) {
+			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY ) {
 				context.circuitSim->TriggerDetector(pos2i);
 			}
 			else {

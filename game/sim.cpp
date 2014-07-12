@@ -264,13 +264,13 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->Team() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
 				context.chitBag->GetNewsHistory()->Add(news);
-
+				
 				// All the buildings become neutral. Some become ruins...
 				BuildingFilter filter;
 				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
 				context.chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
 				for (int i = 0; i < queryArr.Size(); ++i) {
-
+					/*
 					// Make an ornamental copy.
 					GameItem* item = queryArr[i]->GetItem();
 					if (item && queryArr[i]->GetRenderComponent()) {
@@ -280,6 +280,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 						c->GetSpatialComponent()->SetYRotation(yrot);
 					}
 					queryArr[i]->DeRez();
+					*/
 				}
 			}
 			if (context.chitBag->GetHomeTeam() && (chit->Team() == context.chitBag->GetHomeTeam())) {
@@ -293,7 +294,10 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 void Sim::AbandonDomain()
 {
 	static const Vector2I ZERO = { 0, 0 };
-	context.chitBag->SetHomeSector(ZERO);
+	// Don't do this:
+	// context.chitBag->SetHomeTeam(0);
+	// Becasue other parts of the code need to
+	// shut down / change UI based on the home team.
 	if (playerID) {
 		Chit* player = GetPlayerChit();
 		if (player) player->SetPlayerControlled(false);

@@ -2032,8 +2032,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(6), BLACKMAG_Y(0) },	// circuit: fork2		
 		{ BLACKMAG_X(2), BLACKMAG_Y(6) },	// circuit: ice		
 		{ BLACKMAG_X(3), BLACKMAG_Y(1) },	// circuit: stop		
-		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_small_enemy
-		{ BLACKMAG_X(5), BLACKMAG_Y(1) },	// circuit: detect_large_enemy
+		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_enemy
 		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
 		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B		
 	};
@@ -2389,7 +2388,16 @@ void WorldMap::GenerateEmitters(U32 seed)
 					bool found     = false;
 
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						if (!grid[INDEX(it.Pos())].FluidSink()) {
+						// Also annoying: emitters beside water. (Can only
+						// happen with diagonals, but it's a fine early-out.)
+						bool besideWater = false;
+						for(int k = 0; k < 8; ++k) {
+							if (grid[INDEX(it.Pos() + DIR_I8[k])].FluidSink()) {
+								besideWater = true;
+								break;
+							}
+						}
+						if ( !besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
 							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
 							if (h) {
 								int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
