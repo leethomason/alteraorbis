@@ -1133,20 +1133,21 @@ int main( int argc, char* argv[] )
 
 		if ( surface ) {
 			// 444
-			OrderedDitherTo16( surface, RGBA16, false, btexture.pixelBuffer16 );
+
+			OrderedDitherTo16( surface, TEX_RGBA16, false, (U16*)btexture.pixelBuffer );
 			SDL_Surface* newSurf = SDL_CreateRGBSurface( 0, surface->w, surface->h, 16, 0xf000, 0x0f00, 0x00f0, 0x000f );
 			GLASSERT( newSurf->pitch == surface->w*2 );
-			memcpy( newSurf->pixels, btexture.pixelBuffer16, surface->w*surface->h*2 );
+			memcpy( newSurf->pixels, btexture.pixelBuffer, surface->w*surface->h*2 );
 			string out = inputDirectory + "Lenna4440.bmp";
 			SDL_SaveBMP( newSurf, out.c_str() );
 			
 			SDL_FreeSurface( newSurf );
 
 			// 565
-			OrderedDitherTo16( surface, RGB16, false, btexture.pixelBuffer16 );
+			OrderedDitherTo16( surface, TEX_RGB16, false, (U16*)btexture.pixelBuffer );
 			newSurf = SDL_CreateRGBSurface(	0, surface->w, surface->h, 16, 0xf800, 0x07e0, 0x001f, 0 );
 			GLASSERT( newSurf->pitch == surface->w*2 );
-			memcpy( newSurf->pixels, btexture.pixelBuffer16, surface->w*surface->h*2 );
+			memcpy( newSurf->pixels, btexture.pixelBuffer, surface->w*surface->h*2 );
 			string out1 = inputDirectory + "Lenna565.bmp";
 			SDL_SaveBMP( newSurf, out1.c_str() );
 

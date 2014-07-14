@@ -27,20 +27,20 @@
   <markov-word filename="barNames.txt" assetName="barNames" />
   
   <!-- Icon and UI -->
-  <texture filename="title.png" />
+  <texture filename="title.png" depth="32"/>
   <texture filename="icons.png" dither="false"/>
   <texture filename="iconDeco.png" dither="false" />
   <!-- new, atlased home of all icons, decos, etc. -->
   <texture filename="icon.png" table="icon.xml" maxSize="512"/>
   <texture filename="uiIcon.png" table="uiIcon.xml" />
-  <texture filename="farmzone.png" />
+  <texture filename="farmzone.png" depth="32" />
 
   <!-- Model textures -->
-  <texture filename="palette.png" />
+  <texture filename="palette.png" depth="32" />
   
-  <texture filename="palette_50.png" emissive="true" />
-  <texture filename="palette_100.png" emissive="true"/>
-  <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />
+  <texture filename="palette_50.png" emissive="true" depth="32" />
+  <texture filename="palette_100.png" emissive="true" depth="32" />
+  <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" depth="32" />
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="bluestone.png" />
@@ -49,8 +49,8 @@
   <texture filename="structure.png"   filename2="black512.png" emissive="true" colorMap="true"/>
   <texture filename="kioskscreen.png" filename2="black512.png" emissive="true" colorMap="true"/>
 
-  <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
-  <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" />
+  <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64" depth="32"/>
+  <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" depth="32"/>
   <texture filename="flags.png" />
   <texture filename="calibration.png" />
 

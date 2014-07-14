@@ -16,6 +16,7 @@
 #include "dither.h"
 #include "builder.h"
 #include "../grinliz/glutil.h"
+#include "../engine/texturetype.h"
 
 using namespace grinliz;
 
@@ -52,7 +53,7 @@ int ReducePixelDiv( int c, int shift, int num, int denom )
 // that looked odd in the texture. The more regular appearence
 // of the ordered dither looks better at run time.
 
-void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16* target )
+void OrderedDitherTo16( const SDL_Surface* surface, TextureType format, bool invert, U16* target )
 {
 	// Use the dither pattern to both fix error and round up. Since the shift/division tends
 	// to round the color down, the dither can diffuse and correct brightness errors.
@@ -74,7 +75,7 @@ void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16
 			const int numer = pattern[offset];
 
 			switch ( format ) {
-				case RGBA16:
+				case TEX_RGBA16:
 					p =	  
 						  ( ReducePixelDiv( c.r, 4, numer, denom ) << 12 )
 						| ( ReducePixelDiv( c.g, 4, numer, denom ) << 8 )
@@ -82,7 +83,7 @@ void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16
 						| ( ( c.a>>4 ) << 0 );
 					break;
 
-				case RGB16:
+				case TEX_RGB16:
 					p = 
 						  ( ReducePixelDiv( c.r, 3, numer, denom ) << 11 )
 						| ( ReducePixelDiv( c.g, 2, numer, denom ) << 5 )

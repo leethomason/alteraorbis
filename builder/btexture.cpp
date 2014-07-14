@@ -39,7 +39,6 @@ BTexture::BTexture()
 	  dither( false ),
 	  noMip( false ),
 	  colorMap( false ),
-	  doPreMult( false ),
 	  invert( true ),
 	  emissive( false ),
 	  alphaTexture(false),
@@ -51,8 +50,7 @@ BTexture::BTexture()
 	  atlasY( 0 ),
 	  format( TEX_RGBA16 ),
 	  surface( 0 ),
-	  pixelBuffer16( 0 ),
-	  pixelBuffer8( 0 )
+	  pixelBuffer( 0 )
 {
 }
 
@@ -62,8 +60,7 @@ BTexture::~BTexture()
 	if ( surface ) {
 		SDL_FreeSurface( surface );
 	}
-	delete [] pixelBuffer16;
-	delete [] pixelBuffer8;
+	delete [] pixelBuffer;
 }
 
 
@@ -81,16 +78,21 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	else {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "incorrect tag." );
 	}
+
 	element->QueryBoolAttribute( "dither", &dither );
 	element->QueryBoolAttribute( "noMip", &noMip );
 	element->QueryBoolAttribute( "colorMap", &colorMap );
 	element->QueryIntAttribute( "width", &targetWidth );
 	element->QueryIntAttribute( "height", &targetHeight );
 	element->QueryIntAttribute( "maxSize", &targetMax );
-	element->QueryBoolAttribute( "premult", &doPreMult );
 	element->QueryBoolAttribute( "emissive", &emissive );
 	element->QueryBoolAttribute("alphaTexture", &alphaTexture);
 	element->QueryBoolAttribute( "whiteMap", &whiteMap );
+	int depth = 16;
+	element->QueryAttribute("depth", &depth);
+	if (depth == 32) {
+		format = TEX_RGBA32;
+	}
 
 	return true;
 }
@@ -145,11 +147,11 @@ bool BTexture::Load()
 	}
 
 	if ( surface->format->Amask )
-		format = TEX_RGBA16;
+		format = (TextureBytesPerPixel(format) == 2) ? TEX_RGBA16 : TEX_RGBA32;
 	else 
-		format = TEX_RGB16;
+		format = (TextureBytesPerPixel(format) == 2) ? TEX_RGB16  : TEX_RGB24;
 
-	if ( emissive && format != TEX_RGBA16 ) {
+	if (emissive && !TextureHasAlpha(format)) {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Emmisive only supported on RGBA." );
 	}
 
@@ -168,11 +170,12 @@ bool BTexture::Load()
 		surface = alpha;
 	}
 
-	printf( "%s Loaded: '%s' bpp=%d em=%d", 
+	printf( "%s Loaded: '%s' bpp=%d em=%d output=%s", 
 			isImage ? "Image" : "Texture",
 			assetName.c_str(),
 			surface->format->BitsPerPixel,
-			emissive ? 1 : 0 );
+			emissive ? 1 : 0,
+			TextureString(format));
 	return true;
 }
 
@@ -184,14 +187,11 @@ void BTexture::Create( int w, int h, TextureType format )
 	this->format = format;
 
 	GLASSERT( !surface );
-	if ( format == RGBA16 ) {
+	if ( TextureHasAlpha(format)) {
 		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
 	}
-	else if ( format == RGB16 ) {
+	else {
 		surface = SDL_CreateRGBSurface( 0, w, h, 24, 0xff0000, 0x00ff00, 0x0000ff, 0 );
-	}
-	else if ( format == ALPHA ) {
-		surface = SDL_CreateRGBSurface( 0, w, h, 8, 0, 0, 0, 0xff );
 	}
 }
 
@@ -326,103 +326,81 @@ SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface )
 
 bool BTexture::ToBuffer()
 {
-	switch( surface->format->BitsPerPixel ) {
-		case 32:
-			printf( "  RGBA memory=%dk\n", (surface->w * surface->h * 2)/1024 );
-			pixelBuffer16 = new U16[ surface->w * surface->h ];
+	pixelBuffer = new U8[surface->w * surface->h * TextureBytesPerPixel(format)];
 
-			if ( doPreMult ) {
-				for( int j=0; j<surface->h; ++j ) {
-					for ( int i=0; i<surface->w; ++i ) {
-						Color4U8 c = GetPixel( surface, i, j );
-						c.r = c.r*c.a/255;
-						c.g = c.g*c.a/255;
-						c.b = c.b*c.a/255;
-						PutPixel( surface, i, j, c );
-					}
-				}
+	if (format == TEX_RGB24 || format == TEX_RGBA32) {
+		// The logic below assumes the pitch doesn't have padding, and that 
+		// RGB is 3 bytes and RGBA is 4.
+		GLASSERT(surface->pitch == surface->w * TextureBytesPerPixel(format));
+		for (int j = 0; j<surface->h; ++j) {
+			U8* p = pixelBuffer + j * surface->pitch;
+			const U8* q = 0;
+			if (invert)
+				q = (U8*)surface->pixels + (surface->h - 1 - j) * surface->pitch;
+			else
+				q = (U8*)surface->pixels + j * surface->pitch;
 
+			for (int i = 0; i<surface->pitch; ++i) {
+				*p++ = *q++;
 			}
+		}
+	}
+	else if (format == TEX_RGBA16) {
+		GLASSERT(surface->format->BitsPerPixel == 32);
+		// Bottom up!
+		if (!dither) {
+			U16* b = (U16*)pixelBuffer;
+			int start = invert ? surface->h - 1 : 0;
+			int end = invert ? -1 : surface->h;
+			int bias = invert ? -1 : 1;
 
-			// Bottom up!
-			if ( !dither ) {
-				U16* b = pixelBuffer16;
-				int start = invert ? surface->h-1 : 0;
-				int end =   invert ? -1 : surface->h;
-				int bias =  invert ? -1 : 1;
+			for (int j = start; j != end; j += bias) {
+				for (int i = 0; i < surface->w; ++i) {
+					Color4U8 c = GetPixel(surface, i, j);
 
-				for( int j=start; j != end; j+= bias ) {
-					for( int i=0; i<surface->w; ++i ) {
-						Color4U8 c = GetPixel( surface, i, j );
+					U16 p =
+						((c.r >> 4) << 12)
+						| ((c.g >> 4) << 8)
+						| ((c.b >> 4) << 4)
+						| ((c.a >> 4) << 0);
 
-						U16 p =
-								  ( ( c.r>>4 ) << 12 )
-								| ( ( c.g>>4 ) << 8 )
-								| ( ( c.b>>4 ) << 4)
-								| ( ( c.a>>4 ) << 0 );
-
-						*b++ = p;
-					}
-				}
-			}
-			else {
-				OrderedDitherTo16( surface, RGBA16, invert, pixelBuffer16 );
-			}
-			break;
-
-		case 24:
-			printf( "  RGB memory=%dk\n", (surface->w * surface->h * 2)/1024 );
-			pixelBuffer16 = new U16[ surface->w * surface->h ];
-
-			// Bottom up!
-			if ( !dither ) {
-				U16* b = pixelBuffer16;
-				int start = invert ? surface->h-1 : 0;
-				int end =   invert ? -1 : surface->h;
-				int bias =  invert ? -1 : 1;
-
-				for( int j=start; j != end; j+= bias ) {
-					for( int i=0; i<surface->w; ++i ) {
-						Color4U8 c = GetPixel( surface, i, j );
-
-						U16 p = 
-								  ( ( c.r>>3 ) << 11 )
-								| ( ( c.g>>2 ) << 5 )
-								| ( ( c.b>>3 ) );
-
-						*b++ = p;
-					}
+					*b++ = p;
 				}
 			}
-			else {
-				OrderedDitherTo16( surface, RGB16, invert, pixelBuffer16 );
-			}
-			break;
+		}
+		else {
+			OrderedDitherTo16(surface, TEX_RGBA16, invert, (U16*)pixelBuffer);
+		}
+	}
+	else if (format == TEX_RGB16) {
+		// Bottom up!
+		if (!dither) {
+			U16* b = (U16*)pixelBuffer;
+			int start = invert ? surface->h - 1 : 0;
+			int end = invert ? -1 : surface->h;
+			int bias = invert ? -1 : 1;
 
-		case 8:
-			{
-			printf( "  Alpha memory=%dk\n", (surface->w * surface->h * 1)/1024 );
-			pixelBuffer8 = new U8[ surface->w * surface->h ];
-			U8* b = pixelBuffer8;
+			for (int j = start; j != end; j += bias) {
+				for (int i = 0; i < surface->w; ++i) {
+					Color4U8 c = GetPixel(surface, i, j);
 
-			// Bottom up!
-			int start = invert ? surface->h-1 : 0;
-			int end =   invert ? -1 : surface->h;
-			int bias =  invert ? -1 : 1;
+					U16 p =
+						((c.r >> 3) << 11)
+						| ((c.g >> 2) << 5)
+						| ((c.b >> 3));
 
-			for( int j=start; j != end; j+= bias ) {
-				for( int i=0; i<surface->w; ++i ) {
-				    U8 *p = (U8 *)surface->pixels + j*surface->pitch + i;
-					*b++ = *p;
+					*b++ = p;
 				}
 			}
-			}
-			break;
-
-		default:
-			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Unsupported bit depth.\n" );
-			break;
+		}
+		else {
+			OrderedDitherTo16(surface, TEX_RGB16, invert, (U16*)pixelBuffer);
+		}
+	}
+	else {
+		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Unsupported bit depth.\n" );
 	}		
+	printf("\n");
 	return true;
 }
 
@@ -431,23 +409,8 @@ gamedb::WItem* BTexture::InsertTextureToDB( gamedb::WItem* parent )
 {
 	gamedb::WItem* witem = parent->FetchChild( assetName.c_str() );
 
-	if ( format == RGBA16 || format == RGB16 ) {
-		witem->SetData( "pixels", pixelBuffer16, TextureMem() );
-	}
-	else if ( format == ALPHA ) {
-		witem->SetData( "pixels", pixelBuffer8, TextureMem() );
-	}
-	else {
-		GLASSERT( 0 );
-	}
-
-	switch( format ) {
-	case RGBA16:	witem->SetString( "format", "RGBA16" );	break;
-	case RGB16:		witem->SetString( "format", "RGB16" );	break;
-	case ALPHA:		witem->SetString( "format", "ALPHA" );	break;
-	default:	GLASSERT( 0 );
-	}
-
+	witem->SetData("pixels", pixelBuffer, TextureMem());
+	witem->SetString("format", TextureString(format));
 	witem->SetBool( "isImage", isImage );
 	witem->SetInt( "width", surface->w );
 	witem->SetInt( "height", surface->h );
