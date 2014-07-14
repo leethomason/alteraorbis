@@ -146,7 +146,7 @@ d animation generation
 				x turret (or not circuit? building? similar to battery...) (rot)
 				- circuit art
 				x trigger plate
-				- fab plant
+				x fab plant
 				x circuit building ui
 				x switch activation ui
 
