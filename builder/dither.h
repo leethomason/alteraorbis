@@ -18,18 +18,10 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../engine/texturetype.h"
 #include "../libs/SDL2/include/SDL.h"
 
-
-enum {		// channels	bytes
-	RGBA16,	// 4444		2
-	RGB16,	// 565		2
-	ALPHA,	// 8		1
-};
-
-
-//void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, U16* target );
-void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16* target );
+void OrderedDitherTo16( const SDL_Surface* surface, TextureType format, bool invert, U16* target );
 
 
 #endif  // UFO_ATTACK_DITHER_INCLUDED

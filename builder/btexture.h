@@ -62,7 +62,7 @@ public:
 	bool dither;
 	bool noMip;
 	bool colorMap;
-	bool doPreMult;
+	//bool doPreMult;
 	bool invert;
 	bool emissive;		// if set, the alpha channel is emissiveness, not transparency
 	bool alphaTexture;	// if set, color converted to (1,1,1,c)
@@ -78,8 +78,7 @@ public:
 	TextureType format;
 
 	SDL_Surface* surface;
-	U16* pixelBuffer16;	// RGBA16, RGB16
-	U8*  pixelBuffer8;	// ALPHA
+	U8* pixelBuffer;	// all formats!
 
 private:	
 	void WhiteMap();

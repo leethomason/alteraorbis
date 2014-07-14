@@ -1,4 +1,4 @@
-/*
+﻿/*
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -19,6 +19,7 @@
 
 #include "../grinliz/glstringutil.h"
 using namespace grinliz;
+
 
 /*static*/ void TextureManager::Create( const gamedb::Reader* reader )
 {
@@ -255,6 +256,16 @@ void TextureManager::CalcOpenGL( int format, int* glFormat, int* glType )
 		case TEX_RGB16:
 			*glFormat = GL_RGB;
 			*glType = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+
+		case TEX_RGBA32:
+			*glFormat = GL_RGBA;
+			*glType = GL_UNSIGNED_BYTE;
+			break;
+
+		case TEX_RGB24:
+			*glFormat = GL_RGB;
+			*glType = GL_UNSIGNED_BYTE;
 			break;
 
 			/*

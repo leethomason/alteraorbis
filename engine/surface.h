@@ -150,6 +150,19 @@ public:
 		switch ( format ) {
 		case TEX_RGBA16:	c = CalcRGBA16( GetTex16( x, y ));	break;
 		case TEX_RGB16:		c = CalcRGB16( GetTex16( x, y ));	break;
+		case TEX_RGBA32:
+		case TEX_RGB24:
+		{
+			int bpp = TextureBytesPerPixel(format);
+			const U8* p = pixels + y * Width() * bpp + x * bpp;
+			c.r = *p++;
+			c.g = *p++;
+			c.b = *p++;
+			c.a = 255;
+			if (format == TEX_RGBA32) c.a = *p;
+		}
+		break;
+
 		default:		GLASSERT( 0 );
 		}
 		return c;
