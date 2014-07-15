@@ -55,15 +55,15 @@ public:
 						nGroup( 0 ),
 						shading( FLAT ),
 						polyRemoval( POLY_NONE ),
-						atlasArr( 0 ),
-						nAtlas( 0 ),
-						currentSubTex( 0 ),
+//						atlasArr( 0 ),
+//						nAtlas( 0 ),
+//						currentSubTex( 0 ),
 						depth( -1 ),
 						boneID( -1 ),
 						enableBones( false )
 	{}
 
-	void SetAtlasPool( const Atlas* atlasArr, int nAtlas ) { this->atlasArr = atlasArr; this->nAtlas = nAtlas; }
+	//void SetAtlasPool( const Atlas* atlasArr, int nAtlas ) { this->atlasArr = atlasArr; this->nAtlas = nAtlas; }
 
 	void SetMatrix( const grinliz::Matrix4& mat )		{ matrix = mat; }
 
@@ -113,9 +113,9 @@ private:
 	ShadingType shading;
 	int polyRemoval;
 
-	const Atlas* atlasArr;
-	int nAtlas;
-	const AtlasSubTex* currentSubTex;
+//	const Atlas* atlasArr;
+//	int nAtlas;
+//	const AtlasSubTex* currentSubTex;
 	int depth;
 	int boneID;
 	bool enableBones;

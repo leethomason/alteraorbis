@@ -41,7 +41,6 @@
 #include "modelbuilder.h"
 #include "btexture.h"
 #include "dither.h"
-#include "atlas.h"
 #include "animationbuilder.h"
 
 #include "../markov/markov.h"
@@ -61,8 +60,8 @@ int totalDataMem = 0;
 
 gamedb::Writer* writer;
 
-static const int MAX_ATLAS = 4;
-Atlas atlasArr[MAX_ATLAS];
+//static const int MAX_ATLAS = 4;
+//Atlas atlasArr[MAX_ATLAS];
 
 
 void ExitError( const char* tag, 
@@ -618,7 +617,7 @@ void ProcessModel( XMLElement* model )
 	printf( "Model '%s'", assetName.c_str() );
 
 	ModelBuilder* builder = new ModelBuilder();
-	builder->SetAtlasPool( atlasArr, MAX_ATLAS );
+//	builder->SetAtlasPool( atlasArr, MAX_ATLAS );
 	builder->SetShading( ModelBuilder::FLAT );
 
 	GLString animation = "";
@@ -844,7 +843,7 @@ void ProcessTexture( XMLElement* texture )
 	}
 }
 
-
+/*
 void ProcessAtlas( XMLElement* atlasElement )
 {
 	static const int MAX = 40;	// increase as needed
@@ -891,7 +890,7 @@ void ProcessAtlas( XMLElement* atlasElement )
 	atlasArr[it].btexture.ToBuffer();
 	atlasArr[it].btexture.InsertTextureToDB(  writer->Root()->FetchChild( "textures" ) );
 }
-
+*/
 
 SDL_Surface* LoadImage( const char* pathname )
 {
@@ -1212,9 +1211,9 @@ int main( int argc, char* argv[] )
 		else if ( StrEqual( child->Value(), "font" )) {
 			ProcessFont( child );
 		}
-		else if ( StrEqual( child->Value(), "atlas" )) {
-			ProcessAtlas( child );
-		}
+//		else if ( StrEqual( child->Value(), "atlas" )) {
+//			ProcessAtlas( child );
+//		}
 		else if ( StrEqual( child->Value(), "markov" )) {
 			ProcessMarkov( child );
 		}

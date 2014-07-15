@@ -44,10 +44,8 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	
 	switch( data->id ) {
 	case 0:
-		SetupTest0();
-		break;
 	case 1:
-		SetupTest1();
+		SetupTest0();
 		break;
 	default:
 		GLASSERT( 0 );
@@ -131,6 +129,7 @@ void RenderTestScene::SetupTest0()
 
 void RenderTestScene::SetupTest1()
 {
+	/* Was atlas code.
 	const ModelResource* testStruct0Res = ModelResourceManager::Instance()->GetModelResource( "testStruct0" );
 	const ModelResource* testStruct1Res = ModelResourceManager::Instance()->GetModelResource( "testStruct1" );
 
@@ -141,6 +140,7 @@ void RenderTestScene::SetupTest1()
 	model[1]->SetPos( 0.5f, 0.0f, 3.5f );
 
 	engine->CameraLookAt( 0, 3, 8, -45.f, -30.f );
+	*/
 }
 
 

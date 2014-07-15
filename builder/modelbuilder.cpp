@@ -14,7 +14,7 @@
 */
 
 #include "modelbuilder.h"
-#include "atlas.h"
+//#include "atlas.h"
 
 #include "../engine/vertex.h"
 #include "../grinliz/glgeometry.h"
@@ -27,6 +27,7 @@ void ModelBuilder::SetTexture( const char* _textureName )
 	CStr< EL_FILE_STRING_LEN >  textureName( _textureName );
 	current = -1;
 
+	/*
 	// Is this texture in an atlas?
 	currentSubTex = 0;
 	for( int k=0; k<nAtlas; ++k ) {
@@ -36,7 +37,7 @@ void ModelBuilder::SetTexture( const char* _textureName )
 			break;
 		}
 	}
-
+	*/
 
 	for( int i=0; i<nGroup; ++i ) {
 		if (    ( textureName.empty() && group[i].textureName.empty() )
@@ -78,10 +79,10 @@ void ModelBuilder::AddTri( const Vertex& v0, const Vertex& v1, const Vertex& v2 
 		vX[i].boneID = float(boneID);
 
 		// Atlas conversion, if being used.
-		if ( currentSubTex ) {
-			Vector2F in = vX[i].tex;
-			currentSubTex->Map( in, &vX[i].tex );
-		}
+//		if ( currentSubTex ) {
+//			Vector2F in = vX[i].tex;
+//			currentSubTex->Map( in, &vX[i].tex );
+//		}
 
 		// store for processing
 		stream[current].vertex[ stream[current].nVertex+i ]	= vX[i];

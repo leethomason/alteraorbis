@@ -88,7 +88,6 @@
     <ClCompile Include="..\markov\markov.cpp" />
     <ClCompile Include="..\shared\lodepng.cpp" />
     <ClCompile Include="animationbuilder.cpp" />
-    <ClCompile Include="atlas.cpp" />
     <ClCompile Include="btexture.cpp" />
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="dither.cpp" />
@@ -102,7 +101,6 @@
     <ClInclude Include="..\markov\markov.h" />
     <ClInclude Include="..\shared\lodepng.h" />
     <ClInclude Include="animationbuilder.h" />
-    <ClInclude Include="atlas.h" />
     <ClInclude Include="btexture.h" />
     <ClInclude Include="builder.h" />
     <ClInclude Include="dither.h" />

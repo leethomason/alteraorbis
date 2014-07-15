@@ -1,20 +1,31 @@
-? volcanos get left behind
+x 32bit texture support
+x volcanos get left behind
+x resize and colors are wrong bug
+x loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
+x money xchange - gold to crystal and vice versa
+d vault needs "sell to market" button
+x building repair
+x system for gamui to track models
+x make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
+x markets - pay out taxes over a certain limit
+d standing shields!
+d particles aren't additive correctly
+d add rez effect for item switch?
+d animation generation
+x weather should affect fire/shock
+
 - batching troubles - still lots of small batches going in. consider dropping back to ES2
-? resize and colors are wrong bug
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - show rock damage
-x loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
-d standing shields!
 - maps: what direction is player pointed?
 - fix porch image (alpha of the tiles, if not general improvement)
 - squisher, in streaming mode, to save files
 - target “Focus” shouldn’t switch so easily.
-- 32bit texture support
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
 - colors of buildings (not enough)
@@ -27,36 +38,26 @@ d standing shields!
 - buttons for weapons changing
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
-- markets - pay out taxes over a certain limit
 - fabricator. trinkets. (see notes)
 	- medkit
 	- boost items
 	- sellable items
-x money xchange - gold to crystal and vice versa
 - should be able to browse units in character screen
-d vault needs "sell to market" button
-x building repair
-x system for gamui to track models
-- make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
 - add target portrait
 - review all atlases for texture mem usage
-d particles aren't additive correctly
 - remove normalization in shader
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
 - record perf max/min. surprisingly hard.
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-d add rez effect for item switch?
-d animation generation
-- peaks news
+- mountain peaks news
 - openMP - particle system, elsewhere
 - re-do glow
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
 - uitracking in battle scene
 - destroy date of avatar doesn't seem to be getting entered in the Census/History
-- weather should affect fire/shock
 - shock -> plasma??
 - mouse wheel support
 - cage trap
@@ -69,7 +70,7 @@ d animation generation
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
     	d seperate land from water. re-think water texture.
-    	- 32 bit textures
+    	x 32 bit textures
 
 	x Beta 1c
 		x hints about what you need to build
@@ -101,20 +102,9 @@ d animation generation
 			x rampage not destroying plants
 			x plants in rocks
 		x change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
-		- out of gold shouldn't cancel build orders
-		- can't cancel forge (2x2 build)
-	    - plants look repetetive
 		x hints about what you need to build
-		- walk target for the avatar
-		- move "Create Worker" and "Auto-Rebuild" to "Manage"
 		x re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
-		- tuning
-			- farm production (high??)
-			- monster arrival. greater herd more often?
-			- time to use bar (low??)
-			- double tech decay
-			x weapon sorting not quite correct
-		- fluids
+		x fluids
 			x deal with infinite emitters (one in current save)
 			x move voxels to TexturePack? (need 32 bit textures...grumble). not doing: sticking with 2 special sets.
 			x water flow over emitters?
@@ -132,10 +122,10 @@ d animation generation
 			t magma fluid
 			d shock fluid
 			x update world-gen code to place lava emitters
-		- circuits
+		x circuits
 			x implement EXPLODES
 			x circuit class. new rendering overlay. (gamui layer? seperate?)
-			- circuits: 4 bits type(15) + rot(2) = 6 bits?
+			x circuits: 4 bits type(15) + rot(2) = 6 bits?
 				x switch (rot)
 				x battery (rot)
 				x zapper
@@ -144,7 +134,7 @@ d animation generation
 				x crossover
 				x gate
 				x turret (or not circuit? building? similar to battery...) (rot)
-				- circuit art
+				x circuit art
 				x trigger plate
 				x fab plant
 				x circuit building ui
@@ -161,11 +151,22 @@ d animation generation
 		x circuit view - toggle rock and buildings? top down?
 		x remove enemy detector variants
 		x denizens getting stuck pathing
-		- better spark / charge effects. new colors, particle trail
 		x fix particles. much too stressed.
 		t battery logic isn't correct - seems okay in the Fluid Test
-		- above ground water needs differentiation
+		x above ground water needs differentiation
+		- better spark / charge effects. new colors, particle trail
 
+		- out of gold shouldn't cancel build orders
+		- can't cancel forge (2x2 build)
+	    - plants look repetetive
+		- walk target for the avatar
+		- move "Create Worker" and "Auto-Rebuild" to "Manage"
+		- tuning
+			- farm production (high??)
+			- monster arrival. greater herd more often?
+			- time to use bar (low??)
+			- double tech decay
+			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
 	    - plants look repetetivoe
 		- auto-clear not working as well as it should

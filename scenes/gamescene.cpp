@@ -1058,7 +1058,7 @@ void GameScene::HandleHotKey( int mask )
 			buildButton[0].SetDown();
 			SetSelectionModel(tapView);
 		}
-		else if (uiMode[UI_BUILD].Down()) {
+		else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
 			// return to view
 			uiMode[UI_VIEW].SetDown();
 		}

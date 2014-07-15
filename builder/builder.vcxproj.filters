@@ -28,9 +28,6 @@
     <ClCompile Include="..\importers\off.cpp">
       <Filter>Source Files\importers</Filter>
     </ClCompile>
-    <ClCompile Include="atlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="btexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -65,9 +62,6 @@
     </ClInclude>
     <ClInclude Include="..\importers\off.h">
       <Filter>Source Files\importers</Filter>
-    </ClInclude>
-    <ClInclude Include="atlas.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="btexture.h">
       <Filter>Source Files</Filter>

@@ -56,13 +56,13 @@
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
-  -->
   <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
   <texture assetName="map_land" filename="map_land.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
   <texture filename="map_grid.png" filename2="map_grid_em.png" emissive="true" maxSize="128" />
   <texture filename="map_port.png" maxSize="128" />
-  
+ -->
+   
   <texture filename="ringAtlas.png" maxSize="1024" emissive="true" table="ring.xml" colorMap="true"/>
 
   <!-- UI elements -->
@@ -74,11 +74,13 @@
   <!-- Particles -->
   <texture filename="particle.png" />
 
+  <!--
   <atlas width="256">
     <texture filename="testgradient.png" />
     <texture filename="testsquare.png" />
     <texture filename="testwrap.png" />
   </atlas>
+  -->
 
   <model filename="gold.ac"         modelName="gold"            origin="0 0 0" shading="flat"/>
   <model filename="dodecahedron.ac" modelName="crystal_green"   origin="1 0 0" shading="flat" />
@@ -86,9 +88,11 @@
   <model filename="dodecahedron.ac" modelName="crystal_blue"    origin="3 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_violet"  origin="2 0 0" shading="flat" />
   
+  <!--
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0.5 0 0.5"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2.5 0 0.5"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct2"  origin="5.0 0 1.0"  shading="flat" polyRemoval="pre" />
+-->
   <model filename="unitPlateCentered.ac" shading="flat" />
   <model filename="timingPlate.ac" shading="flat" />
   <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
