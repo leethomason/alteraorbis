@@ -73,8 +73,8 @@ public:
 	/// Return the type of the attribute (ATTRIBUTE_DATA, etc.)
 	int AttributeType( const char* ) const; 
 
-	int			GetDataSize( int i ) const;			///< Returns size of an ATTRIBUTE_DATA, -1 or failure.
-	int			GetDataSize( const char* ) const;	///< Returns size of an ATTRIBUTE_DATA, -1 or failure.
+	int			GetDataSize( int i ) const;			///< Returns size of an ATTRIBUTE_DATA, -1 on failure.
+	int			GetDataSize( const char* ) const;	///< Returns size of an ATTRIBUTE_DATA, -1 on failure.
 
 	/** Returns an offset to the raw (possibly compressed) data. NOTE, this is
 		past the end of the memory loaded, so this is an offset and size into

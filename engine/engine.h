@@ -74,7 +74,6 @@ public:
 	Renderer
 
 	Assets
-		- TBD: texture atlasing in builder. (Atlased textures can't be repeated.)
 		- alpha: transparency or emmissive
 
 	Renderer
@@ -82,9 +81,7 @@ public:
 
 		Shadows
 			- shadow casting models rendered to stencil buffer.
-			- background plane can be multi-pass, checked against stencil
-
-		
+			- background plane can be multi-pass, checked against stencil		
 */
 
 class Engine :	public IDeviceLossHandler,

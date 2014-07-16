@@ -154,7 +154,7 @@ x weather should affect fire/shock
 		x fix particles. much too stressed.
 		t battery logic isn't correct - seems okay in the Fluid Test
 		x above ground water needs differentiation
-		- better spark / charge effects. new colors, particle trail
+		x better spark / charge effects. new colors, particle trail
 
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
@@ -168,10 +168,7 @@ x weather should affect fire/shock
 			- double tech decay
 			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
-	    - plants look repetetivoe
 		- auto-clear not working as well as it should
-		- walk target for the avatar
-		- 32 bit texture support
 
 	- Census
 		x coolest stuff, past and present, by category
