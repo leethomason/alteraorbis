@@ -70,7 +70,7 @@ void LumosChitBag::Serialize( XStream* xs )
 	super::Serialize( xs );
 
 	XarcOpen( xs, "LumosChitBag" );
-	XARC_SER( xs, homeSector );
+	XARC_SER( xs, homeTeam );
 	XARC_SER_ARR(xs, deityID, NUM_DEITY);
 	XarcClose( xs );
 }

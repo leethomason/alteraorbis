@@ -302,7 +302,6 @@ private:
 	int							sceneID;
 	SceneData*					sceneData;
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
-	grinliz::Vector2I			homeSector;
 	int							homeTeam;	
 	Sim*						sim;	// if part of a simulation. can be null.
 	int							deityID[NUM_DEITY];
