@@ -656,7 +656,7 @@ void BattleMechanics::GenerateExplosion(const DamageDesc& dd,
 	ParticleDef def = ps->GetPD( "explosion" );
 
 	Color4F color = WeaponGen::GetEffectColor(dd.effects);
-	def.color = { color.r, color.g, color.b, 1.0f };
+	def.color = { color.x, color.y, color.z, 1.0f };
 	ps->EmitPD( def, pos, V3F_UP, 0 );
 
 	// Physics:

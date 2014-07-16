@@ -535,9 +535,9 @@ bool WorldMap::InitPNG( const char* filename,
 				grid[i].SetLand(WorldGrid::LAND);
 				blocks->Push( p );
 			}
-			else if ( c.r == c.g && c.g == c.b ) {
+			else if ( c.r() == c.g() && c.g() == c.b() ) {
 				grid[i].SetLand(WorldGrid::LAND);
-				color = c.r;
+				color = c.r();
 			}
 			else if ( c == BLUE ) {
 				grid[i].SetWater();
@@ -2309,7 +2309,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, boo
 
 	// Real code to draw the map:
 	FlatShader shader;
-	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
+	shader.SetColor( colorMult.r(), colorMult.g(), colorMult.b() );
 	shader.SetStencilMode( mode );
 	if ( useSaturation ) {
 		shader.SetShaderFlag( ShaderManager::SATURATION );

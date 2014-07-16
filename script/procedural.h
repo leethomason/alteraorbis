@@ -79,7 +79,6 @@ private:
 	enum {
 		SKIN, HAIR, GLASSES
 	};
-	void GetColors( grinliz::Color4F* c );
 	void GetColors( grinliz::Vector4F* v );
 
 	bool female;

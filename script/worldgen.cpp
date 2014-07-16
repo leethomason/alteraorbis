@@ -726,12 +726,12 @@ void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int r
 			dst.x += -map.min.x + sector.x * SECTOR_SIZE;
 			dst.y += -map.min.y + sector.y * SECTOR_SIZE;
 
-			if ( c.g == 255 ) {
+			if ( c.g() == 255 ) {
 				if ( land[INDEX(dst)] == WATER ) {
 					land[INDEX(dst)] = LAND0;
 				}
 			}
-			else if ( c.b == 255 ) {
+			else if ( c.b() == 255 ) {
 				if ( land[INDEX(dst)] >= LAND0 && land[INDEX(dst)] <= LAND3 ) {
 					land[INDEX(dst)] = WATER;
 				}

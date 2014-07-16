@@ -77,17 +77,17 @@ void OrderedDitherTo16( const SDL_Surface* surface, TextureType format, bool inv
 			switch ( format ) {
 				case TEX_RGBA16:
 					p =	  
-						  ( ReducePixelDiv( c.r, 4, numer, denom ) << 12 )
-						| ( ReducePixelDiv( c.g, 4, numer, denom ) << 8 )
-						| ( ReducePixelDiv( c.b, 4, numer, denom ) << 4)
-						| ( ( c.a>>4 ) << 0 );
+						  ( ReducePixelDiv( c.r(), 4, numer, denom ) << 12 )
+						| ( ReducePixelDiv( c.g(), 4, numer, denom ) << 8 )
+						| ( ReducePixelDiv( c.b(), 4, numer, denom ) << 4)
+						| ( ( c.a()>>4 ) << 0 );
 					break;
 
 				case TEX_RGB16:
 					p = 
-						  ( ReducePixelDiv( c.r, 3, numer, denom ) << 11 )
-						| ( ReducePixelDiv( c.g, 2, numer, denom ) << 5 )
-						| ( ReducePixelDiv( c.b, 3, numer, denom ) );
+						  ( ReducePixelDiv( c.r(), 3, numer, denom ) << 11 )
+						| ( ReducePixelDiv( c.g(), 2, numer, denom ) << 5 )
+						| ( ReducePixelDiv( c.b(), 3, numer, denom ) );
 					break;
 
 				default:

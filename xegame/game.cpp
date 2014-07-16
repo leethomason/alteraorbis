@@ -494,7 +494,7 @@ void Game::DoTick( U32 _currentTime )
 		Scene* scene = sceneStack.Top()->scene;
 
 		Color4F cc = scene->ClearColor();
-		device->Clear( cc.r, cc.g, cc.b, cc.a );
+		device->Clear( cc.x, cc.y, cc.z, cc.w );
 
 		scene->DoTick( deltaTime );
 

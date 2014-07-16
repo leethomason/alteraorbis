@@ -359,16 +359,6 @@ public:
 						const grinliz::Vector4F& green, 
 						const grinliz::Vector4F& blue,
 						float alpha );	// 0: use passed in channels, 1: use sampler
-	void SetColorMap(	const grinliz::Color4F& red, 
-						const grinliz::Color4F& green, 
-						const grinliz::Color4F& blue,
-						float alpha )	// 0: use passed in channels, 1: use sampler
-	{
-		grinliz::Vector4F r = { red.r, red.g, red.b, red.a };
-		grinliz::Vector4F g = { green.r, green.g, green.b, green.a };
-		grinliz::Vector4F b = { blue.r, blue.g, blue.b, blue.a };
-		SetColorMap( r, g, b, alpha );
-	}
 	void SetColorMap( const grinliz::Matrix4& mat );
 
 	// 1.0 is normal color

@@ -200,9 +200,9 @@ void CircuitSim::DoTick(U32 delta)
 
 			ParticleDef pd = engine->particleSystem->GetPD("electron");
 			if (pe->charge)
-				pd.color = Game::GetMainPalette()->GetV4F(5, 3);
+				pd.color = Game::GetMainPalette()->Get4F(5, 3);
 			else
-				pd.color = Game::GetMainPalette()->GetV4F(7, 4);
+				pd.color = Game::GetMainPalette()->Get4F(7, 4);
 
 			engine->particleSystem->EmitPD(pd, pe->model->Pos(), V3F_UP, 0);
 			pe->model->SetPos(p3);

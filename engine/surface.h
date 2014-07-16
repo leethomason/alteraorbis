@@ -42,9 +42,9 @@ class Surface
 public:
 	static U16 CalcRGB16( grinliz::Color4U8 rgba )
 	{
-		U32 c =   ((rgba.r>>3) << 11)
-				| ((rgba.g>>2) << 5)
-				| ((rgba.b>>3) );
+		U32 c =   ((rgba.r()>>3) << 11)
+				| ((rgba.g()>>2) << 5)
+				| ((rgba.b()>>3) );
 		return (U16)c;
 	}
 
@@ -57,10 +57,10 @@ public:
 		// 0  -> 0
 		// 15 -> 255
 		grinliz::Color4U8 rgb;
-		rgb.r = (r<<3)|(r>>2);
-		rgb.g = (g<<2)|(g>>4);
-		rgb.b = (b<<3)|(b>>2);
-		rgb.a = 255;
+		rgb.r() = (r<<3)|(r>>2);
+		rgb.g() = (g<<2)|(g>>4);
+		rgb.b() = (b<<3)|(b>>2);
+		rgb.a() = 255;
 		return rgb;
 	}
 
@@ -76,10 +76,11 @@ public:
 
 	static U16 CalcRGBA16( grinliz::Color4U8 rgba )
 	{
-		U32 c =   ( (rgba.r>>4) << 12 )
-			    | ( (rgba.g>>4) << 8 )
-				| ( (rgba.b>>4) << 4 )
-				| ( (rgba.a>>4) << 0 );
+
+		U32 c =   ( (rgba.r()>>4) << 12 )
+			    | ( (rgba.g()>>4) << 8 )
+				| ( (rgba.b()>>4) << 4 )
+				| ( (rgba.a()>>4) << 0 );
 		return (U16)c;
 	}
 
@@ -93,10 +94,10 @@ public:
 		// 0  -> 0
 		// 15 -> 255
 		grinliz::Color4U8 rgb;
-		rgb.r = (r<<4)|r;
-		rgb.g = (g<<4)|g;
-		rgb.b = (b<<4)|b;
-		rgb.a = (a<<4)|a;
+		rgb.r() = (r<<4)|r;
+		rgb.g() = (g<<4)|g;
+		rgb.b() = (b<<4)|b;
+		rgb.a() = (a<<4)|a;
 		return rgb;
 	}
 
@@ -155,11 +156,12 @@ public:
 		{
 			int bpp = TextureBytesPerPixel(format);
 			const U8* p = pixels + y * Width() * bpp + x * bpp;
-			c.r = *p++;
-			c.g = *p++;
-			c.b = *p++;
-			c.a = 255;
-			if (format == TEX_RGBA32) c.a = *p;
+			c.x = *p++;
+			c.y = *p++;
+			c.z = *p++;
+			c.w = 255;
+
+			if (format == TEX_RGBA32) c.w = *p;
 		}
 		break;
 

@@ -138,14 +138,8 @@ public:
 
 		grinliz::Color3F Get3F(int x, int y) const {
 			grinliz::Color4F c4 = Get4F(x, y);
-			grinliz::Color3F c3 = { c4.r, c4.g, c4.b };
+			grinliz::Color3F c3 = { c4.x, c4.y, c4.z };
 			return c3;
-		}
-
-		grinliz::Vector4F GetV4F(int x, int y) const {
-			grinliz::Color4F c = Get4F( x, y );
-			grinliz::Vector4F v = { c.r, c.g, c.b, c.a };
-			return v;
 		}
 	};
 	const Palette* GetPalette( const char* name=0 ) const;

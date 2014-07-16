@@ -214,14 +214,15 @@ Color4U8 GetPixel( const SDL_Surface *surface, int x, int y)
 		break;
     }
 	Color4U8 color;
-	SDL_GetRGBA( c, surface->format, &color.r, &color.g, &color.b, &color.a );
+
+	SDL_GetRGBA( c, surface->format, &color.x, &color.y, &color.z, &color.w );
 	return color;
 }
 
 
 void PutPixel(SDL_Surface *surface, int x, int y, const Color4U8& c )
 {
-	U32 pixel = SDL_MapRGBA( surface->format, c.r, c.g, c.b, c.a );
+	U32 pixel = SDL_MapRGBA( surface->format, c.r(), c.g(), c.b(), c.a() );
     int bpp = surface->format->BytesPerPixel;
     U8 *p = (U8*)surface->pixels + y * surface->pitch + x * bpp;
 

@@ -112,25 +112,15 @@ void HumanGen::GetSuitColor( grinliz::Vector4F* c )
 	float fraction = random.Uniform();
 
 	const Game::Palette* palette = Game::GetMainPalette();
-	Vector4F c0 = palette->GetV4F( x0*2, y );
-	Vector4F c1 = palette->GetV4F( x1*2, y );
+	Vector4F c0 = palette->Get4F( x0*2, y );
+	Vector4F c1 = palette->Get4F( x1*2, y );
 
 	*c = Lerp( c0, c1, fraction );
 	c->w = 0.7f;
 }
 
 
-void HumanGen::GetColors( grinliz::Vector4F* v )
-{
-	Color4F c[3];
-	GetColors( c );
-	for( int i=0; i<3; ++i ) {
-		v[i].Set( c[i].r, c[i].g, c[i].b, c[i].a );
-	}
-}
-
-	
-void HumanGen::GetColors( grinliz::Color4F* c )
+void HumanGen::GetColors( grinliz::Vector4F* c )
 {
 	Random random( seed );
 	random.Rand();
@@ -262,7 +252,7 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 	i = abs(i) % NUM_COLORS;
 
 	Color4F effectColor = GetEffectColor(flags);
-	float alpha = effectColor.a;
+	float alpha = effectColor.a();
 	const Game::Palette* palette = Game::GetMainPalette();
 
 	// Add in explosive as a modifying color to the main 2.
@@ -274,22 +264,22 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 			effectColor.X(i) = Mean( effectColor.X(i), ec.X(i) );
 		alpha = Max( 0.7f, alpha );
 	}
-	effectColor.a = alpha;
+	effectColor.a() = alpha;
 
 	Color4F base		= palette->Get4F( c[i*3+0].x, c[i*3+0].y );
 	array[BASE]			= base;
 	Color4F contrast	= palette->Get4F( c[i*3+1].x, c[i*3+1].y );
 	static const float LERP = 0.65f;
-	array[CONTRAST].Set(	Lerp( base.r, contrast.r, LERP ),
-							Lerp( base.g, contrast.g, LERP ),
-							Lerp( base.b, contrast.b, LERP ),
-							Lerp( base.a, contrast.a, LERP ) );
+	array[CONTRAST].Set(	Lerp( base.r(), contrast.r(), LERP ),
+							Lerp( base.g(), contrast.g(), LERP ),
+							Lerp( base.b(), contrast.b(), LERP ),
+							Lerp( base.a(), contrast.a(), LERP ) );
 							
 	array[EFFECT]		= effectColor;
 
-	array[BASE].a		= 0;
-	array[CONTRAST].a	= 0;
-	array[EFFECT].a		= alpha;
+	array[BASE].a()		= 0;
+	array[CONTRAST].a()	= 0;
+	array[EFFECT].a()	= alpha;
 }
 
 
@@ -302,8 +292,7 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 	GetColors(	random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
-		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
-		info->color.SetCol( i, v );
+		info->color.SetCol( i, c[i] );
 	}
 	info->color.m44 = 0;
 
@@ -341,7 +330,7 @@ void WeaponGen::AssignShield( ProcRenderInfo* info )
 	GetColors( random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
-		v[i].Set( c[i].r, c[i].g, c[i].b, c[i].a );
+		v[i] = c[i];
 	}
 
 	v[CONTRAST].w = Max( v[CONTRAST].w, 0.7f );
@@ -370,8 +359,7 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 	GetColors(	random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
-		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
-		info->color.SetCol( i, v );
+		info->color.SetCol( i, c[i] );
 	}
 	info->color.m44 = 0;
 
@@ -414,14 +402,14 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 	const Game::Palette* palette = Game::GetMainPalette();
 
-	Vector4F base		= palette->GetV4F( colors[index].x, colors[index].y );
-	Vector4F contrast	= palette->GetV4F( colors[index].z, colors[index].w );
+	Vector4F base		= palette->Get4F( colors[index].x, colors[index].y );
+	Vector4F contrast	= palette->Get4F( colors[index].z, colors[index].w );
 	Vector4F glow		= select ? base : contrast;
 
 	// Grey colors for neutral:
 	if ( seed == 0 ) {
-		base		= palette->GetV4F( 0, PAL_GRAY );	// dark gray
-		contrast	= palette->GetV4F( 0, PAL_GRAY );
+		base		= palette->Get4F( 0, PAL_GRAY );	// dark gray
+		contrast	= palette->Get4F( 0, PAL_GRAY );
 		glow		= base;
 	}
 

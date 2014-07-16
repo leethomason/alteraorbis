@@ -122,10 +122,6 @@ public:
 
 	void SetTexture( int index, Texture* texture );
 	void SetUniform( int id, const grinliz::Matrix4& mat );
-	void SetUniform( int id, const grinliz::Color4F& color ) {
-		grinliz::Vector4F v = { color.r, color.g, color.b, color.a };
-		SetUniform( id, v );
-	}
 	void SetUniform( int id, const grinliz::Vector4F& vector );
 	void SetUniform( int id, const grinliz::Vector3F& vector );
 	void SetUniform( int id, float value );
@@ -133,9 +129,6 @@ public:
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 	void SetUniformArray( int id, int count, const grinliz::Vector4F* params );
 	void SetUniformArray( int id, int count, const grinliz::Vector3F* params );
-
-	// Encode the data used by procedural rendering. 4 each of colors and texture offset.
-	static void EncodeProceduralMat( const grinliz::Color4F* colors, const float* textureV, grinliz::Matrix4* mat );
 
 private:
 	int  CalcMaxInstances( int flags, int* uniforms );

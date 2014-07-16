@@ -997,10 +997,10 @@ Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 	const Game::Palette* palette = Game::GetMainPalette();
 
 	switch( effectFlags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK) ) {
-	case 0:													bolt->color = palette->GetV4F( 1, PAL_GREEN );	break;
-	case GameItem::EFFECT_FIRE:								bolt->color = palette->GetV4F( 1, PAL_RED );	break;
-	case GameItem::EFFECT_SHOCK:							bolt->color = palette->GetV4F( 1, PAL_BLUE );	break;
-	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	bolt->color = palette->GetV4F( 1, PAL_PURPLE );	break;
+	case 0:													bolt->color = palette->Get4F( 1, PAL_GREEN );	break;
+	case GameItem::EFFECT_FIRE:								bolt->color = palette->Get4F( 1, PAL_RED );	break;
+	case GameItem::EFFECT_SHOCK:							bolt->color = palette->Get4F( 1, PAL_BLUE );	break;
+	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	bolt->color = palette->Get4F( 1, PAL_PURPLE );	break;
 	default:
 		GLASSERT( 0 );
 		break;

@@ -82,7 +82,7 @@ void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSat
 	stream.stride = sizeof( Vector3F );
 
 	FlatShader shader;
-	shader.SetColor( colorMult.r*color.r, colorMult.g*color.g, colorMult.b*color.b );
+	shader.SetColor(colorMult.r()*color.r(), colorMult.g()*color.g(), colorMult.b()*color.b());
 	shader.SetStencilMode( mode );
 
 	GPUDevice* device = GPUDevice::Instance();

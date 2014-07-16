@@ -212,8 +212,17 @@ struct Vector3
 	T y;
 	T z;
 
+	T& r() { return x; }
+	T& g() { return y; }
+	T& b() { return z; }
+
+	T r() const { return x; }
+	T g() const { return y; }
+	T b() const { return z; }
+
 	// I avoid non-const references - but this one is just so handy! And, in
 	// use in the code, it is clear it is an assignment.
+	
 	T& X( int i )    		{	GLASSERT( InRange( i, 0, COMPONENTS-1 ));
 								return *( &x + i ); }
 	T  X( int i ) const		{	GLASSERT( InRange( i, 0, COMPONENTS-1 ));
@@ -368,6 +377,16 @@ struct Vector4
 	T y;
 	T z;
 	T w;
+
+	T& r() { return x; }
+	T& g() { return y; }
+	T& b() { return z; }
+	T& a() { return w; }
+
+	T r() const { return x; }
+	T g() const { return y; }
+	T b() const { return z; }
+	T a() const { return w; }
 
 	// I avoid non-const references - but this one is just so handy! And, in
 	// use in the code, it is clear it is an assignment.

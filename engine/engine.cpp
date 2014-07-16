@@ -494,7 +494,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 	#ifdef EL_USE_MRT_BLUR
 		for( int i=0; i<BLUR_COUNT; ++i ) {
-			shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
+			shader.SetColor( lighting.glow.x, lighting.glow.y, lighting.glow.z, 0 );
 			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 

@@ -144,9 +144,9 @@ void LoadColorBase( const tinyxml2::XMLElement* element, float* r, float* g, flo
 		element->QueryAttribute( "paly", &paly );
 		const Game::Palette* palette = Game::GetMainPalette();
 		Color4F c = palette->Get4F( palx, paly );
-		*r = c.r;
-		*g = c.g;
-		*b = c.b;
+		*r = c.r();
+		*g = c.g();
+		*b = c.b();
 		*a = 1;
 	}
 	else {
@@ -160,19 +160,13 @@ void LoadColorBase( const tinyxml2::XMLElement* element, float* r, float* g, flo
 
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color )
 {
-	LoadColorBase( element, &color->r, &color->g, &color->b, &color->a );
+	LoadColorBase( element, &color->x, &color->y, &color->z, &color->w );
 }
 
 
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color )
 {
-	LoadColorBase( element, &color->r, &color->g, &color->b, 0 );
-}
-
-
-void LoadColor( const tinyxml2::XMLElement* element, grinliz::Vector4F* color )
-{
-	LoadColorBase( element, &color->x, &color->y, &color->z, &color->w );
+	LoadColorBase( element, &color->x, &color->y, &color->z, 0 );
 }
 
 

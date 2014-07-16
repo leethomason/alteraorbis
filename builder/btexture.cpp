@@ -124,7 +124,7 @@ bool BTexture::Load()
 			for( int x=0; x<rgb->w; ++x ) {
 				Color4U8 rgbC = GetPixel( rgb, x, y );
 				Color4U8 alphaC = GetPixel( alpha, x, y );
-				Color4U8 c = { rgbC.r, rgbC.g, rgbC.b, alphaC.r };
+				Color4U8 c = { rgbC.r(), rgbC.g(), rgbC.b(), alphaC.r() };
 				PutPixel( surface, x, y, c );
 			}
 		}
@@ -162,7 +162,7 @@ bool BTexture::Load()
 		for (int y = 0; y<surface->h; ++y) {
 			for (int x = 0; x<surface->w; ++x) {
 				Color4U8 rgb = GetPixel(surface, x, y);
-				Color4U8 c = { 255, 255, 255, (rgb.r + rgb.g + rgb.b) / 3 };
+				Color4U8 c = { 255, 255, 255, (rgb.x + rgb.y + rgb.z) / 3 };
 				PutPixel(alpha, x, y, c);
 			}
 		}
@@ -205,21 +205,21 @@ void BTexture::WhiteMap()
 	for( int y=0; y<surface->h; ++y ) {
 		for( int x=0; x<surface->w; ++x ) {
 			Color4U8 c = GetPixel( surface, x, y );
-			Color4U8 d = { c.r, c.g, c.b, 0 };
+			Color4U8 d = { c.r(), c.g(), c.b(), 0 };
 
 			// Is it white? (Account for AA.)
-			if (    c.b == 0xff 
-				 && c.r > 0 
-				 && c.g > 0 
-				 && abs( c.g - c.r ) < 2 ) 
+			if (    c.b() == 0xff 
+				 && c.r() > 0 
+				 && c.g() > 0 
+				 && abs( c.g() - c.r() ) < 2 ) 
 			{
-				int amount = c.r;
+				int amount = c.r();
 				float f = (float)amount / 255.0f;
 
 				d.Set( 0,
 					   0,
 					   255,
-					   (U8)Lerp( 0.0f, (float)c.r, f  ));
+					   (U8)Lerp( 0.0f, (float)c.r(), f  ));
 			}
 			PutPixel( target, x, y, d );
 		}
@@ -310,10 +310,10 @@ SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface )
 			for( int j=0; j<sy; ++j ) {
 				for( int i=0; i<sx; ++i ) {
 					Color4U8 c = GetPixel( surface, xSrc+i, ySrc+j );
-					r32 += c.r;
-					g32 += c.g;
-					b32 += c.b;
-					a32 += c.a;
+					r32 += c.r();
+					g32 += c.g();
+					b32 += c.b();
+					a32 += c.a();
 				}
 			}
 			Color4U8 c = { r32/(sx*sy), g32/(sx*sy), b32/(sx*sy), a32/(sx*sy) };
@@ -359,10 +359,10 @@ bool BTexture::ToBuffer()
 					Color4U8 c = GetPixel(surface, i, j);
 
 					U16 p =
-						((c.r >> 4) << 12)
-						| ((c.g >> 4) << 8)
-						| ((c.b >> 4) << 4)
-						| ((c.a >> 4) << 0);
+						((c.r() >> 4) << 12)
+						| ((c.g() >> 4) << 8)
+						| ((c.b() >> 4) << 4)
+						| ((c.a() >> 4) << 0);
 
 					*b++ = p;
 				}
@@ -385,9 +385,9 @@ bool BTexture::ToBuffer()
 					Color4U8 c = GetPixel(surface, i, j);
 
 					U16 p =
-						((c.r >> 3) << 11)
-						| ((c.g >> 2) << 5)
-						| ((c.b >> 3));
+						((c.r() >> 3) << 11)
+						| ((c.g() >> 2) << 5)
+						| ((c.b() >> 3));
 
 					*b++ = p;
 				}

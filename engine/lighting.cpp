@@ -76,9 +76,9 @@ void Lighting::Query(	grinliz::Color4F* diffuse,
 						grinliz::Vector4F* _dir )
 {
 	if ( temperature == 0 ) {
-		diffuse->Set( midLight.diffuse.r, midLight.diffuse.g, midLight.diffuse.b, 1 );
-		ambient->Set( midLight.ambient.r, midLight.ambient.g, midLight.ambient.b, 1 );
-		shadow->Set(  midLight.shadow.r,  midLight.shadow.g,  midLight.shadow.b,  1 );
+		diffuse->Set( midLight.diffuse.x, midLight.diffuse.y, midLight.diffuse.z, 1 );
+		ambient->Set( midLight.ambient.x, midLight.ambient.y, midLight.ambient.z, 1 );
+		shadow->Set(  midLight.shadow.x,  midLight.shadow.y,  midLight.shadow.z,  1 );
 	}
 	else if ( temperature < 0 ) {
 		for( int i=0; i<3; ++i ) {
@@ -94,9 +94,9 @@ void Lighting::Query(	grinliz::Color4F* diffuse,
 			shadow->X(i)  = Lerp( midLight.shadow.X(i),	 warm.shadow.X(i),  temperature );
 		}
 	}
-	diffuse->a = 1;
-	ambient->a = 1;
-	shadow->a = 1;
+	diffuse->a() = 1;
+	ambient->a() = 1;
+	shadow->a() = 1;
 
 	if ( _dir ) {
 		_dir->Set( direction.x, direction.y, direction.z, 0 );
