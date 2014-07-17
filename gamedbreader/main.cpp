@@ -18,6 +18,8 @@ int main( int argc, const char* argv[] )
 	reader.Init( 0, argv[1] );
 	reader.RecWalk( reader.Root(), 0 );
 
+	reader.Manifest(2);
+
 	return 0;
 }
 

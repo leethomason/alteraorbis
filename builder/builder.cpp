@@ -1089,48 +1089,6 @@ void ProcessFont( XMLElement* font )
 }
 
 
-struct ManifestItem
-{
-	GLString name;
-	GLString group;
-	int uncompressed;
-};
-
-void ManifestRec(const gamedb::Item* item, int depth, int maxDepth, CDynArray<ManifestItem>* arr )
-{
-	for (int i = 0; i < item->NumChildren(); ++i) {
-		const gamedb::Item* subItem = item->ChildAt(i);
-		if (depth == maxDepth) {
-			int size = 0;
-			for (int j = 0; j < subItem->NumAttributes(); ++j) {
-				int s = subItem->GetDataSize(j);
-				if (s > 0)
-					size += s;
-			}
-
-			ManifestItem mi = { subItem->Name(), item->Name(), size };
-			arr->Push(mi);
-		}
-		else {
-			ManifestRec(subItem, depth + 1, maxDepth, arr);
-		}
-	}
-}
-
-
-void Manifest(const gamedb::Reader* reader)
-{
-	CDynArray<ManifestItem> items;
-	ManifestRec(reader->Root(), 0, 2, &items);
-
-	printf("\n");
-	for (int i = 0; i < items.Size(); ++i) {
-		printf("%s %s %d\n", items[i].group.safe_str(), items[i].name.safe_str(), items[i].uncompressed);
-	}
-
-}
-
-
 int main( int argc, char* argv[] )
 {
 	printf( "UFO Builder. version='%s' argc=%d argv[1]=%s\n", VERSION, argc, argv[1] );
@@ -1282,13 +1240,9 @@ int main( int argc, char* argv[] )
 		gamedb::Reader reader;
 		reader.Init( 0, outputPath.c_str(), 0 );
 		reader.RecWalk( reader.Root(), 0 );
+		reader.Manifest(2);
 	}
-/*	{
-		gamedb::Reader reader;
-		reader.Init( 0, outputPath.c_str(), 0 );
-		Manifest(&reader);
-	}
-*/
+
 	delete StringPool::Instance();
 	return 0;
 }

@@ -29,9 +29,26 @@
 #include "../grinliz/gldebug.h"
 #include "gamedb.h"
 
+// only used for Manifest()
+#include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
+
 namespace gamedb
 {
 class Reader;
+
+struct ManifestItem
+{
+	grinliz::GLString name;
+	grinliz::GLString group;
+	int uncompressedDataSize;
+
+	bool operator<(const ManifestItem& rhs) const {
+//		if (this->group != rhs.group)
+//			return strcmp(this->group.c_str(), rhs.group.c_str()) < 0;
+		return this->uncompressedDataSize > rhs.uncompressedDataSize;
+	}
+};
 
 
 /** Node of the gamedb.
@@ -182,10 +199,13 @@ public:
 
 	// Debug dump
 	void RecWalk( const Item* item, int depth );
+	void Manifest(int maxDepth) const;
+
 	bool ItemInReader( const Item* item ) const { return item >= mem && item < endMem; }
 
 private:
 	bool IsDataType( int i ) const { return i == ATTRIBUTE_DATA || i == ATTRIBUTE_INT_ARRAY || i == ATTRIBUTE_FLOAT_ARRAY; }
+	void ManifestRec(const gamedb::Item* item, int depth, int maxDepth, grinliz::CDynArray<ManifestItem>* arr) const;
 
 	static Reader* readerRoot;
 	Reader* next;

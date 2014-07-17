@@ -804,3 +804,41 @@ bool Item::GetBool( const char* name ) const
 	}
 	return false;
 }
+
+
+void Reader::Manifest(int maxDepth) const
+{
+	grinliz::CDynArray<ManifestItem> items;
+	ManifestRec(Root(), 1, maxDepth, &items);
+	grinliz::Sort<ManifestItem, grinliz::CompValue>(items.Mem(), items.Size());
+
+	printf("\n");
+	for (int i = 0; i < items.Size(); ++i) {
+		printf("%16s %20s %dk\n", items[i].group.safe_str(), items[i].name.safe_str(), items[i].uncompressedDataSize/1024);
+	}
+
+}
+
+void Reader::ManifestRec(const gamedb::Item* item, int depth, int maxDepth, grinliz::CDynArray<ManifestItem>* arr ) const
+{
+	for (int i = 0; i < item->NumChildren(); ++i) {
+		const gamedb::Item* subItem = item->ChildAt(i);
+		if (depth == maxDepth) {
+			int size = 0;
+			for (int j = 0; j < subItem->NumAttributes(); ++j) {
+				if (subItem->AttributeType(j) == gamedb::ATTRIBUTE_DATA) {
+					int s = subItem->GetDataSize(j);
+					if (s > 0)
+						size += s;
+				}
+			}
+
+			ManifestItem mi = { subItem->Name(), item->Name(), size };
+			arr->Push(mi);
+		}
+		else {
+			ManifestRec(subItem, depth + 1, maxDepth, arr);
+		}
+	}
+}
+
