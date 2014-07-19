@@ -2397,12 +2397,12 @@ void WorldMap::GenerateEmitters(U32 seed)
 								break;
 							}
 						}
-						if ( !besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
-							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true);
-							if (h) {
-								int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-								int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
+						int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
+						int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
 
+						if ( !besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
+							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true, fluidType > 0);
+							if (h) {
 								SetEmitter(it.Pos().x, it.Pos().y, true, fluidType);
 								++nEmitters;
 								found = true;

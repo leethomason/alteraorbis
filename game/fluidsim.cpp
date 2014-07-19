@@ -8,13 +8,15 @@
 
 using namespace grinliz;
 
-static const int PRESSURE = 25;
 static const int WATERFALL_HEIGHT = 3;
 
 static const int NDIR = 4;
 static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
 S8 FluidSim::water[SECTOR_SIZE*SECTOR_SIZE];
+S8 FluidSim::boundHeight[SECTOR_SIZE*SECTOR_SIZE];
+grinliz::CArray<grinliz::Vector2I, FluidSim::PRESSURE> FluidSim::fill[MAX_ROCK_HEIGHT];
+
 
 FluidSim::FluidSim(WorldMap* wm, const Rectangle2I& b) : worldMap(wm), bounds(b), settled(false)
 {
@@ -142,14 +144,46 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 	if (settled) return true;
 
 	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
+	memset(boundHeight, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(boundHeight[0]));
 	Rectangle2I aoe;
 	aoe.SetInvalid();
 
 	emitters.Clear();
-	emitterHeights.Clear();
 	waterfalls.Clear();
 	U32 startHash = Hash();
 
+	// First pass: find all the emitters, and if they are bounded.
+	// Generates a potential height map for everything.
+
+	// FIXME: add a 2nd check for a possible height so water falls over rock
+	// FIXME: handle Water and Sinks
+	// FIXME: handle magma vs. water
+
+	for (int y = bounds.min.y + 1; y < bounds.max.y; ++y) {
+		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
+
+			int i = x - bounds.min.x;
+			int j = y - bounds.min.y;
+
+			Vector2I pos2i = { x, y };
+			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
+			if (wg.IsFluidEmitter()) {
+				emitters.Push(pos2i);
+				int h = FindEmitter(pos2i, false, wg.FluidType() > 0);
+				if (h) {
+					// It is bounded!
+					while (!fill[h-1].Empty()) {
+						Vector2I v = fill[h-1].Pop();
+						int bhIndex = (v.y - bounds.min.y) * SECTOR_SIZE + (v.x - bounds.min.x);
+						boundHeight[bhIndex] = Max(boundHeight[bhIndex], (S8)h);
+						aoe.DoUnion(v);
+					}
+				}
+			}
+		}
+	}
+
+	// 2nd pass: lift or lower water / magma
 	for (int y = bounds.min.y + 1; y < bounds.max.y; ++y) {
 		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
 
@@ -159,59 +193,17 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 			Vector2I pos2i = { x, y };
 			int index = worldMap->INDEX(pos2i);
 			WorldGrid* worldGrid = &worldMap->grid[index];
+			int h = FLUID_PER_ROCK * boundHeight[j*SECTOR_SIZE + i];
 
-			if (worldGrid->FluidSink()) {
-				water[j*SECTOR_SIZE + i] = 0;
+			if ((int)worldGrid->fluidHeight < h) {
+				worldGrid->fluidHeight += 1;
 			}
-			else if (worldGrid->fluidEmitter) {
-				// Are we emitting? If not, should we be?
-				int hRock = FindEmitter(pos2i, false);
-				if (hRock) {
-					int h = FLUID_PER_ROCK * hRock;
-					water[j*SECTOR_SIZE + i] = h;
-					emitters.Push(pos2i);
-					emitterHeights.Push(h);
-				}
-				else if (worldGrid->IsFluid()) {
-					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight - 1;
-				}
-			}
-			else {
-				int max = 0;
-
-				for (int k = 0; k < NDIR; ++k) {
-					int subIndex = worldMap->INDEX(x + DIR[k].x, y + DIR[k].y);
-					const WorldGrid* subGrid = &worldMap->grid[subIndex];
-					if ((int)subGrid->fluidHeight > max) {
-						max = Max(max, (int)subGrid->fluidHeight);
-
-						// Water falls as it goes over rock - adjust the
-						// effective height here.
-						if (subGrid->RockHeight() > worldGrid->RockHeight()) {
-							max -= (subGrid->RockHeight() - worldGrid->RockHeight()) * FLUID_PER_ROCK - 1;
-						}
-					}
-				}
-
-				int wgBottom = worldGrid->RockHeight() * FLUID_PER_ROCK;
-
-				if (worldGrid->fluidHeight > 0 && (int)worldGrid->fluidHeight >= max)  {
-					// this is the higher fluid...flow down.
-					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight - 1;
-				}
-				else if ((int)worldGrid->fluidHeight < max - 1	// lower fluid
-					&& wgBottom < max - 1)					// and we have space over the rock
-				{
-					// Go up, but be sure to clear the rock.
-					water[j*SECTOR_SIZE + i] = Max((int)worldGrid->fluidHeight + 1, wgBottom + 1);
-				}
-				else {
-					water[j*SECTOR_SIZE + i] = worldGrid->fluidHeight;
-				}
+			else if ((int)worldGrid->fluidHeight > h) {
+				worldGrid->fluidHeight -= 1;
 			}
 		}
 	}
-
+	/*
 	for (int y = bounds.min.y + 1; y < bounds.max.y; ++y) {
 		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
 			Vector2I pos = { x, y };
@@ -261,15 +253,19 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 			}
 		}
 	}
-
-#if 1
+	*/
+	
+#if 0
 	for (int i = 0; i < emitters.Size(); ++i) {
 		PressureStep(emitters[i], emitterHeights[i]);
 	}
 #endif
 
 	// Reset the pather.
+	// FIXME: not sure the pather is handling this correctly....
+	// FIXME: FLOAT vs not, WATER vs FIRE, etc.
 	// Scan for waterfalls.
+	/*
 	aoe.Outset(1);
 	aoe.DoIntersection(bounds);
 
@@ -286,6 +282,7 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 			}
 		}
 	}
+	*/
 
 	U32 endHash = Hash();
 	settled = (startHash == endHash);
@@ -342,48 +339,52 @@ int FluidSim::PressureStep(const Vector2I& start, int h)
 }
 
 
-int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal)
+int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal, bool magma)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
+	int result = 0;
 
-	for (int hRock = MAX_ROCK_HEIGHT; hRock > 0; hRock--) {
+	// Go up; can only be bounded at higher h if bounded at lower h.
+	for (int hRock = 1; hRock <= MAX_ROCK_HEIGHT; hRock++) {
 		if (hRock > wg.RockHeight()) {
+			fill[hRock-1].Clear();
 			int h = hRock * FLUID_PER_ROCK;
-			int area = 0, areaElevated = 0;
-			BoundCheck(pos2i, h / FLUID_PER_ROCK, nominal, &area, &areaElevated);
+			int area = BoundCheck(pos2i, h / FLUID_PER_ROCK, nominal, magma);
+
 			// Don't start an emitter unless it is enclosed.
 			// "water patties" look pretty silly.
 			//if (area > 5 && area < PRESSURE) {	// the area > 5 is aesthetically nice, but unexpected when building traps.
-			if (area < PRESSURE) {
-				return hRock;
+			if (area > 0 && area < PRESSURE) {
+				result = hRock;
+			}
+			else {
+				break;
 			}
 		}
 	}
-	return 0;
+	return result;;
 }
 
 
-void FluidSim::BoundCheck(const Vector2I& start, int h, int nominal, int* area, int* areaElevated )
+int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma )
 {
 	// Pressure from the emitter.
 	flag.ClearAll();
+	fill[h-1].Clear();
 
 	stack.Clear();
 	stack.Push(start);
 	flag.Set(start.x - bounds.min.x, start.y - bounds.min.y);
 
-	while (!stack.Empty() && *area < PRESSURE) {
+	while (!stack.Empty() && fill[h-1].HasCap()) {
 		Vector2I p = stack.PopFront();	// Need to PopFront() to get 'round' areas and not go depth-first
+		fill[h-1].Push(p);
 
 		int index = worldMap->INDEX(p);
 		const WorldGrid& wg = worldMap->grid[index];
 
-		*area += 1;
-
 		int wgRockHeight = nominal ? wg.NominalRockHeight() : wg.RockHeight();
-		if (wgRockHeight) {
-			*areaElevated += 1;
-		}
+		GLASSERT(wgRockHeight < h);
 		if (wg.FluidSink()) {
 			continue;
 		}
@@ -412,8 +413,11 @@ void FluidSim::BoundCheck(const Vector2I& start, int h, int nominal, int* area, 
 		// Detect a narrow passage if there are 2 ways
 		// out and one way is marked already. Then
 		// undo to bound the fill.
-		if (push == 1 && pass == 2) {
+		if (magma && push == 1 && pass == 2) {
 			stack.Pop();
 		}
 	}
+	int area = fill[h-1].Size();
+	if (area && area < PRESSURE) return area;
+	return 0;
 }
