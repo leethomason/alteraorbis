@@ -54,7 +54,7 @@ private:
 	// can be shared - scratch memory.
 	static S8 water[SECTOR_SIZE*SECTOR_SIZE];
 	static U8 boundHeight[SECTOR_SIZE*SECTOR_SIZE];
-	static grinliz::CArray<grinliz::Vector2I, PRESSURE> fill[MAX_ROCK_HEIGHT];
+	static grinliz::CArray<grinliz::Vector2I, PRESSURE> fill;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
 };

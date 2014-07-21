@@ -15,7 +15,7 @@ static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
 S8 FluidSim::water[SECTOR_SIZE*SECTOR_SIZE];
 U8 FluidSim::boundHeight[SECTOR_SIZE*SECTOR_SIZE];
-grinliz::CArray<grinliz::Vector2I, FluidSim::PRESSURE> FluidSim::fill[MAX_ROCK_HEIGHT];
+grinliz::CArray<grinliz::Vector2I, FluidSim::PRESSURE> FluidSim::fill;
 
 
 FluidSim::FluidSim(WorldMap* wm, const Rectangle2I& b) : worldMap(wm), bounds(b), settled(false)
@@ -161,22 +161,37 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 
 	for (int y = bounds.min.y + 1; y < bounds.max.y; ++y) {
 		for (int x = bounds.min.x + 1; x < bounds.max.x; ++x) {
-
-			int i = x - bounds.min.x;
-			int j = y - bounds.min.y;
-
 			Vector2I pos2i = { x, y };
 			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
 			if (wg.IsFluidEmitter()) {
 				emitters.Push(pos2i);
-				int h = FindEmitter(pos2i, false, wg.FluidType() > 0);
-				if (h) {
+			}
+		}
+	}
+
+	for (int h = 1; h <= MAX_ROCK_HEIGHT; ++h) {
+		for (int e = 0; e < emitters.Size(); ++e) {
+
+			Vector2I pos2i = emitters[e];
+			int i = pos2i.x - bounds.min.x;
+			int j = pos2i.y - bounds.min.y;
+
+			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
+			GLASSERT(wg.IsFluidEmitter());
+
+			int bh = boundHeight[j*SECTOR_SIZE + i];
+			if (bh == 255) bh = 0;
+
+			// Build up in layers.
+			if (bh == h-1) {
+				//int hLocal = FindEmitter(pos2i, false, wg.FluidType() > 0);
+				if (this->BoundCheck(pos2i, h, false, wg.FluidType() > 0)) {
+				// FIXME: 2nd pass for "waterfall bounded"
 					// It is bounded!
-					while (!fill[h-1].Empty()) {
-						Vector2I v = fill[h-1].Pop();
+					while (!fill.Empty()) {
+						Vector2I v = fill.Pop();
 						int bhIndex = (v.y - bounds.min.y) * SECTOR_SIZE + (v.x - bounds.min.x);
-						if (boundHeight[bhIndex] == 255) 
-							boundHeight[bhIndex] = 0;
+						if (boundHeight[bhIndex] == 255) boundHeight[bhIndex] = 0;
 						boundHeight[bhIndex] = Max((int)boundHeight[bhIndex], h);
 						aoe.DoUnion(v);
 					}
@@ -263,6 +278,7 @@ bool FluidSim::DoStep(Rectangle2I* _aoe)
 	aoe.DoIntersection(bounds);
 
 #if 1
+	// FIXME: pressureStep can change AOE
 	PressureStep();
 #endif
 
@@ -343,7 +359,7 @@ int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal, bool mag
 	// Go up; can only be bounded at higher h if bounded at lower h.
 	for (int hRock = 1; hRock <= MAX_ROCK_HEIGHT; hRock++) {
 		if (hRock > wg.RockHeight()) {
-			fill[hRock-1].Clear();
+			fill.Clear();
 			int h = hRock * FLUID_PER_ROCK;
 			int area = BoundCheck(pos2i, h / FLUID_PER_ROCK, nominal, magma);
 
@@ -366,15 +382,15 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 {
 	// Pressure from the emitter.
 	flag.ClearAll();
-	fill[h-1].Clear();
+	fill.Clear();
 
 	stack.Clear();
 	stack.Push(start);
 	flag.Set(start.x - bounds.min.x, start.y - bounds.min.y);
 
-	while (!stack.Empty() && fill[h-1].HasCap()) {
+	while (!stack.Empty() && fill.HasCap()) {
 		Vector2I p = stack.PopFront();	// Need to PopFront() to get 'round' areas and not go depth-first
-		fill[h-1].Push(p);
+		fill.Push(p);
 
 		int index = worldMap->INDEX(p);
 		const WorldGrid& wg = worldMap->grid[index];
@@ -413,7 +429,7 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 			stack.Pop();
 		}
 	}
-	int area = fill[h-1].Size();
+	int area = fill.Size();
 	if (area && area < PRESSURE) return area;
 	return 0;
 }
