@@ -21,6 +21,10 @@ struct BuildData
 	grinliz::IString	structure;		// "vault"
 	ai::Needs			needs;			// needs advertised by the building
 	int					standTime;
+
+	enum {ZONE_NONE, ZONE_INDUSTRIAL, ZONE_NATURAL};
+	int					zoneCreate;
+	int					zoneConsume;
 };
 
 

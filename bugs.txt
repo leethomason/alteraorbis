@@ -155,6 +155,32 @@ x weather should affect fire/shock
 		t battery logic isn't correct - seems okay in the Fluid Test
 		x above ground water needs differentiation
 		x better spark / charge effects. new colors, particle trail
+		x “tab is brilliant”
+		x workers carry fruit - denizens only?
+		x industrial or natural in the menu
+		x pave is drawing over porches
+		x pressure plates don’t have direction
+		x battery can’t tell direction from top. shrink battery?
+		x splitter: 4 bends?
+		- Arachnoid -> Trilobyte
+		- rotate should be somewhere
+		- need circuit lines - circuit board lines
+		- plant growth rate high?
+		- plants shouldn’t grow over circuits
+			- circuit lines block plant growth?
+			- zapper: symbol in middle, block? Spike? Remove
+			- Zapper - charge for?? Remove zapper?
+		- Gate? Ice toggle?
+		- Circuit Fab does nothing
+		- enemy incursion incredibly low
+		- name of Bar
+		- Fluids:
+			- water fully enclosed 
+			- lava algorithm
+			- pather doesn’t respect fluids
+		- gl3.1 suits don't render correctly.
+		- volcanos don't burn plants
+		x eating plants doesn't seem to damage them
 
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)

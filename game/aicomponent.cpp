@@ -1256,7 +1256,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 			CoreScript* cs = CoreScript::GetCore(destSector);
 
 			// Check repelled / attracted.
-			if (cs) {
+			if (cs && cs->ParentChit()->Team()) {
 				int relate = Team::GetRelationship(cs->ParentChit(), thisComp.chit);
 				int tech = cs->MaxTech();
 
@@ -1431,31 +1431,35 @@ bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
 	if (    (thisComp.item->flags & GameItem::AI_EAT_PLANTS) 
 		 && (thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 ))  
 	{
+		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+
+		// Are we standing on a plant?
+		{
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+			if (wg.Plant() && !wg.BlockingPlant()) {
+				this->Stand();
+				return true;
+			}
+		}
+
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
 		Vector2F plantPos = { 0, 0 };
 		for (int rad = 0; rad <= PLANT_AWARE; ++rad) {
 			Rectangle2I r;
-			r.min = r.max = thisComp.spatial->GetPosition2DI();
+			r.min = r.max = pos2i;
 			r.Outset(rad);
 			for (Rectangle2IEdgeIterator it(r); !it.Done(); it.Next()) {
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if (wg.Plant() && !wg.BlockingPlant()) {
+				if (wg.Plant() && !wg.BlockingPlant() && Context()->worldMap->HasStraightPath(pos2, ToWorld2F(it.Pos()))) {
 					plantPos = ToWorld2F(it.Pos());
 					break;
 				}
 			}
 		}
 		if ( !plantPos.IsZero()) {
-			if ( ToWorld2I( plantPos ) == thisComp.spatial->GetPosition2DI() ) {
-				if ( debugFlag ) {
-					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
-				}
-				currentAction = STAND;
-			}
-			else {
-				this->Move( plantPos, false );
-			}
+			this->Move( plantPos, false );
 			return true;
 		}
 	}
@@ -1476,12 +1480,9 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
 			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
 				this->Move( ToWorld2F( sd.core ), false );
+				return true;
 			}
 		}
-		else {
-			currentAction = STAND;
-		}
-		return true;
 	}
 	return false;
 }
@@ -1726,12 +1727,12 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 		need = needs.Value( Needs::FOOD );
 	}
 
-	bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
+	// workers carrying fruit seemed weird for some reason.
+	//bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
 
 	// It is the duty of every citizen to take fruit to the distillery.
-	if ( AtHomeCore() || worker ) {
-		if (    worker
-			 || thisComp.item->GetPersonality().Botany() != Personality::DISLIKES
+	if ( AtHomeCore() ) {
+		if (    thisComp.item->GetPersonality().Botany() != Personality::DISLIKES
 			 || need < NEED_CRITICAL * 2.0 )
 		{
 			// Can we go pick something up?
