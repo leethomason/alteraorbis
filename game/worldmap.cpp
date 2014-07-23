@@ -453,6 +453,7 @@ void WorldMap::InitFluidSim()
  
 			Rectangle2I bounds;
 			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
+			bounds.Outset(-1);
 			bounds.DoIntersection(thisBounds);
 			if (bounds.IsValid())
 				fluidSim[index] = new FluidSim(this, bounds);
@@ -704,7 +705,7 @@ void WorldMap::ProcessEffect(ChitBag* chitBag)
 bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
 {
 	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
-		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep(0);
+		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
 	return true;
 }
 
@@ -755,14 +756,14 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 	int n = fluidTicker.Delta(delta);
 	while (n--) {
 		if (fluidSim[fluidSector]) {
-			Rectangle2I aoe;
-			aoe.SetInvalid();
-			fluidSim[fluidSector]->DoStep(&aoe);
 
-			if (aoe.IsValid()) {
+			fluidSim[fluidSector]->DoStep();
+
+			if (fluidSim[fluidSector]->NumPools()) {
 				// Need to tick everything in the 
 				// area of effect. Physics changes
 				// may apply to the world objects.
+				Rectangle2I aoe = fluidSim[fluidSector]->Bounds();
 				Rectangle2F aoeF = ToWorld(aoe);
 				if (chitBag) {
 					chitBag->SetTickNeeded(aoeF);

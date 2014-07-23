@@ -43,6 +43,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500),
 	saveButton.SetText("Save");
 	loadButton.Init(&gamui2D, game->GetButtonLook(0));
 	loadButton.SetText("Load");
+
+	hover.Zero();
 }
 
 
@@ -83,6 +85,15 @@ void FluidTestScene::Zoom(int style, float delta)
 void FluidTestScene::Rotate(float degrees)
 {
 	context.engine->camera.Orbit(degrees);
+}
+
+
+void FluidTestScene::MouseMove(const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Vector3F at = { 0, 0, 0 };
+	float t = 0;
+	IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
+	hover.Set((int)at.x, (int)at.z);
 }
 
 
@@ -189,7 +200,7 @@ void FluidTestScene::DrawDebugText()
 	static const int x = 0;
 	int y = 120;
 	DrawDebugTextDrawCalls(x, y, context.engine);
-	UFOText::Instance()->Draw(x, y + 16, "Settled: %s", settled ? "true" : "false");
+	UFOText::Instance()->Draw(x, y + 16, "Settled: %s voxel=%d,%d", settled ? "true" : "false", hover.x, hover.y);
 }
 
 

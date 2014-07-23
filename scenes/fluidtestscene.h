@@ -31,6 +31,7 @@ public:
 	virtual void DrawDebugText();
 
 	virtual void DoTick(U32 delta);
+	virtual void MouseMove(const grinliz::Vector2F& view, const grinliz::Ray& world);
 
 private:
 	void Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world);
@@ -63,6 +64,7 @@ private:
 
 	ChitContext	context;
 	bool		settled;
+	grinliz::Vector2I hover;
 
 	CTicker fluidTicker;
 

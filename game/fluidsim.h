@@ -5,6 +5,25 @@
 
 class WorldMap;
 
+/*
+	So many many iterations of this code.
+	Things to think about:
+	- Waterfalls are cool, and water at different heights is cool.
+		Put a lot of work into this, and still doesn't work. But
+		could; detect closed regions, flow from one closed region
+		to another.
+	- It's a flat world. can't do a real sim
+	- Water "piles" are disturbing. Water really needs to be bounded.
+		This was the big problem in the previous implementation.
+		If the water piles are bothersome, then a "mostly closed"
+		algorithm works fine. But see the pather stuff.
+	- Lava piles are pretty cool.
+	- The pather...is a complex topic. 
+		If some things can go through fluids and some things can't,
+		then there needs to be different solutions to pathing.
+		That can be implemented: currentPathState or something.
+		But adds complexity.
+*/
 class FluidSim
 {
 public:
@@ -12,7 +31,7 @@ public:
 	~FluidSim();
 
 	// Call every 600ms (?)
-	bool DoStep(grinliz::Rectangle2I* aoe);
+	bool DoStep();
 	// Particle calls
 	void EmitWaterfalls(U32 delta, Engine* engine);
 
@@ -26,6 +45,7 @@ public:
 	int ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const;
 	
 	int FindEmitter(const grinliz::Vector2I& start, bool nominal, bool magma);
+	grinliz::Rectangle2I Bounds() const { return bounds; }
 
 private:
 	void Reset(int x, int y);
@@ -34,7 +54,7 @@ private:
 	void PressureStep();
 
 	// Both bounds check set 'flag' to tell where the pressureized parts should be.
-	// Do a bounds check for magma flow - unlike water, just needs to be "mostly" enclosed.
+	// if 'waterfalls' is set, it only needs to be mostly enclosed at h >= 2
 	int BoundCheck(const grinliz::Vector2I& start, int h, bool nominal, bool magma);
 
 	grinliz::Vector2I MaxAdjacentWater(int i, int j);
@@ -54,6 +74,7 @@ private:
 	// can be shared - scratch memory.
 	static S8 water[SECTOR_SIZE*SECTOR_SIZE];
 	static U8 boundHeight[SECTOR_SIZE*SECTOR_SIZE];
+	static S8 emitterDist[SECTOR_SIZE*SECTOR_SIZE];
 	static grinliz::CArray<grinliz::Vector2I, PRESSURE> fill;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
