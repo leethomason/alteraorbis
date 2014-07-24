@@ -2439,11 +2439,18 @@ void WorldMap::GenerateEmitters(U32 seed)
 
 						int area = bestArea;
 						int attempt = 0;
-						if (area < 8 && attempt < 3) {
+						if (area < 8 && attempt < 4) {
 							++attempt; 
 							Vector2I v = bestPos;
+							int heading = random.Rand(4);
 							for (int k = 0; k < STEPS; ++k) {
-								v += DIR_I4[random.Rand(4)];
+								if (attempt < 2) {
+									v += DIR_I4[random.Rand(4)];
+								}
+								else {
+									heading = (heading + 3 + random.Rand(3)) % 4;
+									v += DIR_I4[heading];
+								}
 								if (r.Contains(v)) {
 									WorldGrid* mwg = &grid[INDEX(v)];
 									if (!mwg->FluidSink() && mwg->NominalRockHeight() >= bestHeight) {
@@ -2469,7 +2476,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 					}
 					else {
 						// ---- If that doesn't work out, lay down random emitters.
-						if (random.Bit()) {
+						if (random.Rand(3)==0) {
 							bool okay = true;
 							int x = r.min.x + random.Rand(r.Width());
 							int y = r.min.y + random.Rand(r.Height());
