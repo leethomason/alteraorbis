@@ -302,7 +302,6 @@
         mass="80"
         cost="40"
         script="FarmScript"
-        zoneCreate="industrial"
         />
   
   <item name="distillery"

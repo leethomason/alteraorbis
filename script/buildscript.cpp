@@ -87,6 +87,16 @@ const BuildData& BuildScript::GetData( int i )
 			gi.keyValues.Get( ISC::size, &buildData[i].size );
 			gi.keyValues.Get( ISC::cost, &buildData[i].cost );
 
+			if (gi.keyValues.GetIString(ISC::zoneCreate) == ISC::industrial)
+				buildData[i].zoneCreate = BuildData::ZONE_INDUSTRIAL;
+			else if (gi.keyValues.GetIString(ISC::zoneCreate) == ISC::natural)
+				buildData[i].zoneCreate = BuildData::ZONE_NATURAL;
+
+			if (gi.keyValues.GetIString(ISC::zoneConsume) == ISC::industrial)
+				buildData[i].zoneConsume = BuildData::ZONE_INDUSTRIAL;
+			else if (gi.keyValues.GetIString(ISC::zoneConsume) == ISC::natural)
+				buildData[i].zoneConsume = BuildData::ZONE_NATURAL;
+
 			buildData[i].needs.SetZero();
 			
 			for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {

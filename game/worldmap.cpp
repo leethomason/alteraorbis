@@ -1470,6 +1470,9 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 // The line-walk can/should get moved to the utility package. (and the grid lookup replaced with visit() )
 bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p1 )
 {
+	if (ToWorld2I(p0) == ToWorld2I(p1))
+		return true;	// start-end same
+
 	double dx = fabs(p1.x - p0.x);
     double dy = fabs(p1.y - p0.y);
 
@@ -2071,15 +2074,15 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 							layer = EMITTER + 1;	// lava
 					}
 					else if ( layer == WorldGrid::LAND ) {
-						if (wg.Pave()) {
-							layer = PAVE + wg.Pave() - 1;
-						}
-						else if ( wg.Porch() ) {
-							layer = PORCH + wg.Porch() - 1;
-						}
-						else if (wg.Circuit()) {
+						if (wg.Circuit()) {
 							layer = CIRCUIT + wg.Circuit() - 1;
 							rotation = wg.CircuitRot();
+						}
+						else if (wg.Porch()) {
+							layer = PORCH + wg.Porch() - 1;
+						}
+						else if (wg.Pave()) {
+							layer = PAVE + wg.Pave() - 1;
 						}
 					}
 
