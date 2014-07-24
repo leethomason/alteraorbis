@@ -225,7 +225,8 @@ bool FluidSim::DoStep()
 				 && wg.fluidHeight >= FLUID_PER_ROCK
 				 && wg.fluidType == 1 
 				 && altWG.fluidHeight 
-				 && altWG.fluidType == 0) 
+				 && altWG.fluidType == 0
+				 && wg.Plant() == 0) 
 			{
 				worldMap->SetRock(it.Pos().x, it.Pos().y, wg.fluidHeight / FLUID_PER_ROCK, false, 0);
 				break;
@@ -303,6 +304,7 @@ int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal, bool mag
 	if (h) return 0;	// emitter is covered.
 
 	int result = 0;
+	int resultArea = 0;
 
 	// Go up; can only be bounded at higher h if bounded at lower h.
 	for (int hRock = 1; hRock <= MAX_ROCK_HEIGHT; hRock++) {
@@ -316,13 +318,14 @@ int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal, bool mag
 			//if (area > 5 && area < PRESSURE) {	// the area > 5 is aesthetically nice, but unexpected when building traps.
 			if (a > 0 && a < PRESSURE) {
 				result = hRock;
-				*area = a;
+				resultArea = a;
 			}
 			else {
 				break;
 			}
 		}
 	}
+	if (area) *area = resultArea;
 	return result;
 }
 

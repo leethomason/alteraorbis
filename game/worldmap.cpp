@@ -2362,7 +2362,8 @@ void WorldMap::GenerateEmitters(U32 seed)
 	Random random(seed);
 	random.Rand();
 	random.Rand();
-	int nEmitters = 0;
+	int nPoolEmitters = 0;
+	int nRandomEmitters = 0;
 
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
@@ -2391,6 +2392,12 @@ void WorldMap::GenerateEmitters(U32 seed)
 					// ----- Find "good" emitters ---- //
 					bool found     = false;
 
+					int bestArea = 0;
+					Vector2I bestPos = { 0, 0 };
+					int bestHeight = 0;
+					int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
+					int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
+
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 						// Also annoying: emitters beside water. (Can only
 						// happen with diagonals, but it's a fine early-out.)
@@ -2401,12 +2408,8 @@ void WorldMap::GenerateEmitters(U32 seed)
 								break;
 							}
 						}
-						int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-						int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
 
-						int bestVolume = 0;
-						Vector2I bestPos = { 0, 0 };
-						int bestHeight = 0;
+						static const int AREA = 2;
 
 						if (!besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
 							int area = 0;
@@ -2414,51 +2417,85 @@ void WorldMap::GenerateEmitters(U32 seed)
 							grid[INDEX(it.Pos())].SetNominalRockHeight(0);
 							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true, fluidType > 0, &area);
 							grid[INDEX(it.Pos())].SetNominalRockHeight(savedHeight);
-							if (h) {
-								if (area*h > bestVolume) {
-									bestVolume = area*h;
-									bestPos = it.Pos();
-									bestHeight = h;
-								}
+							if (h && (area > AREA)) {
+								bestPos = it.Pos();
+								bestHeight = h;
+								bestArea = area;
 							}
-						}
-						if (bestVolume > 6) {
-							GLASSERT(!bestPos.IsZero());
-							SetEmitter(bestPos.x, bestPos.y, true, fluidType);
-							++nEmitters;
-							found = true;
-							int nm = Min(grid[INDEX(it.Pos())].NominalRockHeight(), bestHeight - 1);
-							grid[INDEX(it.Pos())].SetNominalRockHeight(nm);
 						}
 					}
 
-					// ---- If that doesn't work out, lay down random emitters.
-					if (!found && random.Bit()) {
-						bool okay = true;
-						int x = r.min.x + random.Rand(r.Width());
-						int y = r.min.y + random.Rand(r.Height());
+					if (bestArea) {
+						GLASSERT(!bestPos.IsZero());
+						SetEmitter(bestPos.x, bestPos.y, true, fluidType);
+						++nPoolEmitters;
+						found = true;
+						//int nm = Min(grid[INDEX(bestPos)].NominalRockHeight(), bestHeight - 1);
+						grid[INDEX(bestPos)].SetNominalRockHeight(0);
 
-						Rectangle2I r2;
-						r2.Set(x, y, x, y);
-						r2.Outset(3);
+						static const int STEPS = 8;
+						CArray<Vector2I, STEPS> steps;
+						CArray<int, STEPS> stepH;
 
-						for (Rectangle2IIterator it(r2); !it.Done(); it.Next()) {
-							const WorldGrid& wg = grid[INDEX(it.Pos())];
-							if (wg.FluidSink()) {
-								okay = false;
-								break;
+						int area = bestArea;
+						int attempt = 0;
+						if (area < 8 && attempt < 3) {
+							++attempt; 
+							Vector2I v = bestPos;
+							for (int k = 0; k < STEPS; ++k) {
+								v += DIR_I4[random.Rand(4)];
+								if (r.Contains(v)) {
+									WorldGrid* mwg = &grid[INDEX(v)];
+									if (!mwg->FluidSink() && mwg->NominalRockHeight() >= bestHeight) {
+										steps.Push(v);
+										stepH.Push(mwg->NominalRockHeight());
+										mwg->SetNominalRockHeight(0);
+									}
+								}
+							}
+							int a = 0;
+							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(bestPos, true, fluidType > 0, &a);
+							if (!h || a <= area) {
+								// rewind
+								for (int k = 0; k < steps.Size(); ++k) {
+									grid[INDEX(steps[k])].SetNominalRockHeight(stepH[k]);
+								}
+							}
+							else {
+								area = a;
 							}
 						}
-						if (okay) {
-							WorldGrid* wg = &grid[INDEX(x, y)];
-							SetEmitter(x, y, true, WorldGrid::FLUID_WATER);
-							++nEmitters;
+
+					}
+					else {
+						// ---- If that doesn't work out, lay down random emitters.
+						if (random.Bit()) {
+							bool okay = true;
+							int x = r.min.x + random.Rand(r.Width());
+							int y = r.min.y + random.Rand(r.Height());
+
+							Rectangle2I r2;
+							r2.Set(x, y, x, y);
+							r2.Outset(3);
+
+							for (Rectangle2IIterator it(r2); !it.Done(); it.Next()) {
+								const WorldGrid& wg = grid[INDEX(it.Pos())];
+								if (wg.FluidSink()) {
+									okay = false;
+									break;
+								}
+							}
+							if (okay) {
+								WorldGrid* wg = &grid[INDEX(x, y)];
+								SetEmitter(x, y, true, WorldGrid::FLUID_WATER);
+								++nRandomEmitters;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	GLOUTPUT(("Emitters created=%d\n", nEmitters));
+	GLOUTPUT(("Emitters created. pool=%d random=%d total=%d\n", nPoolEmitters, nRandomEmitters, nPoolEmitters + nRandomEmitters));
 }
 
