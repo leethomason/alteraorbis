@@ -39,13 +39,14 @@ public:
 	void Unsettle() { settled = false; }
 
 	int NumWaterfalls() const { return waterfalls.Size(); }
-	int NumPools() const { return emitters.Size(); }
-	grinliz::Vector2I PoolLoc(int i) const { return emitters[i]; }
+	int NumPools() const { return pools.Size(); }
+
+	grinliz::Vector2I PoolLoc(int i) const { return pools[i]; }
 
 	int ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const;
 	
-	int FindEmitter(const grinliz::Vector2I& start, bool nominal, bool magma);
-	grinliz::Rectangle2I Bounds() const { return bounds; }
+	int FindEmitter(const grinliz::Vector2I& start, bool nominal, bool magma, int* area);
+	grinliz::Rectangle2I Bounds() const { return outerBounds; }
 
 private:
 	void Reset(int x, int y);
@@ -62,19 +63,17 @@ private:
 	enum { PRESSURE = 25 };
 
 	WorldMap* worldMap;
-	grinliz::Rectangle2I bounds;
+	grinliz::Rectangle2I innerBounds, outerBounds;
 	bool settled;
 
 	grinliz::CDynArray<grinliz::Vector2I> waterfalls;
 
-	// Local, cached: (don't want to re-allocate)
-	grinliz::CDynArray<grinliz::Vector2I> emitters;
-	grinliz::CDynArray<grinliz::Vector2I> stack;
+	grinliz::CDynArray<grinliz::Vector2I> emitters, pools;
+	grinliz::CDynArray<grinliz::Vector2I> stack;	// cache (local mem)
 
 	// can be shared - scratch memory.
 	static S8 water[SECTOR_SIZE*SECTOR_SIZE];
-	static U8 boundHeight[SECTOR_SIZE*SECTOR_SIZE];
-	static S8 emitterDist[SECTOR_SIZE*SECTOR_SIZE];
+	static S8 pressure[SECTOR_SIZE*SECTOR_SIZE];
 	static grinliz::CArray<grinliz::Vector2I, PRESSURE> fill;
 
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;

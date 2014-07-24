@@ -1083,7 +1083,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 1
+#if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1102,7 +1102,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 0
+#if 1
 		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
 		if (loc.IsZero()) {
 			poolView = 0;

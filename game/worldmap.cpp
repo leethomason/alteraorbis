@@ -453,10 +453,10 @@ void WorldMap::InitFluidSim()
  
 			Rectangle2I bounds;
 			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
-			bounds.Outset(-1);
 			bounds.DoIntersection(thisBounds);
-			if (bounds.IsValid())
+			if (bounds.IsValid()) {
 				fluidSim[index] = new FluidSim(this, bounds);
+			}
 		}
 	}
 }
@@ -2401,14 +2401,31 @@ void WorldMap::GenerateEmitters(U32 seed)
 						int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
 						int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
 
-						if ( !besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
-							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true, fluidType > 0);
+						int bestVolume = 0;
+						Vector2I bestPos = { 0, 0 };
+						int bestHeight = 0;
+
+						if (!besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
+							int area = 0;
+							int savedHeight = grid[INDEX(it.Pos())].NominalRockHeight();
+							grid[INDEX(it.Pos())].SetNominalRockHeight(0);
+							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true, fluidType > 0, &area);
+							grid[INDEX(it.Pos())].SetNominalRockHeight(savedHeight);
 							if (h) {
-								SetEmitter(it.Pos().x, it.Pos().y, true, fluidType);
-								++nEmitters;
-								found = true;
-								break;
+								if (area*h > bestVolume) {
+									bestVolume = area*h;
+									bestPos = it.Pos();
+									bestHeight = h;
+								}
 							}
+						}
+						if (bestVolume > 6) {
+							GLASSERT(!bestPos.IsZero());
+							SetEmitter(bestPos.x, bestPos.y, true, fluidType);
+							++nEmitters;
+							found = true;
+							int nm = Min(grid[INDEX(it.Pos())].NominalRockHeight(), bestHeight - 1);
+							grid[INDEX(it.Pos())].SetNominalRockHeight(nm);
 						}
 					}
 
