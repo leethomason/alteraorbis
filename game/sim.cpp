@@ -692,7 +692,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 	}
 
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
+	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
 		return false;
 	}
 

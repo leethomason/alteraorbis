@@ -1302,7 +1302,7 @@ void GameScene::SetBuildButtons()
 	buildButton[BuildScript::BATTERY].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::TURRET].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::BUILD_CIRCUIT_SWITCH].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_ZAPPER].SetEnabled(nCircuitFab > 0);
+//	buildButton[BuildScript::BUILD_CIRCUIT_ZAPPER].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::BUILD_CIRCUIT_BEND].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::BUILD_CIRCUTI_FORK_2].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::BUILD_CIRCUIT_ICE].SetEnabled(nCircuitFab > 0);
