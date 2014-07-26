@@ -247,8 +247,8 @@ void Sim::CreateCores()
 			}
 		}
 	}
-	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
-	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
+	cold->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
+	hot->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 

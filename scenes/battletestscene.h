@@ -72,7 +72,7 @@ private:
 
 		DUMMY,		
 		HUMAN,
-		ARACHNOID,
+		TRILOBYTE,
 		MANTIS,
 		RED_MANTIS,
 		CYCLOPS,

@@ -162,7 +162,8 @@ x weather should affect fire/shock
 		x pressure plates don’t have direction
 		x battery can’t tell direction from top. shrink battery?
 		x splitter: 4 bends?
-		- Arachnoid -> Trilobyte
+		x Arachnoid -> Trilobyte
+		x enemy incursion incredibly low
 		- rotate should be somewhere
 		- need circuit lines - circuit board lines
 		- plant growth rate high?
@@ -172,7 +173,6 @@ x weather should affect fire/shock
 			- Zapper - charge for?? Remove zapper?
 		- Gate? Ice toggle?
 		- Circuit Fab does nothing
-		- enemy incursion incredibly low
 		- name of Bar
 		- Fluids:
 			- water fully enclosed 

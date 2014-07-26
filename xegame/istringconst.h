@@ -81,7 +81,7 @@ public:
 	static grinliz::IString natural;
 	static grinliz::IString commercial;
 
-	static grinliz::IString arachnoid;
+	static grinliz::IString trilobyte;
 	static grinliz::IString mantis;
 	static grinliz::IString redMantis;
 	static grinliz::IString troll;

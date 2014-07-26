@@ -32,7 +32,7 @@ grinliz::IString Team::TeamName( int team )
 
 int Team::GetTeam( const grinliz::IString& itemName )
 {
-	if ( itemName == IStringConst::arachnoid ) {
+	if (itemName == IStringConst::trilobyte) {
 		return TEAM_RAT;
 	}
 	else if ( itemName == IStringConst::mantis ) {

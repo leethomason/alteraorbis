@@ -46,7 +46,7 @@
   <!-- workers are immune to fire and SUBMARINE so that they can build/fix ppols. -->
   <item name="worker"
         resource="worker"
-        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE"
+        flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE AI_HEAL_AT_CORE"
         hpRegen="0.5"
         mass="20" >
     <intrinsics>
@@ -317,7 +317,7 @@
         zoneConsume="industrial"
         />
 
-  <item name="arachnoid"
+  <item name="trilobyte"
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE FLOAT"
         mob="lesser"

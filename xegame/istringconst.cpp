@@ -53,7 +53,7 @@ IString IStringConst::zoneConsume;
 IString IStringConst::industrial;
 IString IStringConst::natural;
 IString IStringConst::commercial;
-IString IStringConst::arachnoid;
+IString IStringConst::trilobyte;
 IString IStringConst::mantis;
 IString IStringConst::redMantis;
 IString IStringConst::troll;
@@ -138,7 +138,7 @@ void IStringConst::Init()
 	industrial = StringPool::Intern( "industrial", true );
 	natural = StringPool::Intern( "natural", true );
 	commercial = StringPool::Intern( "commercial", true );
-	arachnoid = StringPool::Intern( "arachnoid", true );
+	trilobyte = StringPool::Intern("trilobyte", true);
 	mantis = StringPool::Intern( "mantis", true );
 	redMantis = StringPool::Intern( "redMantis", true );
 	troll = StringPool::Intern( "troll", true );
