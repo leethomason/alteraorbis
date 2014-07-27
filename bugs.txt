@@ -178,10 +178,10 @@ x weather should affect fire/shock
 			- water fully enclosed 
 			- lava algorithm
 			- pather doesn’t respect fluids
-		- gl3.1 suits don't render correctly.
 		- volcanos don't burn plants
 		x eating plants doesn't seem to damage them
 
+		- gl3.1 suits don't render correctly.
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 	    - plants look repetetive
