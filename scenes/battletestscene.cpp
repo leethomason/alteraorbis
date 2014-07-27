@@ -53,7 +53,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ COUNT_8,	"8",		LEFT_COUNT },
 	{ DUMMY,	"Dummy",			LEFT_MOB },
 	{ HUMAN,	"Human",			LEFT_MOB },
-	{ ARACHNOID,"Arachnoid",		LEFT_MOB },
+	{ TRILOBYTE,"Trilobyte",		LEFT_MOB },
 	{ MANTIS,	"Mantis",			LEFT_MOB },
 	{ RED_MANTIS,"RedMantis",		LEFT_MOB },
 	{ CYCLOPS,	"Cyclops",			LEFT_MOB },
@@ -78,7 +78,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ COUNT_8,	"8",		RIGHT_COUNT },
 	{ DUMMY,	"Dummy",			RIGHT_MOB },
 	{ HUMAN,	"Human",			RIGHT_MOB },
-	{ ARACHNOID,"Arachnoid",		RIGHT_MOB },
+	{ TRILOBYTE,"Trilobyte",		RIGHT_MOB },
 	{ MANTIS,	"Mantis",			RIGHT_MOB },
 	{ RED_MANTIS,	"RedMantis",	RIGHT_MOB },
 	{ CYCLOPS,	"Cyclops",			RIGHT_MOB },
@@ -340,7 +340,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	switch ( type ) {
 	case DUMMY:			itemName = "dummyTarget";		break;
 	case HUMAN:			itemName = "humanFemale";		break;
-	case ARACHNOID:		itemName = "arachnoid";			break;
+	case TRILOBYTE:		itemName = "trilobyte";			break;
 	case MANTIS:		itemName = "mantis";			break;
 	case RED_MANTIS:	itemName = "redMantis";			break;
 	case CYCLOPS:		itemName = "cyclops";			break;

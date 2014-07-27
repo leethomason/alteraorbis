@@ -167,17 +167,17 @@ x weather should affect fire/shock
 			x lava algorithm
 			x pather doesn’t respect fluids
 		x eating plants doesn't seem to damage them
-		- Arachnoid -> Trilobyte
+		x Arachnoid -> Trilobyte
+		x enemy incursion incredibly low
+		x plants shouldn’t grow over circuits
+			x circuit lines block plant growth?
+			x zapper: symbol in middle, block? Spike? Remove
+			x Zapper - charge for?? Remove zapper?
+		x Gate? Ice toggle?
 		- rotate should be somewhere
 		- need circuit lines - circuit board lines
 		- plant growth rate high?
-		- plants shouldn’t grow over circuits
-			- circuit lines block plant growth?
-			- zapper: symbol in middle, block? Spike? Remove
-			- Zapper - charge for?? Remove zapper?
-		- Gate? Ice toggle?
 		- Circuit Fab does nothing
-		- enemy incursion incredibly low
 		- name of Bar
 		- gl3.1 suits don't render correctly.
 		- volcanos don't burn plants

@@ -68,7 +68,7 @@ public:
 		BATTERY,
 		TURRET,
 		BUILD_CIRCUIT_SWITCH,
-		BUILD_CIRCUIT_ZAPPER,
+		//BUILD_CIRCUIT_ZAPPER,	// disabled for now. turrets mostly cover this
 		BUILD_CIRCUIT_BEND,
 		BUILD_CIRCUTI_FORK_2,
 		BUILD_CIRCUIT_ICE,

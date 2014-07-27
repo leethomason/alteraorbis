@@ -247,8 +247,8 @@ void Sim::CreateCores()
 			}
 		}
 	}
-	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
-	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
+	cold->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
+	hot->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
@@ -692,7 +692,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 	}
 
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
+	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
 		return false;
 	}
 

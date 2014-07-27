@@ -404,15 +404,15 @@ int CoreScript::DoTick( U32 delta )
 				if (defaultSpawn.empty()) {
 					/*
 						What to spawn?
-						A core has its "typical spawn": mantis, redManis, arachnoid.
+						A core has its "typical spawn": mantis, redManis, trilobyte.
 						And an occasional greater spawn: cyclops variants, dragon
-						All cores scan spawn arachnoids.
+						All cores scan spawn trilobyte.
 						*/
 					static const char* SPAWN[NUM_SECTORS] = {
-						"arachnoid",
-						"arachnoid",
-						"arachnoid",
-						"arachnoid",
+						"trilobyte",
+						"trilobyte",
+						"trilobyte",
+						"trilobyte",
 						"mantis",
 						"mantis",
 						"mantis",
@@ -433,7 +433,7 @@ int CoreScript::DoTick( U32 delta )
 				static const float rat = 0.25f;
 				const char* spawn = 0;
 
-				if (outland > 4 && defaultSpawn == IStringConst::arachnoid) {
+				if (outland > 4 && defaultSpawn == IStringConst::trilobyte) {
 					greater *= 4.f;	// special spots for greaters to spawn.
 				}
 
@@ -446,7 +446,7 @@ int CoreScript::DoTick( U32 delta )
 					isGreater = true;
 				}
 				if (!spawn && normalPossible && (roll < rat)) {
-					spawn = "arachnoid";
+					spawn = "trilobyte";
 				}
 				if (!spawn && normalPossible) {
 					spawn = defaultSpawn.c_str();
