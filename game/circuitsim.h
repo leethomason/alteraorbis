@@ -6,6 +6,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glrectangle.h"
 #include "../xegame/chit.h"
 
 class WorldMap;
@@ -27,9 +28,17 @@ enum {
 	CIRCUIT_ICE,
 	CIRCUIT_STOP,
 	CIRCUIT_DETECT_ENEMY,
-	CIRCUIT_TRANSISTOR_A,	// needs to be last: some special code that there is one transistor in 2 states.
+	CIRCUIT_TRANSISTOR_A,	// needs to be last of the regular circuits: some special code that there is one transistor in 2 states.
 	CIRCUIT_TRANSISTOR_B,
-	NUM_CIRCUITS
+	CIRCUIT_LINE_NS_GREEN,
+	CIRCUIT_LINE_EW_GREEN,
+	CIRCUIT_LINE_CROSS_GREEN,
+	CIRCUIT_LINE_NS_PAVE,
+	CIRCUIT_LINE_EW_PAVE,
+	CIRCUIT_LINE_CROSS_PAVE,
+
+	CIRCUIT_LINE_START = CIRCUIT_LINE_NS_GREEN,
+	CIRCUIT_LINE_END = CIRCUIT_LINE_CROSS_PAVE+1
 };
 
 
@@ -47,7 +56,15 @@ public:
 
 	static int NameToID(grinliz::IString name);
 
+	void EtchLines(const grinliz::Vector2I& sector);
+	void EtchLines(const grinliz::Rectangle2I& bounds);
+
 private:
+
+	int LocalDir(int dir, int circuitDir) {
+		return (dir - circuitDir + 4) & 3;
+	}
+
 	struct Electron {
 		int charge;	// 0: spark, 1: charge
 		int dir;
@@ -69,8 +86,16 @@ private:
 	Engine* engine;
 	LumosChitBag* chitBag;
 
+	struct Spawn {
+		Spawn(const grinliz::Vector2I& _pos, int _dir) : pos(_pos), dir(_dir) {}
+		grinliz::Vector2I pos;
+		int dir;
+	};
+
 	grinliz::CDynArray< Electron > electrons;	// sparks and charges
 	grinliz::CDynArray< Electron > electronsCopy;	// sparks and charges
+	grinliz::CDynArray< grinliz::Vector2I > emitters;
+	grinliz::CDynArray< Spawn > spawn;
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

@@ -162,6 +162,11 @@ x weather should affect fire/shock
 		x pressure plates don’t have direction
 		x battery can’t tell direction from top. shrink battery?
 		x splitter: 4 bends?
+		x Fluids:
+			x water fully enclosed 
+			x lava algorithm
+			x pather doesn’t respect fluids
+		x eating plants doesn't seem to damage them
 		- Arachnoid -> Trilobyte
 		- rotate should be somewhere
 		- need circuit lines - circuit board lines
@@ -174,13 +179,9 @@ x weather should affect fire/shock
 		- Circuit Fab does nothing
 		- enemy incursion incredibly low
 		- name of Bar
-		- Fluids:
-			- water fully enclosed 
-			- lava algorithm
-			- pather doesn’t respect fluids
 		- gl3.1 suits don't render correctly.
 		- volcanos don't burn plants
-		x eating plants doesn't seem to damage them
+		- drone heal at core
 
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
@@ -195,6 +196,7 @@ x weather should affect fire/shock
 			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
 		- auto-clear not working as well as it should
+		- tune EmitterGenerator - meander length
 
 	- Census
 		x coolest stuff, past and present, by category

@@ -288,6 +288,8 @@ void FluidSim::PressureStep()
 					maxH = Max(h, maxH);
 				}
 			}
+			// Only go up if there isn't rock present: keeps water from
+			// flowing through rocks.
 			if (maxH > (int)wg->fluidHeight + 1 && wg->rockHeight == 0)
 				wg->fluidHeight++;
 			else if ((int)wg->fluidHeight && (maxH <= (int)wg->fluidHeight))

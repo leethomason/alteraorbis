@@ -2038,7 +2038,14 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(3), BLACKMAG_Y(1) },	// circuit: stop		
 		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_enemy
 		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
-		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B		
+		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B	
+		{ BLACKMAG_X(5), BLACKMAG_Y(1) },	// NS line, green
+		{ BLACKMAG_X(6), BLACKMAG_Y(1) },	// EW line, green
+		{ BLACKMAG_X(3), BLACKMAG_Y(2) },	// cross line, green
+		{ BLACKMAG_X(5), BLACKMAG_Y(2) },	// NS line, pave
+		{ BLACKMAG_X(6), BLACKMAG_Y(2) },	// EW line, pave
+		{ BLACKMAG_X(4), BLACKMAG_Y(2) },	// cross line, pave
+
 	};
 	static const int NUM = GL_C_ARRAY_SIZE(UV);
 
@@ -2390,8 +2397,6 @@ void WorldMap::GenerateEmitters(U32 seed)
 					if (r.Contains(GetSector(sector).core)) continue;
 
 					// ----- Find "good" emitters ---- //
-					bool found     = false;
-
 					int bestArea = 0;
 					Vector2I bestPos = { 0, 0 };
 					int bestHeight = 0;
@@ -2426,11 +2431,12 @@ void WorldMap::GenerateEmitters(U32 seed)
 					}
 
 					if (bestArea) {
+						// Before this code, the algorithm wasn't generating enough 
+						// pools. So go in there and make more pools! Uses 2 random
+						// walks to try to cut more pools into the world.
 						GLASSERT(!bestPos.IsZero());
 						SetEmitter(bestPos.x, bestPos.y, true, fluidType);
 						++nPoolEmitters;
-						found = true;
-						//int nm = Min(grid[INDEX(bestPos)].NominalRockHeight(), bestHeight - 1);
 						grid[INDEX(bestPos)].SetNominalRockHeight(0);
 
 						static const int STEPS = 8;
