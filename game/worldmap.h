@@ -399,7 +399,7 @@ private:
 
 	int IntersectPlantAtVoxel( const grinliz::Vector3I& voxel,
 		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);
-	void ProcessEffect( ChitBag* chitBag );	// on slow tick
+	void ProcessEffect(ChitBag* chitBag, int delta);	// on slow tick
 	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
 
 	WorldGrid*					grid;
@@ -437,28 +437,13 @@ private:
 	int								nVoxels;
 	int								nGrids;
 	int								nTrees;	// we don't necessarily use all the trees in the treePool
+	int								processIndex;
 
 	CTicker							fluidTicker;
 	int								fluidSector;
 
-	struct PlantEffect {
-		bool operator==(const PlantEffect& rhs) const { return rhs.voxel == voxel; }
-		void Serialize(XStream* xs);
-		grinliz::Vector2I voxel;
-		bool fire;
-		bool shock;
-	};
-
 	// List of interesting things that need to be processed each frame.
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
-	grinliz::CDynArray< PlantEffect >	plantEffect;		// plants on fire/shock
-
-	struct VHit
-	{
-		grinliz::Vector2I voxel;
-		int effect;
-	};
-	grinliz::CDynArray< VHit > voxelHits;
 
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;

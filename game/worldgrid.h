@@ -283,6 +283,12 @@ public:
 		plantOnFire = onFire ? 1 : 0;
 		plantOnShock = onShock ? 1 : 0;
 	}
+	void SetPlantOnFire(bool onFire) {
+		plantOnFire = onFire ? 1 : 0;
+	}
+	void SetPlantOnShock(bool onShock) {
+		plantOnShock = onShock ? 1 : 0;
+	}
 	bool PlantOnFire() const { return plantOnFire > 0; }
 	bool PlantOnShock() const { return plantOnShock > 0; }
 
