@@ -792,7 +792,6 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 	}
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		// FIXME: call to visible area??
 		if (fluidSim[i]) {
 			fluidSim[i]->EmitWaterfalls(delta, engine);
 		}

@@ -174,15 +174,15 @@ x weather should affect fire/shock
 			x zapper: symbol in middle, block? Spike? Remove
 			x Zapper - charge for?? Remove zapper?
 		x Gate? Ice toggle?
+		x need circuit lines - circuit board lines
+		d plant growth rate high?
+		x volcanos don't burn plants
+		x drone heal at core
+		d gl3.1 suits don't render correctly.
+
 		- rotate should be somewhere
-		- need circuit lines - circuit board lines
-		- plant growth rate high?
 		- Circuit Fab does nothing
 		- name of Bar
-		- gl3.1 suits don't render correctly.
-		- volcanos don't burn plants
-		- drone heal at core
-
 		- out of gold shouldn't cancel build orders
 		- can't cancel forge (2x2 build)
 	    - plants look repetetive
