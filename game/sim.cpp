@@ -667,6 +667,10 @@ void Sim::CreateVolcano( int x, int y )
 	chit->Add( new VolcanoScript());
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+	
+	Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+	NewsEvent event(NewsEvent::VOLCANO, pos);
+	context.chitBag->GetNewsHistory()->Add(event);
 }
 
 

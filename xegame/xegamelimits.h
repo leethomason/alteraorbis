@@ -34,6 +34,7 @@ static const int	VERY_LONG_TICK	= 1000*1000;
 static const int	ABOUT_1_SEC		= 1017;
 static const int	SLOW_TICK		= 500;
 static const U32	MAX_FRAME_TIME	= 100;		// At less that 10fps, just slow down the game.
+static const U32	STD_FRAME_TIME	= 30;		
 static const int	STD_DECO		= 2000;		// typical time for over-head icons to be displayed
 
 #endif // XENOENGINE_GAME_LIMITS_INCLUDED

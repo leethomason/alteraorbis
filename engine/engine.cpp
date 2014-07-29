@@ -341,7 +341,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		engineShaders.Push( EngineShaders::EMISSIVE, em );
 		engineShaders.Push( EngineShaders::BLEND, blend );
 	}
-	Rectangle2I mapBounds( 0, 0, EL_MAX_MAP_SIZE-1, EL_MAX_MAP_SIZE-1 );
+	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}
