@@ -147,6 +147,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector = ToSector(pos2i);
+	Rectangle2I innerBounds = InnerSectorBounds(sector);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
 
@@ -233,7 +234,9 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				context->worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
 				context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
 				context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
+
 				context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
+				context->circuitSim->EtchLines(innerBounds);
 
 				Chit* found = chitBag->QueryRemovable(task->pos2i);
 				if (found) {
@@ -266,6 +269,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					}
 					else if (buildData.circuit) {
 						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
+						context->circuitSim->EtchLines(innerBounds);
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the

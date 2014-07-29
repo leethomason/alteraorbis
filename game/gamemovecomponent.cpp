@@ -80,9 +80,14 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 
 bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floating)
 {
-	static const int N = 9;
-	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
+	/* Water is mostly static now. Would like to fix that, but
+	   until it is, this code isn't worth debugging. Just
+	   disable fluid floating / flow.
 
+	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
+	*/
+
+	static const int N = 9;
 	WorldGrid wg[N];
 	Vector2I pos2i = ToWorld2I(*pos);
 	Vector2I dir[N];
@@ -92,6 +97,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 		return false;
 	}
 
+	/*
 	// Compute gradient.
 	Vector2F grad = { 0, 0 };
 
@@ -105,6 +111,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 
 		grad = grad + delta * v;
 	}
+	*/
 
 	// Floating??
 	*floating = false;
@@ -123,6 +130,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 		submarine = (parentChit->GetItem()->flags & GameItem::SUBMARINE) != 0;
 	}
 
+	/*
 	float SPEED = *floating ? FLUID_SPEED : FLUID_SPEED * 0.5f;
 	float speed = Travel(SPEED, delta);
 
@@ -131,6 +139,11 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 		pos->x += -speed * grad.x;
 		pos->y = 0;
 		pos->z += -speed * grad.y;
+	}
+   */
+
+	if (!submarine) {
+		pos->y = 0;
 	}
 
 	Vector2F pos2 = { pos->x, pos->z };

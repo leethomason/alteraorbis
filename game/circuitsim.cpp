@@ -216,7 +216,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pe->pos)];
 	bool sparkConsumed = false;
-	int dir = (pe->dir - wg.CircuitRot() + 4) & 3;
+	int dir = LocalDir(pe->dir, wg.CircuitRot());
 
 	switch (wg.Circuit()) {
 		case CIRCUIT_SWITCH: {
@@ -376,6 +376,119 @@ void CircuitSim::Explosion(const grinliz::Vector2I& pos, int charge, bool circui
 	BattleMechanics::GenerateExplosion(dd, pos3, 0, engine, chitBag, worldMap);
 	if (circuitDestroyed) {
 		worldMap->SetCircuit(pos.x, pos.y, 0);
+		EtchLines(ToSector(pos));
+	}
+}
+
+
+void CircuitSim::EtchLines(const grinliz::Vector2I& sector)
+{
+	Rectangle2I inner = InnerSectorBounds(sector);
+	EtchLines(inner);
+}
+
+
+void CircuitSim::EtchLines( const grinliz::Rectangle2I& bounds)
+{
+#define IS_EMITTER(c) (c == CIRCUIT_SWITCH || c == CIRCUIT_DETECT_ENEMY)
+
+	// Clear out the existing etching and find all the emitters.
+	emitters.Clear();
+	spawn.Clear();
+
+	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
+		int x = it.Pos().x;
+		int y = it.Pos().y;
+		int circuit = worldMap->Circuit(x, y);
+		if (circuit >= CIRCUIT_LINE_START && circuit < CIRCUIT_LINE_END) {
+			worldMap->SetCircuit(x, y, 0);
+		}
+		if (IS_EMITTER(circuit)) {
+			emitters.Push(it.Pos());
+			spawn.Push(Spawn(it.Pos(), worldMap->CircuitRotation(x, y)));
+		}
+	}
+
+	static const int MAX_SPAWN = 200;
+	int nSpawn = 0;
+
+	// Now walk the emitters and draw traces to receivers.
+	while (!spawn.Empty() && nSpawn < MAX_SPAWN) {
+		++nSpawn;
+
+		const Spawn s = spawn.Pop();
+		const Vector2I pos2i = s.pos;
+		const int dir = s.dir;
+		const Vector2I start = pos2i + DIR_I4[dir];
+		
+		Vector2I end = start;
+		bool found = false;
+		bool stop = false;
+
+		for (; bounds.Contains(end) && !found && !stop; end += DIR_I4[dir]) {
+
+			int endC = worldMap->Circuit(end.x, end.y);
+			if (endC == 0) {
+				continue;	// covering ground
+			}
+
+			int localDir = LocalDir(dir, worldMap->CircuitRotation(end.x, end.y));
+			if (endC == CIRCUIT_BATTERY) {
+				found = true;
+				spawn.Push(Spawn(end,dir));
+			}
+			else if (endC == CIRCUIT_POWER_UP) {
+				found = true;
+			}
+			else if (endC == CIRCUIT_BEND) {
+				if (localDir == 2) {
+					found = true;
+					spawn.Push(Spawn(end, (dir+3)&3));
+				}
+				else if (localDir == 3) {
+					found = true;
+					spawn.Push(Spawn(end, (dir+1)&3));
+				}
+			}
+			else if (endC == CIRCUIT_FORK_2) {
+				found = true;
+				spawn.Push(Spawn(end, (dir+1)&3));
+				spawn.Push(Spawn(end, (dir+3)&3));
+			}
+			else if (endC == CIRCUIT_ICE
+					 || endC == CIRCUIT_STOP)
+			{
+				found = true;
+			}
+			else if (endC == CIRCUIT_TRANSISTOR_A || endC == CIRCUIT_TRANSISTOR_B) {
+				stop = true;
+				if (localDir == 0) {
+					found = true;
+					spawn.Push(Spawn(end, (dir+1)&3));
+					spawn.Push(Spawn(end, (dir+3)&3));
+				}
+				else if (localDir ==2) {
+					found = true;
+				}
+			}
+		}
+
+		if (found) {
+			Vector2I v = start;
+			while (v != end) {
+				int circuit = worldMap->Circuit(v.x, v.y);
+				if (circuit == 0) {
+					worldMap->SetCircuit(v.x, v.y, (dir & 1) ? CIRCUIT_LINE_NS_GREEN : CIRCUIT_LINE_EW_GREEN);
+				}
+				else if (circuit == CIRCUIT_LINE_EW_GREEN && (dir & 1)) {
+					worldMap->SetCircuit(v.x, v.y, CIRCUIT_LINE_CROSS_GREEN);
+				}
+				else if (circuit == CIRCUIT_LINE_NS_GREEN && ((dir & 1) == 0)) {
+					worldMap->SetCircuit(v.x, v.y, CIRCUIT_LINE_CROSS_GREEN);
+				}
+				v += DIR_I4[dir];
+			}
+		}
 	}
 }
 

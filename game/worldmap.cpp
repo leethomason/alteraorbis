@@ -273,16 +273,6 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 		bool fire = random.Uniform() < chanceFire;
 		bool shock = random.Uniform() < chanceShock;
 		if (fire || shock) {
-			PlantEffect f = { v2, false, false };
-			int i = plantEffect.Find(f);
-			if (i < 0) {
-				PlantEffect pe = { v2, fire, shock };
-				plantEffect.Push(pe);
-			}
-			else {
-				plantEffect[i].fire |= fire;
-				plantEffect[i].shock |= shock;
-			}
 			grid[index].SetOn(fire, shock);
 		}
 	}
@@ -304,16 +294,6 @@ void WorldMap::SavePNG( const char* filename )
 }
 
 
-void WorldMap::PlantEffect::Serialize(XStream* xs)
-{
-	XarcOpen(xs, "PlantEffect");
-	XARC_SER(xs, voxel);
-	XARC_SER(xs, fire);
-	XARC_SER(xs, shock);
-	XarcClose(xs);
-}
-
-
 void WorldMap::Save( const char* filename )
 {
 	// Debug or laptap, about 4.5MClock
@@ -331,7 +311,6 @@ void WorldMap::Save( const char* filename )
 		XarcOpen( &writer, "Map" );
 		XARC_SER( &writer, width );
 		XARC_SER( &writer, height );
-		XARC_SER_CARRAY(&writer, plantEffect);
 		
 		worldInfo->Serialize( &writer );
 		XarcClose( &writer );
@@ -363,7 +342,6 @@ void WorldMap::Load( const char* filename )
 		XARC_SER(&reader, width);
 		XARC_SER( &reader, height );
 		Init( width, height );
-		XARC_SER_CARRAY(&reader, plantEffect);
 
 		worldInfo->Serialize( &reader );
 		XarcClose( &reader );
@@ -626,78 +604,76 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 	2. MOB can catch map on fire
 	3. MOB does NOT catch MOB on fire (too surprising in gameplay)
 */
-void WorldMap::ProcessEffect(ChitBag* chitBag)
+void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 {
-	DamageDesc dd = { EFFECT_DAMAGE_PER_SEC * SLOW_TICK / 1000, 0 };
-	voxelHits.Clear();
+	// We need process at a steady rate so that
+	// the time between ticks is constant.
+	// This is performance regressive, so something
+	// to keep an eye on.
+	static const int MAP2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
+	static const int DELTA = 1500;	// How frequenty to tick a given plant
+	static const int N_PER_MSEC = MAP2 / DELTA;
+	const float DAMAGE = EFFECT_DAMAGE_PER_SEC * float(DELTA) / float(1000);
 
-	for (int i = 0; i < plantEffect.Size(); ++i) {
-		PlantEffect* pe = &plantEffect[i];
-		int index = INDEX(pe->voxel);
+	int nGrid = N_PER_MSEC * delta;
 
-		GLASSERT(grid[index].PlantOnFire() == pe->fire);
-		GLASSERT(grid[index].PlantOnShock() == pe->shock);
+	while (nGrid--) {
+		processIndex++;
+		if (processIndex >= MAP2) processIndex = 0;
+		if (processIndex >= width*height) continue;
+
+		int index = processIndex;
+		WorldGrid* wg = &grid[index];
+
+		// FIXME: filter on Plant, Magma, Lava...more ??
+
+		int y = index / width;
+		int x = index - y * width;
+		Vector2I pos2i = { x, y };
+		Vector3I pos3i = { x, 0, y };
 
 		// flammability is reflected in the chance
 		// of it catching fire; once on fire, everything
 		// has the same chance of the fire going out.
-		if (pe->fire && random.Uniform() < CHANCE_FIRE_OUT) {
-			pe->fire = false;
+		if (wg->PlantOnFire() && random.Uniform() < CHANCE_FIRE_OUT) {
+			wg->SetPlantOnFire(false);
 		}
-		if (pe->shock && random.Uniform() < CHANCE_FIRE_OUT) {
-			pe->shock = false;
-		}
-
-		if (grid[index].Plant() == 0)
-			grid[index].SetOn(false, false);
-		else
-			grid[index].SetOn(pe->fire, pe->shock);
-
-		// if deleted OR no effect
-		if ((grid[index].Plant() == 0) || (!pe->fire && !pe->shock)) {
-			plantEffect.SwapRemove(i);
-			--i;
-			continue;
+		if (wg->PlantOnShock() && random.Uniform() < CHANCE_FIRE_OUT) {
+			wg->SetPlantOnShock(false);
 		}
 
-		// Make sure MOBs look around to ProcessEffects().
-		// They aren't damaged directly, they scan the area 
-		// around them.
-		Vector2F origin = ToWorld2F(pe->voxel);
-		chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
+		int effect = 0;
+		if (wg->Plant()) {
+			if (wg->PlantOnFire())  effect |= GameItem::EFFECT_FIRE;
+			if (wg->PlantOnShock()) effect |= GameItem::EFFECT_SHOCK;
+			DamageDesc dd(DAMAGE, effect);
+			this->VoxelHit(pos3i, dd);
+		}
 
-		// Damage this item:
-		Vector3I hit = { pe->voxel.x, 0, pe->voxel.y };
-		this->VoxelHit(hit, dd);
+		if (wg->Magma() || (wg->IsFluid() && wg->FluidType() == WorldGrid::FLUID_LAVA)) {
+			effect |= GameItem::EFFECT_FIRE;
+		}
 
-		// Finally, spread!
-		static const int N = 8;
-		static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
-		DamageDesc ddSpread = { 0, 0 };
-		if (pe->fire) ddSpread.effects |= GameItem::EFFECT_FIRE;
-		if (pe->shock) ddSpread.effects |= GameItem::EFFECT_SHOCK;
+		if (effect) {
+			// Finally, spread!
+			static const int N = 8;
+			static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
 
-		for (int j = 0; j < N; ++j) {
-			int index = INDEX(pe->voxel + delta[j]);
-			if (grid[index].Plant()) {
-				if (random.Uniform() < CHANCE_FIRE_SPREAD) {
-
-					/* Can't call this! VoxelHit can mutate the plantEffect array.
-					   Bad things happen. Weird bug madness.
-					*/
-					//Vector3I hit = { pe->voxel.x + delta[j].x, 0, pe->voxel.y + delta[j].y };
-					//this->VoxelHit(hit, ddSpread);
-					VHit vHit = { pe->voxel + delta[j], ddSpread.effects };
-					voxelHits.Push(vHit);
+			for (int j = 0; j < N; ++j) {
+				int ia = INDEX(pos2i + delta[j]);
+				if (grid[ia].Plant()) {
+					if (random.Uniform() < CHANCE_FIRE_SPREAD) {
+						DamageDesc dd(0, effect);
+						this->VoxelHit(pos3i, dd);
+					}
 				}
 			}
+			// Make sure MOBs look around to ProcessEffects().
+			// They aren't damaged directly, they scan the area 
+			// around them.
+			Vector2F origin = ToWorld2F(pos2i);
+			chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 		}
-	}
-	while (!voxelHits.Empty()) {
-		VHit vHit = voxelHits.Pop();
-		Vector3I hit = { vHit.voxel.x, 0, vHit.voxel.y };
-		DamageDesc dd = { 0, vHit.effect };
-		this->VoxelHit(hit, dd);
 	}
 }
 
@@ -796,6 +772,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 			fluidSim[i]->EmitWaterfalls(delta, engine);
 		}
 	}
+	ProcessEffect(chitBag, delta);
 
 	slowTick -= (int)(delta);
 
@@ -807,7 +784,6 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 			Vector2F origin = ToWorld2F(magmaGrids[i]);
 			chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 		}
-		ProcessEffect(chitBag);
 	}
 
 	// Do particles every time.
@@ -832,6 +808,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 			engine->particleSystem->EmitPD(pdSmoke, r, V3F_UP, delta);
 		}
 	}
+	/*
 	for (int i = 0; i < plantEffect.Size(); ++i) {
 		Vector3F v = ToWorld3F(plantEffect[i].voxel);
 		if (plantEffect[i].fire) {
@@ -843,6 +820,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 			engine->particleSystem->EmitPD(pdShock, v, V3F_UP, delta);
 		}
 	}
+	*/
 }
 
 
@@ -2038,7 +2016,14 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(3), BLACKMAG_Y(1) },	// circuit: stop		
 		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_enemy
 		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
-		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B		
+		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B	
+		{ BLACKMAG_X(5), BLACKMAG_Y(1) },	// NS line, green
+		{ BLACKMAG_X(6), BLACKMAG_Y(1) },	// EW line, green
+		{ BLACKMAG_X(3), BLACKMAG_Y(2) },	// cross line, green
+		{ BLACKMAG_X(5), BLACKMAG_Y(2) },	// NS line, pave
+		{ BLACKMAG_X(6), BLACKMAG_Y(2) },	// EW line, pave
+		{ BLACKMAG_X(4), BLACKMAG_Y(2) },	// cross line, pave
+
 	};
 	static const int NUM = GL_C_ARRAY_SIZE(UV);
 
@@ -2390,8 +2375,6 @@ void WorldMap::GenerateEmitters(U32 seed)
 					if (r.Contains(GetSector(sector).core)) continue;
 
 					// ----- Find "good" emitters ---- //
-					bool found     = false;
-
 					int bestArea = 0;
 					Vector2I bestPos = { 0, 0 };
 					int bestHeight = 0;
@@ -2426,11 +2409,12 @@ void WorldMap::GenerateEmitters(U32 seed)
 					}
 
 					if (bestArea) {
+						// Before this code, the algorithm wasn't generating enough 
+						// pools. So go in there and make more pools! Uses 2 random
+						// walks to try to cut more pools into the world.
 						GLASSERT(!bestPos.IsZero());
 						SetEmitter(bestPos.x, bestPos.y, true, fluidType);
 						++nPoolEmitters;
-						found = true;
-						//int nm = Min(grid[INDEX(bestPos)].NominalRockHeight(), bestHeight - 1);
 						grid[INDEX(bestPos)].SetNominalRockHeight(0);
 
 						static const int STEPS = 8;
@@ -2439,11 +2423,18 @@ void WorldMap::GenerateEmitters(U32 seed)
 
 						int area = bestArea;
 						int attempt = 0;
-						if (area < 8 && attempt < 3) {
+						if (area < 8 && attempt < 4) {
 							++attempt; 
 							Vector2I v = bestPos;
+							int heading = random.Rand(4);
 							for (int k = 0; k < STEPS; ++k) {
-								v += DIR_I4[random.Rand(4)];
+								if (attempt < 2) {
+									v += DIR_I4[random.Rand(4)];
+								}
+								else {
+									heading = (heading + 3 + random.Rand(3)) % 4;
+									v += DIR_I4[heading];
+								}
 								if (r.Contains(v)) {
 									WorldGrid* mwg = &grid[INDEX(v)];
 									if (!mwg->FluidSink() && mwg->NominalRockHeight() >= bestHeight) {
@@ -2469,7 +2460,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 					}
 					else {
 						// ---- If that doesn't work out, lay down random emitters.
-						if (random.Bit()) {
+						if (random.Rand(3)==0) {
 							bool okay = true;
 							int x = r.min.x + random.Rand(r.Width());
 							int y = r.min.y + random.Rand(r.Height());

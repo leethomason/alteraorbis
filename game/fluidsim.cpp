@@ -258,13 +258,17 @@ void FluidSim::PressureStep()
 	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
 		// Only effects grids NOT in the boundHeight
 
+		if (it.Pos().x == 284 && it.Pos().y == 547){
+			int debug = 1;
+		}
+
 		int i = it.Pos().x - outerBounds.min.x;
 		int j = it.Pos().y - outerBounds.min.y;
 
 		int index = worldMap->INDEX(it.Pos());
 		WorldGrid* wg = &worldMap->grid[index];
-
-		if (wg->FluidSink() || wg->RockHeight()) {
+		
+		if (wg->FluidSink()) {
 			continue;
 		}
 
@@ -284,10 +288,13 @@ void FluidSim::PressureStep()
 					maxH = Max(h, maxH);
 				}
 			}
-			if (maxH > (int)wg->fluidHeight + 1)
+			// Only go up if there isn't rock present: keeps water from
+			// flowing through rocks.
+			if (maxH > (int)wg->fluidHeight + 1 && wg->rockHeight == 0)
 				wg->fluidHeight++;
 			else if ((int)wg->fluidHeight && (maxH <= (int)wg->fluidHeight))
 				wg->fluidHeight--;
+
 			if (!wg->fluidEmitter) {
 				wg->fluidType = magma ? 1 : 0;
 			}
@@ -345,6 +352,9 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 	while (!stack.Empty() && fill.HasCap()) {
 		Vector2I p = stack.PopFront();	// Need to PopFront() to get 'round' areas and not go depth-first
 		fill.Push(p);
+		if (p.x == 288 && p.y == 547){
+			int debug = 1;
+		}
 
 		int index = worldMap->INDEX(p);
 		const WorldGrid& wg = worldMap->grid[index];

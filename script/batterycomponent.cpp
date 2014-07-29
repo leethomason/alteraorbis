@@ -44,10 +44,6 @@ int BatteryComponent::DoTick(U32 delta)
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if (!sc) return 0;
 
-//	Vector2I pos = sc->GetPosition2DI();
-//	Context()->worldMap->SetCircuit(pos.x, pos.y, CIRCUIT_BATTERY);
-//	Context()->worldMap->SetCircuitRotation(pos.x, pos.y, LRint(sc->GetYRotation() / 90.0f));
-
 	charge += ticker.Delta(delta);
 	if (charge > 4) charge = 4;
 

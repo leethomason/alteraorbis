@@ -69,8 +69,8 @@ void PlantScript::DoTick(U32 delta)
 	// to keep an eye on.
 	static const int MAP2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
 	static const int DELTA = 100*1000;	// How frequenty to tick a given plant
-	static const int GROWTH_CHANCE = 8;
 	static const int N_PER_MSEC = MAP2 / DELTA;
+	static const int GROWTH_CHANCE = 8;
 	static const int PRIME = 1553;
 
 	static const float SHADE_EFFECT = 0.7f;

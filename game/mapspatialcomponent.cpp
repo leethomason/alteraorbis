@@ -19,6 +19,7 @@
 #include "../engine/serialize.h"
 #include "../xegame/itemcomponent.h"
 #include "../script/evalbuildingscript.h"
+#include "../game/circuitsim.h"
 
 using namespace grinliz;
 
@@ -135,6 +136,7 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 	if (hasCircuit) {
 		Vector2I p = this->GetPosition2DI();
 		Context()->worldMap->SetCircuitRotation(p.x, p.y, LRint(this->GetYRotation() / 90.0f));
+		Context()->circuitSim->EtchLines(ToSector(p));
 	}
 }
 
@@ -153,6 +155,7 @@ void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 	if (hasCircuit) {
 		Vector2I p = this->GetPosition2DI();
 		Context()->worldMap->SetCircuit(p.x, p.y, hasCircuit);
+		Context()->circuitSim->EtchLines(ToSector(p));
 	}
 }
 
