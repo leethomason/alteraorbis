@@ -184,15 +184,15 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				if (action == Task::TASK_BUILD) {
 					Vector3F pos = ToWorld3F(taskList[1].pos2i);
 					pos.y = 0.5f;
-					context->engine->particleSystem->EmitPD("construction", pos, V3F_UP, 30);	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD(ISC::construction, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_USE_BUILDING) {
 					Vector3F pos = thisComp.spatial->GetPosition();
-					context->engine->particleSystem->EmitPD("useBuilding", pos, V3F_UP, 30);	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD(ISC::useBuilding, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_REPAIR_BUILDING) {
 					Vector3F pos = thisComp.spatial->GetPosition();
-					context->engine->particleSystem->EmitPD("repair", pos, V3F_UP, 30);	// FIXME: standard delta constant					
+					context->engine->particleSystem->EmitPD(ISC::repair, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 			}
 		}

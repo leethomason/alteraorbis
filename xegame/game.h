@@ -173,7 +173,6 @@ protected:
 	void LoadPalettes();
 
 	int tapMod;
-	int currentFrame;
 	U32 markFrameTime;
 	U32 frameCountsSinceMark;
 	float framesPerSecond;

@@ -541,7 +541,7 @@ void Sim::DoWeatherEffects( U32 delta )
 	if ( rain > 0.5f ) {
 		float rainEffect = (rain-0.5f)*2.0f;	// 0-1
 
-		ParticleDef pd = context.engine->particleSystem->GetPD( "splash" );
+		ParticleDef pd = context.engine->particleSystem->GetPD( ISC::splash );
 		const float rad = (at - context.engine->camera.PosWC()).Length() * sinf( ToRadian( EL_FOV ));
 		const float RAIN_AREA = rad * rad;
 		pd.count = (int)(RAIN_AREA * rainEffect * 0.05f );

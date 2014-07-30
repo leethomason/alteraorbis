@@ -278,7 +278,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	worldMap->SetRandomPort( sp );
 #endif
 
-	context->engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
+	context->engine->particleSystem->EmitPD( ISC::constructiondone, ToWorld3F( pos ), V3F_UP, 0 );
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
@@ -321,8 +321,8 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 		gen.Assign(team, &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
-
-	context->engine->particleSystem->EmitPD("constructiondone", ToWorld3F(pos), V3F_UP, 0);
+	
+	context->engine->particleSystem->EmitPD(ISC::constructiondone, ToWorld3F(pos), V3F_UP, 0);
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));

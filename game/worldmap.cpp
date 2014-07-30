@@ -244,7 +244,7 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 	if ( grid[index].HP() == 0 ) {
 		if (wasWG.HP()) {
 			Vector3F pos = { (float)v.x + 0.5f, (float)v.y + 0.5f, (float)v.z + 0.5f };
-			engine->particleSystem->EmitPD("derez", pos, V3F_UP, 0);
+			engine->particleSystem->EmitPD(ISC::derez, pos, V3F_UP, 0);
 			SetRock(v.x, v.z, 0, false, 0);
 			SetPlant(v.x, v.z, 0, 0);
 		}
@@ -756,33 +756,7 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 		int n = fluidTicker.Delta(delta);
 		while (n--) {
 			if (fluidSim[fluidSector]) {
-
 				fluidSim[fluidSector]->DoStep();
-
-				if (fluidSim[fluidSector]->NumPools()) {
-					// Need to tick everything in the 
-					// area of effect. Physics changes
-					// may apply to the world objects.
-					Rectangle2I aoe = fluidSim[fluidSector]->Bounds();
-					Rectangle2F aoeF = ToWorld(aoe);
-					if (chitBag) {
-						chitBag->SetTickNeeded(aoeF);
-					}
-					// Run through and look for lava:
-					for (Rectangle2IIterator it(aoe); !it.Done(); it.Next()) {
-						const WorldGrid& wg = grid[INDEX(it.Pos())];
-						if (wg.IsFluid() && wg.FluidType() == WorldGrid::FLUID_LAVA) {
-							for (int i = 0; i < 4; ++i) {
-								if (random.Uniform() < CHANCE_FIRE_SPREAD) {
-									DamageDesc dd(0, GameItem::EFFECT_FIRE);
-									Vector2I v = it.Pos() + DIR_I4[i];
-									Vector3I v3 = { v.x, 0, v.y };
-									this->VoxelHit(v3, dd);
-								}
-							}
-						}
-					}
-				}
 			}
 			fluidSector++;
 			if (fluidSector >= Square(NUM_SECTORS)) {
@@ -812,9 +786,9 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 
 	// Do particles every time.
 	//	ParticleDef pdEmber = engine->particleSystem->GetPD( "embers" );
-	ParticleDef pdSmoke = engine->particleSystem->GetPD("smoke");
-	ParticleDef pdFire = engine->particleSystem->GetPD("fire");
-	ParticleDef pdShock = engine->particleSystem->GetPD("shock");
+	ParticleDef pdSmoke = engine->particleSystem->GetPD(ISC::smoke);
+	ParticleDef pdFire = engine->particleSystem->GetPD(ISC::fire);
+	ParticleDef pdShock = engine->particleSystem->GetPD(ISC::shock);
 
 	for (int i = 0; i < magmaGrids.Size(); ++i) {
 		Rectangle3F r;
@@ -2195,9 +2169,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 	voxelBuffer.Clear();
 	nTrees = 0;
 	ParticleSystem* ps = engine->particleSystem;
-	const ParticleDef& fireDef = ps->GetPD("fire");
-	const ParticleDef& smokeDef = ps->GetPD("smoke");
-	const ParticleDef& shockDef = ps->GetPD("shock");
+	const ParticleDef& fireDef = ps->GetPD(ISC::fire);
+	const ParticleDef& smokeDef = ps->GetPD(ISC::smoke);
+	const ParticleDef& shockDef = ps->GetPD(ISC::shock);
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {

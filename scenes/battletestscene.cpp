@@ -425,7 +425,8 @@ void BattleTestScene::DrawDebugText()
 		ModelVoxel mv = context.engine->IntersectModelVoxel( debugRay.origin, debugRay.direction, 1000.0f, TEST_TRI, 0, 0, 0 );
 
 		if ( mv.Hit() ) {
-			context.engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, 0 );
+			const ParticleDef& spell = context.engine->particleSystem->GetPD("spell");
+			context.engine->particleSystem->EmitPD( spell, mv.at, V3F_UP, 0 );
 
 			GLString str;
 			if ( mv.ModelHit() ) {

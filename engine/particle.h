@@ -81,7 +81,7 @@ struct ParticleStream
 // SHALLOW
 struct ParticleDef
 {
-	grinliz::CStr<64> name;
+	grinliz::IString name;
 
 	enum { ONCE, CONTINUOUS };
 	int time;		// "once" "continuous"
@@ -188,12 +188,13 @@ public:
 		EmitPD( pd, &rr, normal, deltaTime );
 	}
 
-	void EmitPD(	const char* name,
+	void EmitPD(	const grinliz::IString& name,
 					const grinliz::Vector3F& initPos,
 					const grinliz::Vector3F& normal, 
 					U32 deltaTime );
 
 	const ParticleDef& GetPD( const char* name );
+	const ParticleDef& GetPD( const grinliz::IString& name );
 
 	void SetClip(const grinliz::Rectangle3F& clip) { this->clip = clip; }
 	void Update( U32 deltaTime, Camera* camera );

@@ -198,7 +198,7 @@ void CircuitSim::DoTick(U32 delta)
 				pe->model = engine->AllocModel(resName);
 			}
 
-			ParticleDef pd = engine->particleSystem->GetPD("electron");
+			ParticleDef pd = engine->particleSystem->GetPD(ISC::electron);
 			if (pe->charge)
 				pd.color = Game::GetMainPalette()->Get4F(5, 3);
 			else
@@ -318,7 +318,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 void CircuitSim::EmitSparkExplosion(const grinliz::Vector2F& pos)
 {
 	Vector3F p3 = { pos.x, 0, pos.y };
-	engine->particleSystem->EmitPD("sparkExplosion", p3, V3F_UP, 0);
+	engine->particleSystem->EmitPD(ISC::sparkExplosion, p3, V3F_UP, 0);
 }
 
 
@@ -364,7 +364,7 @@ void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 		}
 	}
 	else {
-		engine->particleSystem->EmitPD("sparkPowerUp", ToWorld3F(pos), V3F_UP, 0);
+		engine->particleSystem->EmitPD(ISC::sparkPowerUp, ToWorld3F(pos), V3F_UP, 0);
 	}
 }
 

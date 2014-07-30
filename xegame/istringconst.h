@@ -32,6 +32,27 @@ public:
 	static grinliz::IString shield;
 	static grinliz::IString sound;
 	static grinliz::IString speed;
+	static grinliz::IString boltImpact;
+	static grinliz::IString explosion;
+	static grinliz::IString smoketrail;
+	static grinliz::IString electron;
+	static grinliz::IString fallingWater;
+	static grinliz::IString fallingLava;
+	static grinliz::IString mist;
+	static grinliz::IString splash;
+	static grinliz::IString smoke;
+	static grinliz::IString fire;
+	static grinliz::IString shock;
+	static grinliz::IString derez;
+	static grinliz::IString heal;
+	static grinliz::IString constructiondone;
+	static grinliz::IString meleeImpact;
+	static grinliz::IString sparkExplosion;
+	static grinliz::IString sparkPowerUp;
+	static grinliz::IString teleport;
+	static grinliz::IString construction;
+	static grinliz::IString useBuilding;
+	static grinliz::IString repair;
 
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
