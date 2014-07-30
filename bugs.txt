@@ -1,19 +1,3 @@
-x 32bit texture support
-x volcanos get left behind
-x resize and colors are wrong bug
-x loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
-x money xchange - gold to crystal and vice versa
-d vault needs "sell to market" button
-x building repair
-x system for gamui to track models
-x make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
-x markets - pay out taxes over a certain limit
-d standing shields!
-d particles aren't additive correctly
-d add rez effect for item switch?
-d animation generation
-x weather should affect fire/shock
-
 - batching troubles - still lots of small batches going in. consider dropping back to ES2
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
@@ -63,123 +47,13 @@ x weather should affect fire/shock
 - cage trap
 
 - game
-
-	- Beta 1d
+	- Beta 2b
+		- more aggressively seed plants? (Fire takes out a lot.)
+		- some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- avatar return to base
     	- face icon generation; icon into build (mantis?)
-    	d seperate land from water. re-think water texture.
-    	x 32 bit textures
-
-	x Beta 1c
-		x hints about what you need to build
-		x menu order, menu dependencies
-
-	- Beta2
-		x repair
-		x fast / threaded save
-		x new opening screen?
-		x clean up history code. remove named lesser tracking.
-		x new walkthrough tutorial
-		x (web page) note that installer installs-over
-		x restore 'create world' button.
-			x pre-gen plants
-			x pre-gen volcanoes (50%?)
-			x run world sim 5 minutes?
-		x component infrastructure
-			x remove IScript and ScriptComponent
-			x linked list for components; unlimited general comps
-			d remove spatial component
-		t auto rebuild
-		t abandon to tactical AI
-		x special plant renderer: move plants to worldgrid
-			x test intersection: set firegun to plant visual impact height
-			x track plant #s
-			x respect # limits
-			x check random distribution to growth curve
-			x save and load testing for plants
-			x rampage not destroying plants
-			x plants in rocks
-		x change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
-		x hints about what you need to build
-		x re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
-		x fluids
-			x deal with infinite emitters (one in current save)
-			x move voxels to TexturePack? (need 32 bit textures...grumble). not doing: sticking with 2 special sets.
-			x water flow over emitters?
-			x emitters should wear rock. no, seems okay
-			x plants: impact water, take damage
-			d rain variation. flash floods. vary emitters. 
-			d shown rain variation in selection of domain
-			x Water gradient moves MOBs
-			x GameMoveComponent does nothing but turn on basic water physics move.
-			t mobs: take damage from water
-			t buildings: account for water
-			t water creating !passable for core...flow around cores? cores to sinks?
-			t overlapping fluid emitters shouldn't change height
-			t new physics component - account for water. more travel, travel through water.
-			t magma fluid
-			d shock fluid
-			x update world-gen code to place lava emitters
-		x circuits
-			x implement EXPLODES
-			x circuit class. new rendering overlay. (gamui layer? seperate?)
-			x circuits: 4 bits type(15) + rot(2) = 6 bits?
-				x switch (rot)
-				x battery (rot)
-				x zapper
-				x bend (rot)
-				x 3 split (rot?)
-				x crossover
-				x gate
-				x turret (or not circuit? building? similar to battery...) (rot)
-				x circuit art
-				x trigger plate
-				x fab plant
-				x circuit building ui
-				x switch activation ui
-
-		x grid travel shouldn't walk
-		x emitters too close to Grid
-		d ports or grid should mark fluid unbounded: moved emitters. may net need this.
-		x mini map texture colors incorrect
-		t remove ruins; go to just unknown, and decay?
-		x no emmitter in the core area
-		t no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
-		x circuitFab isn't enabling/disabling other choices
-		x circuit view - toggle rock and buildings? top down?
-		x remove enemy detector variants
-		x denizens getting stuck pathing
-		x fix particles. much too stressed.
-		t battery logic isn't correct - seems okay in the Fluid Test
-		x above ground water needs differentiation
-		x better spark / charge effects. new colors, particle trail
-		x “tab is brilliant”
-		x workers carry fruit - denizens only?
-		x industrial or natural in the menu
-		x pave is drawing over porches
-		x pressure plates don’t have direction
-		x battery can’t tell direction from top. shrink battery?
-		x splitter: 4 bends?
-		x Fluids:
-			x water fully enclosed 
-			x lava algorithm
-			x pather doesn’t respect fluids
-		x eating plants doesn't seem to damage them
-		x Arachnoid -> Trilobyte
-		x enemy incursion incredibly low
-		x plants shouldn’t grow over circuits
-			x circuit lines block plant growth?
-			x zapper: symbol in middle, block? Spike? Remove
-			x Zapper - charge for?? Remove zapper?
-		x Gate? Ice toggle?
-		x need circuit lines - circuit board lines
-		d plant growth rate high?
-		x volcanos don't burn plants
-		x drone heal at core
-		d gl3.1 suits don't render correctly.
-
 		- rotate should be somewhere
 		- Circuit Fab does nothing
 		- name of Bar
@@ -198,44 +72,24 @@ x weather should affect fire/shock
 		- auto-clear not working as well as it should
 		- tune EmitterGenerator - meander length
 
+	- Beta 3
+		- domain AI
+		- troll deity
+		- Gob-men domain
+		- Mantis-men domain
+
 	- Census
-		x coolest stuff, past and present, by category
-		x total of Au and Crystal
-		x consider tying gold/crystal to per-cycle census
-		x check money
-		x switch over to tracking GameItems, if active.
-		x greatest warrior
-		x greatest weapons
-		x location and owner
-		t greater kills don't seem to work at all
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
 		- money checks optional
-		x greatest smith
-		x greatest monsters
 		- needs to feel interactive
-		x # kills
 		- browsing of items/people
 		- redo UI layout
 
 	- Market
-		x rethink fiction / core control / avatar prime
-		x denizens
-		x item market
-		x guard posts
-		x tech pyramids -> power plants
-		x forge
-			x forge or factory?
-			x fee to forge
-		x citizens *don't* pick stuff up in their own domain
-		x coin changer. junk item breakdown?
-		x gold & crystal market
-		x flammability / shockability very agressive
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
-		x cyclops attracted by tech?
 		- turret
-		x influence zones for buildings
 		- team colors
 		- battle flags
     	- time scale culling
@@ -246,8 +100,6 @@ x weather should affect fire/shock
 			- dragging, rows
 			- top view?
 			x auto-clear vegetation
-		x morale
-			x madness / starvation / things going wrong
 
 	- Adventure
 		x weapon swap button or auto-swap?
@@ -404,6 +256,157 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x rethink fiction / core control / avatar prime
+x denizens
+x item market
+x guard posts
+x tech pyramids -> power plants
+x forge
+	x forge or factory?
+	x fee to forge
+x citizens *don't* pick stuff up in their own domain
+x coin changer. junk item breakdown?
+x gold & crystal market
+x flammability / shockability very agressive
+x cyclops attracted by tech?
+x influence zones for buildings
+x morale
+	x madness / starvation / things going wrong
+x coolest stuff, past and present, by category
+x total of Au and Crystal
+x consider tying gold/crystal to per-cycle census
+x check money
+x switch over to tracking GameItems, if active.
+x greatest warrior
+x greatest weapons
+x location and owner
+x greater kills don't seem to work at all
+x greatest smith
+x greatest monsters
+x # kills
+d seperate land from water. re-think water texture.
+x 32 bit textures
+x 32bit texture support
+x volcanos get left behind
+x resize and colors are wrong bug
+x loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
+x money xchange - gold to crystal and vice versa
+d vault needs "sell to market" button
+x building repair
+x system for gamui to track models
+x make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
+x markets - pay out taxes over a certain limit
+d standing shields!
+d particles aren't additive correctly
+d add rez effect for item switch?
+d animation generation
+x weather should affect fire/shock
+
+x Beta2
+	x repair
+	x fast / threaded save
+	x new opening screen?
+	x clean up history code. remove named lesser tracking.
+	x new walkthrough tutorial
+	x (web page) note that installer installs-over
+	x restore 'create world' button.
+		x pre-gen plants
+		x pre-gen volcanoes (50%?)
+		x run world sim 5 minutes?
+	x component infrastructure
+		x remove IScript and ScriptComponent
+		x linked list for components; unlimited general comps
+		d remove spatial component
+	t auto rebuild
+	t abandon to tactical AI
+	x special plant renderer: move plants to worldgrid
+		x test intersection: set firegun to plant visual impact height
+		x track plant #s
+		x respect # limits
+		x check random distribution to growth curve
+		x save and load testing for plants
+		x rampage not destroying plants
+		x plants in rocks
+	x change ItemComponent fire/shock handling to match plants. (Remove accrued, etc.)
+	x hints about what you need to build
+	x re-work damage-desc to be 3 types: kinetic, fire, shock vs. current system
+	x fluids
+		x deal with infinite emitters (one in current save)
+		x move voxels to TexturePack? (need 32 bit textures...grumble). not doing: sticking with 2 special sets.
+		x water flow over emitters?
+		x emitters should wear rock. no, seems okay
+		x plants: impact water, take damage
+		d rain variation. flash floods. vary emitters. 
+		d shown rain variation in selection of domain
+		x Water gradient moves MOBs
+		x GameMoveComponent does nothing but turn on basic water physics move.
+		t mobs: take damage from water
+		t buildings: account for water
+		t water creating !passable for core...flow around cores? cores to sinks?
+		t overlapping fluid emitters shouldn't change height
+		t new physics component - account for water. more travel, travel through water.
+		t magma fluid
+		d shock fluid
+		x update world-gen code to place lava emitters
+	x circuits
+		x implement EXPLODES
+		x circuit class. new rendering overlay. (gamui layer? seperate?)
+		x circuits: 4 bits type(15) + rot(2) = 6 bits?
+			x switch (rot)
+			x battery (rot)
+			x zapper
+			x bend (rot)
+			x 3 split (rot?)
+			x crossover
+			x gate
+			x turret (or not circuit? building? similar to battery...) (rot)
+			x circuit art
+			x trigger plate
+			x fab plant
+			x circuit building ui
+			x switch activation ui
+
+	x grid travel shouldn't walk
+	x emitters too close to Grid
+	d ports or grid should mark fluid unbounded: moved emitters. may net need this.
+	x mini map texture colors incorrect
+	t remove ruins; go to just unknown, and decay?
+	x no emmitter in the core area
+	t no emitter beside water (?? how did this crop back up?? diagonals. not strictly a bug.)
+	x circuitFab isn't enabling/disabling other choices
+	x circuit view - toggle rock and buildings? top down?
+	x remove enemy detector variants
+	x denizens getting stuck pathing
+	x fix particles. much too stressed.
+	t battery logic isn't correct - seems okay in the Fluid Test
+	x above ground water needs differentiation
+	x better spark / charge effects. new colors, particle trail
+	x “tab is brilliant”
+	x workers carry fruit - denizens only?
+	x industrial or natural in the menu
+	x pave is drawing over porches
+	x pressure plates don’t have direction
+	x battery can’t tell direction from top. shrink battery?
+	x splitter: 4 bends?
+	x Fluids:
+		x water fully enclosed 
+		x lava algorithm
+		x pather doesn’t respect fluids
+	x eating plants doesn't seem to damage them
+	x Arachnoid -> Trilobyte
+	x enemy incursion incredibly low
+	x plants shouldn’t grow over circuits
+		x circuit lines block plant growth?
+		x zapper: symbol in middle, block? Spike? Remove
+		x Zapper - charge for?? Remove zapper?
+	x Gate? Ice toggle?
+	x need circuit lines - circuit board lines
+	d plant growth rate high?
+	x volcanos don't burn plants
+	x drone heal at core
+	d gl3.1 suits don't render correctly.
+
+
 	x (web page) note that installer installs-over
 	x restore 'create world' button.
 		x pre-gen plants
