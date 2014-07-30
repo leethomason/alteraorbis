@@ -293,8 +293,7 @@ public:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SHIFT  = 4,
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
-	    NUM_ZONES2	= NUM_ZONES*NUM_ZONES,
+		NUM_ZONES	= EL_MAP_SIZE/ZONE_SIZE,
 		MAX_VOXEL_QUADS  = 16000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
@@ -313,16 +312,19 @@ public:
 private:
 	int INDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height ); 
-		return y*width + x; 
+		return (y<<EL_MAP_Y_SHIFT) | x; 
 	}
 	int INDEX( grinliz::Vector2I v ) const { return INDEX( v.x, v.y ); }
+
 	float IndexToRotation360(int index);
 
 	int ZDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height );
-		x /= ZONE_SIZE;
-		y /= ZONE_SIZE;
-		return (y*width/ZONE_SIZE) + x; 
+		x >>= ZONE_SHIFT;
+		y >>= ZONE_SHIFT;
+		GLASSERT(x >= 0 && x < NUM_ZONES);
+		GLASSERT(x >= 0 && x < NUM_ZONES);
+		return y * NUM_ZONES + x;
 	} 
 
 	void Init( int w, int h );
@@ -378,18 +380,20 @@ private:
 
 	void* ToState( int x, int y ) {
 		grinliz::Vector2I v = ZoneOrigin( x, y );
-		return (void*)(v.y*width+v.x);
+		return (void*)INDEX(v);
 	}
 
 	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec ) {
 		int v = (int)(state);
+		int x = v & EL_MAP_X_MASK;
+		int y = v >> EL_MAP_Y_SHIFT;
+		GLASSERT(x >= 0 && x < width);
+		GLASSERT(y >= 0 && y < height);
+
 		if ( vec ) {
-			int y = v / width;
-			int x = v - y*width;
 			vec->Set( x, y );
 		}
-		GLASSERT( v < width*height );
-		return grid+v;
+		return &grid[INDEX(x, y)];
 	}
 
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
@@ -402,7 +406,6 @@ private:
 	void ProcessEffect(ChitBag* chitBag, int delta);	// on slow tick
 	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
 
-	WorldGrid*					grid;
 	Engine*						engine;
 	IMapGridUse*				iMapGridUse;
 	int							slowTick;
@@ -449,6 +452,9 @@ private:
 	grinliz::CDynArray< Model* > treePool;
 
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
+
+	// Big memory: the actual map.
+	WorldGrid grid[EL_MAP_SIZE*EL_MAP_SIZE];
 
 	// Temporary - big one - last in class
 	grinliz::CArray< Vertex, MAX_VOXEL_QUADS*4 > voxelBuffer;

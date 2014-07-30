@@ -105,12 +105,12 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 	GLASSERT( height % ZONE_SIZE == 0 );
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 
-	grid = 0;
 	engine = 0;
 	currentPather = 0;
 	worldInfo = 0;
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
+	processIndex = 0;
 
 	fluidSector = 0;
 	fluidTicker.SetPeriod(600 / (NUM_SECTORS*NUM_SECTORS));
@@ -126,6 +126,8 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 
 	magmaGrids.Reserve(1000);
 	treePool.Reserve(1000);
+
+	memset(grid, 0, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
@@ -149,7 +151,6 @@ WorldMap::~WorldMap()
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 
 	DeleteAllRegions();
-	delete [] grid;
 	delete worldInfo;
 
 	delete voxelVertexVBO;
@@ -283,8 +284,10 @@ void WorldMap::SavePNG( const char* filename )
 {
 	Color4U8* pixels = new Color4U8[width*height];
 
-	for( int i=0; i<width*height; ++i ) {
-		pixels[i] = grid[i].ToColor();
+	for (int j = 0; j < height; ++j) {
+		for (int i = 0; i < width; ++i) {
+			pixels[j*width+i] = grid[INDEX(i,j)].ToColor();
+		}
 	}
 	GLString path;
 	GetSystemPath(GAME_SAVE_DIR, filename, &path);
@@ -320,7 +323,7 @@ void WorldMap::Save( const char* filename )
 
 		// This works very well; about 3:1 compression.
 		Squisher squisher;
-		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp );
+		squisher.StreamEncode( grid, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE, fp );
 		squisher.StreamEncode( 0, 0, fp );
 
 		fclose( fp );
@@ -348,7 +351,7 @@ void WorldMap::Load( const char* filename )
 
 		//fread( grid, sizeof(WorldGrid), width*height, fp );
 		Squisher squisher;
-		squisher.StreamDecode( grid, sizeof(WorldGrid)*width*height, fp );
+		squisher.StreamDecode( grid, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE, fp );
 
 		fclose( fp );
 		
@@ -453,11 +456,9 @@ void WorldMap::Init( int w, int h )
 //	voxelInit.ClearAll();
 
 	DeleteAllRegions();
-	delete [] grid;
 	this->width = w;
 	this->height = h;
-	grid = new WorldGrid[width*height];
-	memset( grid, 0, width*height*sizeof(WorldGrid) );
+	memset( grid, 0, EL_MAP_SIZE*EL_MAP_SIZE*sizeof(WorldGrid) );
 	
 	delete worldInfo;
 	worldInfo = new WorldInfo( grid, width, height );
@@ -468,7 +469,7 @@ void WorldMap::Init( int w, int h )
 
 void WorldMap::InitCircle()
 {
-	memset( grid, 0, width*height*sizeof(WorldGrid) );
+	memset( grid, 0, EL_MAP_SIZE*EL_MAP_SIZE*sizeof(WorldGrid) );
 
 	const int R = Min( width, height )/2-1;
 	const int R2 = R * R;
@@ -507,32 +508,38 @@ bool WorldMap::InitPNG( const char* filename,
 		int x = 0;
 		int y = 0;
 		int color=0;
-		for( unsigned i=0; i<w*h; ++i ) {
-			Color3U8 c = { pixels[i*3+0], pixels[i*3+1], pixels[i*3+2] };
-			Vector2I p = { x, y };
-			if ( c == BLACK ) {
-				grid[i].SetLand(WorldGrid::LAND);
-				blocks->Push( p );
-			}
-			else if ( c.r() == c.g() && c.g() == c.b() ) {
-				grid[i].SetLand(WorldGrid::LAND);
-				color = c.r();
-			}
-			else if ( c == BLUE ) {
-				grid[i].SetWater();
-			}
-			else if ( c == RED ) {
-				grid[i].SetLand(WorldGrid::LAND);
-				wayPoints->Push( p );
-			}
-			else if ( c == GREEN ) {
-				grid[i].SetLand(WorldGrid::LAND);
-				features->Push( p );
-			}
-			++x;
-			if ( x == w ) {
-				x = 0;
-				++y;
+		for (unsigned j = 0; j < h; ++j) {
+			for (unsigned i = 0; i < w; ++i) {
+
+				int pIndex = j*w + i;
+				int index = INDEX(i, j);
+
+				Color3U8 c = { pixels[pIndex * 3 + 0], pixels[pIndex * 3 + 1], pixels[pIndex * 3 + 2] };
+				Vector2I p = { x, y };
+				if (c == BLACK) {
+					grid[index].SetLand(WorldGrid::LAND);
+					blocks->Push(p);
+				}
+				else if (c.r() == c.g() && c.g() == c.b()) {
+					grid[index].SetLand(WorldGrid::LAND);
+					color = c.r();
+				}
+				else if (c == BLUE) {
+					grid[index].SetWater();
+				}
+				else if (c == RED) {
+					grid[index].SetLand(WorldGrid::LAND);
+					wayPoints->Push(p);
+				}
+				else if (c == GREEN) {
+					grid[index].SetLand(WorldGrid::LAND);
+					features->Push(p);
+				}
+				++x;
+				if (x == w) {
+					x = 0;
+					++y;
+				}
 			}
 		}
 		free( pixels );
@@ -606,6 +613,7 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 */
 void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 {
+	PROFILE_FUNC();
 	// We need process at a steady rate so that
 	// the time between ticks is constant.
 	// This is performance regressive, so something
@@ -616,21 +624,31 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 	const float DAMAGE = EFFECT_DAMAGE_PER_SEC * float(DELTA) / float(1000);
 
 	int nGrid = N_PER_MSEC * delta;
+	Rectangle2I b = Bounds();
+	b.Outset(-1);
+
+	const U64* grid64 = (const U64*)grid;
+	GLASSERT(sizeof(*grid64) == sizeof(WorldGrid));
 
 	while (nGrid--) {
 		processIndex++;
 		if (processIndex >= MAP2) processIndex = 0;
-		if (processIndex >= width*height) continue;
+		if (grid64[processIndex] == 0) continue;
 
-		int index = processIndex;
+		const int index = processIndex;
+
+		// This can be out of bounds - everything is water outside of Bounds()
 		WorldGrid* wg = &grid[index];
+		if (!wg->IsLand()) continue;
+
+		const int y = (index >> EL_MAP_Y_SHIFT);
+		const int x = (index & EL_MAP_X_MASK);
+		const Vector2I pos2i = { x, y };
+		const Vector3I pos3i = { x, 0, y };
+
+		if (!b.Contains(pos2i)) continue;
 
 		// FIXME: filter on Plant, Magma, Lava...more ??
-
-		int y = index / width;
-		int x = index - y * width;
-		Vector2I pos2i = { x, y };
-		Vector3I pos3i = { x, 0, y };
 
 		// flammability is reflected in the chance
 		// of it catching fire; once on fire, everything
@@ -646,8 +664,10 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 		if (wg->Plant()) {
 			if (wg->PlantOnFire())  effect |= GameItem::EFFECT_FIRE;
 			if (wg->PlantOnShock()) effect |= GameItem::EFFECT_SHOCK;
-			DamageDesc dd(DAMAGE, effect);
-			this->VoxelHit(pos3i, dd);
+			if (effect) {
+				DamageDesc dd(DAMAGE, effect);
+				this->VoxelHit(pos3i, dd);
+			}
 		}
 
 		if (wg->Magma() || (wg->IsFluid() && wg->FluidType() == WorldGrid::FLUID_LAVA)) {
@@ -660,11 +680,13 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 			static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
 
 			for (int j = 0; j < N; ++j) {
-				int ia = INDEX(pos2i + delta[j]);
+				Vector2I v2 = pos2i + delta[j];
+				Vector3I v3 = { v2.x, 0, v2.y };
+				int ia = INDEX(v2);
 				if (grid[ia].Plant()) {
 					if (random.Uniform() < CHANCE_FIRE_SPREAD) {
 						DamageDesc dd(0, effect);
-						this->VoxelHit(pos3i, dd);
+						this->VoxelHit(v3, dd);
 					}
 				}
 			}
@@ -729,45 +751,47 @@ grinliz::Vector2I WorldMap::GetPoolLocation(int index)
 
 void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 {
-	int n = fluidTicker.Delta(delta);
-	while (n--) {
-		if (fluidSim[fluidSector]) {
+	{
+		PROFILE_BLOCK(FluidSim);
+		int n = fluidTicker.Delta(delta);
+		while (n--) {
+			if (fluidSim[fluidSector]) {
 
-			fluidSim[fluidSector]->DoStep();
+				fluidSim[fluidSector]->DoStep();
 
-			if (fluidSim[fluidSector]->NumPools()) {
-				// Need to tick everything in the 
-				// area of effect. Physics changes
-				// may apply to the world objects.
-				Rectangle2I aoe = fluidSim[fluidSector]->Bounds();
-				Rectangle2F aoeF = ToWorld(aoe);
-				if (chitBag) {
-					chitBag->SetTickNeeded(aoeF);
-				}
-				// Run through and look for lava:
-				for (Rectangle2IIterator it(aoe); !it.Done(); it.Next()) {
-					const WorldGrid& wg = grid[INDEX(it.Pos())];
-					if (wg.IsFluid() && wg.FluidType() == WorldGrid::FLUID_LAVA) {
-						for (int i = 0; i < 4; ++i) {
-							if (random.Uniform() < CHANCE_FIRE_SPREAD) {
-								DamageDesc dd(0, GameItem::EFFECT_FIRE);
-								Vector2I v = it.Pos() + DIR_I4[i];
-								Vector3I v3 = { v.x, 0, v.y };
-								this->VoxelHit(v3, dd);
+				if (fluidSim[fluidSector]->NumPools()) {
+					// Need to tick everything in the 
+					// area of effect. Physics changes
+					// may apply to the world objects.
+					Rectangle2I aoe = fluidSim[fluidSector]->Bounds();
+					Rectangle2F aoeF = ToWorld(aoe);
+					if (chitBag) {
+						chitBag->SetTickNeeded(aoeF);
+					}
+					// Run through and look for lava:
+					for (Rectangle2IIterator it(aoe); !it.Done(); it.Next()) {
+						const WorldGrid& wg = grid[INDEX(it.Pos())];
+						if (wg.IsFluid() && wg.FluidType() == WorldGrid::FLUID_LAVA) {
+							for (int i = 0; i < 4; ++i) {
+								if (random.Uniform() < CHANCE_FIRE_SPREAD) {
+									DamageDesc dd(0, GameItem::EFFECT_FIRE);
+									Vector2I v = it.Pos() + DIR_I4[i];
+									Vector3I v3 = { v.x, 0, v.y };
+									this->VoxelHit(v3, dd);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		fluidSector++;
-		if (fluidSector >= Square(NUM_SECTORS)) {
-			fluidSector = 0;
+			fluidSector++;
+			if (fluidSector >= Square(NUM_SECTORS)) {
+				fluidSector = 0;
+			}
 		}
 	}
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		// FIXME: call to visible area??
 		if (fluidSim[i]) {
 			fluidSim[i]->EmitWaterfalls(delta, engine);
 		}
@@ -2170,6 +2194,10 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 	}
 	voxelBuffer.Clear();
 	nTrees = 0;
+	ParticleSystem* ps = engine->particleSystem;
+	const ParticleDef& fireDef = ps->GetPD("fire");
+	const ParticleDef& smokeDef = ps->GetPD("smoke");
+	const ParticleDef& shockDef = ps->GetPD("shock");
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2211,6 +2239,15 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					}
 					if (accept) {
 						PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
+
+						Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
+						if (wg.PlantOnFire()) {
+							ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							ps->EmitPD(fireDef, pos3f, V3F_UP, STD_FRAME_TIME);
+						}
+						if (wg.PlantOnShock()) {
+							ps->EmitPD(shockDef, pos3f, V3F_UP, STD_FRAME_TIME);
+						}
 					}
 				}
 
@@ -2234,7 +2271,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
-					Vector2I v = { x, y };
+
+					Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
+					ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
 				}
 				else if ( wg.RockHeight() ) {
 					id = (wg.RockType() == WorldGrid::ROCK) ? ROCK : ICE;

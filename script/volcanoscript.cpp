@@ -106,16 +106,6 @@ int VolcanoScript::DoTick( U32 delta )
 void VolcanoScript::OnAdd(Chit* chit, bool init)
 {
 	super::OnAdd(chit, init);
-	if (init) {
-		SpatialComponent* sc = parentChit->GetSpatialComponent();
-		GLASSERT(sc);
-		if (sc) {
-			Vector2F pos = sc->GetPosition2D();
-
-			NewsEvent event(NewsEvent::VOLCANO, pos);
-			Context()->chitBag->GetNewsHistory()->Add(event);
-		}
-	}
 }
 
 

@@ -119,7 +119,7 @@ static const float MASS_TO_EXPLOSION_DAMAGE = 0.40f;
 static const float CHANCE_FIRE_NORMAL	= 0.40f;
 static const float CHANCE_FIRE_HIGH		= 0.80f;
 static const float CHANCE_FIRE_OUT		= 0.10f;
-static const float CHANCE_FIRE_SPREAD	= 0.20f;	// once it starts spreading, self reinforcing
+static const float CHANCE_FIRE_SPREAD	= 0.40f;	// once it starts spreading, self reinforcing. 0.20 too low.
 
 static const float SALES_TAX = 0.15f;
 static const int   WORKER_BOT_COST = 20;
