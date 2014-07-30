@@ -414,7 +414,7 @@ int main( int argc, char **argv )
 		glDepthFunc( GL_LEQUAL );
 
 		const U8* keys = SDL_GetKeyboardState(0);
-		U32 tickDelta = lastTick - thisTick;
+		U32 tickDelta = thisTick - lastTick;
 		if (tickDelta > 100) tickDelta = 100;
 
 		float keyMoveSpeed  = KEY_MOVE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
