@@ -1,15 +1,7 @@
-- batching troubles - still lots of small batches going in. consider dropping back to ES2
 - GT: ui to show idle and busy workers
-- redo AI utility to be based on a set of curves
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
-- show rock damage
-- GT: lightning
-- can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - maps: what direction is player pointed?
-- fix porch image (alpha of the tiles, if not general improvement)
-- squisher, in streaming mode, to save files
-- target “Focus” shouldn’t switch so easily.
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
 - colors of buildings (not enough)
@@ -29,14 +21,11 @@
 - should be able to browse units in character screen
 - add target portrait
 - review all atlases for texture mem usage
-- remove normalization in shader
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
 - record perf max/min. surprisingly hard.
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-- mountain peaks news
-- openMP - particle system, elsewhere
 - re-do glow
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
@@ -48,6 +37,9 @@
 
 - game
 	- Beta 2b
+		- Linux
+		- Android
+		- Download tracking
 		- more aggressively seed plants? (Fire takes out a lot.)
 		- some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
@@ -102,42 +94,18 @@
 			x auto-clear vegetation
 
 	- Adventure
-		x weapon swap button or auto-swap?
-		x How do bases and adventuring play together?
-			x why do you quit adventuring to build a base?
-		x console
-			x important events
-			x important de-rez
 		- control
 			- space bar to pause
 			- tab to toggle weapons
 			- pause button
-		x shield: 
-			x xp from getting hit
-			x bugs in damage calc
-			x slow reload
-			x effects do something
-		x drop cash or return to vault
 		- balance battles
-		x history events
-		x item history
-			x created 
-			x kills
-			x winning names
 		- real health bars & check visibility
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
-	    x player creation screen
-	    x ruins
 
-	- Fauna 2
-		- external constant file
-		- consider moving ground to voxel gen system, so that ground can vary?
-		x teams. friend-enemy-neutral logic.
+    - TBD
 		- monster ecology
-		x visitors
-		x inventory screen
 		- land variation:
 			- cold dry (rocky)
 			- hot dry (sandy)
@@ -145,15 +113,19 @@
 			- hot wet (greener)
 			- randomization pattern
 		- rock wear / stone aging
-	- Building
-		x domain building
-    	- turrets
-    		- turret art
-    		- building takes crystal
-    		- building rotation
-    		- turret ai
-	- AI
-		- other cores doing the same
+		- external constant file
+		- consider moving ground to voxel gen system, so that ground can vary?
+	    - batching troubles - still lots of small batches going in. consider dropping back to ES2
+		- redo AI utility to be based on a set of curves
+		- show rock damage
+		- GT: lightning
+		- can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
+		- fix porch image (alpha of the tiles, if not general improvement)
+		- squisher, in streaming mode, to save files
+		- target “Focus” shouldn’t switch so easily.
+		- remove normalization in shader
+		- mountain peaks news
+		- openMP - particle system, elsewhere
 
 - combat test scene	
 	x connect item to procedural rendering of melee weapon
@@ -256,6 +228,34 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x weapon swap button or auto-swap?
+x How do bases and adventuring play together?
+	x why do you quit adventuring to build a base?
+x console
+	x important events
+	x important de-rez
+x shield: 
+	x xp from getting hit
+	x bugs in damage calc
+	x slow reload
+	x effects do something
+x drop cash or return to vault
+x history events
+x item history
+	x created 
+	x kills
+	x winning names
+x player creation screen
+x ruins
+x turrets
+	x turret art
+	x building takes crystal
+	x building rotation
+	x turret ai
+x teams. friend-enemy-neutral logic.
+x visitors
+x inventory screen
+x domain building
 x rethink fiction / core control / avatar prime
 x denizens
 x item market
