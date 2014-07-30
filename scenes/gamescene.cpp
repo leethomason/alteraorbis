@@ -1092,7 +1092,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 0
+#if 1
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
@@ -1111,7 +1111,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1
+#if 0
 		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
 		if (loc.IsZero()) {
 			poolView = 0;
@@ -1246,6 +1246,24 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 	for (int i = 0; i<arr.Size(); ++i) {
 		IString mob = arr[i]->GetItem()->keyValues.GetIString(ISC::mob);
 		if (mob == ISC::lesser || mob == ISC::greater) {
+
+			/*
+			// Move the MOB to the port first, if possible, so they don't 
+			// turn around and attack the new core.
+			PathMoveComponent* pmc = GET_SUB_COMPONENT(arr[i], MoveComponent, PathMoveComponent);
+			if (pmc) {
+				pmc->Stop();
+				SpatialComponent* sc = arr[i]->GetSpatialComponent();
+				GLASSERT(sc);
+				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
+				
+				int port = sd.NearestPort(sc->GetPosition2D());
+				if (port) {
+					Vector2F v = SectorData::PortPos(sd.GetPortLoc(port), arr[i]->ID());
+					sc->SetPosition(v.x, 0, v.y);
+				}
+			}
+			*/
 			AIComponent* ai = arr[i]->GetAIComponent();
 			ai->GoSectorHerd(true);
 		}

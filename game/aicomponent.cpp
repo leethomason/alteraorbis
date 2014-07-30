@@ -1284,6 +1284,11 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 					delta.Push(rinit[i]);
 				}
 			}
+			else if (cs) {
+				// FIXME: is the cs check needed?
+				// But we don't want the MOBs herding to the outlan
+				delta.Push(rinit[i]);
+			}
 		}
 	}
 
