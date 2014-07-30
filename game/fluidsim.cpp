@@ -6,6 +6,8 @@
 #include "../engine/engine.h"
 #include "../engine/particle.h"
 
+#include "../xegame/istringconst.h"
+
 using namespace grinliz;
 
 static const int WATERFALL_HEIGHT = 3;
@@ -33,9 +35,9 @@ FluidSim::~FluidSim()
 
 void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 {
-	ParticleDef pdWater = engine->particleSystem->GetPD("fallingWater");
-	ParticleDef pdLava = engine->particleSystem->GetPD("fallingLava");
-	ParticleDef pdMist = engine->particleSystem->GetPD("mist");
+	ParticleDef pdWater = engine->particleSystem->GetPD(ISC::fallingWater);
+	ParticleDef pdLava = engine->particleSystem->GetPD(ISC::fallingLava);
+	ParticleDef pdMist = engine->particleSystem->GetPD(ISC::mist);
 
 	for (int i = 0; i<waterfalls.Size(); ++i) {
 		const Vector2I& wf = waterfalls[i];

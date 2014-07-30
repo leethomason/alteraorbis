@@ -103,12 +103,12 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 				}
 				b.head = mv.at;
 
-				ParticleDef def = ps->GetPD( "boltImpact" );
+				ParticleDef def = ps->GetPD( ISC::boltImpact );
 				def.color = b.color;
 				ps->EmitPD( def, mv.at, -normal, delta );
 
 				if ( b.effect & GameItem::EFFECT_EXPLOSIVE ) {
-					def = ps->GetPD( "explosion" );
+					def = ps->GetPD( ISC::explosion );
 					def.color = b.color;
 					ps->EmitPD( def, mv.at, V3F_UP, delta );
 				}
@@ -194,7 +194,7 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	static const float HALF_WIDTH = 0.07f;
 
 	ParticleSystem* ps = engine->particleSystem;
-	ParticleDef def = ps->GetPD( "smoketrail" );
+	ParticleDef def = ps->GetPD( ISC::smoketrail );
 
 	int count = 0;
 	for( int i=0; i<nBolts && count<MAX_BOLTS; ++i ) {

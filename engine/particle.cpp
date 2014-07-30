@@ -172,7 +172,19 @@ const ParticleDef& ParticleSystem::GetPD( const char* name )
 }
 
 
-void ParticleSystem::EmitPD(	const char* name,
+const ParticleDef& ParticleSystem::GetPD( const IString& name )
+{
+	for( int i=0; i<particleDefArr.Size(); ++i ) {
+		if ( particleDefArr[i].name == name ) {
+			return particleDefArr[i];
+		}
+	}
+	GLASSERT( 0 );	// not intended
+	return particleDefArr[0];
+}
+
+
+void ParticleSystem::EmitPD(	const IString& name,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
 								U32 deltaTime )
@@ -323,7 +335,7 @@ void ParticleSystem::Draw()
 
 void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 {
-	name = ele->Attribute( "name" );
+	name = StringPool::Intern(ele->Attribute( "name" ));
 	
 	time = ONCE;
 	if ( ele->Attribute( "time", "continuous" )) {

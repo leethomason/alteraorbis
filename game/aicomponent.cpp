@@ -949,8 +949,8 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 		if (cs) {
 			Vector2I csPos2i = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
 			if (csPos2i != pos2i) {
-				context->engine->particleSystem->EmitPD("teleport", ToWorld3F(pos2i), V3F_UP, 0);
-				context->engine->particleSystem->EmitPD("teleport", ToWorld3F(csPos2i), V3F_UP, 0);
+				context->engine->particleSystem->EmitPD(ISC::teleport, ToWorld3F(pos2i), V3F_UP, 0);
+				context->engine->particleSystem->EmitPD(ISC::teleport, ToWorld3F(csPos2i), V3F_UP, 0);
 				thisComp.spatial->SetPosition(ToWorld3F(csPos2i));
 			}
 		}

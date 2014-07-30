@@ -437,7 +437,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			RenderComponent* rc = parentChit->GetRenderComponent();
 			if (rc) {
-				ParticleDef def = context->engine->particleSystem->GetPD("shield");
+				ParticleDef def = context->engine->particleSystem->GetPD(ISC::shield);
 				Vector3F shieldPos = { 0, 0, 0 };
 				rc->GetMetaData(HARDPOINT_SHIELD, &shieldPos);
 				context->engine->particleSystem->EmitPD(def, shieldPos, V3F_UP, 0);
@@ -468,7 +468,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		if ( parentChit->GetSpatialComponent() ) {
 			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
-			context->engine->particleSystem->EmitPD( "heal", v, V3F_UP, 30 );
+			context->engine->particleSystem->EmitPD( ISC::heal, v, V3F_UP, 30 );
 		}
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED ) {
@@ -857,12 +857,12 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 
 	if ( compSet.okay ) {
 		if ( it.fireTime > 0 ) {
-			ps->EmitPD( "fire", compSet.spatial->GetPosition(), V3F_UP, delta );
-			ps->EmitPD( "smoke", compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( ISC::fire, compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( ISC::smoke, compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}
 		if ( it.shockTime > 0 ) {
-			ps->EmitPD( "shock", compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( ISC::shock, compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}
 	}

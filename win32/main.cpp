@@ -225,7 +225,7 @@ int main( int argc, char **argv )
 	void* game = NewGame( screenWidth, screenHeight, rotation );
 	
 	int modKeys = SDL_GetModState();
-	U32 tickTimer = 0;
+	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
 
 	// ---- Main Loop --- //
 	while ( !done ) {
@@ -253,6 +253,7 @@ int main( int argc, char **argv )
 					break;
 				}
 				break;
+
 			case SDL_KEYDOWN:
 				{
 					// sym or scancode? I used a dvorak keyboard, so appreciate
@@ -413,34 +414,43 @@ int main( int argc, char **argv )
 		glDepthFunc( GL_LEQUAL );
 
 		const U8* keys = SDL_GetKeyboardState(0);
+		U32 tickDelta = lastTick - thisTick;
+		if (tickDelta > 100) tickDelta = 100;
+
+		float keyMoveSpeed  = KEY_MOVE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+		float keyZoomSpeed  = KEY_ZOOM_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+		float keyRotatepeed = KEY_ROTATE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+
 		if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] ) {
 			if (modKeys & KMOD_CTRL)
-				GameZoom(game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED);
+				GameZoom(game, GAME_ZOOM_DISTANCE, keyZoomSpeed);
 			else
-				GameCameraMove(game, 0, -KEY_MOVE_SPEED);
+				GameCameraMove(game, 0, -keyMoveSpeed);
 		}
 		if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]) {
 			if (modKeys & KMOD_CTRL)
-				GameZoom(game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED);
+				GameZoom(game, GAME_ZOOM_DISTANCE, -keyZoomSpeed);
 			else
-				GameCameraMove(game, 0, KEY_MOVE_SPEED);
+				GameCameraMove(game, 0, keyMoveSpeed);
 		}
 		if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]) {
 			if (modKeys & KMOD_CTRL)
-				GameCameraRotate(game, KEY_ROTATE_SPEED);
+				GameCameraRotate(game, keyRotatepeed);
 			else
-				GameCameraMove(game, -KEY_MOVE_SPEED, 0);
+				GameCameraMove(game, -keyMoveSpeed, 0);
 		}
 		if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]) {
 			if (modKeys & KMOD_CTRL)
-				GameCameraRotate(game, -KEY_ROTATE_SPEED);
+				GameCameraRotate(game, -keyRotatepeed);
 			else
-				GameCameraMove(game, KEY_MOVE_SPEED, 0);
+				GameCameraMove(game, keyMoveSpeed, 0);
 		}
 
 		{
+			lastTick = thisTick;
+			thisTick = SDL_GetTicks();
 			PROFILE_BLOCK( GameDoTick );
-			GameDoTick( game, SDL_GetTicks() );
+			GameDoTick( game, thisTick );
 		}
 		{
 			PROFILE_BLOCK( Swap );

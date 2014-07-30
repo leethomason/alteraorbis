@@ -4,6 +4,8 @@
 #include "gamescene.h"
 #include "characterscene.h"
 
+#include "../version.h"
+
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/cameracomponent.h"

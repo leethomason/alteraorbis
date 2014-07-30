@@ -69,7 +69,6 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	IStringConst::Init();
 
 	scenePopQueued = false;
-	currentFrame = 0;
 	surface.Set( TEX_RGBA16, 256, 256 );
 
 	// Load the database.
@@ -576,7 +575,6 @@ void Game::DoTick( U32 _currentTime )
 
 	device->ResetTriCount();
 	previousTime = currentTime;
-	++currentFrame;
 
 	PushPopScene();
 }

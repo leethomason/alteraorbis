@@ -35,6 +35,8 @@
 
 #include "../audio/xenoaudio.h"
 
+#include "../version.h"
+
 using namespace gamui;
 using namespace grinliz;
 

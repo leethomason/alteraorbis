@@ -152,7 +152,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			const ChitContext* context = Context();
 			BattleMechanics::MeleeAttack( context->engine, parentChit, item );
-			context->engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
+			context->engine->particleSystem->EmitPD( ISC::meleeImpact, pos, V3F_UP, 0 );
 		}
 	}
 	else {
