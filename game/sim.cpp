@@ -1,4 +1,5 @@
 #include "sim.h"
+#include "../version.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"

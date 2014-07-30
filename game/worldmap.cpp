@@ -15,6 +15,8 @@
 
 #include "worldmap.h"
 
+#include "../version.h"
+
 #include "../xegame/xegamelimits.h"
 #include "../xegame/chitevent.h"
 #include "../xegame/chitbag.h"

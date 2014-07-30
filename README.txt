@@ -24,45 +24,32 @@ thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
 
-Changes in 1c
--------------
-- From ShroomArts: new GuardPost and Exchange, new money icons. Thanks!
-- menus re-ordered (again). Order of build enforced by
-  disabling dependent structures. Goal is to make getting
-  started much easier.
-- bug fixes. bug fixes. bug fixes.
-- links on census screen. another baby step in the direction
-  of full history browsing.
+Changes in 2
+------------
 
-Changes in 1b
--------------
-- Sounds! Big thanks to Justin Prymowicz. 
-- the escape key now backs out of menus
-- Sound engine improvements, improved latency
-- re-tune wandering monsters
-- population cap now controlled by # of temples
-- forge and distilleries controlled by current tech level
-- the market now run by the reserve bank, pays a cut to the core
-- bug fixes in history tracking
-- fix many OpenGL bugs on old drivers
-
-Changes in 1a
--------------
-- 2 (!!) crash on start-up bugs fixed
-- internal stability fixes
-- portrait fix
-- targeting fix
-- help text
-- ui tweaks
-- added Exchange to convert between Au and Crystal
-- tweaked Denizen AI, Forge, and Exchange to be self sustaining 
+- Fluid physics. Floating objects. Water, magma, and lava affect plants
+  and mobs. 
+- Circuits to create traps, machine, control water and magma, and defend your 
+  domain.
+- Tab key now toggles between isometric and top-down view.
+- Deeper integration of the effects of fire, shock, and water. (Although more 
+  needs to be done.)
+- Menu system gives indication of build order.
+- Improved world generation.
+- Vastly improved memory usage. Smaller and faster save files.
+- Simplified code architecture.
+- New, simplified, much more stable grid travel code.
+- Many bug fixes. Many bugs created. :)
+- Art improvements.
+- The Arachnoid is now called a Trilobyte
+- Drones no longer carry fruit and care heal at domain cores.
 
 
 FAQ
 ---
 Why do denizens just stand there or get stuck?
 
-	Make sure you don't have a porth that isn't accessible. They may be 
+	Make sure you don't have a portch that isn't accessible. They may be 
 	trying to get to a facility and can't.
 
 Why is everyone carrying fruit?
@@ -73,6 +60,8 @@ Why is everyone carrying fruit?
 
 Controls
 ------------
+
+Tab key toggles between top down and isometric views.
 
 Left-click moves the avatar, selects things, builds.
 Left-click & drag builds lots of pavement or ice at once, or clears an area.
