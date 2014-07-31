@@ -36,11 +36,15 @@
 - cage trap
 
 - game
+	- Beta 2
+		- screenshots of circuits
+		- screenshots of fluids
+		- update wiki
+
 	- Beta 2b
 		- Linux
 		- Android
 		- Download tracking
-		- mobs rush new domains (teleport out? really really sector herd?)
 		- more aggressively seed plants? (Fire takes out a lot.)
 		- some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
@@ -201,6 +205,7 @@ Consider:
 - food drives population?
 
 ---------- Defer ----------
+x mobs rush new domains (teleport out? really really sector herd?)
 d different porch color for usable buildings
 d volcanos: taper at the end
 d zoom way out
