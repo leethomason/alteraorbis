@@ -1529,7 +1529,7 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 
 SectorPort WorldMap::NearestPort( const Vector2F& pos )
 {
-	Vector2I secPos = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };
+	Vector2I secPos = ToSector(pos);
 	const SectorData& sd = worldInfo->GetSector( secPos );
 
 	int   bestPort = 0;
@@ -2060,8 +2060,16 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					}
 					else if ( layer == WorldGrid::LAND ) {
 						if (wg.Circuit()) {
-							layer = CIRCUIT + wg.Circuit() - 1;
+							int circuit = wg.Circuit();
+							layer = CIRCUIT + circuit - 1;
 							rotation = wg.CircuitRot();
+							if (circuit >= CIRCUIT_LINE_NS_GREEN && circuit <= CIRCUIT_LINE_CROSS_PAVE) {
+								int pave = wg.Pave();
+								if (pave && circuit < CIRCUIT_LINE_NS_PAVE)
+									layer += 3;
+								else if (!pave && circuit >= CIRCUIT_LINE_NS_PAVE)
+									layer -= 3;
+							}
 						}
 						else if (wg.Porch()) {
 							layer = PORCH + wg.Porch() - 1;
@@ -2080,8 +2088,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					vArr[2].pos.Set( fx+1.0f,	0, fy+1.0f );
 					vArr[3].pos.Set( fx+1.0f,	0, fy );
 
-					vArr[(0 + rotation)&3].tex.Set( UV[layer].x,		UV[layer].y );
-					vArr[(1 + rotation)&3].tex.Set( UV[layer].x,		UV[layer].y+dv );
+					vArr[(0 + rotation)&3].tex.Set( UV[layer].x,	UV[layer].y );
+					vArr[(1 + rotation)&3].tex.Set( UV[layer].x,	UV[layer].y+dv );
 					vArr[(2 + rotation)&3].tex.Set( UV[layer].x+du,	UV[layer].y+dv );
 					vArr[(3 + rotation)&3].tex.Set( UV[layer].x+du,	UV[layer].y );
 

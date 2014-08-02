@@ -62,6 +62,12 @@ inline grinliz::Vector2I ToSector( int x, int y ) {
 	return ToSector( pos2i );
 }
 
+inline grinliz::Vector2I ToSector(const grinliz::Vector2F& pos2) {
+	grinliz::Vector2I v = ToWorld2I(pos2);
+	return ToSector(v);
+}
+
+
 inline grinliz::Rectangle2I SectorBounds( const grinliz::Vector2I& sector ) {
 	grinliz::Rectangle2I r;
 	r.Set( sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE,

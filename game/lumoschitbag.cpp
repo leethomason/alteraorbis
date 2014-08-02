@@ -454,7 +454,7 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 	chit->GetSpatialComponent()->SetPosition( pos );
 	AddItem( rootItem.Name(), chit, context->engine, team, 0 );
 	chit->Add( new HealthComponent());
-	chit->Add( new DebugStateComponent());
+	//chit->Add( new DebugStateComponent());
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos);

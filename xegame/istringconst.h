@@ -78,6 +78,7 @@ public:
 	static grinliz::IString explosionWAV;
 	static grinliz::IString boltimpactWAV;
 	static grinliz::IString buttonWAV;
+	static grinliz::IString blasterWAV;
 
 	static grinliz::IString pave;
 	static grinliz::IString ice;

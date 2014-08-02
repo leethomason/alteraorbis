@@ -953,8 +953,11 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 				context->engine->particleSystem->EmitPD(ISC::teleport, ToWorld3F(csPos2i), V3F_UP, 0);
 				thisComp.spatial->SetPosition(ToWorld3F(csPos2i));
 			}
+			if (csPos2i == pos2i) {
+				destinationBlocked = 0;
+			}
 		}
-		// Done weather we can teleport or not.
+		// Done whether we can teleport or not.
 		return true;
 	}
 
@@ -1243,7 +1246,14 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 
 	const ChitContext* context = Context();
 	const Vector2F pos = thisComp.spatial->GetPosition2D();
+	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
 	const SectorPort start = context->worldMap->NearestPort(pos);
+	//Sometimes we can't path to any port. Hopefully rampage cuts in.
+	//GLASSERT(start.IsValid());
+	if (!start.IsValid()) {
+		return false;
+	}
+
 	IString mob = thisComp.item->keyValues.GetIString("mob");
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
@@ -1268,12 +1278,16 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 								delta.Push(rinit[i]);
 							}
 						}
-						else if (tech >= TECH_ATTRACTS_LESSER) delta.Insert(0, rinit[i]);
-						else delta.Push(rinit[i]);
+						else if (tech >= TECH_ATTRACTS_LESSER) 
+							delta.Insert(0, rinit[i]);
+						else 
+							delta.Push(rinit[i]);
 					}
 					else if (mob == IStringConst::greater) {
-						if (tech >= TECH_ATTRACTS_GREATER) delta.Insert(0, rinit[i]);
-						else if (tech > TECH_REPELS_GREATER) delta.Push(rinit[i]);
+						if (tech >= TECH_ATTRACTS_GREATER) 
+							delta.Insert(0, rinit[i]);
+						else if (tech > TECH_REPELS_GREATER) 
+							delta.Push(rinit[i]);
 						// else push nothing
 					}
 					else {

@@ -337,6 +337,9 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 			if (wg.Circuit() == CIRCUIT_SWITCH) {
 				context->circuitSim->TriggerSwitch(pos2i);
 			}
+			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
+				context->circuitSim->TriggerDetector(pos2i);
+			}
 			// FIXME: what about flags in other domains?
 			coreScript->RemoveFlag(pos2i);
 			Remove();

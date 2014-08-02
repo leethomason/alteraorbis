@@ -1875,7 +1875,8 @@ void GameScene::DrawDebugText()
 	}
 	if ( !voxelInfoID.IsZero() ) {
 		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( voxelInfoID.x, voxelInfoID.y );
-		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d circuit=%d circRot=%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Circuit(), wg.CircuitRot() );
+		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d pave=%d circuit=%d circRot=%d", 
+					   voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Pave(), wg.Circuit(), wg.CircuitRot() );
 		y += 16;
 	}
 }

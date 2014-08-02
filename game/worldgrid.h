@@ -162,7 +162,6 @@ public:
 	void SetCircuit(int id) {
 		circuit = 0;
 		if (id) {
-			pave = 0;
 			circuit = id;
 			GLASSERT(circuit == id);
 		}

@@ -337,7 +337,7 @@ void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 			Vector3F trigger = { 0, 0, 0 };
 			rc->CalcTrigger(&trigger, 0);
 
-			XenoAudio::Instance()->PlayVariation(ISC::blaster, building->ID(), &trigger);
+			XenoAudio::Instance()->PlayVariation(ISC::blasterWAV, building->ID(), &trigger);
 
 			chitBag->NewBolt(trigger, straight, dd.effects, building->ID(),
 							 dd.damage,

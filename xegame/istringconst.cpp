@@ -53,6 +53,7 @@ IString IStringConst::derezWAV;
 IString IStringConst::explosionWAV;
 IString IStringConst::boltimpactWAV;
 IString IStringConst::buttonWAV;
+IString IStringConst::blasterWAV;
 IString IStringConst::pave;
 IString IStringConst::ice;
 IString IStringConst::core;
@@ -159,6 +160,7 @@ void IStringConst::Init()
 	explosionWAV = StringPool::Intern( "explosionWAV", true );
 	boltimpactWAV = StringPool::Intern( "boltimpactWAV", true );
 	buttonWAV = StringPool::Intern( "buttonWAV", true );
+	blasterWAV = StringPool::Intern( "blasterWAV", true );
 	pave = StringPool::Intern( "pave", true );
 	ice = StringPool::Intern( "ice", true );
 	core = StringPool::Intern( "core", true );
