@@ -55,7 +55,7 @@
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
-		- can't cancel forge (2x2 build)
+		x can't cancel forge (2x2 build)
 	    - plants look repetetive
 		- walk target for the avatar
 		- move "Create Worker" and "Auto-Rebuild" to "Manage"
