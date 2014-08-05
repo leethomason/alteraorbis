@@ -137,11 +137,13 @@ void WorkQueue::RemoveImage( QueueItem* item )
 }
 
 
-void WorkQueue::Remove( const grinliz::Vector2I& pos )
+void WorkQueue::Remove(const grinliz::Vector2I& pos)
 {
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].pos == pos ) {
-			RemoveItem( i );
+	for (int i = 0; i < queue.Size(); ++i) {
+		Rectangle2I bounds = queue[i].Bounds();
+
+		if (bounds.Contains(pos)) {
+			RemoveItem(i);
 		}
 	}
 }
@@ -443,6 +445,22 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
 	XarcClose( xs );
+}
+
+
+Rectangle2I WorkQueue::QueueItem::Bounds()
+{
+	Rectangle2I r;
+	r.min = pos;
+
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData(buildScriptID);
+	int size = buildData.size;
+
+	r.max.x = r.min.x + size - 1;
+	r.max.y = r.min.y + size - 1;
+
+	return r;
 }
 
 
