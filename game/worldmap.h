@@ -174,6 +174,11 @@ public:
 							grinliz::Vector2F* bestEnd,
 							float* totalCost );
 
+	bool CalcWorkPath(	const grinliz::Vector2F& start, 
+						const grinliz::Vector2F& end, 
+						grinliz::Vector2F* bestEnd,
+						float* totalCost );
+
 	// Uses the very fast straight line pather.
 	bool HasStraightPath( const grinliz::Vector2F& start, 
 						  const grinliz::Vector2F& end );

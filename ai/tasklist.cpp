@@ -252,11 +252,12 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					task->buildScriptID,
 					controller->GetItem()->wallet))
 				{
-					// Auto-Clear plants.
+					// Auto-Clear plants & rock
 					Rectangle2I clearBounds;
 					clearBounds.Set(task->pos2i.x, task->pos2i.y, task->pos2i.x + buildData.size - 1, task->pos2i.y + buildData.size - 1);
 					for (Rectangle2IIterator it(clearBounds); !it.Done(); it.Next()) {
 						context->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
+						context->worldMap->SetRock(it.Pos().x, it.Pos().y, 0, false, 0);
 					}
 
 					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,
