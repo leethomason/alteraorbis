@@ -37,6 +37,7 @@ public:
 	void SetAudioOn( bool value );
 	bool DebugGLCalls() const			{ return debugGLCalls; }
 	bool DebugUI() const				{ return debugUI;  }
+	bool DebugFPS() const				{ return debugFPS; }
 	float SpawnDate() const				{ return spawnDate; }
 	float WorldGenDone() const			{ return worldGenDone; }
 
@@ -55,6 +56,7 @@ private:
 	bool audioOn;
 	bool debugGLCalls;
 	bool debugUI;
+	bool debugFPS;
 	float spawnDate;	// would like to be 0.20, but in interest of performance, 0.90 is used. On a debug 0.98 may be correct.
 	float worldGenDone;
 	grinliz::GLString path;
