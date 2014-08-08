@@ -137,11 +137,13 @@ void WorkQueue::RemoveImage( QueueItem* item )
 }
 
 
-void WorkQueue::Remove( const grinliz::Vector2I& pos )
+void WorkQueue::Remove(const grinliz::Vector2I& pos)
 {
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].pos == pos ) {
-			RemoveItem( i );
+	for (int i = 0; i < queue.Size(); ++i) {
+		Rectangle2I bounds = queue[i].Bounds();
+
+		if (bounds.Contains(pos)) {
+			RemoveItem(i);
 		}
 	}
 }
@@ -222,27 +224,14 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == 0 ) {
-
 			float cost = 0;
 			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
+			Vector2F bestEnd = { 0, 0 };
 
-			if (queue[i].buildScriptID == BuildScript::CLEAR) {
-				Vector2F bestEnd = { 0, 0 };
-
-				if ( worldMap->CalcPathBeside( start, end, &bestEnd, &cost )) {
-					if ( cost < bestCost ) {
-						bestCost = cost;
-						best = i;
-					}
-				}
-			}
-			else {
-				if ( worldMap->CalcPath( start, end, 0, &cost )) {
-					if ( cost < bestCost ) {
-						bestCost = cost;
-						best = i;
-					}
-				}
+			bool okay = worldMap->CalcWorkPath(start, end, &bestEnd, &cost);
+			if (okay && (cost < bestCost)) {
+				bestCost = cost;
+				best = i;
 			}
 		}
 	}
@@ -294,59 +283,62 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 }
 
 
-/*static*/ bool WorkQueue::TaskCanComplete( WorldMap* worldMap, 
-											LumosChitBag* chitBag,
-											const grinliz::Vector2I& pos2i, 
-											int action,
-											const Wallet& available )
+/*static*/ bool WorkQueue::TaskCanComplete(WorldMap* worldMap,
+										   LumosChitBag* chitBag,
+										   const grinliz::Vector2I& pos2i,
+										   int action,
+										   const Wallet& available)
 {
-	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
-	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.y );
+	Vector2F pos2 = { (float)pos2i.x + 0.5f, (float)pos2i.y + 0.5f };
+	const WorldGrid& wg = worldMap->GetWorldGrid(pos2i.x, pos2i.y);
 
 	BuildScript buildScript;
-	const BuildData& buildData = buildScript.GetData( action );
+	const BuildData& buildData = buildScript.GetData(action);
 	int size = buildData.size;
-	
-	if ( available.gold < buildData.cost ) {
+
+	if (available.gold < buildData.cost) {
 		return false;
 	}
 
-	int passable = 0;
 	int removable = 0;
 	int water = 0;
-	for( int y=pos2i.y; y<pos2i.y+size; ++y ) {
-		for( int x=pos2i.x; x<pos2i.x+size; ++x ) {
-			if ( worldMap->IsPassable( x, y )) {
-				++passable;
-			}
-			if ( !worldMap->IsLand( x, y )) {
+	int building = 0;
+
+	for (int y = pos2i.y; y < pos2i.y + size; ++y) {
+		for (int x = pos2i.x; x < pos2i.x + size; ++x) {
+			if (!worldMap->IsLand(x, y)) {
 				++water;
 			}
 			Vector2I v = { x, y };
+			const WorldGrid& wg = worldMap->GetWorldGrid(x, y);
+
 			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
 			// However, if the action is CLEAR, we need to know there is something
 			// there to remove.
-			if (worldMap->GetWorldGrid(x, y).Plant()) {
+			if (wg.Plant()) {
 				++removable;	// plant
 			}
-			else if (chitBag->QueryRemovable(v)) {
-				++removable;	// building
+			else if (wg.RockHeight()) {
+				++removable;
+			}
+			else if (chitBag->QueryBuilding(v)) {
+				++building;	// building
 			}
 		}
 	}
 
-	if ( water > 0 ) {
+	if (water > 0) {
 		return false;
 	}
 
-	if ( action == BuildScript::CLEAR ) {
-		if ( passable == size*size && removable == 0 ) {
-			// nothing to clear. (unless paved)
+	if (action == BuildScript::CLEAR) {
+		if ((removable + building) == 0) {
+			// nothing to clear. (unless paved or circuit)
 			return wg.Pave() || wg.Circuit();
 		}
 	}
 	else {
-		if ( passable < size*size || removable ) {
+		if (building) {
 			// stuff in the way
 			return false;
 		}
@@ -453,6 +445,22 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
 	XarcClose( xs );
+}
+
+
+Rectangle2I WorkQueue::QueueItem::Bounds()
+{
+	Rectangle2I r;
+	r.min = pos;
+
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData(buildScriptID);
+	int size = buildData.size;
+
+	r.max.x = r.min.x + size - 1;
+	r.max.y = r.min.y + size - 1;
+
+	return r;
 }
 
 

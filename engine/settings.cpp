@@ -50,6 +50,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	audioOn = true;
 	debugGLCalls = false;
 	debugUI = false;
+	debugFPS = false;
 	spawnDate = 0.90f;
 	worldGenDone = 1.0f;
 }
@@ -104,6 +105,7 @@ void SettingsManager::Save()
 		printer.OpenElement("Debug");
 		printer.PushAttribute("debugGLCalls", debugGLCalls);
 		printer.PushAttribute("debugUI", debugUI);
+		printer.PushAttribute("debugFPS", debugFPS);
 		printer.CloseElement();
 
 		printer.CloseElement();
@@ -126,6 +128,7 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 		if (debugElement) {
 			debugElement->QueryAttribute("debugGLCalls", &debugGLCalls);
 			debugElement->QueryAttribute("debugUI", &debugUI);
+			debugElement->QueryAttribute("debugFPS", &debugFPS);
 		}
 	}
 }

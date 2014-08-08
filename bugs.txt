@@ -42,6 +42,13 @@
 		x update wiki
 
 	- Beta 2b
+		x hide frame stuff
+		- hot key to center on avatar
+		- tab in/out. window resize?
+		- “clippy” advisor
+		- map travel: lanes?
+		- map travel: faster? teleport home?
+    	- avatar return to base
 		- Linux
 		- Android
 		- Download tracking
@@ -49,16 +56,15 @@
 		- some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
-    	- avatar return to base
     	- face icon generation; icon into build (mantis?)
 		- rotate should be somewhere
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
-		- can't cancel forge (2x2 build)
+		x can't cancel forge (2x2 build)
 	    - plants look repetetive
 		- walk target for the avatar
-		- move "Create Worker" and "Auto-Rebuild" to "Manage"
+		d move "Create Worker" and "Auto-Rebuild" to "Manage"
 		- tuning
 			- farm production (high??)
 			- monster arrival. greater herd more often?
@@ -66,14 +72,16 @@
 			- double tech decay
 			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
-		- auto-clear not working as well as it should
+		x auto-clear not working as well as it should
 		- tune EmitterGenerator - meander length
+		- cleaner census scene, bigger buttons, sub-categories
 
 	- Beta 3
 		- domain AI
 		- troll deity
 		- Gob-men domain
 		- Mantis-men domain
+		- less techy, more interesting world gen
 
 	- Census
     	- re-do visitor likes to account for the grids they pass through

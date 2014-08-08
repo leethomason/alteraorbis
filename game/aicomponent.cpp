@@ -2585,23 +2585,24 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			}
 		}
 		if ( item ) {
-			if (BuildScript::IsClear(item->buildScriptID)) {
-				Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
-				Vector2F end;
-				float cost = 0;
-				if ( context->worldMap->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-					taskList.Push( Task::MoveTask( end ));
-					taskList.Push( Task::StandTask( 1000 ));
-					taskList.Push( Task::RemoveTask( item->pos ));
+			Vector2F dest = { 0, 0 };
+			float cost = 0;
+			int hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), ToWorld2F(item->pos), &dest, &cost);
+
+			if (hasPath) {
+				if (BuildScript::IsClear(item->buildScriptID)) {
+					taskList.Push(Task::MoveTask(dest));
+					taskList.Push(Task::StandTask(1000));
+					taskList.Push(Task::RemoveTask(item->pos));
 				}
-			}
-			else if (BuildScript::IsBuild(item->buildScriptID)) {
-				taskList.Push( Task::MoveTask( item->pos ));
-				taskList.Push( Task::StandTask( 1000 ));
-				taskList.Push(Task::BuildTask(item->pos, item->buildScriptID, LRint(item->rotation)));
-			}
-			else {
-				GLASSERT( 0 );
+				else if (BuildScript::IsBuild(item->buildScriptID)) {
+					taskList.Push(Task::MoveTask(dest));
+					taskList.Push(Task::StandTask(1000));
+					taskList.Push(Task::BuildTask(item->pos, item->buildScriptID, LRint(item->rotation)));
+				}
+				else {
+					GLASSERT(0);
+				}
 			}
 		}
 	}
@@ -2759,6 +2760,10 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	ChitBag* chitBag = this->Context()->chitBag;
 	const ChitContext* context = Context();
+
+	if (parentChit->ID() == 42169) {
+		int debug = 1;
+	}
 
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {

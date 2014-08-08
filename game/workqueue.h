@@ -17,6 +17,7 @@
 #define WORKQUEUE_ALTERA_INCLUDED
 
 #include "../grinliz/glvector.h"
+#include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
@@ -46,6 +47,7 @@ public:
 		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
+		grinliz::Rectangle2I Bounds();
 
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;

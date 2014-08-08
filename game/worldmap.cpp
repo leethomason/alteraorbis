@@ -1590,6 +1590,21 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 }
 
 
+bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
+							const grinliz::Vector2F& end,
+							grinliz::Vector2F* bestEnd,
+							float* totalCost)
+{
+	bool okay = CalcPath(start, end, 0, totalCost, false);
+	if (okay) {
+		*bestEnd = end;
+		return true;
+	}
+	okay = CalcPathBeside(start, end, bestEnd, totalCost);
+	return okay;
+}
+
+
 bool WorldMap::CalcPathBeside(	const grinliz::Vector2F& start, 
 								const grinliz::Vector2F& end, 
 								grinliz::Vector2F* bestEnd,
