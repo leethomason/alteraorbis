@@ -37,9 +37,9 @@
 
 - game
 	- Beta 2
-		- screenshots of circuits
-		- screenshots of fluids
-		- update wiki
+		x screenshots of circuits
+		x screenshots of fluids
+		x update wiki
 
 	- Beta 2b
 		- Linux
