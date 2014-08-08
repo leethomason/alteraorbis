@@ -11,6 +11,11 @@ inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
 	return v;
 }
 
+inline grinliz::Vector3F ToWorld3F(const grinliz::Vector2F& pos2) {
+	grinliz::Vector3F v = { pos2.x, 0, pos2.y };
+	return v;
+}
+
 inline grinliz::Vector2F ToWorld2F( const grinliz::Vector2I& pos2i ) {
 	grinliz::Vector2F v = { float(pos2i.x) + 0.5f, float(pos2i.y) + 0.5f };
 	return v;

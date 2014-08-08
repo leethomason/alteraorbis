@@ -49,7 +49,7 @@ public:
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual int DoTick( U32 delta );
 
-	void SetPanTo( const grinliz::Vector3F& dest, float speed = 40.0f );
+	void SetPanTo( const grinliz::Vector2F& dest, float speed = 40.0f );
 	void SetTrack( int targetChitID );
 	int  Tracking() const { return targetChitID; }
 

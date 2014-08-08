@@ -125,12 +125,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( bd.label.safe_str() );
 
+		/* FIXME RESTORE when assets are checked in
 		if (bd.zoneCreate == BuildData::ZONE_INDUSTRIAL || bd.zoneConsume == BuildData::ZONE_INDUSTRIAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("anvil", true), game->CalcUIIconAtom("anvil", false));
 		else if (bd.zoneCreate == BuildData::ZONE_NATURAL || bd.zoneConsume == BuildData::ZONE_NATURAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("leaf", true), game->CalcUIIconAtom("leaf", false));
-		//buildButton[i].SetDecoLayout(Button::RIGHT);
-		
+		*/
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
 		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
@@ -211,13 +211,25 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildMark[i].SetVisible(false);
 	}
 
-	coreWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
-	coreWarningLabel.Init(&gamui2D);
-	domainWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("yellowwarning"), false);
-	domainWarningLabel.Init(&gamui2D);
+	//coreWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
+	RenderAtom redAtom = LumosGame::CalcUIIconAtom("warning");
+	RenderAtom yellowAtom = LumosGame::CalcUIIconAtom("yellowwarning");
+	RenderAtom nullAtom;
 
-	coreWarningLabel.SetText("WARNING: Core under attack.");
-	domainWarningLabel.SetText("WARNING: Domain under attack.");
+//	coreWarningIcon.Init(&gamui2D, nullAtom, nullAtom, nullAtom, nullAtom, redAtom, redAtom);
+//	domainWarningIcon.Init(&gamui2D, nullAtom, nullAtom, nullAtom, nullAtom, yellowAtom, yellowAtom);
+	coreWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
+	domainWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
+	coreWarningIcon.SetDeco(redAtom, redAtom);
+	domainWarningIcon.SetDeco(yellowAtom, yellowAtom);
+
+//	coreWarningIcon.Init(&gamui2D)
+//	coreWarningLabel.Init(&gamui2D);
+//	domainWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("yellowwarning"), false);
+//	domainWarningLabel.Init(&gamui2D);
+
+	coreWarningIcon.SetText("WARNING: Core under attack.");
+	domainWarningIcon.SetText("WARNING: Domain under attack.");
 }
 
 
@@ -285,18 +297,18 @@ void GameScene::Resize()
 	layout.PosAbs(&buildDescription, 0, 4);
 
 	layout.PosAbs(&coreWarningIcon, 1, 6);
-	layout.PosAbs(&coreWarningLabel, 1, 6);
+//	layout.PosAbs(&coreWarningLabel, 1, 6);
 
 	layout.PosAbs(&domainWarningIcon, 1, 7);
-	layout.PosAbs(&domainWarningLabel, 1, 7);
+//	layout.PosAbs(&domainWarningLabel, 1, 7);
 
-	coreWarningIcon.SetSize(coreWarningIcon.Height(), coreWarningIcon.Height());
-	domainWarningIcon.SetSize(domainWarningIcon.Height(), domainWarningIcon.Height());
+//	coreWarningIcon.SetSize(coreWarningIcon.Height(), coreWarningIcon.Height());
+//	domainWarningIcon.SetSize(domainWarningIcon.Height(), domainWarningIcon.Height());
 
 	coreWarningIcon.SetVisible(false);
 	domainWarningIcon.SetVisible(false);
-	coreWarningLabel.SetVisible(false);
-	domainWarningLabel.SetVisible(false);
+//	coreWarningLabel.SetVisible(false);
+//	domainWarningLabel.SetVisible(false);
 
 	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
 	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
@@ -939,6 +951,28 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+	else if (item == &coreWarningIcon) {
+		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		if (cc) {
+			cc->SetPanTo(coreWarningPos);
+		}
+	}
+	else if (item == &domainWarningIcon) {
+		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		if (cc) {
+			cc->SetPanTo(domainWarningPos);
+		}
+	}
+
+	Vector2F pos2 = { 0, 0 };
+	if (consoleWidget.IsItem(item, &pos2)) {
+		if (!pos2.IsZero()) {
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			if (cc) {
+				cc->SetPanTo(pos2);
+			}
+		}
+	}
 
 	// Only hitting the bottom row (actual action) buttons triggers
 	// the build. Up until that time, the selection icon doesn't 
@@ -1398,20 +1432,34 @@ void GameScene::ProcessNewsToConsole()
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
 
+	RenderAtom atom;
+	Vector2F pos2 = { 0, 0 };
+
 	for ( ;currentNews < history->NumNews(); ++currentNews ) {
 		const NewsEvent& ne = history->News( currentNews );
 		Vector2I sector = ToSector(ToWorld2I(ne.pos));
+		Chit* chit = chitBag->GetChit(ne.chitID);
+		SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
 
 		str = "";
 
 		switch( ne.what ) {
 		case NewsEvent::DENIZEN_CREATED:
+			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
+				ne.Console( &str, chitBag, 0 );
+				if (sc) pos2 = sc->GetPosition2D();
+				atom = LumosGame::CalcUIIconAtom("greeninfo");
+			}
+			break;
+
 		case NewsEvent::DENIZEN_KILLED:
 		case NewsEvent::STARVATION:
 		case NewsEvent::BLOOD_RAGE:
 		case NewsEvent::VISION_QUEST:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
 				ne.Console( &str, chitBag, 0 );
+				if (sc) pos2 = sc->GetPosition2D();
+				atom = LumosGame::CalcUIIconAtom("warning");
 			}
 			break;
 
@@ -1422,11 +1470,18 @@ void GameScene::ProcessNewsToConsole()
 				|| sector == homeSector)
 			{
 				ne.Console(&str, chitBag, 0);
+				if (sc) pos2 = sc->GetPosition2D();
+				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
 			break;
 
 		case NewsEvent::GREATER_MOB_CREATED:
 		case NewsEvent::GREATER_MOB_KILLED:
+			ne.Console( &str, chitBag, 0 );
+			if (sc) pos2 = sc->GetPosition2D();
+			atom = LumosGame::CalcUIIconAtom("greeninfo");
+			break;
+
 		case NewsEvent::DOMAIN_CREATED:
 		case NewsEvent::DOMAIN_DESTROYED:
 		case NewsEvent::GREATER_SUMMON_TECH:
@@ -1437,7 +1492,8 @@ void GameScene::ProcessNewsToConsole()
 			break;
 		}
 		if ( !str.empty() ) {
-			consoleWidget.Push( str );
+			//consoleWidget.Push( str );
+			consoleWidget.Push(str, atom, pos2);
 		}
 	}
 }
@@ -1621,11 +1677,11 @@ void GameScene::DoTick( U32 delta )
 		}
 	}
 
-	coreWarningLabel.SetVisible(coreWarningTimer > 0);
+//	coreWarningLabel.SetVisible(coreWarningTimer > 0);
 	coreWarningIcon.SetVisible(coreWarningTimer > 0);
 	coreWarningTimer -= delta;
 
-	domainWarningLabel.SetVisible(domainWarningTimer > 0);
+//	domainWarningLabel.SetVisible(domainWarningTimer > 0);
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
 }
@@ -1655,10 +1711,14 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	{
 		BuildingFilter filter;
 		if (filter.Accept(chit)) {
-			if (chit->GetComponent("CoreScript"))
+			if (chit->GetComponent("CoreScript")) {
 				coreWarningTimer = 6000;
-			else
+				coreWarningPos = chit->GetSpatialComponent()->GetPosition2D();
+			}
+			else {
 				domainWarningTimer = 6000;
+				domainWarningPos = chit->GetSpatialComponent()->GetPosition2D();
+			}
 		}
 	}
 }
