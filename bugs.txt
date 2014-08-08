@@ -48,6 +48,7 @@
 		- “clippy” advisor
 		- map travel: lanes?
 		- map travel: faster? teleport home?
+    	- avatar return to base
 		- Linux
 		- Android
 		- Download tracking
@@ -55,7 +56,6 @@
 		- some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
-    	- avatar return to base
     	- face icon generation; icon into build (mantis?)
 		- rotate should be somewhere
 		- Circuit Fab does nothing
@@ -74,6 +74,7 @@
 		- rotation of grid and voxel elements (experiment)
 		x auto-clear not working as well as it should
 		- tune EmitterGenerator - meander length
+		- cleaner census scene, bigger buttons, sub-categories
 
 	- Beta 3
 		- domain AI
