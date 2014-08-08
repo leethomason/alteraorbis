@@ -80,38 +80,53 @@ void CameraComponent::SetTrack( int targetID )
 }
 
 
-int CameraComponent::DoTick( U32 delta ) 
+int CameraComponent::DoTick(U32 delta)
 {
-	if ( Context()->chitBag->GetCameraChitID() != parentChit->ID() ) {
+	if (Context()->chitBag->GetCameraChitID() != parentChit->ID()) {
 		parentChit->QueueDelete();
 		return VERY_LONG_TICK;
 	}
 
-	switch ( mode ) {
+	float EASE = 0.2f;
 
-	case PAN:
+	switch (mode) {
+
+		case PAN:
 		{
-			float travel = Travel( speed, delta );
-			Vector3F toDest = ( dest - camera->PosWC() );
-			float lenToDest = toDest.Length();
+			/*
+				float travel = Travel( speed, delta );
+				Vector3F toDest = ( dest - camera->PosWC() );
+				float lenToDest = toDest.Length();
 
-			if ( lenToDest <= travel ) {
+				if ( lenToDest <= travel ) {
 				camera->SetPosWC( dest );
 				mode = DONE;
-			}
-			else {
+				}
+				else {
 				toDest.Normalize();
 				Vector3F v = toDest * travel;
 				camera->DeltaPosWC( v.x, v.y, v.z );
+				}
+				*/
+
+			Vector3F d = (dest - camera->PosWC());
+			Vector3F c = camera->PosWC();
+
+			if (d.Length() < 0.01f) {
+				camera->SetPosWC(dest.x, dest.y, dest.z);
+				mode = DONE;
+			}
+			else {
+				camera->SetPosWC(c.x + EASE*d.x, c.y + EASE*d.y, c.z + EASE*d.z);
 			}
 		}
 		break;
 
-	case TRACK:
+		case TRACK:
 		{
-			Chit* chit = Context()->chitBag->GetChit( targetChitID );
-			if ( chit && chit->GetSpatialComponent() ) {
-				
+			Chit* chit = Context()->chitBag->GetChit(targetChitID);
+			if (chit && chit->GetSpatialComponent()) {
+
 				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
 				pos.y = 0;
 
@@ -119,30 +134,29 @@ int CameraComponent::DoTick( U32 delta )
 				// errors that occur from rotation, drift, etc.
 				const Vector3F* eye3 = camera->EyeDir3();
 				Vector3F at;
-				int result = IntersectRayPlane( camera->PosWC(), eye3[0], 1, 0.0f, &at );
-				if ( result == INTERSECT ) {
+				int result = IntersectRayPlane(camera->PosWC(), eye3[0], 1, 0.0f, &at);
+				if (result == INTERSECT) {
 					Vector3F t = (camera->PosWC() - at);
-					
+
 					//camera->SetPosWC( pos + t );
 					Vector3F c = camera->PosWC();
-					Vector3F d = (pos+t) - c;
-					float EASE = 0.2f;
+					Vector3F d = (pos + t) - c;
 
 					// If grid moving, the EASE contributes to jitter.
-					if ( GET_SUB_COMPONENT( chit, MoveComponent, GridMoveComponent )) {
+					if (GET_SUB_COMPONENT(chit, MoveComponent, GridMoveComponent)) {
 						EASE = 1.0f;
 					}
-					camera->SetPosWC( c.x+EASE*d.x, pos.y+t.y, c.z+EASE*d.z );
+					camera->SetPosWC(c.x + EASE*d.x, pos.y + t.y, c.z + EASE*d.z);
 				}
 			}
 		}
 		break;
 
-	case DONE:
+		case DONE:
 		break;
 
-	default:
-		GLASSERT( 0 );
+		default:
+		GLASSERT(0);
 	}
 	return 0;
 }

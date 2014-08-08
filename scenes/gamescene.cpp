@@ -125,12 +125,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( bd.label.safe_str() );
 
-		/* FIXME RESTORE when assets are checked in
 		if (bd.zoneCreate == BuildData::ZONE_INDUSTRIAL || bd.zoneConsume == BuildData::ZONE_INDUSTRIAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("anvil", true), game->CalcUIIconAtom("anvil", false));
 		else if (bd.zoneCreate == BuildData::ZONE_NATURAL || bd.zoneConsume == BuildData::ZONE_NATURAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("leaf", true), game->CalcUIIconAtom("leaf", false));
-		*/
+
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
 		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
