@@ -1,6 +1,7 @@
 #include "consolewidget.h"
 
 using namespace grinliz;
+using namespace gamui;
 
 /*
 	4 Newest
@@ -12,60 +13,128 @@ using namespace grinliz;
 
 ConsoleWidget::ConsoleWidget()
 {
-	GLString empty;
-	for( int i=0; i<NUM_LINES; ++i ) {
-		lines.Push( empty );
-		age.Push( 0 );
-	}
+	nLines = NUM_LINES;
 }
 
 
 void ConsoleWidget::Init( gamui::Gamui* g )
 {
-	text.Init( g );
-	text.SetText( "Console Line 1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" );
+	gamui = g;
+	gamui::RenderAtom nullAtom;
+	for (int i = 0; i < NUM_LINES; ++i) {
+		lines[i].age = 0;
+		lines[i].text.Init(g);
+		lines[i].button.Init(g, nullAtom, nullAtom, nullAtom, nullAtom, nullAtom, nullAtom);
+		lines[i].pos.Zero();
+	}
 }
 
 
 void ConsoleWidget::SetBounds( float w, float h )
 {
-	text.SetBounds( w, h );
+	nLines = LRint(h / gamui->GetTextHeight());
+	nLines = Clamp(nLines, 1, (int)NUM_LINES);
+	for (int i = 0; i < NUM_LINES; ++i) {
+		lines[i].text.SetVisible(i < nLines);
+		lines[i].button.SetVisible(i < nLines);
+	}
 }
 
 
-void ConsoleWidget::Push( const grinliz::GLString &str )
+void ConsoleWidget::Scroll()
 {
-	// Else kick off the oldest:
-	for( int i=1; i<lines.Size(); ++i ) {
-		lines[i-1] = lines[i];
-		age[i-1]   = age[i];
-	}
-	lines[lines.Size()-1] = str;
-	age[age.Size()-1] = 0;
-	SetText();
-}
+	RenderAtom a0, a1;
 
-void ConsoleWidget::SetText()
-{
-	strBuffer = "";
-	for( int i=lines.Size()-1; i>=0; --i ) {
-		if ( !lines[i].empty() ) {
-			strBuffer.append( lines[i] );
-			strBuffer.append( "\n" );
-		}
+	for( int i=NUM_LINES-1; i>0; --i ) {
+		lines[i].age = lines[i-1].age;
+		lines[i].pos = lines[i-1].pos;
+
+		const char* t = lines[i-1].text.GetText();
+		lines[i].text.SetText(t);
+
+		lines[i-1].button.GetDeco(&a0, &a1);
+		lines[i].button.SetDeco(a0, a1);
 	}
-	text.SetText( strBuffer.c_str() );
+	RenderAtom nullAtom;
+	lines[0].age = 0;
+	lines[0].pos.Zero();
+	lines[0].text.SetText("");
+	lines[0].button.SetDeco(nullAtom, nullAtom);
 }
 
 
 void ConsoleWidget::DoTick( U32 delta )
 {
-	int count = 0;
-	for( int i=0; i<lines.Size(); ++i ) {
-		age[i] += delta;
-		if ( age[i] > AGE_TIME ) {
-			lines[i] = "";
+	int last = -1;
+	for( int i=0; i<NUM_LINES; ++i ) {
+		lines[i].age += delta;
+		const char* p = lines[i].text.GetText();
+		if (p && *p) {
+			last = i;
 		}
 	}
-	SetText();
+	if (last >= 0 && lines[last].age > AGE_TIME) {
+		RenderAtom nullAtom;
+		lines[last].age = 0;
+		lines[last].pos.Zero();
+		lines[last].text.SetText("");
+		lines[last].button.SetDeco(nullAtom, nullAtom);
+	}
+}
+
+
+float ConsoleWidget::Height() const
+{
+	return nLines * gamui->GetTextHeight();
+}
+
+
+void ConsoleWidget::SetPos(float x, float y)
+{
+	float h = gamui->GetTextHeight();
+	for (int i = 0; i < NUM_LINES; ++i) {
+		lines[i].button.SetPos(x, y + (float)i*h);
+		lines[i].button.SetSize(h, h);
+		lines[i].text.SetPos(x + h, y + (float)i*h);
+	}
+}
+
+
+void ConsoleWidget::SetVisible(bool vis)
+{
+	for (int i = 0; i < NUM_LINES; ++i) {
+		bool visible = vis && (i < nLines);
+		lines[i].text.SetVisible(visible);
+		lines[i].button.SetVisible(visible);
+	}
+}
+
+
+void ConsoleWidget::Push(const grinliz::GLString &str)
+{
+	Scroll();
+	lines[0].text.SetText(str.safe_str());
+	lines[0].age = 0;
+}
+
+
+void ConsoleWidget::Push(const grinliz::GLString &str, gamui::RenderAtom icon, const grinliz::Vector2F& pos)
+{
+	Scroll();
+	lines[0].text.SetText(str.safe_str());
+	lines[0].age = 0;
+	lines[0].pos = pos;
+	lines[0].button.SetDeco(icon, icon);
+}
+
+
+bool ConsoleWidget::IsItem(const gamui::UIItem* item, grinliz::Vector2F* pos)
+{
+	for (int i = 0; i < NUM_LINES; ++i) {
+		if (item == &lines[i].button) {
+			*pos = lines[i].pos;
+			return true;
+		}
+	}
+	return false;
 }

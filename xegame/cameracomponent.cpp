@@ -57,11 +57,15 @@ void CameraComponent::DebugStr( grinliz::GLString* str )
 }
 
 	
-void CameraComponent::SetPanTo( const grinliz::Vector3F& _dest, float _speed )
+void CameraComponent::SetPanTo( const grinliz::Vector2F& _dest, float _speed )
 {
 	GLOUTPUT(( "CC Pan set\n" ));
 	mode = PAN;
-	dest = _dest;
+	
+	Vector3F at;
+	Context()->engine->CameraLookingAt( &at );	
+	dest = Context()->engine->camera.PosWC() + (ToWorld3F(_dest) - at);
+
 	speed = _speed;
 }
 

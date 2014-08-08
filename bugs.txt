@@ -42,6 +42,12 @@
 		- update wiki
 
 	- Beta 2b
+		x hide frame stuff
+		- hot key to center on avatar
+		- tab in/out. window resize?
+		- “clippy” advisor
+		- map travel: lanes?
+		- map travel: faster? teleport home?
 		- Linux
 		- Android
 		- Download tracking
@@ -55,10 +61,10 @@
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
-		- can't cancel forge (2x2 build)
+		x can't cancel forge (2x2 build)
 	    - plants look repetetive
 		- walk target for the avatar
-		- move "Create Worker" and "Auto-Rebuild" to "Manage"
+		d move "Create Worker" and "Auto-Rebuild" to "Manage"
 		- tuning
 			- farm production (high??)
 			- monster arrival. greater herd more often?
@@ -74,6 +80,7 @@
 		- troll deity
 		- Gob-men domain
 		- Mantis-men domain
+		- less techy, more interesting world gen
 
 	- Census
     	- re-do visitor likes to account for the grids they pass through
