@@ -93,22 +93,6 @@ int CameraComponent::DoTick(U32 delta)
 
 		case PAN:
 		{
-			/*
-				float travel = Travel( speed, delta );
-				Vector3F toDest = ( dest - camera->PosWC() );
-				float lenToDest = toDest.Length();
-
-				if ( lenToDest <= travel ) {
-				camera->SetPosWC( dest );
-				mode = DONE;
-				}
-				else {
-				toDest.Normalize();
-				Vector3F v = toDest * travel;
-				camera->DeltaPosWC( v.x, v.y, v.z );
-				}
-				*/
-
 			Vector3F d = (dest - camera->PosWC());
 			Vector3F c = camera->PosWC();
 

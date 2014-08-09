@@ -43,9 +43,12 @@
 
 	- Beta 2b
 		x hide frame stuff
+		- “clippy” advisor
+		- teleport home
+		- goto hotkeys
+
 		- hot key to center on avatar
 		- tab in/out. window resize?
-		- “clippy” advisor
 		- map travel: lanes?
 		- map travel: faster? teleport home?
     	- avatar return to base
@@ -81,8 +84,15 @@
 		- troll deity
 		- Gob-men domain
 		- Mantis-men domain
-		- less techy, more interesting world gen
 
+	- World Gen
+		- less techy, more interesting world gen
+		- use some of the time and space to introduce and explain the game
+		- text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
+		- text report on major battles
+		- text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
+		- enhance the text reports with screen shots of the events (which replace the map as it is now)
+	
 	- Census
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
