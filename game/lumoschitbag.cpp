@@ -40,6 +40,7 @@
 #include "../script/procedural.h"
 #include "../script/countdownscript.h"
 #include "../script/corescript.h"
+#include "../script/buildscript.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -129,6 +130,29 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 	GLASSERT( 0 );
 }
 
+
+void LumosChitBag::BuildingCounts(const Vector2I& sector, int* counts, int n)
+{
+	BuildScript buildScript;
+
+	for( MapSpatialComponent* it = mapSpatialHash[sector.y*NUM_SECTORS+sector.x]; it; it = it->nextBuilding ) {
+		Chit* chit = it->ParentChit();
+		GLASSERT( chit );
+
+		const GameItem* item = chit->GetItem();
+		if (!item)
+			continue;
+		const IString& name = item->IName();
+
+		int id = 0;
+		if (!name.empty()) {
+			buildScript.GetDataFromStructure(name, &id);
+			if (id < n) {
+				counts[id] += 1;
+			}
+		}
+	}
+}
 
 Chit* LumosChitBag::FindBuildingCC(const grinliz::IString& name,		// particular building, or emtpy to match all
 									const grinliz::Vector2I& sector,	// sector to query

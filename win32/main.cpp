@@ -280,6 +280,7 @@ int main( int argc, char **argv )
 					case SDL_SCANCODE_F2:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
 					// F3: screenshot
 					case SDL_SCANCODE_TAB:	GameHotKey(game, GAME_HK_CAMERA_TOGGLE);		break;
+					case SDL_SCANCODE_HOME:	GameHotKey(game, GAME_HK_CAMERA_HOME);			break;
 
 					//case SDLK_a: reserved
 					case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;

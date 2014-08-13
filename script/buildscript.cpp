@@ -38,14 +38,15 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Battery", "power",			5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
 	{ "Turret", "turret",			5, "Fires weapon when charge applied.", "Requires a Circuit Fab" },
 	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
-	//{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
 	{ "Bend", "",					5, "Routes electrons.", "Requires a Circuit Fab", CIRCUIT_BEND },
 	{ "Split", "",					5, "Splits electrons.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
-	{ "Ice\nToggle", "",				5, "Uses a charge to toggle ICE.", "Requires a Circuit Fab", CIRCUIT_ICE },
+	{ "Ice\nToggle", "",			5, "Uses a charge to toggle ICE.", "Requires a Circuit Fab", CIRCUIT_ICE },
 	{ "Stop", "",					5, "Absorbs a charge or spark.", "Requires a Circuit Fab", CIRCUIT_STOP },
 	{ "Detector", "",				5, "Sparks for enemies of any mass.", "Requires a Circuit Fab", CIRCUIT_DETECT_ENEMY },
 	{ "Transistor", "",				5, "Digital toggle switch.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
 };
+
+	//{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
 
 
 const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure, int *id )

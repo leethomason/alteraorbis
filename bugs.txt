@@ -43,15 +43,18 @@
 
 	- Beta 2b
 		x hide frame stuff
-		- “clippy” advisor
-		- teleport home
-		- goto hotkeys
-
-		- hot key to center on avatar
+		x “clippy” advisor
+			x improve?
+			x position
+			- test!
+		x teleport home
+		x goto hotkeys
+			x hot key to center on avatar
 		- tab in/out. window resize?
 		- map travel: lanes?
-		- map travel: faster? teleport home?
-    	- avatar return to base
+		d map travel: faster? teleport home? (try teleport)
+    	d avatar return to base (teleport)
+    	- shock-flame hard to see
 		- Linux
 		- Android
 		- Download tracking

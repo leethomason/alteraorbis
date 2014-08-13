@@ -77,6 +77,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_CHEAT_HERD			   14
 #define GAME_HK_ESCAPE				   15
 #define GAME_HK_CAMERA_TOGGLE		   16	// 'tab' on windows
+#define GAME_HK_CAMERA_HOME			   17	// home the camera; also 'home' on windows
 
 #define GAME_HK_TOGGLE_GLOW			   20
 #define GAME_HK_TOGGLE_PARTICLE		   21
