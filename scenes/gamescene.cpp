@@ -1273,6 +1273,7 @@ void GameScene::HandleHotKey( int mask )
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 			if (cc) {
 				cc->SetTrack(sim->GetPlayerChit()->ID());
+				uiMode[UI_VIEW].SetDown();
 			}
 		}
 	}

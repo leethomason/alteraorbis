@@ -55,7 +55,7 @@
 		d map travel: faster? teleport home? (try teleport)
     	d avatar return to base (teleport)
     	x shock-flame hard to see
-    	- fluids get stuck in weird states
+    	x fluids get stuck in weird states
 		- Linux
 		- Android
 		- Download tracking
@@ -72,11 +72,11 @@
 	    - plants look repetetive
 		- walk target for the avatar
 		d move "Create Worker" and "Auto-Rebuild" to "Manage"
-		- tuning
-			- farm production (high??)
-			- monster arrival. greater herd more often?
-			- time to use bar (low??)
-			- double tech decay
+		x tuning
+			x farm production (high??)
+			d monster arrival. greater herd more often?
+			d time to use bar (low??)
+			d double tech decay
 			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
 		x auto-clear not working as well as it should
