@@ -79,6 +79,7 @@ void FluidSim::Reset(int x, int y)
 }
 
 
+/*
 U32 FluidSim::Hash()
 {
 	unsigned int h = 2166136261U;
@@ -92,7 +93,7 @@ U32 FluidSim::Hash()
 	}
 	return h;
 }
-
+*/
 
 bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG, int* type)
 {
@@ -151,7 +152,8 @@ bool FluidSim::DoStep()
 	emitters.Clear();
 	pools.Clear();
 	waterfalls.Clear();
-	U32 startHash = Hash();
+	settled = true;
+//	U32 startHash = Hash();
 
 	// First pass: find all the emitters, and if they are bounded.
 	// Generates a potential height map for everything.
@@ -194,6 +196,7 @@ bool FluidSim::DoStep()
 			WorldGrid* eWG = &worldMap->grid[worldMap->INDEX(fillLocal[0])];
 			if ((int)eWG->fluidHeight < height * FLUID_PER_ROCK) {
 				eWG->fluidHeight++;
+				settled = false;
 			}
 			pressure[j*SECTOR_SIZE + i] = 1;
 			int h = eWG->fluidHeight;
@@ -203,6 +206,7 @@ bool FluidSim::DoStep()
 					kwg->fluidHeight++;
 					h--;
 					kwg->fluidType = magma ? 1 : 0;
+					settled = false;
 				}
 				int i0 = fillLocal[k].x - outerBounds.min.x;
 				int j0 = fillLocal[k].y - outerBounds.min.y;
@@ -231,6 +235,7 @@ bool FluidSim::DoStep()
 				 && wg.Plant() == 0) 
 			{
 				worldMap->SetRock(it.Pos().x, it.Pos().y, wg.fluidHeight / FLUID_PER_ROCK, false, 0);
+				settled = false;
 				break;
 			}
 			else if (HasWaterfall(wg, altWG, 0)) {
@@ -241,8 +246,8 @@ bool FluidSim::DoStep()
 		}
 	}
 
-	U32 endHash = Hash();
-	settled = (startHash == endHash);
+//	U32 endHash = Hash();
+//	settled = (startHash == endHash);
 	return settled;
 }
 
@@ -259,10 +264,6 @@ void FluidSim::PressureStep()
 
 	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
 		// Only effects grids NOT in the boundHeight
-
-		if (it.Pos().x == 284 && it.Pos().y == 547){
-			int debug = 1;
-		}
 
 		int i = it.Pos().x - outerBounds.min.x;
 		int j = it.Pos().y - outerBounds.min.y;
@@ -292,13 +293,21 @@ void FluidSim::PressureStep()
 			}
 			// Only go up if there isn't rock present: keeps water from
 			// flowing through rocks.
-			if (maxH > (int)wg->fluidHeight + 1 && wg->rockHeight == 0)
+			if (maxH > (int)wg->fluidHeight + 1 && wg->rockHeight == 0) {
 				wg->fluidHeight++;
-			else if ((int)wg->fluidHeight && (maxH <= (int)wg->fluidHeight))
+				settled = false;
+			}
+			else if ((int)wg->fluidHeight && (maxH <= (int)wg->fluidHeight)) {
 				wg->fluidHeight--;
+				settled = false;
+			}
 
 			if (!wg->fluidEmitter) {
-				wg->fluidType = magma ? 1 : 0;
+				unsigned type = magma ? 1 : 0;
+				if (wg->fluidType != type) {
+					settled = false;
+					wg->fluidType = type;
+				}
 			}
 		}
 	}
