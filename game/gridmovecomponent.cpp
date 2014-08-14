@@ -19,6 +19,7 @@ GridMoveComponent::GridMoveComponent() : GameMoveComponent()
 	state = NOT_INIT;
 	velocity.Zero();
 	speed = DEFAULT_MOVE_SPEED;
+	lastGB.Zero();
 }
 
 
@@ -167,6 +168,7 @@ int GridMoveComponent::DoTick( U32 delta )
 			else {
 				if ( path.Size() == 0 ) {
 					GridBlock current = MapToGridBlock(pos.x, pos.y);
+					lastGB.Zero();
 
 					int result = context->worldMap->GetWorldInfoMutable()->Solve( current, destBlock, &path );
 					if ( result == micropather::MicroPather::START_END_SAME ) {
@@ -187,11 +189,26 @@ int GridMoveComponent::DoTick( U32 delta )
 					GridBlock gb   = path[0];
 					Vector2F target = { (float)gb.x, (float)gb.y };
 
+					/* This would, in theory, add lanes. But not working.
+					if (!lastGB.IsZero()) {
+						int dx = gb.x - lastGB.x;
+						int dy = gb.y - lastGB.y;
+						if (dx && !dy) {
+							target.y += -0.5f * Sign((float)dx);
+						}
+						else if (!dx && dy) {
+							target.x += 0.5f * Sign((float)dy);
+						}
+						GLASSERT(Context()->worldMap->GetWorldGrid(ToWorld2I(target)).IsGrid());
+					}
+					*/
+
 					Vector2F delta = target - pos;
 					float len = delta.Length();
 					if ( len <= travel ) {
 						travel -= len;
 						pos = target;
+						lastGB = path[0];
 						path.Remove( 0 );	// FIXME: potentially expensive - use index
 					}
 					else {

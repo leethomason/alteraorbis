@@ -56,6 +56,7 @@ private:
 	float				speed;
 
 	// Not serialized:
+	GridBlock lastGB;
 	grinliz::Vector3F velocity;
 	grinliz::CDynArray< GridBlock > path;
 };

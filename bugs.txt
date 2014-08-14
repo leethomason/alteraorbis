@@ -55,6 +55,7 @@
 		d map travel: faster? teleport home? (try teleport)
     	d avatar return to base (teleport)
     	x shock-flame hard to see
+    	- fluids get stuck in weird states
 		- Linux
 		- Android
 		- Download tracking
