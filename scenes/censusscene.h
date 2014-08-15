@@ -4,6 +4,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../script/itemscript.h"
+#include "../grinliz/glstringutil.h"
 
 class LumosGame;
 class ItemComponent;
@@ -42,6 +43,14 @@ struct ItemHistoryCrafting
 };
 
 
+struct ItemHistoryItems
+{
+	// sort descending
+	static bool Equal(const ItemHistory& a, const ItemHistory& b) { return a.value == b.value; }
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.value > b.value; }
+};
+
+
 class CensusSceneData : public SceneData
 {
 public:
@@ -72,6 +81,8 @@ public:
 private:
 	void Scan();
 	void ScanItem( ItemComponent* ic, const GameItem* );
+	void DoLayout();
+	void SetItem(int i, const char* label, const ItemHistory& history);
 
 	enum {
 		MOB_DENIZEN,
@@ -91,16 +102,26 @@ private:
 	};
 
 	enum {
-		MAX_ROWS = 3,
-		MAX_BUTTONS = ITEM_COUNT + MOB_COUNT + 4 * MAX_ROWS + 5
+		GROUP_NOTABLE,
+		GROUP_KILLS,
+		GROUP_GREATER_KILLS,
+		GROUP_ITEMS,
+		GROUP_CRAFTING,
+		GROUP_DOMAINS,
+		NUM_GROUPS
+	};
+
+	enum {
+		MAX_ROWS = ITEM_COUNT + MOB_COUNT
 	};
 
 	LumosGame*			lumosGame;
 	ChitBag*			chitBag;
+	grinliz::GLString	str;		// avoid allocations
 	gamui::PushButton	okay;
-	gamui::PushButton	link[MAX_BUTTONS];
-	gamui::TextLabel	group[MAX_BUTTONS];
-	gamui::TextLabel	label[MAX_BUTTONS];
+	gamui::PushButton	link[MAX_ROWS];
+	gamui::TextLabel	label[MAX_ROWS];
+	gamui::ToggleButton	radio[NUM_GROUPS];
 
 	// stuff to scan for:
 	Wallet	allWallet, 
@@ -111,6 +132,7 @@ private:
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryKills> kills;
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryGreaterKills> greaterKills;
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryCrafting> crafted;
+	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryItems> items;
 
 	struct Info {
 		const GameItem*			item;

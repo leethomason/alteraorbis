@@ -52,10 +52,27 @@
 			x hot key to center on avatar
 		- tab in/out. window resize? can't repro.
 		- map travel: lanes?
+		- cleaner census scene, bigger buttons, sub-categories
+			- layout cleanup
+			- add weapons ranking
+
 		d map travel: faster? teleport home? (try teleport)
     	d avatar return to base (teleport)
     	x shock-flame hard to see
     	x fluids get stuck in weird states
+		x auto-clear not working as well as it should
+		x can't cancel forge (2x2 build)
+		d move "Create Worker" and "Auto-Rebuild" to "Manage"
+		x tuning
+			x farm production (high??)
+			d monster arrival. greater herd more often?
+			d time to use bar (low??)
+			d double tech decay
+			x weapon sorting not quite correct
+		- new porch art
+		- remove social?
+		- add elixir to stuff that gets carried?
+
 		- Linux
 		- Android
 		- Download tracking
@@ -68,22 +85,10 @@
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
-		x can't cancel forge (2x2 build)
 	    - plants look repetetive
 		- walk target for the avatar
-		d move "Create Worker" and "Auto-Rebuild" to "Manage"
-		x tuning
-			x farm production (high??)
-			d monster arrival. greater herd more often?
-			d time to use bar (low??)
-			d double tech decay
-			x weapon sorting not quite correct
 		- rotation of grid and voxel elements (experiment)
-		x auto-clear not working as well as it should
 		- tune EmitterGenerator - meander length
-		- cleaner census scene, bigger buttons, sub-categories
-		- remove social?
-		- add elixir to stuff that gets carried?
 
 	- Beta 3
 		- domain AI

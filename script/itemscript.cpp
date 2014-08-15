@@ -279,7 +279,7 @@ void ItemHistory::Serialize( XStream* xs )
 }
 
 
-void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
+void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* separator ) const
 {
 	if ( !itemID ) {
 		str->append( "(none)" );
@@ -287,22 +287,25 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 	else {
 		GLASSERT( !titledName.empty() );
 		if (score)
-			str->AppendFormat("[%d] %s %s", itemID, CoreAchievement::CivTechDescription(score), titledName.c_str());
+			str->AppendFormat("%s %s [%d] ", CoreAchievement::CivTechDescription(score), titledName.c_str(), itemID);
 		else
-			str->AppendFormat( "[%d] %s", itemID, titledName.c_str() );
+			str->AppendFormat( "%s [%d] ", titledName.c_str(), itemID );
+		
+		if (separator)
+			str->append(separator);
 
 		if ( level )
-			str->AppendFormat( " Level=%d", level );
+			str->AppendFormat( "Level=%d ", level );
 		if ( value )
-			str->AppendFormat( " Value=%d", value );
+			str->AppendFormat( "Value=%d ", value );
 		if ( kills )
-			str->AppendFormat( " Kills=%d", kills );
+			str->AppendFormat( "Kills=%d ", kills );
 		if ( greater ) 
-			str->AppendFormat( " Greater=%d", greater );
+			str->AppendFormat( "Greater=%d ", greater );
 		if ( crafted )
-			str->AppendFormat( " Crafted=%d", crafted );
+			str->AppendFormat( "Crafted=%d ", crafted );
 		if (score)
-			str->AppendFormat(" Score=%d", score);
+			str->AppendFormat("Score=%d ", score);
 
 		if (history) {
 			NewsHistory::Data data;
@@ -311,10 +314,10 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 
 			if (data.born) {
 				if (data.died) {
-					str->AppendFormat(" (c%.2f d%.2f)", double(data.born) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
+					str->AppendFormat("(c%.2f d%.2f) ", double(data.born) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
 				}
 				else {
-					str->AppendFormat(" (c%.2f)", double(data.born) / double(AGE_IN_MSEC));
+					str->AppendFormat("(c%.2f) ", double(data.born) / double(AGE_IN_MSEC));
 				}
 			}
 		}
