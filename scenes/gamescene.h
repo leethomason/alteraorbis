@@ -79,11 +79,13 @@ private:
 	void SetSelectionModel( const grinliz::Vector2F& view );
 
 	void SetPickupButtons();	// if the avatar can pick things up
-	void SetBuildButtons();		// enable / disable menu items
+	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
+	void SetHelpText(const int* buildingCount);
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
 	bool AvatarSelected();
+	bool CameraTrackingAvatar();
 	bool DragAtom(gamui::RenderAtom* atom);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 
@@ -169,14 +171,13 @@ private:
 	gamui::Image		playerMark;
 	gamui::Image		buildMark[NUM_BUILD_MARKS];	// used for click&drag building
 	gamui::PushButton	coreWarningIcon;
-	//gamui::TextLabel	coreWarningLabel;
 	gamui::PushButton	domainWarningIcon;
-	//gamui::TextLabel	domainWarningLabel;
 	gamui::PushButton	atlasButton;
 	gamui::ToggleButton	autoRebuild;
 	gamui::PushButton	abandonButton;
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
+	gamui::TextLabel	helpText;
 
 	FacePushWidget		faceWidget;
 

@@ -18,8 +18,10 @@
 #include "chitbag.h"
 #include "xegamelimits.h"
 #include "rendercomponent.h"
+#include "istringconst.h"
 
 #include "../engine/engine.h"
+#include "../engine/particle.h"
 #include "../grinliz/glmatrix.h"
 #include "../game/lumoschitbag.h"
 
@@ -130,6 +132,14 @@ void SpatialComponent::OnRemove()
 {
 	Context()->chitBag->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
 	Component::OnRemove();
+}
+
+
+void SpatialComponent::Teleport(const grinliz::Vector3F& pos)
+{
+	Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+	SetPosition(pos);
+	Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
 }
 
 

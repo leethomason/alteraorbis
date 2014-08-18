@@ -215,6 +215,8 @@ public:
 						CChitArray* arr,					// optional; the matches that fit
 						IChitAccept* filter);				// optional; run this filter first
 
+	void BuildingCounts(const grinliz::Vector2I& sector, int* counts, int n);
+
 	enum {
 		DEITY_MOTHER_CODE,	// master control
 		DEITY_Q_CORE,		// logistics, infrastructure

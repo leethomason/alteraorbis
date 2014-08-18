@@ -107,9 +107,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
-	//placeFlag.Init(&gamui2D, game->GetButtonLook(0));
-	//placeFlag.SetText("Flag");
-	//placeFlag.SetVisible(false);
+	helpText.Init(&gamui2D);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
@@ -210,22 +208,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildMark[i].SetVisible(false);
 	}
 
-	//coreWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
 	RenderAtom redAtom = LumosGame::CalcUIIconAtom("warning");
 	RenderAtom yellowAtom = LumosGame::CalcUIIconAtom("yellowwarning");
 	RenderAtom nullAtom;
 
-//	coreWarningIcon.Init(&gamui2D, nullAtom, nullAtom, nullAtom, nullAtom, redAtom, redAtom);
-//	domainWarningIcon.Init(&gamui2D, nullAtom, nullAtom, nullAtom, nullAtom, yellowAtom, yellowAtom);
 	coreWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
 	domainWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
 	coreWarningIcon.SetDeco(redAtom, redAtom);
 	domainWarningIcon.SetDeco(yellowAtom, yellowAtom);
-
-//	coreWarningIcon.Init(&gamui2D)
-//	coreWarningLabel.Init(&gamui2D);
-//	domainWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("yellowwarning"), false);
-//	domainWarningLabel.Init(&gamui2D);
 
 	coreWarningIcon.SetText("WARNING: Core under attack.");
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
@@ -248,6 +238,7 @@ void GameScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 
 	layout.PosAbs(&censusButton, 0, -1);
+	layout.PosAbs(&helpText, 1, -1);
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&loadButton, 2, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
@@ -296,18 +287,10 @@ void GameScene::Resize()
 	layout.PosAbs(&buildDescription, 0, 4);
 
 	layout.PosAbs(&coreWarningIcon, 1, 6);
-//	layout.PosAbs(&coreWarningLabel, 1, 6);
-
 	layout.PosAbs(&domainWarningIcon, 1, 7);
-//	layout.PosAbs(&domainWarningLabel, 1, 7);
-
-//	coreWarningIcon.SetSize(coreWarningIcon.Height(), coreWarningIcon.Height());
-//	domainWarningIcon.SetSize(domainWarningIcon.Height(), domainWarningIcon.Height());
 
 	coreWarningIcon.SetVisible(false);
 	domainWarningIcon.SetVisible(false);
-//	coreWarningLabel.SetVisible(false);
-//	domainWarningLabel.SetVisible(false);
 
 	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
 	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
@@ -317,7 +300,7 @@ void GameScene::Resize()
 	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
-	layout.PosAbs(&atlasButton, -2, 2);	// actuall to set size and x-value
+	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
@@ -329,7 +312,7 @@ void GameScene::Resize()
 	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
-	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
+	layout.PosAbs(&consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
 	float consoleHeight = okay.Y() - consoleWidget.Y();
 	consoleWidget.SetBounds( 0, consoleHeight );
 
@@ -786,6 +769,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 }
 
 
+bool GameScene::CameraTrackingAvatar()
+{
+	Chit* playerChit = sim->GetPlayerChit();
+	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	if (playerChit && cc && (playerChit->ID() == cc->Tracking())) {
+		return true;
+	}
+	return false;
+}
+
+
 bool GameScene::AvatarSelected()
 {
 	bool button = uiMode[UI_VIEW].Down();
@@ -918,35 +912,43 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if ( item == &prevUnit || item == &nextUnit || item == &avatarUnit ) {
-		int bias = 0;
-		if (item == &prevUnit) bias = -1;
-		if (item == &nextUnit) bias = 1;
-
 		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
-		if ( coreScript && coreScript->NumCitizens() ) {
-			if (item == &avatarUnit) {
-				chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+
+		if (item == &avatarUnit && AvatarSelected() && CameraTrackingAvatar()) {
+			if (coreScript && sim->GetPlayerChit()) {
+				sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
 			}
-			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-			int index = 0;
-			if ( chit ) {
-				index = coreScript->FindCitizenIndex( chit );
-			}
+		}
+		else {
+			int bias = 0;
+			if (item == &prevUnit) bias = -1;
+			if (item == &nextUnit) bias = 1;
 
-			if ( index < 0 ) 
-				index = 0;
-			else
-				index = index+bias;
+			if (coreScript && coreScript->NumCitizens()) {
+				if (item == &avatarUnit) {
+					chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+				}
+				Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+				int index = 0;
+				if (chit) {
+					index = coreScript->FindCitizenIndex(chit);
+				}
 
-			if ( index < 0 ) index += coreScript->NumCitizens();
-			if ( index >= coreScript->NumCitizens() ) index = 0;
+				if (index < 0)
+					index = 0;
+				else
+					index = index + bias;
 
-			chit = coreScript->CitizenAtIndex( index );
-			
-			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-			if ( cc && chit ) {
-				chitTracking = chit->ID();
-				cc->SetTrack( chitTracking );
+				if (index < 0) index += coreScript->NumCitizens();
+				if (index >= coreScript->NumCitizens()) index = 0;
+
+				chit = coreScript->CitizenAtIndex(index);
+
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				if (cc && chit) {
+					chitTracking = chit->ID();
+					cc->SetTrack(chitTracking);
+				}
 			}
 		}
 	}
@@ -1060,7 +1062,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	Vector2F dest = _dest;
 
 	Chit* chit = sim->GetPlayerChit();
-	//if (AvatarSelected() && chit) {
 	if (chit) {
 		AIComponent* ai = chit->GetAIComponent();
 		if ( ai ) {
@@ -1263,6 +1264,18 @@ void GameScene::HandleHotKey( int mask )
 		Vector2I sector = ToSector( ToWorld2I( at ));
 		ForceHerd(sector);
 	}
+	else if (mask == GAME_HK_CAMERA_HOME) {
+		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+		if (coreScript && sim->GetPlayerChit()) {
+			if (AvatarSelected() && CameraTrackingAvatar()) {
+				sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
+			}
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			if (cc) {
+				cc->SetTrack(sim->GetPlayerChit()->ID());
+			}
+		}
+	}
 	else {
 		super::HandleHotKey( mask );
 	}
@@ -1304,29 +1317,66 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 }
 
 
-void GameScene::SetBuildButtons()
+void GameScene::SetHelpText(const int* arr)
+{
+	static const int BUILD_ADVISOR[] = {
+		BuildScript::FARM,
+		BuildScript::SLEEPTUBE,
+		BuildScript::DISTILLERY,
+		BuildScript::BAR,
+		BuildScript::MARKET,
+		BuildScript::FORGE,
+		BuildScript::TEMPLE,
+		BuildScript::GUARDPOST,
+		BuildScript::EXCHANGE,
+		BuildScript::KIOSK_N,
+		BuildScript::KIOSK_M,
+		BuildScript::KIOSK_C,
+		BuildScript::KIOSK_S,
+		BuildScript::VAULT,
+		BuildScript::CIRCUITFAB
+	};
+
+	static const int NUM_BUILD_ADVISORS = GL_C_ARRAY_SIZE(BUILD_ADVISOR);
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	CStr<100> str = "";
+
+	if (cs) {
+		const Wallet& wallet = cs->ParentChit()->GetItem()->wallet;
+
+		for (int i = 0; i < NUM_BUILD_ADVISORS; ++i) {
+			int id = BUILD_ADVISOR[i];
+			if (arr[id] == 0) {
+				BuildScript buildScript;
+				const BuildData& data = buildScript.GetData(id);
+
+				if (wallet.gold >= data.cost) {
+					str.Format("Advisor: Build a(n) %s.", data.cName);
+				}
+				else {
+					str.Format("Advisor: Collect gold by defeating attackers or raiding domains.");
+				}
+				break;
+			}
+		}
+	}
+	helpText.SetText(str.c_str());
+}
+
+
+void GameScene::SetBuildButtons(const int* arr)
 {
 	// Went back and forth a bit on whether this should be
 	// BuildScript. But in the end, the enable/disbale is 
 	// actually for helping the player and clarifying the
 	// UI, not core game logic.
 
-	LumosChitBag* cb = sim->GetChitBag();
-	Vector2I sector = cb->GetHomeSector();
-
-	CChitArray arr;
-	cb->FindBuildingCC(ISC::bed, sector, 0, 0, &arr, 0);
-	int nBeds = arr.Size();
-	cb->FindBuildingCC(ISC::temple, sector, 0, 0, &arr, 0);
-	int nTemples = arr.Size();
-	cb->FindBuildingCC(ISC::farm, sector, 0, 0, &arr, 0);
-	int nFarms = arr.Size();
-	cb->FindBuildingCC(ISC::distillery, sector, 0, 0, &arr, 0);
-	int nDistilleries = arr.Size();
-	cb->FindBuildingCC(ISC::market, sector, 0, 0, &arr, 0);
-	int nMarkets = arr.Size();
-	cb->FindBuildingCC(ISC::circuitFab, sector, 0, 0, &arr, 0);
-	int nCircuitFab = arr.Size();
+	int nBeds = arr[BuildScript::SLEEPTUBE];
+	int nTemples = arr[BuildScript::TEMPLE];
+	int nFarms = arr[BuildScript::FARM];
+	int nDistilleries = arr[BuildScript::DISTILLERY];
+	int nMarkets = arr[BuildScript::MARKET];
+	int nCircuitFab = arr[BuildScript::CIRCUITFAB];
 
 	// Enforce the sleep tube limit.
 	CStr<32> str;
@@ -1601,7 +1651,15 @@ void GameScene::DoTick( U32 delta )
 	}
 
 	CheckGameStage(delta);
-	SetBuildButtons();
+
+	{
+		LumosChitBag* cb = sim->GetChitBag();
+		Vector2I sector = cb->GetHomeSector();
+		int arr[BuildScript::NUM_OPTIONS] = { 0 };
+		cb->BuildingCounts(sector, arr, BuildScript::NUM_OPTIONS);
+		SetBuildButtons(arr);
+		SetHelpText(arr);
+	}
 
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 	{
@@ -1618,21 +1676,7 @@ void GameScene::DoTick( U32 delta )
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
-	/*
-	if (coreScript) {
-		// Enforce the sleep tube limit.
-		CStr<32> str2;
-		int techLevel = coreScript->MaxTech() - 1;	// use the nTemples, not the current/achieved tech.
-		int maxTubes  = 4 << techLevel;
-		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
-		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );
-		const BuildData* data = buildScript.GetDataFromStructure(IStringConst::bed, 0);
-		GLASSERT(data);
 
-		str2.Format( "SleepTube\n%d %d/%d", data->cost, chitQuery.Size(), maxTubes );
-		buildButton[sleepTubeID].SetText( str2.c_str() ); 
-	}
-	*/
 	autoRebuild.SetEnabled(coreScript != 0);
 	abandonButton.SetEnabled(coreScript != 0);
 	if (coreScript) {
@@ -1662,7 +1706,13 @@ void GameScene::DoTick( U32 delta )
 	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
 	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
 	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
-	//placeFlag.SetVisible(uiMode[UI_VIEW].Down());
+
+	if (AvatarSelected() && CameraTrackingAvatar()) {
+		avatarUnit.SetText("Teleport\nAvatar");
+	}
+	else {
+		avatarUnit.SetText("Avatar");
+	}
 
 	sim->GetEngine()->RestrictCamera( 0 );
 
@@ -1676,11 +1726,9 @@ void GameScene::DoTick( U32 delta )
 		}
 	}
 
-//	coreWarningLabel.SetVisible(coreWarningTimer > 0);
 	coreWarningIcon.SetVisible(coreWarningTimer > 0);
 	coreWarningTimer -= delta;
 
-//	domainWarningLabel.SetVisible(domainWarningTimer > 0);
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
 }
