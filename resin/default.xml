@@ -133,6 +133,7 @@
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />
   <model filename="tombstoneGreater.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="fruit.ac"                                               shading="flat" />
+  <model filename="elixir.ac"                                              shading="flat" />
   <model filename="ruins.ac"  modelName="ruins1.0"  origin="1.5 0 -0.5"    shading="flat" polyRemoval="pre" />
   <model filename="ruins.ac"  modelName="ruins1.1"  origin="3.5 0 -0.5"    shading="flat" polyRemoval="pre" />
 
