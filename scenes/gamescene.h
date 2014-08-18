@@ -80,7 +80,7 @@ private:
 
 	void SetPickupButtons();	// if the avatar can pick things up
 	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
-	void SetHelpText(const int* buildingCount);
+	void SetHelpText(const int* buildingCount, int nWorkers);
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);

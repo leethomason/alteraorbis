@@ -312,6 +312,11 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			Vector2I v = { x, y };
 			const WorldGrid& wg = worldMap->GetWorldGrid(x, y);
 
+			// Check for the forbidden areas:
+			if (wg.IsWater() || wg.IsPort() || wg.IsGrid()) {
+				return false;
+			}
+
 			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
 			// However, if the action is CLEAR, we need to know there is something
 			// there to remove.

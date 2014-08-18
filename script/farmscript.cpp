@@ -160,7 +160,7 @@ int FarmScript::DoTick( U32 delta )
 	if (rc) {
 		CStr<32> str;
 		//str.Format("%d,%d-%d,%d e=%d", farmBounds.min.x, farmBounds.min.y, farmBounds.max.x, farmBounds.max.y, efficiency);
-		str.Format("Eff=%d%% [%d%%]", efficiency, fruitGrowth*100/GROWTH_NEEDED);
+		str.Format("Eff=%d%% [%d%%]", efficiency, int(double(fruitGrowth)*100.0/double(GROWTH_NEEDED)));
 		rc->SetDecoText(str.c_str());
 	}
 

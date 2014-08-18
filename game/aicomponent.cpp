@@ -949,7 +949,7 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 		if (cs) {
 			Vector2I csPos2i = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
 			if (csPos2i != pos2i) {
-				cs->ParentChit()->GetSpatialComponent()->Teleport(ToWorld3F(csPos2i));
+				thisComp.spatial->Teleport(ToWorld3F(csPos2i));
 			}
 			if (csPos2i == pos2i) {
 				destinationBlocked = 0;

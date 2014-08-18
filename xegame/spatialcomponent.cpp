@@ -137,9 +137,13 @@ void SpatialComponent::OnRemove()
 
 void SpatialComponent::Teleport(const grinliz::Vector3F& pos)
 {
-	Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
-	SetPosition(pos);
-	Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+	GLASSERT(!GET_SUB_COMPONENT(ParentChit(), SpatialComponent, MapSpatialComponent));
+	if (ToWorld2I(pos) != ToWorld2I(position)) {
+
+		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+		SetPosition(pos);
+		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+	}
 }
 
 
