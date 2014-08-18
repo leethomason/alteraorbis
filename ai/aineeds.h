@@ -31,7 +31,6 @@ public:
 
 	enum {
 		FOOD,
-		SOCIAL,
 		ENERGY,
 		FUN,
 		NUM_NEEDS

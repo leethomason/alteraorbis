@@ -75,8 +75,8 @@
 		- Linux
 		- Android
 		- Download tracking
-		- more aggressively seed plants? (Fire takes out a lot.)
-		- some kind of shock source - lighting? electric water??
+		d more aggressively seed plants? (Fire takes out a lot.)
+		d some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- face icon generation; icon into build (mantis?)
@@ -90,7 +90,7 @@
 		- tune EmitterGenerator - meander length
 
 	- Beta 3
-		- remove social
+		x remove social
 		- domain AI
 		- troll deity
 		- Gob-men domain

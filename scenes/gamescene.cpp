@@ -37,6 +37,7 @@
 #include "../scenes/censusscene.h"
 
 #include "../ai/rebuildai.h"
+#include "../ai/domainai.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -1127,6 +1128,17 @@ void GameScene::HandleHotKey( int mask )
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
 #if 1
+		{
+			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
+			if (cs) {
+				Chit* chit = cs->ParentChit();
+				if (!chit->GetComponent("DomainAI")) {
+					chit->Add(new DomainAI());
+				}
+			}
+		}
+#endif
+#if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);

@@ -25,6 +25,7 @@
 #include "../script/batterycomponent.h"
 
 #include "../ai/rebuildai.h"
+#include "../ai/domainai.h"
 
 #include "componentfactory.h"
 
@@ -113,6 +114,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	}
 	else if (name == "BatteryComponent") {
 		return glnew BatteryComponent();
+	}
+	else if (name == "DomainAI") {
+		return glnew DomainAI();
 	}
 
 

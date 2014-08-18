@@ -391,9 +391,14 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 
 	// Okay, passed checks. Give social happiness.
 //	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
-	double social = double(arr.Size()) * 0.10;
 	for( int i=0; i<arr.Size(); ++i ) {
-		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
+		const Personality& personality = thisComp.item->GetPersonality();
+		double social = double(arr.Size()) * 0.10;
+		if (personality.Introvert()) {
+			social *= 0.5;	// introverts get less reward from social interaction (go build stuff)
+		}
+
+		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::FUN, social );
 		if ( thisComp.chit->GetRenderComponent() ) {
 			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
 		}
@@ -470,7 +475,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			coreScript->nElixir -= 1;
 		}
 		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
-		supply.Set(Needs::SOCIAL, 0);
+		//supply.Set(Needs::SOCIAL, 0);
 
 		double scale = 1.0;
 

@@ -62,7 +62,6 @@ protected:
 		BAR_LEVEL,
 		BAR_MORALE,
 		BAR_FOOD,
-		BAR_SOCIAL,
 		BAR_ENERY,
 		BAR_FUN,
 		MAX_BARS

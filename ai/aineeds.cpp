@@ -16,7 +16,7 @@ double Needs::DecayTime() { return DECAY_TIME; }
 {
 	GLASSERT( i >= 0 && i < NUM_NEEDS );
 
-	static const char* name[NUM_NEEDS] = { "food", "social", "energy", "fun" };
+	static const char* name[NUM_NEEDS] = { "food", "energy", "fun" };
 	GLASSERT( GL_C_ARRAY_SIZE( name ) == NUM_NEEDS );
 	return name[i];
 }
@@ -50,7 +50,7 @@ void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Person
 	}
 	else {
 		need[FOOD]   -= dNeed;
-		need[SOCIAL] -= dNeed * Dice3D6ToMult(personality->IntroExtro());	// social decays faster for extroverts
+		//need[SOCIAL] -= dNeed * Dice3D6ToMult(personality->IntroExtro());	// social decays faster for extroverts
 		need[ENERGY] -= dNeed;
 		need[FUN]	 -= dNeed;
 
