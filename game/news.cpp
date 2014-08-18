@@ -77,12 +77,14 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHist
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::GREATER_MOB_CREATED:
 			case NewsEvent::DOMAIN_CREATED:
+			case NewsEvent::FORGED:
 				GLASSERT( data->born == 0 );
 				data->born = cache[i]->date;
 				break;
 			case NewsEvent::DENIZEN_KILLED:
 			case NewsEvent::GREATER_MOB_KILLED:
 			case NewsEvent::DOMAIN_DESTROYED:
+			case NewsEvent::UN_FORGED:
 				GLASSERT(data->born);
 				GLASSERT( data->died == 0 );
 				data->died = cache[i]->date;

@@ -62,7 +62,6 @@ private:
 	};
 
 	ChitContext	context;
-	bool		settled;
 	grinliz::Vector2I hover;
 
 	CTicker fluidTicker;

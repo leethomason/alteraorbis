@@ -46,7 +46,8 @@ private:
 		// 60: 4 good farms can sustain 4 denizens. Puts a little too much pressure on farming. Ideal(2,0) = 4.1
 		// 40: shouldn't have made so much of a difference...but way easy. But also later game & higher tech.
 		FRUIT_TIME		= 100*1000,		// Ideal(2,0) = 5.4 possibly not enough...
-		GROWTH_NEEDED	= NUM_PLANTS * (NOMINAL_STAGE+1)*(NOMINAL_STAGE+1) * FRUIT_TIME
+		// Added a fudge factor: x1 is way too productive. Switched to x2.
+		GROWTH_NEEDED	= NUM_PLANTS * (NOMINAL_STAGE+1)*(NOMINAL_STAGE+1) * FRUIT_TIME * 2	// last one is fudge factor
 	};
 
 	void ComputeFarmBound();

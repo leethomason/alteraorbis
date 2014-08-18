@@ -7,12 +7,13 @@
 #include "../game/team.h"
 #include "../game/circuitsim.h"
 #include "../engine/text.h"
+#include "../game/fluidsim.h"
 
 using namespace gamui;
 using namespace grinliz;
 
 
-FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500), settled(false)
+FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 {
 	context.game = game;
 	context.worldMap = new WorldMap(SECTOR_SIZE, SECTOR_SIZE);
@@ -202,7 +203,8 @@ void FluidTestScene::DrawDebugText()
 	static const int x = 0;
 	int y = 120;
 	DrawDebugTextDrawCalls(x, y, context.engine);
-	UFOText::Instance()->Draw(x, y + 16, "Settled: %s voxel=%d,%d", settled ? "true" : "false", hover.x, hover.y);
+	Vector2I sector = { 0, 0 };
+	UFOText::Instance()->Draw(x, y + 16, "Settled: %s voxel=%d,%d", context.worldMap->GetFluidSim(sector)->Settled() ? "true" : "false", hover.x, hover.y);
 }
 
 

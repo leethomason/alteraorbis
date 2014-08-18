@@ -79,7 +79,7 @@ struct ItemHistory
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );
-	void AppendDesc( grinliz::GLString* str, NewsHistory* history );
+	void AppendDesc( grinliz::GLString* str, NewsHistory* history, const char* separator ) const;
 };
 
 /*
