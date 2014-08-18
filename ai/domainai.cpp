@@ -6,6 +6,8 @@
 #include "../script/corescript.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../game/gameitem.h"
+#include "../game/reservebank.h"
 
 using namespace grinliz;
 
@@ -44,26 +46,38 @@ void DomainAI::OnChitMsg(Chit* chit, const ChitMsg& msg)
 }
 
 
+bool DomainAI::BuyWorkers()
+{
+	SpatialComponent* spatial = parentChit->GetSpatialComponent();
+	GameItem* mainItem = parentChit->GetItem();
+	Vector2I sector = spatial->GetSector();
+	CoreScript* cs = CoreScript::GetCore(sector);
+
+	// Create workers, if needed.
+	Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+	CChitArray arr;
+	ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
+	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
+	if (arr.Empty()) {
+		if (mainItem->wallet.gold >= WORKER_BOT_COST) {
+			Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
+			Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
+		}
+		return true;	// we should be buying workers, even if we can't.
+	}
+	return false;
+}
+
+
 int DomainAI::DoTick(U32 delta)
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if (!spatial) return ticker.Next();
 
-	//GameItem* mainItem = parentChit->GetItem();
-	Vector2I sector = spatial->GetSector();
-	CoreScript* cs = CoreScript::GetCore(sector);
-
 	if (ticker.Delta(delta)) {
-		// Create workers, if needed.
-		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
-		CChitArray arr;
-		ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
-		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
-		if (arr.Empty()) {
-	//		if (mainItem->wallet.gold >= WORKER_BOT_COST) {
-	//			Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
-				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
-	//		}
+		while (true) {
+			if (BuyWorkers()) break;
+			break;
 		}
 	}
 	return ticker.Next();

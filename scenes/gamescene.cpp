@@ -1131,10 +1131,13 @@ void GameScene::HandleHotKey( int mask )
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
-				Chit* chit = cs->ParentChit();
-				if (!chit->GetComponent("DomainAI")) {
-					chit->Add(new DomainAI());
-				}
+				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+//				Chit* chit = cs->ParentChit();
+//				if (!chit->GetComponent("DomainAI")) {
+					int team = Team::GenTeam(TEAM_TROLL);
+					cs = sim->CreateCore(sector, team);
+					cs->ParentChit()->Add(new DomainAI());
+//				}
 			}
 		}
 #endif

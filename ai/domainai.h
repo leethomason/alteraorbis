@@ -37,6 +37,8 @@ public:
 	virtual int DoTick(U32 delta);
 
 private:
+	bool BuyWorkers();
+
 	CTicker ticker;
 };
 
