@@ -1253,10 +1253,10 @@ void GameScene::HandleHotKey( int mask )
 		}
 	}
 	else if (mask == GAME_HK_CHEAT_ELIXIR) {
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-		if (cs) {
-			cs->nElixir += 20;
-		}
+//		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+//		if (cs) {
+//			cs->nElixir += 20;
+//		}
 	}
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
@@ -1660,7 +1660,7 @@ void GameScene::DoTick( U32 delta )
 	if (coreScript) {
 		float tech = coreScript->GetTech();
 		int maxTech = coreScript->MaxTech();
-		str.Format("Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir);
+		str.Format("Tech %.2f / %d", tech, maxTech);
 		techLabel.SetText(str.c_str());
 	}
 

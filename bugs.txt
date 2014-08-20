@@ -71,6 +71,8 @@
 			x weapon sorting not quite correct
 		- new porch art
 		- add elixir to stuff that gets carried
+			- head deco: shouldn't show loot
+			- head deco: should show elixir
 
 		- Linux
 		- Android

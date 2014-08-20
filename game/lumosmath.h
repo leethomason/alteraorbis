@@ -4,6 +4,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glrectangle.h"
+#include "../grinliz/glrandom.h"
 #include "gamelimits.h"
 
 inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
@@ -122,6 +123,13 @@ inline float Travel(float rate, int msecTime) {
 
 inline float Travel(float rate, float secTime) {
 	return rate * secTime;
+}
+
+inline grinliz::Vector2F RandomInRect(const grinliz::Rectangle2I& r, grinliz::Random* random) {
+	grinliz::Rectangle2F rect2f = ToWorld(r);
+	grinliz::Vector2F v = { rect2f.min.x + random->Uniform()*rect2f.Width(), 
+		                    rect2f.min.y + random->Uniform()*rect2f.Height() };
+	return v;
 }
 
 #endif // LUMOS_MATH_INCLUDED

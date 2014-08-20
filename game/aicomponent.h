@@ -148,7 +148,7 @@ private:
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp );
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
-	Chit* FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest );
+	void FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest, grinliz::CArray<Chit*, 32 >* arr );
 	grinliz::Vector3F EnemyPos(Chit* chit);	// find the correct position, if building, if mob, etc. Will return Zero if not available (happens with buildings)
 
 	// Returns true if this action was actually taken.

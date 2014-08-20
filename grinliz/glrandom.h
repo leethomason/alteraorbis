@@ -87,7 +87,8 @@ class Random
 	*/
 	float DiceUniform( U32 nDice, U32 sides );
 
-	/// Return a random number from 0 to upper: [0.0,1.0].
+	/*
+	need to test if this actually works. think range may be wrong.
 	float Uniform11()	{
 		// http://stackoverflow.com/questions/1557208/generating-random-number-between-1-1-in-c
 		// http://www.rgba.org/articles/sfrand/sfrand.htm
@@ -96,10 +97,17 @@ class Random
 	    float v = ( *((float*)&a) - 3.0f );
 		return v;
 	}
+	*/
 
+	/// Return a random number from 0 to upper: [0.0,1.0].
 	float Uniform()	{
-		float v = (Uniform11() + 1.0f) * 0.5f;
-		return v;
+///		static const double INV = 1.0 / double(UINT16_MAX);
+//		U32 r = Rand() & UINT16_MAX;
+//		return float(double(r) * INV);
+
+		static const float INV = 1.0f / 255.0f;
+		U32 r = Rand() & 0xff;	// random series in the low bits.
+		return float(r) * INV;
 	}
 
 	/// Return 0 or 1

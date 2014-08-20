@@ -144,7 +144,7 @@ private:
 
 		grinliz::CDynArray< Icon > icons;
 		gamui::TextLabel*	textLabel;
-		grinliz::CStr< 24 > decoText;
+		grinliz::CStr< 48 > decoText;
 	};
 	HUD* hud;
 

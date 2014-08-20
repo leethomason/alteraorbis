@@ -46,6 +46,7 @@ IString IStringConst::crystal_red;
 IString IStringConst::crystal_blue;
 IString IStringConst::crystal_violet;
 IString IStringConst::fruit;
+IString IStringConst::elixir;
 IString IStringConst::tombstone;
 IString IStringConst::shieldBoost;
 IString IStringConst::rezWAV;
@@ -153,6 +154,7 @@ void IStringConst::Init()
 	crystal_blue = StringPool::Intern( "crystal_blue", true );
 	crystal_violet = StringPool::Intern( "crystal_violet", true );
 	fruit = StringPool::Intern( "fruit", true );
+	elixir = StringPool::Intern( "elixir", true );
 	tombstone = StringPool::Intern( "tombstone", true );
 	shieldBoost = StringPool::Intern( "shieldBoost", true );
 	rezWAV = StringPool::Intern( "rezWAV", true );

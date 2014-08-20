@@ -910,6 +910,17 @@ int ItemComponent::NumCarriedItems() const
 }
 
 
+int ItemComponent::NumCarriedItems(const IString& item) const
+{
+	int count = 0;
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( !itemArr[i]->Intrinsic() && itemArr[i]->IName() == item )
+			++count;
+	}
+	return count;
+}
+
+
 int ItemComponent::ItemToSell() const
 {
 	// returns 0 or the cheapest item that can be sold
@@ -954,9 +965,10 @@ void ItemComponent::AddToInventory( GameItem* item )
 }
 
 
-void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems )
+int ItemComponent::TransferInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems )
 {
 	GLASSERT( ic );
+	int nTransfer = 0;
 	for( int i=1; i<ic->NumItems(); ++i ) {
 		GameItem* item = ic->GetItem(i);
 		if ( item->Intrinsic() ) continue;
@@ -968,6 +980,7 @@ void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz
 			ic->RemoveFromInventory( i );
 			--i;
 			this->AddToInventory( item );
+			++nTransfer;
 		}
 	}
 
@@ -977,6 +990,7 @@ void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz
 	}
 	hardpointsModified = true;
 	UpdateActive();
+	return nTransfer;
 }
 
 

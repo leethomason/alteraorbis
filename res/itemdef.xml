@@ -669,4 +669,11 @@
         mass="5"
         />
 
+  <item name="elixir"
+        desc="Elixir"
+        resource="elixir"
+        flags="CLICK_THROUGH FLAMMABLE SHOCKABLE"
+        mass="8"
+        />
+
 </items>
