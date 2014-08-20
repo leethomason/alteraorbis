@@ -794,9 +794,13 @@ int ItemComponent::DoTick( U32 delta )
 		 || mainItem->IName() == IStringConst::worker ) 
 	{
 		if ( parentChit->GetRenderComponent() ) {
-			int index = this->FindItem( IStringConst::fruit );
+			int index = this->FindItem( ISC::fruit );
 			if ( index >= 0 ) {
 				parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO/2 );
+			}
+			index = this->FindItem(ISC::elixir);
+			if (index >= 0) {
+				parentChit->GetRenderComponent()->AddDeco("elixir", STD_DECO / 2);
 			}
 			// don't remove - can't see fruit being eaten!
 			//else {
@@ -1011,8 +1015,11 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
-		if ( gameItem->IName() == IStringConst::fruit ) {
+		if ( gameItem->IName() == ISC::fruit ) {
 			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );	// will get refreshed if carred.
+		}
+		else if (gameItem->IName() == ISC::elixir) {
+			parentChit->GetRenderComponent()->AddDeco("elixir", STD_DECO);	// will get refreshed if carred.
 		}
 		else {
 			parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );

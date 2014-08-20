@@ -4,6 +4,7 @@
 #include "glstreamer.h"
 #include "../grinliz/glmicrodb.h"
 #include "../grinliz/glmatrix.h"
+#include "../grinliz/glrandom.h"
 #include "squisher.h"
 
 using namespace grinliz;
@@ -163,7 +164,6 @@ int main( int argc, const char* argv[] )
 {
 	printf( "Xarchive test.\n" );
 
-
 	if ( argc == 1 ) {
 		{
 			FILE* fp = 0;
@@ -298,5 +298,31 @@ int main( int argc, const char* argv[] )
 		}
 
 	}
+
+	printf("Random test.\n");
+	{
+		Random random;
+		static const int NBUCKETS = 4;
+		static const int DIV = UINT32_MAX / 4;
+		int bucket[NBUCKETS] = { 0 };
+		int fbucket[NBUCKETS] = { 0 };
+
+		for (int i = 0; i < 10000; ++i) {
+			bucket[random.Rand() / DIV]++;
+
+			int f = int(random.Uniform() * 4.0f);
+			if (f == 4) f = 3;
+			fbucket[f]++;
+ 		}
+		for (int i = 0; i < NBUCKETS; ++i) {
+			printf("[%d] %d  ", i, bucket[i]);
+		}
+		printf("\n");
+		for (int i = 0; i < NBUCKETS; ++i) {
+			printf("[%f] %d  ", float(i)/4.0f, fbucket[i]);
+		}
+		printf("\n");
+	}
+
 	return 0;
 }
