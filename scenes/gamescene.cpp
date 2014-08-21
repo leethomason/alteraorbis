@@ -791,6 +791,42 @@ bool GameScene::AvatarSelected()
 }
 
 
+void GameScene::DoCameraHome()
+{
+	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	if (coreScript) {
+		Chit* chit = coreScript->ParentChit();
+		if (chit && chit->GetSpatialComponent()) {
+			Vector3F lookAt = chit->GetSpatialComponent()->GetPosition();
+			sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.z);
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			cc->SetTrack(0);
+		}
+	}
+}
+
+
+void GameScene::DoAvatarButton()
+{
+	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+
+	if (AvatarSelected() && CameraTrackingAvatar()) {
+		if (coreScript && sim->GetPlayerChit()) {
+			sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
+		}
+	}
+	else {
+		chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+		if (cc && chit) {
+			chitTracking = chit->ID();
+			cc->SetTrack(chitTracking);
+		}
+	}
+}
+
+
 void GameScene::ItemTapped( const gamui::UIItem* item )
 {
 	Vector2F dest = { 0, 0 };
@@ -900,55 +936,39 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim->UseBuilding();
 	}
 	else if ( item == &cameraHomeButton ) {
-		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
-		if ( coreScript ) {
-			Chit* chit = coreScript->ParentChit();
-			if ( chit && chit->GetSpatialComponent() ) {
-				Vector3F lookAt = chit->GetSpatialComponent()->GetPosition();
-				sim->GetEngine()->CameraLookAt( lookAt.x, lookAt.z );
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				cc->SetTrack(0);
-			}
-		}
+		DoCameraHome();
 	}
-	else if ( item == &prevUnit || item == &nextUnit || item == &avatarUnit ) {
+	else if ( item == &avatarUnit ) {
+		DoAvatarButton();
+	}
+	else if ( item == &prevUnit || item == &nextUnit ) {
 		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
-		if (item == &avatarUnit && AvatarSelected() && CameraTrackingAvatar()) {
-			if (coreScript && sim->GetPlayerChit()) {
-				sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
+		int bias = 0;
+		if (item == &prevUnit) bias = -1;
+		if (item == &nextUnit) bias = 1;
+
+		if (coreScript && coreScript->NumCitizens()) {
+			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+			int index = 0;
+			if (chit) {
+				index = coreScript->FindCitizenIndex(chit);
 			}
-		}
-		else {
-			int bias = 0;
-			if (item == &prevUnit) bias = -1;
-			if (item == &nextUnit) bias = 1;
 
-			if (coreScript && coreScript->NumCitizens()) {
-				if (item == &avatarUnit) {
-					chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
-				}
-				Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-				int index = 0;
-				if (chit) {
-					index = coreScript->FindCitizenIndex(chit);
-				}
+			if (index < 0)
+				index = 0;
+			else
+				index = index + bias;
 
-				if (index < 0)
-					index = 0;
-				else
-					index = index + bias;
+			if (index < 0) index += coreScript->NumCitizens();
+			if (index >= coreScript->NumCitizens()) index = 0;
 
-				if (index < 0) index += coreScript->NumCitizens();
-				if (index >= coreScript->NumCitizens()) index = 0;
+			chit = coreScript->CitizenAtIndex(index);
 
-				chit = coreScript->CitizenAtIndex(index);
-
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				if (cc && chit) {
-					chitTracking = chit->ID();
-					cc->SetTrack(chitTracking);
-				}
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			if (cc && chit) {
+				chitTracking = chit->ID();
+				cc->SetTrack(chitTracking);
 			}
 		}
 	}
@@ -1110,30 +1130,10 @@ void GameScene::HandleHotKey( int mask )
 		buildDescription.SetText("");
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
-		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
-		if (coreScript && sim->GetPlayerChit()) {
-			if (buildActive > 0) {
-				// back out of build
-				buildActive = 0;
-				buildButton[0].SetDown();
-				SetSelectionModel(tapView);
-			}
-			if (AvatarSelected() && CameraTrackingAvatar()) {
-				sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
-			}
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-			if (cc) {
-				cc->SetTrack(sim->GetPlayerChit()->ID());
-				uiMode[UI_VIEW].SetDown();
-			}
-		}
+		DoAvatarButton();
 	}
 	else if (mask == GAME_HK_CAMERA_CORE) {
-		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
-		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-		if (cc) {
-			cc->SetTrack(coreScript->ParentChit()->ID());
-		}
+		DoCameraHome();
 	}
 	else if (mask == GAME_HK_SPACE) {
 		Chit* playerChit = sim->GetPlayerChit();

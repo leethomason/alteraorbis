@@ -379,9 +379,9 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	NewsHistory* history = context.chitBag->GetNewsHistory();
 	Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
 	for (int i = 0; i < 3; i++) {
+		items[i]->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
 		NewsEvent news(NewsEvent::FORGED, ToWorld2F(pos), items[i], deity);
 		history->Add(news);
-		items[i]->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
 	}
 
 	chit->GetAIComponent()->EnableDebug( true );

@@ -89,6 +89,9 @@ private:
 	bool DragAtom(gamui::RenderAtom* atom);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 
+	void DoCameraHome();
+	void DoAvatarButton();
+
 	enum {
 		NUM_PICKUP_BUTTONS = 8,
 		

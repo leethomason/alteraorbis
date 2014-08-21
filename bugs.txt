@@ -46,7 +46,7 @@
 		x “clippy” advisor
 			x improve?
 			x position
-			- test!
+			x test!
 		x teleport home
 		x goto hotkeys
 			x hot key to center on avatar
@@ -90,6 +90,7 @@
 		- walk target for the avatar
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
+		- enemies don't attack turrets
 
 	- Beta 3
 		- remove social
