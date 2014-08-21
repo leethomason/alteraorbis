@@ -236,7 +236,7 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 		break;
 
 	case FORGED:
-		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.safe_str(), domain.safe_str(), secondName.safe_str() );
 		break;
 
 	case UN_FORGED:

@@ -89,13 +89,15 @@ public:
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
-	int ItemToSell() const;	// returns 0 or the cheapest item that can be sold
+	int  NumCarriedItems(const grinliz::IString& str) const;
+	int  ItemToSell() const;	// returns 0 or the cheapest item that can be sold
 
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
 	// Add the component, and deletes it.
 	void AddToInventory( ItemComponent* ic );
-	void AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems );
+	// Move from one inventory to another. Return count of items moved.
+	int TransferInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems );
 
 	// Removes an item from the inventory. Returns
 	// null if that item cannot be removed.

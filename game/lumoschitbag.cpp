@@ -398,9 +398,10 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
 		
+		// Mark this item as important with a destroyMsg:
+		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 		NewsHistory* history = GetNewsHistory();
 		history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
-		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 	}
 	chit->GetItem()->wallet.Add( w );	
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
@@ -453,9 +454,9 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	Vector2I sector = ToSector( pos );
 	CoreScript::GetCore( sector )->AddCitizen( chit );
 
+	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 	NewsHistory* history = GetNewsHistory();
 	history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
-	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));

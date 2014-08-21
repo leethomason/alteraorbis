@@ -5,8 +5,10 @@
 #include "../xegame/istringconst.h"
 #include "../xegame/rendercomponent.h"
 #include "../game/lumoschitbag.h"
+#include "../game/mapspatialcomponent.h"
 #include "corescript.h"
 #include "evalbuildingscript.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 
@@ -61,13 +63,13 @@ int DistilleryScript::DoTick( U32 delta )
 	ItemComponent* ic = parentChit->GetItemComponent();
 
 	if ( n ) { 
-		SpatialComponent* sc = parentChit->GetSpatialComponent();
-		GLASSERT( sc );
-		Vector2I sector = ToSector( sc->GetPosition2DI() );
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
+		GLASSERT( msc );
+		Vector2I sector = msc->GetSector();
+		Rectangle2I porch = msc->PorchPos();
 		CoreScript* cs = CoreScript::GetCore( sector );
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");
 	
-//		int tech = cs->GetTechLevel();
 		float tech = Max(cs->GetTech(), 0.8f);
 		double dProg = double(tech) * double(progressTick.Period()) / double(TECH_MAX);
 		double p = dProg*double(n);
@@ -83,9 +85,18 @@ int DistilleryScript::DoTick( U32 delta )
 			if ( ic ) {
 				int index = ic->FindItem( IStringConst::fruit );
 				if ( index >= 0 ) {
-					cs->nElixir += ELIXIR_PER_FRUIT;
+					//cs->nElixir += ELIXIR_PER_FRUIT;
 					GameItem* item = ic->RemoveFromInventory( index );
 					delete item;
+
+					const GameItem& def = ItemDefDB::Instance()->Get( "elixir" );
+
+					for (int k = 0; k < ELIXIR_PER_FRUIT; ++k) {
+						GameItem* gameItem = new GameItem( def );
+						Vector2F pos2 = RandomInRect(porch, &parentChit->random);
+						static const int ELIXIR_SELF_DESTRUCT = 60*1000;
+						Context()->chitBag->NewItemChit(ToWorld3F(pos2), gameItem, false, true, ELIXIR_SELF_DESTRUCT);
+					}
 				}
 			}
 		}

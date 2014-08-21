@@ -413,6 +413,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	Vector2I sector			= ToSector( pos2i );
 	CoreScript* coreScript  = CoreScript::GetCore(sector);
 	Chit* controller		= coreScript->ParentChit();
+	ItemComponent* ic		= building->GetItemComponent();
 
 	// Workers:
 	if ( buildingName == IStringConst::vault ) {
@@ -422,7 +423,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		// Put everything in the vault.
 		ItemComponent* vaultIC = building->GetItemComponent();
-		vaultIC->AddSubInventory( thisComp.itemComponent, true, IString() );
+		vaultIC->TransferInventory( thisComp.itemComponent, true, IString() );
 
 		// Move gold & crystal to the owner.
 		if ( controller && controller->GetItemComponent() ) {
@@ -432,11 +433,17 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		return;
 	}
 	if ( buildingName == IStringConst::distillery ) {
-		ItemComponent* ic = building->GetItemComponent();
 		GLASSERT( ic );
-		ic->AddSubInventory( thisComp.itemComponent, false, IStringConst::fruit );
+		ic->TransferInventory( thisComp.itemComponent, false, IStringConst::fruit );
 		building->SetTickNeeded();
 		return;
+	}
+	if (buildingName == ISC::bar) {
+		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, IStringConst::elixir );
+		building->SetTickNeeded();
+		if (nTransfer) {
+			return;	// only return on transfer. else use the bar!
+		}
 	}
 
 	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
@@ -444,9 +451,10 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		const BuildData* bd = buildScript.GetDataFromStructure( buildingName, 0 );
 		GLASSERT( bd );
 		ai::Needs supply = bd->needs;
+		int nElixir = ic->NumCarriedItems(ISC::elixir);
 
 		// Food based buildings don't work if there is no elixir.
-		if ( supply.Value(Needs::FOOD) && coreScript->nElixir == 0 ) {
+		if ( supply.Value(Needs::FOOD) && nElixir == 0 ) {
 			supply.SetZero();
 		}
 
@@ -471,8 +479,14 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		}
 		if ( supply.Value(Needs::FOOD) > 0 ) {
 			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
-			GLASSERT( coreScript->nElixir > 0 );
-			coreScript->nElixir -= 1;
+			GLASSERT( nElixir > 0 );
+
+			int index = ic->FindItem(ISC::elixir);
+			GLASSERT(index >= 0);
+			if (index >= 0) {
+				GameItem* item = ic->RemoveFromInventory(index);
+				delete item;
+			}
 		}
 		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
 		//supply.Set(Needs::SOCIAL, 0);
@@ -777,10 +791,11 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		item->BestName(),
 		sector.x, sector.y ));
 
+	// Mark this item as important with a destroyMsg:
+	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 	NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
 	NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
 	history->Add( news );
-	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 
 	return true;
 }

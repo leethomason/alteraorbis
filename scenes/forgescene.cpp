@@ -266,9 +266,9 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		if (chit && history) {
 			Vector2F pos = { 0, 0 };
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
+			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 			NewsEvent news( NewsEvent::FORGED, pos, item, forgeData->itemComponent->ParentChit() ); 
 			history->Add( news );
-			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 		}
 
 		logText.AppendFormat("%s forged! Value=%d.\n", item->Name(), item->GetValue());

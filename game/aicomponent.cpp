@@ -77,7 +77,7 @@ static const float	FRUIT_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
-static const int	GUARD_RANGE					= 2;
+static const int	GUARD_RANGE					= 1;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
 static const int	BUILD_TIME					= 1000;
@@ -949,7 +949,7 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 		if (cs) {
 			Vector2I csPos2i = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
 			if (csPos2i != pos2i) {
-				cs->ParentChit()->GetSpatialComponent()->Teleport(ToWorld3F(csPos2i));
+				thisComp.spatial->Teleport(ToWorld3F(csPos2i));
 			}
 			if (csPos2i == pos2i) {
 				destinationBlocked = 0;
@@ -1665,7 +1665,7 @@ bool AIComponent::AtFriendlyOrNeutralCore()
 }
 
 
-Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
+void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* arr, bool* nearPath )
 {
 	// Be careful of performance. Allow one full pathing, use
 	// direct pathing for the rest.
@@ -1673,54 +1673,82 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 	// can be picked up on its grid, or the closest neighbor
 	// grid. And check near the mob and near farms.
 
-	const ChitContext* context = this->Context();
-	LumosChitBag* chitBag = this->Context()->chitBag;
+	const ChitContext* context	= this->Context();
+	LumosChitBag* chitBag		= this->Context()->chitBag;
+	const Vector2I sector		= ToSector(pos2);
+	CoreScript* cs				= CoreScript::GetCore(sector);
 
-	ItemNameFilter filter(IStringConst::fruit, IChitAccept::MOB);
+	const IString names[2] = { ISC::fruit, ISC::elixir };
+	ItemNameFilter filter(names, 2, IChitAccept::MOB);
+	*nearPath = false;
 
 	// Check local. For local, use direct path.
 	CChitArray chitArr;
 	chitBag->QuerySpatialHash( &chitArr, pos2, FRUIT_AWARE, 0, &filter );
-	for( int i=0; i<chitArr.Size(); ++i ) {
+	for (int i = 0; i < chitArr.Size(); ++i) {
 		Chit* chit = chitArr[i];
 		Vector2F fruitPos = chit->GetSpatialComponent()->GetPosition2D();
-		if ( context->worldMap->HasStraightPath( pos2, fruitPos )) {
+		if (context->worldMap->HasStraightPath(pos2, fruitPos)) {
 			*dest = fruitPos;
-			return chit;
-		}
-		Vector2F fruitPosAdj = ToWorld2F( AdjacentWorldGrid( fruitPos ));
-		if ( context->worldMap->HasStraightPath( pos2, fruitPosAdj )) {
-			*dest = fruitPosAdj;
-			return chit;
+			arr->Push(chit);
+			// Push other fruit at this same location.
+			for (int k = i + 1; k < chitArr.Size(); ++k) {
+				if (chitArr[k]->GetSpatialComponent()->GetPosition2DI() == chit->GetSpatialComponent()->GetPosition2DI()) {
+					arr->Push(chitArr[k]);
+				}
+			}
+			*nearPath = true;
+			return;
 		}
 	}
 
-	// Okay, now check the farms. Now we need to use full pathing for meaningful results.
+	// Okay, now check the farms and distilleries. 
+	// Now we need to use full pathing for meaningful results.
 	// Only need to check the farm porch - all fruit goes there.
-	CChitArray array;
-	chitBag->FindBuildingCC(IStringConst::farm,
-		ToSector(ToWorld2I(pos2)),
-		0, 0, &array, 0);
+	for (int pass = 0; pass < 2; ++pass) {
+		if (pass == 1) {
+			int debug = 1;
+		}
+		CChitArray buildingArr;
+		chitBag->FindBuildingCC(pass == 0 ? ISC::farm : ISC::distillery,
+								ToSector(ToWorld2I(pos2)),
+								0, 0, &buildingArr, 0);
 
-	for (int i = 0; i < array.Size(); ++i) {
-		Chit* farmChit = array[i];
-		MapSpatialComponent* farmMSC = GET_SUB_COMPONENT( farmChit, SpatialComponent, MapSpatialComponent );
-		GLASSERT( farmMSC );
-		if ( farmMSC ) {
-			Vector2F farmLoc = ToWorld2F( farmMSC->PorchPos().min );
-			chitBag->QuerySpatialHash( &chitArr, farmLoc, 0.5f, 0, &filter );
+		for (int i = 0; i < buildingArr.Size(); ++i) {
+			Chit* farmChit = buildingArr[i];
+			MapSpatialComponent* farmMSC = GET_SUB_COMPONENT(farmChit, SpatialComponent, MapSpatialComponent);
+			GLASSERT(farmMSC);
+			if (farmMSC) {
+				Rectangle2I porch = farmMSC->PorchPos();
+				Vector2F farmLoc = ToWorld(porch).Center();
+				chitBag->QuerySpatialHash(&chitArr, farmLoc, 1.0f, 0, &filter);
 
-			if ( chitArr.Size() ) {
-				Vector2F fruitLoc = chitArr[0]->GetSpatialComponent()->GetPosition2D();
-				if ( context->worldMap->CalcPath( pos2, fruitLoc, 0, 0, 0 )) {
-					*dest = fruitLoc;
-					return chitArr[0];
+				for (int j = 0; j < chitArr.Size(); ++j) {
+					Vector2F fruitLoc = chitArr[j]->GetSpatialComponent()->GetPosition2D();
+					Vector2I fruitLoc2i = ToWorld2I(fruitLoc);
+					// Skip if someone probably heading there.
+					if (cs && cs->HasTask(fruitLoc2i)) {
+						continue;
+					}
+
+					if (context->worldMap->CalcPath(pos2, fruitLoc, 0, 0, 0)) {
+						*dest = fruitLoc;
+						Chit* chit = chitArr[j];
+						arr->Push(chit);
+						// Push other fruit at this same location.
+						for (int k = j + 1; k < chitArr.Size(); ++k) {
+							if (chitArr[k]->GetSpatialComponent()->GetPosition2DI() == chit->GetSpatialComponent()->GetPosition2DI()) {
+								arr->Push(chitArr[k]);
+							}
+						}
+						return;
+					}
 				}
 			}
 		}
 	}
 	dest->Zero();
-	return 0;
+	return;
 }
 
 
@@ -1734,9 +1762,9 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 		return false;
 	}
 
-	int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
-	bool carrying = index >= 0;
-	if ( carrying ) return false;	// only carry one fruit, at least intentionally?
+	//int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
+	//bool carrying = index >= 0;
+	//if ( carrying ) return false;	// only carry one fruit, at least intentionally?
 
 	double need = 1;
 	if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
@@ -1755,18 +1783,22 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 			// Can we go pick something up?
 			if ( thisComp.itemComponent->CanAddToInventory() ) {
 				Vector2F fruitPos = { 0, 0 };
-				Chit* fruit = FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos );
-				if ( fruit ) {
-					GameItem* gi = fruit->GetItem();
-					Vector2I fruitPos2i = fruit->GetSpatialComponent()->GetPosition2DI();
+				CChitArray fruit;
+				bool nearPath = false;
+				FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos, &fruit, &nearPath );
+				if ( fruit.Size() ) {
+					//GameItem* gi = fruit[0]->GetItem();
+					Vector2I fruitPos2i = ToWorld2I(fruitPos);
 					Vector2I sector = ToSector(fruitPos2i);
 					CoreScript* cs = CoreScript::GetCore(sector);
-					if (cs && cs->HasTask(fruitPos2i)) {
+					if (!nearPath && cs && cs->HasTask(fruitPos2i)) {
 						// Do nothing; assume it is this task.
 					}
 					else {
 						taskList.Push(Task::MoveTask(fruitPos));
-						taskList.Push(Task::PickupTask(fruit->ID()));
+						for (int i = 0; i < fruit.Size(); ++i) {
+							taskList.Push(Task::PickupTask(fruit[i]->ID()));
+						}
 						return true;
 					}
 				}
@@ -1802,25 +1834,29 @@ bool AIComponent::ThinkFlag(const ComponentSet& thisComp)
 }
 
 
-bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
+bool AIComponent::ThinkHungry(const ComponentSet& thisComp)
 {
-	if ( parentChit->PlayerControlled() ) {
+	if (parentChit->PlayerControlled()) {
 		return false;
 	}
 
-	int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
-	bool carrying = index >= 0;
+	int indexFruit = thisComp.itemComponent->FindItem(ISC::fruit);
+	int indexElixir = thisComp.itemComponent->FindItem(ISC::elixir);
+	bool carrying = (indexFruit >= 0) || (indexElixir >= 0);
 
 	// Are we carrying fruit?? If so, eat if hungry!
-	if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
+	if (carrying && (thisComp.item->flags & GameItem::HAS_NEEDS)) {
 		const ai::Needs& needs = GetNeeds();
-		if ( needs.Value( Needs::FOOD ) < NEED_CRITICAL ) {
-			if ( carrying ) {
-				GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
-				delete item;
-				this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
-				return true;	// did something...?
+		if (needs.Value(Needs::FOOD) < NEED_CRITICAL) {
+			int index = indexFruit;
+			if (indexElixir >= 0) {
+				index = indexElixir;	// prefer elixir
 			}
+
+			GameItem* item = thisComp.itemComponent->RemoveFromInventory(index);
+			delete item;
+			this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+			return true;	// did something...?
 		}
 	}
 	return false;
@@ -1879,27 +1915,30 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 		}
 	}
 
-	if ( worker || usesBuilding )
+	if (worker || usesBuilding)
 	{
-		int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
-		bool carrying = index >= 0;
-		if ( carrying ) {
-			Vector2I sector = thisComp.spatial->GetSector();
-			Chit* vault = Context()->chitBag->FindBuilding(	IStringConst::distillery, 
-															sector, 
-															&thisComp.spatial->GetPosition2D(), 
-															LumosChitBag::RANDOM_NEAR, 0, 0 );
-			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
-				GLASSERT( msc );
-				CoreScript* coreScript = CoreScript::GetCore(sector);
-				if ( msc && coreScript ) {
-					Rectangle2I porch = msc->PorchPos();
-					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
-						if (!coreScript->HasTask(it.Pos())) {
-							taskList.Push(Task::MoveTask(it.Pos()));
-							taskList.Push(Task::UseBuildingTask());
-							return true;
+		for (int pass = 0; pass < 2; ++pass) {
+			const IString iItem     = (pass == 0) ? ISC::elixir : ISC::fruit;
+			const IString iBuilding = (pass == 0) ? ISC::bar    : ISC::distillery;
+
+			int index = thisComp.itemComponent->FindItem(iItem);
+			if (index >= 0) {
+				Vector2I sector = thisComp.spatial->GetSector();
+				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
+																  &thisComp.spatial->GetPosition2D(),
+																  LumosChitBag::RANDOM_NEAR, 0, 0);
+				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
+					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+					GLASSERT(msc);
+					CoreScript* coreScript = CoreScript::GetCore(sector);
+					if (msc && coreScript) {
+						Rectangle2I porch = msc->PorchPos();
+						for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
+							if (!coreScript->HasTask(it.Pos())) {
+								taskList.Push(Task::MoveTask(it.Pos()));
+								taskList.Push(Task::UseBuildingTask());
+								return true;
+							}
 						}
 					}
 				}
@@ -1976,7 +2015,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 	if ( Team::GetRelationship( parentChit, coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
-	int nElixir = coreScript->nElixir;
+//	int nElixir = coreScript->nElixir;
 
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
@@ -2035,7 +2074,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 
 		// A building that supplies food MUST have elixir, else it
 		// supplies nothing.
-		if (bd->needs.Value(Needs::FOOD) > 0 && nElixir == 0) {
+		if (bd->needs.Value(Needs::FOOD) > 0 && (chit->GetItemComponent()->FindItem(ISC::elixir) < 0)) {
 			continue;
 		}
 
@@ -2204,9 +2243,10 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if (ThinkHungry(thisComp))
 		return;
-	if (ThinkFruitCollect(thisComp))
-		return;
+	// Be sure to deliver before collecting!
 	if (ThinkDelivery(thisComp))
+		return;
+	if (ThinkFruitCollect(thisComp))
 		return;
 	if (ThinkFlag(thisComp))
 		return;

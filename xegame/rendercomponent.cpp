@@ -523,13 +523,18 @@ void RenderComponent::ProcessIcons( int delta )
 		IString proper;
 		proper = gameItem->IProperName();
 		if (!proper.empty()) {
-			CStr<24> str;
-			int level = parentChit->GetItem()->Traits().Level();
-			if (level)
-				str.Format("%s %d", proper.safe_str(), level);
-			else
-				str.Format("%s", proper.safe_str());
-
+			CStr<48> str;
+			if (gameItem->IName() == ISC::bar) {
+				int nElixir = parentChit->GetItemComponent()->NumCarriedItems(ISC::elixir);
+				str.Format("%s\nElixir=%d", proper.safe_str(), nElixir);
+			}
+			else {
+				int level = parentChit->GetItem()->Traits().Level();
+				if (level)
+					str.Format("%s %d", proper.safe_str(), level);
+				else
+					str.Format("%s", proper.safe_str());
+			}
 			SetDecoText(str.c_str());
 		}
 	}

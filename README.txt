@@ -62,7 +62,10 @@ Why is everyone carrying fruit?
 Controls
 --------
 
-Tab key toggles between top down and isometric views.
+'Tab' key toggles between top down and isometric views.
+'Home' key centers the camera on your core.
+'End' key centers the camera on your avatar; if already centered, the
+  end key teleports the avatar home.
 
 Left-click moves the avatar, selects things, builds.
 Left-click & drag builds lots of pavement or ice at once, or clears an area.

@@ -90,7 +90,7 @@ public:
 	int   MaxTech();
 	void  AddTech();
 
-	int nElixir;
+//	int nElixir;
 
 	// Each task pushes a position for that task,
 	// and removes it when done/cancelled. (Some careful

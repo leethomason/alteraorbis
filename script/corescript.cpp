@@ -82,7 +82,7 @@ CoreScript::CoreScript()
 	tech = 0;
 	achievement.Clear();
 	workQueue = 0;
-	nElixir = 0;
+//	nElixir = 0;
 	sector.Zero();
 }
 
@@ -105,7 +105,7 @@ void CoreScript::Serialize(XStream* xs)
 {
 	BeginSerialize(xs, Name());
 	XARC_SER(xs, tech);
-	XARC_SER(xs, nElixir);
+//	XARC_SER(xs, nElixir);
 	XARC_SER(xs, summonGreater);
 	XARC_SER(xs, autoRebuild);
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:b482358fc8b3810ef6cfb1b575b4a67b$ -->
+<!-- $TexturePacker:SmartUpdate:5a0ecc10d8ac7fbd41a3a83c5d94c48c$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -14,26 +14,27 @@ oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="icon.png" width="1024" height="2048">
-    <sprite n="attention" x="0" y="982" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
-    <sprite n="build" x="482" y="982" w="224" h="224" oX="15" oY="15" oW="256" oH="256"/>
-    <sprite n="chat" x="726" y="740" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="attention" x="242" y="982" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="build" x="724" y="982" w="224" h="224" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="chat" x="0" y="982" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="commerce" x="762" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
-    <sprite n="delete" x="242" y="982" w="224" h="224" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="delete" x="484" y="982" w="224" h="224" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="elixir" x="726" y="740" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="flag" x="484" y="740" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="fruit" x="242" y="740" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="happy" x="0" y="740" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="heal" x="726" y="498" w="226" h="226" oX="16" oY="15" oW="256" oH="256"/>
     <sprite n="horn" x="484" y="498" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
-    <sprite n="icon" x="242" y="1222" w="90" h="42" oX="16" oY="45" oW="128" oH="128"/>
+    <sprite n="icon" x="0" y="1224" w="90" h="42" oX="16" oY="45" oW="128" oH="128"/>
     <sprite n="levelup" x="242" y="498" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="loot" x="0" y="498" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="media" x="508" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
     <sprite n="news" x="254" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
-    <sprite n="possibleTarget" x="722" y="1220" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="possibleTarget" x="722" y="1222" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
     <sprite n="reload" x="726" y="256" w="226" h="226" oX="16" oY="15" oW="256" oH="256"/>
     <sprite n="repair" x="484" y="256" w="226" h="226" oX="16" oY="15" oW="256" oH="256"/>
     <sprite n="sad" x="242" y="256" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
     <sprite n="social" x="0" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
-    <sprite n="target" x="722" y="982" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="target" x="484" y="1222" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
     <sprite n="techxfer" x="0" y="256" w="226" h="226" oX="15" oY="15" oW="256" oH="256"/>
 </TextureAtlas>

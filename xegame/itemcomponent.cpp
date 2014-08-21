@@ -794,9 +794,13 @@ int ItemComponent::DoTick( U32 delta )
 		 || mainItem->IName() == IStringConst::worker ) 
 	{
 		if ( parentChit->GetRenderComponent() ) {
-			int index = this->FindItem( IStringConst::fruit );
+			int index = this->FindItem( ISC::fruit );
 			if ( index >= 0 ) {
 				parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO/2 );
+			}
+			index = this->FindItem(ISC::elixir);
+			if (index >= 0) {
+				parentChit->GetRenderComponent()->AddDeco("elixir", STD_DECO / 2);
 			}
 			// don't remove - can't see fruit being eaten!
 			//else {
@@ -910,6 +914,17 @@ int ItemComponent::NumCarriedItems() const
 }
 
 
+int ItemComponent::NumCarriedItems(const IString& item) const
+{
+	int count = 0;
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( !itemArr[i]->Intrinsic() && itemArr[i]->IName() == item )
+			++count;
+	}
+	return count;
+}
+
+
 int ItemComponent::ItemToSell() const
 {
 	// returns 0 or the cheapest item that can be sold
@@ -954,9 +969,10 @@ void ItemComponent::AddToInventory( GameItem* item )
 }
 
 
-void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems )
+int ItemComponent::TransferInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems )
 {
 	GLASSERT( ic );
+	int nTransfer = 0;
 	for( int i=1; i<ic->NumItems(); ++i ) {
 		GameItem* item = ic->GetItem(i);
 		if ( item->Intrinsic() ) continue;
@@ -968,6 +984,7 @@ void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz
 			ic->RemoveFromInventory( i );
 			--i;
 			this->AddToInventory( item );
+			++nTransfer;
 		}
 	}
 
@@ -977,6 +994,7 @@ void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz
 	}
 	hardpointsModified = true;
 	UpdateActive();
+	return nTransfer;
 }
 
 
@@ -997,8 +1015,11 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
-		if ( gameItem->IName() == IStringConst::fruit ) {
+		if ( gameItem->IName() == ISC::fruit ) {
 			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );	// will get refreshed if carred.
+		}
+		else if (gameItem->IName() == ISC::elixir) {
+			parentChit->GetRenderComponent()->AddDeco("elixir", STD_DECO);	// will get refreshed if carred.
 		}
 		else {
 			parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
