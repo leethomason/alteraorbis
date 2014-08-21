@@ -77,7 +77,7 @@ static const float	FRUIT_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
-static const int	GUARD_RANGE					= 2;
+static const int	GUARD_RANGE					= 1;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
 static const int	BUILD_TIME					= 1000;
@@ -1665,7 +1665,7 @@ bool AIComponent::AtFriendlyOrNeutralCore()
 }
 
 
-void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* arr )
+void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* arr, bool* nearPath )
 {
 	// Be careful of performance. Allow one full pathing, use
 	// direct pathing for the rest.
@@ -1680,6 +1680,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 
 	const IString names[2] = { ISC::fruit, ISC::elixir };
 	ItemNameFilter filter(names, 2, IChitAccept::MOB);
+	*nearPath = false;
 
 	// Check local. For local, use direct path.
 	CChitArray chitArr;
@@ -1696,6 +1697,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 					arr->Push(chitArr[k]);
 				}
 			}
+			*nearPath = true;
 			return;
 		}
 	}
@@ -1782,13 +1784,14 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 			if ( thisComp.itemComponent->CanAddToInventory() ) {
 				Vector2F fruitPos = { 0, 0 };
 				CChitArray fruit;
-				FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos, &fruit );
+				bool nearPath = false;
+				FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos, &fruit, &nearPath );
 				if ( fruit.Size() ) {
 					//GameItem* gi = fruit[0]->GetItem();
 					Vector2I fruitPos2i = ToWorld2I(fruitPos);
 					Vector2I sector = ToSector(fruitPos2i);
 					CoreScript* cs = CoreScript::GetCore(sector);
-					if (cs && cs->HasTask(fruitPos2i)) {
+					if (!nearPath && cs && cs->HasTask(fruitPos2i)) {
 						// Do nothing; assume it is this task.
 					}
 					else {
@@ -1915,8 +1918,8 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 	if (worker || usesBuilding)
 	{
 		for (int pass = 0; pass < 2; ++pass) {
-			const IString iItem = (pass == 0) ? ISC::elixir : ISC::fruit;
-			const IString iBuilding = (pass == 0) ? ISC::bar : ISC::distillery;
+			const IString iItem     = (pass == 0) ? ISC::elixir : ISC::fruit;
+			const IString iBuilding = (pass == 0) ? ISC::bar    : ISC::distillery;
 
 			int index = thisComp.itemComponent->FindItem(iItem);
 			if (index >= 0) {

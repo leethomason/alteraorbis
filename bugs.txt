@@ -69,10 +69,10 @@
 			d time to use bar (low??)
 			d double tech decay
 			x weapon sorting not quite correct
-		- new porch art
-		- add elixir to stuff that gets carried
-			- head deco: shouldn't show loot
-			- head deco: should show elixir
+		x new porch art
+		x add elixir to stuff that gets carried
+			x head deco: shouldn't show loot
+			x head deco: should show elixir
 
 		- Linux
 		- Android

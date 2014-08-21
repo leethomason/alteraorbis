@@ -1109,7 +1109,7 @@ void GameScene::HandleHotKey( int mask )
 		}
 		buildDescription.SetText("");
 	}
-	else if (mask == GAME_HK_CAMERA_HOME) {
+	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 		if (coreScript && sim->GetPlayerChit()) {
 			if (buildActive > 0) {
@@ -1126,6 +1126,13 @@ void GameScene::HandleHotKey( int mask )
 				cc->SetTrack(sim->GetPlayerChit()->ID());
 				uiMode[UI_VIEW].SetDown();
 			}
+		}
+	}
+	else if (mask == GAME_HK_CAMERA_CORE) {
+		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+		if (cc) {
+			cc->SetTrack(coreScript->ParentChit()->ID());
 		}
 	}
 	else if (mask == GAME_HK_SPACE) {
