@@ -71,7 +71,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	note.Init( &gamui2D );
 	note.SetText( "Thanks for playing this beta of Altera! "
-				  "Please see the README.txt for information and a link to the 'how to play' game wiki." );
+				  "Please see the README.txt for information and a link to the 'how to play' wiki." );
 
 	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	if (SettingsManager::Instance()->AudioOn()) {

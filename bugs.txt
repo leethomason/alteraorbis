@@ -37,6 +37,7 @@
 
 - game
 	- Beta 2c
+		- update SDL
 		- tab in/out. window resize? can't repro.
 		- map travel: lanes?
 		- Linux
