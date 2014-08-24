@@ -72,39 +72,56 @@ void DomainAI::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 bool DomainAI::BuyWorkers()
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	if (!Preamble(&sector, &cs, &workQueue))
+		return false;
 	GameItem* mainItem = parentChit->GetItem();
-	Vector2I sector = spatial->GetSector();
-	CoreScript* cs = CoreScript::GetCore(sector);
 
 	// Create workers, if needed.
 	Rectangle2F b = ToWorld(InnerSectorBounds(sector));
 	CChitArray arr;
 	ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
-	if (arr.Empty()) {
-		if (mainItem->wallet.gold >= WORKER_BOT_COST) {
+	static const int GOLD[4] = { WORKER_BOT_COST, 400, 800, 1200 };
+	for (int i = 0; i < 4; ++i) {
+		if (arr.Size() == i && mainItem->wallet.gold >= GOLD[i]) {
 			Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
 			Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
+			return true;	// we should be buying workers, even if we can't.
 		}
-		return true;	// we should be buying workers, even if we can't.
 	}
 	return false;
 }
 
 
+bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq)
+{
+	GLASSERT(parentChit->GetSpatialComponent());
+	*sector = parentChit->GetSpatialComponent()->GetSector();
+	*cs = CoreScript::GetCore(*sector);
+	GLASSERT(*cs);
+	if (!(*cs)) return false;
+	*wq = (*cs)->GetWorkQueue();
+	GLASSERT(*wq);
+	if (!(*wq)) return false;
+
+	return true;
+}
+
+
 bool DomainAI::BuildRoad()
 {
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	if (!Preamble(&sector, &cs, &workQueue))
+		return false;
+
 	// Check a random road.
 	int p4 = parentChit->random.Rand(4);
 	bool issuedOrders = false;
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	CoreScript* cs = CoreScript::GetCore(sector);
-	GLASSERT(cs);
-	if (!cs) return false;
-	WorkQueue* workQueue = cs->GetWorkQueue();
-	GLASSERT(workQueue);
-	if (!workQueue) return false;
 
 	for (int i = 0; i < road[p4].Size(); ++i) {
 		Vector2I pos2i = road[p4][i];
@@ -124,15 +141,13 @@ int DomainAI::DoTick(U32 delta)
 	if (!spatial) return ticker.Next();
 
 	if (ticker.Delta(delta)) {
+		Vector2I sector = { 0, 0 };
+		CoreScript* cs = 0;
+		WorkQueue* workQueue = 0;
+		if (!Preamble(&sector, &cs, &workQueue))
+			return VERY_LONG_TICK;
 
-		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-		CoreScript* cs = CoreScript::GetCore(sector);
-		GLASSERT(cs);
-		if (!cs) return VERY_LONG_TICK;
-		WorkQueue* workQueue = cs->GetWorkQueue();
-		GLASSERT(workQueue);
-		if (!workQueue) return VERY_LONG_TICK;
-		if (workQueue->HasJob()) {
+	if (workQueue->HasJob()) {
 			return ticker.Next();
 		}
 

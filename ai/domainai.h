@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "../xegame/chitbag.h"
 #include "../xegame/cticker.h"
 
+class CoreScript;
+class WorkQueue;
+
 class DomainAI : public Component, public IChitListener
 {
 	typedef Component super;
@@ -37,6 +40,7 @@ public:
 	virtual int DoTick(U32 delta);
 
 private:
+	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq);
 	bool BuyWorkers();
 	bool BuildRoad();
 
