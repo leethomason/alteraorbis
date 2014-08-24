@@ -146,6 +146,14 @@
         mass="100"
         />
 
+  <item name="trollStatue"
+        resource="trollStatue"
+        flags="CLICK_THROUGH"
+        mass="300"
+        cost="100"
+        size="2"
+        />
+
   <item name="vault"
         resource="vault"
         flags="DAMAGE_UNDER_WATER"

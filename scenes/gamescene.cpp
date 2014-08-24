@@ -118,7 +118,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		modeButton[i].SetText( modeButtonText[i] );
 		modeButton[0].AddToToggleGroup( &modeButton[i] );
 	}
-	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
+	for( int i=0; i<BuildScript::NUM_PLAYER_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
 
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -255,7 +255,7 @@ void GameScene::Resize()
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
 
-	for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
+	for( int i=1; i<BuildScript::NUM_PLAYER_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
 		if ( bd.group != level ) {
 			level = bd.group;
@@ -759,7 +759,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		mapDragStart.Zero();
 	}
 	if (!uiHasTap && action == GAME_TAP_DOWN && gamui2D.DisabledTapCaptured()) {
-		for (int i = 1; i < BuildScript::NUM_OPTIONS; ++i) {
+		for (int i = 1; i < BuildScript::NUM_PLAYER_OPTIONS; ++i) {
 			if (&buildButton[i] == gamui2D.DisabledTapCaptured()) {
 				BuildScript buildScript;
 				const BuildData& data = buildScript.GetData(i);
@@ -1002,7 +1002,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	buildActive = 0;
 	buildDescription.SetText("");
 	if (uiMode[UI_BUILD].Down()) {
-		for (int i = 1; i < BuildScript::NUM_OPTIONS; ++i) {
+		for (int i = 1; i < BuildScript::NUM_PLAYER_OPTIONS; ++i) {
 			if (&buildButton[i] == item) {
 				buildActive = i;
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
@@ -1707,8 +1707,8 @@ void GameScene::DoTick( U32 delta )
 	{
 		LumosChitBag* cb = sim->GetChitBag();
 		Vector2I sector = cb->GetHomeSector();
-		int arr[BuildScript::NUM_OPTIONS] = { 0 };
-		cb->BuildingCounts(sector, arr, BuildScript::NUM_OPTIONS);
+		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
+		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
 		SetBuildButtons(arr);
 		SetHelpText(arr, nWorkers);
 	}

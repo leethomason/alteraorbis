@@ -159,7 +159,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	saveButton, loadButton;
-	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
+	gamui::ToggleButton	buildButton[BuildScript::NUM_PLAYER_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;
 	gamui::PushButton	cameraHomeButton;

@@ -7,7 +7,7 @@
 using namespace grinliz;
 
 /* static */
-BuildData BuildScript::buildData[NUM_OPTIONS] = {
+BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "", "", 0, 0, 0 },
 	// Utility
 	{ "Cancel", "",		0, "Cancels build orders in place." },
@@ -44,6 +44,9 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "Stop", "",					5, "Absorbs a charge or spark.", "Requires a Circuit Fab", CIRCUIT_STOP },
 	{ "Detector", "",				5, "Sparks for enemies of any mass.", "Requires a Circuit Fab", CIRCUIT_DETECT_ENEMY },
 	{ "Transistor", "",				5, "Digital toggle switch.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
+
+	// Additional:
+	{ "TrollStatue", "trollStatue", 6 },
 };
 
 	//{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
@@ -51,7 +54,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 
 const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure, int *id )
 {
-	for( int i=0; i<NUM_OPTIONS; ++i ) {
+	for( int i=0; i<NUM_TOTAL_OPTIONS; ++i ) {
 		if ( structure == buildData[i].cStructure ) {
 			if (id) *id = i;
 			return &GetData( i );
@@ -63,7 +66,7 @@ const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& stru
 
 const BuildData& BuildScript::GetData( int i )
 {
-	GLASSERT( i >= 0 && i < NUM_OPTIONS );
+	GLASSERT( i >= 0 && i < NUM_TOTAL_OPTIONS );
 	if ( buildData[i].size == 0 ) {
 
 		buildData[i].name		= StringPool::Intern( buildData[i].cName, true );
@@ -114,6 +117,10 @@ const BuildData& BuildScript::GetData( int i )
 			float timeF = 1.0;
 			gi.keyValues.Get( "need.time", &timeF );
 			buildData[i].standTime = int( timeF * 1000.0f );
+
+			int porch = 0;
+			gi.keyValues.Get(ISC::porch, &porch);
+			buildData[i].porch = porch != 0;
 		}
 	}
 	return buildData[i];

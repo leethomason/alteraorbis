@@ -136,6 +136,7 @@
   <model filename="elixir.ac"                                              shading="flat" />
   <model filename="ruins.ac"  modelName="ruins1.0"  origin="1.5 0 -0.5"    shading="flat" polyRemoval="pre" />
   <model filename="ruins.ac"  modelName="ruins1.1"  origin="3.5 0 -0.5"    shading="flat" polyRemoval="pre" />
+  <model filename="trollStatue.ac"       shading="flat" polyRemoval="pre" />
 
   <model filename="spark.ac"    assetName="spark"                          shading="flat" />
   <model filename="electron.ac" assetName="charge"                         shading="flat" />

@@ -135,6 +135,80 @@ bool DomainAI::BuildRoad()
 }
 
 
+bool DomainAI::BuildBuilding(int id)
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	if (!Preamble(&sector, &cs, &workQueue))
+		return false;
+
+	BuildScript buildScript;
+	const BuildData& bd = buildScript.GetData(id);
+
+	int endIndex = 0;
+	for (int i = 0; i < MAX_ROADS; ++i) {
+		endIndex = Max(endIndex, road[i].Size());
+	}
+
+	for (int index = 2; index < endIndex; ++index) {
+		for (int i = 0; i < MAX_ROADS; ++i) {
+			if (index >= road[i].Size())
+				continue;
+
+			Vector2I head = road[i][index];
+			Vector2I tail = road[i][index - 1];
+			Vector2I dir = head - tail;
+			Vector2I left  = { -dir.y, dir.x };
+			Vector2I right = { dir.y, dir.x };
+			Vector2I porchScoot = { 0, 0 };
+
+			int size = bd.size;
+			if (bd.porch) {
+				++size;
+			}
+
+			int rotation = 0;
+			if (dir.y == 1) {
+				rotation = 90;
+			}
+			else if (dir.x == -1) {
+				rotation = 180;
+				porchScoot.Set(0, 1);
+			}
+			else if (dir.y == -1) {
+				rotation = 270;
+				porchScoot.Set(1, 0);
+			}
+
+			Vector2I loc0, loc1;
+			loc0 = head + left;
+			loc1 = head + left * (size) + dir*(size-1);
+			Rectangle2I b;
+			b.FromPair(loc0, loc1);
+
+			bool okay = true;
+			for (Rectangle2IIterator it(b); !it.Done(); it.Next()) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+				if (!wg.IsLand() || wg.Pave()) {
+					okay = false;
+					break;
+				}
+			}
+
+			if (okay) {
+				for (Rectangle2IIterator it(b); !it.Done(); it.Next()) {
+					workQueue->AddAction(it.Pos(), BuildScript::PAVE);
+				}
+				workQueue->AddAction(b.min + porchScoot, id, (float)rotation);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 int DomainAI::DoTick(U32 delta)
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
@@ -147,13 +221,20 @@ int DomainAI::DoTick(U32 delta)
 		if (!Preamble(&sector, &cs, &workQueue))
 			return VERY_LONG_TICK;
 
-	if (workQueue->HasJob()) {
+		// FIXME: this isn't really correct. will stall
+		// domain ai if there is an inaccessible job.
+		if (workQueue->HasJob()) {
 			return ticker.Next();
 		}
+
+		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 
 		while (true) {
 			if (BuyWorkers()) break;
 			if (BuildRoad()) break;
+			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
+			if (arr[BuildScript::MARKET] == 0 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
 		}
 	}
