@@ -38,6 +38,10 @@ public:
 
 private:
 	bool BuyWorkers();
+	bool BuildRoad();
+
+	enum { MAX_ROADS = 4};
+	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
 
 	CTicker ticker;
 };

@@ -258,6 +258,12 @@ public:
 		Pop();
 	}
 
+	void Reverse() {
+		for (int i = 0; i < size / 2; ++i) {
+			Swap(&mem[i], &mem[size - 1 - i]);
+		}
+	}
+
 	int Find( const T& t ) const {
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == t )

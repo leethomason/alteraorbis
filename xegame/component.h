@@ -65,7 +65,9 @@ public:
 
 	virtual int DoTick( U32 delta )						{ return VERY_LONG_TICK; }
 	virtual void DoUpdate()								{}
-	virtual void DebugStr( grinliz::GLString* str )		{}
+	virtual void DebugStr(grinliz::GLString* str)		{
+		str->AppendFormat("[%s] ", Name());
+	}
 
 	virtual void OnChitEvent( const ChitEvent& event )			{}
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );

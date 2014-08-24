@@ -60,6 +60,7 @@ public:
 	// Manages what jobs there are to do:
 	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation = 0);	// add an action to do
 	void Remove( const grinliz::Vector2I& pos );
+	bool HasJob() const { return !queue.Empty(); }
 	
 	// Manages which chits are doing a job:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
@@ -91,7 +92,6 @@ private:
 	void SendNotification( const grinliz::Vector2I& pos );
 
 	Chit				*parentChit;
-	//int					idPool;
 	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do
 };
