@@ -205,6 +205,10 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 	v.Set( 0, 0, 0, 0 );
 	if ( !hasPorch ) return v;
 
+	v = CalcPorchPos(bounds.min, bounds.Width(), this->GetYRotation());
+	return v;
+
+	/*
 	// picks up the size, so we only need to 
 	// adjust one coordinate for the porch below
 	v.min = bounds.min;
@@ -221,5 +225,27 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 	}
 
 	return v;
+	*/
 }
 
+
+Rectangle2I MapSpatialComponent::CalcPorchPos(const Vector2I& pos, int size, float rotation)
+{
+	Rectangle2I b;
+	b.min = b.max = pos;
+	b.max.x += (size - 1);
+	b.max.y += (size - 1);
+
+	int r = LRintf(rotation / 90.0f);
+	Rectangle2I v = b;
+
+	switch (r) {
+		case 0:		v.min.y = v.max.y = b.max.y + 1;	break;
+		case 1:		v.min.x = v.max.x = b.max.x + 1;	break;
+		case 2:		v.min.y = v.max.y = b.min.y - 1;	break;
+		case 3:		v.min.x = v.max.x = b.min.x - 1;	break;
+		default:	GLASSERT(0);	break;
+	}
+
+	return v;
+}

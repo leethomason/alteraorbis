@@ -170,15 +170,19 @@ bool DomainAI::BuildBuilding(int id)
 
 			int rotation = 0;
 			if (dir.y == 1) {
-				rotation = 90;
+				rotation = 270;
+				porchScoot.Set(1, 0);
 			}
 			else if (dir.x == -1) {
 				rotation = 180;
 				porchScoot.Set(0, 1);
 			}
 			else if (dir.y == -1) {
-				rotation = 270;
-				porchScoot.Set(1, 0);
+				rotation = 90;
+			}
+
+			if (!bd.porch) {
+				porchScoot.Zero();
 			}
 
 			Vector2I loc0, loc1;
@@ -197,9 +201,28 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			if (okay) {
-				for (Rectangle2IIterator it(b); !it.Done(); it.Next()) {
-					workQueue->AddAction(it.Pos(), BuildScript::PAVE);
-				}
+				Chit* chit = Context()->chitBag->QueryBuilding(b);
+				okay = !chit;
+			}
+
+			if (okay) {
+				/*
+				if (bd.porch) {
+					Vector2I p1 = head + left;
+					Vector2I p2 = p1;
+					if (dir.x == 0) {
+						p1.y = b.min.y;
+						p2.y = b.max.y;
+					}
+					else {
+						p1.x = b.min.x;
+						p2.x = b.max.x;
+					}
+					workQueue->AddAction(p1, BuildScript::PAVE);
+					if (size > 1) {
+						workQueue->AddAction(p2, BuildScript::PAVE);						
+					}
+				}*/
 				workQueue->AddAction(b.min + porchScoot, id, (float)rotation);
 				return true;
 			}
@@ -234,7 +257,7 @@ int DomainAI::DoTick(U32 delta)
 			if (BuyWorkers()) break;
 			if (BuildRoad()) break;
 			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
-			if (arr[BuildScript::MARKET] == 0 && BuildBuilding(BuildScript::MARKET)) break;
+			if (arr[BuildScript::MARKET] < 4 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
 		}
 	}
