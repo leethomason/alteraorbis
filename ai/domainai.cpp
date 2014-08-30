@@ -120,15 +120,16 @@ bool DomainAI::BuildRoad()
 		return false;
 
 	// Check a random road.
-	int p4 = parentChit->random.Rand(4);
 	bool issuedOrders = false;
 
-	for (int i = 0; i < road[p4].Size(); ++i) {
-		Vector2I pos2i = road[p4][i];
-		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-		if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
-			workQueue->AddAction(pos2i, BuildScript::PAVE);
-			issuedOrders = true;
+	for (int p = 0; p < 4 && !issuedOrders; ++p) {
+		for (int i = 0; i < road[p].Size(); ++i) {
+			Vector2I pos2i = road[p][i];
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+			if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
+				workQueue->AddAction(pos2i, BuildScript::PAVE);
+				issuedOrders = true;
+			}
 		}
 	}
 	return issuedOrders;
@@ -160,39 +161,26 @@ bool DomainAI::BuildBuilding(int id)
 			Vector2I tail = road[i][index - 1];
 			Vector2I dir = head - tail;
 			Vector2I left  = { -dir.y, dir.x };
-			Vector2I right = { dir.y, dir.x };
-			Vector2I porchScoot = { 0, 0 };
+			Vector2I right = -left;
+			int porch = bd.porch ? 1 : 0;
 
-			int size = bd.size;
-			if (bd.porch) {
-				++size;
-			}
+			Rectangle2I fullBounds, buildBounds, porchBounds;
+			fullBounds.FromPair(head - left *(porch + bd.size), tail - left);
+			buildBounds.FromPair(head - left*(porch + bd.size), tail - left*(1 + porch));
+			porchBounds.FromPair(head - left, tail - left);
 
+			// FIXME: move to a function and don't think about the weird
+			// rotation system again. Strange sort of coordinate system.
+
+			// Why right? The building is to the left, so it faces right.
 			int rotation = 0;
-			if (dir.y == 1) {
-				rotation = 270;
-				porchScoot.Set(1, 0);
-			}
-			else if (dir.x == -1) {
-				rotation = 180;
-				porchScoot.Set(0, 1);
-			}
-			else if (dir.y == -1) {
-				rotation = 90;
-			}
-
-			if (!bd.porch) {
-				porchScoot.Zero();
-			}
-
-			Vector2I loc0, loc1;
-			loc0 = head + left;
-			loc1 = head + left * (size) + dir*(size-1);
-			Rectangle2I b;
-			b.FromPair(loc0, loc1);
+			if (right.y == 1) rotation = 180;
+			else if (right.x == 1) rotation = 270;
+			else if (right.y == -1) rotation = 0;
+			else if (right.x == -1) rotation = 90;
 
 			bool okay = true;
-			for (Rectangle2IIterator it(b); !it.Done(); it.Next()) {
+			for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
 				if (!wg.IsLand() || wg.Pave()) {
 					okay = false;
@@ -201,29 +189,17 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			if (okay) {
-				Chit* chit = Context()->chitBag->QueryBuilding(b);
+				Chit* chit = Context()->chitBag->QueryBuilding(fullBounds);
 				okay = !chit;
 			}
 
 			if (okay) {
-				/*
+				workQueue->AddAction(buildBounds.min, id, (float)rotation);
 				if (bd.porch) {
-					Vector2I p1 = head + left;
-					Vector2I p2 = p1;
-					if (dir.x == 0) {
-						p1.y = b.min.y;
-						p2.y = b.max.y;
+					for (Rectangle2IIterator it(porchBounds); !it.Done(); it.Next()) {
+						workQueue->AddAction(it.Pos(), BuildScript::PAVE);
 					}
-					else {
-						p1.x = b.min.x;
-						p2.x = b.max.x;
-					}
-					workQueue->AddAction(p1, BuildScript::PAVE);
-					if (size > 1) {
-						workQueue->AddAction(p2, BuildScript::PAVE);						
-					}
-				}*/
-				workQueue->AddAction(b.min + porchScoot, id, (float)rotation);
+				}
 				return true;
 			}
 		}
@@ -255,7 +231,7 @@ int DomainAI::DoTick(U32 delta)
 
 		while (true) {
 			if (BuyWorkers()) break;
-			if (BuildRoad()) break;
+			if (BuildRoad()) break;	// will return true until all roads are built.
 			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 			if (arr[BuildScript::MARKET] < 4 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
