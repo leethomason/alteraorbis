@@ -62,6 +62,7 @@
 	- Beta 3
 		x remove social
 		- domain AI
+			- left + right support in the AI
 			- use the lest common pave
 			- save pave, test
 		- troll deity

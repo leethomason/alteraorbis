@@ -37,6 +37,7 @@
 
 class DamageDesc;
 class XStream;
+class NewsHistory;
 
 /*
 	Items and Inventory.
@@ -346,6 +347,10 @@ public:
 	void SetProperName( const grinliz::IString& n );
 	void SetResource( const char* n )			{ resource = grinliz::StringPool::Intern( n ); }
 
+	// Sets this item to be tracked. Also records the team that created it, 
+	// for generating colors when applicable.
+	void SetSignificant(NewsHistory* history, const grinliz::Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator);
+
 	enum {
 		// Type(s) of the item
 		MELEE_WEAPON		= (1<<1),
@@ -395,7 +400,7 @@ public:
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
-	int		team;			// which team this item is aligned with
+	int		team;			// which team this item is aligned with (or created it, for items.)
 	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
 	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half

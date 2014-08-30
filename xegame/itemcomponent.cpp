@@ -1160,7 +1160,6 @@ void ItemComponent::SetHardpoints()
 	}
 	RenderComponent* rc = parentChit->GetRenderComponent();
 	bool female = strstr( itemArr[0]->Name(), "Female" ) != 0;
-	int  team   = itemArr[0]->team;
 
 	for( int i=0; i<itemArr.Size(); ++i ) {
 		const GameItem* item = itemArr[i];
@@ -1180,7 +1179,7 @@ void ItemComponent::SetHardpoints()
 			ProcRenderInfo info;
 
 			if ( !proc.empty() ) {
-				AssignProcedural( proc.c_str(), female, item->ID(), team, false, item->Effects(), features, &info );
+				AssignProcedural( proc.c_str(), female, item->ID(), item->team, false, item->Effects(), features, &info );
 			}
 			rc->SetProcedural( (i==0) ? 0 : itemArr[i]->hardpoint, info );
 		}

@@ -14,6 +14,7 @@
 */
 
 #include "gameitem.h"
+#include "news.h"
 
 #include "../grinliz/glstringutil.h"
 #include "../engine/serialize.h"
@@ -693,6 +694,19 @@ IString GameItem::ITitle() const
 	}
 	*/
 	return IString();
+}
+
+
+void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator)
+{
+	// Mark this item as important with a destroyMsg:
+	keyValues.Set("destroyMsg", destructionMsg);
+	NewsEvent news(creationMsg, pos, this, creator);
+	history->Add(news);
+
+	if (creator && team == 0) {
+		team = creator->Team();
+	}
 }
 
 

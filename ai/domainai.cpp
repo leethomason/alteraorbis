@@ -316,10 +316,8 @@ int DomainAI::DoTick(U32 delta)
 				market->GetItemComponent()->AddToInventory(item);
 
 				// Mark this item as important with a destroyMsg:
-				item->GetItem()->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
-				NewsHistory* history = Context()->chitBag->GetNewsHistory();
-				NewsEvent news(NewsEvent::FORGED, pos, item, Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
-				history->Add(news);
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, 
+									 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
 			}
 		}
 	}

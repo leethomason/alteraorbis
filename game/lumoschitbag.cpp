@@ -370,6 +370,8 @@ Chit* LumosChitBag::GetDeity(int id)
 		AddItem("deity", chit, context->engine, 0, 0);
 		chit->GetItem()->SetProperName(NAME[id]);
 	}
+
+	if (id == DEITY_TRUULGA) chit->GetItem()->team = TEAM_TROLL;
 	return chit;
 }
 
@@ -399,9 +401,7 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
 		
 		// Mark this item as important with a destroyMsg:
-		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
-		NewsHistory* history = GetNewsHistory();
-		history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::GREATER_MOB_CREATED, NewsEvent::GREATER_MOB_KILLED, 0);
 	}
 	chit->GetItem()->wallet.Add( w );	
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
@@ -453,10 +453,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	Vector2I sector = ToSector( pos );
 	CoreScript::GetCore( sector )->AddCitizen( chit );
-
-	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
-	NewsHistory* history = GetNewsHistory();
-	history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));

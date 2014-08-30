@@ -2,6 +2,7 @@
 #include "../grinliz/glvector.h"
 #include "../game/gameitem.h"
 #include "../xegame/istringconst.h"
+#include "../game/team.h"
 
 using namespace grinliz;
 
@@ -210,6 +211,13 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 }
 
 
+WeaponGen::WeaponGen(U32 _seed, int _team, int _effectFlags, int _features) : seed(_seed), team(_team), effectFlags(_effectFlags), features(_features)
+{
+	int id = 0;
+	Team::SplitID(_team, &team, &id);
+}
+
+
 Color4F WeaponGen::GetEffectColor(int flags)
 {
 	Vector2I effect = { 0, 0 };
@@ -274,9 +282,14 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 							Lerp( base.g(), contrast.g(), LERP ),
 							Lerp( base.b(), contrast.b(), LERP ),
 							Lerp( base.a(), contrast.a(), LERP ) );
-							
-	array[EFFECT]		= effectColor;
+	
+	// Handle special cases.
+	if (team == TEAM_TROLL) {
+		array[BASE] = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
+		array[CONTRAST] = palette->Get4F(PAL_RED * 2, PAL_GREEN);
+	}
 
+	array[EFFECT]		= effectColor;
 	array[BASE].a()		= 0;
 	array[CONTRAST].a()	= 0;
 	array[EFFECT].a()	= alpha;
@@ -440,7 +453,7 @@ void AssignProcedural( const char* name,
 		gen.AssignSuit( info );
 	}
 	else if ( StrEqual( name, "ring" )) {
-		WeaponGen gen( seed, effectFlags, features );
+		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignRing( info );
 	}
 	else if ( StrEqual( name, "gun" )
@@ -449,11 +462,11 @@ void AssignProcedural( const char* name,
 			  || StrEqual( name, "pulse" )
 			  || StrEqual( name, "beamgun" ))
 	{
-		WeaponGen gen( seed, effectFlags, features );
+		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignGun( info );
 	}
 	else if ( StrEqual( name, "shield" )) {
-		WeaponGen gen( seed, effectFlags, features );
+		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignShield( info );
 	}
 	else {

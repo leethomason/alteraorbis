@@ -715,12 +715,9 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 			item->BestName(),
 			sector.x, sector.y));
 
-		// Mark this item as important with a destroyMsg:
-		item->GetItem()->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
-		NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
-		NewsEvent news(NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit);
-		history->Add(news);
-
+		item->SetSignificant(thisComp.chit->Context()->chitBag->GetNewsHistory(), 
+							 thisComp.spatial->GetPosition2D(),
+							 NewsEvent::FORGED, NewsEvent::UN_FORGED, thisComp.chit);
 		return true;
 	}
 	return false;

@@ -107,7 +107,7 @@ public:
 		PART_MASK   = 0x0f
 	};
 
-	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}
+	WeaponGen(U32 _seed, int _team, int _effectFlags, int _features);
 	void AssignRing( ProcRenderInfo* info );
 	void AssignGun( ProcRenderInfo* info );
 	void AssignShield( ProcRenderInfo* info );
@@ -126,6 +126,7 @@ private:
 		NUM_ROWS = 8
 	};
 	U32 seed;
+	int team;	// the group part
 	int effectFlags;
 	int features;
 };

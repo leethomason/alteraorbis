@@ -116,8 +116,8 @@ NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* it
 	this->what = what;
 	this->pos = pos;
 	this->itemID = item->ID();
-	this->chitID = second->ID();
-	this->secondItemID = second->GetItem() ? second->GetItem()->ID() : 0;
+	this->chitID = second ? second->ID() : 0;
+	this->secondItemID = (second && second->GetItem()) ? second->GetItem()->ID() : 0;
 }
 
 
