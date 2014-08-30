@@ -366,7 +366,7 @@ Chit* LumosChitBag::GetDeity(int id)
 		chit = NewChit();
 		deityID[id] = chit->ID();
 
-		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "BeastCore", "ShogScrift" };
+		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "Truulga", "BeastCore", "ShogScrift" };
 		AddItem("deity", chit, context->engine, 0, 0);
 		chit->GetItem()->SetProperName(NAME[id]);
 	}

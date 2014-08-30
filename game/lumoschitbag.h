@@ -221,6 +221,7 @@ public:
 		DEITY_MOTHER_CODE,	// master control
 		DEITY_Q_CORE,		// logistics, infrastructure
 		DEITY_R1K_CORE,		// adventures
+		DEITY_TRUULGA,		// troll deity
 
 		// in progress:
 		DEITY_BEAST_CORE,	// beast-man core. name TBD

@@ -12,6 +12,10 @@
 #include "../game/worldinfo.h"
 #include "../script/buildscript.h"
 #include "../game/workqueue.h"
+#include "../xegame/itemcomponent.h"
+#include "../script/forgescript.h"
+#include "../game/team.h"
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -29,6 +33,7 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 	ticker.SetPeriod(2000 + chit->random.Rand(1000));
+	forgeTicker.SetPeriod(10 * 1000 + chit->random.Rand(1000));
 
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
@@ -266,6 +271,56 @@ int DomainAI::DoTick(U32 delta)
 			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 			if (arr[BuildScript::MARKET] < 4 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
+		}
+	}
+	if (forgeTicker.Delta(delta)) {
+		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+
+		// find a market.
+		// if has cap, make an item
+		// add the item, transfer from reserve bank
+		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+		Chit* market = Context()->chitBag->FindBuilding(ISC::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0);
+		if (market && market->GetItemComponent() && market->GetItemComponent()->CanAddToInventory()) {
+
+			int group = 0, id = 0;
+			int itemType = ForgeScript::GUN;
+			int partsMask = 0xff;
+			int effectsMask = GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK;
+			int tech = 0;
+			int level = 0;
+			int seed = parentChit->random.Rand();
+
+			Team::SplitID(parentChit->Team(), &group, &id);
+
+			switch (group) {
+				case TEAM_TROLL:
+				{
+					itemType = parentChit->random.Rand(ForgeScript::NUM_ITEM_TYPES);
+					if (itemType == ForgeScript::RING) partsMask = WeaponGen::TROLL_RING_PART_MASK;
+					effectsMask = 0;
+					tech = 0;
+					level = 4;
+				}
+				break;
+
+				default:
+				GLASSERT(0);
+				break;
+			}
+
+			Wallet cost;
+			GameItem* item = ForgeScript::DoForge(itemType, ReserveBank::Instance()->bank, &cost, partsMask, effectsMask, tech, level, seed);
+			if (item) {
+				Transfer(&item->wallet, &ReserveBank::Instance()->bank, cost);
+				market->GetItemComponent()->AddToInventory(item);
+
+				// Mark this item as important with a destroyMsg:
+				item->GetItem()->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
+				NewsHistory* history = Context()->chitBag->GetNewsHistory();
+				NewsEvent news(NewsEvent::FORGED, pos, item, Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+				history->Add(news);
+			}
 		}
 	}
 	return ticker.Next();

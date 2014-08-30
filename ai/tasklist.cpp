@@ -679,10 +679,6 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech )
 {
-	// Guarentee we can build something:
-	if ( thisComp.item->wallet.crystal[0] == 0 ) {
-		return false;
-	}
 	if ( !thisComp.itemComponent->CanAddToInventory() ) {
 		return false;
 	}
@@ -692,18 +688,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	IShield* shield = thisComp.itemComponent->GetShield();
 
 	int itemType = 0;
-	int subType = 0;
-	int parts = 1;		// always have body.
 	Random& random = thisComp.chit->random;
-
-	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
-	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK };	// don't allow explosive to be manufactured, yet: , GameItem::EFFECT_EXPLOSIVE
-
-	// Get the inital to "everything"
-	int effects = 0;
-	for (int i = 0; i < GL_C_ARRAY_SIZE(effectsArr); ++i) {
-		effects |= effectsArr[i];
-	}
 
 	if ( !ranged )		itemType = ForgeScript::GUN;
 	else if ( !shield ) itemType = ForgeScript::SHIELD;
@@ -712,92 +697,33 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		itemType = random.Rand( ForgeScript::NUM_ITEM_TYPES );
 	}
 
-	if ( itemType == ForgeScript::GUN ) {
-		if ( tech == 0 )
-			subType = random.Rand( ForgeScript::NUM_TECH0_GUNS );
-		else
-			subType = random.Rand( ForgeScript::NUM_GUN_TYPES );
-		parts = WeaponGen::PART_MASK;
-	}
-	else if ( itemType == ForgeScript::RING ) {
-		if ( (tech < 2) && random.Bit() ) {
-			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;
-		}
-		else {
-			// Don't use the blade at higher tech levels.
-			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD;
-		}
-	}
-
-	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
-	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
-
 	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
 	int level = thisComp.item->Traits().Level();
-	ForgeScript forge( seed, level, tech );
-	GameItem* item = new GameItem();
+	Wallet cost;
 
-	int cp = 0;
-	int ce = 0;
-	Wallet wallet;
+	// FIXME: the parts mask (0xff) is set for denizen domains.
+	GameItem* item = ForgeScript::DoForge(itemType, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
+	if (item) {
+		Transfer(&item->wallet, &thisComp.item->wallet, cost);
+		thisComp.itemComponent->AddToInventory(item);
+		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
+		thisComp.item->historyDB.Increment("Crafted");
 
-	// Given we have a crystal, we should always be able to build something.
-	// Remove sub-parts and effects until we succeed. As the forge 
-	// changes, this is no longer a hard rule.
-	int maxIt = 10;
-	while( maxIt ) {
-		wallet.EmptyWallet();
-		int techRequired = 0;
-		forge.Build( itemType, subType, parts, effects, item, &wallet, &techRequired, true );
+		Vector2I sector = thisComp.spatial->GetPosition2DI();
+		GLOUTPUT(("'%s' forged the item '%s' at sector=%x,%x\n",
+			thisComp.item->BestName(),
+			item->BestName(),
+			sector.x, sector.y));
 
-		if ( wallet <= thisComp.item->wallet && techRequired <= tech ) {
-			break;
-		}
+		// Mark this item as important with a destroyMsg:
+		item->GetItem()->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
+		NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
+		NewsEvent news(NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit);
+		history->Add(news);
 
-		bool didSomething = false;
-		if (wallet > thisComp.item->wallet && ce < GL_C_ARRAY_SIZE(effectsArr)) {
-			effects &= ~(effectsArr[ce++]);
-			didSomething = true;
-		}
-		if (techRequired > tech && cp < GL_C_ARRAY_SIZE(partsArr)) {
-			parts &= ~(partsArr[cp++]);
-			didSomething = true;
-		}
-
-		// The equations between cost are more complex; the
-		// model above doesn't capture all the combos any more.
-		// Make sure something changes every loop.
-		if (!didSomething) {
-			if (ce < GL_C_ARRAY_SIZE(effectsArr)) {
-				effects &= ~(effectsArr[ce++]);
-			}
-			if (cp < GL_C_ARRAY_SIZE(partsArr)) {
-				parts &= ~(partsArr[cp++]);
-			}
-		}
-		--maxIt;
+		return true;
 	}
-	GLASSERT(maxIt);	// should have seen success...
-	if (!maxIt) return false;
-
-	Transfer(&item->wallet, &thisComp.item->wallet, wallet);
-	thisComp.itemComponent->AddToInventory( item );
-	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );
-	thisComp.item->historyDB.Increment( "Crafted" );
-
-	Vector2I sector = thisComp.spatial->GetPosition2DI();
-	GLOUTPUT(( "'%s' forged the item '%s' at sector=%x,%x\n",
-		thisComp.item->BestName(),
-		item->BestName(),
-		sector.x, sector.y ));
-
-	// Mark this item as important with a destroyMsg:
-	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
-	NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
-	NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
-	history->Add( news );
-
-	return true;
+	return false;
 }
 
 

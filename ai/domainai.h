@@ -49,7 +49,8 @@ private:
 	enum { MAX_ROADS = 4};
 	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
 
-	CTicker ticker;
+	CTicker ticker;			// build logic ticker.
+	CTicker forgeTicker;	// every tick builds something
 };
 
 #endif // REBUILDAI_COMPONENT_INCLUDED

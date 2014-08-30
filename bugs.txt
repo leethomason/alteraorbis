@@ -62,7 +62,18 @@
 	- Beta 3
 		x remove social
 		- domain AI
+			- use the lest common pave
+			- save pave, test
 		- troll deity
+			x create items (Trulga). limit creation to culture.
+			- colors
+			- logic to adjust needs to travel
+			- summon trolls
+			- depart trolls
+			- avatar use
+			- destroy and steal items with markets
+			- logic for Trulga creation, destruction, spawning. destroy cores.
+			- see trolls on map
 		- Gob-men domain
 		- Mantis-men domain
 

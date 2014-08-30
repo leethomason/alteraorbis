@@ -47,10 +47,20 @@ public:
 	static const char* ItemPart( int item, int part );	// part from 0-3, matches WeaponGen order, but index not flag
 	static const char* Effect( int effect );
 
+	static GameItem* DoForge(	int itemType,		// GUN, etc.
+								const Wallet& avail,
+								Wallet* cost,
+								int partsMask,
+								int effectsMask,
+								int tech,
+								int level,
+								int seed);
+
+
 	void Build(	int itemType,		// GUN
 				int subItemType,	// BLASTER
-				int partsFlags,		
-				int effectsFlags,	// GameItem effect flags, not enumeration above
+				int partsFlags,		// WeaponGen::GUN_CELL, etc.	
+				int effectsFlags,	// GameItem effect flags, not enumeration above. GameItem::EFFECT_FIRE, etc.
 				GameItem* target,
 				Wallet* required,
 				int* techRequired,
