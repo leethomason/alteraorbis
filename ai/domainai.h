@@ -43,6 +43,7 @@ private:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq);
 	bool BuyWorkers();
 	bool BuildRoad();
+	bool BuildPlaza(int size);
 	bool BuildBuilding(int id);
 
 	enum { MAX_ROADS = 4};

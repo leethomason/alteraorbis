@@ -136,6 +136,36 @@ bool DomainAI::BuildRoad()
 }
 
 
+bool DomainAI::BuildPlaza(int size)
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	if (!Preamble(&sector, &cs, &workQueue))
+		return false;
+
+	// Check a random road.
+	bool issuedOrders = false;
+	const SectorData& sd = Context()->worldMap->GetSector(sector);
+	Rectangle2I r;
+	r.min = r.max = sd.core;
+	r.Outset(size);
+
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		if (it.Pos() == sd.core) {
+			continue;
+		}
+
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+		if ( !wg.Pave() || wg.Plant() || wg.RockHeight()) {
+			workQueue->AddAction(it.Pos(), BuildScript::PAVE);
+			issuedOrders = true;
+		}
+	}
+	return issuedOrders;
+}
+
+
 bool DomainAI::BuildBuilding(int id)
 {
 	Vector2I sector = { 0, 0 };
@@ -232,6 +262,7 @@ int DomainAI::DoTick(U32 delta)
 		while (true) {
 			if (BuyWorkers()) break;
 			if (BuildRoad()) break;	// will return true until all roads are built.
+			if (BuildPlaza(2)) break;
 			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 			if (arr[BuildScript::MARKET] < 4 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
