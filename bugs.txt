@@ -56,6 +56,9 @@
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
 		- enemies don't attack turrets
+		- free fire to replace rock-melt
+		- update game fiction: rez, de-rez, born, died, kills
+		- display of enemy you are fighting. health, level, portrait.
 
 	- Beta 3
 		- remove social
