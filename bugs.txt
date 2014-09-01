@@ -37,8 +37,18 @@
 
 - game
 	- Beta 2c
+		- attachment issues on wiki
 		- update SDL
 		- tab in/out. window resize? can't repro.
+		- enemies don't attack turrets
+		- better rotation ui
+		- gold shouldn't float
+		- teleport home while in grid travel (oops)
+		- UI tweak:
+			- show current enemies
+			- show overall happiness
+		- face icons in map screen
+
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time
 		- Linux
@@ -49,7 +59,6 @@
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- face icon generation; icon into build (mantis?)
-		- rotate should be somewhere
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
@@ -57,21 +66,22 @@
 		- walk target for the avatar
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
-		- enemies don't attack turrets
 
 	- Beta 3
 		x remove social
 		- domain AI
-			- left + right support in the AI
-			- use the lest common pave
+			- left + right support in the AI for building
+			- use the least common pave
 			- save pave, test
 		- troll deity
-			x create items (Trulga). limit creation to culture.
+			x create items (Truulga). limit creation to culture.
 			- colors
+				x items
+				- buildings
 			- logic to adjust needs to travel
 			- summon trolls
 			- depart trolls
-			- avatar use
+			x avatar use
 			- destroy and steal items with markets
 			- logic for Trulga creation, destruction, spawning. destroy cores.
 			- see trolls on map

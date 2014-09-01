@@ -393,8 +393,11 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 }
 
 
-void TeamGen::Assign( int seed, ProcRenderInfo* info )
+void TeamGen::Assign( int seed, int _team, ProcRenderInfo* info )
 {
+	int team = 0;
+	int id = 0;
+	Team::SplitID(_team, &team, &id);
 	static const int NUM = 4;
 	static const Vector4I colors[NUM] = {
 		// approved
@@ -419,8 +422,14 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 	Vector4F contrast	= palette->Get4F( colors[index].z, colors[index].w );
 	Vector4F glow		= select ? base : contrast;
 
-	// Grey colors for neutral:
-	if ( seed == 0 ) {
+	// Handle special cases.
+	if (team == TEAM_TROLL) {
+		base     = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
+		contrast = palette->Get4F(PAL_RED * 2, PAL_GREEN);
+		glow	 = palette->Get4F(PAL_TANGERINE * 2, PAL_GREEN);
+	}
+	else if (team == TEAM_NEUTRAL) {
+		// Grey colors for neutral:
 		base		= palette->Get4F( 0, PAL_GRAY );	// dark gray
 		contrast	= palette->Get4F( 0, PAL_GRAY );
 		glow		= base;
@@ -446,7 +455,7 @@ void AssignProcedural( const char* name,
 
 	if ( StrEqual( name, "team" )) {
 		TeamGen gen;
-		gen.Assign( team, info );
+		gen.Assign( seed, team, info );
 	}
 	else if ( StrEqual( name, "suit" )) {
 		HumanGen gen( female, seed, team, electric );

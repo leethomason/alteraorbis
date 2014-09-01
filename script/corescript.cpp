@@ -337,7 +337,7 @@ int CoreScript::DoTick( U32 delta )
 		team = parentChit->Team();
 		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign( team, &info );
+		gen.Assign( team, team, &info );
 		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 
@@ -469,7 +469,7 @@ int CoreScript::DoTick( U32 delta )
 
 		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign( 0, &info );
+		gen.Assign( 0, 0, &info );
 		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 	workQueue->DoTick();

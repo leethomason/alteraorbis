@@ -1242,7 +1242,7 @@ void GameScene::HandleHotKey( int mask )
 			RenderComponent* rc = queryArr[i]->GetRenderComponent();
 			TeamGen gen;
 			ProcRenderInfo info;
-			gen.Assign( colorSeed, &info );
+			gen.Assign( colorSeed, 0, &info );
 			rc->SetProcedural( 0, info );
 		}
 		++colorSeed;
