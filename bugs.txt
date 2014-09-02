@@ -40,7 +40,7 @@
 		- attachment issues on wiki
 		- update SDL
 		- tab in/out. window resize? can't repro.
-		- enemies don't attack turrets
+		x enemies don't attack turrets
 		- better rotation ui
 		x gold shouldn't float
 		- teleport home while in grid travel (oops)

@@ -259,7 +259,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
-	msc->SetBuilding(true, porch != 0, circuit);
+	msc->SetBuilding(porch != 0, circuit);
 	chit->Add(msc);
 
 	chit->Add(new RenderComponent(rootItem.ResourceName()));
@@ -557,7 +557,7 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 
 	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->Bounds().Intersect( bounds )) {
-			GLASSERT( it->Building() );
+//			GLASSERT( it->Building() );
 			return it->ParentChit();
 		}
 	}
@@ -909,10 +909,7 @@ bool BuildingFilter::Accept( Chit* chit )
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	if ( msc && msc->Building() ) {
-		return true;
-	}
-	return false;
+	return msc != 0;
 }
 
 
@@ -920,7 +917,7 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-	if (msc && msc->Building()) {
+	if (msc ) { //&& msc->Building()) {
 		GameItem* item = chit->GetItem();
 		if (item && item->HPFraction() < 0.9f) {
 			return true;

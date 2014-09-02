@@ -39,7 +39,7 @@ public:
 
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y, int cx, int cy );
-	void SetBuilding( bool b, bool hasPorch, int circuit );
+	void SetBuilding( bool hasPorch, int circuit );
 	// -- end before OnAdd warning --
 
 	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
@@ -48,7 +48,7 @@ public:
 
 	void SetMode( int mode );	// GRID_IN_USE or GRID_BLOCKED
 	int Mode() const			{ return mode; }
-	bool Building() const		{ return building; }
+	//bool Building() const		{ return building; }
 
 	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
@@ -65,7 +65,7 @@ private:
 	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
 
 	int						mode;
-	bool					building;	// is this a building?
+	//bool					building;	// is this a building?
 	int						hasPorch;	// if a building, does it have a porch?
 	int						hasCircuit;	
 	grinliz::Rectangle2I	bounds;

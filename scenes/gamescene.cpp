@@ -673,7 +673,7 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 
 			if (chit) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-				if (msc && msc->Building()) {
+				if (msc ) { //&& msc->Building()) {
 					float r = msc->GetYRotation();
 					r += 90.0f;
 					r = NormalizeAngleDegrees(r);
