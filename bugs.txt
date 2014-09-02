@@ -37,17 +37,30 @@
 
 - game
 	- Beta 2c
-		- tab in/out. window resize? can't repro.
+		x attachment issues on wiki
+		x gold shouldn't float
+		x update SDL
+		t tab in/out. window resize? can't repro.
+		- enemies don't attack turrets
+		- better rotation ui
+		- teleport home while in grid travel (oops)
+		- UI tweak:
+			- show current enemies, display of enemy you are fighting. health, level, portrait.
+			- show overall happiness
+		- face icons in map screen
+		- free fire to replace rock-melt
+		- update game fiction: rez, de-rez, born, died, kills
+
 		- map travel: lanes?
+		- worldgen: only run fluids past a certain time
 		- Linux
 		- Android
 		- Download tracking
-		- more aggressively seed plants? (Fire takes out a lot.)
-		- some kind of shock source - lighting? electric water??
+		d more aggressively seed plants? (Fire takes out a lot.)
+		d some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- face icon generation; icon into build (mantis?)
-		- rotate should be somewhere
 		- Circuit Fab does nothing
 		- name of Bar
 		- out of gold shouldn't cancel build orders
@@ -55,10 +68,6 @@
 		- walk target for the avatar
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
-		- enemies don't attack turrets
-		- free fire to replace rock-melt
-		- update game fiction: rez, de-rez, born, died, kills
-		- display of enemy you are fighting. health, level, portrait.
 
 	- Beta 3
 		- remove social
