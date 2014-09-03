@@ -927,17 +927,40 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 }
 
 
-bool MOBKeyFilter::Accept(Chit* chit)
+void RelationshipFilter::CheckRelationship(Chit* _compareTo, int _relationship)
 {
-	GameItem* item = chit->GetItem();
-	return item && !item->keyValues.GetIString( IStringConst::mob ).empty();
+	team = _compareTo->Team();
+	relationship = _relationship;
 }
 
 
-bool MOBIshFilter::RelateAccept( Chit* chit ) const
+void RelationshipFilter::CheckRelationship(int _team, int _relationship)
 {
-	if (!relateTo) return true;	// not doing the check.
-	return Team::GetRelationship(chit, relateTo) == relationship;
+	team = _team;
+	relationship = _relationship;
+}
+
+
+bool RelationshipFilter::Accept( Chit* chit )
+{
+	if (team < 0) return true;	// not checking.
+	return Team::GetRelationship(team, chit->Team()) == relationship;
+}
+
+
+bool MOBKeyFilter::Accept(Chit* chit)
+{
+	GameItem* item = chit->GetItem();
+	if (item) {
+		IString mob = item->keyValues.GetIString(ISC::mob);
+		if (!mob.empty()) {
+			if (value.empty())
+				return RelationshipFilter::Accept(chit);
+			else if (value == mob)
+				return RelationshipFilter::Accept(chit);
+		}
+	}
+	return false;
 }
 
 
@@ -947,11 +970,11 @@ bool MOBIshFilter::Accept(Chit* chit)
 	// Mostly a good metric. Doesn't account for dummy targets.
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 	if (pmc && chit->Team()) {
-		return RelateAccept(chit);
+		return RelationshipFilter::Accept(chit);
 	}
 	GameItem* item = chit->GetItem();
 	if (item && item->IName() == IStringConst::dummyTarget) {
-		return RelateAccept(chit);
+		return RelationshipFilter::Accept(chit);
 	}
 	return false;
 }

@@ -61,6 +61,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	mapAtom.tx1 = map2Bounds.max.x / float(worldMap->Width());
 	mapAtom.ty1 = map2Bounds.min.y / float(worldMap->Height());
 
+	mapAtom.renderState = (void*)UIRenderer::RENDERSTATE_UI_DECO;
 	mapImage2.Init( &gamui2D, mapAtom, false );
 	mapImage2.SetCapturesTap( true );
 
@@ -80,6 +81,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
 		map2Text[i].Init( &gamui2D );
 	}
+
+	RenderAtom nullAtom;
+	for (int i = 0; i < MAX_FACE; ++i) {
+		face[i].Init(&gamui2D, nullAtom, true);
+	}
 }
 
 
@@ -87,6 +93,19 @@ MapScene::~MapScene()
 {
 }
 
+
+Rectangle2F MapScene::GridBounds2(int x, int y, bool useGutter)
+{
+	float gridSize = mapImage2.Width() / float(MAP2_SIZE);
+	float gutter = useGutter ? gamui2D.GetTextHeight() * 0.25f : 0;
+
+	Rectangle2F r;
+	r.Set(mapImage2.X() + float(x)*gridSize + gutter,
+		  mapImage2.Y() + float(y)*gridSize + gutter,
+		  mapImage2.X() + float(x + 1)*gridSize - gutter,
+		  mapImage2.Y() + float(y + 1)*gridSize - gutter);
+	return r;
+}
 
 void MapScene::Resize()
 {
@@ -144,30 +163,28 @@ void MapScene::Resize()
 	playerMark2.SetCenterPos( x + dx*(pos.x-map2Bounds.min.x)/map2Bounds.Width(), 
 							  y + dy*(pos.y-map2Bounds.min.y)/map2Bounds.Height());
 
-	float gridSize = mapImage2.Width() / float(MAP2_SIZE);
-	float gutter = gamui2D.GetTextHeight() * 0.25f;
-
 	for( int j=0; j<MAP2_SIZE; ++j ) {
 		for( int i=0; i<MAP2_SIZE; ++i ) {
-			map2Text[j*MAP2_SIZE+i].SetPos( x + float(i)*gridSize + gutter, y + float(j)*gridSize + gutter );
-			map2Text[j*MAP2_SIZE+i].SetBounds( gridSize - gutter*2.0f, 0 );
+			Rectangle2F r = GridBounds2(i, j, true);
+			map2Text[j*MAP2_SIZE + i].SetPos(r.min.x, r.min.y);
+			map2Text[j*MAP2_SIZE+i].SetBounds( r.Width(), 0 );
 		}
 	}
 
 	homeMark2.SetVisible( false );
 	if ( !homeSector.IsZero() && sectorBounds.Contains( homeSector) ) {
 		homeMark2.SetVisible( true );
-		homeMark2.SetSize( gridSize, gridSize );
-		homeMark2.SetPos( x + dx*(float)(homeSector.x-sectorBounds.min.x)/float(MAP2_SIZE),
-						  y + dy*(float)(homeSector.y-sectorBounds.min.y)/float(MAP2_SIZE));
+		Rectangle2F r = GridBounds2(homeSector.x - sectorBounds.min.x, homeSector.y - sectorBounds.min.y, false);
+		homeMark2.SetSize( r.Width(), r.Height() );
+		homeMark2.SetPos(r.min.x, r.min.y);
 	}
 
 	travelMark2.SetVisible( false );
 	if ( !data->destSector.IsZero() && sectorBounds.Contains( data->destSector ) ) {
+		Rectangle2F r = GridBounds2(data->destSector.x - sectorBounds.min.x, data->destSector.y - sectorBounds.min.y, false);
 		travelMark2.SetVisible( true );
-		travelMark2.SetSize( gridSize, gridSize );
-		travelMark2.SetPos( x + dx*(float)(data->destSector.x-sectorBounds.min.x)/float(MAP2_SIZE),
-						    y + dy*(float)(data->destSector.y-sectorBounds.min.y)/float(MAP2_SIZE));
+		travelMark2.SetSize( r.Width(), r.Height() );
+		travelMark2.SetPos(r.min.x, r.min.y);
 	}
 
 	SetText();
@@ -178,56 +195,75 @@ void MapScene::SetText()
 {
 	CDynArray<Chit*> query;
 
+	int primaryTeam = lumosChitBag->GetHomeTeam();
+	int nFace = 0;
+
 	for( int j=0; j<MAP2_SIZE; ++j ) {
 		for( int i=0; i<MAP2_SIZE; ++i ) {
 
 			Vector2I sector = { sectorBounds.min.x + i, sectorBounds.min.y + j };
 			const SectorData& sd = worldMap->GetSector( sector );
 
-			MOBKeyFilter mobFilter;
 			Rectangle2I innerI = sd.InnerBounds();
 			Rectangle2F inner;
 			inner.Set( float(innerI.min.x), float(innerI.min.y), float(innerI.max.x+1), float(innerI.max.y+1) );
 
-			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
-
-			int low=0, med=0, high=0, greater=0;
-			float playerPower = 100.0f;
-
-			CoreScript* homeCore = lumosChitBag->GetHomeCore();
-			int primaryTeam = lumosChitBag->GetHomeTeam();
-			if ( player ) {
-				playerPower = player->GetItemComponent()->PowerRating();
-			}
-
-			for( int k=0; k<query.Size(); ++k ) {
-				const GameItem* item = query[k]->GetItem();
-				if ( Team::GetRelationship( primaryTeam, item->team ) == RELATE_ENEMY ) {
-
-					float power = query[k]->GetItemComponent()->PowerRating();
-
-					if ( item->keyValues.GetIString( ISC::mob ) == ISC::greater )
-						++greater;
-					else if ( power < playerPower * 0.5f ) 
-						++low;
-					else if ( power > playerPower * 2.0f )
-						++high;
-					else
-						++med;
-				}
-			}
-
-			CStr<64> str;
+			CStr<64> str = "";
 			if ( sd.HasCore() ) {
-				const char* owner = "<none>";
+				const char* owner = "";
 				CoreScript* cc = CoreScript::GetCore( sector );
 				if ( cc && cc->InUse() ) {
 					owner = Team::TeamName( cc->ParentChit()->Team() ).c_str();
 				}
-				str.Format( "%s\n%s\n%d-%d-%d G%d", sd.name, owner, low, med, high, greater );
+				str.Format( "%s\n%s", sd.name, owner );
 			}
 			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
+
+
+			for (int pass = 0; pass < 2; ++pass) {
+				MOBKeyFilter mobFilter;
+				mobFilter.CheckRelationship(primaryTeam, RELATE_ENEMY);
+				mobFilter.value = (pass == 0) ? ISC::lesser : ISC::greater;
+
+				CChitArray query;
+				lumosChitBag->QuerySpatialHash(&query, inner, 0, &mobFilter);
+
+				CArray<MCount, 16> counter;
+				for (int k = 0; k < query.Size(); ++k) {
+					const GameItem* item = query[k]->GetItem();
+					IString name = item->IName();
+					int idx = counter.Find(name);
+					if (idx >= 0) {
+						counter[idx].count += 1;
+					}
+					else {
+						MCount c(name);
+						counter.Push(c);
+					}
+				}
+				Sort<MCount, MCountSorter>(counter.Mem(), counter.Size());
+
+				//float textH = gamui2D.GetTextHeight();
+				Rectangle2F r = GridBounds2(i, j, true);
+				float h = r.Width() / 3.0f;
+				float x = r.min.x;
+				float y = r.min.y + h * float(pass + 1);
+
+				for (int k = 0; k < counter.Size() && k < MAX_COL && nFace < MAX_FACE; ++k) {
+					RenderAtom atom = LumosGame::CalcUIIconAtom(counter[k].name.c_str(), true);
+					atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
+					face[nFace].SetAtom(atom);
+					face[nFace].SetSize(h, h);
+					face[nFace].SetPos(x + float(k)*h, y);
+					face[nFace].SetVisible(true);
+					++nFace;
+				}
+			}
 		}
+	}
+
+	for (int i = nFace; i < MAX_FACE; ++i) {
+		face[i].SetVisible(false);
 	}
 
 	if ( !data->destSector.IsZero() ) {

@@ -45,12 +45,28 @@ public:
 	virtual void HandleHotKey( int value );
 
 private:
-
+	grinliz::Rectangle2F GridBounds2(int x, int y, bool gutter);
 	void SetText();
+
+	struct MCount {
+		MCount() : count(0) {}
+		MCount(const grinliz::IString& istr) : name(istr), count(0) {}
+
+		bool operator==(const MCount& rhs) const { return name == rhs.name; }
+
+		grinliz::IString name;
+		int				 count;
+	};
+
+	struct MCountSorter {
+		static bool Less( const MCount& v0, const MCount& v1 )	{ return v0.count > v1.count; }
+	};
 
 	enum {	MAP2_RAD	= 2,
 			MAP2_SIZE	= 5,
-			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE
+			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE,
+			MAX_COL		= 3,
+			MAX_FACE	= MAP2_SIZE2 * MAX_COL * 2
 	};
 
 	LumosGame*			lumosGame;
@@ -66,6 +82,7 @@ private:
 	gamui::PushButton	gridTravel;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
+	gamui::Image		face[MAX_FACE];
 
 	gamui::Image		playerMark, playerMark2;
 	gamui::Image		homeMark,	homeMark2;

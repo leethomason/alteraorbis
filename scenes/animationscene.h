@@ -44,6 +44,7 @@ public:
 	void Rotate( float degrees );
 	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 deltaTime );
+	virtual grinliz::Color4F ClearColor();
 
 private:
 	void LoadModel();
@@ -71,7 +72,7 @@ private:
 	gamui::ToggleButton animSelect[ANIM_COUNT];
 	gamui::TextLabel speedLabel;
 
-	gamui::ToggleButton ortho;
+	gamui::ToggleButton ortho, front;
 	gamui::ToggleButton zeroFrame;
 	gamui::ToggleButton instance;
 	enum { PARTICLE, GUN, RING, NUM_TRIGGERS };

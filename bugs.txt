@@ -43,7 +43,7 @@
 		x enemies don't attack turrets
 		- better rotation ui
 		x gold shouldn't float
-		- teleport home while in grid travel (oops)
+		x teleport home while in grid travel (oops)
 		- UI tweak:
 			- show current enemies
 			- show overall happiness

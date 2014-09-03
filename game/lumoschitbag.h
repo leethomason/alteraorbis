@@ -45,36 +45,41 @@ public:
 	virtual int  Type() { return MAP; }
 };
 
+// This one is abstract - has no Type()
+class RelationshipFilter : public IChitAccept
+{
+public:
+	RelationshipFilter() : team(-1), relationship(0) {}
+
+	virtual bool Accept( Chit* chit );
+
+	void CheckRelationship(Chit* compareTo, int status);
+	void CheckRelationship(int team, int status);
+
+private:
+	int team;
+	int relationship;
+};
 
 // Literally has the MOB key: Denizen, Lesser, Greater
-class MOBKeyFilter : public IChitAccept
+class MOBKeyFilter : public RelationshipFilter
 {
 public:
 	virtual bool Accept( Chit* chit );
 	virtual int  Type() { return MOB; }
+		
+	grinliz::IString value;	// if null (the default) will accept any value for the "mob" key
 };
 
 
 // Generally intended: Denizen, Lesser, Greater, Worker, Visitor, etc. etc.
-class MOBIshFilter : public IChitAccept
+class MOBIshFilter : public RelationshipFilter
 {
 public:
-	MOBIshFilter() : relateTo(0), relationship(0) {}
-	// If set, will check for a relationship.
-
 	virtual bool Accept(Chit* chit);
 	virtual int  Type() { return MOB; }
 
-	void CheckRelationship(Chit* compareTo, int status) {
-		relateTo = compareTo;
-		relationship = status;
-	}
-
 private:
-	bool RelateAccept( Chit* chit) const;
-
-	Chit* relateTo;
-	int relationship;
 };
 
 
