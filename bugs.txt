@@ -42,14 +42,16 @@
 		x update SDL
 		t tab in/out. window resize? can't repro.
 		x enemies don't attack turrets
-		- better rotation ui
+		x face icons in map screen
 		x teleport home while in grid travel (oops)
+		- better rotation ui
 		- UI tweak:
 			- show current enemies, display of enemy you are fighting. health, level, portrait.
 			- show overall happiness
-		- face icons in map screen
 		- free fire to replace rock-melt
 		- update game fiction: rez, de-rez, born, died, kills
+		- replace build with click/drag?
+		- zoom out to full domain
 
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time
