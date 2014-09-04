@@ -182,7 +182,8 @@ private:
 	gamui::PushButton	swapWeapons;
 	gamui::TextLabel	helpText;
 
-	FacePushWidget		faceWidget;
+	FacePushWidget		faceWidget,
+						targetFaceWidget;
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	techLabel;

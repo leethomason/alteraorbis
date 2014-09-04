@@ -66,30 +66,38 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 
 void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 {
-	if ( item ) {
-		ProcRenderInfo info;
-		HumanGen faceGen( strstr( item->ResourceName(), "emale" ) != 0, item->ID(), item->team, false );
-		faceGen.AssignFace( &info );
+	if (item) {
+		IString mob = item->keyValues.GetIString(ISC::mob);
+		if (mob == ISC::denizen) {
+			ProcRenderInfo info;
+			HumanGen faceGen(strstr(item->ResourceName(), "emale") != 0, item->ID(), item->team, false);
+			faceGen.AssignFace(&info);
 
-		RenderAtom procAtom(	(const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
+			RenderAtom procAtom((const void*)(UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP),
 								info.texture,
-								info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w );
+								info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w);
 
-		GetButton()->SetDeco( procAtom, procAtom );
+			GetButton()->SetDeco(procAtom, procAtom);
 
-		renderer->uv[0]			= info.te.uv;
-		renderer->uvClip[0]		= info.te.clip;
-		renderer->colorXForm[0]	= info.color;
+			renderer->uv[0] = info.te.uv;
+			renderer->uvClip[0] = info.te.clip;
+			renderer->colorXForm[0] = info.color;
+		}
+		else {
+			RenderAtom atom = LumosGame::CalcUIIconAtom(item->Name());
+			atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
+			GetButton()->SetDeco(atom, atom);
+		}
 
-		GetButton()->SetVisible( true );
+		GetButton()->SetVisible(true);
 
 		CStr<40> str;
-		if ( flags & SHOW_NAME ) {
-			upper.SetVisible( true );
-			str.AppendFormat( "%s", item->IBestName().c_str() );
+		if (flags & SHOW_NAME) {
+			upper.SetVisible(true);
+			str.AppendFormat("%s", item->IBestName().c_str());
 			//str.AppendFormat( "%s", item->INameAndTitle().c_str() );
 		}
-		upper.SetText( str.c_str() );
+		upper.SetText(str.c_str());
 	}
 	else {
 		GetButton()->SetVisible( false );
@@ -154,7 +162,6 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 			bar[BAR_SHIELD].SetRange( 0 );
 		}
 	}
-
 
 	if ( ai ) {
 		const ai::Needs& needs = ai->GetNeeds();

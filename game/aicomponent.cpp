@@ -842,6 +842,15 @@ void AIComponent::Target( Chit* chit, bool focused )
 }
 
 
+Chit* AIComponent::GetTarget()
+{
+	if (targetDesc.HasTarget()) {
+		return Context()->chitBag->GetChit(targetDesc.id);
+	}
+	return 0;
+}
+
+
 bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 {
 	GLOUTPUT(( "Destroy something at %d,%d\n", rock.x, rock.y ));

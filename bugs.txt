@@ -52,6 +52,8 @@
 		- update game fiction: rez, de-rez, born, died, kills
 		- replace build with click/drag?
 		- zoom out to full domain
+		- ice block: on/off instead of toggle
+		- advisor face
 
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time

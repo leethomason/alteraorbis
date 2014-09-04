@@ -72,6 +72,7 @@ public:
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
+	Chit* GetTarget();
 	bool RockBreak( const grinliz::Vector2I& pos );
 	void MakeAware( const int* enemyIDs, int n );
 	

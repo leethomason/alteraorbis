@@ -172,6 +172,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 	faceWidget.SetSize( 100, 100 );
 
+	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME);
+	targetFaceWidget.SetSize(100, 100);
+
 	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
@@ -302,10 +305,12 @@ void GameScene::Resize()
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
+	layout.PosAbs( &targetFaceWidget, -3, 0, 1, 1 );
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
+	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
-	layout.PosAbs( &dateLabel,   -3, 0 );
+	layout.PosAbs( &dateLabel,   -4, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
@@ -1629,6 +1634,17 @@ void GameScene::DoTick( U32 delta )
 		track = sim->GetPlayerChit();
 	}
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
+
+	if (playerChit && playerChit->GetAIComponent() && playerChit->GetAIComponent()->GetTarget()) {
+		Chit* target = playerChit->GetAIComponent()->GetTarget();
+		GLASSERT(target->GetItem());
+		targetFaceWidget.SetFace(&uiRenderer, target->GetItem() );
+		targetFaceWidget.SetMeta(target->GetItemComponent(), target->GetAIComponent());
+	}
+	else {
+		targetFaceWidget.SetFace(&uiRenderer, 0);
+	}
+
 	SetBars( track );
 	
 	// This doesn't really work. The AI will swap weapons
