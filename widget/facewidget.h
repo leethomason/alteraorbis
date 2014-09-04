@@ -33,7 +33,7 @@ public:
 		ALL			= 0xffff
 	};
 
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags ) = 0;
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id ) = 0;
 	void SetFace( UIRenderer* renderer, const GameItem* item );
 	void SetMeta( ItemComponent* ic, AIComponent* ai );
 
@@ -52,9 +52,10 @@ public:
 	virtual gamui::Button* GetButton() = 0;
 
 protected:
-	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags );
+	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags, int id );
 
 	int					flags;
+	int					id;
 	gamui::TextLabel	upper;
 	enum {
 		BAR_HP,
@@ -78,7 +79,7 @@ public:
 	FaceToggleWidget() {
 	}
 
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id );
 
 	virtual const gamui::Button* GetButton() const		{ return &toggle; }
 	virtual gamui::Button* GetButton()					{ return &toggle; }
@@ -92,7 +93,7 @@ class FacePushWidget : public FaceWidget
 public:
 	FacePushWidget() {
 	}
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id );
 
 	virtual const gamui::Button* GetButton() const		{ return &push; }
 	virtual gamui::Button* GetButton()					{ return &push; }

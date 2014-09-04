@@ -169,10 +169,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
 	swapWeapons.SetText("Swap\nWeapons");
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL, 2 );
 	faceWidget.SetSize( 100, 100 );
 
-	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME);
+	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
 	targetFaceWidget.SetSize(100, 100);
 
 	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;

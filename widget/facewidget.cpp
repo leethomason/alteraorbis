@@ -13,24 +13,26 @@ using namespace grinliz;
 static const float HEIGHT = 10.0f;
 static const float SPACE = 5.0f;
 
-void FaceToggleWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f )
+void FaceToggleWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f, int id )
 {
 	toggle.Init( gamui, look );
 	toggle.SetEnabled( true );
-	BaseInit( gamui, look, f );
+	BaseInit( gamui, look, f, id );
 }
 
 
-void FacePushWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f )
+void FacePushWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f, int id )
 {
 	push.Init( gamui, look );
 	push.SetEnabled( true );
-	BaseInit( gamui, look, f );
+	BaseInit( gamui, look, f, id );
 }
 
 
-void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f )
+void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f, int id )
 {
+	GLASSERT(id >= 0 && id < UIRenderer::NUM_DATA);
+	this->id = id;
 	flags = f;
 	upper.Init( gamui );
 
@@ -73,15 +75,15 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 			HumanGen faceGen(strstr(item->ResourceName(), "emale") != 0, item->ID(), item->team, false);
 			faceGen.AssignFace(&info);
 
-			RenderAtom procAtom((const void*)(UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP),
+			RenderAtom procAtom((const void*)(UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP_0 + id),
 								info.texture,
 								info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w);
 
 			GetButton()->SetDeco(procAtom, procAtom);
 
-			renderer->uv[0] = info.te.uv;
-			renderer->uvClip[0] = info.te.clip;
-			renderer->colorXForm[0] = info.color;
+			renderer->uv[id] = info.te.uv;
+			renderer->uvClip[id] = info.te.clip;
+			renderer->colorXForm[id] = info.color;
 		}
 		else {
 			RenderAtom atom = LumosGame::CalcUIIconAtom(item->Name());

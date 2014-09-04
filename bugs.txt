@@ -44,10 +44,13 @@
 		x enemies don't attack turrets
 		x face icons in map screen
 		x teleport home while in grid travel (oops)
-		- better rotation ui
 		- UI tweak:
 			- show current enemies, display of enemy you are fighting. health, level, portrait.
+				x handle MOBs
+				- handle 2 humans
+				- fall back to mouse-over if no target (with memory?)
 			- show overall happiness
+		- better rotation ui
 		- free fire to replace rock-melt
 		- update game fiction: rez, de-rez, born, died, kills
 		- replace build with click/drag?
