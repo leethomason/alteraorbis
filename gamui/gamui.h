@@ -431,7 +431,6 @@ public:
 	const void* userData;
 
 private:
-	UIItem( const UIItem& );			// private, not implemented.
 	void operator=( const UIItem& );	// private, not implemented.
 
 	float	m_x;
@@ -453,7 +452,7 @@ protected:
 
 	void ApplyRotation( int nVertex, Gamui::Vertex* vertex );
 
-	UIItem( int level );
+	UIItem( int level=0 );
 	virtual ~UIItem();
 
 	Gamui*			m_gamui;

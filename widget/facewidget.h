@@ -2,6 +2,7 @@
 #define FACEWIDGET_INCLUDED
 
 #include "../gamui/gamui.h"
+#include "barstack.h"
 
 class GameItem;
 class UIRenderer;
@@ -69,7 +70,8 @@ protected:
 		BAR_FUN,
 		MAX_BARS
 	};
-	gamui::DigitalBar	bar[MAX_BARS];
+//	gamui::DigitalBar	bar[MAX_BARS];
+	BarStackWidget barStack;
 };
 
 

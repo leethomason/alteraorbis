@@ -178,6 +178,7 @@
     <ClCompile Include="..\script\volcanoscript.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
+    <ClCompile Include="..\widget\barstack.cpp" />
     <ClCompile Include="..\widget\consolewidget.cpp" />
     <ClCompile Include="..\widget\endwidget.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
@@ -309,6 +310,7 @@
     <ClInclude Include="..\script\worldgen.h" />
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\dbhelper.h" />
+    <ClInclude Include="..\widget\barstack.h" />
     <ClInclude Include="..\widget\consolewidget.h" />
     <ClInclude Include="..\widget\endwidget.h" />
     <ClInclude Include="..\widget\facewidget.h" />

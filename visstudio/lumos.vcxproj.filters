@@ -394,6 +394,9 @@
     <ClCompile Include="..\script\batterycomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\barstack.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -791,6 +794,9 @@
     </ClInclude>
     <ClInclude Include="..\script\batterycomponent.h">
       <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\barstack.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
