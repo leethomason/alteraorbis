@@ -175,10 +175,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
 	targetFaceWidget.SetSize(100, 100);
 
-	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS);
+	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS + 1);
 	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
-		summaryBars.SetBarText(i, ai::Needs::Name(i));
+		summaryBars.SetBarText(i+1, ai::Needs::Name(i));
 	}
+	summaryBars.SetBarText(0, "Morale");
 
 	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 
@@ -1652,8 +1653,8 @@ void GameScene::DoTick( U32 delta )
 	CStr<64> str;
 
 	{
-		double sum[ai::Needs::NUM_NEEDS] = { 0 };
-		bool critical[ai::Needs::NUM_NEEDS] = { 0 };
+		double sum[ai::Needs::NUM_NEEDS+1] = { 0 };
+		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
 	
 		if (coreScript && coreScript->NumCitizens()) {
@@ -1669,19 +1670,26 @@ void GameScene::DoTick( U32 delta )
 							critical[k] = true;
 						}
 					}
+					sum[ai::Needs::NUM_NEEDS] += needs.Morale();
+					if (needs.Morale() < 0.1) {
+						critical[ai::Needs::NUM_NEEDS] = true;
+					}
 				}
 			}
 			if (nActive) {
 				for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
 					sum[k] /= double(nActive);
 				}
+				sum[ai::Needs::NUM_NEEDS] /= double(nActive);
 			}
 		}
 		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
+		summaryBars.SetBarColor(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
+		summaryBars.SetBarRatio(0, float(sum[ai::Needs::NUM_NEEDS]));
 		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
-			summaryBars.SetBarColor(k, critical[k] ? red : blue);
-			summaryBars.SetBarRatio(k, float(sum[k]));
+			summaryBars.SetBarColor(k+1, critical[k] ? red : blue);
+			summaryBars.SetBarRatio(k+1, float(sum[k]));
 		}
 
 		str.Format("Date %.2f\n%s\n%d Denizens", sim->AgeF(), sd.name.c_str(), nActive + (playerChit ? 1 : 0));
