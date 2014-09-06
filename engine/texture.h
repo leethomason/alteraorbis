@@ -96,6 +96,7 @@ public:
 		grinliz::Vector4F	uvXForm;		// a,d,tx,ty
 	};
 	int NumTableEntries() const;
+	bool HasTableEntry(const char* name) const;
 	void GetTableEntry( int i, TableEntry* te ) const;
 	void GetTableEntry( const char* name, TableEntry* te ) const;
 

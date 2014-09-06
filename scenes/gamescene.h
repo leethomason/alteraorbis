@@ -181,6 +181,7 @@ private:
 	gamui::PushButton	abandonButton;
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
+	gamui::Image		helpImage;
 	gamui::TextLabel	helpText;
 	BarStackWidget		summaryBars;
 

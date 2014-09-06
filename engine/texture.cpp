@@ -466,6 +466,18 @@ void Texture::GetTableEntry( int i, TableEntry* te ) const
 }
 
 
+bool Texture::HasTableEntry(const char* name) const
+{
+	if (item) {
+		const gamedb::Item* table = item->Child("table");
+		if (table) {
+			return table->Child(name) != 0;
+		}
+	}
+	return false;
+}
+
+
 void Texture::GetTableEntry( const char* name, TableEntry* te ) const
 {
 	te->name = IString();

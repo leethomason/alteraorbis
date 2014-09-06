@@ -108,6 +108,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetVisible(false);
 
 	helpText.Init(&gamui2D);
+	RenderAtom adviser = LumosGame::CalcUIIconAtom("adviser", true);
+	adviser.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
+	helpImage.Init(&gamui2D, adviser, true);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
@@ -247,7 +250,8 @@ void GameScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 
 	layout.PosAbs(&censusButton, 0, -1);
-	layout.PosAbs(&helpText, 1, -1);
+	layout.PosAbs(&helpImage, 1, -1);
+	layout.PosAbs(&helpText, 2, -1);
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&loadButton, 2, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
@@ -259,6 +263,10 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+
+	static float SIZE_BOOST = 1.3f;
+	helpImage.SetPos(helpImage.X() + layout.Width() * 0.4f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
+	helpImage.SetSize(helpImage.Height()*SIZE_BOOST, helpImage.Height()*SIZE_BOOST);
 
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;

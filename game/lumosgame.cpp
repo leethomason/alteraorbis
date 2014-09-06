@@ -160,13 +160,23 @@ RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled )
 	}
 
 	Texture::TableEntry te;
-	texture->GetTableEntry( name, &te );
-	RenderAtom atom( (const void*) (UIRenderer::RENDERSTATE_UI_DECO), 
-					 texture,
-					 te.uv.x, te.uv.y, te.uv.z, te.uv.w );
+	RenderAtom atom;
 
-	if ( !enabled ) {
-		atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+	if (texture->HasTableEntry(name)) {
+		texture->GetTableEntry(name, &te);
+		RenderAtom a((const void*)(UIRenderer::RENDERSTATE_UI_DECO),
+			texture,
+			te.uv.x, te.uv.y, te.uv.z, te.uv.w);
+		atom = a;
+
+		if (!enabled) {
+			atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+		}
+	}
+	else {
+		//GLASSERT(false);	// safe, but expected to work. 
+							//Actually this gets called when we are looking at things that don't have images...
+							//will pretty easily see the bug in-game.
 	}
 	return atom;
 }
