@@ -761,6 +761,7 @@ void Engine::SetZoom( float z )
 	float d = Interpolate(	GAME_ZOOM_MIN, EL_CAMERA_MIN,
 							GAME_ZOOM_MAX, EL_CAMERA_MAX,
 							z );
+	GLOUTPUT(("Zoom %.1f\n", z));
 
 	const Vector3F* eyeDir = camera.EyeDir3();
 	Vector3F origin;

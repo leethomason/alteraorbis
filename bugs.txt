@@ -44,15 +44,15 @@
 		x enemies don't attack turrets
 		x face icons in map screen
 		x teleport home while in grid travel (oops)
-		- UI tweak:
-			- show current enemies, display of enemy you are fighting. health, level, portrait.
+		x UI tweak:
+			x show current enemies, display of enemy you are fighting. health, level, portrait.
 				x handle MOBs
-				- handle 2 humans
-				- fall back to mouse-over if no target (with memory?)
-			- show overall happiness
+				x handle 2 humans
+				d fall back to mouse-over if no target (with memory?)
+			x show overall happiness
 		- better rotation ui
 		- free fire to replace rock-melt
-		- update game fiction: rez, de-rez, born, died, kills
+		- update game fiction: rez, de-rez, born, died, kills, ice
 		- replace build with click/drag?
 		- zoom out to full domain
 		- ice block: on/off instead of toggle

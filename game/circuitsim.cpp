@@ -278,7 +278,10 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 			sparkConsumed = true;
 			if (pe->charge) {
 				const WorldGrid& wg = worldMap->GetWorldGrid(pe->pos);
-				worldMap->SetRock(pe->pos.x, pe->pos.y, wg.RockHeight() ? 0 : 1, false, WorldGrid::ICE);
+				if (dir == 0 || dir == 2)
+					worldMap->SetRock(pe->pos.x, pe->pos.y, 1, false, WorldGrid::ICE);
+				else
+					worldMap->SetRock(pe->pos.x, pe->pos.y, 0, false, WorldGrid::ICE);
 			}
 		}
 		break;
