@@ -175,6 +175,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
 	targetFaceWidget.SetSize(100, 100);
 
+	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS);
+	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
+		summaryBars.SetBarText(i, ai::Needs::Name(i));
+	}
+
 	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
@@ -305,12 +310,13 @@ void GameScene::Resize()
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
-	layout.PosAbs( &targetFaceWidget, -3, 0, 1, 1 );
+	layout.PosAbs( &targetFaceWidget, -4, 0, 1, 1 );
+	layout.PosAbs(&summaryBars, -3, 1);
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
-	layout.PosAbs( &dateLabel,   -4, 0 );
+	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
@@ -352,6 +358,7 @@ void GameScene::SetBars( Chit* chit )
 
 	faceWidget.SetMeta( ic, ai );
 }
+
 
 void GameScene::Save()
 {
@@ -1615,10 +1622,6 @@ void GameScene::DoTick( U32 delta )
 	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
-	CStr<64> str;
-	str.Format( "Date %.2f\n%s", sim->AgeF(), sd.name.c_str() );
-	dateLabel.SetText( str.c_str() );
-
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
@@ -1645,8 +1648,46 @@ void GameScene::DoTick( U32 delta )
 		targetFaceWidget.SetFace(&uiRenderer, 0);
 	}
 
-	SetBars( track );
+	SetBars(track);
+	CStr<64> str;
+
+	{
+		double sum[ai::Needs::NUM_NEEDS] = { 0 };
+		bool critical[ai::Needs::NUM_NEEDS] = { 0 };
+		int nActive = 0;
 	
+		if (coreScript && coreScript->NumCitizens()) {
+			Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+			for (int i = 0; i < coreScript->NumCitizens(); i++) {
+				Chit* chit = coreScript->CitizenAtIndex(i);
+				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
+					++nActive;
+					const ai::Needs& needs = chit->GetAIComponent()->GetNeeds();
+					for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+						sum[k] += needs.Value(k);
+						if (needs.Value(k) < 0.05) {
+							critical[k] = true;
+						}
+					}
+				}
+			}
+			if (nActive) {
+				for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+					sum[k] /= double(nActive);
+				}
+			}
+		}
+		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
+		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
+		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+			summaryBars.SetBarColor(k, critical[k] ? red : blue);
+			summaryBars.SetBarRatio(k, float(sum[k]));
+		}
+
+		str.Format("Date %.2f\n%s\n%d Denizens", sim->AgeF(), sd.name.c_str(), nActive + (playerChit ? 1 : 0));
+		dateLabel.SetText( str.c_str() );
+	}
+
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
 	//swapWeapons.SetVisible(track && track == playerChit);

@@ -16,7 +16,7 @@ void BarStackWidget::Init(gamui::Gamui* g, int _nBars)
 	GLASSERT(deltaY == 0);
 	GLASSERT(_nBars <= MAX_BARS);
 	nBars = _nBars;
-	height = g->GetTextHeight() * 0.9f;
+	height = g->GetTextHeight() * 0.8f;
 	deltaY = g->GetTextHeight();
 
 //	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	

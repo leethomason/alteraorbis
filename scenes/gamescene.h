@@ -25,6 +25,7 @@
 #include "../widget/consolewidget.h"
 #include "../widget/startwidget.h"
 #include "../widget/endwidget.h"
+#include "../widget/barstack.h"
 
 #include "../script/buildscript.h"
 
@@ -181,6 +182,7 @@ private:
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
 	gamui::TextLabel	helpText;
+	BarStackWidget		summaryBars;
 
 	FacePushWidget		faceWidget,
 						targetFaceWidget;

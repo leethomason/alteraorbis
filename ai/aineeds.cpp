@@ -87,6 +87,11 @@ void Needs::ClampNeeds()
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] = Clamp( need[i], 0.0, 1.0 );
 	}
+
+	// Hack for beta3:
+	if (need[SOCIAL] < 0.4) {
+		need[SOCIAL] = 0.4;
+	}
 }
 
 
