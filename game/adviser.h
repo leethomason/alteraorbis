@@ -11,7 +11,7 @@ public:
 	Adviser();
 
 	void Attach(gamui::TextLabel *text, gamui::Image* image);
-	void DoTick(int time, CoreScript* cs, int nWorkers);
+	void DoTick(int time, CoreScript* cs, int nWorkers, const int* buildCounts, int nBuildCounts);
 
 private:
 	gamui::TextLabel *text;
