@@ -288,7 +288,7 @@ void LumosGame::CopyFile( const char* src, const char* target )
 
 
 
-const char* LumosGame::GenName( const char* dataset, int seed, int min, int max )
+const char* LumosGame::GenName( const char* dataset, int _seed, int min, int max )
 {
 	const gamedb::Item* parent = this->GetDatabase()->Root()->Child( "markovName" );
 	GLASSERT( parent );
@@ -298,11 +298,16 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 
 	nameBuffer = "";
 
+	// Make sure the name generator is warm:
+	Random random(_seed);
+	random.Rand();
+	random.Rand();
+	int seed = random.Rand();
+
+
 	const gamedb::Item* word = item->Child("words0");
 	if (word) {
 		// The 3-word form.
-		Random random(seed);
-
 		for (int i = 0; i < 3; ++i) {
 			static const char* CHILD[] = { "words0", "words1", "words2" };
 			word = item->Child(CHILD[i]);
