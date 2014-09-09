@@ -24,6 +24,7 @@
 #include "../game/workqueue.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/team.h"
+#include "../game/adviser.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -64,6 +65,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	poolView = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
+	adviser = new Adviser();
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
 
@@ -107,10 +109,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
+	const RenderAtom nullAtom;
 	helpText.Init(&gamui2D);
-	RenderAtom adviser = LumosGame::CalcUIIconAtom("adviser", true);
-	adviser.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
-	helpImage.Init(&gamui2D, adviser, true);
+	helpImage.Init(&gamui2D, nullAtom, true);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
@@ -222,7 +223,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	RenderAtom redAtom = LumosGame::CalcUIIconAtom("warning");
 	RenderAtom yellowAtom = LumosGame::CalcUIIconAtom("yellowwarning");
-	RenderAtom nullAtom;
 
 	coreWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
 	domainWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
@@ -231,6 +231,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	coreWarningIcon.SetText("WARNING: Core under attack.");
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
+
+	adviser->Attach(&helpText, &helpImage);
 }
 
 
@@ -240,6 +242,7 @@ GameScene::~GameScene()
 		sim->GetEngine()->FreeModel( selectionModel );
 	}
 	delete sim;
+	delete adviser;
 }
 
 
@@ -265,7 +268,7 @@ void GameScene::Resize()
 	layout.PosAbs(&nextUnit, 3, 1);
 
 	static float SIZE_BOOST = 1.3f;
-	helpImage.SetPos(helpImage.X() + layout.Width() * 0.4f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
+	helpImage.SetPos(helpImage.X() + layout.Width() * 0.3f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
 	helpImage.SetSize(helpImage.Height()*SIZE_BOOST, helpImage.Height()*SIZE_BOOST);
 
 	int level = BuildScript::GROUP_UTILITY;
@@ -1358,6 +1361,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 }
 
 
+/*
 void GameScene::SetHelpText(const int* arr, int nWorkers)
 {
 	static const int BUILD_ADVISOR[] = {
@@ -1408,7 +1412,7 @@ void GameScene::SetHelpText(const int* arr, int nWorkers)
 	}
 	helpText.SetText(str.c_str());
 }
-
+*/
 
 void GameScene::SetBuildButtons(const int* arr)
 {
@@ -1774,7 +1778,7 @@ void GameScene::DoTick( U32 delta )
 		int arr[BuildScript::NUM_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_OPTIONS);
 		SetBuildButtons(arr);
-		SetHelpText(arr, nWorkers);
+		adviser->DoTick(delta, coreScript, nWorkers, arr, BuildScript::NUM_OPTIONS);
 	}
 
 	autoRebuild.SetEnabled(coreScript != 0);

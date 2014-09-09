@@ -14,6 +14,21 @@ public:
 	void DoTick(int time, CoreScript* cs, int nWorkers, const int* buildCounts, int nBuildCounts);
 
 private:
+	enum {
+		DORMANT,
+		GREETING,
+		ADVISING
+	};
+
+	enum {
+		DORMANT_TIME = 5000,
+		GREETING_TIME = 8000
+	};
+
+	int state;
+	int timer;
+	float rotation;
+
 	gamui::TextLabel *text;
 	gamui::Image* image;
 };

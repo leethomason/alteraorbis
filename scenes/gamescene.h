@@ -36,7 +36,7 @@ class Sim;
 class NewsEvent;
 class Chit;
 class GameItem;
-
+class Adviser;
 
 class GameScene : public Scene,
 				  public IChitListener
@@ -81,7 +81,7 @@ private:
 
 	void SetPickupButtons();	// if the avatar can pick things up
 	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
-	void SetHelpText(const int* buildingCount, int nWorkers);
+	//void SetHelpText(const int* buildingCount, int nWorkers);
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
@@ -153,6 +153,7 @@ private:
 	grinliz::Quaternion	savedCameraRotation;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
+	Adviser*			adviser;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
