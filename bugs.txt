@@ -52,12 +52,12 @@
 			x show overall happiness
 		x ice block: on/off instead of toggle
 		x advisor face
+		x free fire to replace rock-melt
 		- better rotation ui
-		- free fire to replace rock-melt
 		- update game fiction: rez, de-rez, born, died, kills, ice
-		- replace build with click/drag?
 		- improved advisor: Greetings, Core.
 
+		- replace build with click/drag?
 		- zoom out to full domain
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time

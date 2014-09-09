@@ -637,12 +637,16 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		return;
 	}
 
-	if (mv.VoxelHit()) {
+	if ((game->GetTapMod() & GAME_TAP_MOD_SHIFT) && mv.Hit()) {
 		if (AvatarSelected()) {
 			// clicked on a rock. Melt away!
 			Chit* player = sim->GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				player->GetAIComponent()->RockBreak(mv.Voxel2());
+				//player->GetAIComponent()->RockBreak(mv.Voxel2());
+				if (mv.ModelHit())
+					player->GetAIComponent()->Target(mv.model->userData, false);
+				else
+					player->GetAIComponent()->Target(ToWorld2I(mv.voxel), false);
 				return;
 			}
 		}
