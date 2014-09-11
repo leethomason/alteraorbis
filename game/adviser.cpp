@@ -109,7 +109,8 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 							str.Format("Building a Temple increases our potential.\nAnd attracts monsters.");
 						}
 						else {
-							str.Format("A(n) %s is recommended.", data.cName);
+							//str.Format("A(n) %s is recommended.", data.cName);
+							str.Format("Recommendation: %s.", data.cName);
 						}
 					}
 					else {

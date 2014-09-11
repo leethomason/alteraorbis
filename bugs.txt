@@ -34,6 +34,10 @@
 - shock -> plasma??
 - mouse wheel support
 - cage trap
+- taskBeside needs to account for 2x2 buildings.
+- interface annoyances
+	- when does/should flick rotation work?
+	- end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 - game
 	- Beta 2c
@@ -53,9 +57,9 @@
 		x ice block: on/off instead of toggle
 		x advisor face
 		x free fire to replace rock-melt
-		- better rotation ui
+		x improved advisor: Greetings, Core.
+		x better rotation ui
 		- update game fiction: rez, de-rez, born, died, kills, ice
-		- improved advisor: Greetings, Core.
 
 		- replace build with click/drag?
 		- zoom out to full domain

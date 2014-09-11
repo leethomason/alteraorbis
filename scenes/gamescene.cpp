@@ -48,6 +48,7 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
+	dragBuildingRotation = false;
 	fastMode = false;
 	simTimer = 0;
 	simPS = 1.0f;
@@ -680,6 +681,42 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 }
 
 
+bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
+{
+	Chit* building = 0;
+	if (uiMode[UI_BUILD].Down() && !buildActive) {
+		building = sim->GetChitBag()->QueryBuilding(pos2i);
+	}
+	return building != 0;
+}
+
+
+void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
+{
+	Vector2I dragStart = ToWorld2I(mapDragStart);
+	Vector2I dragEnd = ToWorld2I(drag);
+
+	Chit* building = sim->GetChitBag()->QueryBuilding(dragStart);
+
+	if (building && (dragStart != dragEnd)) {
+		Vector2I d = dragEnd - dragStart;
+		float rotation = 0;
+		if (abs(d.x) > abs(d.y)) {
+			if (d.x > 0)	rotation = 90.0f;
+			else			rotation = 270.0f;
+		}
+		else {
+			if (d.y > 0)	rotation = 0;
+			else			rotation = 180.0f;
+		}
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+		if (msc) {
+			msc->SetYRotation(rotation);
+		}
+	}
+}
+
+
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
@@ -733,29 +770,42 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	if (!uiHasTap) {
 		if (action == GAME_TAP_DOWN) {
 			mapDragStart.Zero();
+			dragBuildingRotation = false;
 			if (DragAtom(&atom)) {
-				mapDragStart.Set(at.x, at.z);
+				mapDragStart = ToWorld2F(at);
+			}
+			else if (DragRotate(ToWorld2I(at))) {
+				dragBuildingRotation = true;
+				mapDragStart = ToWorld2F(at);
 			}
 		}
 		if (action == GAME_TAP_MOVE) {
 			if (!mapDragStart.IsZero()) {
 				Vector2F end = { at.x, at.z };
-				int count = 0;
-				if ((end - mapDragStart).LengthSquared() > 0.25f) {
-					Rectangle2I r;
-					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-					DragAtom(&atom);
 
-					for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
-						buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
-						buildMark[count].SetSize(1.0f, 1.0f);
-						buildMark[count].SetVisible(true);
-						buildMark[count].SetAtom(atom);
-					}
+				if (dragBuildingRotation) {
+					// Building rotation.
+					DragRotateBuilding(end);
 				}
-				while (count < NUM_BUILD_MARKS) {
-					buildMark[count].SetVisible(false);
-					++count;
+				else {
+					// Building placement, clear, etc.
+					int count = 0;
+					if ((end - mapDragStart).LengthSquared() > 0.25f) {
+						Rectangle2I r;
+						r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+						DragAtom(&atom);
+
+						for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
+							buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
+							buildMark[count].SetSize(1.0f, 1.0f);
+							buildMark[count].SetVisible(true);
+							buildMark[count].SetAtom(atom);
+						}
+					}
+					while (count < NUM_BUILD_MARKS) {
+						buildMark[count].SetVisible(false);
+						++count;
+					}
 				}
 			}
 		}
@@ -764,18 +814,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			if (mapDragStart.IsZero()) {
 				Tap3D(view, world);
 			}
-			else {
+			else if (!dragBuildingRotation) {
 				Vector2F end = { at.x, at.z };
-				//if ((end - mapDragStart).LengthSquared() > 0.25f) {
-					Rectangle2I r;
-					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-					DragAtom(&atom);
+				Rectangle2I r;
+				r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+				DragAtom(&atom);
 
-					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						BuildAction(it.Pos());
-					}
-				//}
+				for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+					BuildAction(it.Pos());
+				}
 			}
+			dragBuildingRotation = false;
 		}
 	}
 	// Clear out drag indicator, if not dragging.

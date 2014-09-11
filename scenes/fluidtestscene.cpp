@@ -34,7 +34,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
 	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
-											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Ice", "Stop", "Detector", "Transistor", "Rotate" };
+											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Silica", "Stop", "Detector", "Transistor", "Rotate" };
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
