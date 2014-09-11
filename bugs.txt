@@ -58,7 +58,8 @@
 		- replace build with click/drag?
 		- improved advisor: Greetings, Core.
 
-		- zoom out to full domain
+		- pause function
+    - zoom out to full domain
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time
 		- Linux
