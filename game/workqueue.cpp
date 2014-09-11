@@ -225,10 +225,9 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == 0 ) {
 			float cost = 0;
-			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
 			Vector2F bestEnd = { 0, 0 };
 
-			bool okay = worldMap->CalcWorkPath(start, end, &bestEnd, &cost);
+			bool okay = worldMap->CalcWorkPath(start, queue[i].Bounds(), &bestEnd, &cost);
 			if (okay && (cost < bestCost)) {
 				bestCost = cost;
 				best = i;
@@ -453,7 +452,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 }
 
 
-Rectangle2I WorkQueue::QueueItem::Bounds()
+Rectangle2I WorkQueue::QueueItem::Bounds() const
 {
 	Rectangle2I r;
 	r.min = pos;

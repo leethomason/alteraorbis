@@ -47,12 +47,14 @@ public:
 		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
-		grinliz::Rectangle2I Bounds();
+
+		// Accounts for the size of the structure.
+		grinliz::Rectangle2I Bounds() const;
 
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
-		int					assigned;	// id of worker assigned this task.			
-		Model*				model;		// model used to show map work location
+		int					assigned;		// id of worker assigned this task.			
+		Model*				model;			// model used to show map work location
 		float				rotation;
 	};
 

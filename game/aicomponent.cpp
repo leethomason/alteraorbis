@@ -2570,7 +2570,8 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 		if ( item ) {
 			Vector2F dest = { 0, 0 };
 			float cost = 0;
-			int hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), ToWorld2F(item->pos), &dest, &cost);
+
+			bool hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), item->Bounds(), &dest, &cost);
 
 			if (hasPath) {
 				if (BuildScript::IsClear(item->buildScriptID)) {
