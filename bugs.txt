@@ -59,8 +59,11 @@
 		x free fire to replace rock-melt
 		x improved advisor: Greetings, Core.
 		x better rotation ui
-		- update game fiction: rez, de-rez, born, died, kills, ice
+		x update game fiction: rez, de-rez, born, died, kills, ice
 
+		- pause
+			- basic
+			- tactical
 		- replace build with click/drag?
 		- zoom out to full domain
 		- map travel: lanes?
