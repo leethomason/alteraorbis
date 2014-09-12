@@ -117,8 +117,15 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		for (; !it.Done(); it.Next()) {
 
 			const char* key = it.Key();
+			const char* prefix = "";
+
+			if (StrEqualUntil(key, "Kills", ':')) {
+				prefix = MOB_KILLS;
+				key += 5;
+			}
+
 			if (it.Type() == MicroDB::TYPE_INT) {
-				str.Format("%s\t%d\n", key, it.IntValue());
+				str.Format("%s%s\t%d\n", prefix, key, it.IntValue());
 				textBuffer += str.c_str();
 			}
 		}

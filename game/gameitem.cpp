@@ -647,7 +647,11 @@ IString GameItem::INameAndTitle() const
 {
 	IString title = ITitle();
 	CStr<128> str;
-	str.Format( "%s %s", IFullName().c_str(), ITitle().safe_str() );
+	if (!ITitle().empty())
+		str.Format("%s %s", IFullName().safe_str(), ITitle().safe_str());
+	else
+		str.Format("%s", IFullName().safe_str());
+
 	return StringPool::Intern( str.c_str() );
 }
 

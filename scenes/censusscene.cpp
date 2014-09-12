@@ -28,7 +28,7 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 		label[i].SetTab(100);
 	}
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		static const char* NAME[NUM_GROUPS] = { "Notable", "Kills", "Greater\nKills", "Items", "Crafting", "Domains" };
+		static const char* NAME[NUM_GROUPS] = { "Notable", MOB_KILLS, "Greater\n" MOB_KILLS, "Items", "Crafting", "Domains" };
 		radio[i].Init(&gamui2D, game->GetButtonLook(0));
 		radio[i].SetText(NAME[i]);
 		radio[0].AddToToggleGroup(&radio[i]);

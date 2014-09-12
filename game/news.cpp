@@ -125,15 +125,15 @@ grinliz::IString NewsEvent::GetWhat() const
 {
 	GLASSERT( what >= 0 && what < NUM_WHAT );
 	static const char* NAME[] = {
-		"",
-		"Denizen Created",
-		"Denizen Derez",
-		"Greater Created",
-		"Greater Derez",
-		"Domain Created",
-		"Domain Destroyed",
+		"", 
+		"Denizen " MOB_Created,
+		"Denizen " MOB_Destroyed,
+		"Greater " MOB_Created,
+		"Greater " MOB_Destroyed,
+		"Domain " MOB_Created,
+		"Domain " MOB_Destroyed,
 		"Forged",
-		"Destroyed",
+		MOB_Destroyed,
 		"Purchase",
 		"Starvation",
 		"Blood Rage",
@@ -212,27 +212,27 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 
 	switch ( what ) {
 	case DENIZEN_CREATED:
-		str->Format( "%.2f: Denizen %s created at %s.", age, itemName.c_str(), domain.c_str() );
+		str->Format( "%.2f: Denizen %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	case DENIZEN_KILLED:
-		str->Format( "%.2f: Denizen %s de-rez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		str->Format( "%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
 	case GREATER_MOB_CREATED:
-		str->Format( "%.2f: %s created at %s.", age, itemName.c_str(), domain.c_str() ); 
+		str->Format( "%.2f: %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str() ); 
 		break;
 
 	case DOMAIN_CREATED:
-		str->Format("%.2f: %s created.", age, domain.c_str());
+		str->Format("%.2f: %s " MOB_created ".", age, domain.c_str());
 		break;
 
 	case GREATER_MOB_KILLED:
-		str->Format( "%.2f: %s de-rez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
+		str->Format( "%.2f: %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
 		break;
 
 	case DOMAIN_DESTROYED:
-		str->Format("%.2f: %s destroyed.", age, domain.c_str());
+		str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
 		break;
 
 	case FORGED:
@@ -240,7 +240,7 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 		break;
 
 	case UN_FORGED:
-		str->Format( "%.2f: %s destroyed at %s.", age, itemName.c_str(), domain.c_str() );
+		str->Format( "%.2f: %s " MOB_destroyed " at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	case PURCHASED:
