@@ -40,27 +40,7 @@
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 - game
-	- Beta 2c
-		x attachment issues on wiki
-		x gold shouldn't float
-		x update SDL
-		t tab in/out. window resize? can't repro.
-		x enemies don't attack turrets
-		x face icons in map screen
-		x teleport home while in grid travel (oops)
-		x UI tweak:
-			x show current enemies, display of enemy you are fighting. health, level, portrait.
-				x handle MOBs
-				x handle 2 humans
-				d fall back to mouse-over if no target (with memory?)
-			x show overall happiness
-		x ice block: on/off instead of toggle
-		x advisor face
-		x free fire to replace rock-melt
-		x improved advisor: Greetings, Core.
-		x better rotation ui
-		x update game fiction: rez, de-rez, born, died, kills, ice
-
+	- Beta 2d
 		- pause
 			- basic
 			- tactical
@@ -258,6 +238,26 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta 2c
+	x attachment issues on wiki
+	x gold shouldn't float
+	x update SDL
+	t tab in/out. window resize? can't repro.
+	x enemies don't attack turrets
+	x face icons in map screen
+	x teleport home while in grid travel (oops)
+	x UI tweak:
+		x show current enemies, display of enemy you are fighting. health, level, portrait.
+			x handle MOBs
+			x handle 2 humans
+			d fall back to mouse-over if no target (with memory?)
+		x show overall happiness
+	x ice block: on/off instead of toggle
+	x advisor face
+	x free fire to replace rock-melt
+	x improved advisor: Greetings, Core.
+	x better rotation ui
+	x update game fiction: rez, de-rez, born, died, kills, ice
 x Beta 2
 	x screenshots of circuits
 	x screenshots of fluids
