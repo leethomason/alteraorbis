@@ -37,7 +37,7 @@
 - taskBeside needs to account for 2x2 buildings.
 - interface annoyances
 	- when does/should flick rotation work?
-	- end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
+	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 - game
 	- Beta 2c

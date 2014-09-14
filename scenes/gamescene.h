@@ -91,6 +91,7 @@ private:
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
 
+	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
 	void DoAvatarButton();
 

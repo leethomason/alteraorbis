@@ -883,16 +883,35 @@ void GameScene::DoCameraHome()
 }
 
 
+bool GameScene::DoEscape()
+{
+	if (buildActive > 0) {
+		// back out of build
+		buildActive = 0;
+		buildButton[0].SetDown();
+		SetSelectionModel(tapView);
+	}
+	else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
+		// return to view
+		uiMode[UI_VIEW].SetDown();
+	}
+	buildDescription.SetText("");
+	return uiMode[UI_VIEW].Down();
+}
+
+
 void GameScene::DoAvatarButton()
 {
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	if (AvatarSelected() && CameraTrackingAvatar()) {
+		// Teleport.
 		if (coreScript && sim->GetPlayerChit()) {
 			sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
 		}
 	}
 	else {
+		// Select.
 		chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
@@ -900,6 +919,10 @@ void GameScene::DoAvatarButton()
 			chitTracking = chit->ID();
 			cc->SetTrack(chitTracking);
 		}
+	}
+	bool escape = false;
+	while (!escape) {
+		escape = DoEscape();
 	}
 }
 
@@ -1194,17 +1217,7 @@ void GameScene::HandleHotKey( int mask )
 		fastMode = !fastMode;
 	}
 	else if (mask == GAME_HK_ESCAPE) {
-		if (buildActive > 0) {
-			// back out of build
-			buildActive = 0;
-			buildButton[0].SetDown();
-			SetSelectionModel(tapView);
-		}
-		else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
-			// return to view
-			uiMode[UI_VIEW].SetDown();
-		}
-		buildDescription.SetText("");
+		DoEscape();
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();
