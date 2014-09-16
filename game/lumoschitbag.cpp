@@ -259,7 +259,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
-	msc->SetBuilding(true, porch != 0, circuit);
+	msc->SetBuilding(porch != 0, circuit);
 	chit->Add(msc);
 
 	chit->Add(new RenderComponent(rootItem.ResourceName()));
@@ -554,7 +554,7 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 
 	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->Bounds().Intersect( bounds )) {
-			GLASSERT( it->Building() );
+//			GLASSERT( it->Building() );
 			return it->ParentChit();
 		}
 	}
@@ -906,10 +906,7 @@ bool BuildingFilter::Accept( Chit* chit )
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	if ( msc && msc->Building() ) {
-		return true;
-	}
-	return false;
+	return msc != 0;
 }
 
 
@@ -917,7 +914,7 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-	if (msc && msc->Building()) {
+	if (msc ) { //&& msc->Building()) {
 		GameItem* item = chit->GetItem();
 		if (item && item->HPFraction() < 0.9f) {
 			return true;
@@ -927,17 +924,40 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 }
 
 
-bool MOBKeyFilter::Accept(Chit* chit)
+void RelationshipFilter::CheckRelationship(Chit* _compareTo, int _relationship)
 {
-	GameItem* item = chit->GetItem();
-	return item && !item->keyValues.GetIString( IStringConst::mob ).empty();
+	team = _compareTo->Team();
+	relationship = _relationship;
 }
 
 
-bool MOBIshFilter::RelateAccept( Chit* chit ) const
+void RelationshipFilter::CheckRelationship(int _team, int _relationship)
 {
-	if (!relateTo) return true;	// not doing the check.
-	return Team::GetRelationship(chit, relateTo) == relationship;
+	team = _team;
+	relationship = _relationship;
+}
+
+
+bool RelationshipFilter::Accept( Chit* chit )
+{
+	if (team < 0) return true;	// not checking.
+	return Team::GetRelationship(team, chit->Team()) == relationship;
+}
+
+
+bool MOBKeyFilter::Accept(Chit* chit)
+{
+	GameItem* item = chit->GetItem();
+	if (item) {
+		IString mob = item->keyValues.GetIString(ISC::mob);
+		if (!mob.empty()) {
+			if (value.empty())
+				return RelationshipFilter::Accept(chit);
+			else if (value == mob)
+				return RelationshipFilter::Accept(chit);
+		}
+	}
+	return false;
 }
 
 
@@ -947,11 +967,11 @@ bool MOBIshFilter::Accept(Chit* chit)
 	// Mostly a good metric. Doesn't account for dummy targets.
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 	if (pmc && chit->Team()) {
-		return RelateAccept(chit);
+		return RelationshipFilter::Accept(chit);
 	}
 	GameItem* item = chit->GetItem();
 	if (item && item->IName() == IStringConst::dummyTarget) {
-		return RelateAccept(chit);
+		return RelationshipFilter::Accept(chit);
 	}
 	return false;
 }

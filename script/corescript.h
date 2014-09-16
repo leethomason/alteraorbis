@@ -65,6 +65,8 @@ public:
 	virtual const char* Name() const	{ return "CoreScript"; }
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
+	int GetPave();
+
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
 	bool IsCitizen( int id );
@@ -89,8 +91,6 @@ public:
 	// The number of temples+1:
 	int   MaxTech();
 	void  AddTech();
-
-//	int nElixir;
 
 	// Each task pushes a position for that task,
 	// and removes it when done/cancelled. (Some careful
@@ -129,6 +129,7 @@ private:
 	double		tech;
 	int			summonGreater;
 	bool		autoRebuild;
+	int			pave;
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;

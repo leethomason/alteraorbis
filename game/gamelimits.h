@@ -123,4 +123,13 @@ static const float CHANCE_FIRE_SPREAD	= 0.40f;	// once it starts spreading, self
 static const float SALES_TAX = 0.15f;
 static const int   WORKER_BOT_COST = 20;
 
+// Game fiction consistency.
+#define MOB_Created		"Initialized"	// Denizen Initialized
+#define MOB_Destroyed	"Deleted"		// Denizen Deleted
+#define MOB_created		"initialized"	// Denizen Initialized
+#define MOB_destroyed	"deleted"		// Denizen Deleted
+#define MOB_KILLS		"Deletes"		// Deletions: mantis
+#define DATE_ABBR_BORN	"i"
+#define DATE_ABBR_DIED	"d"
+
 #endif // GAMELIMITS_INCLUDED

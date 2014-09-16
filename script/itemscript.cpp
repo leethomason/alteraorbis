@@ -299,7 +299,7 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* s
 		if ( value )
 			str->AppendFormat( "Value=%d ", value );
 		if ( kills )
-			str->AppendFormat( "Kills=%d ", kills );
+			str->AppendFormat( "%s=%d ", MOB_KILLS, kills );
 		if ( greater ) 
 			str->AppendFormat( "Greater=%d ", greater );
 		if ( crafted )
@@ -314,10 +314,12 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* s
 
 			if (data.born) {
 				if (data.died) {
-					str->AppendFormat("(c%.2f d%.2f) ", double(data.born) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
+					str->AppendFormat("(%s%.2f %s%.2f) ", 
+									  DATE_ABBR_BORN, double(data.born) / double(AGE_IN_MSEC), 
+									  DATE_ABBR_DIED, double(data.died) / double(AGE_IN_MSEC));
 				}
 				else {
-					str->AppendFormat("(c%.2f) ", double(data.born) / double(AGE_IN_MSEC));
+					str->AppendFormat("(%s%.2f) ", DATE_ABBR_BORN, double(data.born) / double(AGE_IN_MSEC));
 				}
 			}
 		}

@@ -160,13 +160,23 @@ RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled )
 	}
 
 	Texture::TableEntry te;
-	texture->GetTableEntry( name, &te );
-	RenderAtom atom( (const void*) (UIRenderer::RENDERSTATE_UI_DECO), 
-					 texture,
-					 te.uv.x, te.uv.y, te.uv.z, te.uv.w );
+	RenderAtom atom;
 
-	if ( !enabled ) {
-		atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+	if (texture->HasTableEntry(name)) {
+		texture->GetTableEntry(name, &te);
+		RenderAtom a((const void*)(UIRenderer::RENDERSTATE_UI_DECO),
+			texture,
+			te.uv.x, te.uv.y, te.uv.z, te.uv.w);
+		atom = a;
+
+		if (!enabled) {
+			atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+		}
+	}
+	else {
+		//GLASSERT(false);	// safe, but expected to work. 
+							//Actually this gets called when we are looking at things that don't have images...
+							//will pretty easily see the bug in-game.
 	}
 	return atom;
 }
@@ -278,7 +288,7 @@ void LumosGame::CopyFile( const char* src, const char* target )
 
 
 
-const char* LumosGame::GenName( const char* dataset, int seed, int min, int max )
+const char* LumosGame::GenName( const char* dataset, int _seed, int min, int max )
 {
 	const gamedb::Item* parent = this->GetDatabase()->Root()->Child( "markovName" );
 	GLASSERT( parent );
@@ -288,11 +298,16 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 
 	nameBuffer = "";
 
+	// Make sure the name generator is warm:
+	Random random(_seed);
+	random.Rand();
+	random.Rand();
+	int seed = random.Rand();
+
+
 	const gamedb::Item* word = item->Child("words0");
 	if (word) {
 		// The 3-word form.
-		Random random(seed);
-
 		for (int i = 0; i < 3; ++i) {
 			static const char* CHILD[] = { "words0", "words1", "words2" };
 			word = item->Child(CHILD[i]);

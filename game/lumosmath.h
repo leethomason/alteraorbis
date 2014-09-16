@@ -37,6 +37,12 @@ inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3F& pos3 ) {
 	return pos2i;
 }
 
+inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3I& pos3i ) {
+	grinliz::Vector2I pos2i = { pos3i.x, pos3i.z };
+	return pos2i;
+}
+
+
 inline grinliz::Rectangle2F ToWorld(const grinliz::Rectangle2I& ri)
 {
 	grinliz::Rectangle2F r;

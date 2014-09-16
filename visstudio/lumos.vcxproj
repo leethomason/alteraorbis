@@ -117,6 +117,7 @@
     <ClCompile Include="..\engine\ufoutil.cpp" />
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\engine\vertex.cpp" />
+    <ClCompile Include="..\game\adviser.cpp" />
     <ClCompile Include="..\game\aicomponent.cpp" />
     <ClCompile Include="..\game\circuitsim.cpp" />
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="..\script\volcanoscript.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
+    <ClCompile Include="..\widget\barstack.cpp" />
     <ClCompile Include="..\widget\consolewidget.cpp" />
     <ClCompile Include="..\widget\endwidget.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
@@ -239,6 +241,7 @@
     <ClInclude Include="..\engine\ufoutil.h" />
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />
+    <ClInclude Include="..\game\adviser.h" />
     <ClInclude Include="..\game\aicomponent.h" />
     <ClInclude Include="..\game\census.h" />
     <ClInclude Include="..\game\circuitsim.h" />
@@ -311,6 +314,7 @@
     <ClInclude Include="..\script\worldgen.h" />
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\dbhelper.h" />
+    <ClInclude Include="..\widget\barstack.h" />
     <ClInclude Include="..\widget\consolewidget.h" />
     <ClInclude Include="..\widget\endwidget.h" />
     <ClInclude Include="..\widget\facewidget.h" />

@@ -76,7 +76,7 @@
 
   <item name="gold"
         resource="gold"
-        flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="10">
   </item>
 

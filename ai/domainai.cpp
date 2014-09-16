@@ -80,7 +80,8 @@ bool DomainAI::BuyWorkers()
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
 	WorkQueue* workQueue = 0;
-	if (!Preamble(&sector, &cs, &workQueue))
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return false;
 	GameItem* mainItem = parentChit->GetItem();
 
@@ -101,7 +102,7 @@ bool DomainAI::BuyWorkers()
 }
 
 
-bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq)
+bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave)
 {
 	GLASSERT(parentChit->GetSpatialComponent());
 	*sector = parentChit->GetSpatialComponent()->GetSector();
@@ -112,6 +113,8 @@ bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** 
 	GLASSERT(*wq);
 	if (!(*wq)) return false;
 
+	*pave = (*cs)->GetPave();
+
 	return true;
 }
 
@@ -121,7 +124,8 @@ bool DomainAI::BuildRoad()
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
 	WorkQueue* workQueue = 0;
-	if (!Preamble(&sector, &cs, &workQueue))
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return false;
 
 	// Check a random road.
@@ -131,8 +135,8 @@ bool DomainAI::BuildRoad()
 		for (int i = 0; i < road[p].Size(); ++i) {
 			Vector2I pos2i = road[p][i];
 			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-			if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
-				workQueue->AddAction(pos2i, BuildScript::PAVE);
+			if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+				workQueue->AddAction(pos2i, BuildScript::PAVE, 0, pave);
 				issuedOrders = true;
 			}
 		}
@@ -146,7 +150,8 @@ bool DomainAI::BuildPlaza(int size)
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
 	WorkQueue* workQueue = 0;
-	if (!Preamble(&sector, &cs, &workQueue))
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return false;
 
 	// Check a random road.
@@ -162,8 +167,8 @@ bool DomainAI::BuildPlaza(int size)
 		}
 
 		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-		if ( !wg.Pave() || wg.Plant() || wg.RockHeight()) {
-			workQueue->AddAction(it.Pos(), BuildScript::PAVE);
+		if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+			workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 			issuedOrders = true;
 		}
 	}
@@ -176,7 +181,8 @@ bool DomainAI::BuildBuilding(int id)
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
 	WorkQueue* workQueue = 0;
-	if (!Preamble(&sector, &cs, &workQueue))
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return false;
 
 	BuildScript buildScript;
@@ -194,6 +200,12 @@ bool DomainAI::BuildBuilding(int id)
 
 			Vector2I head = road[i][index];
 			Vector2I tail = road[i][index - 1];
+
+			// Mix up the head/tail left/right
+			if (index & 1) {
+				Swap(&head, &tail);
+			}
+
 			Vector2I dir = head - tail;
 			Vector2I left  = { -dir.y, dir.x };
 			Vector2I right = -left;
@@ -217,7 +229,7 @@ bool DomainAI::BuildBuilding(int id)
 			bool okay = true;
 			for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if (!wg.IsLand() || wg.Pave()) {
+				if (!wg.IsLand() || (wg.Pave() == pave)) {
 					okay = false;
 					break;
 				}
@@ -229,10 +241,10 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			if (okay) {
-				workQueue->AddAction(buildBounds.min, id, (float)rotation);
+				workQueue->AddAction(buildBounds.min, id, (float)rotation, 0);
 				if (bd.porch) {
 					for (Rectangle2IIterator it(porchBounds); !it.Done(); it.Next()) {
-						workQueue->AddAction(it.Pos(), BuildScript::PAVE);
+						workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 					}
 				}
 				return true;
@@ -252,7 +264,8 @@ int DomainAI::DoTick(U32 delta)
 		Vector2I sector = { 0, 0 };
 		CoreScript* cs = 0;
 		WorkQueue* workQueue = 0;
-		if (!Preamble(&sector, &cs, &workQueue))
+		int pave = 0;
+		if (!Preamble(&sector, &cs, &workQueue, &pave))
 			return VERY_LONG_TICK;
 
 		// FIXME: this isn't really correct. will stall

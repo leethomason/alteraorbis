@@ -394,6 +394,12 @@
     <ClCompile Include="..\script\batterycomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\barstack.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\adviser.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
     <ClCompile Include="..\ai\domainai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
@@ -794,6 +800,12 @@
     </ClInclude>
     <ClInclude Include="..\script\batterycomponent.h">
       <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\barstack.h">
+      <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\adviser.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\ai\domainai.h">
       <Filter>Source Files\ai</Filter>

@@ -440,20 +440,26 @@ public:
 		Pop();
 	}
 
-	const T& Max() const {
+	const T& Max(int *index = 0) const {
 		int m = 0;
+		if (index) *index = 0;
 		for( int i=1; i<size; ++i ) {
-			if ( mem[i] > mem[m] )
+			if (mem[i] > mem[m]) {
 				m = i;
+				if (index) *index = i;
+			}
 		}
 		return mem[m];
 	}
 
-	const T& Min() const {
+	const T& Min(int *index = 0) const {
 		int m = 0;
+		if (index) *index = 0;
 		for( int i=1; i<size; ++i ) {
-			if ( mem[i] < mem[m] )
+			if (mem[i] < mem[m]) {
 				m = i;
+				if (index) *index = i;
+			}
 		}
 		return mem[m];
 	}

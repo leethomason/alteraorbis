@@ -25,6 +25,7 @@
 #include "../widget/consolewidget.h"
 #include "../widget/startwidget.h"
 #include "../widget/endwidget.h"
+#include "../widget/barstack.h"
 
 #include "../script/buildscript.h"
 
@@ -35,7 +36,7 @@ class Sim;
 class NewsEvent;
 class Chit;
 class GameItem;
-
+class Adviser;
 
 class GameScene : public Scene,
 				  public IChitListener
@@ -80,15 +81,17 @@ private:
 
 	void SetPickupButtons();	// if the avatar can pick things up
 	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
-	void SetHelpText(const int* buildingCount, int nWorkers);
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
 	bool AvatarSelected();
 	bool CameraTrackingAvatar();
 	bool DragAtom(gamui::RenderAtom* atom);
+	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
+	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
 
+	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
 	void DoAvatarButton();
 
@@ -149,9 +152,11 @@ private:
 	grinliz::Vector2F	coreWarningPos, domainWarningPos;
 	int					poolView;
 	float				savedCameraHeight;
+	bool				dragBuildingRotation;
 	grinliz::Quaternion	savedCameraRotation;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
+	Adviser*			adviser;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
@@ -180,9 +185,12 @@ private:
 	gamui::PushButton	abandonButton;
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
+	gamui::Image		helpImage;
 	gamui::TextLabel	helpText;
+	BarStackWidget		summaryBars;
 
-	FacePushWidget		faceWidget;
+	FacePushWidget		faceWidget,
+						targetFaceWidget;
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	techLabel;

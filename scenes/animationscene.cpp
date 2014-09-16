@@ -73,6 +73,9 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	ortho.SetText( "ortho" );
 
+	front.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	front.SetText( "front" );
+
 	zeroFrame.Init( &gamui2D, game->GetButtonLook(0) );
 	zeroFrame.SetText( "zero" );
 
@@ -157,6 +160,7 @@ void AnimationScene::Resize()
 	layout.PosAbs( &boneLeft,		0, -2 );
 	layout.PosAbs( &boneName,		1, -2 );
 	layout.PosAbs( &boneRight,		3, -2 );
+	layout.PosAbs( &front,			4, -3 );
 	layout.PosAbs( &ortho,			4, -2 );
 	layout.PosAbs( &zeroFrame,		5, -2 );
 	layout.PosAbs( &instance,		6, -2 );
@@ -306,13 +310,30 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 		--currentBone;
 		if ( currentBone == -2 ) currentBone = EL_MAX_BONES-1;
 	}
-	else if ( item == &ortho ) {
+	else if ( item == &ortho || item == &front ) {
 		Screenport* port = engine->GetScreenportMutable();
 		if ( ortho.Down() ) {
 			port->SetOrthoCamera( true, 0, 3.0f );
 			static const Vector3F DIR = { 1, 0, 0 };
 			static const Vector3F UP  = { 0, 1, 0 };
 			engine->camera.SetPosWC( -5, 0.55f, 1 );
+			engine->camera.SetDir( DIR, UP ); 
+			SetModelVis();
+		}
+		else if (front.Down()) {
+			port->SetOrthoCamera( true, 0, 3.0f );
+			static const Vector3F DIR = { 0, 0, -1 };
+			static const Vector3F UP  = { 0, 1, 0 };
+
+			Vector3F dir = { 0, 1, 1 };
+			dir.Normalize();
+			engine->lighting.SetLightDirection(&dir);
+
+			const ModelResource* res = model[0]->GetResource();
+			float h = 0.55f * res->AABB().SizeY();
+			float d = 5.0f * res->AABB().SizeY();
+
+			engine->camera.SetPosWC( 1, h, d );
 			engine->camera.SetDir( DIR, UP ); 
 			SetModelVis();
 		}
@@ -424,4 +445,12 @@ void AnimationScene::DoTick( U32 deltaTime )
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
+}
+
+
+grinliz::Color4F AnimationScene::ClearColor()
+{
+	Color4F c = game->GetMainPalette()->Get4F(0, PAL_GRAY);
+	c.Multiply(0.5f);
+	return c;
 }

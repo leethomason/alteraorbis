@@ -85,7 +85,10 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
-	case RENDERSTATE_UI_CLIP_XFORM_MAP:
+	case RENDERSTATE_UI_CLIP_XFORM_MAP_0:
+	case RENDERSTATE_UI_CLIP_XFORM_MAP_1:
+	case RENDERSTATE_UI_CLIP_XFORM_MAP_2:
+	case RENDERSTATE_UI_CLIP_XFORM_MAP_3:
 		{
 			shader.SetColor( 1, 1, 1, 1 );
 			shader.SetBlendMode( BLEND_NORMAL );
@@ -113,12 +116,16 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	
 	GPUStreamData data;
 	data.texture0 = (Texture*)textureHandle;
-	data.texture0XForm = uv;
-	data.texture0Clip  = uvClip;
-	data.texture0ColorMap = colorXForm;
 	data.indexBuffer  = ibo->ID();
 	data.vertexBuffer = vbo->ID();
 
+	int rs = (int)renderState;
+	if (rs >= RENDERSTATE_UI_CLIP_XFORM_MAP_0 && rs <= RENDERSTATE_UI_CLIP_XFORM_MAP_3) {
+		int id = rs - RENDERSTATE_UI_CLIP_XFORM_MAP_0;
+		data.texture0XForm = uv + id;
+		data.texture0Clip = uvClip + id;
+		data.texture0ColorMap = colorXForm + id;
+	}
 	GPUDevice::Instance()->Draw( shader, stream, data, start, count, 1 );
 }
 

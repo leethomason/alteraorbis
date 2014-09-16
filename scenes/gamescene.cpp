@@ -24,6 +24,7 @@
 #include "../game/workqueue.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/team.h"
+#include "../game/adviser.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -48,6 +49,7 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
+	dragBuildingRotation = false;
 	fastMode = false;
 	simTimer = 0;
 	simPS = 1.0f;
@@ -65,6 +67,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	poolView = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
+	adviser = new Adviser();
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
 
@@ -108,7 +111,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
+	const RenderAtom nullAtom;
 	helpText.Init(&gamui2D);
+	helpImage.Init(&gamui2D, nullAtom, true);
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
@@ -170,8 +175,17 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
 	swapWeapons.SetText("Swap\nWeapons");
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL, 2 );
 	faceWidget.SetSize( 100, 100 );
+
+	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
+	targetFaceWidget.SetSize(100, 100);
+
+	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS + 1);
+	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
+		summaryBars.SetBarText(i+1, ai::Needs::Name(i));
+	}
+	summaryBars.SetBarText(0, "Morale");
 
 	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 
@@ -211,7 +225,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	RenderAtom redAtom = LumosGame::CalcUIIconAtom("warning");
 	RenderAtom yellowAtom = LumosGame::CalcUIIconAtom("yellowwarning");
-	RenderAtom nullAtom;
 
 	coreWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
 	domainWarningIcon.Init(&gamui2D, game->GetButtonLook(0));
@@ -220,6 +233,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	coreWarningIcon.SetText("WARNING: Core under attack.");
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
+
+	adviser->Attach(&helpText, &helpImage);
 }
 
 
@@ -229,6 +244,7 @@ GameScene::~GameScene()
 		sim->GetEngine()->FreeModel( selectionModel );
 	}
 	delete sim;
+	delete adviser;
 }
 
 
@@ -239,7 +255,8 @@ void GameScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 
 	layout.PosAbs(&censusButton, 0, -1);
-	layout.PosAbs(&helpText, 1, -1);
+	layout.PosAbs(&helpImage, 1, -1);
+	layout.PosAbs(&helpText, 2, -1);
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&loadButton, 2, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
@@ -251,6 +268,10 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+
+	static float SIZE_BOOST = 1.3f;
+	helpImage.SetPos(helpImage.X() + layout.Width() * 0.3f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
+	helpImage.SetSize(helpImage.Height()*SIZE_BOOST, helpImage.Height()*SIZE_BOOST);
 
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
@@ -303,8 +324,11 @@ void GameScene::Resize()
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
+	layout.PosAbs( &targetFaceWidget, -4, 0, 1, 1 );
+	layout.PosAbs(&summaryBars, -3, 1);
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
+	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
 	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
@@ -348,6 +372,7 @@ void GameScene::SetBars( Chit* chit )
 
 	faceWidget.SetMeta( ic, ai );
 }
+
 
 void GameScene::Save()
 {
@@ -617,12 +642,16 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		return;
 	}
 
-	if (mv.VoxelHit()) {
+	if ((game->GetTapMod() & GAME_TAP_MOD_SHIFT) && mv.Hit()) {
 		if (AvatarSelected()) {
 			// clicked on a rock. Melt away!
 			Chit* player = sim->GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				player->GetAIComponent()->RockBreak(mv.Voxel2());
+				//player->GetAIComponent()->RockBreak(mv.Voxel2());
+				if (mv.ModelHit())
+					player->GetAIComponent()->Target(mv.model->userData, false);
+				else
+					player->GetAIComponent()->Target(ToWorld2I(mv.voxel), false);
 				return;
 			}
 		}
@@ -653,6 +682,42 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 }
 
 
+bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
+{
+	Chit* building = 0;
+	if (uiMode[UI_BUILD].Down() && !buildActive) {
+		building = sim->GetChitBag()->QueryBuilding(pos2i);
+	}
+	return building != 0;
+}
+
+
+void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
+{
+	Vector2I dragStart = ToWorld2I(mapDragStart);
+	Vector2I dragEnd = ToWorld2I(drag);
+
+	Chit* building = sim->GetChitBag()->QueryBuilding(dragStart);
+
+	if (building && (dragStart != dragEnd)) {
+		Vector2I d = dragEnd - dragStart;
+		float rotation = 0;
+		if (abs(d.x) > abs(d.y)) {
+			if (d.x > 0)	rotation = 90.0f;
+			else			rotation = 270.0f;
+		}
+		else {
+			if (d.y > 0)	rotation = 0;
+			else			rotation = 180.0f;
+		}
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+		if (msc) {
+			msc->SetYRotation(rotation);
+		}
+	}
+}
+
+
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
@@ -662,7 +727,7 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 		RemovableFilter removableFilter;
 
 		if (buildActive == BuildScript::CLEAR) {
-			wq->AddAction(pos2i, BuildScript::CLEAR);
+			wq->AddAction(pos2i, BuildScript::CLEAR, 0, 0);
 			return;
 		}
 		else if (buildActive == BuildScript::CANCEL) {
@@ -674,7 +739,7 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 
 			if (chit) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-				if (msc && msc->Building()) {
+				if (msc ) { //&& msc->Building()) {
 					float r = msc->GetYRotation();
 					r += 90.0f;
 					r = NormalizeAngleDegrees(r);
@@ -687,7 +752,11 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 			}
 		}
 		else {
-			wq->AddAction(pos2i, buildActive);
+			int variation = 0;
+			if (buildActive == BuildScript::PAVE) {
+				variation = coreScript->GetPave();
+			}
+			wq->AddAction(pos2i, buildActive, 0, variation);
 		}
 	}
 }
@@ -706,29 +775,42 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	if (!uiHasTap) {
 		if (action == GAME_TAP_DOWN) {
 			mapDragStart.Zero();
+			dragBuildingRotation = false;
 			if (DragAtom(&atom)) {
-				mapDragStart.Set(at.x, at.z);
+				mapDragStart = ToWorld2F(at);
+			}
+			else if (DragRotate(ToWorld2I(at))) {
+				dragBuildingRotation = true;
+				mapDragStart = ToWorld2F(at);
 			}
 		}
 		if (action == GAME_TAP_MOVE) {
 			if (!mapDragStart.IsZero()) {
 				Vector2F end = { at.x, at.z };
-				int count = 0;
-				if ((end - mapDragStart).LengthSquared() > 0.25f) {
-					Rectangle2I r;
-					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-					DragAtom(&atom);
 
-					for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
-						buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
-						buildMark[count].SetSize(1.0f, 1.0f);
-						buildMark[count].SetVisible(true);
-						buildMark[count].SetAtom(atom);
-					}
+				if (dragBuildingRotation) {
+					// Building rotation.
+					DragRotateBuilding(end);
 				}
-				while (count < NUM_BUILD_MARKS) {
-					buildMark[count].SetVisible(false);
-					++count;
+				else {
+					// Building placement, clear, etc.
+					int count = 0;
+					if ((end - mapDragStart).LengthSquared() > 0.25f) {
+						Rectangle2I r;
+						r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+						DragAtom(&atom);
+
+						for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
+							buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
+							buildMark[count].SetSize(1.0f, 1.0f);
+							buildMark[count].SetVisible(true);
+							buildMark[count].SetAtom(atom);
+						}
+					}
+					while (count < NUM_BUILD_MARKS) {
+						buildMark[count].SetVisible(false);
+						++count;
+					}
 				}
 			}
 		}
@@ -737,18 +819,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			if (mapDragStart.IsZero()) {
 				Tap3D(view, world);
 			}
-			else {
+			else if (!dragBuildingRotation) {
 				Vector2F end = { at.x, at.z };
-				//if ((end - mapDragStart).LengthSquared() > 0.25f) {
-					Rectangle2I r;
-					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-					DragAtom(&atom);
+				Rectangle2I r;
+				r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+				DragAtom(&atom);
 
-					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						BuildAction(it.Pos());
-					}
-				//}
+				for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+					BuildAction(it.Pos());
+				}
 			}
+			dragBuildingRotation = false;
 		}
 	}
 	// Clear out drag indicator, if not dragging.
@@ -807,16 +888,35 @@ void GameScene::DoCameraHome()
 }
 
 
+bool GameScene::DoEscape()
+{
+	if (buildActive > 0) {
+		// back out of build
+		buildActive = 0;
+		buildButton[0].SetDown();
+		SetSelectionModel(tapView);
+	}
+	else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
+		// return to view
+		uiMode[UI_VIEW].SetDown();
+	}
+	buildDescription.SetText("");
+	return uiMode[UI_VIEW].Down();
+}
+
+
 void GameScene::DoAvatarButton()
 {
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	if (AvatarSelected() && CameraTrackingAvatar()) {
+		// Teleport.
 		if (coreScript && sim->GetPlayerChit()) {
 			sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
 		}
 	}
 	else {
+		// Select.
 		chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
@@ -824,6 +924,10 @@ void GameScene::DoAvatarButton()
 			chitTracking = chit->ID();
 			cc->SetTrack(chitTracking);
 		}
+	}
+	bool escape = false;
+	while (!escape) {
+		escape = DoEscape();
 	}
 }
 
@@ -1118,17 +1222,7 @@ void GameScene::HandleHotKey( int mask )
 		fastMode = !fastMode;
 	}
 	else if (mask == GAME_HK_ESCAPE) {
-		if (buildActive > 0) {
-			// back out of build
-			buildActive = 0;
-			buildButton[0].SetDown();
-			SetSelectionModel(tapView);
-		}
-		else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
-			// return to view
-			uiMode[UI_VIEW].SetDown();
-		}
-		buildDescription.SetText("");
+		DoEscape();
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();
@@ -1346,6 +1440,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 }
 
 
+/*
 void GameScene::SetHelpText(const int* arr, int nWorkers)
 {
 	static const int BUILD_ADVISOR[] = {
@@ -1396,7 +1491,7 @@ void GameScene::SetHelpText(const int* arr, int nWorkers)
 	}
 	helpText.SetText(str.c_str());
 }
-
+*/
 
 void GameScene::SetBuildButtons(const int* arr)
 {
@@ -1623,10 +1718,6 @@ void GameScene::DoTick( U32 delta )
 	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
-	CStr<64> str;
-	str.Format( "Date %.2f\n%s", sim->AgeF(), sd.name.c_str() );
-	dateLabel.SetText( str.c_str() );
-
 	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
@@ -1642,8 +1733,64 @@ void GameScene::DoTick( U32 delta )
 		track = sim->GetPlayerChit();
 	}
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
-	SetBars( track );
+
+	if (playerChit && playerChit->GetAIComponent() && playerChit->GetAIComponent()->GetTarget()) {
+		Chit* target = playerChit->GetAIComponent()->GetTarget();
+		GLASSERT(target->GetItem());
+		targetFaceWidget.SetFace(&uiRenderer, target->GetItem() );
+		targetFaceWidget.SetMeta(target->GetItemComponent(), target->GetAIComponent());
+	}
+	else {
+		targetFaceWidget.SetFace(&uiRenderer, 0);
+	}
+
+	SetBars(track);
+	CStr<64> str;
+
+	{
+		double sum[ai::Needs::NUM_NEEDS+1] = { 0 };
+		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
+		int nActive = 0;
 	
+		if (coreScript && coreScript->NumCitizens()) {
+			Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+			for (int i = 0; i < coreScript->NumCitizens(); i++) {
+				Chit* chit = coreScript->CitizenAtIndex(i);
+				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
+					++nActive;
+					const ai::Needs& needs = chit->GetAIComponent()->GetNeeds();
+					for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+						sum[k] += needs.Value(k);
+						if (needs.Value(k) < 0.05) {
+							critical[k] = true;
+						}
+					}
+					sum[ai::Needs::NUM_NEEDS] += needs.Morale();
+					if (needs.Morale() < 0.1) {
+						critical[ai::Needs::NUM_NEEDS] = true;
+					}
+				}
+			}
+			if (nActive) {
+				for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+					sum[k] /= double(nActive);
+				}
+				sum[ai::Needs::NUM_NEEDS] /= double(nActive);
+			}
+		}
+		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
+		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
+		summaryBars.SetBarColor(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
+		summaryBars.SetBarRatio(0, float(sum[ai::Needs::NUM_NEEDS]));
+		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
+			summaryBars.SetBarColor(k+1, critical[k] ? red : blue);
+			summaryBars.SetBarRatio(k+1, float(sum[k]));
+		}
+
+		str.Format("Date %.2f\n%s\n%d Denizens", sim->AgeF(), sd.name.c_str(), nActive + (playerChit ? 1 : 0));
+		dateLabel.SetText( str.c_str() );
+	}
+
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
 	//swapWeapons.SetVisible(track && track == playerChit);
@@ -1710,7 +1857,7 @@ void GameScene::DoTick( U32 delta )
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
 		SetBuildButtons(arr);
-		SetHelpText(arr, nWorkers);
+		adviser->DoTick(delta, coreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
 	autoRebuild.SetEnabled(coreScript != 0);

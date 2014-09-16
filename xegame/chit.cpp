@@ -202,7 +202,7 @@ void Chit::Add( Component* c, bool loading )
 }
 
 
-void Chit::Remove( Component* c )
+Component* Chit::Remove( Component* c )
 {
 	timeToTick = 0;
 	for( int i=0; i<NUM_SLOTS; ++i ) {
@@ -226,10 +226,11 @@ void Chit::Remove( Component* c )
 			GLASSERT(!aiComponent || aiComponent->ToAIComponent());
 			GLASSERT(!healthComponent || healthComponent->ToHealthComponent());
 			GLASSERT(!renderComponent || renderComponent->ToRenderComponent());
-			return;
+			return c;
 		}
 	}
 	GLASSERT( 0 );	// not found
+	return 0;
 }
 
 

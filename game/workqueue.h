@@ -44,21 +44,24 @@ public:
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
-		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0) { pos.Zero(); }
+		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0), variation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
-		grinliz::Rectangle2I Bounds();
+
+		// Accounts for the size of the structure.
+		grinliz::Rectangle2I Bounds() const;
 
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
-		int					assigned;	// id of worker assigned this task.			
-		Model*				model;		// model used to show map work location
+		int					assigned;		// id of worker assigned this task.			
+		Model*				model;			// model used to show map work location
 		float				rotation;
+		int					variation;		// which PAVE
 	};
 
 	void Serialize( XStream* xs );
 	// Manages what jobs there are to do:
-	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation = 0);	// add an action to do
+	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation, int variation);	// add an action to do
 	void Remove( const grinliz::Vector2I& pos );
 	bool HasJob() const { return !queue.Empty(); }
 	

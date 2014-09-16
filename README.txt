@@ -25,6 +25,18 @@ thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
 
+Changes in Beta2c
+-----------------
+- Improved map screen
+- Help adviser improves help system and adds cool image
+- "flick-rotate". if in build mode, but no building selected,
+  click and drag rotates buildings
+- Show average fun, energy, social, and food for your domain
+- Target portrait
+- Updated to new stable SDL
+- Enemies will now attack turrents
+- Bug fixes, especially teleport home while in grid travel
+
 Changes in Beta 2
 -----------------
 
@@ -32,15 +44,12 @@ Changes in Beta 2
   and mobs. 
 - Circuits to create traps, machine, control water and magma, and defend your 
   domain.
-- Tab key now toggles between isometric and top-down view.
 - Deeper integration of the effects of fire, shock, and water. (Although more 
   needs to be done.)
-- Menu system gives indication of build order.
 - Improved world generation.
 - Vastly improved memory usage. Smaller and faster save files.
 - Simplified code architecture.
 - New, simplified, much more stable grid travel code.
-- Many bug fixes. Many bugs created. :)
 - Art improvements.
 - The Arachnoid is now called a Trilobyte
 - Drones no longer carry fruit and care heal at domain cores.
@@ -66,6 +75,7 @@ Controls
 'Home' key centers the camera on your core.
 'End' key centers the camera on your avatar; if already centered, the
   end key teleports the avatar home.
+'Escape' key backs out of the menus back to 'view' mode.
 
 Left-click moves the avatar, selects things, builds.
 Left-click & drag builds lots of pavement or ice at once, or clears an area.
@@ -75,6 +85,9 @@ Ctrl-Right-click & drag rotates and zooms the camera.
 
 The arrow keys or WASD moves the camera.
 Ctrl-Arrow keys or ctrl-WASD rotates and zooms.
+
+If in build mode, but no building selected (so click "Build" but don't select
+a building), then left-click & drag rotates buildings.
 
 
 Install

@@ -116,7 +116,7 @@ public:
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
 		const WorldGrid& wg = grid[index];
-		if ( wg.Land() == WorldGrid::LAND && wg.Height() == 0 ) {
+		if ( wg.Land() == WorldGrid::LAND && wg.RockHeight() == 0 ) {
 			grid[index].SetPave(pave);
 		}
 	}
@@ -167,15 +167,9 @@ public:
 					float* totalCost,
 					bool showDebugging = false );
 
-	// Calculate a path assuming that the position at 'end' is blocked,
-	// but we can get to a neighbor.
-	bool CalcPathBeside(	const grinliz::Vector2F& start, 
-							const grinliz::Vector2F& end, 
-							grinliz::Vector2F* bestEnd,
-							float* totalCost );
-
+	// Accounts that 'end' might be 1 or 2 grid size.
 	bool CalcWorkPath(	const grinliz::Vector2F& start, 
-						const grinliz::Vector2F& end, 
+						const grinliz::Rectangle2I& end, 
 						grinliz::Vector2F* bestEnd,
 						float* totalCost );
 
@@ -343,6 +337,20 @@ private:
 	void DrawTreeZones();
 	void ClearDebugDrawing();	// debugging
 	void DumpRegions();
+
+
+	// Calculate a path assuming that the position at 'end' is blocked,
+	// but we can get to a neighbor.
+	bool CalcPathBeside(	const grinliz::Vector2F& start, 
+							const grinliz::Vector2F& end, 
+							grinliz::Vector2F* bestEnd,
+							float* totalCost );
+
+	// Find a path to 'end' or beside 'end'
+//	bool CalcWorkPath(	const grinliz::Vector2F& start, 
+//						const grinliz::Vector2F& end, 
+//						grinliz::Vector2F* bestEnd,
+//						float* totalCost );
 
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector

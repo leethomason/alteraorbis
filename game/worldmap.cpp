@@ -1590,6 +1590,7 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 }
 
 
+/*
 bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
 							const grinliz::Vector2F& end,
 							grinliz::Vector2F* bestEnd,
@@ -1602,6 +1603,35 @@ bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
 	}
 	okay = CalcPathBeside(start, end, bestEnd, totalCost);
 	return okay;
+}
+*/
+
+
+bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
+							const grinliz::Rectangle2I& end,
+							grinliz::Vector2F* bestEnd,
+							float* totalCost)
+{
+	Vector2I best = end.min;
+	bool okay = CalcPath(start, ToWorld2F(best), 0, totalCost, false);
+	if (okay) {
+		*bestEnd = ToWorld2F(best);
+		return true;
+	}
+
+	Rectangle2I r = end;
+	r.Outset(1);
+
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		if (it.Pos() != best) {
+			okay = CalcPath(start, ToWorld2F(it.Pos()), 0, totalCost, false);
+			if (okay) {
+				*bestEnd = ToWorld2F(it.Pos());
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 

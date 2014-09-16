@@ -266,7 +266,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE);
 					}
 					else if (task->buildScriptID == BuildScript::PAVE) {
-						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, chit->Team() % 3 + 1);
+						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, coreScript->GetPave());
 					}
 					else if (buildData.circuit) {
 						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);

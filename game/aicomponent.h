@@ -72,7 +72,10 @@ public:
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
-	bool RockBreak( const grinliz::Vector2I& pos );
+	void Target(const grinliz::Vector2I& voxel, bool focused);
+
+	Chit* GetTarget();
+	//bool RockBreak( const grinliz::Vector2I& pos );
 	void MakeAware( const int* enemyIDs, int n );
 	
 	// Use a null IString for ICE.
@@ -95,7 +98,6 @@ public:
 	enum {
 		NORMAL_MODE,
 		RAMPAGE_MODE,		// a MOB that gets stuck can 'rampage', which means cutting a path through the world.
-		ROCKBREAK_MODE,		// weird special mode for attacking rocks. probably can be removed.
 		BATTLE_MODE,
 		NUM_MODES
 	};
@@ -128,7 +130,6 @@ private:
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
-	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
 	bool ThinkHungry( const ComponentSet& thisComp );

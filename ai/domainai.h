@@ -40,7 +40,7 @@ public:
 	virtual int DoTick(U32 delta);
 
 private:
-	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq);
+	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
 	bool BuyWorkers();
 	bool BuildRoad();
 	bool BuildPlaza(int size);

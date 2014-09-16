@@ -82,7 +82,7 @@ CoreScript::CoreScript()
 	tech = 0;
 	achievement.Clear();
 	workQueue = 0;
-//	nElixir = 0;
+	pave = 0;
 	sector.Zero();
 }
 
@@ -105,9 +105,9 @@ void CoreScript::Serialize(XStream* xs)
 {
 	BeginSerialize(xs, Name());
 	XARC_SER(xs, tech);
-//	XARC_SER(xs, nElixir);
 	XARC_SER(xs, summonGreater);
 	XARC_SER(xs, autoRebuild);
+	XARC_SER(xs, pave);
 
 	XARC_SER(xs, defaultSpawn);
 
@@ -565,4 +565,39 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 		}
 	}
 	return 0;
+}
+
+
+int CoreScript::GetPave()
+{
+	if (pave) {
+		return pave;
+	}
+
+	// Pavement is used as a flag for "this is a road" by the AI.
+	// It's important to use the least common pave in a domain
+	// so that building isn't interfered with.
+	CArray<int, WorldGrid::NUM_PAVE> nPave;
+	for (int i = 0; i < WorldGrid::NUM_PAVE; ++i) nPave.Push(0);
+
+	if (pave == 0) {
+		Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
+		for (Rectangle2IIterator it(inner); !it.Done(); it.Next()) {
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+			nPave[wg.Pave()] += 1;
+		}
+	}
+
+	nPave[0] = 0;
+	if (nPave.Max() == 0) {
+		pave = 1 + parentChit->random.Rand(WorldGrid::NUM_PAVE - 1);
+	}
+	else {
+		nPave[0] = SECTOR_SIZE*SECTOR_SIZE;
+		nPave.Min(&pave);
+	}
+	if (pave == 0) {
+		pave = 1;
+	}
+	return pave;
 }

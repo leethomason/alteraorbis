@@ -14,7 +14,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "Clear", "",		0, "Clear rock, plants, and buildings." },
 	{ "Rotate", "",		0, "Rotate a building and position its porch." },
 	{ "Pave", "pave",	0, "Create path paving that blocks plant growth." },
-	{ "Ice", "ice",		0, "Build synthetic rock." },
+	{ "Silica", "ice",	0, "Build synthetic rock." },
 	// Denizen
 	{ "SleepTube", "bed",			1, "Increases population." },
 	{ "Temple", "temple",			1, "Increases Tech cap, increases population cap, attracts monsters.", "Requires a SleepTube." },
@@ -40,7 +40,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
 	{ "Bend", "",					5, "Routes electrons.", "Requires a Circuit Fab", CIRCUIT_BEND },
 	{ "Split", "",					5, "Splits electrons.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
-	{ "Ice\nToggle", "",			5, "Uses a charge to toggle ICE.", "Requires a Circuit Fab", CIRCUIT_ICE },
+	{ "Silica\nGate", "",			5, "Uses a charge to create or destroy Silica.", "Requires a Circuit Fab", CIRCUIT_ICE },
 	{ "Stop", "",					5, "Absorbs a charge or spark.", "Requires a Circuit Fab", CIRCUIT_STOP },
 	{ "Detector", "",				5, "Sparks for enemies of any mass.", "Requires a Circuit Fab", CIRCUIT_DETECT_ENEMY },
 	{ "Transistor", "",				5, "Digital toggle switch.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },

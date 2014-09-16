@@ -26,6 +26,8 @@ class UIRenderer : public gamui::IGamuiRenderer, public gamui::IGamuiText
 {
 public:
 	enum {
+		NUM_DATA = 4,
+
 		RENDERSTATE_UI_NORMAL = 1,		// a=1, normal UI rendering (1.0 alpha)
 		RENDERSTATE_UI_NORMAL_OPAQUE,	// a=1, same, but for resources that don't blend (background images)
 		RENDERSTATE_UI_DISABLED,		// a=0.5, disabled of both above
@@ -33,7 +35,11 @@ public:
 		RENDERSTATE_UI_TEXT_DISABLED,
 		RENDERSTATE_UI_DECO,			// a=0.7,deco rendering
 		RENDERSTATE_UI_DECO_DISABLED,	// a=0.2
-		RENDERSTATE_UI_CLIP_XFORM_MAP,	// special rendering for faces. FIXME: not really working. Only supports one face.
+		// Giant hack: renderstates for up to 4 faces in the UI.
+		RENDERSTATE_UI_CLIP_XFORM_MAP_0,	// special rendering for faces.
+		RENDERSTATE_UI_CLIP_XFORM_MAP_1,	// special rendering for faces.
+		RENDERSTATE_UI_CLIP_XFORM_MAP_2,	// special rendering for faces.
+		RENDERSTATE_UI_CLIP_XFORM_MAP_3,	// special rendering for faces.
 		RENDERSTATE_COUNT
 	};
 
@@ -53,7 +59,6 @@ public:
 	virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
 	
 	// Rendering parameters:
-	enum { NUM_DATA = 4 };
 	grinliz::Vector4F uv[NUM_DATA];
 	grinliz::Vector4F uvClip[NUM_DATA];
 	grinliz::Matrix4  colorXForm[NUM_DATA];

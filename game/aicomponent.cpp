@@ -83,7 +83,7 @@ static const double	NEED_CRITICAL				= 0.1;
 static const int	BUILD_TIME					= 1000;
 static const int	REPAIR_TIME					= 4000;
 
-const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
+const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 
@@ -175,9 +175,13 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWea
 
 bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& mapPos )
 {
+	RenderComponent* rc = ParentChit()->GetRenderComponent();
+	GLASSERT(rc);
+	if (!rc) return false;
+
 	Vector3F origin;
-	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
-	GLASSERT( weapon );
+	rc->CalcTrigger(&origin, 0);
+
 	CArray<const Model*, RenderComponent::NUM_MODELS+1> ignore;
 	thisComp.render->GetModelList( &ignore );
 
@@ -762,7 +766,6 @@ void AIComponent::Think( const ComponentSet& thisComp )
 		else
 			ThinkWander( thisComp );	
 		break;
-	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
 	case RAMPAGE_MODE:		ThinkRampage( thisComp );	break;
 	}
@@ -842,49 +845,25 @@ void AIComponent::Target( Chit* chit, bool focused )
 }
 
 
-bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
+void AIComponent::Target( const Vector2I& pos2i, bool focused )
 {
-	GLOUTPUT(( "Destroy something at %d,%d\n", rock.x, rock.y ));
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
-		                               Chit::SPATIAL_BIT |
-									   Chit::ITEM_BIT |
-									   ComponentSet::IS_ALIVE |
-									   ComponentSet::NOT_IN_IMPACT );
-	if ( !thisComp.okay ) 
-		return false;
-
-	const ChitContext* context = Context();
-
-	Vector2I sector = thisComp.spatial->GetPosition2DI();
-	sector.x /= SECTOR_SIZE;
-	sector.y /= SECTOR_SIZE;
-
-	CoreScript* cs = CoreScript::GetCore( sector );
-	if ( cs && cs->InUse() && (cs->ParentChit()->Team() != thisComp.chit->Team()) ) {
-		// Core is in use. We can only blast away.
-		const WorldGrid& wg = context->worldMap->GetWorldGrid( rock.x, rock.y );
-		if ( wg.RockHeight() == 0 )
-			return false;
-
-		aiMode = ROCKBREAK_MODE;
-		currentAction = NO_ACTION;
-		targetDesc.Set( rock );
-		GLASSERT( targetDesc.HasTarget() );
-		parentChit->SetTickNeeded();
-	}
-	else {
-		// neutral. Can vaporize.
-		Vector2F dest = { (float)rock.x + 0.5f, (float)rock.y+0.5f };
-		Vector2F end = { 0, 0 };
-		float cost = 0;
-		if ( context->worldMap->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			taskList.Clear();
-			taskList.Push( Task::MoveTask( end ));
-			taskList.Push( Task::StandTask( 1000 ));
-			taskList.Push( Task::RemoveTask( rock));
+	if ( aiMode != BATTLE_MODE ) {
+		aiMode = BATTLE_MODE;
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
 		}
 	}
-	return true;
+	targetDesc.Set(pos2i);
+	focus = focused ? FOCUS_TARGET : 0;
+}
+
+
+Chit* AIComponent::GetTarget()
+{
+	if (targetDesc.HasTarget()) {
+		return Context()->chitBag->GetChit(targetDesc.id);
+	}
+	return 0;
 }
 
 
@@ -1042,55 +1021,6 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		aiMode = NORMAL_MODE;
 		currentAction = NO_ACTION;
 	}
-}
-
-	
-void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
-{
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	const ChitContext* context = Context();
-	const WorldGrid& wg = context->worldMap->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
-
-	const Vector3F& pos = thisComp.spatial->GetPosition();
-	Vector2F pos2		= { pos.x, pos.z };
-	Vector2I pos2i		= { (int)pos2.x, (int)pos2.y };
-	Vector3F rockTarget	= targetDesc.MapTarget();
-	Vector2I rock2i		= { (int)rockTarget.x, (int)rockTarget.z };
-	Vector2F rock2		= { (float)rock2i.x + 0.5f, (float)rock2i.y + 0.5f };
-	
-	if ( !pmc || wg.RockHeight() == 0 ) {
-		currentAction	= NO_ACTION;
-		aiMode			= NORMAL_MODE;
-		return;
-	}
-
-	// The current weapons.
-	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
-
-	// Always use melee first because bolts tend to "shoot through" in close quarters.
-	if ( meleeWeapon && BattleMechanics::InMeleeZone( context->engine, thisComp.chit, rock2i )) {
-		currentAction = MELEE;
-		return;
-	}
-	bool lineOfSight = rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos );
-	if ( lineOfSight && rangedWeapon->GetItem()->CanUse() ) {
-		GLASSERT( targetDesc.HasTarget() );
-		currentAction = SHOOT;
-		return;
-	}
-	else if ( !lineOfSight || meleeWeapon ) {
-		// Move to target
-		Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
-		Vector2F end;
-		float cost = 0;
-		if ( context->worldMap->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			this->Move( end, false );
-			return;
-		}
-	}
-	aiMode = NORMAL_MODE;
-	currentAction = NO_ACTION;
 }
 
 
@@ -2015,8 +1945,6 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 	if ( Team::GetRelationship( parentChit, coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
-//	int nElixir = coreScript->nElixir;
-
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 	
@@ -2292,7 +2220,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		bool sectorWander =		pmc
 							&& itemFlags & GameItem::AI_SECTOR_WANDER
 							&& thisComp.item
-							&& thisComp.item->HPFraction() > 0.90f
+							&& thisComp.item->HPFraction() > 0.80f
 							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0);
 
 		if ( sectorHerd || sectorWander ) 
@@ -2512,6 +2440,23 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		}
 	}
 
+	// Handle having a location target:
+	if (enemyList.Size() == 0 && targetDesc.HasTarget() && !targetDesc.mapPos.IsZero()) {
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(targetDesc.mapPos);
+		if (wg.RockHeight() == 0 && wg.Plant() == 0) {
+			targetDesc.Clear();
+		}
+		else {
+			float range = (pos - targetDesc.MapTarget()).Length();
+			if (range > 3.0f && range < LONGEST_WEAPON_RANGE && LineOfSight(thisComp, targetDesc.mapPos)) {
+				utility[OPTION_SHOOT] = 1.0f;
+			}
+			else { //if (BattleMechanics::InMeleeZone(Context()->engine, parentChit, targetDesc.mapPos)) {
+				utility[OPTION_MELEE] = 1.0f;
+			}
+		}
+	}
+
 	int index = MaxValue<float, CompValue>( utility, NUM_OPTIONS );
 
 	// Translate to action system:
@@ -2537,24 +2482,24 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		case OPTION_MELEE:
 		{
-			GLASSERT(target[OPTION_MELEE]);
+			currentAction = MELEE;
 			if (target[OPTION_MELEE]) {
-				currentAction = MELEE;
 				targetDesc.Set(target[OPTION_MELEE]->ID());
-				GLASSERT(targetDesc.HasTarget());
 			}
+			// Either a new target specified, or already one in place.
+			GLASSERT(targetDesc.HasTarget());
 		}
 		break;
 		
 		case OPTION_SHOOT:
 		{
-			GLASSERT(target[OPTION_SHOOT]);
+			pmc->Stop();
+			currentAction = SHOOT;
 			if (target[OPTION_SHOOT]) {
-				pmc->Stop();
-				currentAction = SHOOT;
 				targetDesc.Set(target[OPTION_SHOOT]->ID());
-				GLASSERT(targetDesc.HasTarget());
 			}
+			// Either a new target specified, or already one in place.
+			GLASSERT(targetDesc.HasTarget());
 		}
 		break;
 
@@ -2625,7 +2570,8 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 		if ( item ) {
 			Vector2F dest = { 0, 0 };
 			float cost = 0;
-			int hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), ToWorld2F(item->pos), &dest, &cost);
+
+			bool hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), item->Bounds(), &dest, &cost);
 
 			if (hasPath) {
 				if (BuildScript::IsClear(item->buildScriptID)) {
@@ -2829,7 +2775,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	if ( focus == FOCUS_TARGET && !targetDesc.id ) {
+	if ( focus == FOCUS_TARGET && !targetDesc.HasTarget() ) {
 		focus = FOCUS_NONE;
 	}
 
@@ -2866,7 +2812,7 @@ int AIComponent::DoTick( U32 deltaTime )
 				}
 			}
 		}
-		else if ( aiMode == BATTLE_MODE && targetDesc.id == 0 && enemyList.Empty() ) {
+		else if ( aiMode == BATTLE_MODE && !targetDesc.HasTarget() && enemyList.Empty() ) {
 			aiMode = NORMAL_MODE;
 			currentAction = 0;
 			if ( debugFlag ) {
@@ -3048,7 +2994,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 
 	case ChitMsg::CHIT_SECTOR_HERD:
-		{
+		if (parentChit->GetItem() && (parentChit->GetItem()->flags & (GameItem::AI_SECTOR_HERD | GameItem::AI_SECTOR_WANDER))) {
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
 			this->Move( *sectorPort, msg.Data() ? true : false );

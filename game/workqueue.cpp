@@ -149,7 +149,7 @@ void WorkQueue::Remove(const grinliz::Vector2I& pos)
 }
 
 
-bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation)
+bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation, int variation)
 {
 	if ( ToSector( pos2i ) != sector ) {
 		// wrong sector.
@@ -160,6 +160,11 @@ bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, flo
 	item.buildScriptID = buildScriptID;
 	item.pos = pos2i;
 	item.rotation = rotation;
+	item.variation = variation;
+
+#ifdef DEBUG
+	if (item.buildScriptID == BuildScript::PAVE) GLASSERT(item.variation);
+#endif
 
 	if ( !TaskCanComplete( item )) {
 		return false;
@@ -225,10 +230,9 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == 0 ) {
 			float cost = 0;
-			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
 			Vector2F bestEnd = { 0, 0 };
 
-			bool okay = worldMap->CalcWorkPath(start, end, &bestEnd, &cost);
+			bool okay = worldMap->CalcWorkPath(start, queue[i].Bounds(), &bestEnd, &cost);
 			if (okay && (cost < bestCost)) {
 				bestCost = cost;
 				best = i;
@@ -381,7 +385,8 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 	}
 	else if (BuildScript::IsBuild(item.buildScriptID)) {
 		if (item.buildScriptID == BuildScript::PAVE) {
-			return wg.Pave() > 0;
+			GLASSERT(item.variation);
+			return (wg.Pave() == item.variation) || item.variation == 0;
 		}
 		else if (item.buildScriptID == BuildScript::ICE) {
 			return wg.RockHeight() > 0;
@@ -453,7 +458,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 }
 
 
-Rectangle2I WorkQueue::QueueItem::Bounds()
+Rectangle2I WorkQueue::QueueItem::Bounds() const
 {
 	Rectangle2I r;
 	r.min = pos;

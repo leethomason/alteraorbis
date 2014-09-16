@@ -24,6 +24,7 @@
 #include "../engine/particle.h"
 #include "../grinliz/glmatrix.h"
 #include "../game/lumoschitbag.h"
+#include "../game/pathmovecomponent.h"	// see the Teleport() function.
 
 using namespace grinliz;
 
@@ -143,6 +144,16 @@ void SpatialComponent::Teleport(const grinliz::Vector3F& pos)
 		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
 		SetPosition(pos);
 		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+
+		// Sigh. Reaching into another component. Didn't think of this when I 
+		// added the teleport method.
+		while (parentChit->StackedMoveComponent()) {
+			Component* c = parentChit->Remove(parentChit->GetMoveComponent());
+			delete c;
+		}
+		GLASSERT(parentChit->GetMoveComponent());
+		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+		if (pmc) pmc->Stop();
 	}
 }
 

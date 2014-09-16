@@ -139,7 +139,7 @@ public:
 
 	int ID() const { return id; }
 	void Add( Component*, bool loading=false );
-	void Remove( Component* );
+	Component* Remove( Component* );
 
 	void SetTickNeeded()		{ timeToTick = 0; }
 	void DoTick();

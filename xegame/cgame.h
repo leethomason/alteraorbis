@@ -29,13 +29,6 @@ void GameResize( void* handle, int width, int height, int rotation );
 void GameSave( void* handle );
 
 // Input
-// Mimics the iPhone input. UFOAttack procesess:
-//		Touch and drag. (scrolling, movement)
-//		2 finger zoom in/out
-//		Taps (buttons, UI)
-//
-
-
 #define GAME_TAP_DOWN		0
 #define GAME_TAP_MOVE		1
 #define GAME_TAP_UP			2
@@ -43,7 +36,6 @@ void GameSave( void* handle );
 #define GAME_MOVE_WHILE_UP	4	// not on tablets, obviously
 #define GAME_TAP_MOD_SHIFT	5	// debugging
 #define GAME_TAP_MOD_CTRL	6	// debugging
-
 void GameTap( void* handle, int action, int x, int y, int mod );
 
 #define GAME_ZOOM_DISTANCE	0

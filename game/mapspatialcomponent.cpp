@@ -26,7 +26,7 @@ using namespace grinliz;
 MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 {
 	mode = GRID_IN_USE;
-	building = false;
+//	building = false;
 	hasPorch = 0;
 	hasCircuit = 0;
 	nextBuilding = 0;
@@ -69,10 +69,9 @@ void MapSpatialComponent::SetMode( int newMode )
 }
 
 
-void MapSpatialComponent::SetBuilding( bool b, bool p, int circuit )
+void MapSpatialComponent::SetBuilding( bool p, int circuit )
 {
 	GLASSERT( !parentChit );
-	building = b;
 	hasPorch = p ? 1 : 0;
 	hasCircuit = circuit;
 }
@@ -103,7 +102,7 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 		worldMap->SetPorch(it.Pos().x, it.Pos().y, type);
 	}
 
-	if (building && hasPorch) {
+	if (hasPorch) {
 		hasPorch = 1;	// standard porch.
 		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetComponent("EvalBuildingScript"));
 		if (evalScript) {
@@ -144,10 +143,8 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 {
 	super::OnAdd( chit, init );
-	if ( building ) {
-		Context()->chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
-		UpdatePorch(false);
-	}
+	Context()->chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
+	UpdatePorch(false);
 
 	if ( mode == GRID_BLOCKED ) {
 		UpdateBlock( Context()->worldMap );
@@ -169,10 +166,8 @@ void MapSpatialComponent::OnRemove()
 		Vector2I p = this->GetPosition2DI();
 		Context()->worldMap->SetCircuit(p.x, p.y, 0);
 	}
-	if ( building ) {
-		Vector2I pos = GetPosition2DI();
-		chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
-	}
+	Vector2I pos = GetPosition2DI();
+	chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	UpdatePorch(true);
 
 	// Remove so that the callback doesn't return blocking.
@@ -190,7 +185,7 @@ void MapSpatialComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
-	XARC_SER( xs, building );
+//	XARC_SER( xs, building );
 	XARC_SER( xs, hasPorch );
 	XARC_SER(xs, hasCircuit);
 	XARC_SER( xs, bounds );

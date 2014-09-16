@@ -2,6 +2,7 @@
 #define FACEWIDGET_INCLUDED
 
 #include "../gamui/gamui.h"
+#include "barstack.h"
 
 class GameItem;
 class UIRenderer;
@@ -14,17 +15,18 @@ public:
 	FaceWidget()	{}
 
 	enum {
-		HP_BAR		= 0x01,
-		AMMO_BAR	= 0x02,
-		SHIELD_BAR	= 0x04,
-		LEVEL_BAR	= 0x08,
-		MORALE_BAR  = 0x10,
+		HP_BAR = 0x01,
+		AMMO_BAR = 0x02,
+		SHIELD_BAR = 0x04,
+		LEVEL_BAR = 0x08,
+		MORALE_BAR = 0x10,
 
-		FOOD_BAR	= 0x020,
-		SOCIAL_BAR	= 0x040,
-		ENERGY_BAR	= 0x080,
-		FUN_BAR		= 0x100, 
+		FOOD_BAR = 0x020,
+		SOCIAL_BAR = 0x040,
+		ENERGY_BAR = 0x080,
+		FUN_BAR = 0x100,
 
+		BATTLE_BARS = HP_BAR | AMMO_BAR | SHIELD_BAR | LEVEL_BAR,
 		NEED_BARS	= MORALE_BAR | FOOD_BAR | SOCIAL_BAR | ENERGY_BAR | FUN_BAR,
 		ALL_BARS	= NEED_BARS | LEVEL_BAR | SHIELD_BAR | AMMO_BAR | HP_BAR,
 
@@ -32,7 +34,7 @@ public:
 		ALL			= 0xffff
 	};
 
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags ) = 0;
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id ) = 0;
 	void SetFace( UIRenderer* renderer, const GameItem* item );
 	void SetMeta( ItemComponent* ic, AIComponent* ai );
 
@@ -51,9 +53,10 @@ public:
 	virtual gamui::Button* GetButton() = 0;
 
 protected:
-	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags );
+	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags, int id );
 
 	int					flags;
+	int					id;
 	gamui::TextLabel	upper;
 	enum {
 		BAR_HP,
@@ -66,7 +69,8 @@ protected:
 		BAR_FUN,
 		MAX_BARS
 	};
-	gamui::DigitalBar	bar[MAX_BARS];
+//	gamui::DigitalBar	bar[MAX_BARS];
+	BarStackWidget barStack;
 };
 
 
@@ -76,7 +80,7 @@ public:
 	FaceToggleWidget() {
 	}
 
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id );
 
 	virtual const gamui::Button* GetButton() const		{ return &toggle; }
 	virtual gamui::Button* GetButton()					{ return &toggle; }
@@ -90,7 +94,7 @@ class FacePushWidget : public FaceWidget
 public:
 	FacePushWidget() {
 	}
-	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
+	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags, int id );
 
 	virtual const gamui::Button* GetButton() const		{ return &push; }
 	virtual gamui::Button* GetButton()					{ return &push; }

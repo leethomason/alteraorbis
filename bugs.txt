@@ -34,21 +34,18 @@
 - shock -> plasma??
 - mouse wheel support
 - cage trap
+- taskBeside needs to account for 2x2 buildings.
+- interface annoyances
+	- when does/should flick rotation work?
+	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 - game
-	- Beta 2c
-		- attachment issues on wiki
-		- update SDL
-		- tab in/out. window resize? can't repro.
-		- enemies don't attack turrets
-		- better rotation ui
-		- gold shouldn't float
-		- teleport home while in grid travel (oops)
-		- UI tweak:
-			- show current enemies
-			- show overall happiness
-		- face icons in map screen
-
+	- Beta 2d
+		- pause
+			- basic
+			- tactical
+		- replace build with click/drag?
+		- zoom out to full domain
 		- map travel: lanes?
 		- worldgen: only run fluids past a certain time
 		- Linux
@@ -70,14 +67,15 @@
 	- Beta 3
 		x remove social
 		- domain AI
-			- left + right support in the AI for building
+			x left + right support in the AI for building
 			- use the least common pave
 			- save pave, test
 		- troll deity
+			- torches
 			x create items (Truulga). limit creation to culture.
 			- colors
 				x items
-				- buildings
+				- buildings (Trulga okay; player?)
 			- logic to adjust needs to travel
 			- summon trolls
 			- depart trolls
@@ -255,6 +253,26 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta 2c
+	x attachment issues on wiki
+	x gold shouldn't float
+	x update SDL
+	t tab in/out. window resize? can't repro.
+	x enemies don't attack turrets
+	x face icons in map screen
+	x teleport home while in grid travel (oops)
+	x UI tweak:
+		x show current enemies, display of enemy you are fighting. health, level, portrait.
+			x handle MOBs
+			x handle 2 humans
+			d fall back to mouse-over if no target (with memory?)
+		x show overall happiness
+	x ice block: on/off instead of toggle
+	x advisor face
+	x free fire to replace rock-melt
+	x improved advisor: Greetings, Core.
+	x better rotation ui
+	x update game fiction: rez, de-rez, born, died, kills, ice
 x Beta 2
 	x screenshots of circuits
 	x screenshots of fluids
