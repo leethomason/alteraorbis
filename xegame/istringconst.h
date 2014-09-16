@@ -135,6 +135,8 @@ public:
 	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
 
+	static grinliz::IString Truulga;
+
 	// double underscore -> '.'
 	static grinliz::IString kiosk__n;
 	static grinliz::IString kiosk__m;

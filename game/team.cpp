@@ -9,20 +9,27 @@ using namespace grinliz;
 
 int Team::idPool = 0;
 
-grinliz::IString Team::TeamName( int team )
+grinliz::IString Team::TeamName(int team)
 {
 	IString name;
 	CStr<64> str;
 	int group = 0, id = 0;
 	SplitID(team, &group, &id);
 
-	switch ( group ) {
-	case TEAM_HOUSE:
+	switch (group) {
+		case TEAM_HOUSE:
 		str.Format("House-%x", id);
-		name = StringPool::Intern( str.c_str() );	
+		name = StringPool::Intern(str.c_str());
 		break;
 
-	default:
+		case TEAM_TROLL:
+		// Since Trolls can't build anything,
+		// any troll core is by definition
+		// Truulga. (At least at this point.)
+		name = ISC::Truulga;
+		break;
+
+		default:
 		break;
 	}
 
