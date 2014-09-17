@@ -258,7 +258,7 @@ bool DomainAI::BuildBuilding(int id)
 int DomainAI::DoTick(U32 delta)
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial) return ticker.Next();
+	if (!spatial || !parentChit->GetItem()) return ticker.Next();
 
 	if (ticker.Delta(delta)) {
 		Vector2I sector = { 0, 0 };
@@ -274,6 +274,12 @@ int DomainAI::DoTick(U32 delta)
 			return ticker.Next();
 		}
 
+		// FIXME: this is really, really Truulga specific:
+		GameItem* item = parentChit->GetItem();
+		if (item->wallet.gold < 500 && ReserveBank::BankPtr()->gold > 500) {
+			Transfer(&item->wallet, ReserveBank::BankPtr(), 500);
+		}
+
 		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 
@@ -282,7 +288,7 @@ int DomainAI::DoTick(U32 delta)
 			if (BuildRoad()) break;	// will return true until all roads are built.
 			if (BuildPlaza(2)) break;
 			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
-			if (arr[BuildScript::MARKET] < 4 && BuildBuilding(BuildScript::MARKET)) break;
+			if (arr[BuildScript::MARKET] < 2 && BuildBuilding(BuildScript::MARKET)) break;
 			break;
 		}
 	}

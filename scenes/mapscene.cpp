@@ -213,7 +213,7 @@ void MapScene::SetText()
 				const char* owner = "";
 				CoreScript* cc = CoreScript::GetCore( sector );
 				if ( cc && cc->InUse() ) {
-					owner = Team::TeamName( cc->ParentChit()->Team() ).c_str();
+					owner = Team::TeamName( cc->ParentChit()->Team() ).safe_str();
 				}
 				str.Format( "%s\n%s", sd.name, owner );
 			}

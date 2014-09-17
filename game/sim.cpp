@@ -26,6 +26,8 @@
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
 
+#include "../ai/domainai.h"
+
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
@@ -307,6 +309,34 @@ void Sim::AbandonDomain()
 }
 
 
+void Sim::CreateTruulgaCore()
+{
+	Chit* truulga = context.chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
+	if (!truulga) return;
+
+	Vector2I sector = truulga->GetSpatialComponent()->GetSector();
+	CoreScript* cs = CoreScript::GetCore(sector);
+
+	int team = 0;
+	if (cs) {
+		team = cs->ParentChit()->Team();
+		team = TeamGroup(team);
+	}
+
+	if (team != TEAM_TROLL) {
+		// Need a new core for Truulga.
+		Vector2I newSector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+		CoreScript* cs = CoreScript::GetCore(newSector);
+		if (cs && cs->ParentChit()->Team() == 0) {
+			CoreScript* troll = CreateCore(newSector, TEAM_TROLL);
+			troll->ParentChit()->Add(new DomainAI());
+			truulga->GetSpatialComponent()->SetPosition(troll->ParentChit()->GetSpatialComponent()->GetPosition());
+			GLOUTPUT(("Truulga domain created at %x%x\n", newSector.x, newSector.y));
+		}
+	}
+}
+
+
 CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 {
 	// Destroy the existing core.
@@ -429,6 +459,7 @@ void Sim::DoTick( U32 delta )
 			--i;
 		}
 	}
+	CreateTruulgaCore();
 
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );

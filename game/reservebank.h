@@ -30,6 +30,8 @@ public:
 	ReserveBank();
 	~ReserveBank();
 
+	static Wallet* BankPtr() { GLASSERT(instance);  return &instance->bank; }
+
 	Wallet bank;
 
 	void Serialize( XStream* xs );

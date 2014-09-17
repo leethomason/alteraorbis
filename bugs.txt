@@ -77,13 +77,15 @@
 				x items
 				- buildings (Truulga okay; player?)
 			- logic to adjust needs to travel
-			- summon trolls
-			- depart trolls
-			- troll spawning
+				- summon trolls
+				- depart trolls
 			x avatar use
 			- destroy and steal items with markets
-			- logic for Trulga creation, destruction, spawning. destroy cores.
+			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
+			- Redo spawn system. 
+				- Spawn trolls from Truulga domain
+				- Domain takeover (by mobs)
 		- Gob-men domain
 		- Mantis-men domain
 

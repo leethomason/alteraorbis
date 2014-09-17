@@ -531,24 +531,26 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		MOBIshFilter mobFilter;
 
 		Wallet w = mainItem->wallet.EmptyWallet();
-		bool dropItems = false;
+
 		Vector3F pos = { 0, 0, 0 };
 		if ( parentChit->GetSpatialComponent() ) {
 			pos = parentChit->GetSpatialComponent()->GetPosition();
 		}
 
-		if ( mobFilter.Accept( parentChit ) || mainItem->wallet.NumCrystals() || this->NumCarriedItems() ) {
-			dropItems = true;
+		// Mobs drop gold and crystal; everyone else returns it to the Bank
+		if ( mobFilter.Accept( parentChit )) {
 			if ( !w.IsEmpty() ) {
 				Context()->chitBag->NewWalletChits( pos, w );
 				w.EmptyWallet();
 			}
 		}
-		if (!w.IsEmpty()) {
-			if ( ReserveBank::Instance() ) {	// null in battle mode
-				ReserveBank::Instance()->bank.Add( w );
+		else {
+			if (ReserveBank::Instance()) {	// null in battle mode
+				ReserveBank::Instance()->bank.Add(w);
 			}
+			w.EmptyWallet();
 		}
+		GLASSERT(w.IsEmpty());
 
 		while( itemArr.Size() > 1 ) {
 			if ( itemArr[itemArr.Size()-1]->Intrinsic() ) {
@@ -556,14 +558,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 			GameItem* item = itemArr.Pop();
 			GLASSERT( !item->IName().empty() );
-			if ( dropItems ) {
-				Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
-			}
-			else {
-				ReserveBank::Instance()->bank.Add( item->wallet.EmptyWallet() );
-				NewsDestroy( item );
-				delete item;
-			}
+			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 		}
 	}
 	else {
@@ -595,6 +590,8 @@ int ItemComponent::ProcessEffect(int delta)
 
 	Vector2F pos2 = sc->GetPosition2D();
 	Vector2I pos2i = ToWorld2I(pos2);
+	if (pos2i.IsZero()) return VERY_LONG_TICK;	// if we are at origin, not really for processing.
+
 	GameItem* mainItem = itemArr[0];
 	IShield* iShield = this->GetShield();
 	const GameItem* shield = iShield ? iShield->GetItem() : 0;

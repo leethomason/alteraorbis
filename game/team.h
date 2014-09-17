@@ -73,4 +73,8 @@ private:
 	static int idPool;
 };
 
+inline int TeamGroup(int team) {
+	return team & 0xff;
+}
+
 #endif // LUMOS_TEAM_INCLUDED

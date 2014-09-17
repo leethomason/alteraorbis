@@ -454,6 +454,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER(xs, buildScriptID);
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
+	XARC_SER( xs, variation );
 	XarcClose( xs );
 }
 

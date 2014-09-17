@@ -372,6 +372,14 @@ Chit* LumosChitBag::GetDeity(int id)
 	}
 
 	if (id == DEITY_TRUULGA) chit->GetItem()->team = TEAM_TROLL;
+	if (!chit->GetSpatialComponent()) {
+		// Have a spatial component but not a render component.
+		// Used to set the "focus" of the deity, and mark
+		// the location of a home core. (Truulga's base, for 
+		// example.)
+		chit->Add(new SpatialComponent());
+	}
+
 	return chit;
 }
 

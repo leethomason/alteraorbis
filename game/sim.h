@@ -100,6 +100,7 @@ private:
 	void CreateRockInOutland();
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
+	void CreateTruulgaCore();
 	
 	ChitContext		context;
 	Weather*		weather;
