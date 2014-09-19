@@ -1200,6 +1200,27 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	IString mob = thisComp.item->keyValues.GetIString("mob");
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
+	if (thisComp.item->IName() == ISC::troll) {
+		// Visit Truulga every now and again. And if leaving truuga...go far.
+		Chit* truulga = Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
+		if (truulga && truulga->GetSpatialComponent()) {
+			Vector2I truulgaSector = truulga->GetSpatialComponent()->GetSector();
+			if (thisComp.spatial->GetSector() == truulgaSector) {
+				// At Truulga - try to go far.
+				Vector2I destSector = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
+				if (DoSectorHerd(thisComp, focus, destSector))
+					return true;
+				// Else drop out and use code below to go to a neighbor.
+			}
+			else {
+				// Should we visit Truulga?
+				if (parentChit->random.Rand(20) == 0) {
+					return DoSectorHerd(thisComp, focus, truulgaSector );
+				}
+			}
+		}
+	}
+
 	// First pass: filter on attract / repel choices.
 	// This is game difficulty logic!
 	for (int i = 0; i < rinit.Size(); ++i) {
@@ -1252,16 +1273,23 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	// 2nd pass: look for 1st match
 	if (start.IsValid()) {
 		for (int i = 0; i < delta.Size(); ++i) {
-			SectorPort dest;
-			dest.sector = start.sector + delta[i];
-			const SectorData& destSD = context->worldMap->GetSector(dest.sector);
-			dest.port = destSD.NearestPort(pos);
-			if (DoSectorHerd(thisComp, focus, dest)) {
+			if (DoSectorHerd(thisComp, focus, start.sector + delta[i])) {
 				return true;
 			}
 		}
 	}
 	return false;
+}
+
+
+bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector)
+{
+	SectorPort dest;
+	dest.sector = sector;
+	const SectorData& destSD = Context()->worldMap->GetSector(dest.sector);
+	GLASSERT(thisComp.spatial);
+	dest.port = destSD.NearestPort(thisComp.spatial->GetPosition2D());
+	return DoSectorHerd(thisComp, focus, dest);
 }
 
 

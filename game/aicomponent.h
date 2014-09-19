@@ -223,6 +223,7 @@ private:
 	void DoMove( const ComponentSet& thisComp );
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp, bool focus );	// "upper" function: look for dest, etc.
+	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector);	// lower function: go
 	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
 	void EnterNewGrid( const ComponentSet& thisComp );
 

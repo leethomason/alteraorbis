@@ -75,7 +75,11 @@ public:
 	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
 	grinliz::Vector2I GetPosition2DI() const		{ grinliz::Vector2I v = { (int)position.x, (int)position.z }; return v; }
 	grinliz::Vector2F GetHeading2D() const;
-	grinliz::Vector2I GetSector() const				{ grinliz::Vector2I s = { (int)position.x/SECTOR_SIZE, (int)position.z/SECTOR_SIZE }; return s; }
+	grinliz::Vector2I GetSector() const				{ 
+		grinliz::Vector2I s = { (int)position.x/SECTOR_SIZE, (int)position.z/SECTOR_SIZE }; 
+		GLASSERT(s.x >= 0 && s.x < NUM_SECTORS && s.y >= 0 && s.y < NUM_SECTORS);
+		return s; 
+	}
 
 	virtual grinliz::Rectangle2I Bounds() const		{ grinliz::Rectangle2I b; b.min = b.max = GetPosition2DI(); return b; }
 

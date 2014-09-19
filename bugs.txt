@@ -73,14 +73,14 @@
 		- troll deity
 			- torches
 			x create items (Truulga). limit creation to culture.
-			- colors
+			x colors
 				x items
-				- buildings (Truulga okay; player?)
-			- logic to adjust needs to travel
-				- summon trolls
-				- depart trolls
+				x buildings (Truulga okay)
+			x logic to adjust needs to travel
+				x summon trolls
+				x depart trolls
 			x avatar use
-			- destroy and steal items with markets
+			x destroy and steal items with markets
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
 			- Redo spawn system. 
@@ -88,6 +88,7 @@
 				- Domain takeover (by mobs)
 		- Gob-men domain
 		- Mantis-men domain
+		- Player domain colors
 
 	- World Gen
 		- less techy, more interesting world gen
