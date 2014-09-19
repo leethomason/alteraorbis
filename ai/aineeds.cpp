@@ -31,11 +31,16 @@ Needs::Needs()
 }
 
 
+void Needs::DoTravelTick(U32 delta)
+{
+	double dMorale= double(delta) * 0.001 * 0.05 / DECAY_TIME;
+	morale -= dMorale;
+	morale = Clamp( morale, 0.0, 1.0 );
+}
+
 
 void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Personality* personality )
 {
-	// if 'lowerDifficulty' is true, then don't decay social.
-	//
 	double dNeed = double(delta) * 0.001 / DECAY_TIME;
 	if (lowerDifficulty)
 		dNeed *= 0.5f;
@@ -50,7 +55,6 @@ void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Person
 	}
 	else {
 		need[FOOD]   -= dNeed;
-		//need[SOCIAL] -= dNeed * Dice3D6ToMult(personality->IntroExtro());	// social decays faster for extroverts
 		need[ENERGY] -= dNeed;
 		need[FUN]	 -= dNeed;
 

@@ -312,19 +312,6 @@ void CoreScript::UpdateAI()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	CoreInfo* info = &coreInfoArr[index];
 	GLASSERT(info->coreScript == this);
-
-	/*
-	if (this->InUse()) {
-		info->approxTeam = PrimaryTeam();
-		CChitArray chitArr;
-		scriptContext->chitBag->FindBuildingCC(IStringConst::power, sector, 0, 0, &chitArr, 0);
-		info->approxNTemples = chitArr.Size();
-	}
-	else {
-		info->approxNTemples = 0;
-		info->approxTeam = 0;
-	}
-	*/
 }
 
 

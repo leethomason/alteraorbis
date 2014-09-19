@@ -241,10 +241,12 @@ public:
 	// returns true if settled
 	bool RunFluidSim(const grinliz::Vector2I& sector);
 	void EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine);
-	const FluidSim* GetFluidSim(const grinliz::Vector2I& sector) { 
+	const FluidSim* GetFluidSim(const grinliz::Vector2I& sector) {
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
 		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
 	}
+	// Debugging
+	void Unsettle(const grinliz::Vector2I& sector);
 
 	// Map information, debugging of pools and waterfalls:
 	void FluidStats(int* pools, int* waterfalls);

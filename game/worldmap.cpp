@@ -702,6 +702,12 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 }
 
 
+void WorldMap::Unsettle(const grinliz::Vector2I& sector)
+{
+	fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+}
+
+
 bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
 {
 	if (fluidSim[sector.y*NUM_SECTORS + sector.x])

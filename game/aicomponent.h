@@ -75,10 +75,8 @@ public:
 	void Target(const grinliz::Vector2I& voxel, bool focused);
 
 	Chit* GetTarget();
-	//bool RockBreak( const grinliz::Vector2I& pos );
 	void MakeAware( const int* enemyIDs, int n );
 	
-	// Use a null IString for ICE.
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
@@ -140,6 +138,7 @@ private:
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);
+	bool TravelHome(const ComponentSet& thisComp, bool focus);
 	void WorkQueueToTask(  const ComponentSet& thisComp );			// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );	// moves tasks along, mark tasks completed, do special actions
 

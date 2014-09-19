@@ -1,6 +1,7 @@
 #include "news.h"
 #include "gameitem.h"
 #include "worldinfo.h"
+#include "team.h"
 #include "../xarchive/glstreamer.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
@@ -99,25 +100,28 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHist
 
 
 
-NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main, Chit* second )
+NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, Chit* main, Chit* second)
 {
 	Clear();
 	this->what = what;
 	this->pos = pos;
-	this->chitID	   = main ? main->ID() : 0;
-	this->itemID	   = ( main && main->GetItem() )     ? main->GetItem()->ID()   : 0;
-	this->secondItemID = ( second && second->GetItem() ) ? second->GetItem()->ID() : 0;
+	this->chitID = main ? main->ID() : 0;
+	this->itemID = (main && main->GetItem()) ? main->GetItem()->ID() : 0;
+	this->secondItemID = (second && second->GetItem()) ? second->GetItem()->ID() : 0;
+	this->team = main ? main->Team() : 0;
 }
 
 
-NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* item, Chit* second )
+NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, const GameItem* item, Chit* second)
 {
+	GLASSERT(item);
 	Clear();
 	this->what = what;
 	this->pos = pos;
 	this->itemID = item->ID();
 	this->chitID = second ? second->ID() : 0;
 	this->secondItemID = (second && second->GetItem()) ? second->GetItem()->ID() : 0;
+	this->team = item->team;
 }
 
 
@@ -153,7 +157,7 @@ grinliz::IString NewsEvent::GetWhat() const
 }
 
 
-grinliz::IString NewsEvent::IDToName( int id, bool shortName ) const
+grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 {
 	if ( id == 0 ) return IString();
 
@@ -184,100 +188,109 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName ) const
 }
 
 
-void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortNameID ) const
+void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameID) const
 {
 	*str = "";
 	IString wstr = GetWhat();
-	Vector2I sector	= ToSector( ToWorld2I( pos ));
-	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
+	Vector2I sector = ToSector(ToWorld2I(pos));
+
+	//const GameItem* first = ItemDB::Instance()->Find(itemID);
+	const GameItem* second = ItemDB::Instance()->Find(secondItemID);
 
 	// Not the case with explosives: can kill yourself.
 	//GLASSERT( itemID != secondItemID );
 
 	Chit* chit = 0;
-	if ( chitBag ) {
-		chit = chitBag->GetChit( chitID );
+	if (chitBag) {
+		chit = chitBag->GetChit(chitID);
 	}
 
-	IString itemName   = IDToName( itemID, itemID == shortNameID );
-	IString secondName = IDToName( secondItemID, secondItemID == shortNameID );
-	if ( secondName.empty() ) secondName = StringPool::Intern( "[unknown]" );
+	IString itemName = IDToName(itemID, itemID == shortNameID);
+	IString secondName = IDToName(secondItemID, secondItemID == shortNameID);
+	if (secondName.empty()) secondName = StringPool::Intern("[unknown]");
 
-	float age = float( double(date) / double(AGE_IN_MSEC));
+	float age = float(double(date) / double(AGE_IN_MSEC));
 	IString domain;
-	if ( WorldInfo::Instance() ) {
-		const SectorData& sd = WorldInfo::Instance()->GetSector( sector );
+	if (WorldInfo::Instance()) {
+		const SectorData& sd = WorldInfo::Instance()->GetSector(sector);
 		domain = sd.name;
 	}
 
-	switch ( what ) {
-	case DENIZEN_CREATED:
-		str->Format( "%.2f: Denizen %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str() );
+	switch (what) {
+		case DENIZEN_CREATED:
+		str->Format("%.2f: Denizen %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case DENIZEN_KILLED:
-		str->Format( "%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		case DENIZEN_KILLED:
+		str->Format("%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str());
 		break;
 
-	case GREATER_MOB_CREATED:
-		str->Format( "%.2f: %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str() ); 
+		case GREATER_MOB_CREATED:
+		str->Format("%.2f: %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case DOMAIN_CREATED:
+		case DOMAIN_CREATED:
 		str->Format("%.2f: %s " MOB_created ".", age, domain.c_str());
 		break;
 
-	case GREATER_MOB_KILLED:
-		str->Format( "%.2f: %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
+		case GREATER_MOB_KILLED:
+		str->Format("%.2f: %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str());
 		break;
 
-	case DOMAIN_DESTROYED:
-		str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
+		case DOMAIN_DESTROYED:
+		if (team) {
+			IString teamName = Team::TeamName(team);
+			str->Format("%.2f: %s domain %s " MOB_destroyed ".", age, teamName.safe_str(), domain.safe_str());
+		}
+		else {
+			str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
+		}
 		break;
 
-	case FORGED:
-		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.safe_str(), domain.safe_str(), secondName.safe_str() );
+		case FORGED:
+		str->Format("%.2f: %s forged at %s by %s.", age, itemName.safe_str(), domain.safe_str(), secondName.safe_str());
 		break;
 
-	case UN_FORGED:
-		str->Format( "%.2f: %s " MOB_destroyed " at %s.", age, itemName.c_str(), domain.c_str() );
+		case UN_FORGED:
+		str->Format("%.2f: %s " MOB_destroyed " at %s.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case PURCHASED:
-		str->Format( "%.2f: %s purchased at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		case PURCHASED:
+		str->Format("%.2f: %s purchased at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str());
 		break;
 
-	case STARVATION:
-		str->Format( "%.2f: %s has been overcome by starvation at %s.", age, itemName.c_str(), domain.c_str() );
+		case STARVATION:
+		str->Format("%.2f: %s has been overcome by starvation at %s.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case BLOOD_RAGE:
-		str->Format( "%.2f: a distraught %s is overcome by blood rage at %s.", age, itemName.c_str(), domain.c_str() );
+		case BLOOD_RAGE:
+		str->Format("%.2f: a distraught %s is overcome by blood rage at %s.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case VISION_QUEST:
-		str->Format( "%.2f: %s is consumed by despair at %s and leaves for a vision quest.", age, itemName.c_str(), domain.c_str() );
+		case VISION_QUEST:
+		str->Format("%.2f: %s is consumed by despair at %s and leaves for a vision quest.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	case GREATER_SUMMON_TECH:
+		case GREATER_SUMMON_TECH:
 		str->Format("%.2f: %s is called to %s by the siren song of Tech.", age, itemName.c_str(), domain.c_str());
 		break;
 
-	default:
-		GLASSERT( 0 );
+		default:
+		GLASSERT(0);
 	}
 }
 
 
-void NewsEvent::Serialize( XStream* xs )
+void NewsEvent::Serialize(XStream* xs)
 {
-	XarcOpen( xs, "NewsEvent" );
-	XARC_SER( xs, what );
-	XARC_SER( xs, pos );
-	XARC_SER( xs, chitID );
-	XARC_SER( xs, itemID );
-	XARC_SER( xs, secondItemID );
-	XARC_SER( xs, date );
-	XarcClose( xs );	
+	XarcOpen(xs, "NewsEvent");
+	XARC_SER(xs, what);
+	XARC_SER(xs, pos);
+	XARC_SER(xs, chitID);
+	XARC_SER(xs, itemID);
+	XARC_SER(xs, secondItemID);
+	XARC_SER(xs, date);
+	XARC_SER(xs, team);
+	XarcClose(xs);
 }
 

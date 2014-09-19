@@ -32,8 +32,8 @@ DomainAI::~DomainAI()
 void DomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
-	ticker.SetPeriod(2000 + chit->random.Rand(1000));
-	forgeTicker.SetPeriod(10 * 1000 + chit->random.Rand(1000));
+	ticker.SetPeriod(10 * 1000 + chit->random.Rand(1000));
+	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
 
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();

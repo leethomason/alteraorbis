@@ -25,6 +25,7 @@
 #include "../game/mapspatialcomponent.h"
 #include "../game/team.h"
 #include "../game/adviser.h"
+#include "../game/fluidsim.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -1145,11 +1146,11 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if (index >= 0) {
 				const NewsEvent& ne = current[index];
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				if (cc && ne.chitID) {
-					cc->SetTrack(ne.chitID);
+				if (cc && ne.FirstChitID()) {
+					cc->SetTrack(ne.FirstChitID());
 				}
 				else {
-					sim->GetEngine()->CameraLookAt(ne.pos.x, ne.pos.y);
+					sim->GetEngine()->CameraLookAt(ne.Pos().x, ne.Pos().y);
 					if (cc) cc->SetTrack(0);
 				}
 			}
@@ -1249,7 +1250,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
-#if 1
+#if 0
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
@@ -1261,6 +1262,10 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+		{	
+			Vector2I sector = ToSector(ToWorld2I(at));
+			sim->GetWorldMap()->Unsettle(sector);
+		}
 #if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
@@ -1615,15 +1620,15 @@ void GameScene::ProcessNewsToConsole()
 
 	for ( ;currentNews < history->NumNews(); ++currentNews ) {
 		const NewsEvent& ne = history->News( currentNews );
-		Vector2I sector = ToSector(ToWorld2I(ne.pos));
-		Chit* chit = chitBag->GetChit(ne.chitID);
+		Vector2I sector = ne.Sector();
+		Chit* chit = chitBag->GetChit(ne.FirstChitID());
 		SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
 
 		str = "";
 
-		switch( ne.what ) {
+		switch( ne.What() ) {
 		case NewsEvent::DENIZEN_CREATED:
-			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
+			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
 				ne.Console( &str, chitBag, 0 );
 				if (sc) pos2 = sc->GetPosition2D();
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
@@ -1634,7 +1639,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::STARVATION:
 		case NewsEvent::BLOOD_RAGE:
 		case NewsEvent::VISION_QUEST:
-			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
+			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
 				ne.Console( &str, chitBag, 0 );
 				if (sc) pos2 = sc->GetPosition2D();
 				atom = LumosGame::CalcUIIconAtom("warning");
@@ -1644,7 +1649,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::FORGED:
 		case NewsEvent::UN_FORGED:
 		case NewsEvent::PURCHASED:
-			if ((coreScript && coreScript->IsCitizen(ne.chitID))
+			if ((coreScript && coreScript->IsCitizen(ne.FirstChitID() ))
 				|| sector == homeSector)
 			{
 				ne.Console(&str, chitBag, 0);

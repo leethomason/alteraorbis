@@ -772,6 +772,21 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
+bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)
+{
+	CoreScript* cs = CoreScript::GetCoreFromTeam(parentChit->Team());
+	if (!cs) return false;
+
+	Vector2I dstSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+	SectorData dstSD = Context()->worldMap->GetSector(dstSector);
+
+	SectorPort dstSP;
+	dstSP.sector = dstSector;
+	dstSP.port = dstSD.NearestPort(cs->ParentChit()->GetSpatialComponent()->GetPosition2D());
+
+	return Move(dstSP, focus);
+}
+
 
 bool AIComponent::Move( const SectorPort& sp, bool focused )
 {
@@ -1957,12 +1972,13 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	Vector2I bestPorch = { 0, 0 };
 	CChitArray mobs;
 
-#define LOG_NEEDS
-
+	bool logNeeds = false;
+	/*
 	bool logNeeds = thisComp.item->IProperName() == "Tria";
 	if (logNeeds) {
 		GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
 	}
+	*/
 
 	int sellIndex = thisComp.itemComponent->ItemToSell();
 	int sellValue = 0;
@@ -2053,16 +2069,6 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		if ( item->IName() == taskList.LastBuildingUsed() ) {
 			s *= 0.2;
 		}
-
-		// Practicality - is available?
-		// Note that for social buildings, being crowded is good.
-		//if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
-		//	MOBFilter mobFilter;
-		//	Context()->chitBag->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
-		//	if ( mobs.Size() ) {
-		//		s *= 0.5;
-		//	}
-		//}
 
 		if (logNeeds) {
 			GLOUTPUT(("  %.2f %s\n", s, item->Name()));
@@ -2831,18 +2837,42 @@ int AIComponent::DoTick( U32 deltaTime )
 		return 0;
 	}
 
-	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
-		// Travel exists without needs - plenty of other things to go wrong.
-		if ( this->AtFriendlyOrNeutralCore() ) {
+	// This is complex; HAS_NEEDS and USES_BUILDINGS aren't orthogonal. See aineeds.h
+	// for an explanation.
+	// FIXME: remove "lower difficulty" from needs.DoTick()
+	if (thisComp.item->flags & (GameItem::HAS_NEEDS | GameItem::AI_USES_BUILDINGS)) {
+		if (needsTicker.Delta(deltaTime)) {
 			CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
-			bool lowerDifficulty = cs && (cs->MaxTech() == 1);
+			bool atHomeCore = cs && cs->IsCitizen(parentChit->ID());
 
-			needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, lowerDifficulty, &thisComp.item->GetPersonality());
-			if ( thisComp.chit->PlayerControlled() ) {
-				thisComp.ai->GetNeedsMutable()->SetFull();
+			static const double LOW_MORALE = 0.25;
+
+			if (AtFriendlyOrNeutralCore()) {
+				needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, false, &thisComp.item->GetPersonality());
+
+				if (thisComp.chit->PlayerControlled()) {
+					needs.SetFull();
+				}
+				else if (!(thisComp.item->flags & GameItem::HAS_NEEDS)) {
+					needs.SetMorale(1.0);	// no needs, so morale doesn't change.
+				}
+				else if (atHomeCore && needs.Morale() == 0) {
+					DoMoraleZero(thisComp);
+				}
+				else if (needs.Morale() < LOW_MORALE) {
+					bool okay = TravelHome(thisComp, true);
+					if (!okay) needs.SetMorale(1.0);
+				}
 			}
-			if ( needs.Morale() == 0 ) {
-				DoMoraleZero( thisComp );
+			else {
+				// We are wandering the world.
+				if ((thisComp.item->flags & GameItem::HAS_NEEDS) && !thisComp.chit->PlayerControlled()) {
+					needs.DoTravelTick(deltaTime);
+					if (needs.Morale() == 0) {
+						bool okay = TravelHome(thisComp, true);
+						if (!okay) needs.SetMorale(1.0);
+					}
+				}
 			}
 		}
 	}
