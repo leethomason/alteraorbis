@@ -83,12 +83,15 @@
 			x destroy and steal items with markets
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
-			- Redo spawn system. 
-				- Spawn trolls from Truulga domain
-				- Domain takeover (by mobs)
 		- Gob-men domain
 		- Mantis-men domain
 		- Player domain colors
+		- Long play test
+			- Troll distribution
+			- Troll gun distribution
+		- Redo spawn system. 
+			- Spawn trolls from Truulga domain
+			- Domain takeover (by mobs)
 
 	- World Gen
 		- less techy, more interesting world gen
