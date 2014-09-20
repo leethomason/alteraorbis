@@ -33,7 +33,6 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 	ticker.SetPeriod(10 * 1000 + chit->random.Rand(1000));
-	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
 
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
@@ -273,25 +272,53 @@ int DomainAI::DoTick(U32 delta)
 		if (workQueue->HasJob()) {
 			return ticker.Next();
 		}
-
-		// FIXME: this is really, really Truulga specific:
-		GameItem* item = parentChit->GetItem();
-		if (item->wallet.gold < 500 && ReserveBank::BankPtr()->gold > 500) {
-			Transfer(&item->wallet, ReserveBank::BankPtr(), 500);
-		}
-
-		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
-		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-
-		while (true) {
-			if (BuyWorkers()) break;
-			if (BuildRoad()) break;	// will return true until all roads are built.
-			if (BuildPlaza(2)) break;
-			if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
-			if (arr[BuildScript::MARKET] < 2 && BuildBuilding(BuildScript::MARKET)) break;
-			break;
-		}
 	}
+	return ticker.Next();
+}
+
+
+TrollDomainAI::TrollDomainAI()
+{
+
+}
+	
+
+TrollDomainAI::~TrollDomainAI()
+{
+
+}
+
+
+void TrollDomainAI::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	this->EndSerialize( xs );
+}
+
+
+void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	return super::OnAdd(chit, initialize);
+	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
+}
+
+
+void TrollDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+
+int TrollDomainAI::DoTick(U32 delta)
+{
+	// Skim off the reserve bank:
+	GameItem* item = parentChit->GetItem();
+	if (item->wallet.gold < 500 && ReserveBank::BankPtr()->gold > 500) {
+		Transfer(&item->wallet, ReserveBank::BankPtr(), 500);
+	}
+
+	// Build stuff for the trolls to buy.
 	if (forgeTicker.Delta(delta)) {
 		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
 
@@ -340,5 +367,28 @@ int DomainAI::DoTick(U32 delta)
 			}
 		}
 	}
-	return ticker.Next();
+	return Min(forgeTicker.Next(), super::DoTick(delta));
+}
+
+
+void TrollDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+
+	while (true) {
+		if (BuyWorkers()) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
+		if (BuildPlaza(2)) break;
+		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
+		if (arr[BuildScript::MARKET] < 2 && BuildBuilding(BuildScript::MARKET)) break;
+		break;
+	}
 }

@@ -185,7 +185,6 @@ void MapSpatialComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
-//	XARC_SER( xs, building );
 	XARC_SER( xs, hasPorch );
 	XARC_SER(xs, hasCircuit);
 	XARC_SER( xs, bounds );

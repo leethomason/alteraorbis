@@ -39,7 +39,10 @@ public:
 	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 	virtual int DoTick(U32 delta);
 
-private:
+	// subclasses implement to place build orders.
+	virtual void DoBuild() = 0;
+
+protected:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
 	bool BuyWorkers();
 	bool BuildRoad();
@@ -49,8 +52,31 @@ private:
 	enum { MAX_ROADS = 4};
 	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
 
+private:
 	CTicker ticker;			// build logic ticker.
+};
+
+
+class TrollDomainAI : public DomainAI
+{
+	typedef DomainAI super;
+
+public:
+	TrollDomainAI();
+	~TrollDomainAI();
+
+	virtual const char* Name() const { return "TrollDomainAI"; }
+	virtual void Serialize(XStream* xs);
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
+	virtual int DoTick(U32 delta);
+
+	virtual void DoBuild();
+private:
+
 	CTicker forgeTicker;	// every tick builds something
+
 };
 
 #endif // REBUILDAI_COMPONENT_INCLUDED

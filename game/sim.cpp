@@ -329,7 +329,7 @@ void Sim::CreateTruulgaCore()
 		CoreScript* cs = CoreScript::GetCore(newSector);
 		if (cs && cs->ParentChit()->Team() == 0) {
 			CoreScript* troll = CreateCore(newSector, TEAM_TROLL);
-			troll->ParentChit()->Add(new DomainAI());
+			troll->ParentChit()->Add(new TrollDomainAI());
 			truulga->GetSpatialComponent()->SetPosition(troll->ParentChit()->GetSpatialComponent()->GetPosition());
 			GLOUTPUT(("Truulga domain created at %x%x\n", newSector.x, newSector.y));
 		}
