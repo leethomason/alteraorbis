@@ -272,6 +272,7 @@ int DomainAI::DoTick(U32 delta)
 		if (workQueue->HasJob()) {
 			return ticker.Next();
 		}
+		this->DoBuild();
 	}
 	return ticker.Next();
 }
