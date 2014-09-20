@@ -41,6 +41,8 @@
 
 - game
 	- Beta 2d
+		- clean up UI layout
+		- persisting fluids bugs
 		- pause
 			- basic
 			- tactical
