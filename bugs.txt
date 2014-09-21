@@ -70,8 +70,8 @@
 			x left + right support in the AI for building
 			x use the least common pave
 			x save pave, test
-		- troll deity
-			- torches
+		x troll deity
+			x torches
 			x create items (Truulga). limit creation to culture.
 			x colors
 				x items
@@ -92,7 +92,13 @@
 		- Redo spawn system. 
 			- Spawn trolls from Truulga domain
 			- Domain takeover (by mobs)
-
+		- Squads
+			- squad control:
+				- defend
+				- attack
+				- adventure
+				- follow avatar
+				
 	- World Gen
 		- less techy, more interesting world gen
 		- use some of the time and space to introduce and explain the game

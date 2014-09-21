@@ -154,6 +154,14 @@
         size="2"
         />
 
+  <item name="trollBrazier"
+        resource="trollBrazier"
+        flags="CLICK_THROUGH"
+        mass="150"
+        cost="100"
+        size="2"
+        />
+
   <item name="vault"
         resource="vault"
         flags="DAMAGE_UNDER_WATER"

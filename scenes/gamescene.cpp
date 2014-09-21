@@ -1262,10 +1262,23 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+#if 0
 		{	
 			Vector2I sector = ToSector(ToWorld2I(at));
 			sim->GetWorldMap()->Unsettle(sector);
 		}
+#endif
+#if 1
+		{
+			Chit* truulga = sim->GetChitBag()->GetDeity(LumosChitBag::DEITY_TRUULGA);
+			if (truulga) {
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				cc->SetTrack(0);
+				Vector2F lookat = truulga->GetSpatialComponent()->GetPosition2D();
+				sim->GetEngine()->CameraLookAt(lookat.x, lookat.y);
+			}
+		}
+#endif
 #if 0
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);

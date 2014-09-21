@@ -1213,8 +1213,9 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 				// Else drop out and use code below to go to a neighbor.
 			}
 			else {
-				// Should we visit Truulga?
-				if (parentChit->random.Rand(20) == 0) {
+				// Should we visit Truulga? Check for a little gold, too.
+				// FIXME: needs tuning!
+				if (thisComp.item->wallet.gold > 15 && parentChit->random.Rand(15) == 0) {
 					return DoSectorHerd(thisComp, focus, truulgaSector );
 				}
 			}
