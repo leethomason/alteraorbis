@@ -83,6 +83,8 @@
 			x destroy and steal items with markets
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
+		- debug: attach to domain
+		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Gob-men domain
 		- Mantis-men domain
 		- Player domain colors
@@ -98,7 +100,7 @@
 				- attack
 				- adventure
 				- follow avatar
-				
+
 	- World Gen
 		- less techy, more interesting world gen
 		- use some of the time and space to introduce and explain the game

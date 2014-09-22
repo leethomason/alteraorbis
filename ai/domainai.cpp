@@ -385,13 +385,12 @@ void TrollDomainAI::DoBuild()
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 	int nBraziers = 4 + (parentChit->ID() % 4);
 
-	while (true) {
+	do {
 		if (BuyWorkers()) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 		if (BuildPlaza(2)) break;
 		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
-		break;
-	}
+	} while (false);
 }
