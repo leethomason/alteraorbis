@@ -24,6 +24,7 @@
   <markov filename="vikingMale.txt" assetName="vikingMale" />
   <markov filename="vikingFemale.txt" assetName="vikingFemale" />
   <markov filename="monster.txt" assetName="monster" />
+  <markov filename="gobnames.txt" assetName="gobnames" />
   <markov-word filename="barNames.txt" assetName="barNames" />
   
   <!-- Icon and UI -->
@@ -235,6 +236,16 @@
   </animation>
 
   <model filename="troll/troll.ac" shading="flat" animation="trollAnimation" animationSpeed="1.25" >
+    <meta name="trigger" pos="-0.24 0.33 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.55 0"/>
+    <meta name="shield"  pos="0 0.60 -0.08" rot="1 0 0 80" boneName="torso" />
+  </model>
+
+  <animation filename="gob/gob_.bvh" assetName="gobAnimation" >
+    <meta animation="melee" name="impact" time="500" />
+  </animation>
+
+  <model filename="gob/gob.ac" shading="flat" animation="gobAnimation" animationSpeed="1.25" >
     <meta name="trigger" pos="-0.24 0.33 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="0 0.55 0"/>
     <meta name="shield"  pos="0 0.60 -0.08" rot="1 0 0 80" boneName="torso" />

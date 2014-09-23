@@ -217,6 +217,16 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 }
 
 
+bool WorkQueue::HasAssignedJob() const
+{
+	for (int i = 0; i < queue.Size(); ++i) {
+		if (queue[i].assigned)
+			return true;
+	}
+	return false;
+}
+
+
 const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {
 	GLASSERT( parentChit );

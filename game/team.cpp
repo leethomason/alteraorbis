@@ -29,6 +29,11 @@ grinliz::IString Team::TeamName(int team)
 		name = ISC::Truulga;
 		break;
 
+		case TEAM_GOB:
+		str.Format("Gob-%x", id);
+		name = StringPool::Intern(str.c_str());
+		break;
+
 		default:
 		break;
 	}
@@ -96,6 +101,11 @@ int Team::GetRelationship( int _t0, int _t1 )
 	if ( t1 == TEAM_TROLL ) {
 		if ( t0 == TEAM_GREEN_MANTIS || t0 == TEAM_RED_MANTIS )
 			return RELATE_NEUTRAL;
+	}
+
+	if (t1 == TEAM_GOB) {
+		// FIXME: just for dev.sub
+		return RELATE_NEUTRAL;
 	}
 
 	return RELATE_ENEMY;

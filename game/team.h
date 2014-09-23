@@ -31,6 +31,8 @@ enum {
 	TEAM_TROLL,
 
 	TEAM_HOUSE,		// denizen houses (primarily human)
+
+	TEAM_GOB,
 	
 	TEAM_CHAOS
 };

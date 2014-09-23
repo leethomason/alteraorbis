@@ -431,6 +431,12 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 		assetName = "humanMale";
 	}
 
+	switch (TeamGroup(team)) {
+		case TEAM_HOUSE: break;		// all is well; the default.
+		case TEAM_GOB:	assetName = "gob";	break;
+		default: GLASSERT(0); break;
+	}
+
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());

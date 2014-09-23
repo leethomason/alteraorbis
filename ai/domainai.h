@@ -79,5 +79,25 @@ private:
 
 };
 
-#endif // REBUILDAI_COMPONENT_INCLUDED
+class GobDomainAI : public DomainAI
+{
+	typedef DomainAI super;
+
+public:
+	GobDomainAI();
+	~GobDomainAI();
+
+	virtual const char* Name() const { return "GobDomainAI"; }
+	virtual void Serialize(XStream* xs);
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
+
+	virtual void DoBuild();
+
+private:
+};
+
+
+#endif // DOMAINAI_COMPONENT_INCLUDED
 

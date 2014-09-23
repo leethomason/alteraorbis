@@ -725,8 +725,18 @@ bool Sim::CreatePlant( int x, int y, int type )
 		return false;
 	}
 
+	Vector2I sector = ToSector(x, y);
+	CoreScript* cs = CoreScript::GetCore(sector);
+	bool paveBlocks = false;
+	if (cs && cs->ParentChit()->Team()) {
+		paveBlocks = true;
+	}
+
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
+	if (paveBlocks && wg.Pave()) {
+		return false;
+	}
+	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
 		return false;
 	}
 
@@ -758,6 +768,7 @@ bool Sim::CreatePlant( int x, int y, int type )
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
+		context.worldMap->SetPave(x, y, 0);
 		context.worldMap->SetPlant(x, y, type + 1, 0);
 		return true;
 	}

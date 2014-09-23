@@ -211,9 +211,12 @@ bool DomainAI::BuildBuilding(int id)
 			int porch = bd.porch ? 1 : 0;
 
 			Rectangle2I fullBounds, buildBounds, porchBounds;
-			fullBounds.FromPair(head - left *(porch + bd.size), tail - left);
-			buildBounds.FromPair(head - left*(porch + bd.size), tail - left*(1 + porch));
-			porchBounds.FromPair(head - left, tail - left);
+			GLASSERT(bd.size == 1 || bd.size == 2);
+			// For building, if the size is one, then the tail is at the location of the head.
+			Vector2I btail = (bd.size == 2) ? tail : head;
+			fullBounds.FromPair(head - left *(porch + bd.size), btail - left);
+			buildBounds.FromPair(head - left*(porch + bd.size), btail - left*(1 + porch));
+			porchBounds.FromPair(head - left, btail - left);
 
 			// FIXME: move to a function and don't think about the weird
 			// rotation system again. Strange sort of coordinate system.
@@ -269,7 +272,7 @@ int DomainAI::DoTick(U32 delta)
 
 		// FIXME: this isn't really correct. will stall
 		// domain ai if there is an inaccessible job.
-		if (workQueue->HasJob()) {
+		if (workQueue->HasAssignedJob()) {
 			return ticker.Next();
 		}
 		this->DoBuild();
@@ -394,3 +397,55 @@ void TrollDomainAI::DoBuild()
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
 	} while (false);
 }
+
+
+GobDomainAI::GobDomainAI()
+{
+
+}
+
+
+GobDomainAI::~GobDomainAI()
+{
+
+}
+
+void GobDomainAI::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	this->EndSerialize( xs );
+}
+
+
+void GobDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	return super::OnAdd(chit, initialize);
+}
+
+
+void GobDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+void GobDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+
+	do {
+		if (BuyWorkers()) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
+		if (BuildPlaza(2)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+	} while (false);
+}
+

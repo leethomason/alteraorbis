@@ -51,10 +51,6 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
 	dragBuildingRotation = false;
-	fastMode = false;
-	simTimer = 0;
-	simPS = 1.0f;
-	simCount = 0;
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
@@ -66,6 +62,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	coreWarningTimer = 0;
 	domainWarningTimer = 0;
 	poolView = 0;
+	attached.Zero();
 	voxelInfoID.Zero();
 	lumosGame = game;
 	adviser = new Adviser();
@@ -188,7 +185,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	}
 	summaryBars.SetBarText(0, "Morale");
 
-	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+	chitTracking = GetPlayerChitID();
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -210,11 +207,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Vector3F delta = { 14.0f, 14.0f, 14.0f };
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
 	uiMode[UI_VIEW].SetDown();
-	if (sim->GetPlayerChit()) {
-		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+	if (GetPlayerChit()) {
+		target = GetPlayerChit()->GetSpatialComponent()->GetPosition();
 	}
-	else if (sim->GetChitBag()->GetHomeCore()) {
-		target = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
+	else if (GetHomeCore()) {
+		target = GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
 	}
 	sim->GetEngine()->CameraLookAt(target + delta, target);
 	sim->GetChitBag()->AddListener(this);
@@ -409,7 +406,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
-	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+	chitTracking = GetPlayerChitID();
 }
 
 
@@ -439,9 +436,6 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	if ( mv.model && mv.model->userData ) {
 		infoID = mv.model->userData->ID();
 	}
-//	if ( mv.VoxelHit() ) {
-//		voxelInfoID = mv.Voxel2();
-//	}
 	voxelInfoID = ToWorld2I(at);
 
 	SetSelectionModel( view );
@@ -531,7 +525,7 @@ void GameScene::ClearTargetFlags()
 
 void GameScene::MoveModel( Chit* target )
 {
-	Chit* player = sim->GetPlayerChit();
+	Chit* player = GetPlayerChit();
 	if ( !player ) {
 		ClearTargetFlags();
 		return;
@@ -565,7 +559,7 @@ void GameScene::TapModel( Chit* target )
 	if ( !target ) {
 		return;
 	}
-	Chit* player = sim->GetPlayerChit();
+	Chit* player = GetPlayerChit();
 	if ( !player ) {
 		ClearTargetFlags();
 
@@ -627,7 +621,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 
-	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 
 	Vector3F atModel = { 0, 0, 0 };
 	Vector3F plane = { 0, 0, 0 };
@@ -646,7 +640,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	if ((game->GetTapMod() & GAME_TAP_MOD_SHIFT) && mv.Hit()) {
 		if (AvatarSelected()) {
 			// clicked on a rock. Melt away!
-			Chit* player = sim->GetPlayerChit();
+			Chit* player = GetPlayerChit();
 			if (player && player->GetAIComponent()) {
 				//player->GetAIComponent()->RockBreak(mv.Voxel2());
 				if (mv.ModelHit())
@@ -658,7 +652,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		}
 	}
 
-	Chit* playerChit = sim->GetPlayerChit();
+	Chit* playerChit = GetPlayerChit();
 	if (playerChit && !buildActive) {
 		if (mv.model) {
 			TapModel(mv.model->userData);
@@ -721,7 +715,7 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
-	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 	if (coreScript && buildActive) {
 		WorkQueue* wq = coreScript->GetWorkQueue();
 		GLASSERT(wq);
@@ -854,7 +848,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 bool GameScene::CameraTrackingAvatar()
 {
-	Chit* playerChit = sim->GetPlayerChit();
+	Chit* playerChit = GetPlayerChit();
 	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 	if (playerChit && cc && (playerChit->ID() == cc->Tracking())) {
 		return true;
@@ -866,7 +860,7 @@ bool GameScene::CameraTrackingAvatar()
 bool GameScene::AvatarSelected()
 {
 	bool button = uiMode[UI_VIEW].Down();
-	Chit* playerChit = sim->GetPlayerChit();
+	Chit* playerChit = GetPlayerChit();
 	if (button && playerChit && playerChit->ID() == chitTracking) {
 		return true;
 	}
@@ -876,7 +870,7 @@ bool GameScene::AvatarSelected()
 
 void GameScene::DoCameraHome()
 {
-	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 	if (coreScript) {
 		Chit* chit = coreScript->ParentChit();
 		if (chit && chit->GetSpatialComponent()) {
@@ -908,17 +902,17 @@ bool GameScene::DoEscape()
 
 void GameScene::DoAvatarButton()
 {
-	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 
 	if (AvatarSelected() && CameraTrackingAvatar()) {
 		// Teleport.
-		if (coreScript && sim->GetPlayerChit()) {
-			sim->GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
+		if (coreScript && GetPlayerChit()) {
+			GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
 		}
 	}
 	else {
 		// Select.
-		chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+		chitTracking = GetPlayerChitID();
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 		if (cc && chit) {
@@ -959,7 +953,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		engine->CameraLookAt(x, y);
 	}
 	else if (item == &atlasButton) {
-		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );
+		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), GetPlayerChit() );
 		Vector3F at;
 		sim->GetEngine()->CameraLookingAt(&at);
 		at.x = Clamp(at.x, 0.0f, sim->GetWorldMap()->Width() - 1.0f);
@@ -983,7 +977,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_CENSUS, new CensusSceneData( sim->GetChitBag()) );
 	}
 	else if ( item == &createWorkerButton ) {
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		CoreScript* cs = GetHomeCore();
 		if (cs) {
 			Chit* coreChit = cs->ParentChit();
 			if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
@@ -994,7 +988,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if (item == &autoRebuild) {
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		CoreScript* cs = GetHomeCore();
 		if (cs) {
 			Chit* coreChit = cs->ParentChit();
 			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
@@ -1010,7 +1004,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if (item == &abandonButton) {
 		// Add a rebuild, if not present, and then abandon.
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		CoreScript* cs = GetHomeCore();
 		if (cs) {
 			Chit* coreChit = cs->ParentChit();
 			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
@@ -1023,17 +1017,17 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 		if (!chit) {
-			chit = sim->GetPlayerChit();
+			chit = GetPlayerChit();
 		}
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
 							 new CharacterSceneData( chit->GetItemComponent(), 0, 
-							 chit == sim->GetPlayerChit() ? CharacterSceneData::AVATAR : CharacterSceneData::CHARACTER_ITEM, 
+							 chit == GetPlayerChit() ? CharacterSceneData::AVATAR : CharacterSceneData::CHARACTER_ITEM, 
 							 0 ));
 		}
 	}
 	else if (item == &swapWeapons) {
-		Chit* player = sim->GetPlayerChit();
+		Chit* player = GetPlayerChit();
 		if (player && player->GetItemComponent()) {
 			player->GetItemComponent()->SwapWeapons();
 		}
@@ -1048,7 +1042,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		DoAvatarButton();
 	}
 	else if ( item == &prevUnit || item == &nextUnit ) {
-		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+		CoreScript* coreScript = GetHomeCore();
 
 		int bias = 0;
 		if (item == &prevUnit) bias = -1;
@@ -1169,7 +1163,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		if ( item == &pickupButton[i] ) {
-			Chit* playerChit = sim->GetPlayerChit();
+			Chit* playerChit = GetPlayerChit();
 			Chit* item = sim->GetChitBag()->GetChit( pickupData[i].chitID );
 			if ( item && playerChit ) {
 				if ( playerChit->GetAIComponent() ) {
@@ -1189,7 +1183,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 {
 	Vector2F dest = _dest;
 
-	Chit* chit = sim->GetPlayerChit();
+	Chit* chit = GetPlayerChit();
 	if (chit) {
 		AIComponent* ai = chit->GetAIComponent();
 		if ( ai ) {
@@ -1219,10 +1213,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 
 void GameScene::HandleHotKey( int mask )
 {
-	if ( mask == GAME_HK_TOGGLE_FAST ) {
-		fastMode = !fastMode;
-	}
-	else if (mask == GAME_HK_ESCAPE) {
+	if (mask == GAME_HK_ESCAPE) {
 		DoEscape();
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
@@ -1232,43 +1223,36 @@ void GameScene::HandleHotKey( int mask )
 		DoCameraHome();
 	}
 	else if (mask == GAME_HK_SPACE) {
-		Chit* playerChit = sim->GetPlayerChit();
+		Chit* playerChit = GetPlayerChit();
+		Vector3F at = V3F_ZERO;
+		sim->GetEngine()->CameraLookingAt(&at);
+
 #ifdef DEBUG
-#if 0
-		if ( playerChit ) {
-			ItemComponent* ic = playerChit->GetItemComponent();
-			if ( ic ) {
-				ic->SwapWeapons();
-			}
-		}
-#endif
-#if 0
+#if 0	// Rampage player
 		if ( playerChit ) {
 			AIComponent* ai = playerChit->GetAIComponent();
 			ai->Rampage( 0 );
 		}
 #endif
-		Vector3F at = V3F_ZERO;
-		sim->GetEngine()->CameraLookingAt(&at);
-#if 0
+#if 1	// Create Gob domain.
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
 				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
-				int team = Team::GenTeam(TEAM_TROLL);
+				int team = Team::GenTeam(TEAM_GOB);
 				cs = sim->CreateCore(sector, team);
-				cs->ParentChit()->Add(new DomainAI());
-				Transfer(&cs->ParentChit()->GetItem()->wallet, &ReserveBank::Instance()->bank, 1000);
+				cs->ParentChit()->Add(new GobDomainAI());
+				Transfer(&cs->ParentChit()->GetItem()->wallet, &ReserveBank::Instance()->bank, 4000);
 			}
 		}
 #endif
-#if 0
+#if 0	// Unsettle fluids
 		{	
 			Vector2I sector = ToSector(ToWorld2I(at));
 			sim->GetWorldMap()->Unsettle(sector);
 		}
 #endif
-#if 1
+#if 0	// Look at Truulga
 		{
 			Chit* truulga = sim->GetChitBag()->GetDeity(LumosChitBag::DEITY_TRUULGA);
 			if (truulga) {
@@ -1279,26 +1263,13 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 0
+#if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
-			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
 		}
 #endif
-#if 0
-		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
-			Chit* chit = sim->CreatePlant((int)at.x + i, (int)at.z, i);
-			if (chit) {
-				if (i < 6) {
-					PlantScript* plantScript = (PlantScript*)chit->GetScript("PlantScript");
-					GLASSERT(plantScript);
-					plantScript->SetStage(3);
-				}
-			}
-		}
-#endif
-#if 0
+#if 0	// Look at pools.
 		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
 		if (loc.IsZero()) {
 			poolView = 0;
@@ -1307,7 +1278,7 @@ void GameScene::HandleHotKey( int mask )
 		Vector2F lookAt = ToWorld2F(loc);
 		sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.y);
 #endif
-#if 0
+#if 0	// Summon Greaters
 		if (playerChit) {
 			sim->GetChitBag()->AddSummoning(playerChit->GetSpatialComponent()->GetSector(), LumosChitBag::SUMMON_TECH);
 		}
@@ -1336,7 +1307,7 @@ void GameScene::HandleHotKey( int mask )
 			sim->GetEngine()->CameraLookAt(at.x, at.z);
 		}
 	}
-	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
+/*	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;
 		const IString NAMES[4] = { 
 			IStringConst::kiosk__m, 
@@ -1358,6 +1329,11 @@ void GameScene::HandleHotKey( int mask )
 			rc->SetProcedural( 0, info );
 		}
 		++colorSeed;
+	}*/
+	else if (mask == GAME_HK_ATTACH_CORE) {
+		Vector3F at = V3F_ZERO;
+		sim->GetEngine()->CameraLookingAt(&at);
+		attached = ToSector(ToWorld2I(at));
 	}
 	else if ( mask == GAME_HK_TOGGLE_PATHING ) {
 		Rectangle2I r;
@@ -1373,11 +1349,11 @@ void GameScene::HandleHotKey( int mask )
 		sim->GetWorldMap()->ShowRegionOverlay( r );
 	}
 	else if ( mask == GAME_HK_MAP ) {
-		Chit* playerChit = sim->GetPlayerChit();
+		Chit* playerChit = GetPlayerChit();
 		game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
 	}
 	else if ( mask == GAME_HK_CHEAT_GOLD ) {
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		CoreScript* cs = GetHomeCore();
 		if ( cs ) {
 			static const int GOLD = 100;
 			ReserveBank::Instance()->bank.AddGold( -GOLD );
@@ -1391,7 +1367,7 @@ void GameScene::HandleHotKey( int mask )
 //		}
 	}
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
-		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		CoreScript* cs = GetHomeCore();
 		if ( cs ) {
 			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
 				if ( ReserveBank::Instance()->bank.crystal[i] ) {
@@ -1402,9 +1378,7 @@ void GameScene::HandleHotKey( int mask )
 		}
 	}
 	else if ( mask == GAME_HK_CHEAT_TECH ) {
-		Chit* player = sim->GetPlayerChit();
-
-		CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+		CoreScript* coreScript = GetHomeCore();
 		if (coreScript) {
 			for (int i = 0; i < 10; ++i) {
 				coreScript->AddTech();
@@ -1564,7 +1538,7 @@ void GameScene::SetBuildButtons(const int* arr)
 
 void GameScene::SetPickupButtons()
 {
-	Chit* player = sim->GetPlayerChit();
+	Chit* player = GetPlayerChit();
 	if ( AvatarSelected() ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
@@ -1617,14 +1591,14 @@ void GameScene::ProcessNewsToConsole()
 	currentNews = Max( currentNews, history->NumNews() - 40 );
 	GLString str;
 	LumosChitBag* chitBag = sim->GetChitBag();
-	CoreScript* coreScript = chitBag->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 
 	Vector2I avatarSector = { 0, 0 };
-	Chit* playerChit = sim->GetPlayerChit();
+	Chit* playerChit = GetPlayerChit();
 	if ( playerChit && playerChit->GetSpatialComponent() ) {
 		avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
 	}
-	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+	Vector2I homeSector = GetHomeSector();
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
 
@@ -1700,14 +1674,6 @@ void GameScene::DoTick( U32 delta )
 	clock_t startTime = clock();
 
 	sim->DoTick( delta );
-	++simCount;
-
-	if ( fastMode ) {
-		while( clock() - startTime < 100 ) {
-			sim->DoTick( 30 );
-			++simCount;
-		}
-	}
 
 	SetPickupButtons();
 
@@ -1729,26 +1695,25 @@ void GameScene::DoTick( U32 delta )
 	}
 
 	clock_t endTime = clock();
-	simTimer += (int)(endTime-startTime);
 
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
 	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
-	CoreScript* coreScript = sim->GetChitBag()->GetHomeCore();
+	CoreScript* coreScript = GetHomeCore();
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
-	Chit* playerChit = sim->GetPlayerChit();
+	Chit* playerChit = GetPlayerChit();
 	if ( !playerChit && !coreScript ) {
 		uiMode[UI_VIEW].SetDown();
 	}
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
-	if (!track && sim->GetPlayerChit()) {
-		track = sim->GetPlayerChit();
+	if (!track && GetPlayerChit()) {
+		track = GetPlayerChit();
 	}
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
 
@@ -1817,7 +1782,7 @@ void GameScene::DoTick( U32 delta )
 	str.Clear();
 
 	Wallet wallet;
-	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	CoreScript* cs = GetHomeCore();
 	if ( cs ) {
 		wallet = cs->ParentChit()->GetItem()->wallet;
 	}
@@ -1852,7 +1817,7 @@ void GameScene::DoTick( U32 delta )
 	CheckGameStage(delta);
 	int nWorkers = 0;
 
-	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+	Vector2I homeSector = GetHomeSector();
 	{
 		// Enforce the worker limit.
 		CStr<32> str2;
@@ -1871,7 +1836,7 @@ void GameScene::DoTick( U32 delta )
 
 	{
 		LumosChitBag* cb = sim->GetChitBag();
-		Vector2I sector = cb->GetHomeSector();
+		Vector2I sector = GetHomeSector();
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
 		SetBuildButtons(arr);
@@ -2110,7 +2075,7 @@ void GameScene::DrawDebugText()
 	y += 16;
 
 	UFOText* ufoText = UFOText::Instance();
-	Chit* chit = sim->GetPlayerChit();
+	Chit* chit = GetPlayerChit();
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
 	Vector3F at = { 0, 0, 0 };
@@ -2126,12 +2091,6 @@ void GameScene::DrawDebugText()
 	}
 	else {
 		engine->CameraLookingAt( &at );
-	}
-
-	if ( simTimer > 1000 ) {
-		simPS = 1000.0f * (float)simCount / (float)simTimer;
-		simTimer = 0;
-		simCount = 0;
 	}
 
 	Wallet w = ReserveBank::Instance()->bank;
@@ -2205,4 +2164,47 @@ void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 	}
 }
 
+
+Chit* GameScene::GetPlayerChit()
+{
+	if (attached.IsZero()) {
+		return sim->GetPlayerChit();
+	}
+	return 0;	// don't have avatars when attached.
+}
+
+
+int GameScene::GetPlayerChitID()
+{
+	Chit* chit = GetPlayerChit();
+	return chit ? chit->ID() : 0;
+}
+
+
+CoreScript* GameScene::GetHomeCore()
+{
+	if (attached.IsZero()) {
+		return sim->GetChitBag()->GetHomeCore();
+	}
+	else {
+		CoreScript* cs = CoreScript::GetCore(attached);
+		return cs;
+	}
+}
+
+
+grinliz::Vector2I GameScene::GetHomeSector()
+{
+	if (attached.IsZero()) {
+		return sim->GetChitBag()->GetHomeSector();
+	}
+	else {
+		CoreScript* cs = CoreScript::GetCore(attached);
+		if (cs) {
+			return cs->ParentChit()->GetSpatialComponent()->GetSector();
+		}
+	}
+	Vector2I z = { 0, 0 };
+	return z;
+}
 

@@ -351,7 +351,7 @@ int CoreScript::DoTick( U32 delta )
 		int nCitizens = this->NumCitizens();
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
-			Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
+			Context()->chitBag->NewDenizen( pos2i, team );
 		}
 
 		if (maxTech >= TECH_ATTRACTS_GREATER) {
