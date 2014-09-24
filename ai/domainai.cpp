@@ -175,6 +175,31 @@ bool DomainAI::BuildPlaza(int size)
 }
 
 
+bool DomainAI::CanBuild(const grinliz::Rectangle2I& r, int pave)
+{
+	bool okay = true;
+	WorldMap* worldMap = Context()->worldMap;
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos());
+		if (!wg.IsLand() || (wg.Pave() == pave)) {
+			okay = false;
+			break;
+		}
+	}
+	return okay;
+}
+
+
+int DomainAI::RightVectorToRotation(const grinliz::Vector2I& right)
+{
+	int rotation = 0;
+	if (right.y == 1) rotation = 180;
+	else if (right.x == 1) rotation = 270;
+	else if (right.y == -1) rotation = 0;
+	else if (right.x == -1) rotation = 90;
+	return rotation;
+}
+
 bool DomainAI::BuildBuilding(int id)
 {
 	Vector2I sector = { 0, 0 };
@@ -222,21 +247,9 @@ bool DomainAI::BuildBuilding(int id)
 			// rotation system again. Strange sort of coordinate system.
 
 			// Why right? The building is to the left, so it faces right.
-			int rotation = 0;
-			if (right.y == 1) rotation = 180;
-			else if (right.x == 1) rotation = 270;
-			else if (right.y == -1) rotation = 0;
-			else if (right.x == -1) rotation = 90;
+			int rotation = RightVectorToRotation(right);
 
-			bool okay = true;
-			for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
-				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if (!wg.IsLand() || (wg.Pave() == pave)) {
-					okay = false;
-					break;
-				}
-			}
-
+			bool okay = CanBuild(fullBounds, pave);
 			if (okay) {
 				Chit* chit = Context()->chitBag->QueryBuilding(fullBounds);
 				okay = !chit;
@@ -252,6 +265,84 @@ bool DomainAI::BuildBuilding(int id)
 				return true;
 			}
 		}
+	}
+	return false;
+}
+
+
+bool DomainAI::BuildFarm()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return false;
+
+	int endIndex = 0;
+	for (int i = 0; i < MAX_ROADS; ++i) {
+		endIndex = Max(endIndex, road[i].Size());
+	}
+
+	int bestScore = 0;
+	Vector2I bestFarm = { 0, 0 }, bestRight = { 0, 0 };
+	Rectangle2I bestPave;
+
+	for (int index = 7; index < endIndex; ++index) {
+		for (int i = 0; i < MAX_ROADS; ++i) {
+			if (index >= road[i].Size())
+				continue;
+
+			Vector2I head = road[i][index];
+			Vector2I tail = road[i][index - 1];
+
+			// Mix up the head/tail left/right
+			if (index & 0) {
+				Swap(&head, &tail);
+			}
+
+			Vector2I dir = head - tail;
+			Vector2I left = { -dir.y, dir.x };
+			Vector2I right = -left;
+
+			Vector2I solar = head - left * 3;
+			Rectangle2I paveBounds;
+			paveBounds.FromPair(head - left * 2, head - left);
+			Rectangle2I fullBounds;
+			fullBounds.min = fullBounds.max = solar;
+			fullBounds.Outset(FARM_GROW_RAD);
+			Rectangle2I buildBounds = paveBounds;
+			buildBounds.DoUnion(solar);
+			Rectangle2I extendedBounds = fullBounds;
+			extendedBounds.Outset(2);
+
+			// Can we build the pave and the solar farm?
+			if (CanBuild(buildBounds, pave) && !Context()->chitBag->QueryBuilding(extendedBounds)) {
+				int score = 0;
+				for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
+					if (!buildBounds.Contains(it.Pos())) {
+						const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+						if (wg.Plant()) {
+							score += wg.PlantStage()*wg.PlantStage();
+						}
+					}
+				}
+				if (score > bestScore) {
+					bestScore = score;
+					bestFarm = solar;
+					bestPave = paveBounds;
+					bestRight = right;
+				}
+			}
+		}
+	}
+	if (bestScore) {
+		int rotation = RightVectorToRotation(bestRight);
+		workQueue->AddAction(bestFarm, BuildScript::FARM, (float)rotation, 0);
+		for (Rectangle2IIterator it(bestPave); !it.Done(); it.Next()) {
+			workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
+		}
+		return true;
 	}
 	return false;
 }
@@ -446,6 +537,14 @@ void GobDomainAI::DoBuild()
 		if (BuildRoad()) break;	// will return true until all roads are built.
 		if (BuildPlaza(2)) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
+		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
+		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
+		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
+		if (arr[BuildScript::FARM] == 1 && BuildFarm()) break;
+		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 	} while (false);
 }
 

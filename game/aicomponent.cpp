@@ -2888,7 +2888,7 @@ int AIComponent::DoTick( U32 deltaTime )
 				else if (atHomeCore && needs.Morale() == 0) {
 					DoMoraleZero(thisComp);
 				}
-				else if (needs.Morale() < LOW_MORALE) {
+				else if (!atHomeCore && needs.Morale() < LOW_MORALE) {
 					bool okay = TravelHome(thisComp, true);
 					if (!okay) needs.SetMorale(1.0);
 				}

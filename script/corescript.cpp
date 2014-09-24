@@ -333,9 +333,30 @@ int CoreScript::DoTick( U32 delta )
 
 	bool inUse = InUse();
 
-	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/double(TECH_MAX) );
-	int maxTech = MaxTech();
-	tech = Clamp( tech, 0.0, double(maxTech)-0.01 );
+	int team = TeamGroup(parentChit->Team());
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
+			int maxTech = MaxTech();
+			tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
+		}
+		break;
+
+		case TEAM_GOB:
+		{
+			tech = MaxTech();
+		}
+		break;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		tech = 0;
+		break;
+
+		default:
+		GLASSERT(0);
+	}
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
@@ -354,7 +375,7 @@ int CoreScript::DoTick( U32 delta )
 			Context()->chitBag->NewDenizen( pos2i, team );
 		}
 
-		if (maxTech >= TECH_ATTRACTS_GREATER) {
+		if ( (TeamGroup(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
 			summonGreater += spawnTick.Period();
 			if (summonGreater > SUMMON_GREATER_TIME) {
 				// Find a greater and bring 'em in!
@@ -454,10 +475,10 @@ int CoreScript::DoTick( U32 delta )
 		workQueue = new WorkQueue();
 		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
 
-		TeamGen gen;
-		ProcRenderInfo info;
-		gen.Assign( 0, 0, &info );
-		parentChit->GetRenderComponent()->SetProcedural( 0, info );
+		//TeamGen gen;
+		//ProcRenderInfo info;
+		//gen.Assign( 0, 0, &info );
+		//parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 	workQueue->DoTick();
 
@@ -499,10 +520,28 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	Vector2I sector = ToSector( parentChit->GetSpatialComponent()->GetPosition2DI() );
-	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC( IStringConst::temple, sector, 0, 0, &chitArr, 0 );
-	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
+	int team = TeamGroup(parentChit->Team());
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
+			CChitArray chitArr;
+			Context()->chitBag->FindBuildingCC(IStringConst::temple, sector, 0, 0, &chitArr, 0);
+			return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
+		}
+		break;
+
+		case TEAM_GOB:
+		return 1;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		return 0;
+
+		default:
+		GLASSERT(0);
+		break;
+	}
 }
 
 

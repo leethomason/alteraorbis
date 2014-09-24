@@ -84,18 +84,22 @@
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
 		x debug: attach to domain
-		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Gob-men domain
 			- need gob names
 			- need ui icon
+			- gob building colors
+			- gob bar names
+			- gob alignment
+		- Redo spawn system. 
+			- Spawn trolls from Truulga domain
+			- Domain takeover (by mobs)
+
+		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Mantis-men domain
 		- Player domain colors
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution
-		- Redo spawn system. 
-			- Spawn trolls from Truulga domain
-			- Domain takeover (by mobs)
 		- Squads
 			- squad control:
 				- defend

@@ -44,10 +44,14 @@ public:
 
 protected:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
+	bool CanBuild(const grinliz::Rectangle2I& r, int pave);	// clear of water and pave
+	int RightVectorToRotation(const grinliz::Vector2I& right);
+
 	bool BuyWorkers();
 	bool BuildRoad();
 	bool BuildPlaza(int size);
 	bool BuildBuilding(int id);
+	bool BuildFarm();
 
 	enum { MAX_ROADS = 4};
 	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
