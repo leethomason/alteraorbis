@@ -44,21 +44,24 @@ grinliz::IString Team::TeamName(int team)
 
 int Team::GetTeam( const grinliz::IString& itemName )
 {
-	if (itemName == IStringConst::trilobyte) {
+	if (itemName == ISC::trilobyte) {
 		return TEAM_RAT;
 	}
-	else if ( itemName == IStringConst::mantis ) {
+	else if ( itemName == ISC::mantis ) {
 		return TEAM_GREEN_MANTIS;
 	}
-	else if ( itemName == IStringConst::redMantis ) {
+	else if ( itemName == ISC::redMantis ) {
 		return TEAM_RED_MANTIS;
 	}
-	else if ( itemName == IStringConst::troll ) {
+	else if ( itemName == ISC::troll ) {
 		return TEAM_TROLL;
 	}
-	else if (    itemName == IStringConst::cyclops
-		      || itemName == IStringConst::fireCyclops
-		      || itemName == IStringConst::shockCyclops )
+	else if (itemName == ISC::gob) {
+		return TEAM_GOB;
+	}
+	else if (    itemName == ISC::cyclops
+		      || itemName == ISC::fireCyclops
+		      || itemName == ISC::shockCyclops )
 	{
 		return TEAM_CHAOS;
 	}

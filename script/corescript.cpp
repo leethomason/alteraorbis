@@ -240,7 +240,7 @@ int CoreScript::NumCitizens()
 			if ( sc ) {
 				Vector2F pos2 = sc->GetPosition2D();
 				Vector2I sector = ToSector( ToWorld2I( pos2 ));
-				Chit* bed = scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
+				Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
 				if ( bed && bed->GetItem() ) {
 					bed->GetItem()->hp = 0;
 					bed->SetTickNeeded();
@@ -368,7 +368,7 @@ int CoreScript::DoTick( U32 delta )
 		// FIXME: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
 		CChitArray chitArr;
-		Context()->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
+		Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
@@ -441,7 +441,7 @@ int CoreScript::DoTick( U32 delta )
 				static const float rat = 0.25f;
 				const char* spawn = 0;
 
-				if (outland > 4 && defaultSpawn == IStringConst::trilobyte) {
+				if (outland > 4 && defaultSpawn == ISC::trilobyte) {
 					greater *= 4.f;	// special spots for greaters to spawn.
 				}
 
@@ -526,7 +526,7 @@ int CoreScript::MaxTech()
 		{
 			Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
 			CChitArray chitArr;
-			Context()->chitBag->FindBuildingCC(IStringConst::temple, sector, 0, 0, &chitArr, 0);
+			Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
 			return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
 		}
 		break;

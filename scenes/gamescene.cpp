@@ -1310,10 +1310,10 @@ void GameScene::HandleHotKey( int mask )
 /*	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;
 		const IString NAMES[4] = { 
-			IStringConst::kiosk__m, 
-			IStringConst::kiosk__n, 
-			IStringConst::kiosk__c, 
-			IStringConst::kiosk__s 
+			ISC::kiosk__m, 
+			ISC::kiosk__n, 
+			ISC::kiosk__c, 
+			ISC::kiosk__s 
 		};
 		ItemNameFilter filter( NAMES, 4, IChitAccept::MAP );
 		Vector3F at;
@@ -1505,7 +1505,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	int maxTubes  = 4 << techLevel;
 
 	BuildScript buildScript;
-	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(IStringConst::bed, 0);
+	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(ISC::bed, 0);
 	GLASSERT(sleepTubeData);
 
 	str.Format( "SleepTube\n%d %d/%d", sleepTubeData->cost, nBeds, maxTubes );
@@ -1825,7 +1825,7 @@ void GameScene::DoTick( U32 delta )
 
 		Rectangle2F b = ToWorld( InnerSectorBounds(homeSector));
 		CChitArray arr;
-		ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
+		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
 		nWorkers = arr.Size();
 

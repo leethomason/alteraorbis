@@ -470,10 +470,10 @@ void GameItem::Apply( const GameItem* intrinsic )
 
 double GameItem::GetBuildingIndustrial() const
 {
-	IString istr = keyValues.GetIString(IStringConst::zone);
-	if (istr == IStringConst::industrial)
+	IString istr = keyValues.GetIString(ISC::zone);
+	if (istr == ISC::industrial)
 		return 1;
-	if (istr == IStringConst::natural)
+	if (istr == ISC::natural)
 		return -1;
 	return 0;
 }
@@ -614,7 +614,7 @@ bool GameItem::Significant() const
 	if ( keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
 		return true;
 	}
-	if (team && name == IStringConst::core) {
+	if (team && name == ISC::core) {
 		return true;
 	}
 

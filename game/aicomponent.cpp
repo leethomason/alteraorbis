@@ -1237,7 +1237,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 
 				// For enemies, apply rules to make the gameplay smoother.
 				if (relate == RELATE_ENEMY) {
-					if (mob == IStringConst::lesser) {
+					if (mob == ISC::lesser) {
 						if (tech <= TECH_REPELS_LESSER) {
 							if (parentChit->random.Rand(2) == 0) {
 								delta.Push(rinit[i]);
@@ -1248,7 +1248,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 						else 
 							delta.Push(rinit[i]);
 					}
-					else if (mob == IStringConst::greater) {
+					else if (mob == ISC::greater) {
 						if (tech >= TECH_ATTRACTS_GREATER) 
 							delta.Insert(0, rinit[i]);
 						else if (tech > TECH_REPELS_GREATER) 
@@ -1501,13 +1501,13 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 		// This is "critical call ahead" needs.
 		if ( !melee || !ranged || !shield ) {
 			LumosChitBag* chitBag = this->Context()->chitBag;
-			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0 );
+			Chit* market = chitBag->FindBuilding( ISC::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0 );
 
 			if ( market ) {
 				bool goMarket = false;
 				MarketAI marketAI( market );
 				BuildScript buildScript;
-				const BuildData* bd = buildScript.GetDataFromStructure( IStringConst::market, 0 );
+				const BuildData* bd = buildScript.GetDataFromStructure( ISC::market, 0 );
 				GLASSERT( bd );
 
 				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
@@ -1581,7 +1581,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 
 	if ( !coreScript ) return false;
 
-	ItemNameFilter filter(IStringConst::guardpost, IChitAccept::MAP);
+	ItemNameFilter filter(ISC::guardpost, IChitAccept::MAP);
 	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 
 	if ( chitArr.Empty() ) return false;
@@ -1736,7 +1736,7 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 		return false;
 	}
 
-	//int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
+	//int index = thisComp.itemComponent->FindItem( ISC::fruit );
 	//bool carrying = index >= 0;
 	//if ( carrying ) return false;	// only carry one fruit, at least intentionally?
 
@@ -1867,7 +1867,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 		}
 		if ( needVaultRun ) {
 			Vector2I sector = thisComp.spatial->GetSector();
-			Chit* vault = Context()->chitBag->FindBuilding(	IStringConst::vault, 
+			Chit* vault = Context()->chitBag->FindBuilding(	ISC::vault, 
 															sector, 
 															&thisComp.spatial->GetPosition2D(), 
 															LumosChitBag::RANDOM_NEAR, 0, 0 );
@@ -2231,7 +2231,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		int r = parentChit->random.Rand(4);
 
-		if (thisComp.item->keyValues.GetIString(IStringConst::mob) == IStringConst::greater) {
+		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::greater) {
 			// If there is a summoning, try to go there. Don't actually pop until
 			// the Grid travel kicks in.
 			Vector2I techSector = Context()->chitBag->HasSummoning(LumosChitBag::SUMMON_TECH);
@@ -2716,7 +2716,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 			LumosChitBag* chitBag = this->Context()->chitBag;
 
 			// For now, just tombstones.
-			ItemNameFilter filter(IStringConst::tombstone, IChitAccept::MOB);
+			ItemNameFilter filter(ISC::tombstone, IChitAccept::MOB);
 			chitBag->QuerySpatialHash( &arr, center, 1.1f, parentChit, &filter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* chit = arr[i];
@@ -2729,9 +2729,9 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				GLASSERT( team >= 0 );
 
 				double boost = 0;
-				if ( mob == IStringConst::lesser )			boost = 0.05;
-				else if ( mob == IStringConst::greater )	boost = 0.20;
-				else if ( mob == IStringConst::denizen )	boost = 0.10;
+				if ( mob == ISC::lesser )			boost = 0.05;
+				else if ( mob == ISC::greater )	boost = 0.20;
+				else if ( mob == ISC::denizen )	boost = 0.10;
 
 				int relate = Team::GetRelationship( thisComp.chit->Team(), team );
 				if ( relate == RELATE_ENEMY ) {
@@ -2822,7 +2822,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	if (focus != FOCUS_MOVE &&  !taskList.UsingBuilding()) {
 		CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
-		bool goesToBattle = (thisComp.item->IName() != IStringConst::worker)
+		bool goesToBattle = (thisComp.item->IName() != ISC::worker)
 			|| (cs && cs->NumCitizens() <= 4);
 
 		if (    aiMode != BATTLE_MODE 

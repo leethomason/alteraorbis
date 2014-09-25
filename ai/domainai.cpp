@@ -88,7 +88,7 @@ bool DomainAI::BuyWorkers()
 	// Create workers, if needed.
 	Rectangle2F b = ToWorld(InnerSectorBounds(sector));
 	CChitArray arr;
-	ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
+	ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 	static const int GOLD[4] = { WORKER_BOT_COST, 400, 800, 1200 };
 	for (int i = 0; i < 4; ++i) {

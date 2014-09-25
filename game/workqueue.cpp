@@ -47,7 +47,7 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 {
 	int size = 1;
 	if ( !structure.empty() ) {
-		if ( structure == IStringConst::pave || structure == IStringConst::ice ) {
+		if ( structure == ISC::pave || structure == ISC::ice ) {
 			size = 1;
 		}
 		else {
@@ -187,7 +187,7 @@ void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 	// Notify near.
 	CChitArray array;
-	ItemNameFilter workerFilter( IStringConst::worker, IChitAccept::MOB );
+	ItemNameFilter workerFilter( ISC::worker, IChitAccept::MOB );
 	chitBag->QuerySpatialHash( &array, pos2, NOTIFICATION_RAD, 0, &workerFilter );
 	for( int i=0; i<array.Size(); ++i ) {
 		ChitMsg msg( ChitMsg::WORKQUEUE_UPDATE );

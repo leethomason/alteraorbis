@@ -654,7 +654,7 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
-		IString trigger = IStringConst::trigger;
+		IString trigger = ISC::trigger;
 		if ( HasMetaData( HARDPOINT_TRIGGER )) { 
 			if ( pos ) 
 				GetMetaData( HARDPOINT_TRIGGER, pos );

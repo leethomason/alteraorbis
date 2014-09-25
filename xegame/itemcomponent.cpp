@@ -182,7 +182,7 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 	int killshotLevel = killshot ? 0 : loser->Traits().Level();
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
 
-	bool isGreater = (loser->keyValues.GetIString( IStringConst::mob ) == IStringConst::greater);
+	bool isGreater = (loser->keyValues.GetIString( ISC::mob ) == ISC::greater);
 
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
@@ -786,9 +786,9 @@ int ItemComponent::DoTick( U32 delta )
 	}
 
 	// FIXME: hack for ui. shouldn't use specific names.
-	if (    mainItem->IName() == IStringConst::humanMale
-		 || mainItem->IName() == IStringConst::humanFemale
-		 || mainItem->IName() == IStringConst::worker ) 
+	if (    mainItem->IName() == ISC::humanMale
+		 || mainItem->IName() == ISC::humanFemale
+		 || mainItem->IName() == ISC::worker ) 
 	{
 		if ( parentChit->GetRenderComponent() ) {
 			int index = this->FindItem( ISC::fruit );
@@ -819,10 +819,10 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 
 	if ( Context()->chitBag ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if ( mob == IStringConst::lesser ) {
+		if ( mob == ISC::lesser ) {
 			Context()->chitBag->census.normalMOBs += 1;
 		}
-		else if ( mob == IStringConst::greater ) {
+		else if ( mob == ISC::greater ) {
 			Context()->chitBag->census.greaterMOBs += 1;
 		}
 	}
@@ -837,10 +837,10 @@ void ItemComponent::OnRemove()
 	if ( Context()->chitBag ) {
 		IString mob;
 		mainItem->keyValues.Get( ISC::mob, &mob );
-		if ( mob == IStringConst::lesser ) {
+		if ( mob == ISC::lesser ) {
 			Context()->chitBag->census.normalMOBs -= 1;
 		}
-		else if ( mob == IStringConst::greater ) {
+		else if ( mob == ISC::greater ) {
 			Context()->chitBag->census.greaterMOBs -= 1;
 		}
 	}
@@ -1195,11 +1195,11 @@ void ItemComponent::ApplyLootLimits()
 	int limit = 0;
 	int cLimit = 0;
 
-	if (mob == IStringConst::greater) {
+	if (mob == ISC::greater) {
 		limit = MAX_GREATER_GOLD;
 		cLimit = MAX_GREATER_MOB_CRYSTAL;
 	}
-	else if (mob == IStringConst::lesser) {
+	else if (mob == ISC::lesser) {
 		limit = MAX_LESSER_GOLD;
 		cLimit = MAX_LESSER_MOB_CRYSTAL;
 	}

@@ -78,6 +78,7 @@ IString IStringConst::trilobyte;
 IString IStringConst::mantis;
 IString IStringConst::redMantis;
 IString IStringConst::troll;
+IString IStringConst::gob;
 IString IStringConst::cyclops;
 IString IStringConst::fireCyclops;
 IString IStringConst::shockCyclops;
@@ -185,6 +186,7 @@ void IStringConst::Init()
 	mantis = StringPool::Intern( "mantis", true );
 	redMantis = StringPool::Intern( "redMantis", true );
 	troll = StringPool::Intern( "troll", true );
+	gob = StringPool::Intern( "gob", true );
 	cyclops = StringPool::Intern( "cyclops", true );
 	fireCyclops = StringPool::Intern( "fireCyclops", true );
 	shockCyclops = StringPool::Intern( "shockCyclops", true );

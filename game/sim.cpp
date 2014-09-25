@@ -642,7 +642,7 @@ void Sim::Draw3D( U32 deltaTime )
 		CompositingShader debug( BLEND_NORMAL );
 		debug.SetColor( 1, 1, 1, 0.5f );
 		CChitArray arr;
-		context.chitBag->FindBuilding(	IStringConst::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
+		context.chitBag->FindBuilding(	ISC::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
 								0, LumosChitBag::NEAREST, &arr );
 		for( int i=0; i<arr.Size(); ++i ) {
 			Rectangle2I p = GET_SUB_COMPONENT( arr[i], SpatialComponent, MapSpatialComponent )->PorchPos();
@@ -798,20 +798,20 @@ void Sim::UseBuilding()
 		ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
 
 		if ( cs && ic ) {
-			if ( name == IStringConst::vault ) {
+			if ( name == ISC::vault ) {
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0 ));
 			}
-			else if ( name == IStringConst::market ) {
+			else if ( name == ISC::market ) {
 				// The avatar doesn't pay sales tax.
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0 ));
 			}
-			else if (name == IStringConst::exchange) {
+			else if (name == ISC::exchange) {
 				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
 					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0));
 			}
-			else if ( name == IStringConst::factory ) {
+			else if ( name == ISC::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
 				data->tech = int(cs->GetTech());
 				data->itemComponent = ic;

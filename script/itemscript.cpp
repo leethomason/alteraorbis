@@ -49,11 +49,11 @@ void ItemDefDB::Load( const char* path )
 			map.Add( item->key.c_str(), item );
 			topNames.Push( item->IName() );
 
-			IString mob = item->keyValues.GetIString( IStringConst::mob );
-			if ( mob == IStringConst::greater ) {
+			IString mob = item->keyValues.GetIString( ISC::mob );
+			if ( mob == ISC::greater ) {
 				greaterMOBs.Push( item->IName() );
 			}
-			else if ( mob == IStringConst::lesser ) {
+			else if ( mob == ISC::lesser ) {
 				lesserMOBs.Push( item->IName() );
 			}
 

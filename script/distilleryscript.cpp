@@ -42,7 +42,7 @@ void DistilleryScript::SetInfoText()
 	if ( ic && rc ) {
 		int nFruit = 0;
 		for( int i=1; i<ic->NumItems(); ++i ) {
-			if ( ic->GetItem( i )->IName() == IStringConst::fruit ) {
+			if ( ic->GetItem( i )->IName() == ISC::fruit ) {
 				++nFruit;
 			}
 		}
@@ -83,7 +83,7 @@ int DistilleryScript::DoTick( U32 delta )
 			progress -= ELIXIR_TIME;
 
 			if ( ic ) {
-				int index = ic->FindItem( IStringConst::fruit );
+				int index = ic->FindItem( ISC::fruit );
 				if ( index >= 0 ) {
 					//cs->nElixir += ELIXIR_PER_FRUIT;
 					GameItem* item = ic->RemoveFromInventory( index );
@@ -102,7 +102,7 @@ int DistilleryScript::DoTick( U32 delta )
 		}
 	}
 	
-	if (ic && ic->FindItem(IStringConst::fruit) < 0) {
+	if (ic && ic->FindItem(ISC::fruit) < 0) {
 		// No fruit, no progress.
 		progress = 0;
 	}

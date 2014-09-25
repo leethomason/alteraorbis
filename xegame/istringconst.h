@@ -106,6 +106,7 @@ public:
 	static grinliz::IString mantis;
 	static grinliz::IString redMantis;
 	static grinliz::IString troll;
+	static grinliz::IString gob;
 	static grinliz::IString cyclops;
 	static grinliz::IString fireCyclops;
 	static grinliz::IString shockCyclops;

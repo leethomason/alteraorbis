@@ -281,7 +281,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
-	IString consumes = rootItem.keyValues.GetIString(IStringConst::zone);
+	IString consumes = rootItem.keyValues.GetIString(ISC::zone);
 	if (!consumes.empty()) {
 		Component* s = ComponentFactory::Factory("EvalBuildingScript", &chitContext);
 		GLASSERT(s);
@@ -607,7 +607,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 
 	Vector2F v2 = { pos.x, pos.z };
 
-	ItemNameFilter goldFilter( IStringConst::gold, IChitAccept::MOB );
+	ItemNameFilter goldFilter( ISC::gold, IChitAccept::MOB );
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 
@@ -913,11 +913,11 @@ bool ItemNameFilter::Accept( Chit* chit )
 
 GoldCrystalFilter::GoldCrystalFilter()
 {
-	arr[0] = IStringConst::gold;
-	arr[1] = IStringConst::crystal_green;
-	arr[2] = IStringConst::crystal_red;
-	arr[3] = IStringConst::crystal_blue;
-	arr[4] = IStringConst::crystal_violet;
+	arr[0] = ISC::gold;
+	arr[1] = ISC::crystal_green;
+	arr[2] = ISC::crystal_red;
+	arr[3] = ISC::crystal_blue;
+	arr[4] = ISC::crystal_violet;
 	names = arr;
 	count = 5;
 	type = MOB;
@@ -992,7 +992,7 @@ bool MOBIshFilter::Accept(Chit* chit)
 		return RelationshipFilter::Accept(chit);
 	}
 	GameItem* item = chit->GetItem();
-	if (item && item->IName() == IStringConst::dummyTarget) {
+	if (item && item->IName() == ISC::dummyTarget) {
 		return RelationshipFilter::Accept(chit);
 	}
 	return false;

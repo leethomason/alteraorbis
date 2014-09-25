@@ -416,7 +416,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	ItemComponent* ic		= building->GetItemComponent();
 
 	// Workers:
-	if ( buildingName == IStringConst::vault ) {
+	if ( buildingName == ISC::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
 		Transfer(&vaultItem->wallet, &thisComp.item->wallet, thisComp.item->wallet);
@@ -432,14 +432,14 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		building->SetTickNeeded();
 		return;
 	}
-	if ( buildingName == IStringConst::distillery ) {
+	if ( buildingName == ISC::distillery ) {
 		GLASSERT( ic );
-		ic->TransferInventory( thisComp.itemComponent, false, IStringConst::fruit );
+		ic->TransferInventory( thisComp.itemComponent, false, ISC::fruit );
 		building->SetTickNeeded();
 		return;
 	}
 	if (buildingName == ISC::bar) {
-		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, IStringConst::elixir );
+		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, ISC::elixir );
 		building->SetTickNeeded();
 		if (nTransfer) {
 			return;	// only return on transfer. else use the bar!
@@ -458,20 +458,20 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			supply.SetZero();
 		}
 
-		if ( buildingName == IStringConst::market ) {
+		if ( buildingName == ISC::market ) {
 			GoShopping( thisComp, building );
 		}
-		else if (buildingName == IStringConst::exchange) {
+		else if (buildingName == ISC::exchange) {
 			GoExchange(thisComp, building);
 		}
-		else if ( buildingName == IStringConst::factory ) {
+		else if ( buildingName == ISC::factory ) {
 			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
 			if ( !used ) supply.SetZero();
 		}
-		else if ( buildingName == IStringConst::bed ) {
+		else if ( buildingName == ISC::bed ) {
 			// Apply the needs as is.
 		}
-		else if ( buildingName == IStringConst::bar ) {
+		else if ( buildingName == ISC::bar ) {
 			// Apply the needs as is...if there is Elixir.
 		}
 		else {
