@@ -23,7 +23,7 @@ class XStream;
 
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
-	TEAM_VISITOR,
+	TEAM_CHAOS,
 	
 	TEAM_RAT,	
 	TEAM_GREEN_MANTIS,
@@ -31,10 +31,10 @@ enum {
 	TEAM_TROLL,
 
 	TEAM_HOUSE,		// denizen houses (primarily human)
-
 	TEAM_GOB,
+	TEAM_VISITOR,
 	
-	TEAM_CHAOS
+	NUM_TEAMS
 };
 
 

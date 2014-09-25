@@ -79,39 +79,32 @@ int Team::GetRelationship( int _t0, int _t1 )
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
 
-	// Likewise, neutral is neutral even to themselves.
-	if (t0 == TEAM_NEUTRAL)
-		return RELATE_NEUTRAL;
 	// CHAOS hates all - even each other.
-	if ( t1 == TEAM_CHAOS )   
+	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
 		return RELATE_ENEMY;
-	// Exceptions handled: everyone is friends with themselves.
-	if ( t0 == t1 ) 
-		return RELATE_FRIEND;
-
-	// Everyone hates RAT
-	if ( t1 == TEAM_RAT )
-		return RELATE_ENEMY;
-
-	if ( t0 == TEAM_VISITOR ) {
-		if ( t1 == TEAM_HOUSE )
-			return RELATE_FRIEND;
-		else
-			return RELATE_ENEMY;
-	}
-
-	// Trolls are neutral to the mantis, so they can disperse out.
-	if ( t1 == TEAM_TROLL ) {
-		if ( t0 == TEAM_GREEN_MANTIS || t0 == TEAM_RED_MANTIS )
-			return RELATE_NEUTRAL;
-	}
-
-	if (t1 == TEAM_GOB) {
-		// FIXME: just for dev.sub
+	// Likewise, neutral is neutral even to themselves.
+	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
 		return RELATE_NEUTRAL;
-	}
 
-	return RELATE_ENEMY;
+	static const int F = RELATE_FRIEND;
+	static const int E = RELATE_ENEMY;
+	static const int N = RELATE_NEUTRAL;
+	static const int OFFSET = TEAM_RAT;
+	static const int NUM = NUM_TEAMS - OFFSET;
+
+	static const int relate[NUM][NUM] = {
+		{ F, E, E, E, E, E, E },		// rat
+		{ 0, F, E, N, E, E, E },		// green
+		{ 0, 0, F, N, E, E, E },		// red
+		{ 0, 0, 0, F, E, N, E },		// troll 
+		{ 0, 0, 0, 0, F, N, F },		// house
+		{ 0, 0, 0, 0, 0, F, N },		// gob
+		{ 0, 0, 0, 0, 0, 0, F },	// visitor
+	};
+	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
+	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);
+	GLASSERT(t1 >= t0);
+	return relate[t0-OFFSET][t1-OFFSET];
 }
 
 
