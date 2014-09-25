@@ -85,18 +85,19 @@
 			x see Truulga on map
 		x debug: attach to domain
 		- Gob-men domain
-			- need gob names
-			- need ui icon
-			- gob building colors
-			- gob bar names
-			- gob alignment
+			x need gob names
+			x need ui icon
+			x gob building colors
+			d gob bar names
+			x better logic for farm building: how many should build based on efficiency?
+			- gob alignment (team, enemy, friend)
 		- Redo spawn system. 
 			- Spawn trolls from Truulga domain
 			- Domain takeover (by mobs)
 
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Mantis-men domain
-		- Player domain colors
+		- Player domain colors, color screen, revisit gob colors
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution

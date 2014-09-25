@@ -281,7 +281,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
-	IString consumes = rootItem.keyValues.GetIString(IStringConst::zoneConsume);
+	IString consumes = rootItem.keyValues.GetIString(IStringConst::zone);
 	if (!consumes.empty()) {
 		Component* s = ComponentFactory::Factory("EvalBuildingScript", &chitContext);
 		GLASSERT(s);
@@ -561,16 +561,24 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 }
 
 
-Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
+Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr )
 {
 	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
 	Vector2I sector = ToSector( bounds.min );
 
 	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->Bounds().Intersect( bounds )) {
-//			GLASSERT( it->Building() );
-			return it->ParentChit();
+			Chit* chit = it->ParentChit();
+			if (name.empty() || (chit->GetItem() && chit->GetItem()->IName() == name)) {
+				if (!arr) {
+					return chit;
+				}
+				arr->Push(chit);
+			}
 		}
+	}
+	if (arr && !arr->Empty()) {
+		return (*arr)[0];
 	}
 	return 0;
 }

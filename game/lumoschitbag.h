@@ -278,13 +278,17 @@ public:
 
 	// Query the porch at the location.
 	Chit* QueryPorch( const grinliz::Vector2I& pos, int* type );
+
 	// Query the first building in the bounds.
-	Chit* QueryBuilding( const grinliz::Vector2I& pos ) {
+	// If !name.empty, filters for that type.
+	// If arr != null, returns all the matches.
+	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Vector2I& pos, CChitArray* arr ) {
 		grinliz::Rectangle2I r;
 		r.Set( pos.x, pos.y, pos.x, pos.y );
-		return QueryBuilding( r );
+		return QueryBuilding( name, r, arr );
 	}
-	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
+	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr );
+
 	Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 	//LumosGame* GetLumosGame() { return lumosGame; }

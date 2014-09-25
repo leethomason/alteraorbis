@@ -16,6 +16,7 @@
 #include "../script/forgescript.h"
 #include "../game/team.h"
 #include "../script/procedural.h"
+#include "../script/farmscript.h"
 
 using namespace grinliz;
 
@@ -243,15 +244,38 @@ bool DomainAI::BuildBuilding(int id)
 			buildBounds.FromPair(head - left*(porch + bd.size), btail - left*(1 + porch));
 			porchBounds.FromPair(head - left, btail - left);
 
-			// FIXME: move to a function and don't think about the weird
-			// rotation system again. Strange sort of coordinate system.
+			// Check that we aren't building too close to a farm.
+			Rectangle2I farmCheckBounds = fullBounds;
+			farmCheckBounds.Outset(FARM_GROW_RAD);
+			if (Context()->chitBag->QueryBuilding(ISC::farm, farmCheckBounds, 0)) {
+				continue;	// Don't build too close to farms!
+			}
+
+			// A little teeny tiny effort to group natural and industrial buildings.
+			if (bd.zone) {
+				IString avoid = (bd.zone == BuildData::ZONE_INDUSTRIAL) ? ISC::natural : ISC::industrial;
+				Rectangle2I conflictBounds = fullBounds;
+				conflictBounds.Outset(3);
+				CChitArray conflict;
+				Context()->chitBag->QueryBuilding(IString(), conflictBounds, &conflict);
+				bool hasConflict = false;
+
+				for (int i = 0; i < conflict.Size(); ++i) {
+					const GameItem* item = conflict[i]->GetItem();
+					if (item && item->keyValues.GetIString(ISC::zone) == avoid) {
+						hasConflict = true;
+						break;
+					}
+				}
+				if (hasConflict) continue;	// try another location. 
+			}
 
 			// Why right? The building is to the left, so it faces right.
 			int rotation = RightVectorToRotation(right);
 
 			bool okay = CanBuild(fullBounds, pave);
 			if (okay) {
-				Chit* chit = Context()->chitBag->QueryBuilding(fullBounds);
+				Chit* chit = Context()->chitBag->QueryBuilding(IString(), fullBounds, 0);
 				okay = !chit;
 			}
 
@@ -317,16 +341,19 @@ bool DomainAI::BuildFarm()
 			extendedBounds.Outset(2);
 
 			// Can we build the pave and the solar farm?
-			if (CanBuild(buildBounds, pave) && !Context()->chitBag->QueryBuilding(extendedBounds)) {
+			if (CanBuild(buildBounds, pave) && !Context()->chitBag->QueryBuilding(IString(), extendedBounds, 0)) {
 				int score = 0;
 				for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
 					if (!buildBounds.Contains(it.Pos())) {
 						const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
 						if (wg.Plant()) {
-							score += wg.PlantStage()*wg.PlantStage();
+							int stage = wg.PlantStage() + 1;
+							score += stage * stage;
 						}
 					}
 				}
+				score = score / index;	// don't want it TOO far from center.
+
 				if (score > bestScore) {
 					bestScore = score;
 					bestFarm = solar;
@@ -531,6 +558,14 @@ void GobDomainAI::DoBuild()
 
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+	CChitArray farms;
+	Context()->chitBag->QueryBuilding(ISC::farm, sector, &farms);
+
+	float eff = 0.0f;
+	for (int i = 0; i < farms.Size(); ++i) {
+		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
+		eff += farmScript->Efficiency();
+	}
 
 	do {
 		if (BuyWorkers()) break;
@@ -542,7 +577,7 @@ void GobDomainAI::DoBuild()
 		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
-		if (arr[BuildScript::FARM] == 1 && BuildFarm()) break;
+		if (eff < 2.0f && BuildFarm()) break;
 		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 	} while (false);

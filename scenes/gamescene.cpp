@@ -127,9 +127,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( bd.label.safe_str() );
 
-		if (bd.zoneCreate == BuildData::ZONE_INDUSTRIAL || bd.zoneConsume == BuildData::ZONE_INDUSTRIAL)
+		if (bd.zone == BuildData::ZONE_INDUSTRIAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("anvil", true), game->CalcUIIconAtom("anvil", false));
-		else if (bd.zoneCreate == BuildData::ZONE_NATURAL || bd.zoneConsume == BuildData::ZONE_NATURAL)
+		else if (bd.zone == BuildData::ZONE_NATURAL)
 			buildButton[i].SetDeco(game->CalcUIIconAtom("leaf", true), game->CalcUIIconAtom("leaf", false));
 
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
@@ -681,7 +681,7 @@ bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
 {
 	Chit* building = 0;
 	if (uiMode[UI_BUILD].Down() && !buildActive) {
-		building = sim->GetChitBag()->QueryBuilding(pos2i);
+		building = sim->GetChitBag()->QueryBuilding(IString(),pos2i,0);
 	}
 	return building != 0;
 }
@@ -692,7 +692,7 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 	Vector2I dragStart = ToWorld2I(mapDragStart);
 	Vector2I dragEnd = ToWorld2I(drag);
 
-	Chit* building = sim->GetChitBag()->QueryBuilding(dragStart);
+	Chit* building = sim->GetChitBag()->QueryBuilding(IString(),dragStart,0);
 
 	if (building && (dragStart != dragEnd)) {
 		Vector2I d = dragEnd - dragStart;
@@ -729,7 +729,7 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 			wq->Remove(pos2i);
 		}
 		else if (buildActive == BuildScript::ROTATE) {
-			Chit* chit = sim->GetChitBag()->QueryBuilding(pos2i);
+			Chit* chit = sim->GetChitBag()->QueryBuilding(IString(),pos2i, 0);
 			int circuit = sim->GetWorldMap()->Circuit(pos2i.x, pos2i.y);
 
 			if (chit) {

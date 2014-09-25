@@ -453,9 +453,7 @@ public:
 	virtual const IShield*		ToShield() const	{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	// Convenience method to get the natural-industrial scale
-	// true: what it creates
-	// false: what it consumes
-	double GetBuildingIndustrial( bool create ) const;
+	double GetBuildingIndustrial() const;
 
 	int Effects() const { return flags & EFFECT_MASK; }
 	int DoTick( U32 delta );

@@ -24,8 +24,7 @@ struct BuildData
 	bool				porch;
 
 	enum {ZONE_NONE, ZONE_INDUSTRIAL, ZONE_NATURAL};
-	int					zoneCreate;
-	int					zoneConsume;
+	int					zone;
 };
 
 

@@ -340,7 +340,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			else if (wg.RockHeight()) {
 				++removable;
 			}
-			else if (chitBag->QueryBuilding(v)) {
+			else if (chitBag->QueryBuilding(IString(),v,0)) {
 				++building;	// building
 			}
 		}
@@ -402,7 +402,7 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 			return wg.RockHeight() > 0;
 		}
 		else {
-			Chit* building = context->chitBag->QueryBuilding(item.pos);
+			Chit* building = context->chitBag->QueryBuilding(IString(),item.pos,0);
 			if (building && building->GetItem() && building->GetItem()->IName() == buildData.structure) {
 				return true;
 			}

@@ -468,15 +468,9 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-double GameItem::GetBuildingIndustrial( bool create ) const
+double GameItem::GetBuildingIndustrial() const
 {
-	IString istr;
-	if (create) {
-		istr = keyValues.GetIString(IStringConst::zoneCreate);
-	}
-	else {
-		istr = keyValues.GetIString(IStringConst::zoneConsume);
-	}
+	IString istr = keyValues.GetIString(IStringConst::zone);
 	if (istr == IStringConst::industrial)
 		return 1;
 	if (istr == IStringConst::natural)

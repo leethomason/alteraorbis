@@ -109,7 +109,7 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 			GameItem* item = parentChit->GetItem();
 			GLASSERT(item);
 			if (item) {
-				double consumes = item->GetBuildingIndustrial(false);
+				double consumes = item->GetBuildingIndustrial();
 				if (consumes) {
 					double scan = evalScript->EvalIndustrial(false);
 

@@ -68,8 +68,8 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 {
 	if (item) {
-		IString mob = item->keyValues.GetIString(ISC::mob);
-		if (mob == ISC::denizen) {
+		IString icon = item->keyValues.GetIString("uiIcon");
+		if (icon == "human") {
 			ProcRenderInfo info;
 			HumanGen faceGen(strstr(item->ResourceName(), "emale") != 0, item->ID(), item->team, false);
 			faceGen.AssignFace(&info);
@@ -85,7 +85,7 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 			renderer->colorXForm[id] = info.color;
 		}
 		else {
-			RenderAtom atom = LumosGame::CalcUIIconAtom(item->Name());
+			RenderAtom atom = LumosGame::CalcUIIconAtom(icon.safe_str());
 			atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
 			GetButton()->SetDeco(atom, atom);
 		}

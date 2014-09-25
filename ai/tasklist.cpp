@@ -495,7 +495,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
 		if (evalScript) {
-			double industry = building->GetItem()->GetBuildingIndustrial(false);
+			double industry = building->GetItem()->GetBuildingIndustrial();
 			double score = evalScript->EvalIndustrial(true);
 			double dot = score * industry;
 			scale = 0.55 + 0.45 * dot;

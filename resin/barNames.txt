@@ -9,6 +9,8 @@ The Analog
 Electric
 The Blazing
 The De-Rezzed
+Flickering
+Neon
 
 1
 Ring
@@ -20,3 +22,5 @@ Cyclops
 Arachnoid
 Mantis
 Grid
+Blaster
+

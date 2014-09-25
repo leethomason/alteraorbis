@@ -98,11 +98,9 @@ public:
 	static grinliz::IString turret;
 	static grinliz::IString circuitFab;
 
-	static grinliz::IString zoneCreate;
-	static grinliz::IString zoneConsume;
+	static grinliz::IString zone;
 	static grinliz::IString industrial;
 	static grinliz::IString natural;
-	static grinliz::IString commercial;
 
 	static grinliz::IString trilobyte;
 	static grinliz::IString mantis;

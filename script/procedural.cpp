@@ -213,8 +213,6 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 
 WeaponGen::WeaponGen(U32 _seed, int _team, int _effectFlags, int _features) : seed(_seed), team(_team), effectFlags(_effectFlags), features(_features)
 {
-	int id = 0;
-	Team::SplitID(_team, &team, &id);
 }
 
 
@@ -284,9 +282,13 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 							Lerp( base.a(), contrast.a(), LERP ) );
 	
 	// Handle special cases.
-	if (team == TEAM_TROLL) {
+	if (TeamGroup(team) == TEAM_TROLL) {
 		array[BASE] = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
 		array[CONTRAST] = palette->Get4F(PAL_RED * 2, PAL_GREEN);
+	}
+	else if (TeamGroup(team) == TEAM_GOB) {
+		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
+		contrast = palette->Get4F(PAL_RED * 2, PAL_PURPLE);
 	}
 
 	array[EFFECT]		= effectColor;
@@ -395,9 +397,7 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 
 void TeamGen::Assign( int seed, int _team, ProcRenderInfo* info )
 {
-	int team = 0;
-	int id = 0;
-	Team::SplitID(_team, &team, &id);
+	int team = _team;
 	static const int NUM = 4;
 	static const Vector4I colors[NUM] = {
 		// approved
@@ -423,12 +423,17 @@ void TeamGen::Assign( int seed, int _team, ProcRenderInfo* info )
 	Vector4F glow		= select ? base : contrast;
 
 	// Handle special cases.
-	if (team == TEAM_TROLL) {
+	if (TeamGroup(team) == TEAM_TROLL) {
 		base     = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
 		contrast = palette->Get4F(PAL_RED * 2, PAL_GREEN);
 		glow	 = palette->Get4F(PAL_TANGERINE * 2, PAL_GREEN);
 	}
-	else if (team == TEAM_NEUTRAL) {
+	else if (TeamGroup(team) == TEAM_GOB) {
+		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
+		contrast = palette->Get4F(PAL_RED * 2, PAL_PURPLE);
+		glow = base;
+	}
+	else if (TeamGroup(team) == TEAM_NEUTRAL) {
 		// Grey colors for neutral:
 		base		= palette->Get4F( 0, PAL_GRAY );	// dark gray
 		contrast	= palette->Get4F( 0, PAL_GRAY );

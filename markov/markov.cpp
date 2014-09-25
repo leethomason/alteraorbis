@@ -87,7 +87,7 @@ void MarkovGenerator::Analyze()
 //	int* options = new int[256 * 256];
 //	memset(options, 0, 256 * 256 *sizeof(int));
 
-	char buf[64] = { 0 };
+	char buf[MAX_BUF] = { 0 };
 
 	GLOUTPUT(("\n"));
 	for (int i = 0; i < nTriplets; ++i) {
@@ -123,12 +123,15 @@ void MarkovGenerator::Analyze()
 
 void MarkovGenerator::AnalyzeRec(char *buf, int nChars, int* options)
 {
+	if (nChars >= MAX_BUF - 2) return;
+
 	int start = 0;
 	int count = 0;
 
 	FindPair(buf[nChars-2], buf[nChars-1], &start, &count);
 	if (count == 0)
 		return;
+
 	*options += count;
 	if (*options > 100)
 		return;

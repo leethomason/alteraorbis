@@ -188,7 +188,7 @@
         size="2"
         mass="200"
         cost="100"
-        zoneCreate="industrial"
+        zone="industrial"
         />
 
   <!-- note that the 'needs' has a weird syntax - it
@@ -205,8 +205,7 @@
         size="2"
         mass="150"
         cost="80" 
-        zoneCreate="industrial"
-        zoneConsume="industrial"
+        zone="industrial"
         
 		need.time="2.0"
         need.fun="0.8"
@@ -220,7 +219,7 @@
         size="2"
         mass="150"
         cost="60"
-        zoneCreate="natural" />
+        zone="natural" />
 
   <item name="power"
         resource="power"
@@ -232,7 +231,7 @@
         size="1"
         mass="150"
         cost="40"
-        zoneCreate="industrial" />
+        zone="industrial" />
 
   <item name="turret"
         resource="turret"
@@ -243,7 +242,7 @@
         size="1"
         mass="100"
         cost="40"
-        zoneCreate="industrial" />
+        zone="industrial" />
 
   <item name="circuitFab"
         resource="circuitFab"
@@ -252,7 +251,7 @@
         size="1"
         mass="100"
         cost="100"
-        zoneCreate="industrial" />
+        zone="industrial" />
 
   <item name="guardpost"
         resource="guardpost"
@@ -272,7 +271,7 @@
         size="1"
         mass="100"
         cost="25"
-        zoneConsume="natural"
+        zone="natural"
         
 	    need.time="10.0"
         need.energy="1.0"
@@ -286,7 +285,7 @@
         size="2"
         mass="150"
         cost="50"
-        zoneConsume="natural"
+        zone="natural"
         
 	    need.time="1.5"
         need.fun="0.4"
@@ -301,8 +300,7 @@
         size="1"
         mass="100"
         cost="80"
-        zoneCreate="industrial"
-        zoneConsume="industrial"
+        zone="industrial"
 
         need.time="1.5"
         need.fun="0.4"
@@ -319,7 +317,7 @@
         size="2"
         mass="150"
         cost="50"
-        zoneConsume="natural"
+        zone="natural"
         nameGen="barNames"
         
 	    need.time="5.0"
@@ -347,8 +345,7 @@
         mass="200"
         cost="80"
         script="DistilleryScript"
-        zoneCreate="industrial"
-        zoneConsume="industrial"
+        zone="industrial"
         />
 
   <item name="trilobyte"
