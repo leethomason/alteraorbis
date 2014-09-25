@@ -13,8 +13,8 @@ using namespace grinliz;
 
 int main( int argc, const char* argv[] )
 {
-	if ( argc != 2 ) {
-		printf( "Usage: markov path/in.txt\n" );
+	if ( argc < 2 ) {
+		printf( "Usage: markov path/in.txt [maxLen]\n" );
 		exit( 1 );
 	}
 #if 0
@@ -28,6 +28,9 @@ int main( int argc, const char* argv[] )
 		printf( "Could not open file %s\n", argv[1] );
 		exit( 2 );
 	}
+
+	int maxLen = 12;
+	if (argc >= 3) maxLen = atoi(argv[2]);
 
 	MarkovBuilder builder;
 
@@ -73,7 +76,7 @@ int main( int argc, const char* argv[] )
 
 	line = 0;
 	for( int k=0; k<800; ++k ) {
-		if ( generator.Name( &name, 11 )) {
+		if ( generator.Name( &name, maxLen )) {
 			int len = name.size();
 			if ( len > 3 ) {
 				printf( "%s ", name.c_str() );
