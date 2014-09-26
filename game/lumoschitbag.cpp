@@ -277,7 +277,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	if (!proc.empty()) {
 		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, team, &info);
+		gen.Assign(team, &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
@@ -342,7 +342,7 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	if (!proc.empty()) {
 		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, team, &info);
+		gen.Assign(team, &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 	

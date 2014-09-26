@@ -388,6 +388,22 @@ int DomainAI::DoTick(U32 delta)
 		if (!Preamble(&sector, &cs, &workQueue, &pave))
 			return VERY_LONG_TICK;
 
+		// The tax man!
+		// Solves the sticky problem: "how do non-player domains fund themselves?"
+		int gold = parentChit->GetItem()->wallet.gold;
+		for (int i = 0; i < cs->NumCitizens(); ++i) {
+			Chit* citizen = cs->CitizenAtIndex(i);
+			if (citizen->GetItem()) {
+				int citizenGold = citizen->GetItem()->wallet.gold;
+				if (citizenGold > gold / 4) {
+					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
+					if (tax > 0) {
+						Transfer(&parentChit->GetItem()->wallet, &citizen->GetItem()->wallet, tax);
+					}
+				}
+			}
+		}
+
 		// FIXME: this isn't really correct. will stall
 		// domain ai if there is an inaccessible job.
 		if (workQueue->HasAssignedJob()) {

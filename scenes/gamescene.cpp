@@ -1242,7 +1242,7 @@ void GameScene::HandleHotKey( int mask )
 				int team = Team::GenTeam(TEAM_GOB);
 				cs = sim->CreateCore(sector, team);
 				cs->ParentChit()->Add(new GobDomainAI());
-				Transfer(&cs->ParentChit()->GetItem()->wallet, &ReserveBank::Instance()->bank, 4000);
+				Transfer(&cs->ParentChit()->GetItem()->wallet, &ReserveBank::Instance()->bank, 150);
 			}
 		}
 #endif

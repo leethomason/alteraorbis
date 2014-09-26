@@ -135,7 +135,7 @@ private:
 class TeamGen
 {
 public:
-	void Assign( int seed, int team, ProcRenderInfo* info );
+	void Assign( int team, ProcRenderInfo* info );
 };
 
 

@@ -395,9 +395,8 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 }
 
 
-void TeamGen::Assign( int seed, int _team, ProcRenderInfo* info )
+void TeamGen::Assign( int team, ProcRenderInfo* info )
 {
-	int team = _team;
 	static const int NUM = 4;
 	static const Vector4I colors[NUM] = {
 		// approved
@@ -413,8 +412,8 @@ void TeamGen::Assign( int seed, int _team, ProcRenderInfo* info )
 
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
-	int index = (seed+2) % NUM;	// the magic constant is to get a good color palette for HOUSE0
-	bool select = (seed / NUM) & 1 ? true : false; 
+	int index = team % NUM;	// the magic constant is to get a good color palette for HOUSE0
+	bool select = (team / NUM) & 1 ? true : false; 
 
 	const Game::Palette* palette = Game::GetMainPalette();
 
@@ -460,7 +459,7 @@ void AssignProcedural( const char* name,
 
 	if ( StrEqual( name, "team" )) {
 		TeamGen gen;
-		gen.Assign( seed, team, info );
+		gen.Assign( team, info );
 	}
 	else if ( StrEqual( name, "suit" )) {
 		HumanGen gen( female, seed, team, electric );
