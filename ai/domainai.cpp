@@ -580,6 +580,7 @@ void GobDomainAI::DoBuild()
 		if (eff < 2.0f && BuildFarm()) break;
 		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 	} while (false);
 }
 

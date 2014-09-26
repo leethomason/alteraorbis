@@ -115,6 +115,7 @@ public:
 private:
 	void UpdateAI();
 	void UpdateScore(int n);
+	bool RecruitNeutral();
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes

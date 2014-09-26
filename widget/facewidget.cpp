@@ -69,6 +69,10 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 {
 	if (item) {
 		IString icon = item->keyValues.GetIString("uiIcon");
+		if (icon.empty()) {
+			icon = item->IName();
+		}
+
 		if (icon == "human") {
 			ProcRenderInfo info;
 			HumanGen faceGen(strstr(item->ResourceName(), "emale") != 0, item->ID(), item->team, false);

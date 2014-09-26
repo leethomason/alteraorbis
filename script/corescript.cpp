@@ -315,6 +315,35 @@ void CoreScript::UpdateAI()
 }
 
 
+bool CoreScript::RecruitNeutral()
+{
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Rectangle2I inner = InnerSectorBounds(sector);
+
+	MOBKeyFilter filter;
+	filter.value = ISC::denizen;
+	CChitArray arr;
+	Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), 0, &filter);
+
+	for (int i = 0; i < arr.Size(); ++i) {
+		Chit* chit = arr[i];
+		if (Team::GetRelationship(chit, parentChit) != RELATE_ENEMY) {
+			if (this->IsCitizen(chit)) continue;
+			if (!chit->GetItem()) continue;
+
+			if (CoreScript::GetCoreFromTeam(chit->Team()) == 0) {
+				// ronin! denizen without a core.
+				chit->GetItem()->team = parentChit->Team();
+				GLASSERT(chit->GetItem()->Significant());
+
+				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(), chit, 0);
+				Context()->chitBag->GetNewsHistory()->Add(news);
+			}
+		}
+	}
+	return false;
+}
+
 
 int CoreScript::DoTick( U32 delta )
 {
@@ -372,7 +401,9 @@ int CoreScript::DoTick( U32 delta )
 		int nCitizens = this->NumCitizens();
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
-			Context()->chitBag->NewDenizen( pos2i, team );
+			if (!RecruitNeutral()) {
+				Context()->chitBag->NewDenizen( pos2i, team );
+			}
 		}
 
 		if ( (TeamGroup(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {

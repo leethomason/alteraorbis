@@ -98,8 +98,8 @@ int Team::GetRelationship( int _t0, int _t1 )
 		{ 0, 0, F, N, E, E, E },		// red
 		{ 0, 0, 0, F, E, N, E },		// troll 
 		{ 0, 0, 0, 0, F, N, F },		// house
-		{ 0, 0, 0, 0, 0, F, N },		// gob
-		{ 0, 0, 0, 0, 0, 0, F },	// visitor
+		{ 0, 0, 0, 0, 0, F, N },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F },		// visitor
 	};
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
 	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);

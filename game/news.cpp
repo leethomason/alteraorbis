@@ -79,6 +79,7 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHist
 			case NewsEvent::GREATER_MOB_CREATED:
 			case NewsEvent::DOMAIN_CREATED:
 			case NewsEvent::FORGED:
+			case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
 				GLASSERT( data->born == 0 );
 				data->born = cache[i]->date;
 				break;
@@ -136,6 +137,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Greater " MOB_Destroyed,
 		"Domain " MOB_Created,
 		"Domain " MOB_Destroyed,
+		"Roque Joins",
 		"Forged",
 		MOB_Destroyed,
 		"Purchase",
@@ -216,6 +218,8 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		domain = sd.name;
 	}
 
+	IString teamName = Team::TeamName(team);
+
 	switch (what) {
 		case DENIZEN_CREATED:
 		str->Format("%.2f: Denizen %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str());
@@ -233,13 +237,16 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		str->Format("%.2f: %s " MOB_created ".", age, domain.c_str());
 		break;
 
+		case ROQUE_DENIZEN_JOINS_TEAM:
+		str->Format("%.2f: Denizen %s joins %s at %s.", age, itemName.c_str(), teamName.safe_str(), domain.c_str());
+		break;
+
 		case GREATER_MOB_KILLED:
 		str->Format("%.2f: %s " MOB_destroyed " at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str());
 		break;
 
 		case DOMAIN_DESTROYED:
 		if (team) {
-			IString teamName = Team::TeamName(team);
 			str->Format("%.2f: %s domain %s " MOB_destroyed ".", age, teamName.safe_str(), domain.safe_str());
 		}
 		else {
