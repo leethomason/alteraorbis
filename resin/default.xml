@@ -246,9 +246,9 @@
   </animation>
 
   <model filename="gob/gob.ac" shading="flat" animation="gobAnimation" animationSpeed="1.25" >
-    <meta name="trigger" pos="-0.24 0.33 0" rot="1 0 0 -90" boneName="arm.lower.right" />
-    <meta name="target"  pos="0 0.55 0"/>
-    <meta name="shield"  pos="0 0.60 -0.08" rot="1 0 0 80" boneName="torso" />
+    <meta name="trigger" pos="-0.17 0.36 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.64 0"/>
+    <meta name="shield"  pos="0 0.64 -0.12" rot="1 0 0 80" boneName="torso" />
   </model>
 
   <model filename="visitor.ac" animation="nullAnimation" shading="flat">
