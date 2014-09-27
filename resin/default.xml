@@ -251,6 +251,16 @@
     <meta name="shield"  pos="0 0.64 -0.12" rot="1 0 0 80" boneName="torso" />
   </model>
 
+  <animation filename="mantessa/mantessa_.bvh" assetName="mantessaAnimation" >
+    <meta animation="melee" name="impact" time="500" />
+  </animation>
+
+  <model filename="mantessa/mantessa.ac" shading="flat" animation="mantessaAnimation" animationSpeed="1.25" >
+    <meta name="trigger" pos="-0.14 0.50 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.93 0"/>
+    <meta name="shield"  pos="0 0.91 -0.13" rot="1 0 0 80" boneName="torso" />
+  </model>
+    
   <model filename="visitor.ac" animation="nullAnimation" shading="flat">
     <meta name="target" pos="0 0.71 0" />
   </model>
