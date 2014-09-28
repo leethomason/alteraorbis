@@ -84,7 +84,7 @@
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
 		x debug: attach to domain
-		x Gob-men domain
+		- Gob-men domain
 			x need gob names
 			x need ui icon
 			x gob building colors
@@ -94,13 +94,26 @@
 			x recruit neutral, wandering gobmen
 			x how to fund gobmen domain??
 			x bug setting face (mantis not working - need fallback to name)
+			- special building
 		- Redo spawn system. 
 			- Spawn trolls from Truulga domain
 			- Domain takeover (by mobs)
+		- Mantessa domain
+			x art
+			x animation
+			- special buildings:
+				- fab
+				- sculpture
+			- mantesssan beamgun
+		- Player domain colors, color screen, revisit gob colors
+		- Denizen domains
+		- Census: 
+			- gob domains don't count
+			- strange container-is-item bug
+		- Start with 0 team id for un-assigned, all domains 1+ team id
 
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Mantis-men domain
-		- Player domain colors, color screen, revisit gob colors
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution
