@@ -819,11 +819,8 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 
 	if ( Context()->chitBag ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if ( mob == ISC::lesser ) {
-			Context()->chitBag->census.normalMOBs += 1;
-		}
-		else if ( mob == ISC::greater ) {
-			Context()->chitBag->census.greaterMOBs += 1;
+		if (!mob.empty()) {
+			Context()->chitBag->census.Add(mainItem->IName());
 		}
 	}
 	slowTick.SetPeriod( 500 + (chit->ID() & 128));
@@ -835,13 +832,9 @@ void ItemComponent::OnRemove()
 {
 	GameItem* mainItem = itemArr[0];
 	if ( Context()->chitBag ) {
-		IString mob;
-		mainItem->keyValues.Get( ISC::mob, &mob );
-		if ( mob == ISC::lesser ) {
-			Context()->chitBag->census.normalMOBs -= 1;
-		}
-		else if ( mob == ISC::greater ) {
-			Context()->chitBag->census.greaterMOBs -= 1;
+		IString mob = mainItem->keyValues.GetIString( "mob" );
+		if (!mob.empty()) {
+			Context()->chitBag->census.Remove(mainItem->IName());
 		}
 	}
 	super::OnRemove();

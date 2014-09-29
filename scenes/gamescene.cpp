@@ -2114,10 +2114,13 @@ void GameScene::DrawDebugText()
 		}
 	}
 
-	ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: norm=%d greater=%d", 
+	int lesser = 0, greater = 0, denizen = 0;
+	chitBag->census.NumByType(&lesser, &greater, &denizen);
+
+	ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: lesser=%d greater=%d denizen=%d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
 									stageCount[0], stageCount[1], stageCount[2], stageCount[3],
-									chitBag->census.normalMOBs, chitBag->census.greaterMOBs );
+									lesser, greater, denizen );
 	y += 16;
 
 	micropather::CacheData cacheData;

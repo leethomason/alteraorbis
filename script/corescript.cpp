@@ -345,10 +345,8 @@ bool CoreScript::RecruitNeutral()
 }
 
 
-int CoreScript::DoTick( U32 delta )
+int CoreScript::DoTick(U32 delta)
 {
-	static const int RADIUS = 4;
-
 	if ( parentChit->Team() != team ) {
 		team = parentChit->Team();
 		TeamGen gen;
@@ -357,11 +355,29 @@ int CoreScript::DoTick( U32 delta )
 		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 
-	bool normalPossible = Context()->chitBag->census.normalMOBs < TYPICAL_MONSTERS;
-	bool greaterPossible = Context()->chitBag->census.greaterMOBs < TYPICAL_GREATER;
+	int nScoreTicks = scoreTicker.Delta(delta);
+	int nAITicks = aiTicker.Delta(delta);
+	int nSpawnTicks = spawnTick.Delta(delta);
 
-	bool inUse = InUse();
+	if (InUse()) {
+		DoTickInUse(delta, nSpawnTicks);
+		UpdateScore(nScoreTicks);
+	}
+	else {
+		DoTickNeutral(delta, nSpawnTicks);
+	}
+	workQueue->DoTick();
 
+	if (nAITicks) {
+		UpdateAI();
+	}
+
+	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
+}
+
+
+void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
+{
 	int team = TeamGroup(parentChit->Team());
 	switch (team) {
 		case TEAM_HOUSE:
@@ -391,10 +407,9 @@ int CoreScript::DoTick( U32 delta )
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-	int tickd = spawnTick.Delta( delta );
 
-	if ( tickd && inUse ) {
-		// FIXME: essentially caps the #citizens to the capacity of CChitArray (32)
+	if ( nSpawnTicks ) {
+		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
 		CChitArray chitArr;
 		Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
@@ -418,9 +433,22 @@ int CoreScript::DoTick( U32 delta )
 			}
 		}
 	}
-	else if (    tickd 
-			  && !inUse
-			  && ( normalPossible || greaterPossible ))
+}
+
+
+void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
+{
+	int lesser, greater, denizen;
+	Context()->chitBag->census.NumByType(&lesser, &greater, &denizen);
+	bool greaterPossible = greater < TYPICAL_GREATER;
+	bool lesserPossible = lesser < TYPICAL_LESSER;
+
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
+	GLASSERT( ms );
+	Vector2I pos2i = ms->MapPosition();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
+	if ( nSpawnTicks && ( lesserPossible || greaterPossible ))
 	{
 #ifdef SPAWN_MOBS
 		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
@@ -484,10 +512,10 @@ int CoreScript::DoTick( U32 delta )
 					spawn = greater[parentChit->random.Rand(greater.Size())].c_str();
 					isGreater = true;
 				}
-				if (!spawn && normalPossible && (roll < rat)) {
+				if (!spawn && lesserPossible && (roll < rat)) {
 					spawn = "trilobyte";
 				}
-				if (!spawn && normalPossible) {
+				if (!spawn && lesserPossible) {
 					spawn = defaultSpawn.c_str();
 				}
 				if (spawn) {
@@ -500,29 +528,10 @@ int CoreScript::DoTick( U32 delta )
 		}
 #endif
 	}
-	if ( !inUse ) {
-		// Clear the work queue - chit is gone that controls this.
-		delete workQueue;
-		workQueue = new WorkQueue();
-		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
-
-		//TeamGen gen;
-		//ProcRenderInfo info;
-		//gen.Assign( 0, 0, &info );
-		//parentChit->GetRenderComponent()->SetProcedural( 0, info );
-	}
-	workQueue->DoTick();
-
-	if (aiTicker.Delta(delta)) {
-		UpdateAI();
-	}
-
-	int nScoreTicks = scoreTicker.Delta(delta);
-	if (inUse) {
-		UpdateScore(nScoreTicks);
-	}
-
-	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
+	// Clear the work queue - chit is gone that controls this.
+	delete workQueue;
+	workQueue = new WorkQueue();
+	workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
 }
 
 

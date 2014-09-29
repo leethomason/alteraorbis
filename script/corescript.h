@@ -116,6 +116,8 @@ private:
 	void UpdateAI();
 	void UpdateScore(int n);
 	bool RecruitNeutral();
+	void DoTickNeutral(int delta, int nSpawnTicks);
+	void DoTickInUse(int delta, int nSpawnTicks);
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes

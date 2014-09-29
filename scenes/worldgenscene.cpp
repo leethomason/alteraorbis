@@ -351,22 +351,25 @@ void WorldGenScene::DoTick( U32 delta )
 					  "Bamboo=%d\t\t[%d, %d, %d, %d]\n"
 					  "Shroom=%d\t\t[%d, %d, %d, %d]\n"
 					  "SunBloom=%d\t\t[%d, %d]\n"
-					  "MoonBloom=%d\t\t[%d, %d]\n\n"
-					  "Lesser Monsters=%d\n"
-					  "Greater Monsters=%d",
-						age,	
-						swm->CountPlants(),
-						pools, waterfalls,
-						typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
-						typeCount[1], swm->plantCount[1][0], swm->plantCount[1][1], swm->plantCount[1][2], swm->plantCount[1][3],
-						typeCount[2], swm->plantCount[2][0], swm->plantCount[2][1], swm->plantCount[2][2], swm->plantCount[2][3],
-						typeCount[3], swm->plantCount[3][0], swm->plantCount[3][1], swm->plantCount[3][2], swm->plantCount[3][3],
-						typeCount[4], swm->plantCount[4][0], swm->plantCount[4][1], swm->plantCount[4][2], swm->plantCount[4][3],
-						typeCount[5], swm->plantCount[5][0], swm->plantCount[5][1], swm->plantCount[5][2], swm->plantCount[5][3],
-						typeCount[6], swm->plantCount[6][0], swm->plantCount[6][1],
-						typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1],
-						sim->GetChitBag()->census.normalMOBs,
-						sim->GetChitBag()->census.greaterMOBs );
+					  "MoonBloom=%d\t\t[%d, %d]\n\n",
+					  age,
+					  swm->CountPlants(),
+					  pools, waterfalls,
+					  typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
+					  typeCount[1], swm->plantCount[1][0], swm->plantCount[1][1], swm->plantCount[1][2], swm->plantCount[1][3],
+					  typeCount[2], swm->plantCount[2][0], swm->plantCount[2][1], swm->plantCount[2][2], swm->plantCount[2][3],
+					  typeCount[3], swm->plantCount[3][0], swm->plantCount[3][1], swm->plantCount[3][2], swm->plantCount[3][3],
+					  typeCount[4], swm->plantCount[4][0], swm->plantCount[4][1], swm->plantCount[4][2], swm->plantCount[4][3],
+					  typeCount[5], swm->plantCount[5][0], swm->plantCount[5][1], swm->plantCount[5][2], swm->plantCount[5][3],
+					  typeCount[6], swm->plantCount[6][0], swm->plantCount[6][1],
+					  typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1]);
+
+		const Census& census = sim->GetChitBag()->census;
+		for (int i = 0; i < census.MOBItems().Size(); ++i) {
+			const Census::MOBItem& mobItem = census.MOBItems()[i];
+			simStr.AppendFormat("%s=%s\n", mobItem.name.safe_str(), mobItem.count);
+		}
+
 		worldText.SetText(simStr.c_str());
 
 		CStr<32> str;
