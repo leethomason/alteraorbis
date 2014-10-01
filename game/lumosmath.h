@@ -138,5 +138,22 @@ inline grinliz::Vector2F RandomInRect(const grinliz::Rectangle2I& r, grinliz::Ra
 	return v;
 }
 
+inline grinliz::Vector2I RandomInOutland(grinliz::Random* random) 
+{
+	static const int OUTLAND = NUM_SECTORS / 4 + 1;
+
+
+	grinliz::Vector2I v = { 0, 0 };
+	for (int i = 0; i < 2; ++i) {
+		if (random->Bit())
+			v.X(i) = NUM_SECTORS - OUTLAND + random->Rand(OUTLAND);
+		else
+			v.X(i) = random->Rand(OUTLAND);
+
+		GLASSERT(v.X(i) >= 0 && v.X(i) < NUM_SECTORS);
+	}
+	return v;
+}
+
 #endif // LUMOS_MATH_INCLUDED
 

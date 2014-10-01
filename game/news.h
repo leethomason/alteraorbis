@@ -47,6 +47,7 @@ public:
 		BLOOD_RAGE,					//  victim					victim
 		VISION_QUEST,				//	victim					victim
 		GREATER_SUMMON_TECH,		//  mob
+		DOMAIN_CONQUER,				//	conquered	conquerer	conquered
 
 		// Current events, but not logged:
 		START_CURRENT,
@@ -62,6 +63,7 @@ public:
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
+												|| what == DOMAIN_CREATED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;

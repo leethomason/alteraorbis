@@ -282,11 +282,11 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 							Lerp( base.a(), contrast.a(), LERP ) );
 	
 	// Handle special cases.
-	if (TeamGroup(team) == TEAM_TROLL) {
+	if (Team::Group(team) == TEAM_TROLL) {
 		array[BASE] = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
 		array[CONTRAST] = palette->Get4F(PAL_RED * 2, PAL_GREEN);
 	}
-	else if (TeamGroup(team) == TEAM_GOB) {
+	else if (Team::Group(team) == TEAM_GOB) {
 		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
 		contrast = palette->Get4F(PAL_RED * 2, PAL_PURPLE);
 	}
@@ -422,17 +422,17 @@ void TeamGen::Assign( int team, ProcRenderInfo* info )
 	Vector4F glow		= select ? base : contrast;
 
 	// Handle special cases.
-	if (TeamGroup(team) == TEAM_TROLL) {
+	if (Team::Group(team) == TEAM_TROLL) {
 		base     = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
 		contrast = palette->Get4F(PAL_RED * 2, PAL_GREEN);
 		glow	 = palette->Get4F(PAL_TANGERINE * 2, PAL_GREEN);
 	}
-	else if (TeamGroup(team) == TEAM_GOB) {
+	else if (Team::Group(team) == TEAM_GOB) {
 		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
 		contrast = palette->Get4F(PAL_RED * 2, PAL_PURPLE);
 		glow = base;
 	}
-	else if (TeamGroup(team) == TEAM_NEUTRAL) {
+	else if (Team::Group(team) == TEAM_NEUTRAL) {
 		// Grey colors for neutral:
 		base		= palette->Get4F( 0, PAL_GRAY );	// dark gray
 		contrast	= palette->Get4F( 0, PAL_GRAY );

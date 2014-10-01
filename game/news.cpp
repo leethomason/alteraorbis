@@ -79,7 +79,6 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHist
 			case NewsEvent::GREATER_MOB_CREATED:
 			case NewsEvent::DOMAIN_CREATED:
 			case NewsEvent::FORGED:
-			case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
 				GLASSERT( data->born == 0 );
 				data->born = cache[i]->date;
 				break;
@@ -145,6 +144,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Blood Rage",
 		"Vision Quest",
 		"Greater Summoned",
+		"Domain Conquered",
 
 		"",	// placeholder to mark minor events
 
@@ -280,6 +280,10 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 
 		case GREATER_SUMMON_TECH:
 		str->Format("%.2f: %s is called to %s by the siren song of Tech.", age, itemName.c_str(), domain.c_str());
+		break;
+
+		case DOMAIN_CONQUER:
+		str->Format("%.2f: %s is taken over by %s for team %s.", age, domain.safe_str(), itemName.safe_str(), teamName.safe_str() );
 		break;
 
 		default:

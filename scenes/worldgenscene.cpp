@@ -367,7 +367,7 @@ void WorldGenScene::DoTick( U32 delta )
 		const Census& census = sim->GetChitBag()->census;
 		for (int i = 0; i < census.MOBItems().Size(); ++i) {
 			const Census::MOBItem& mobItem = census.MOBItems()[i];
-			simStr.AppendFormat("%s=%s\n", mobItem.name.safe_str(), mobItem.count);
+			simStr.AppendFormat("%s=%d\n", mobItem.name.safe_str(), mobItem.count);
 		}
 
 		worldText.SetText(simStr.c_str());

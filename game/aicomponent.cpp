@@ -57,6 +57,7 @@
 
 #include "../ai/tasklist.h"
 #include "../ai/marketai.h"
+#include "../ai/domainai.h"
 
 using namespace grinliz;
 using namespace ai;
@@ -778,7 +779,7 @@ bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)
 	if (!cs) return false;
 
 	Vector2I dstSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
-	SectorData dstSD = Context()->worldMap->GetSector(dstSector);
+	const SectorData& dstSD = Context()->worldMap->GetSector(dstSector);
 
 	SectorPort dstSP;
 	dstSP.sector = dstSector;
@@ -1081,16 +1082,20 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 
 Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
-	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector(pos2i);
+
+	// FIXME: generalize "I want a home logic."
+	// See also the EnterGrid(), where it takes over a neutral core.
+	if ( (thisComp.item->flags & GameItem::AI_DOES_WORK )								// workers stay close
+		|| (thisComp.item->IName() == ISC::gob && Team::IsRogue(parentChit->Team())))	// as do denizens trying to find a home.
+	{
 		// workers stay close to core.
 		Vector2F dest = GetWanderOrigin( thisComp );
 		dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 		dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 		return dest;
 	}
-
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 	Vector2F dest = { 0, 0 };
 	dest.x = (float)(sector.x*SECTOR_SIZE + 1 + parentChit->random.Rand( SECTOR_SIZE-2 )) + 0.5f;
@@ -2703,6 +2708,43 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs && Team::GetRelationship(cs->ParentChit(), parentChit) == RELATE_ENEMY) {
 			Context()->circuitSim->TriggerDetector(pos2i);
+		}
+	}
+
+	// Domain Takeover.
+	if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen
+		&& Team::IsRogue(thisComp.chit->Team()))
+	{
+		// FIXME: refactor this to somewhere. Part of CoreScript?
+		Vector2I sector = ToSector(pos2i);
+		CoreScript* cs = CoreScript::GetCore(sector);
+		if (cs
+			&& !cs->InUse()
+			&& cs->ParentChit()->GetSpatialComponent()->GetPosition2DI() == pos2i)
+		{
+			if (Team::Group(thisComp.chit->Team()) == TEAM_GOB) {
+				// Need some team. And some cash.
+				Rectangle2I inner = InnerSectorBounds(sector);
+				CChitArray arr;
+				ItemNameFilter filter(ISC::gob, IChitAccept::MOB);
+				Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
+
+				if (arr.Size() > 2) {
+					thisComp.item->team = Team::GenTeam(TEAM_GOB);
+					cs->ParentChit()->GetItem()->team = thisComp.item->team;
+					cs->ParentChit()->Add(new GobDomainAI());
+
+					for (int i = 0; i < arr.Size(); ++i) {
+						if (arr[i]->GetItem() && Team::IsRogue(arr[i]->GetItem()->team)) {
+							arr[i]->GetItem()->team = parentChit->Team();
+						}
+					}
+
+					NewsEvent news(NewsEvent::DOMAIN_CONQUER, cs->ParentChit()->GetSpatialComponent()->GetPosition2D(),
+								   cs->ParentChit(), parentChit);
+					Context()->chitBag->GetNewsHistory()->Add(news);
+				}
+			}
 		}
 	}
 

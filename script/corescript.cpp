@@ -378,7 +378,7 @@ int CoreScript::DoTick(U32 delta)
 
 void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
-	int team = TeamGroup(parentChit->Team());
+	int team = Team::Group(parentChit->Team());
 	switch (team) {
 		case TEAM_HOUSE:
 		{
@@ -421,7 +421,7 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 			}
 		}
 
-		if ( (TeamGroup(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
+		if ( (Team::Group(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
 			summonGreater += spawnTick.Period();
 			if (summonGreater > SUMMON_GREATER_TIME) {
 				// Find a greater and bring 'em in!
@@ -440,7 +440,6 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 {
 	int lesser, greater, denizen;
 	Context()->chitBag->census.NumByType(&lesser, &greater, &denizen);
-	bool greaterPossible = greater < TYPICAL_GREATER;
 	bool lesserPossible = lesser < TYPICAL_LESSER;
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
@@ -448,7 +447,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
-	if ( nSpawnTicks && ( lesserPossible || greaterPossible ))
+	if ( nSpawnTicks && lesserPossible)
 	{
 #ifdef SPAWN_MOBS
 		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
@@ -496,22 +495,11 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 					defaultSpawn = StringPool::Intern(SPAWN[outland]);
 				}
 
-				float greater = (float)(outland*outland) / (float)(80 * 256);
 				static const float rat = 0.25f;
 				const char* spawn = 0;
 
-				if (outland > 4 && defaultSpawn == ISC::trilobyte) {
-					greater *= 4.f;	// special spots for greaters to spawn.
-				}
-
 				float roll = parentChit->random.Uniform();
-				bool isGreater = false;
 
-				if (greaterPossible && roll < greater) {
-					const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
-					spawn = greater[parentChit->random.Rand(greater.Size())].c_str();
-					isGreater = true;
-				}
 				if (!spawn && lesserPossible && (roll < rat)) {
 					spawn = "trilobyte";
 				}
@@ -560,7 +548,7 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	int team = TeamGroup(parentChit->Team());
+	int team = Team::Group(parentChit->Team());
 	switch (team) {
 		case TEAM_HOUSE:
 		{

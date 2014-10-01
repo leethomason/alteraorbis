@@ -46,7 +46,7 @@
   <item name="gob"
         resource="gob"
         uiIcon="anvil"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="gobnames"
         mob="denizen"
         mass ="50">

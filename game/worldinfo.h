@@ -16,13 +16,14 @@
 #ifndef LUMOS_WORLDINFO_INCLUDED
 #define LUMOS_WORLDINFO_INCLUDED
 
+#include "gamelimits.h"
 #include "../xarchive/glstreamer.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../micropather/micropather.h"
-#include "gamelimits.h"
 #include "../engine/enginelimits.h"
-#include "../grinliz/glutil.h"
 #include "../xegame/stackedsingleton.h"
+#include "../grinliz/glrandom.h"
+#include "../grinliz/glutil.h"
 
 struct WorldGrid;
 namespace micropather {
@@ -60,6 +61,8 @@ public:
 		grinliz::Vector2I p = { grinliz::LRintf(pos.x), grinliz::LRintf(pos.y) };
 		return NearestPort( p );
 	}
+	int RandomPort(grinliz::Random* random) const;
+
 	grinliz::Rectangle2I GetPortLoc( int port ) const;
 	grinliz::Rectangle2I Bounds() const;
 	grinliz::Rectangle2I InnerBounds() const;

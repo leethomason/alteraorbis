@@ -100,6 +100,10 @@ private:
 	void CreateRockInOutland();
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
+
+	void DoSpawn();
+	void SpawnGreater();
+	void SpawnDenizens();
 	void CreateTruulgaCore();
 	
 	ChitContext		context;

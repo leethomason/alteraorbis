@@ -92,6 +92,7 @@ public:
 
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 		WORKQUEUE_UPDATE,
+		CORE_TAKEOVER,			// Yes		vector location, in grid coordinates.
 	};
 
 	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0), originID(0) {

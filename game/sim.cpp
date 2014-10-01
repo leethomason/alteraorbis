@@ -41,6 +41,7 @@
 #include "team.h"
 #include "lumosmath.h"
 #include "circuitsim.h"
+#include "gridmovecomponent.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -235,8 +236,6 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 void Sim::CreateCores()
 {
 	int ncores = 0;
-	CoreScript* cold = 0;
-	CoreScript* hot  = 0;
 
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
@@ -244,14 +243,10 @@ void Sim::CreateCores()
 			CoreScript* cs = CreateCore(sector, TEAM_NEUTRAL);
 
 			if (cs) {
-				if (!cold) cold = cs;	// first
-				hot = cs;	// last
 				++ncores;
 			}
 		}
 	}
-	cold->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
-	hot->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
@@ -309,6 +304,100 @@ void Sim::AbandonDomain()
 }
 
 
+void Sim::DoSpawn()
+{
+	SpawnGreater();
+	SpawnDenizens();
+}
+
+
+void Sim::SpawnDenizens()
+{
+	// FIXME: should track the relative numbers. Spawn more Mantessa
+	// when there are few Mantessa domains. But probably need logic
+	// to account for both #of Denizens, and Denizens in domains.
+
+	int greater = 0, lesser = 0, denizen = 0;
+	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
+	if (denizen < TYPICAL_DENIZENS) {
+		SectorPort sp;
+		for (int i = 0; i < 4; ++i) {
+			sp.Zero();
+			Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && !cs->InUse()) {
+				const SectorData& sd = context.worldMap->GetSector(sector);
+				GLASSERT(sd.ports);
+				sp.sector = sector;
+				sp.port = sd.RandomPort(&random);
+				break;
+			}
+		}
+		if (sp.IsValid()) {
+			static const int NSPAWN = 8;
+			static const int NUM = 1;
+			static const char* greater[NUM] = { "gob" };
+			static const float odds[NUM] = { 0.50f };
+			int index = random.Select(odds, NUM );
+
+			for (int i = 0; i < NSPAWN; ++i) {
+				IString ispawn = StringPool::Intern(greater[index], true);
+				int team = Team::GetTeam(ispawn);
+				GLASSERT(team != TEAM_NEUTRAL);
+
+				Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+				Chit* mob = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+
+				pos.x += 0.2f * float(i);
+				mob->GetSpatialComponent()->SetPosition(pos);
+
+				GridMoveComponent* gmc = new GridMoveComponent();
+				mob->Add(gmc);
+				gmc->SetDest(sp);
+			}
+		}
+	}
+}
+
+void Sim::SpawnGreater()
+{
+	int lesser = 0, greater = 0, denizen = 0;
+	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
+	if (greater < TYPICAL_GREATER) {
+		SectorPort sp;
+		for (int i = 0; i < 4; ++i) {
+			sp.Zero();
+			Vector2I sector = RandomInOutland(&random);
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && !cs->InUse()) {
+				const SectorData& sd = context.worldMap->GetSector(sector);
+				GLASSERT(sd.ports);
+				sp.sector = sector;
+				sp.port = sd.RandomPort(&random);
+				break;
+			}
+		}
+		if (sp.IsValid()) {
+
+			static const int NUM_GREATER = 3;
+			static const char* greater[NUM_GREATER] = { "cyclops", "fireCyclops", "shockCyclops" };
+			static const float odds[NUM_GREATER] = { 0.50f, 0.35f, 0.15f };
+			int index = random.Select(odds, 3);
+
+			IString ispawn = StringPool::Intern(greater[index], true);
+			int team = Team::GetTeam(ispawn);
+			GLASSERT(team != TEAM_NEUTRAL);
+
+			Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+			Chit* mob = context.chitBag->NewMonsterChit(pos, ispawn.c_str(), team);
+			GridMoveComponent* gmc = new GridMoveComponent();
+			mob->Add(gmc);
+			gmc->SetDest(sp);
+		}
+	}
+}
+
+
 void Sim::CreateTruulgaCore()
 {
 	Chit* truulga = context.chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
@@ -320,7 +409,7 @@ void Sim::CreateTruulgaCore()
 	int team = 0;
 	if (cs) {
 		team = cs->ParentChit()->Team();
-		team = TeamGroup(team);
+		team = Team::Group(team);
 	}
 
 	if (team != TEAM_TROLL) {
@@ -464,6 +553,10 @@ void Sim::DoTick( U32 delta )
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
+
+	if (minuteTick) {
+		DoSpawn();
+	}
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = VolcanoScript::MAX_RAD;

@@ -1234,7 +1234,7 @@ void GameScene::HandleHotKey( int mask )
 			ai->Rampage( 0 );
 		}
 #endif
-#if 1	// Create Gob domain.
+#if 0	// Create Gob domain.
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
@@ -1263,9 +1263,10 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 0	// Monster swarm
+#if 1	// Monster swarm
 		for (int i = 0; i<5; ++i) {
-			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+			sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_GOB);
+//			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
 		}
 #endif
@@ -1615,6 +1616,7 @@ void GameScene::ProcessNewsToConsole()
 
 		switch( ne.What() ) {
 		case NewsEvent::DENIZEN_CREATED:
+		case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
 			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
 				ne.Console( &str, chitBag, 0 );
 				if (sc) pos2 = sc->GetPosition2D();
@@ -1655,6 +1657,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::DOMAIN_CREATED:
 		case NewsEvent::DOMAIN_DESTROYED:
 		case NewsEvent::GREATER_SUMMON_TECH:
+		case NewsEvent::DOMAIN_CONQUER:
 			ne.Console( &str, chitBag, 0 );
 			break;
 

@@ -7,7 +7,7 @@
 
 using namespace grinliz;
 
-int Team::idPool = 0;
+int Team::idPool = 1;	// id=0 is rogue.
 
 grinliz::IString Team::TeamName(int team)
 {

@@ -71,12 +71,17 @@ public:
 			*id = ((t & 0xffffff00) >> 8);
 	}
 
+	static int Group(int team) {
+		return team & 0xff;
+	}
+
+	static bool IsRogue(int team) {
+		return (team & 0xffffff00) == 0;
+	}
+
 private:
 	static int idPool;
 };
 
-inline int TeamGroup(int team) {
-	return team & 0xff;
-}
 
 #endif // LUMOS_TEAM_INCLUDED
