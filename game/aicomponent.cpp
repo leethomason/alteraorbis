@@ -2253,15 +2253,18 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		}
 
 		// FIXME: the greater logic doesn't even seem to get used.
-		bool sectorHerd =		pmc 
-							 && itemFlags & GameItem::AI_SECTOR_HERD
- 							 && ( friendList.Size() >= (MAX_TRACK*3/4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
-							 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0);
+		// Denizens DO sector herd until they are members of a core.
+		bool sectorHerd = pmc
+							&& itemFlags & GameItem::AI_SECTOR_HERD
+							&& (friendList.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
+							&& (thisComp.chit->random.Rand(WANDER_ODDS) == 0)
+							&& (CoreScript::GetCoreFromTeam(thisComp.chit->Team()) == 0);
 		bool sectorWander =		pmc
 							&& itemFlags & GameItem::AI_SECTOR_WANDER
 							&& thisComp.item
 							&& thisComp.item->HPFraction() > 0.80f
-							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0);
+							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0)
+							&& (CoreScript::GetCoreFromTeam(thisComp.chit->Team()) == 0);
 
 		if ( sectorHerd || sectorWander ) 
 		{
@@ -2729,15 +2732,25 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				ItemNameFilter filter(ISC::gob, IChitAccept::MOB);
 				Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
 
-				if (arr.Size() > 2) {
+				int k = 0;
+				while (k <arr.Size()) {
+					if (arr[k]->GetItem() && Team::IsRogue(arr[k]->GetItem()->team)) {
+						// okay, good fit.
+						++k;
+					}
+					else {
+						arr.SwapRemove(k);
+					}
+				}
+
+				if (arr.Size() > 3) {
 					thisComp.item->team = Team::GenTeam(TEAM_GOB);
 					cs->ParentChit()->GetItem()->team = thisComp.item->team;
 					cs->ParentChit()->Add(new GobDomainAI());
+					cs->AddCitizen(thisComp.chit);
 
 					for (int i = 0; i < arr.Size(); ++i) {
-						if (arr[i]->GetItem() && Team::IsRogue(arr[i]->GetItem()->team)) {
-							arr[i]->GetItem()->team = parentChit->Team();
-						}
+						cs->AddCitizen(arr[i]);
 					}
 
 					NewsEvent news(NewsEvent::DOMAIN_CONQUER, cs->ParentChit()->GetSpatialComponent()->GetPosition2D(),

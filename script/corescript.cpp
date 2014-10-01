@@ -183,7 +183,12 @@ void CoreScript::OnRemove()
 
 void CoreScript::AddCitizen( Chit* chit )
 {
+	GLASSERT(ParentChit()->Team());
+	GLASSERT(!Team::IsRogue(ParentChit()->Team()));
 	GLASSERT( citizens.Find( chit->ID()) < 0 );
+	GLASSERT(Team::IsRogue(chit->Team()) || (chit->Team() == ParentChit()->Team()));
+
+	chit->GetItem()->team = ParentChit()->Team();
 	citizens.Push( chit->ID() );
 }
 
@@ -331,9 +336,9 @@ bool CoreScript::RecruitNeutral()
 			if (this->IsCitizen(chit)) continue;
 			if (!chit->GetItem()) continue;
 
-			if (CoreScript::GetCoreFromTeam(chit->Team()) == 0) {
+			if (Team::IsRogue(chit->Team())) {
 				// ronin! denizen without a core.
-				chit->GetItem()->team = parentChit->Team();
+				this->AddCitizen( chit );
 				GLASSERT(chit->GetItem()->Significant());
 
 				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(), chit, 0);
@@ -417,7 +422,8 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
 			if (!RecruitNeutral()) {
-				Context()->chitBag->NewDenizen( pos2i, team );
+				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
+				this->AddCitizen( chit );
 			}
 		}
 

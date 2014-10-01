@@ -346,13 +346,18 @@ void Sim::SpawnDenizens()
 				GLASSERT(team != TEAM_NEUTRAL);
 
 				Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
-				Chit* mob = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+
+				if (random.Bit())
+					context.chitBag->AddItem( "pistol", chit, context.engine, 0, 0 );
+				else
+					context.chitBag->AddItem( "ring", chit, context.engine, 0, 0 );
 
 				pos.x += 0.2f * float(i);
-				mob->GetSpatialComponent()->SetPosition(pos);
+				chit->GetSpatialComponent()->SetPosition(pos);
 
 				GridMoveComponent* gmc = new GridMoveComponent();
-				mob->Add(gmc);
+				chit->Add(gmc);
 				gmc->SetDest(sp);
 			}
 		}
@@ -488,6 +493,8 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	Chit* chit = context.chitBag->NewDenizen(pos, context.chitBag->GetHomeTeam());
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
+	CoreScript::GetCore( ToSector(pos) )->AddCitizen( chit );
+
 	context.chitBag->GetCamera( context.engine )->SetTrack( playerID );
 
 	GameItem* items[3] = { 0, 0, 0 };

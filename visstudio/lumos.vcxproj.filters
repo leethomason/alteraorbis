@@ -403,7 +403,7 @@
     <ClCompile Include="..\ai\domainai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\censcus.cpp">
+    <ClCompile Include="..\game\census.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
   </ItemGroup>
