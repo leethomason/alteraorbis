@@ -22,12 +22,16 @@
 #include "../engine/text.h"
 #include "../script/procedural.h"
 #include "../game/team.h"
+#include "../game/gameitem.h"
 
 using namespace gamui;
 using namespace tinyxml2;
 using namespace grinliz;
 
 const static int SIZE = 64;
+
+static const char* GUN_NAME[] = { "pistol", "blaster", "pulse", "beamgun" };
+
 
 ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( game )
 {
@@ -95,41 +99,16 @@ void ColorTestScene::SetupTest()
 	model[RING_MODEL]->SetPos(0.8f, 0.5f, 2.0f);
 	model[RING_MODEL]->SetYRotation(90.0f);
 
-	model[BLASTER_MODEL] = engine->AllocModel("blaster");
-	model[BLASTER_MODEL]->SetPos(1.2f, 0.5f, 2.0f);
-	model[BLASTER_MODEL]->SetYRotation(90.0f);
+	for (int i = PISTOL_MODEL; i <= BEAMGUN_MODEL; ++i) {
+		model[i] = engine->AllocModel( GUN_NAME[i-PISTOL_MODEL] );
+		model[i]->SetPos(0.5f + 0.4f*float(i-PISTOL_MODEL), 0.5f, 2.8f);
+		model[i]->SetYRotation(90.0f);
+	}
 
 	Vector3F cam    = { 1.0f, 5.0f, 8.0f };
 	Vector3F target = { 2.5f, 0.5f, 1.0f };
 
 	engine->CameraLookAt(cam, target);
-
-
-	/*
-	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
-	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
-
-	for( int i=0; i<NUM_MODELS/2; ++i ) {
-		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
-		model[i]->SetPos( 1, 0, (float)i );
-		model[i]->SetYRotation( (float)(i*30) );
-	}
-	for( int i=NUM_MODELS/2; i<NUM_MODELS; ++i ) {
-		model[i] = engine->AllocModel( (i-NUM_MODELS/2)<3 ? res0 : res1 );
-		model[i]->SetPos( 2, 0, (float)(i-NUM_MODELS/2) );
-		model[i]->SetYRotation( (float)(i*30) );
-		model[i]->SetAnimation( ANIM_WALK, 1000, true ); 
-	}
-
-	for ( int i=0; i<NUM_MODELS; ++i ) {
-		ProcRenderInfo info;
-		AssignProcedural( "suit", model[i]->GetResource() == res0, i, 1, false, 0, 0, &info ); 
-		model[i]->SetTextureXForm( info.te.uvXForm );
-		model[i]->SetColorMap( info.color );
-		model[i]->SetBoneFilter( info.filterName, info.filter );
-	}
-	engine->CameraLookAt( 2, (float)(NUM_MODELS/4), 12 );
-	*/
 }
 
 
@@ -189,17 +168,18 @@ void ColorTestScene::DoProcedural()
 		model[RING_MODEL]->SetBoneFilter( info.filterName, info.filter );
 	}
 
-	{
+	for(int i=PISTOL_MODEL; i<=BEAMGUN_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "blaster", false, 0, TEAM_HOUSE, false, 0, 0, &info ); 
-		model[BLASTER_MODEL]->SetTextureXForm( info.te.uvXForm );
+		static const int EFFECT_ARR[4] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
+		AssignProcedural(GUN_NAME[i - PISTOL_MODEL], false, 0, TEAM_HOUSE, false, EFFECT_ARR[i-PISTOL_MODEL], 0, &info);
+		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
 		color.SetCol(0, base);
 		color.SetCol(1, contrast);
-		model[BLASTER_MODEL]->SetColorMap( color );
-		model[BLASTER_MODEL]->SetBoneFilter( info.filterName, info.filter );
+		model[i]->SetColorMap( color );
+		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 
 	for (int i = 0; i < NUM_PAL_SEL; ++i) {
