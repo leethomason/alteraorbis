@@ -237,7 +237,7 @@ Color4F WeaponGen::GetEffectColor(int flags)
 }
 
 
-void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
+void WeaponGen::GetColors( int flags, grinliz::Color4F* array )
 {
 	// red for fire
 	// green for shock/corruption? 
@@ -255,7 +255,7 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 		{ PAL_GRAY*2, PAL_GRAY },		{ PAL_GRAY*2, PAL_TANGERINE },	{ PAL_BLUE*2+1, PAL_GRAY },
 	};
 
-	i = abs(i) % NUM_COLORS;
+	int i = seed % NUM_COLORS;
 
 	Color4F effectColor = GetEffectColor(flags);
 	float alpha = effectColor.a();
@@ -283,8 +283,14 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 	
 	// Handle special cases.
 	if (Team::Group(team) == TEAM_TROLL) {
+		static const Vector2I TROLL_CONTRAST[] = {
+			{ 2, 3 }, { 2, 2 }, { 4, 2 }, { 10, 0 }, { 10, 2 }, { 10, 5 }
+		};
+		static const int NUM_TROLL_CONTRAST = GL_C_ARRAY_SIZE(TROLL_CONTRAST);
+		int index = seed % NUM_TROLL_CONTRAST;
+
 		array[BASE] = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
-		array[CONTRAST] = palette->Get4F(PAL_RED * 2, PAL_GREEN);
+		array[CONTRAST] = palette->Get4F(TROLL_CONTRAST[index]);
 	}
 	else if (Team::Group(team) == TEAM_GOB) {
 		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
@@ -304,7 +310,7 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 	random.Rand();
 
 	Color4F c[3];
-	GetColors(	random.Rand(), effectFlags, c ); 
+	GetColors(effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
 		info->color.SetCol( i, c[i] );
@@ -342,7 +348,7 @@ void WeaponGen::AssignShield( ProcRenderInfo* info )
 
 	Color4F c[3];
 	Vector4F v[3] = { V4F_ZERO, V4F_ZERO, V4F_ZERO };
-	GetColors( random.Rand(), effectFlags, c ); 
+	GetColors( effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
 		v[i] = c[i];
@@ -371,7 +377,7 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 	random.Rand();
 
 	Color4F c[3];
-	GetColors(	random.Rand(), effectFlags, c ); 
+	GetColors(	effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
 		info->color.SetCol( i, c[i] );

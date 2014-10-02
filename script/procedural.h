@@ -116,7 +116,7 @@ public:
 	static grinliz::Color4F GetEffectColor(int effect);
 
 private:
-	void GetColors( int i, int effectFlags, grinliz::Color4F* array );
+	void GetColors( int effectFlags, grinliz::Color4F* array );
 	enum {
 		BASE,
 		CONTRAST,

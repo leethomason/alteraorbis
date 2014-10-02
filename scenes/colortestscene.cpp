@@ -229,7 +229,7 @@ void ColorTestScene::ItemTapped( const gamui::UIItem* item )
 			float x = 0, y = 0;
 			gamui2D.GetRelativeTap(&x, &y);
 			paletteVec[i].Set(int(x*float(PAL_COUNT*2)), int(y*float(PAL_COUNT)));
-			if (paletteVec[i].x > paletteVec[i].y) {
+			if (paletteVec[i].x/2 >= paletteVec[i].y) {
 				paletteVec[i].x &= (~1);
 			}
 			DoProcedural();
