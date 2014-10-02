@@ -13,8 +13,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RENDERTESTSCENE_INCLUDED
-#define RENDERTESTSCENE_INCLUDED
+#ifndef COLORTESTSCENE_INCLUDED
+#define COLORTESTSCENE_INCLUDED
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
@@ -24,20 +24,12 @@ class Engine;
 class TestMap;
 class Model;
 
-class RenderTestSceneData : public SceneData
-{
-public:
-	RenderTestSceneData( int _id ) : id( _id ) {}
-	int id;
-};
-
-
-class RenderTestScene : public Scene
+class ColorTestScene : public Scene
 {
 	typedef Scene super;
 public:
-	RenderTestScene( LumosGame* game, const RenderTestSceneData* data );
-	virtual ~RenderTestScene();
+	ColorTestScene( LumosGame* game );
+	virtual ~ColorTestScene();
 
 	virtual void Resize();
 
@@ -51,23 +43,37 @@ public:
 	virtual void DrawDebugText();
 
 private:
-	enum { NUM_ITEMS = 4,
-		   NUM_MODELS = 16,
-		   NUM_CONTROL = 6 };
+
+	enum {
+		HUMAN_MODEL,
+		TEMPLE_MODEL,
+		SLEEPTUBE_MODEL,
+		RING_MODEL,
+		BLASTER_MODEL,
+		NUM_MODELS
+	};
 
 	void SetupTest();
-	void LoadLighting();
+	void DoProcedural();
 
-	int glowLayer;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
-	gamui::PushButton refreshButton;
-	gamui::ToggleButton control[ NUM_CONTROL ];
-	gamui::Image rtImage;
 
 	Engine* engine;
-	Model*  model[NUM_MODELS];
 	TestMap* testMap;
+	Model* model[NUM_MODELS];
+
+	enum {
+		SEL_BUILDING_BASE,
+		SEL_BUILDING_CONTRAST,
+		SEL_BUILDING_GLOW,
+		SEL_BASE,
+		SEL_CONTRAST,
+		NUM_PAL_SEL,
+	};
+	grinliz::Vector2I	paletteVec[NUM_PAL_SEL];
+	gamui::Image		paletteSelector[NUM_PAL_SEL];
+	gamui::TextLabel	paletteLabel[NUM_PAL_SEL];
 };
 
-#endif // RENDERTESTSCENE_INCLUDED
+#endif // COLORTESTSCENE_INCLUDED

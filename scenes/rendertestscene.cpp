@@ -42,15 +42,7 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	
-	switch( data->id ) {
-	case 0:
-	case 1:
-		SetupTest0();
-		break;
-	default:
-		GLASSERT( 0 );
-		break;
-	};
+	SetupTest();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
@@ -99,7 +91,7 @@ void RenderTestScene::Resize()
 
 
 
-void RenderTestScene::SetupTest0()
+void RenderTestScene::SetupTest()
 {
 	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
 	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
@@ -124,23 +116,6 @@ void RenderTestScene::SetupTest0()
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 	engine->CameraLookAt( 2, (float)(NUM_MODELS/4), 12 );
-}
-
-
-void RenderTestScene::SetupTest1()
-{
-	/* Was atlas code.
-	const ModelResource* testStruct0Res = ModelResourceManager::Instance()->GetModelResource( "testStruct0" );
-	const ModelResource* testStruct1Res = ModelResourceManager::Instance()->GetModelResource( "testStruct1" );
-
-	model[0] = engine->AllocModel( testStruct0Res );
-	model[0]->SetPos( 0.5f, 0.0f, 1.0f );
-
-	model[1] = engine->AllocModel( testStruct1Res );
-	model[1]->SetPos( 0.5f, 0.0f, 3.5f );
-
-	engine->CameraLookAt( 0, 3, 8, -45.f, -30.f );
-	*/
 }
 
 

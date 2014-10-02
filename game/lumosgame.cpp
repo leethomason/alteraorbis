@@ -22,6 +22,7 @@
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
 #include "../scenes/rendertestscene.h"
+#include "../scenes/colortestscene.h"
 #include "../scenes/particlescene.h"
 #include "../scenes/navtestscene.h"
 #include "../scenes/navtest2scene.h"
@@ -92,6 +93,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
 	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );		break;
+	case SCENE_COLORTEST:	scene = new ColorTestScene(this);			break;
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
 	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;

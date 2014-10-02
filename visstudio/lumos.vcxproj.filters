@@ -406,6 +406,9 @@
     <ClCompile Include="..\game\census.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\colortestscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -812,6 +815,9 @@
     </ClInclude>
     <ClInclude Include="..\ai\domainai.h">
       <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\colortestscene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
