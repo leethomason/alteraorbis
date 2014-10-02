@@ -4,5 +4,12 @@ Human Domains
 
 
 Troll
+	Build:
 	B 12,3
 	C 2, 3
+	G 4, 3
+
+	Weapon:
+	B 12, 3
+	C 2, 3    2,2    4,2    10,0    10,2    10,5
+
