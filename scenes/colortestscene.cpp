@@ -42,6 +42,8 @@ ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( gam
 	testMap->SetColor( c );
 
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
+	engine->lighting.direction.Set(-2, 5, 1.5f);
+	engine->lighting.direction.Normalize();
 	
 	SetupTest();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
@@ -55,6 +57,7 @@ ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( gam
 		paletteLabel[i].Init(&gamui2D);
 		paletteVec[i].Set(i * 2, i + 1);
 	}
+	cameraHigh = true;
 }
 
 
@@ -95,18 +98,29 @@ void ColorTestScene::SetupTest()
 	model[SLEEPTUBE_MODEL] = engine->AllocModel("sleep");
 	model[SLEEPTUBE_MODEL]->SetPos(4.0f, 0, 1);
 
-	model[RING_MODEL] = engine->AllocModel("ring");
-	model[RING_MODEL]->SetPos(0.8f, 0.5f, 2.0f);
-	model[RING_MODEL]->SetYRotation(90.0f);
-
-	for (int i = PISTOL_MODEL; i <= BEAMGUN_MODEL; ++i) {
-		model[i] = engine->AllocModel( GUN_NAME[i-PISTOL_MODEL] );
-		model[i]->SetPos(0.5f + 0.4f*float(i-PISTOL_MODEL), 0.5f, 2.8f);
+	for (int i = RING_0_MODEL; i <= RING_1_MODEL; ++i) {
+		model[i] = engine->AllocModel("ring");
+		model[i]->SetPos(0.8f + 0.4f*float(i-RING_0_MODEL), 0.5f, 2.0f);
 		model[i]->SetYRotation(90.0f);
 	}
 
+	for (int i = PISTOL_MODEL; i <= BEAMGUN_MODEL; ++i) {
+		model[i] = engine->AllocModel(GUN_NAME[i - PISTOL_MODEL]);
+		model[i]->SetPos(0.5f + 0.4f*float(i - PISTOL_MODEL), 0.5f, 2.8f);
+		model[i]->SetYRotation(90.0f);
+	}
+	SetCamera();
+}
+
+void ColorTestScene::SetCamera()
+{
 	Vector3F cam    = { 1.0f, 5.0f, 8.0f };
 	Vector3F target = { 2.5f, 0.5f, 1.0f };
+
+	if (!cameraHigh) {
+		cam.Set(1.0f, 1.0f, 6.0f);
+		target.Set(0.8f, 0.5f, 1.0f);
+	}
 
 	engine->CameraLookAt(cam, target);
 }
@@ -155,17 +169,17 @@ void ColorTestScene::DoProcedural()
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 
-	{
+	for(int i=RING_0_MODEL; i<=RING_1_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "ring", false, 0, TEAM_HOUSE, false, 0, 0, &info ); 
-		model[RING_MODEL]->SetTextureXForm( info.te.uvXForm );
+		AssignProcedural( "ring", false, i, TEAM_HOUSE, false, 0, 0, &info ); 
+		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
 		color.SetCol(0, base);
 		color.SetCol(1, contrast);
-		model[RING_MODEL]->SetColorMap( color );
-		model[RING_MODEL]->SetBoneFilter( info.filterName, info.filter );
+		model[i]->SetColorMap( color );
+		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 
 	for(int i=PISTOL_MODEL; i<=BEAMGUN_MODEL; ++i) {
@@ -235,7 +249,13 @@ void ColorTestScene::Rotate( float degrees )
 
 void ColorTestScene::HandleHotKey( int mask )
 {
-	super::HandleHotKey( mask );
+	if (mask == GAME_HK_SPACE) {
+		cameraHigh = !cameraHigh;
+		SetCamera();
+	}
+	else {
+		super::HandleHotKey(mask);
+	}
 }
 
 

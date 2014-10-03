@@ -48,7 +48,8 @@ private:
 		HUMAN_MODEL,
 		TEMPLE_MODEL,
 		SLEEPTUBE_MODEL,
-		RING_MODEL,
+		RING_0_MODEL,
+		RING_1_MODEL,
 		PISTOL_MODEL,
 		BLASTER_MODEL,
 		PULSE_MODEL,
@@ -58,9 +59,11 @@ private:
 
 	void SetupTest();
 	void DoProcedural();
+	void SetCamera();
 
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
+	bool cameraHigh;
 
 	Engine* engine;
 	TestMap* testMap;
