@@ -78,6 +78,8 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	context.engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), context.worldMap );
 	context.worldMap->AttachEngine( context.engine, this );
 
+	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
+
 	context.chitBag = new LumosChitBag( context, 0 );
 
 	Rectangle2I b;

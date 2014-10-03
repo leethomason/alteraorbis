@@ -275,9 +275,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString proc = rootItem.keyValues.GetIString("procedural");
 	if (!proc.empty()) {
-		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, &info);
+		AssignProcedural(chit->GetItem(), &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
@@ -340,9 +339,8 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 
 	IString proc = rootItem.keyValues.GetIString("procedural");
 	if (!proc.empty()) {
-		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, &info);
+		AssignProcedural(chit->GetItem(), &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 	

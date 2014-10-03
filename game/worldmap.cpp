@@ -2212,10 +2212,14 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 	}
 	voxelBuffer.Clear();
 	nTrees = 0;
-	ParticleSystem* ps = engine->particleSystem;
-	const ParticleDef& fireDef = ps->GetPD(ISC::fire);
-	const ParticleDef& smokeDef = ps->GetPD(ISC::smoke);
-	const ParticleDef& shockDef = ps->GetPD(ISC::shock);
+	ParticleSystem* ps = 0;
+	const ParticleDef *fireDef = 0, *smokeDef = 0, *shockDef = 0;
+	if (engine) {
+		ps = engine->particleSystem;
+		fireDef  = &ps->GetPD(ISC::fire);
+		smokeDef = &ps->GetPD(ISC::smoke);
+		shockDef = &ps->GetPD(ISC::shock);
+	}
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2260,11 +2264,15 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 
 						Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
 						if (wg.PlantOnFire()) {
-							ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
-							ps->EmitPD(fireDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							if (ps) {
+								ps->EmitPD(*smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+								ps->EmitPD(*fireDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							}
 						}
 						if (wg.PlantOnShock()) {
-							ps->EmitPD(shockDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							if (ps) {
+								ps->EmitPD(*shockDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							}
 						}
 					}
 				}
@@ -2291,7 +2299,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
 
 					Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
-					ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+					if (ps) {
+						ps->EmitPD(*smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+					}
 				}
 				else if ( wg.RockHeight() ) {
 					id = (wg.RockType() == WorldGrid::ROCK) ? ROCK : ICE;

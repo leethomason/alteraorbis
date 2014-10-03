@@ -354,9 +354,8 @@ int CoreScript::DoTick(U32 delta)
 {
 	if ( parentChit->Team() != team ) {
 		team = parentChit->Team();
-		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign( team, &info );
+		AssignProcedural(parentChit->GetItem(), &info);
 		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 

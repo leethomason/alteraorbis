@@ -1308,29 +1308,6 @@ void GameScene::HandleHotKey( int mask )
 			sim->GetEngine()->CameraLookAt(at.x, at.z);
 		}
 	}
-/*	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
-		static int colorSeed = 0;
-		const IString NAMES[4] = { 
-			ISC::kiosk__m, 
-			ISC::kiosk__n, 
-			ISC::kiosk__c, 
-			ISC::kiosk__s 
-		};
-		ItemNameFilter filter( NAMES, 4, IChitAccept::MAP );
-		Vector3F at;
-		sim->GetEngine()->CameraLookingAt( &at );
-		Vector2F at2 = { at.x, at.z };
-		CChitArray queryArr;
-		sim->GetChitBag()->QuerySpatialHash( &queryArr, at2, 10.f, 0, &filter );
-		for( int i=0; i<queryArr.Size(); ++i ) {
-			RenderComponent* rc = queryArr[i]->GetRenderComponent();
-			TeamGen gen;
-			ProcRenderInfo info;
-			gen.Assign( colorSeed, 0, &info );
-			rc->SetProcedural( 0, info );
-		}
-		++colorSeed;
-	}*/
 	else if (mask == GAME_HK_ATTACH_CORE) {
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);

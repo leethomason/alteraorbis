@@ -21,6 +21,7 @@
 #include "../grinliz/glcolor.h"
 #include "../engine/text.h"
 #include "../script/procedural.h"
+#include "../game/team.h"
 
 using namespace gamui;
 using namespace tinyxml2;
@@ -110,7 +111,8 @@ void RenderTestScene::SetupTest()
 
 	for ( int i=0; i<NUM_MODELS; ++i ) {
 		ProcRenderInfo info;
-		AssignProcedural( "suit", model[i]->GetResource() == res0, i, 1, false, 0, 0, &info ); 
+		const int team = Team::CombineID(TEAM_HOUSE, i+1);
+		AssignProcedural( "suit", model[i]->GetResource() == res0, i*37, team, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 		model[i]->SetColorMap( info.color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );

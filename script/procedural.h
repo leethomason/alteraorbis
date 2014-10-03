@@ -71,9 +71,9 @@ public:
 
 private:
 
-	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c );
-	void GetHairColor( int index0, grinliz::Color4F* c );
-	void GetGlassesColor( int index0, int index1, float fade, grinliz::Color4F* c );
+	void GetSkinColor( int index, grinliz::Color4F* c );
+	void GetHairColor( int index, grinliz::Color4F* c );
+	void GetGlassesColor( int index, grinliz::Color4F* c );
 	void GetSuitColor( grinliz::Vector4F* c );
 	
 	enum {
@@ -135,7 +135,9 @@ private:
 class TeamGen
 {
 public:
-	void Assign( U32 seed, int team, ProcRenderInfo* info );
+	static void Assign( U32 seed, int team, ProcRenderInfo* info );
+	static void TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast, grinliz::Vector2I* glow);
+	static void TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast);
 };
 
 

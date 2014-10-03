@@ -17,7 +17,7 @@ HumanGen::HumanGen( bool female, U32 seed, int team, bool electric )
 }
 
 
-void HumanGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
+void HumanGen::GetSkinColor( int index, Color4F* color )
 {
 	static const int NUM_SKIN_COLORS = 4;
 	static const Vector2I c[NUM_SKIN_COLORS] = {
@@ -26,19 +26,13 @@ void HumanGen::GetSkinColor( int index0, int index1, float fade, Color4F* color 
 		{ PAL_TANGERINE*2+1, PAL_GRAY },
 		{ PAL_GRAY*2, PAL_TANGERINE }
 	};
-
-	index0 = abs(index0) % NUM_SKIN_COLORS;
-	index1 = abs(index1) % NUM_SKIN_COLORS;
-
+	int i = abs(index) % NUM_SKIN_COLORS;
 	const Game::Palette* palette = Game::GetMainPalette();
-		
-	*color = Lerp( palette->Get4F( c[index0].x, c[index0].y ),
-				   palette->Get4F( c[index1].x, c[index1].y ),
-				   fade );
+	*color = palette->Get4F(c[i].x, c[i].y);
 }
 
 
-void HumanGen::GetGlassesColor( int index0, int index1, float fade, Color4F* color )
+void HumanGen::GetGlassesColor( int index, Color4F* color )
 {
 	static const int NUM_GLASSES_COLORS = 6;
 	static const Vector2I c[NUM_GLASSES_COLORS] = {
@@ -50,18 +44,13 @@ void HumanGen::GetGlassesColor( int index0, int index1, float fade, Color4F* col
 		{ PAL_RED*2+1, PAL_PURPLE }
 	};
 
-	index0 = abs(index0) % NUM_GLASSES_COLORS;
-	index1 = abs(index1) % NUM_GLASSES_COLORS; 
-
+	int i = abs(index) % NUM_GLASSES_COLORS;
 	const Game::Palette* palette = Game::GetMainPalette();
-
-	*color = Lerp( palette->Get4F( c[index0].x, c[index0].y ),
-				   palette->Get4F( c[index1].x, c[index1].y ),
-				   fade );
+	*color = palette->Get4F(c[i].x, c[i].y);
 }
 
 
-void HumanGen::GetHairColor( int index0, Color4F* color )
+void HumanGen::GetHairColor( int index, Color4F* color )
 {
 	static const int N_FEMALE = 9;
 	static const int N_MALE   = 7;
@@ -94,11 +83,11 @@ void HumanGen::GetHairColor( int index0, Color4F* color )
 
 	const Game::Palette* palette = Game::GetMainPalette();
 	if ( female ) {
-		index0 = abs(index0) % N_FEMALE;
+		int index0 = abs(index) % N_FEMALE;
 		*color = palette->Get4F( cFemale[index0].x, cFemale[index0].y );
 	}
 	else {
-		index0 = abs(index0) % N_MALE;
+		int index0 = abs(index) % N_MALE;
 		*color = palette->Get4F( cMale[index0].x, cMale[index0].y );
 	}
 }
@@ -106,39 +95,46 @@ void HumanGen::GetHairColor( int index0, Color4F* color )
 
 void HumanGen::GetSuitColor( grinliz::Vector4F* c )
 {
-	Random random( seed );
-	int y = random.Rand( PAL_COUNT );
-	int x0 = y + random.Rand( PAL_COUNT - y );
-	int x1 = y + random.Rand( PAL_COUNT - y );
-	float fraction = random.Uniform();
+	// Suits are at the right column and bottom row
+	// of the color palette. Just to be a little fancy,
+	// ony use colors that are in the team palette 
+	// somewhere.
+	Vector2I cvec[3];
+	TeamGen::TeamBuildColors(team, cvec + 0, cvec + 1, cvec + 2);
+
+	CArray<Vector2I, 6> arr;
+	Vector2I v;
+	for (int i = 0; i < 2; ++i) {
+		v.Set(PAL_GRAY * 2, cvec[0].y);
+		arr.Push(v);
+		v.Set(cvec[0].x, PAL_GRAY);
+		arr.Push(v);
+		v.Set(cvec[0].x + 1, PAL_GRAY);
+		arr.Push(v);
+	}
+
+	int teamID, teamGroup;
+	Team::SplitID(team, &teamGroup, &teamID);
+	int index = abs(teamID) % arr.Size();
 
 	const Game::Palette* palette = Game::GetMainPalette();
-	Vector4F c0 = palette->Get4F( x0*2, y );
-	Vector4F c1 = palette->Get4F( x1*2, y );
-
-	*c = Lerp( c0, c1, fraction );
+	*c = palette->Get4F(arr[index]);
 	c->w = 0.7f;
 }
 
 
-void HumanGen::GetColors( grinliz::Vector4F* c )
+void HumanGen::GetColors(grinliz::Vector4F* c)
 {
-	Random random( seed );
+	Random random(seed);
 	random.Rand();
 
-	GetSkinColor(	random.Rand(), 
-					random.Rand(),
-					random.Uniform(), 
-					c+SKIN );
-	GetHairColor( random.Rand(), c+HAIR );
-	GetGlassesColor( random.Rand(),
-					 random.Rand(),
-					 random.Uniform(),
-					 c+GLASSES );
+	GetSkinColor(random.Rand(), c + SKIN);
+	GetHairColor(random.Rand(), c + HAIR);
+	GetGlassesColor(random.Rand(), c + GLASSES);
 
-	if ( electric ) {
-		c[SKIN] = c[SKIN] + c[HAIR]*0.5f + c[GLASSES]*0.5f;
-		c[HAIR] = c[HAIR] + c[GLASSES]*0.5f;
+	if (electric) {
+		c[SKIN] = c[SKIN] + c[HAIR] * 0.5f + c[GLASSES] * 0.5f;
+		c[HAIR] = c[HAIR] + c[GLASSES] * 0.5f;
 	}
 }
 
@@ -401,7 +397,7 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 }
 
 
-void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
+void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast, grinliz::Vector2I* glow)
 {
 	static const Vector2I NEUTRAL_COLORS[] = {
 		{ 0, PAL_GRAY }, { 0, PAL_GRAY }, { 0, PAL_GRAY }
@@ -468,14 +464,74 @@ void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
 		GLASSERT(0);	// team not implemented?
 	}
 
+	int index = abs(teamID) % nColors;
+	*base = colors[index * 3 + 0];
+	*contrast = colors[index * 3 + 1];
+	*glow = colors[index * 3 + 2];
+}
+
+
+void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast)
+{
+	static const Vector2I TROLL_COLORS[] = {
+		{ PAL_GRAY * 2, PAL_GREEN }, { PAL_RED * 2, PAL_GREEN }, { PAL_TANGERINE * 2, PAL_GREEN }
+	};
+
+	static const Vector2I GENERAL_COLORS[] = {
+		{4,0}, {6,0},		{4,1}, {8,1},		{6,1}, {6,0},		{8,1}, {10,0},
+		{3,2}, {10,0},		{8,2}, {8,3},		{8,2}, {6,4},		{8,2}, {7,4},
+		{10,2}, {3,2},		{6,3}, {8,2},		{8,3}, {4,1},		{8,3}, {4,2},
+		{8,3}, {8,2},		{8,3}, {7,4},		{8,3}, {7,5},		{8,3}, {10,5},
+		{3,4}, {8,3},		{3,4}, {3,2},		{3,4}, {1,3},		{4,4}, {4,2},
+		{4,4}, {6,2},		{4,4}, {8,2},		{4,4}, {10,2},		{4,4}, {7,4},
+		{5,4}, {8,3},		{5,4}, {8,2},		{6,4}, {4,2},		{6,4}, {7,4},
+		{6,4}, {5,4}
+	};
+
+	const Vector2I* colors = 0;
+	int nColors = 0;
+	int teamGroup = 0;
+	int teamID = 0;
+
+	Team::SplitID(team, &teamGroup, &teamID);
+
+	switch (teamGroup) {
+		case TEAM_HOUSE:	
+		case TEAM_GOB:
+		GLASSERT(teamID);	// how can a neutral ID be building?
+		colors = GENERAL_COLORS;
+		nColors = GL_C_ARRAY_SIZE(GENERAL_COLORS) / 2;
+		break;
+
+		case TEAM_TROLL:
+		colors = TROLL_COLORS;
+		nColors = GL_C_ARRAY_SIZE(TROLL_COLORS) / 2;
+		break;
+
+		case TEAM_NEUTRAL:
+		default:
+		GLASSERT(0);	// team not implemented?
+	}
+
+	int index = abs(teamID) % nColors;
+	*base		= colors[index * 2 + 0];
+	*contrast	= colors[index * 2 + 1];
+}
+
+
+void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
+{
+
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
-	int index = teamID % nColors;
+	Vector2I vbase, vcontrast, vglow;
+	TeamGen::TeamBuildColors(team, &vbase, &vcontrast, &vglow);
+
 	const Game::Palette* palette = Game::GetMainPalette();
 
-	Vector4F base		= palette->Get4F(colors[index * 3 + 0].x, colors[index * 3 + 0].y);
-	Vector4F contrast	= palette->Get4F(colors[index * 3 + 1].x, colors[index * 3 + 1].y);
-	Vector4F glow		= palette->Get4F(colors[index * 3 + 2].x, colors[index * 3 + 2].y);
+	Vector4F base		= palette->Get4F(vbase);
+	Vector4F contrast	= palette->Get4F(vcontrast);
+	Vector4F glow		= palette->Get4F(vglow);
 
 	base.w		= 0;
 	contrast.w	= 0;
@@ -515,8 +571,7 @@ void AssignProcedural( const char* name,
 		return;
 
 	if ( StrEqual( name, "team" )) {
-		TeamGen gen;
-		gen.Assign( seed, team, info );
+		TeamGen::Assign( seed, team, info );
 	}
 	else if ( StrEqual( name, "suit" )) {
 		HumanGen gen( female, seed, team, electric );

@@ -133,14 +133,16 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	engine->CameraLookAt(CAM, TARGET);
 	{
-		HumanGen gen(true, 99, TEAM_HOUSE, false);
+		const int team = Team::CombineID(TEAM_HOUSE, 1);
+		HumanGen gen(true, 99, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
 		model[HUMAN_FEMALE]->SetColorMap(info.color);
 	}
 	{
-		HumanGen gen(false, 1, TEAM_HOUSE, false);
+		const int team = Team::CombineID(TEAM_HOUSE, 5);
+		HumanGen gen(false, 1, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_MALE]->SetTextureXForm(info.te.uvXForm);

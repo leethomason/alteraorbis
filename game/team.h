@@ -71,6 +71,12 @@ public:
 			*id = ((t & 0xffffff00) >> 8);
 	}
 
+	static int CombineID(int group, int id) {
+		GLASSERT(group >= 0 && group < 256);
+		GLASSERT(id >= 0);
+ 		return group | (id << 8);
+	}
+
 	static int Group(int team) {
 		return team & 0xff;
 	}

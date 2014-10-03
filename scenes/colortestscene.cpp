@@ -143,7 +143,8 @@ void ColorTestScene::DoProcedural()
 	{
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "suit", false, 0, TEAM_HOUSE, false, 0, 0, &info ); 
+		const int team = Team::CombineID(TEAM_HOUSE, 1);
+		AssignProcedural( "suit", false, 0, team, false, 0, 0, &info ); 
 		model[HUMAN_MODEL]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
@@ -157,7 +158,8 @@ void ColorTestScene::DoProcedural()
 	for (int i = TEMPLE_MODEL; i <= SLEEPTUBE_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "team", false, 0, TEAM_HOUSE, false, 0, 0, &info ); 
+		const int team = Team::CombineID(TEAM_HOUSE, 1);
+		AssignProcedural( "team", false, 0, team, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
@@ -172,7 +174,7 @@ void ColorTestScene::DoProcedural()
 	for(int i=RING_0_MODEL; i<=RING_1_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "ring", false, i, TEAM_HOUSE, false, 0, 0, &info ); 
+		AssignProcedural( "ring", false, i, Team::CombineID(TEAM_HOUSE, 1), false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
