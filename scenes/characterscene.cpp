@@ -369,17 +369,8 @@ void CharacterScene::SetButtonText()
 			IString proc = down->keyValues.GetIString( "procedural" );
 			if ( !proc.empty() ) {
 				ProcRenderInfo info;
-				int features = 0;
-				down->keyValues.Get( ISC::features, &features );
+				AssignProcedural(down, &info);
 
-				AssignProcedural(	proc.c_str(), 
-									strstr( down->Name(), "emale" )!=0, 
-									down->ID(), 
-									down->team, 
-									false, 
-									down->flags & GameItem::EFFECT_MASK, 
-									features,
-									&info );
 				model->SetTextureXForm( info.te.uvXForm );
 				model->SetColorMap( info.color );
 				model->SetBoneFilter( info.filterName, info.filter );

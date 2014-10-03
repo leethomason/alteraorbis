@@ -135,14 +135,17 @@ private:
 class TeamGen
 {
 public:
-	void Assign( int team, ProcRenderInfo* info );
+	void Assign( U32 seed, int team, ProcRenderInfo* info );
 };
 
+
+// Easier form.
+void AssignProcedural(const GameItem* item, ProcRenderInfo* info);
 
 void AssignProcedural( const char* name,
 					   bool female, 
 					   U32 seed,			// random #
-					   int team,			// team, from PrimaryTeam() (0 if not needed)
+					   int team,			// team, full value (id & group)
 					   bool electric,		// more colorface face rendering
 					   int effectFlags,		// EFFECT_FIRE etc.
 					   int features,		// which parts of the weapon are in use

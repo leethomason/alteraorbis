@@ -1149,7 +1149,6 @@ void ItemComponent::SetHardpoints()
 		return;
 	}
 	RenderComponent* rc = parentChit->GetRenderComponent();
-	bool female = strstr( itemArr[0]->Name(), "Female" ) != 0;
 
 	for( int i=0; i<itemArr.Size(); ++i ) {
 		const GameItem* item = itemArr[i];
@@ -1162,16 +1161,9 @@ void ItemComponent::SetHardpoints()
 
 		if ( setProc )	// not a built-in
 		{
-			IString proc = itemArr[i]->keyValues.GetIString( "procedural" );
-			int features = 0;
-			itemArr[i]->keyValues.Get( ISC::features, &features );
-
 			ProcRenderInfo info;
-
-			if ( !proc.empty() ) {
-				AssignProcedural( proc.c_str(), female, item->ID(), item->team, false, item->Effects(), features, &info );
-			}
-			rc->SetProcedural( (i==0) ? 0 : itemArr[i]->hardpoint, info );
+			AssignProcedural(itemArr[i], &info);
+			rc->SetProcedural((i == 0) ? 0 : itemArr[i]->hardpoint, info);
 		}
 	}
 }

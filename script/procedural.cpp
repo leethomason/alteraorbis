@@ -401,49 +401,81 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 }
 
 
-void TeamGen::Assign( int team, ProcRenderInfo* info )
+void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
 {
-	static const int NUM = 4;
-	static const Vector4I colors[NUM] = {
-		// approved
-		{ PAL_BLUE*2, PAL_GREEN,			PAL_GREEN*2, PAL_GREEN },
-		{ PAL_TANGERINE*2, PAL_TANGERINE,	PAL_GREEN*2, PAL_TANGERINE },
-		{ PAL_GREEN*2, PAL_TANGERINE,		PAL_TANGERINE*2, PAL_TANGERINE },
-		{ PAL_RED*2, PAL_RED,				PAL_GREEN*2, PAL_RED },
-
-		// fail
-		//{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },
-		//{ PAL_BLUE*2, PAL_BLUE,				PAL_PURPLE*2, PAL_BLUE }
+	static const Vector2I NEUTRAL_COLORS[] = {
+		{ 0, PAL_GRAY }, { 0, PAL_GRAY }, { 0, PAL_GRAY }
 	};
+
+	static const Vector2I TROLL_COLORS[] = {
+		{ PAL_GRAY * 2, PAL_GREEN }, { PAL_RED * 2, PAL_GREEN }, { PAL_TANGERINE * 2, PAL_GREEN }
+	};
+
+	static const Vector2I GOB_COLORS[] = {
+		{ PAL_GRAY * 2, PAL_PURPLE }, { PAL_RED * 2, PAL_PURPLE }, { PAL_GRAY * 2, PAL_PURPLE }
+	};
+
+	static const Vector2I HUMAN_COLORS[] = {
+		{ 8, 3 }, { 6, 3 }, { 8, 3 },
+		{8, 3}, {12, 5}, {8, 3},
+		{10, 3}, {7, 4}, {8, 3},
+		{10, 3}, {6, 1}, {10, 3},
+		{10, 3}, {4, 2}, {3, 2},
+		{6, 1}, {8, 3}, {6, 1},
+		{8, 1}, {6, 0}, {7, 4},
+		{8, 1}, {12, 5}, {8, 2},
+		{10, 1}, {6, 4}, {10, 1},
+		{6, 2}, {8, 2}, {8, 2},
+		{6, 2}, {10, 2}, {6, 2},
+		{8, 2}, {10, 3}, {10, 3},
+		{10, 2}, {10, 3}, {10, 3},
+		{6, 3}, {6, 1}, {6, 1},
+		{10, 3}, {3, 4}, {3, 4},
+		{10, 3}, {1, 3}, {10, 3}
+	};
+
+	const Vector2I* colors = 0;
+	int nColors = 0;
+	int teamGroup = 0;
+	int teamID = 0;
+
+	Team::SplitID(team, &teamGroup, &teamID);
+
+	switch (teamGroup) {
+		case TEAM_HOUSE:	
+		GLASSERT(teamID);	// how can a neutral ID be building?
+		colors = HUMAN_COLORS;
+		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
+		break;
+
+		case TEAM_TROLL:
+		colors = TROLL_COLORS;
+		nColors = GL_C_ARRAY_SIZE(TROLL_COLORS) / 3;
+		break;
+
+		case TEAM_GOB:
+		GLASSERT(teamID);	// how can a neutral ID be building?
+		colors = GOB_COLORS;
+		nColors = GL_C_ARRAY_SIZE(GOB_COLORS) / 3;
+		break;
+
+		case TEAM_NEUTRAL:
+		colors = NEUTRAL_COLORS;
+		nColors = GL_C_ARRAY_SIZE(NEUTRAL_COLORS) / 3;
+		break;
+
+		default:
+		GLASSERT(0);	// team not implemented?
+	}
 
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
-	int index = team % NUM;	// the magic constant is to get a good color palette for HOUSE0
-	bool select = (team / NUM) & 1 ? true : false; 
-
+	int index = teamID % nColors;
 	const Game::Palette* palette = Game::GetMainPalette();
 
-	Vector4F base		= palette->Get4F( colors[index].x, colors[index].y );
-	Vector4F contrast	= palette->Get4F( colors[index].z, colors[index].w );
-	Vector4F glow		= select ? base : contrast;
-
-	// Handle special cases.
-	if (Team::Group(team) == TEAM_TROLL) {
-		base     = palette->Get4F(PAL_GRAY * 2, PAL_GREEN);
-		contrast = palette->Get4F(PAL_RED * 2, PAL_GREEN);
-		glow	 = palette->Get4F(PAL_TANGERINE * 2, PAL_GREEN);
-	}
-	else if (Team::Group(team) == TEAM_GOB) {
-		base = palette->Get4F(PAL_GRAY * 2, PAL_PURPLE);
-		contrast = palette->Get4F(PAL_RED * 2, PAL_PURPLE);
-		glow = base;
-	}
-	else if (Team::Group(team) == TEAM_NEUTRAL) {
-		// Grey colors for neutral:
-		base		= palette->Get4F( 0, PAL_GRAY );	// dark gray
-		contrast	= palette->Get4F( 0, PAL_GRAY );
-		glow		= base;
-	}
+	Vector4F base		= palette->Get4F(colors[index * 3 + 0].x, colors[index * 3 + 0].y);
+	Vector4F contrast	= palette->Get4F(colors[index * 3 + 1].x, colors[index * 3 + 1].y);
+	Vector4F glow		= palette->Get4F(colors[index * 3 + 2].x, colors[index * 3 + 2].y);
 
 	base.w		= 0;
 	contrast.w	= 0;
@@ -456,6 +488,25 @@ void TeamGen::Assign( int team, ProcRenderInfo* info )
 }
 
 
+void AssignProcedural(const GameItem* item, ProcRenderInfo* info)
+{
+	if (!item) return;
+	IString proc = item->keyValues.GetIString("procedural");
+	if (proc.empty()) return;
+
+	const char* name = item->Name();
+	bool female = (item->IName() == ISC::humanFemale);
+	U32 seed = item->ID();
+	int team = item->team;
+	bool electric = false;	// not using; FIXME revisit 'electric'
+	int effects = item->Effects();
+	int features = 0;
+	item->keyValues.Get(ISC::features, &features);
+
+	AssignProcedural(name, female, seed, team, electric, effects, features, info);
+}
+
+
 void AssignProcedural( const char* name,
 					   bool female, U32 seed, int team, bool electric, int effectFlags, int features,
 					   ProcRenderInfo* info )
@@ -465,7 +516,7 @@ void AssignProcedural( const char* name,
 
 	if ( StrEqual( name, "team" )) {
 		TeamGen gen;
-		gen.Assign( team, info );
+		gen.Assign( seed, team, info );
 	}
 	else if ( StrEqual( name, "suit" )) {
 		HumanGen gen( female, seed, team, electric );

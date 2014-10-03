@@ -216,7 +216,8 @@ void ForgeScene::SetModel( bool randomTraits )
 		q.FromAxisAngle( AXIS, type == ForgeScript::SHIELD ? -90.0f : 0.0f );
 		model->SetRotation( q );
 
-		AssignProcedural( item->ResourceName(), false, item->ID(), 0, false, effectFlags, partsFlags, &info );
+		//AssignProcedural( item->ResourceName(), false, item->ID(), 0, false, effectFlags, partsFlags, &info );
+		AssignProcedural(item, &info);
 
 		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
