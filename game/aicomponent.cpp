@@ -311,7 +311,7 @@ void AIComponent::GetFriendEnemyLists()
 		for (int i = 0; i < chitArr.Size(); ++i) {
 			Chit* building = chitArr[i];
 			int status = Team::GetRelationship(building, parentChit);
-			if (status == RELATE_ENEMY) {
+			if (building->Team() && status == RELATE_ENEMY) {				// never attack neutral buildings, no matter what we are.
 				// Note that buildings are behind walls and such, so we can't use HasStraightPath()
 				if (enemyList.HasCap()) {
 					if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {

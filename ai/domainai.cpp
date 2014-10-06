@@ -86,11 +86,13 @@ bool DomainAI::BuyWorkers()
 	GameItem* mainItem = parentChit->GetItem();
 
 	// Create workers, if needed.
+	// Be aggressive; domains tend to fall 
+	// apart before getting built.
 	Rectangle2F b = ToWorld(InnerSectorBounds(sector));
 	CChitArray arr;
 	ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
-	static const int GOLD[4] = { WORKER_BOT_COST, 400, 800, 1200 };
+	static const int GOLD[4] = { WORKER_BOT_COST, WORKER_BOT_COST * 2, WORKER_BOT_COST*3, 1200 };
 	for (int i = 0; i < 4; ++i) {
 		if (arr.Size() == i && mainItem->wallet.gold >= GOLD[i]) {
 			Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);

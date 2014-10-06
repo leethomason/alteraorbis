@@ -105,12 +105,19 @@
 				- fab
 				- sculpture
 			- mantesssan beamgun
-		- Player domain colors, color screen, revisit gob colors
+		x Player domain colors, color screen, revisit gob colors
 		- Denizen domains
-		- Census: 
-			- gob domains don't count
-			- strange container-is-item bug
+
+		- gob domains don't count in census
+		- strange container-is-item bug when looking at items from census
 		x Start with 0 team id for un-assigned, all domains 1+ team id
+		- AI buildings not connected.
+		- ReserveBank needs a "guaranteed withdrawal" to start player domains.
+		- Spawn Gob-men in 4, more frequently.
+		- When domain falls, teamID->0
+		- Search full domain for farms?
+		- test bank running out of money
+		- and then re-test with higher limits
 
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Mantis-men domain

@@ -30,18 +30,25 @@ public:
 	ReserveBank();
 	~ReserveBank();
 
-	static Wallet* BankPtr() { GLASSERT(instance);  return &instance->bank; }
-
-	Wallet bank;
+	Wallet wallet;
 
 	void Serialize( XStream* xs );
 
 	int WithdrawDenizen();
 	Wallet WithdrawMonster();
-	const int* CrystalValue();
+
+	const int* CrystalValue() const;
+
+	// There is no CanBuy(), because having the economy
+	// falter because the bank is out of money is 
+	// crazy. Buy() still works. However, Withdraw()
+	// and other functions will get cut way back if
+	// the bank is under water.
+	void Buy(Wallet* src, const int* crystals);
 
 	// Withdraws 1 or 0 crystals. type is returned.
 	int WithdrawRandomCrystal();
+
 	static ReserveBank* Instance() { return instance; }
 
 private:

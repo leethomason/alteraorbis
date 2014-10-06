@@ -3,6 +3,10 @@
 using namespace grinliz;
 
 IString IStringConst::main;
+IString IStringConst::procedural;
+IString IStringConst::team;
+IString IStringConst::suit;
+IString IStringConst::gun;
 IString IStringConst::trigger;
 IString IStringConst::target;
 IString IStringConst::althand;
@@ -111,6 +115,10 @@ IString IStringConst::kiosk__s;
 void IStringConst::Init()
 {
 	main = StringPool::Intern( "main", true );
+	procedural = StringPool::Intern( "procedural", true );
+	team = StringPool::Intern( "team", true );
+	suit = StringPool::Intern( "suit", true );
+	gun = StringPool::Intern( "gun", true );
 	trigger = StringPool::Intern( "trigger", true );
 	target = StringPool::Intern( "target", true );
 	althand = StringPool::Intern( "althand", true );

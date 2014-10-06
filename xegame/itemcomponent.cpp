@@ -1152,18 +1152,19 @@ void ItemComponent::SetHardpoints()
 
 	for( int i=0; i<itemArr.Size(); ++i ) {
 		const GameItem* item = itemArr[i];
-		bool setProc = (i==0);
+		bool attached = false;
 
-		if ( i > 0 && item->hardpoint && !item->Intrinsic() && activeArr[i] ) { 
-			setProc = true;
-			rc->Attach( item->hardpoint, item->ResourceName() );
+		if (i > 0 && item->hardpoint && !item->Intrinsic() && activeArr[i]) {
+			rc->Attach(item->hardpoint, item->ResourceName());
+			attached = true;
 		}
 
-		if ( setProc )	// not a built-in
-		{
-			ProcRenderInfo info;
-			AssignProcedural(itemArr[i], &info);
-			rc->SetProcedural((i == 0) ? 0 : itemArr[i]->hardpoint, info);
+		if (attached || (i == 0)) {
+			if (item->keyValues.Has(ISC::procedural)) {
+				ProcRenderInfo info;
+				AssignProcedural(item, &info);
+				rc->SetProcedural((i == 0) ? 0 : item->hardpoint, info);
+			}
 		}
 	}
 }

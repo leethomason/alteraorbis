@@ -9,7 +9,7 @@
   <item name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
-		flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+		    flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
@@ -497,7 +497,7 @@
         resource="ring"
         uiIcon="ring"
         flags="MELEE_WEAPON CLICK_THROUGH FLOAT"
-		procedural="ring"
+		    procedural="ring"
         nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="1.4"
@@ -594,6 +594,13 @@
         absorbsDamage="1.0"
         procedural="shield"
         hpRegen="1.0"
+        >
+  </item>
+
+  <item name="xpu"
+        uiIcon="human"
+        flags="CLICK_THROUGH FLOAT SHOCKABLE"
+        mass="1"
         >
   </item>
 

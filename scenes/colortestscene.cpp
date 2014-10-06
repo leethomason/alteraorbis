@@ -144,7 +144,7 @@ void ColorTestScene::DoProcedural()
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
 		const int team = Team::CombineID(TEAM_HOUSE, 1);
-		AssignProcedural( "suit", false, 0, team, false, 0, 0, &info ); 
+		AssignProcedural( ISC::suit, false, 0, team, false, 0, 0, &info ); 
 		model[HUMAN_MODEL]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
@@ -159,7 +159,7 @@ void ColorTestScene::DoProcedural()
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
 		const int team = Team::CombineID(TEAM_HOUSE, 1);
-		AssignProcedural( "team", false, 0, team, false, 0, 0, &info ); 
+		AssignProcedural( ISC::team, false, 0, team, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
@@ -174,7 +174,7 @@ void ColorTestScene::DoProcedural()
 	for(int i=RING_0_MODEL; i<=RING_1_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( "ring", false, i, Team::CombineID(TEAM_HOUSE, 1), false, 0, 0, &info ); 
+		AssignProcedural( ISC::ring, false, i, Team::CombineID(TEAM_HOUSE, 1), false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
@@ -188,7 +188,7 @@ void ColorTestScene::DoProcedural()
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
 		static const int EFFECT_ARR[4] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
-		AssignProcedural(GUN_NAME[i - PISTOL_MODEL], false, 0, TEAM_HOUSE, false, EFFECT_ARR[i-PISTOL_MODEL], 0, &info);
+		AssignProcedural(ISC::gun, false, 0, TEAM_HOUSE, false, EFFECT_ARR[i-PISTOL_MODEL], 0, &info);
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;

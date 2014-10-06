@@ -550,7 +550,6 @@ void AssignProcedural(const GameItem* item, ProcRenderInfo* info)
 	IString proc = item->keyValues.GetIString("procedural");
 	if (proc.empty()) return;
 
-	const char* name = item->Name();
 	bool female = (item->IName() == ISC::humanFemale);
 	U32 seed = item->ID();
 	int team = item->team;
@@ -559,38 +558,31 @@ void AssignProcedural(const GameItem* item, ProcRenderInfo* info)
 	int features = 0;
 	item->keyValues.Get(ISC::features, &features);
 
-	AssignProcedural(name, female, seed, team, electric, effects, features, info);
+	AssignProcedural(proc, female, seed, team, electric, effects, features, info);
 }
 
 
-void AssignProcedural( const char* name,
+void AssignProcedural( const IString& proc,
 					   bool female, U32 seed, int team, bool electric, int effectFlags, int features,
 					   ProcRenderInfo* info )
 {
-	if ( !name || !*name )
-		return;
-
-	if ( StrEqual( name, "team" )) {
+	if ( proc == ISC::team) {
 		TeamGen::Assign( seed, team, info );
 	}
-	else if ( StrEqual( name, "suit" )) {
+	else if ( proc == ISC::suit) {
 		HumanGen gen( female, seed, team, electric );
 		gen.AssignSuit( info );
 	}
-	else if ( StrEqual( name, "ring" )) {
+	else if (proc == ISC::ring) {
 		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignRing( info );
 	}
-	else if ( StrEqual( name, "gun" )
-	          || StrEqual( name, "pistol" )
-			  || StrEqual( name, "blaster" )
-			  || StrEqual( name, "pulse" )
-			  || StrEqual( name, "beamgun" ))
+	else if (proc == ISC::gun )
 	{
 		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignGun( info );
 	}
-	else if ( StrEqual( name, "shield" )) {
+	else if ( proc == ISC::shield) {
 		WeaponGen gen( seed, team, effectFlags, features );
 		gen.AssignShield( info );
 	}

@@ -25,6 +25,10 @@ public:
 	static void Init();
 	
 	static grinliz::IString main;
+	static grinliz::IString procedural;
+	static grinliz::IString team;
+	static grinliz::IString suit;
+	static grinliz::IString gun;
 	static grinliz::IString trigger;
 	static grinliz::IString target;
 	static grinliz::IString althand;

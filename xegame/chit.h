@@ -45,6 +45,7 @@ class LumosChitBag;
 class DamageDesc;
 class ChitMsg;
 class IScript;
+class Wallet;
 
 // Allows registering to listen to chit messages.
 // This is not serialized. Calls are synchronous. (Be careful.)
@@ -165,6 +166,8 @@ public:
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
 	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
+	Wallet* GetWallet();
+
 	void QueueDelete();
 	void DeRez();	// deletes, but goes through de-rez sequence, checks for indestructible, etc.
 

@@ -68,13 +68,16 @@ int DistilleryScript::DoTick( U32 delta )
 		Vector2I sector = msc->GetSector();
 		Rectangle2I porch = msc->PorchPos();
 		CoreScript* cs = CoreScript::GetCore( sector );
+		GLASSERT(cs);
+		if (!cs) return VERY_LONG_TICK;
+
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");
 	
 		float tech = Max(cs->GetTech(), 0.8f);
 		double dProg = double(tech) * double(progressTick.Period()) / double(TECH_MAX);
 		double p = dProg*double(n);
 		if (evalScript) {
-			p *= 0.5 + 0.5*evalScript->EvalIndustrial(false);
+			p *= 0.65 + 0.35*evalScript->EvalIndustrial(false);
 		}
 
 		progress += int(p);

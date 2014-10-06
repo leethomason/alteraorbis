@@ -277,7 +277,8 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
 						Chit* building = chitBag->NewBuilding(task->pos2i, buildData.cStructure, chit->Team());
-						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
+
+						building->GetWallet()->Deposit(&controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
 						building->GetSpatialComponent()->SetYRotation(float(task->data));
 					}
@@ -419,7 +420,8 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	if ( buildingName == ISC::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
-		Transfer(&vaultItem->wallet, &thisComp.item->wallet, thisComp.item->wallet);
+		GLASSERT(building->GetWallet());
+		building->GetWallet()->Deposit(&thisComp.item->wallet, thisComp.item->wallet);
 
 		// Put everything in the vault.
 		ItemComponent* vaultIC = building->GetItemComponent();
@@ -427,7 +429,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		// Move gold & crystal to the owner.
 		if ( controller && controller->GetItemComponent() ) {
-			Transfer(&controller->GetItem()->wallet, &vaultItem->wallet, vaultItem->wallet);
+			controller->GetWallet()->Deposit(&vaultItem->wallet, vaultItem->wallet);
 		}
 		building->SetTickNeeded();
 		return;
@@ -520,52 +522,42 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 	const Personality& personality = thisComp.item->GetPersonality();
 	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
 	bool usedExchange = false;
+	ReserveBank* bank = ReserveBank::Instance();
 
 	if (personality.Crafting() == Personality::DISLIKES) {
 		// Sell all the crystal
 		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int n = thisComp.item->wallet.crystal[type];
+			int n = thisComp.item->wallet.Crystal(type);
 			if (n) {
 				// Gold from bank.
-				Wallet c;
-				c.crystal[type] = n;
+				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+				crystal[type] = n;
 
-				if (CanTransfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type])) {
-					Transfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type]);
-					Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, c);
+				if (bank->CanBuy(crystal)) {
+					bank->Buy(&thisComp.item->wallet, crystal);
 					usedExchange = true;
 				}
 			}
 		}
 	}
 	else {
-		int willSpend = thisComp.item->wallet.gold / 5;
+		int willSpend = thisComp.item->wallet.Gold() / 5;
 		if (personality.Crafting() == Personality::LIKES) {
-			willSpend = thisComp.item->wallet.gold / 2;
+			willSpend = thisComp.item->wallet.Gold() / 2;
 		}
 
 		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.crystal[type];
-	
-			while (nWant) {
-				int cost = crystalValue[type];
-				if (cost < willSpend) {
-					Wallet c;
-					c.crystal[type] = 1;
+			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.Crystal(type);
+			int nBuy = willSpend / crystalValue[type];
+			nBuy = Min(nBuy, nWant);
 
-					if (CanTransfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c)) {
-						Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, cost);
-						Transfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c);
-						--nWant;
-						willSpend -= cost;
-						usedExchange = true;
-					}
-					else {
-						break;
-					}
-				}
-				else {
-					break;
+			for (int i = 0; i < nBuy; ++i) {
+				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+				crystal[type] = 1;
+
+				if (bank->CanBuy(crystal)) {
+					bank->Buy(&thisComp.item->wallet, crystal);
+					usedExchange = true;
 				}
 			}
 		}
@@ -592,10 +584,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	// Transfer money from reserve to market:
-	if (!ReserveBank::Instance() || ReserveBank::Instance()->bank.gold < 1500) {
+	if (!ReserveBank::Instance() || ReserveBank::Instance()->wallet.Gold() < 1500) {
 		return;
 	}
-	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->bank, 1000);
+	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->wallet, 1000);
 
 	MarketAI marketAI( market );
 

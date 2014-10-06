@@ -221,6 +221,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	if ( flags == RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
 			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
+			if (len < 1) len = 1;
 			findWeight.Push( 1.0f/len );
 		}
 		int index = random.Select( findWeight.Mem(), findWeight.Size() );

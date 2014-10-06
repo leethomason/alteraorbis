@@ -144,7 +144,7 @@ public:
 // Easier form.
 void AssignProcedural(const GameItem* item, ProcRenderInfo* info);
 
-void AssignProcedural( const char* name,
+void AssignProcedural( const grinliz::IString& procedure,
 					   bool female, 
 					   U32 seed,			// random #
 					   int team,			// team, full value (id & group)
