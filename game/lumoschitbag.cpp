@@ -399,18 +399,14 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 
 	chit->Add( new HealthComponent());
 
-	Wallet w;
+	IString mob = chit->GetItem()->keyValues.GetIString(ISC::mob);
 	if (ReserveBank::Instance()) {
-		w = ReserveBank::Instance()->WithdrawMonster();
+		ReserveBank::Instance()->WithdrawMonster(chit->GetWallet(), mob == ISC::greater);
 	}
-	if ( chit->GetItem()->keyValues.GetIString( ISC::mob ) == ISC::greater ) {
-		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
-		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
-		
+	if (mob == ISC::greater) {
 		// Mark this item as important with a destroyMsg:
 		chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::GREATER_MOB_CREATED, NewsEvent::GREATER_MOB_KILLED, 0);
 	}
-	chit->GetItem()->wallet.Add( w );	
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
 
 	if (XenoAudio::Instance()) {
@@ -443,7 +439,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( new PathMoveComponent());
 
 	AddItem( assetName, chit, context->engine, team, 0 );
-	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
+	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
 
@@ -597,10 +593,11 @@ Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos, int *type )
 }
 
 
-Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
+Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 {
-	if ( !amount )
-		return 0;
+	GLASSERT(src);
+	if (src->Gold() == 0) return 0;
+
 	const ChitContext* context = Context();
 
 	Vector2F v2 = { pos.x, pos.z };
@@ -628,18 +625,28 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		chit->GetSpatialComponent()->SetPosition( pos );
 		chit->Add(new GameMoveComponent());
 	}
-	chit->GetItem()->wallet.AddGold( amount );
+	chit->GetWallet()->Deposit(src, src->Gold());
 	return chit;
 }
 
 
-Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzz )
+Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzz )
 {
 	Vector2F v2 = { pos.x, pos.z };
 	if ( fuzz ) {
 		v2.x = floorf(pos.x) + random.Uniform();
 		v2.y = floorf(pos.y) + random.Uniform();
 	}
+
+	int crystal = -1;
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		if (src->Crystal(i)) {
+			crystal = i;
+			break;
+		}
+	}
+
+	if (crystal == -1) return 0;	// done
 
 	const char* name = 0;
 	switch ( crystal ) {
@@ -659,21 +666,20 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 
 	chit->GetSpatialComponent()->SetPosition( pos );
 	
-	Wallet w;
-	w.AddCrystal( crystal );
-	chit->GetItem()->wallet.Add( w );
+	int c[NUM_CRYSTAL_TYPES] = { 0 };
+	c[crystal] = 1;
+
+	chit->GetWallet()->Deposit(src, 0, c);
 
 	return chit;
 }
 
 
-void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet )
+void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, Wallet* wallet )
 {
-	NewGoldChit( pos, wallet.gold );
+	NewGoldChit(pos, wallet);
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		for( int j=0; j<wallet.crystal[i]; ++j ) {
-			NewCrystalChit( pos, i, true );
-		}
+		while (NewCrystalChit(pos, wallet, true)) {}
 	}
 }
 

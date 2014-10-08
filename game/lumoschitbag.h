@@ -23,7 +23,7 @@
 #include "visitor.h"
 
 class WorldMap;
-struct Wallet;
+class Wallet;
 class CoreScript;
 class LumosGame;
 class MapSpatialComponent;
@@ -236,8 +236,8 @@ public:
 	Chit* GetDeity(int id);
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
-	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
-	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
+	Chit* NewGoldChit( const grinliz::Vector3F& pos, Wallet* src );		// consumes the gold!
+	Chit* NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzzPos );	// consumes the 1st crystal!
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
@@ -259,7 +259,7 @@ public:
 					float speed,
 					bool trail );
 	// Creates enough chits to empty the wallet.
-	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
+	void NewWalletChits( const grinliz::Vector3F& pos, Wallet* srcWallet );
 	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0 );
 
 	// IBoltImpactHandler

@@ -70,7 +70,7 @@ private:
 
 	ForgeSceneData*		forgeData;
 	int					techRequired;
-	Wallet				crystalRequired;
+	TransactAmt			crystalRequired;
 	GameItem*			item;
 	grinliz::GLString	logText;
 

@@ -19,6 +19,7 @@
 #include "../engine/texture.h"
 #include "../xegame/itemcomponent.h"
 #include "../game/lumosgame.h"
+#include "../game/reservebank.h"
 #include "../script/itemscript.h"
 
 #include "../scenes/characterscene.h"
@@ -64,6 +65,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	const GameItem& market  = db->Get("market");
 	const GameItem& shield  = db->Get("shield");
 
+	reserveBank = new ReserveBank();
+
+	static const int crystal[NUM_CRYSTAL_TYPES] = { 2, 2, 1, 1 };
+
 	itemComponent0 = new ItemComponent( new GameItem( human ));
 	itemComponent0->AddToInventory( new GameItem( blaster ));
 	itemComponent0->AddToInventory( new GameItem( pistol ));
@@ -75,17 +80,14 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	itemComponent1->AddToInventory( new GameItem( pistol ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
-	itemComponent1->GetItem()->wallet.AddGold( 200 );
+	itemComponent1->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 
 	marketComponent = new ItemComponent( new GameItem( market ));
-	marketComponent->GetItem(0)->wallet.AddGold( 100 );
+	marketComponent->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 	marketComponent->AddToInventory( new GameItem( blaster ));
 	marketComponent->AddToInventory( new GameItem( blaster ));
 	marketComponent->AddToInventory( new GameItem( pistol ));
 
-	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		itemComponent0->GetItem(0)->wallet.AddCrystal( i, 2 );
-	}
 	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
 	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
 	itemComponent0->GetItem()->SetProperName("Worvaka");
@@ -93,13 +95,14 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 
 DialogScene::~DialogScene()
 {
-	itemComponent0->GetItem()->wallet.EmptyWallet();
-	itemComponent1->GetItem()->wallet.EmptyWallet();
-	marketComponent->GetItem()->wallet.EmptyWallet();
+	reserveBank->wallet.Deposit(&itemComponent0->GetItem()->wallet, itemComponent0->GetItem()->wallet);
+	reserveBank->wallet.Deposit(&itemComponent1->GetItem()->wallet, itemComponent1->GetItem()->wallet);
+	reserveBank->wallet.Deposit(&marketComponent->GetItem()->wallet, marketComponent->GetItem()->wallet);
 
 	delete itemComponent0;
 	delete itemComponent1;
 	delete marketComponent;
+	delete reserveBank;
 }
 
 

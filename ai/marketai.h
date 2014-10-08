@@ -4,7 +4,7 @@
 class Chit;
 class GameItem;
 class ItemComponent;
-struct Wallet;
+class Wallet;
 
 /* utility class to interpret a chit as a market. */
 class MarketAI

@@ -478,8 +478,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			 && gold->GetItem()				// it has an item component
 			 && !parentChit->Destroyed() )	// this item is alive
 		{
-			Transfer(&mainItem->wallet, &gold->GetItem()->wallet, gold->GetItem()->wallet);
-
+			mainItem->wallet.Deposit(gold->GetWallet(), gold->GetWallet()->Gold(), gold->GetWallet()->Crystal());
 			// Need to delete the gold, else it will track to us again!
 			gold->DeRez();
 
@@ -530,27 +529,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// or carrying crystal.
 		MOBIshFilter mobFilter;
 
-		Wallet w = mainItem->wallet.EmptyWallet();
-
 		Vector3F pos = { 0, 0, 0 };
 		if ( parentChit->GetSpatialComponent() ) {
 			pos = parentChit->GetSpatialComponent()->GetPosition();
 		}
-
-		// Mobs drop gold and crystal; everyone else returns it to the Bank
-		if ( mobFilter.Accept( parentChit )) {
-			if ( !w.IsEmpty() ) {
-				Context()->chitBag->NewWalletChits( pos, w );
-				w.EmptyWallet();
-			}
-		}
-		else {
-			if (ReserveBank::Instance()) {	// null in battle mode
-				ReserveBank::Instance()->bank.Add(w);
-			}
-			w.EmptyWallet();
-		}
-		GLASSERT(w.IsEmpty());
 
 		while( itemArr.Size() > 1 ) {
 			if ( itemArr[itemArr.Size()-1]->Intrinsic() ) {
@@ -560,6 +542,19 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			GLASSERT( !item->IName().empty() );
 			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 		}
+
+		// Mobs drop gold and crystal; everyone else returns it to the Bank
+		if ( mobFilter.Accept( parentChit )) {
+			if (!parentChit->GetWallet()->IsEmpty()) {
+				Context()->chitBag->NewWalletChits(pos, parentChit->GetWallet());
+			}
+		}
+		else {
+			if (ReserveBank::Instance()) {	// null in battle mode
+				ReserveBank::Instance()->wallet.DepositAll(parentChit->GetWallet());
+			}
+		}
+		GLASSERT(parentChit->GetWallet()->IsEmpty());
 	}
 	else {
 		super::OnChitMsg( chit, msg );
@@ -1036,7 +1031,6 @@ GameItem* ItemComponent::RemoveFromInventory( int index )
 
 void ItemComponent::Drop( const GameItem* item )
 {
-	GLASSERT( parentChit->GetSpatialComponent() );
 	if ( !parentChit->GetSpatialComponent() )
 		return;
 
@@ -1191,16 +1185,17 @@ void ItemComponent::ApplyLootLimits()
 	}
 
 	if (limit) {
-		int d = mainItem->wallet.gold - limit;
+		ReserveBank* bank = ReserveBank::Instance();
+		int d = mainItem->wallet.Gold() - limit;
 		if (d > 0) {
-			mainItem->wallet.AddGold(-d);
-			ReserveBank::Instance()->bank.AddGold(d);
+			bank->wallet.Deposit(&mainItem->wallet, d);
 		}
 		for (int i = 0; i<NUM_CRYSTAL_TYPES; ++i) {
-			d = mainItem->wallet.crystal[i] - cLimit;
+			d = mainItem->wallet.Crystal(i) - cLimit;
 			if (d > 0) {
-				mainItem->wallet.AddCrystal(i, -d);
-				ReserveBank::Instance()->bank.AddCrystal(i, d);
+				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+				crystal[i] = d;
+				bank->wallet.Deposit(&mainItem->wallet, 0, crystal);
 			}
 		}
 	}

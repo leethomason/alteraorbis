@@ -50,11 +50,11 @@ void MoneyWidget::SetVisible( bool vis )
 void MoneyWidget::Set( const Wallet& wallet )
 {
 	CStr<16> str;
-	str.Format( "%d", wallet.gold );
+	str.Format( "%d", wallet.Gold() );
 	textLabel[0].SetText( str.c_str() );
 
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		str.Format( "%d", wallet.crystal[i] );
+		str.Format( "%d", wallet.Crystal(i) );
 		textLabel[i+1].SetText( str.c_str() );
 	}
 

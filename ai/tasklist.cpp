@@ -533,10 +533,9 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 				crystal[type] = n;
 
-				if (bank->CanBuy(crystal)) {
-					bank->Buy(&thisComp.item->wallet, crystal);
-					usedExchange = true;
-				}
+				// The reserve never runs out of money.
+				bank->Buy(&thisComp.item->wallet, crystal);
+				usedExchange = true;
 			}
 		}
 	}
@@ -555,10 +554,8 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 				crystal[type] = 1;
 
-				if (bank->CanBuy(crystal)) {
-					bank->Buy(&thisComp.item->wallet, crystal);
-					usedExchange = true;
-				}
+				bank->Buy(&thisComp.item->wallet, crystal);
+				usedExchange = true;
 			}
 		}
 	}
@@ -584,10 +581,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	// Transfer money from reserve to market:
-	if (!ReserveBank::Instance() || ReserveBank::Instance()->wallet.Gold() < 1500) {
-		return;
-	}
-	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->wallet, 1000);
+	market->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
 
 	MarketAI marketAI( market );
 
@@ -614,10 +608,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	bool boughtStuff = false;
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
-		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, 1 );
+		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.Gold(), 1 );
 		if ( i == 1 && !shield )
-			purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
-		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
+			purchase = marketAI.HasShield( thisComp.item->wallet.Gold(), 1 );
+		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.Gold(), 1 );
 		if ( purchase ) {
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
@@ -652,9 +646,9 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		// by a non-critical. Also, personality probably should factor in to purchasing decisions.
 		for (int i = 0; i < 3; ++i) {
 			const GameItem* purchase = 0;
-			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.gold, ranged->GetValue() * 2);
-			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.gold, shield->GetValue() * 2);
-			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.gold, melee->GetValue() * 2);
+			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.Gold(), ranged->GetValue() * 2);
+			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.Gold(), shield->GetValue() * 2);
+			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.Gold(), melee->GetValue() * 2);
 			if (purchase) {
 
 				MarketAI::Transact(purchase,
@@ -665,7 +659,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			}
 		}
 	}
-	Transfer(&ReserveBank::Instance()->bank, &market->GetItem()->wallet, market->GetItem()->wallet);
+	ReserveBank::GetWallet()->Deposit(market->GetWallet(), *(market->GetWallet()));
 }
 
 
@@ -691,12 +685,12 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 
 	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
 	int level = thisComp.item->Traits().Level();
-	Wallet cost;
+	TransactAmt cost;
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
 	GameItem* item = ForgeScript::DoForge(itemType, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
 	if (item) {
-		Transfer(&item->wallet, &thisComp.item->wallet, cost);
+		item->wallet.Deposit(&thisComp.item->wallet, cost);
 		thisComp.itemComponent->AddToInventory(item);
 		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
 		thisComp.item->historyDB.Increment("Crafted");

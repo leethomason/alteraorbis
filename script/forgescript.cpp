@@ -66,7 +66,7 @@ const char* ForgeScript::Effect( int effect )
 
 GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 							   const Wallet& avail,
-							   Wallet* cost,	// in/out
+							   TransactAmt* cost,	// in/out
 							   int partsMask,
 							   int effectsMask,
 							   int tech,
@@ -74,7 +74,7 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 							   int seed)
 {
 	// Guarentee we can build something:
-	if (avail.crystal[0] == 0) {
+	if (avail.Crystal(0) == 0) {
 		return 0;
 	}
 
@@ -112,23 +112,22 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 
 	int cp = 0;
 	int ce = 0;
-	Wallet wallet;
 
 	// Given we have a crystal, we should always be able to build something.
 	// Remove sub-parts and effects until we succeed. As the forge 
 	// changes, this is no longer a hard rule.
 	int maxIt = 10;
 	while (maxIt) {
-		wallet.EmptyWallet();
+		cost->Clear();
 		int techRequired = 0;
-		forge.Build(itemType, subType, parts, effects, item, &wallet, &techRequired, true);
+		forge.Build(itemType, subType, parts, effects, item, cost, &techRequired, true);
 
-		if (wallet <= avail && techRequired <= tech) {
+		if (*cost <= avail && techRequired <= tech) {
 			break;
 		}
 
 		bool didSomething = false;
-		if (wallet > avail && ce < GL_C_ARRAY_SIZE(effectsArr)) {
+		if (*cost > avail && ce < GL_C_ARRAY_SIZE(effectsArr)) {
 			effects &= ~(effectsArr[ce++]);
 			didSomething = true;
 		}
@@ -153,7 +152,6 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 	GLASSERT(maxIt);	// should have seen success...
 	if (!maxIt) return 0;
 
-	*cost = wallet;
 	return item;
 }
 
@@ -163,13 +161,13 @@ void ForgeScript::Build(	int type,			// GUN
 							int partsFlags,		
 							int effectFlags,
 							GameItem* item,
-							Wallet* required,
+							TransactAmt* required,
 							int *techRequired,
 							bool doRandom )
 {
 	*techRequired = 0;
-	required->EmptyWallet();
-	required->crystal[CRYSTAL_GREEN] += 1;
+	required->Clear();
+	required->AddCrystal(CRYSTAL_GREEN, 1);
 
 	// Random, but can't leave forge and come back
 	// to get different numbers.
@@ -219,7 +217,7 @@ void ForgeScript::Build(	int type,			// GUN
 			++nParts;
 		}
 		if (nParts > 1) {
-			required->crystal[0] += (nParts - 1)*(nParts - 1);
+			required->AddCrystal(0, (nParts - 1)*(nParts - 1));
 		}
 	}
 	else if ( type == ForgeScript::RING ) {
@@ -256,17 +254,17 @@ void ForgeScript::Build(	int type,			// GUN
 	}
 
 	if ( effectFlags & GameItem::EFFECT_FIRE ) {
-		required->crystal[CRYSTAL_RED] += 1;
+		required->AddCrystal(CRYSTAL_RED, 1);
 	}
 	if ( effectFlags & GameItem::EFFECT_SHOCK ) {
-		required->crystal[CRYSTAL_BLUE] += 1;
+		required->AddCrystal(CRYSTAL_BLUE, 1);
 	}
 	if ( effectFlags & GameItem::EFFECT_EXPLOSIVE ) {
-		required->crystal[CRYSTAL_VIOLET] += 1;
+		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 	// 2 effects adds a 2nd violet crystal
 	if ( FloorPowerOf2( effectFlags ) != effectFlags ) {
-		required->crystal[CRYSTAL_VIOLET] += 1;
+		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 
 	if ( item ) {

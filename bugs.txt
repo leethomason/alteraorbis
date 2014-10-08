@@ -118,6 +118,7 @@
 		- Search full domain for farms?
 		- test bank running out of money
 		- and then re-test with higher limits
+		- markets aren't paying tax
 
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Mantis-men domain

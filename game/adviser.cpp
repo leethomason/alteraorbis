@@ -115,7 +115,7 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 					BuildScript buildScript;
 					const BuildData& data = buildScript.GetData(id);
 
-					if (wallet.gold >= data.cost) {
+					if (wallet.Gold() >= data.cost) {
 						if (id >= BuildScript::KIOSK_N && id <= BuildScript::KIOSK_S) {
 							str.Format("Build a %s kiosk to attract Visitors.", data.cName);
 						}

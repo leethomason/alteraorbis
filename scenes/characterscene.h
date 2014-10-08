@@ -54,9 +54,9 @@ public:
 	Wallet*			taxRecipiant;
 	int				type;
 
-	bool IsAvatar() const		{ return type == AVATAR; }
-	bool IsCharacterItem() const	{ return type == CHARACTER_ITEM; }
-	bool IsAvatarCharacterItem() const			{ return type == AVATAR || type == CHARACTER_ITEM; }
+	bool IsAvatar() const					{ return type == AVATAR; }
+	bool IsCharacterItem() const			{ return type == CHARACTER_ITEM; }
+	bool IsAvatarCharacterItem() const		{ return type == AVATAR || type == CHARACTER_ITEM; }
 
 	bool IsVault() const		{ return type == VAULT; }
 	bool IsMarket() const		{ return type == MARKET; }
@@ -90,9 +90,6 @@ private:
 	void SetButtonText();
 	void SetExchangeButtonText();
 	void SetItemInfo(const GameItem* item, const GameItem* user);
-	void CalcCost( int* bought, int* sold );
-	void ResetInventory();
-	void CalcCrystalValue();
 
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
@@ -106,7 +103,7 @@ private:
 	int					nStorage;	// 1 for character, 2 for vault
 
 	Screenport			screenport;
-	gamui::PushButton	okay, cancel, reset;
+	gamui::PushButton	okay;
 	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextLabel	desc;
@@ -114,13 +111,8 @@ private:
 	MoneyWidget			moneyWidget[2];		// left is character, right is market
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
-	gamui::TextLabel	billOfSale;
 	gamui::TextLabel	helpText;
 	gamui::PushButton	crystalButton[2][NUM_CRYSTAL_TYPES];
-	int					crystalValue[NUM_CRYSTAL_TYPES];
-
-	grinliz::CDynArray< const GameItem* > boughtList, soldList;
-
 };
 
 

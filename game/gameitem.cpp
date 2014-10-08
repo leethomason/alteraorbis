@@ -134,7 +134,8 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		rounds = clipCap;
 		traits.Init();
 		personality.Init();
-		wallet.EmptyWallet();
+		GLASSERT(wallet.IsEmpty());
+		wallet.Set(0, 0);
 		keyValues.Clear();
 		historyDB.Clear();
 

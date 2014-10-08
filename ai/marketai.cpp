@@ -74,14 +74,14 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 			if ( seller->GetItem(i) == itemToBuy ) {
 				cost = itemToBuy->GetValue();
 
-				if (    buyer->GetItem()->wallet.gold >= cost
+				if (    buyer->GetItem()->wallet.Gold() >= cost
 					 && buyer->CanAddToInventory() ) 
 				{
 					if ( doTrade ) {
 						GameItem* gi = seller->RemoveFromInventory( i );
 						GLASSERT( gi );
 						buyer->AddToInventory( gi );
-						Transfer(&seller->GetItem()->wallet, &buyer->GetItem()->wallet, cost);
+						seller->GetItem()->wallet.Deposit(&buyer->GetItem()->wallet, cost);
 
 						Vector2F pos    = { 0, 0 };
 						Vector2I sector = { 0, 0 };
@@ -98,8 +98,8 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 
 						if (salesTax && ReserveBank::Instance()) {
 							int tax = LRint(float(cost) * SALES_TAX);
-							if (tax > 0 && tax <  ReserveBank::Instance()->bank.gold ) {
-								Transfer(salesTax, &ReserveBank::Instance()->bank, tax);
+							if (tax > 0 ) {
+								salesTax->Deposit(ReserveBank::GetWallet(), tax);
 								GLOUTPUT(("  tax paid: %d\n", tax));
 							}
 						}

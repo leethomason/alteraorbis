@@ -154,7 +154,8 @@ void ForgeScene::SetModel( bool randomTraits )
 {
 	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
-	crystalRequired.EmptyWallet();
+	int crystalArr[NUM_CRYSTAL_TYPES] = { 0 };
+	crystalRequired.Set(0, crystalArr);
 
 	int type	= ForgeScript::RING;
 	int subType = 0;
@@ -252,14 +253,13 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		// apply the features and make the die roll.
 		SetModel( true );
 
-		int count=0;
-		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) count += crystalRequired.crystal[i];
+		int count = crystalRequired.NumCrystals();
 		
 		forgeData->itemComponent->AddCraftXP( count );
 		forgeData->itemComponent->AddToInventory( item );
 		forgeData->itemComponent->GetItem(0)->historyDB.Increment( "Crafted" );
-		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
-		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
+		// becomes part of the item, and will be returned to Reserve when item is destroyed.
+		item->wallet.Deposit(&forgeData->itemComponent->GetItem(0)->wallet, 0, crystalRequired.Crystal());
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
 		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.

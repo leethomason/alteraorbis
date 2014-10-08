@@ -39,14 +39,17 @@ ReserveBank::ReserveBank()
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
 		crystalValue[i] = 0;
 	}
+	wallet.SetCanBeUnderwater(true);
 
 	// All the gold in the world.
-	bank.gold = ALL_GOLD;
-
-	bank.crystal[CRYSTAL_GREEN]		= ALL_CRYSTAL_GREEN;
-	bank.crystal[CRYSTAL_RED]		= ALL_CRYSTAL_RED;
-	bank.crystal[CRYSTAL_BLUE]		= ALL_CRYSTAL_BLUE;
-	bank.crystal[CRYSTAL_VIOLET]	= ALL_CRYSTAL_VIOLET;
+	const int gold = ALL_GOLD;
+	const int crystal[NUM_CRYSTAL_TYPES] = {
+		ALL_CRYSTAL_GREEN,
+		ALL_CRYSTAL_RED,
+		ALL_CRYSTAL_BLUE,
+		ALL_CRYSTAL_VIOLET
+	};
+	wallet.Set(gold, crystal);
 }
 
 
@@ -60,43 +63,37 @@ ReserveBank::~ReserveBank()
 void ReserveBank::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "ReserveBank" );
-	bank.Serialize( xs );
+	wallet.Serialize( xs );
 	XarcClose( xs );
 }
 
 
-int ReserveBank::WithdrawDenizen()
+void ReserveBank::WithdrawDenizen(Wallet* dst)
 {
-	int g = Min( GOLD_PER_DENIZEN, bank.gold );
-	bank.gold -= g;
-	return g;
+	int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+	Withdraw(dst, GOLD_PER_DENIZEN, crystal);
 }
 
 
-Wallet ReserveBank::WithdrawMonster()
+void ReserveBank::WithdrawMonster(Wallet* dst, bool greater)
 {
-	Wallet w;
-	if ( bank.gold >= GOLD_PER_LESSER) {
-		w.AddGold( GOLD_PER_LESSER );
-		bank.AddGold( -GOLD_PER_LESSER );
+	int gold = greater ? GOLD_PER_GREATER : GOLD_PER_LESSER;
+	int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+
+	static const float score[NUM_CRYSTAL_TYPES] = { 100, 50, 10, 1 };
+	int pass = greater ? random.Rand(4) : random.Rand(2);
+
+	for (int i = 0; i < pass; ++i) {
+		int index = random.Select(score, NUM_CRYSTAL_TYPES);
+		crystal[index] += 1;
 	}
-	if ( random.Rand(2) == 0 ) {
-		w.AddCrystal( WithdrawRandomCrystal() );
-	}
-	return w;
+	Withdraw(dst, gold, crystal);
 }
 
 
-int ReserveBank::WithdrawRandomCrystal()
+void ReserveBank::Withdraw(Wallet* dst, int gold, const int* crystal)
 {
-	static const float score[NUM_CRYSTAL_TYPES] = { 100,50,10,1 };
-	int type = random.Select( score, NUM_CRYSTAL_TYPES );
-
-	if ( bank.crystal[type] ) {
-		bank.crystal[type] -= 1;
-		return type;
-	}
-	return NO_CRYSTAL;
+	dst->Deposit(&wallet, gold, crystal);
 }
 
 
@@ -105,7 +102,7 @@ const int* ReserveBank::CrystalValue()
 	if (crystalValue[0] == 0) {
 		ForgeScript script(0, 2, 0);
 		GameItem item;
-		Wallet wallet;
+		TransactAmt wallet;
 		int tech = 0;
 		script.Build(ForgeScript::GUN, ForgeScript::BLASTER, 0, 0, &item, &wallet, &tech, false);
 		crystalValue[0] = int(item.GetValue() + 1.0f);
@@ -115,4 +112,15 @@ const int* ReserveBank::CrystalValue()
 		crystalValue[CRYSTAL_VIOLET] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_VIOLET;
 	}
 	return crystalValue;
+}
+
+
+void ReserveBank::Buy(Wallet* src, const int* crystals)
+{
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		GLASSERT(src->Crystal(i) >= crystals[i]);
+		int cost = CrystalValue(i) * crystals[i];
+		src->Deposit(&wallet, cost);
+	}
+	wallet.Deposit(src, 0, crystals);
 }

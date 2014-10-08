@@ -220,22 +220,22 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 void CensusScene::DoLayout()
 {
 	ReserveBank* reserve = ReserveBank::Instance();
-	const Wallet& reserveWallet = reserve->bank;
+	const Wallet& reserveWallet = reserve->wallet;
 	NewsHistory* history = chitBag->GetNewsHistory();
 
 	GLString debug;
 	GLString str;
 	debug.AppendFormat( "Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
-	debug.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
-	debug.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
+	debug.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.Gold(), allWallet.Crystal(0), allWallet.Crystal(1), allWallet.Crystal(2), allWallet.Crystal(3) );
+	debug.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.Gold(), reserveWallet.Crystal(1), reserveWallet.Crystal(1), reserveWallet.Crystal(2), reserveWallet.Crystal(3) );
 	debug.AppendFormat( "Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
-		allWallet.gold + reserveWallet.gold, 
-		allWallet.crystal[0] + reserveWallet.crystal[0], 
-		allWallet.crystal[1] + reserveWallet.crystal[1], 
-		allWallet.crystal[2] + reserveWallet.crystal[2], 
-		allWallet.crystal[3] + reserveWallet.crystal[3] );
+		allWallet.Gold() + reserveWallet.Gold(), 
+		allWallet.Crystal(0) + reserveWallet.Crystal(0), 
+		allWallet.Crystal(1) + reserveWallet.Crystal(1), 
+		allWallet.Crystal(2) + reserveWallet.Crystal(2), 
+		allWallet.Crystal(3) + reserveWallet.Crystal(3) );
 
-	debug.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
+	debug.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.Gold(), mobWallet.Crystal(0), mobWallet.Crystal(1), mobWallet.Crystal(2), mobWallet.Crystal(3) );
 	debug.append( "\n" );
 
 	for (int i = 0; i < MAX_ROWS; ++i) {

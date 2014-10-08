@@ -158,10 +158,10 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					context.worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
 				}
 				else if (buildButton[BUTTON_GREEN].Down()) {
-					context.chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
+//					context.chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
 				}
 				else if (buildButton[BUTTON_VIOLET].Down()) {
-					context.chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
+//					context.chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
 				}
 				else if (buildButton[BUTTON_MANTIS].Down()) {
 					context.chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);

@@ -94,8 +94,8 @@ bool DomainAI::BuyWorkers()
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 	static const int GOLD[4] = { WORKER_BOT_COST, WORKER_BOT_COST * 2, WORKER_BOT_COST*3, 1200 };
 	for (int i = 0; i < 4; ++i) {
-		if (arr.Size() == i && mainItem->wallet.gold >= GOLD[i]) {
-			Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
+		if (arr.Size() == i && mainItem->wallet.Gold() >= GOLD[i]) {
+			ReserveBank::GetWallet()->Deposit( &mainItem->wallet, WORKER_BOT_COST);
 			Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
 			return true;	// we should be buying workers, even if we can't.
 		}
@@ -392,15 +392,15 @@ int DomainAI::DoTick(U32 delta)
 
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
-		int gold = parentChit->GetItem()->wallet.gold;
+		int gold = parentChit->GetItem()->wallet.Gold();
 		for (int i = 0; i < cs->NumCitizens(); ++i) {
 			Chit* citizen = cs->CitizenAtIndex(i);
 			if (citizen->GetItem()) {
-				int citizenGold = citizen->GetItem()->wallet.gold;
+				int citizenGold = citizen->GetItem()->wallet.Gold();
 				if (citizenGold > gold / 4) {
 					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
 					if (tax > 0) {
-						Transfer(&parentChit->GetItem()->wallet, &citizen->GetItem()->wallet, tax);
+						parentChit->GetWallet()->Deposit( &citizen->GetItem()->wallet, tax);
 					}
 				}
 			}
@@ -454,8 +454,8 @@ int TrollDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (item->wallet.gold < 500 && ReserveBank::BankPtr()->gold > 500) {
-		Transfer(&item->wallet, ReserveBank::BankPtr(), 500);
+	if (item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
+		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
 	}
 
 	// Build stuff for the trolls to buy.
@@ -495,10 +495,10 @@ int TrollDomainAI::DoTick(U32 delta)
 				break;
 			}
 
-			Wallet cost;
-			GameItem* item = ForgeScript::DoForge(itemType, ReserveBank::Instance()->bank, &cost, partsMask, effectsMask, tech, level, seed);
+			TransactAmt cost;
+			GameItem* item = ForgeScript::DoForge(itemType, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
 			if (item) {
-				Transfer(&item->wallet, &ReserveBank::Instance()->bank, cost);
+				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 				market->GetItemComponent()->AddToInventory(item);
 
 				// Mark this item as important with a destroyMsg:

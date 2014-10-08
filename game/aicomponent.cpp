@@ -1220,7 +1220,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 			else {
 				// Should we visit Truulga? Check for a little gold, too.
 				// FIXME: needs tuning!
-				if (thisComp.item->wallet.gold > 15 && parentChit->random.Rand(15) == 0) {
+				if (thisComp.item->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
 					return DoSectorHerd(thisComp, focus, truulgaSector );
 				}
 			}
@@ -1495,7 +1495,7 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 	// a market to buy it, and the means to buy.
 	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
 		 && AtFriendlyOrNeutralCore()
-		 && thisComp.item->wallet.gold )
+		 && thisComp.item->wallet.Gold() )
 	{
 		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
 		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
@@ -1515,13 +1515,13 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 				const BuildData* bd = buildScript.GetDataFromStructure( ISC::market, 0 );
 				GLASSERT( bd );
 
-				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
+				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
-				if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
+				if ( !shield && marketAI.HasShield( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
-				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
+				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
 
@@ -2083,7 +2083,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		// The factory fun is set high, but only works if
 		// there is crystal.
 		if (item->IName() == ISC::factory) {
-			if (!thisComp.item->wallet.crystal[CRYSTAL_GREEN]) {
+			if (!thisComp.item->wallet.Crystal(CRYSTAL_GREEN)) {
 				s *= 0.1;
 			}
 		}

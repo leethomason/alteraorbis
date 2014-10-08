@@ -87,8 +87,8 @@ int RebuildAIComponent::DoTick(U32 delta)
 		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 		if (arr.Empty()) {
-			if (mainItem->wallet.gold >= WORKER_BOT_COST) {
-				Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
+			if (mainItem->wallet.Gold() >= WORKER_BOT_COST) {
+				ReserveBank::GetWallet()->Deposit(&mainItem->wallet, WORKER_BOT_COST);
 				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
 			}
 		}
