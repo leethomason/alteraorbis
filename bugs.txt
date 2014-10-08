@@ -106,7 +106,7 @@
 				- sculpture
 			- mantesssan beamgun
 		x Player domain colors, color screen, revisit gob colors
-		- Denizen domains
+		- Mantis-men domain
 
 		- gob domains don't count in census
 		- strange container-is-item bug when looking at items from census
@@ -121,7 +121,7 @@
 		- markets aren't paying tax
 
 		- Census: actual census. # trolls, # mantis, etc. etc.
-		- Mantis-men domain
+		- Denizen domains
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution
