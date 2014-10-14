@@ -69,40 +69,45 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 
 	static const int crystal[NUM_CRYSTAL_TYPES] = { 2, 2, 1, 1 };
 
-	itemComponent0 = new ItemComponent( new GameItem( human ));
-	itemComponent0->AddToInventory( new GameItem( blaster ));
-	itemComponent0->AddToInventory( new GameItem( pistol ));
-	itemComponent0->AddToInventory(new GameItem(shield));
-	itemComponent0->AddToInventory(new GameItem(ring));
+	itemComponent0 = new ItemComponent(human.Clone());
+	itemComponent0->AddToInventory(blaster.Clone() );
+	itemComponent0->AddToInventory( pistol.Clone());
+	itemComponent0->AddToInventory(shield.Clone());
+	itemComponent0->AddToInventory(ring.Clone());
+	itemComponent0->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 
-	itemComponent1 = new ItemComponent( new GameItem( troll ));
-	itemComponent1->AddToInventory( new GameItem( blaster ));
-	itemComponent1->AddToInventory( new GameItem( pistol ));
-	itemComponent1->AddToInventory( new GameItem( ring ));
-	itemComponent1->AddToInventory( new GameItem( ring ));
+	itemComponent1 = new ItemComponent(troll.Clone());
+	itemComponent1->AddToInventory( blaster.Clone());
+	itemComponent1->AddToInventory( pistol.Clone());
+	itemComponent1->AddToInventory( ring.Clone() );
+	itemComponent1->AddToInventory( ring.Clone());
 	itemComponent1->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 
-	marketComponent = new ItemComponent( new GameItem( market ));
+	marketComponent = new ItemComponent( market.Clone());
 	marketComponent->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
-	marketComponent->AddToInventory( new GameItem( blaster ));
-	marketComponent->AddToInventory( new GameItem( blaster ));
-	marketComponent->AddToInventory( new GameItem( pistol ));
+	marketComponent->AddToInventory( blaster.Clone());
+	marketComponent->AddToInventory( blaster.Clone());
+	marketComponent->AddToInventory( pistol.Clone());
 
-	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
-	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
-	itemComponent0->GetItem()->SetProperName("Worvaka");
+//	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
+//	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
+//	itemComponent0->GetItem()->SetProperName("Worvaka");
 }
 
 DialogScene::~DialogScene()
 {
-	reserveBank->wallet.Deposit(&itemComponent0->GetItem()->wallet, itemComponent0->GetItem()->wallet);
-	reserveBank->wallet.Deposit(&itemComponent1->GetItem()->wallet, itemComponent1->GetItem()->wallet);
-	reserveBank->wallet.Deposit(&marketComponent->GetItem()->wallet, marketComponent->GetItem()->wallet);
+//	reserveBank->wallet.Deposit(&itemComponent0->GetItem()->wallet, itemComponent0->GetItem()->wallet);
+//	reserveBank->wallet.Deposit(&itemComponent1->GetItem()->wallet, itemComponent1->GetItem()->wallet);
+//	reserveBank->wallet.Deposit(&marketComponent->GetItem()->wallet, marketComponent->GetItem()->wallet);
+	GameItem::trackWallet = false;
 
 	delete itemComponent0;
 	delete itemComponent1;
 	delete marketComponent;
 	delete reserveBank;
+
+	GameItem::trackWallet = true;
+
 }
 
 

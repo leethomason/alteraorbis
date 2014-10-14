@@ -95,7 +95,7 @@ int DistilleryScript::DoTick( U32 delta )
 					const GameItem& def = ItemDefDB::Instance()->Get( "elixir" );
 
 					for (int k = 0; k < ELIXIR_PER_FRUIT; ++k) {
-						GameItem* gameItem = new GameItem( def );
+						GameItem* gameItem = def.Clone();
 						Vector2F pos2 = RandomInRect(porch, &parentChit->random);
 						static const int ELIXIR_SELF_DESTRUCT = 60*1000;
 						Context()->chitBag->NewItemChit(ToWorld3F(pos2), gameItem, false, true, ELIXIR_SELF_DESTRUCT);

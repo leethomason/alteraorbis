@@ -154,7 +154,11 @@ public:
 
 	const char* Value( const Attribute* a, int index ) const;
 
+	// returns the name of the element; next call must be OpenElement()
+	// Allows for name = PeekElement(); switch(name)... OpenElement()
+	const char*			PeekElement();		
 	const char*			OpenElement();
+
 	const Attribute*	Attributes() const			{ return attributes.Mem(); }
 	int					NumAttributes() const		{ return attributes.Size(); }
 	bool				HasChild();
@@ -180,6 +184,7 @@ private:
 	FILE* fp;
 	int depth;
 	int version;
+	const char* peekElementName;
 };
 
 void DumpStream( StreamReader* reader, int depth );

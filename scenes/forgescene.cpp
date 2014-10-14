@@ -23,10 +23,7 @@ static const float FAR  = 10.0f;
 ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) 
 	:	Scene( game ), 
 		lumosGame( game ), 
-		screenport( game->GetScreenport()),
-		forgeScript(data->itemComponent->GetItem()->ID() ^ data->itemComponent->GetItem()->Traits().Experience(),
-					data->itemComponent->GetItem()->Traits().Level(),
-					data->tech )
+		screenport( game->GetScreenport())
 {
 	forgeData = data;
 	item = new GameItem();
@@ -152,7 +149,7 @@ void ForgeScene::Resize()
 
 void ForgeScene::SetModel( bool randomTraits )
 {
-	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
+	const GameItem& humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
 	int crystalArr[NUM_CRYSTAL_TYPES] = { 0 };
 	crystalRequired.Set(0, crystalArr);
@@ -194,9 +191,17 @@ void ForgeScene::SetModel( bool randomTraits )
 	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
 	//if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
 
-	forgeScript.Build(	type, subType, 
+	const GameItem* mainItem = forgeData->itemComponent->GetItem();
+	int seed = mainItem->ID() ^ mainItem->Traits().Experience();
+	ForgeScript forgeScript(seed,
+							mainItem->Traits().Level(),
+							forgeData->tech);
+
+	GameItem* newItem = forgeScript.Build( type, subType, 
 						partsFlags, effectFlags, 
-						item, &crystalRequired, &techRequired, randomTraits );
+						&crystalRequired, &techRequired, randomTraits );
+	delete item;
+	item = newItem;
 
 	Chit* parentChit = forgeData->itemComponent->ParentChit();;
 	LumosChitBag* chitBag = 0;

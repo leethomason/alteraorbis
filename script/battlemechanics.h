@@ -35,7 +35,7 @@ class BattleMechanics
 public:
 	// Melee --------------------- //
 	// Returns true if something hit.
-	static bool MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
+	static bool MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapon );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.
@@ -49,28 +49,26 @@ public:
 								Chit* src,
 								const grinliz::Vector2I& mapPos );
 
-	static void CalcMeleeDamage( const GameItem* wielder, const IMeleeWeaponItem* weapon, DamageDesc* outDD );
+	static void CalcMeleeDamage( const GameItem* wielder, const MeleeWeapon* weapon, DamageDesc* outDD );
 
-	static float MeleeDPTU( const GameItem* wielder, const IMeleeWeaponItem* weapon );
+	static float MeleeDPTU( const GameItem* wielder, const MeleeWeapon* weapon );
 	// Assuming effective range.
 	// 'contiuous' if true, accounts for clip reload time.
-	static float RangedDPTU( const IRangedWeaponItem* weapon, bool continuous );
-
-	static float ComputeShieldBoost( const IMeleeWeaponItem* weapon );
+	static float RangedDPTU( const RangedWeapon* weapon, bool continuous );
 	
 	// Shooting ------------------- //
 	static void Shoot(	ChitBag* bag, 
 						Chit* src, 
 						const grinliz::Vector3F& target,
 						bool targetMoving,
-						IRangedWeaponItem* weapon );
+						RangedWeapon* weapon );
 
 
 	// Radius at 1 unit distance. The shot is randomly placed within the sphere
 	// at that distance. The shere part is tricky - doing volume calc for hit
 	// chances.
 	static float ComputeRadAt1(	const GameItem* shooter, 
-								const IRangedWeaponItem* weapon,
+								const RangedWeapon* weapon,
 								bool shooterMoving,
 								bool targetMoving );
 	// Returns the chance of hitting, between 0 and 1.
@@ -84,6 +82,7 @@ public:
 	// Returns the leading target.
 	static grinliz::Vector3F ComputeLeadingShot(	Chit* origin, 
 													Chit* target, 
+													float boltSpeed,
 													grinliz::Vector3F* trigger );
 
 	// Other --------------------- //

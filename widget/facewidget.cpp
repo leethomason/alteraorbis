@@ -141,18 +141,18 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 			barStack.SetBarText(BAR_LEVEL, str.safe_str()); // bar[BAR_LEVEL].SetText(str.c_str());
 			barStack.SetBarRatio(BAR_LEVEL, float(xp - pxp) / float(nxp - pxp)); // bar[BAR_LEVEL].SetRange(float(xp - pxp) / float(nxp - pxp));
 		}
-		IShield* ishield			= ic->GetShield();
-		IRangedWeaponItem* iweapon	= ic->GetRangedWeapon(0);
+		Shield* ishield			= ic->GetShield();
+		RangedWeapon* iweapon	= ic->GetRangedWeapon(0);
 
 		if ( iweapon ) {
 			float r = 0;
-			if ( iweapon->GetItem()->Reloading() ) {
-				r = iweapon->GetItem()->ReloadFraction();
+			if ( iweapon->Reloading() ) {
+				r = iweapon->ReloadFraction();
 				//bar[BAR_AMMO].SetLowerAtom( orange );
 				barStack.SetBarColor(BAR_AMMO, orange);
 			}
 			else {
-				r = iweapon->GetItem()->RoundsFraction();
+				r = iweapon->RoundsFraction();
 				//bar[BAR_AMMO].SetLowerAtom( blue );
 				barStack.SetBarColor(BAR_AMMO, blue);
 			}
@@ -165,7 +165,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 		}
 
 		if ( ishield ) {
-			float r = ishield->GetItem()->RoundsFraction();
+			float r = ishield->ChargeFraction();
 			//bar[BAR_SHIELD].SetRange( r );
 			barStack.SetBarRatio(BAR_SHIELD, r);
 		}

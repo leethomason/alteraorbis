@@ -12,12 +12,13 @@ class MarketAI
 public:
 	MarketAI( Chit* chit );
 
-	const GameItem* HasRanged( int maxAuCost, int minAuValue=1 );
-	const GameItem* HasMelee(  int maxAuCost, int minAuValue=1 );
-	const GameItem* HasShield( int maxAuCost, int minAuValue=1 );
+	const GameItem* HasRanged(int maxAuCost, int minAuValue = 1)	{ return Has(RANGED, maxAuCost, minAuValue); }
+	const GameItem* HasMelee(  int maxAuCost, int minAuValue=1 )	{ return Has(MELEE, maxAuCost, minAuValue); }
+	const GameItem* HasShield( int maxAuCost, int minAuValue=1 )	{ return Has(SHIELD, maxAuCost, minAuValue); }
 
 	// generic form of the query
-	const GameItem* Has( int flag, int hardpoint, int maxAuCost, int minAuValue );
+	enum {RANGED, MELEE, SHIELD};
+	const GameItem* Has( int flag, int maxAuCost, int minAuValue );
 
 	// returns cost (>0) if able to buy
 	static int Transact(	const GameItem* itemToBuy, 

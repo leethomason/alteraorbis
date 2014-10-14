@@ -80,12 +80,12 @@ public:
 	*/
 
 	// Gets the *currently* in use:
-	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
-	IMeleeWeaponItem*	GetMeleeWeapon()	{ return melee; }
-	IShield*			GetShield()			{ return shield; }
+	RangedWeapon*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
+	MeleeWeapon*	GetMeleeWeapon()	{ return melee; }
+	Shield*			GetShield()			{ return shield; }
 
 	// Always returns a HELD weapon, or null.
-	IWeaponItem*		GetReserveWeapon()	{ return reserve; }
+	GameItem*		GetReserveWeapon()	{ return reserve; }
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
@@ -134,10 +134,10 @@ private:
 	// Not serialized:
 	bool				hardpointsModified;
 	int					lastDamageID;			// the last thing that hit us.
-	IRangedWeaponItem*	ranged;		// may be 0, active, or neither
-	IMeleeWeaponItem*	melee;		// may be 0, active, or neither
-	IWeaponItem*		reserve;	// remember: always held
-	IShield*			shield;
+	RangedWeapon*		ranged;		// may be 0, active, or neither
+	MeleeWeapon*		melee;		// may be 0, active, or neither
+	GameItem*			reserve;	// remember: always held
+	Shield*				shield;
 	CTicker				slowTick;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.

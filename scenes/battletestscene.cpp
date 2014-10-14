@@ -26,6 +26,7 @@
 #include "../game/aicomponent.h"
 #include "../game/healthcomponent.h"
 #include "../game/layout.h"
+#include "../game/team.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
@@ -319,14 +320,14 @@ void BattleTestScene::GoScene()
 	int rightLevel   = LEVEL[ ButtonDownID( RIGHT_LEVEL ) - LEVEL_0  ];
 
 	for( int i=0; i<leftCount; ++i ) {
-		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT_TEAM, leftLevel );
+		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), leftLevel );
 		if ( i==0 ) {
 			c->GetAIComponent()->EnableDebug( true );
 		}
 
 	}
 	for( int i=0; i<rightCount; ++i ) {
-		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, RIGHT_TEAM, rightLevel );
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_RIGHT), rightLevel );
 	}
 
 	random.ShuffleArray(waypoints[LEFT].Mem(), waypoints[LEFT].Size());

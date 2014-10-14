@@ -51,8 +51,6 @@ public:
 	const grinliz::CDynArray< grinliz::IString >& LesserMOBs() const  { return lesserMOBs; }
 
 private:
-	GameItem nullItem;
-
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;

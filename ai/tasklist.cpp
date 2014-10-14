@@ -592,10 +592,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
 		GameItem* gi = thisComp.itemComponent->GetItem( i );
 		if ( gi && !gi->Intrinsic() ) {
-			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
+			if ( !ranged && gi->ToRangedWeapon()) {
 				ranged = gi;
 			}
-			else if ( !melee && !(gi->flags & GameItem::RANGED_WEAPON) && (gi->flags & GameItem::MELEE_WEAPON) ) {
+			else if ( !melee && gi->ToMeleeWeapon() ) {
 				melee = gi;
 			}
 			else if ( !shield && gi->ToShield() ) {
@@ -669,9 +669,9 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		return false;
 	}
 
-	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-	IShield* shield = thisComp.itemComponent->GetShield();
+	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+	Shield* shield = thisComp.itemComponent->GetShield();
 
 	int itemType = 0;
 	Random& random = thisComp.chit->random;

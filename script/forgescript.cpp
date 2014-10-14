@@ -108,7 +108,6 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
 
 	ForgeScript forge(random.Rand(), level, tech);
-	GameItem* item = new GameItem();
 
 	int cp = 0;
 	int ce = 0;
@@ -117,10 +116,13 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 	// Remove sub-parts and effects until we succeed. As the forge 
 	// changes, this is no longer a hard rule.
 	int maxIt = 10;
+	GameItem* item = 0;
 	while (maxIt) {
+		delete item; item = 0;
+
 		cost->Clear();
 		int techRequired = 0;
-		forge.Build(itemType, subType, parts, effects, item, cost, &techRequired, true);
+		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true);
 
 		if (*cost <= avail && techRequired <= tech) {
 			break;
@@ -156,14 +158,13 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 }
 
 
-void ForgeScript::Build(	int type,			// GUN
-							int subType,		// BLASTER
-							int partsFlags,		
-							int effectFlags,
-							GameItem* item,
-							TransactAmt* required,
-							int *techRequired,
-							bool doRandom )
+GameItem* ForgeScript::Build(	int type,			// GUN
+								int subType,		// BLASTER
+								int partsFlags,		
+								int effectFlags,
+								TransactAmt* required,
+								int *techRequired,
+								bool doRandom )
 {
 	*techRequired = 0;
 	required->Clear();
@@ -247,11 +248,10 @@ void ForgeScript::Build(	int type,			// GUN
 		roll[i] = Clamp(roll[i], 1, 20);
 	}
 
-	if ( item ) {
-		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
-		*item = itemDef;
-		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
-	}
+	
+	const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
+	GameItem* item = itemDef.Clone();
+	item->Roll(roll);
 
 	if ( effectFlags & GameItem::EFFECT_FIRE ) {
 		required->AddCrystal(CRYSTAL_RED, 1);
@@ -272,5 +272,6 @@ void ForgeScript::Build(	int type,			// GUN
 		item->flags &= ~GameItem::EFFECT_MASK;
 		item->flags |= effectFlags;
 	}
+	return item;
 }
 

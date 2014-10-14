@@ -258,16 +258,9 @@ void CharacterScene::SetButtonText()
 		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
 		const GameItem* mainItem		= ic->GetItem(0);
-		const IRangedWeaponItem* ranged = ic->GetRangedWeapon(0);
-		const IMeleeWeaponItem*  melee  = ic->GetMeleeWeapon();
-		const IShield*           shield = ic->GetShield();
-		const GameItem* rangedItem		= ranged ? ranged->GetItem() : 0;
-		const GameItem* meleeItem		= melee  ? melee->GetItem() : 0;
-		const GameItem* shieldItem		= shield ? shield->GetItem() : 0;
-		//float costMult = 0;
-		//if ( data->IsMarket() ) {
-		//	costMult = 1.0f + SALES_TAX;
-		//}
+		const RangedWeapon* rangedItem = mainItem->ToRangedWeapon();
+		const MeleeWeapon* meleeItem = mainItem->ToMeleeWeapon();
+		const Shield* shieldItem = mainItem->ToShield();
 
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			const GameItem* item = ic->GetItem(src);
@@ -318,7 +311,7 @@ void CharacterScene::SetButtonText()
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
-			if (down->GetItem()->IName() == ISC::shield) {
+			if (down->IName() == ISC::shield) {
 				Quaternion q;
 				Matrix4 m;
 				m.ConcatRotation(90.0f, 0);
@@ -326,7 +319,7 @@ void CharacterScene::SetButtonText()
 				q.FromRotationMatrix(m);
 				model->SetRotation(q);
 			}
-			else if (down->GetItem()->keyValues.GetIString(ISC::mob) == IString()) {
+			else if (down->keyValues.GetIString(ISC::mob) == IString()) {
 				model->SetYRotation(90.0f);
 			}
 			else {

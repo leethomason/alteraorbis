@@ -50,7 +50,7 @@ ItemComponent::ItemComponent( const GameItem& item )
 	  ranged(0), melee(0), reserve(0), shield(0)
 {
 	GLASSERT( !item.IName().empty() );
-	itemArr.Push( new GameItem( item ) );
+	itemArr.Push(item.Clone());
 }
 
 
@@ -93,13 +93,16 @@ void ItemComponent::Serialize( XStream* xs )
 
 	if ( xs->Loading() ) {
 		for ( int i=0; i<nItems; ++i  ) {
-			GameItem* pItem = new GameItem();	
+			GameItem* pItem = GameItem::Factory(xs->Loading()->PeekElement());
+			pItem->Serialize(xs);
 			itemArr.Push( pItem );
 		}
 	}
-	for( int i=0; i<nItems; ++i ) {
-		itemArr[i]->Serialize( xs );
-		GLASSERT( !itemArr[i]->IName().empty() );
+	else {
+		for (int i = 0; i < nItems; ++i) {
+			itemArr[i]->Serialize(xs);
+			GLASSERT(!itemArr[i]->IName().empty());
+		}
 	}
 
 	this->EndSerialize( xs );
@@ -196,9 +199,9 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 	// credit everything in use
 	static const int NUM = 3;
 	GameItem* weapon[NUM] = { 0, 0, 0 };	// ranged, melee, shield
-	weapon[0] = this->GetRangedWeapon(0) ? this->GetRangedWeapon(0)->GetItem() : 0;
-	weapon[1] = this->GetMeleeWeapon() ? this->GetMeleeWeapon()->GetItem() : 0;
-	weapon[2] = this->GetShield() ? this->GetShield()->GetItem() : 0;
+	weapon[0] = this->GetRangedWeapon(0) ? this->GetRangedWeapon(0) : 0;
+	weapon[1] = this->GetMeleeWeapon() ? this->GetMeleeWeapon() : 0;
+	weapon[2] = this->GetShield() ? this->GetShield() : 0;
 
 	for (int i = 0; i < NUM; ++i) {
 		if (weapon[i]) {
@@ -288,7 +291,7 @@ void ItemComponent::UpdateActive()
 					melee = item->ToMeleeWeapon();
 					active = true;
 				}
-				else if ( melee->GetItem()->Intrinsic() ) {
+				else if ( melee->Intrinsic() ) {
 					melee = item->ToMeleeWeapon();
 					active = true;
 				}
@@ -298,7 +301,7 @@ void ItemComponent::UpdateActive()
 					ranged = item->ToRangedWeapon();
 					active = true;
 				}
-				else if ( ranged->GetItem()->Intrinsic() ) {
+				else if ( ranged->Intrinsic() ) {
 					ranged = item->ToRangedWeapon();
 					active = true;
 				}
@@ -308,7 +311,7 @@ void ItemComponent::UpdateActive()
 					shield = item->ToShield();
 					active = true;
 				}
-				else if ( shield->GetItem()->Intrinsic() ) {
+				else if ( shield->Intrinsic() ) {
 					shield = item->ToShield();
 					active = true;
 				}
@@ -327,10 +330,10 @@ void ItemComponent::UpdateActive()
 		else {
 			// NOT active - reserve?
 			if ( !reserve ) {
-				if ( melee && !melee->GetItem()->Intrinsic() && !item->Intrinsic() && item->ToRangedWeapon() )
-					reserve = item->ToWeapon();
-				if ( ranged && !ranged->GetItem()->Intrinsic() && !item->Intrinsic() && item->ToMeleeWeapon() )
-					reserve = item->ToWeapon();
+				if ( melee && !melee->Intrinsic() && !item->Intrinsic() && item->ToRangedWeapon() )
+					reserve = item;
+				if ( ranged && !ranged->Intrinsic() && !item->Intrinsic() && item->ToMeleeWeapon() )
+					reserve = item;
 			}
 		}
 		activeArr.Push( active );
@@ -407,36 +410,20 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
 
 		DamageDesc dd = ddorig;
-		IShield* iShield = this->GetShield();
-		GameItem* shield = iShield ? iShield->GetItem() : 0;
+		Shield* iShield = this->GetShield();
 
 		// Check for a shield. Block or reduce damage.
-		if (shield && shield->HasRound()) {
-			if (shield->flags & GameItem::EFFECT_FIRE)	dd.effects &= (~GameItem::EFFECT_FIRE);
-			if (shield->flags & GameItem::EFFECT_SHOCK)	dd.effects &= (~GameItem::EFFECT_SHOCK);
-
-			float rounds = (float)shield->rounds;
-			IMeleeWeaponItem* melee = this->GetMeleeWeapon();
-			if (melee) {
-				// A shield boost effectively reduces the % of damage.
-				// (Which means the melee weapons "powers up" the shield.)
-				dd.damage /= BattleMechanics::ComputeShieldBoost(melee);
+		if (shield) {
+			bool active = shield->Active();
+			float boost = 1.0f;
+			if (this->GetMeleeWeapon()) {
+				boost = this->GetMeleeWeapon()->ShieldBoost();
 			}
-
-			if (float(shield->rounds) >= dd.damage) {
-				shield->rounds -= LRint(dd.damage);
-				if (shield->rounds < 0) shield->rounds = 0;
-				dd.damage = 0;
-			}
-			else {
-				dd.damage -= (float)shield->rounds;
-				shield->rounds = 0;
-			}
-			shield->reload.ResetUnready();
+			shield->AbsorbDamage(&dd, boost);
 			shield->GetTraitsMutable()->AddXP(1);
 
 			RenderComponent* rc = parentChit->GetRenderComponent();
-			if (rc) {
+			if (active && rc) {
 				ParticleDef def = context->engine->particleSystem->GetPD(ISC::shield);
 				Vector3F shieldPos = { 0, 0, 0 };
 				rc->GetMetaData(HARDPOINT_SHIELD, &shieldPos);
@@ -588,8 +575,7 @@ int ItemComponent::ProcessEffect(int delta)
 	if (pos2i.IsZero()) return VERY_LONG_TICK;	// if we are at origin, not really for processing.
 
 	GameItem* mainItem = itemArr[0];
-	IShield* iShield = this->GetShield();
-	const GameItem* shield = iShield ? iShield->GetItem() : 0;
+	Shield* shield = this->GetShield();
 
 	// Look around at map, weather, etc. and sum up
 	// the chances of fire, shock, & water
@@ -655,7 +641,7 @@ int ItemComponent::ProcessEffect(int delta)
 
 	// Shields offer a lot of environmental protection.
 	if (shield) {
-		if (shield->HasRound()) {
+		if (shield->Active()) {
 			cF = 0;
 			cS = 0;
 		}
@@ -920,7 +906,7 @@ int ItemComponent::ItemToSell() const
 		GameItem* item = itemArr[i];
 		if (!item->Intrinsic() && item->GetValue()) {
 			if (!ItemActive(i) 
-				&& (!reserve || item != reserve->GetItem()))
+				&& (!reserve || item != reserve))
 			{
 				if (item->GetValue() < val) {
 					index = i;
@@ -963,7 +949,7 @@ int ItemComponent::TransferInventory( ItemComponent* ic, bool addWeapons, grinli
 		if ( item->Intrinsic() ) continue;
 		if ( !this->CanAddToInventory() ) break;
 
-		if (    (addWeapons && ( item->ToWeapon() || item->ToShield() ))
+		if (    (addWeapons && ( item->ToMeleeWeapon() || item->ToRangedWeapon() || item->ToShield() ))
 			 || filterItems == item->IName() )
 		{
 			ic->RemoveFromInventory( i );
@@ -1090,37 +1076,36 @@ bool ItemComponent::SwapWeapons()
 {
 	// The current but NOT intrinsic
 	GameItem* current = 0;
-	IRangedWeaponItem* ranged = GetRangedWeapon(0);
-	IMeleeWeaponItem*  melee  = GetMeleeWeapon();
-	if ( ranged && !ranged->GetItem()->Intrinsic() )
-		current = ranged->GetItem();
-	if ( melee && !melee->GetItem()->Intrinsic() )
-		current = melee->GetItem();
+	RangedWeapon* ranged = GetRangedWeapon(0);
+	MeleeWeapon*  melee  = GetMeleeWeapon();
+	if ( ranged && !ranged->Intrinsic() )
+		current = ranged;
+	if ( melee && !melee->Intrinsic() )
+		current = melee;
 
 	// The reserve is never intrinsic:
-	IWeaponItem* reserve = GetReserveWeapon();
-	GLASSERT( !reserve->GetItem()->Intrinsic() );
-
-	GLASSERT( current != reserve->GetItem() );
+	GameItem* reserve = GetReserveWeapon();
+	GLASSERT( !reserve->Intrinsic() );
+	GLASSERT( current != reserve );
 
 	if ( current && reserve ) {
-		int slot0 = FindItem( current->GetItem() );
-		int slot1 = FindItem( reserve->GetItem() );
+		int slot0 = FindItem( current );
+		int slot1 = FindItem( reserve );
 		Swap( slot0, slot1 );
 
 		hardpointsModified = true;
 		UpdateActive();
 	
 		GLOUTPUT(( "Swapped %s -> %s\n",
-				   current->GetItem()->BestName(),
-				   reserve->GetItem()->BestName() ));
+				   current->BestName(),
+				   reserve->BestName() ));
 		return true;
 	}
 	return false;
 }
 
 
-IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
+RangedWeapon* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 {
 	// Go backwards, so that we get the NOT intrinsic first.
 	if ( ranged && trigger ) {
@@ -1128,7 +1113,7 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 		GLASSERT( rc );
 		if ( rc ) {
 			Matrix4 xform;
-			rc->GetMetaData( ranged->GetItem()->hardpoint, &xform ); 
+			rc->GetMetaData( ranged->hardpoint, &xform ); 
 			Vector3F pos = xform * V3F_ZERO;
 			*trigger = pos;
 		}

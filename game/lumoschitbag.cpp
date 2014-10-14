@@ -239,13 +239,14 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
-	GameItem rootItem = ItemDefDB::Instance()->Get(name);
+	const GameItem& rootItem = ItemDefDB::Instance()->Get(name);
+	GameItem* item = rootItem.Clone();
 
 	// Hack...how to do this better??
-	if (rootItem.IResourceName() == "pyramid0") {
+	if (item->IResourceName() == "pyramid0") {
 		CStr<32> str;
 		str.Format("pyramid%d", random.Rand(3));
-		rootItem.SetResource(str.c_str());
+		item->SetResource(str.c_str());
 	}
 
 	int cx = 1;
@@ -317,28 +318,28 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
-	GameItem rootItem = ItemDefDB::Instance()->Get(name);
+	GameItem* rootItem = ItemDefDB::Instance()->Get(name).Clone();
 
 	// Hack...how to do this better??
-	if (rootItem.IResourceName() == "ruins1.0") {
+	if (rootItem->IResourceName() == "ruins1.0") {
 		CStr<32> str;
 		str.Format("ruins1.%d", random.Rand(2));
-		rootItem.SetResource(str.c_str());
+		rootItem->SetResource(str.c_str());
 	}
 
 	int cx = 1;
-	rootItem.keyValues.Get(ISC::size, &cx);
+	rootItem->keyValues.Get(ISC::size, &cx);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
 
 	chit->Add(msc);
-	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new RenderComponent(rootItem->ResourceName()));
 	chit->Add(new HealthComponent());
-	AddItem(name, chit, context->engine, team, 0);
+	AddItem(rootItem, chit, context->engine, team, 0);
 
-	IString proc = rootItem.keyValues.GetIString("procedural");
+	IString proc = rootItem->keyValues.GetIString("procedural");
 	if (!proc.empty()) {
 		ProcRenderInfo info;
 		AssignProcedural(chit->GetItem(), &info);
@@ -779,36 +780,51 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-GameItem* LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes )
+GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes)
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( name, &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
+	itemDefDB->Get(name, &itemDefArr);
+	GLASSERT(itemDefArr.Size() > 0);
 
-	GameItem item = *(itemDefArr[0]);
-	if ( altRes ) {
-		item.SetResource( altRes );
+	GameItem* item = itemDefArr[0]->Clone();
+	if (altRes) {
+		item->SetResource(altRes);
 	}
-	item.team = team;
-	item.GetTraitsMutable()->SetExpFromLevel( level );
-	item.InitState();
+	item->team = team;
+	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->Roll(item->Traits().Get());
 
-	GameItem* gi = 0;
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
-			gi = new GameItem(*(itemDefArr[i]));
+			GameItem* gi = itemDefArr[i]->Clone();
 			ic->AddToInventory(gi);
 		}
 	}
 	else {
 		GLASSERT( itemDefArr.Size() == 1 );
-		gi = new GameItem(item);
-		chit->GetItemComponent()->AddToInventory(gi);
+		chit->GetItemComponent()->AddToInventory(item);
 	}
-	return gi;
+	return item;
+}
+
+
+GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int team, int level)
+{
+	item->team = team;
+	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->Roll(item->Traits().Get());
+
+	if ( !chit->GetItemComponent() ) {
+		ItemComponent* ic = new ItemComponent( item );
+		chit->Add( ic );
+	}
+	else {
+		chit->GetItemComponent()->AddToInventory(item);
+	}
+	return item;
 }
 
 

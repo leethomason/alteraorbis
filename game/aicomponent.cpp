@@ -147,7 +147,7 @@ void AIComponent::OnRemove()
 }
 
 
-bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, RangedWeapon* weapon )
 {
 	Vector3F origin, dest;
 	GLASSERT( weapon );
@@ -408,9 +408,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 			return;
 		}
 		// Reloading is always a good background task.
-		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-		if ( rangedWeapon && rangedWeapon->GetItem()->CanReload() ) {
-			rangedWeapon->GetItem()->Reload( parentChit );
+		RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+		if ( rangedWeapon && rangedWeapon->CanReload() ) {
+			rangedWeapon->Reload( parentChit );
 		}
 	}
 	else {
@@ -418,16 +418,14 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
-		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-		GameItem* ranged = rangedWeapon ? rangedWeapon->GetItem() : 0;
-
-		if ( ranged ) {
+		RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+		if ( rangedWeapon ) {
 			Vector3F heading = thisComp.spatial->GetHeading();
-			bool explosive = (ranged->GetItem()->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
+			bool explosive = (rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
 
-			if ( ranged->CanUse() ) {
+			if ( rangedWeapon->CanShoot() ) {
 				float radAt1 = BattleMechanics::ComputeRadAt1( thisComp.chit->GetItem(), 
-															   ranged->ToRangedWeapon(),
+															   rangedWeapon,
 															   true,
 															   true );	// Doesn't matter to utility.
 
@@ -437,7 +435,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 						continue;
 					}
 					Vector3F p0;
-					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0 );
+					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, rangedWeapon->BoltSpeed(), &p0 );
 					Vector3F normal = p1 - p0;
 					normal.Normalize();
 					float range = (p0-p1).Length();
@@ -459,9 +457,8 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				}
 			}
 			float utilityReload = 0.0f;
-			GameItem* rangedItem = ranged->GetItem();
-			if ( rangedItem->CanReload() ) {
-				utilityReload = 1.0f - rangedItem->RoundsFraction();
+			if ( rangedWeapon->CanReload() ) {
+				utilityReload = 1.0f - rangedWeapon->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
 				if ( debugFlag ) {
@@ -469,18 +466,18 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				}
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
-					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
+					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, rangedWeapon->BoltSpeed(), 0 );
 					BattleMechanics::Shoot(	Context()->chitBag, 
 											thisComp.chit, 
 											leading, 
 											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
-											ranged->ToRangedWeapon() );
+											rangedWeapon );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->RunAndGun\n" ));
 					}
 				}
 				else {
-					ranged->Reload( parentChit );
+					rangedWeapon->Reload( parentChit );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->Reload\n" ));
 					}
@@ -496,6 +493,9 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	bool pointed = false;
 	Vector3F leading = { 0, 0, 0 };
 	bool isMoving = false;
+	RangedWeapon* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+	GLASSERT(weapon);
+	if (!weapon) return;
 
 	if ( targetDesc.id ) {
 		ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
@@ -504,7 +504,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			return;
 		}
 
-		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, 0 );
+		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, weapon->BoltSpeed(), 0 );
 		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
 	}
 	else if ( !targetDesc.mapPos.IsZero() ) {
@@ -536,12 +536,10 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		return;
 	}
 
-	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 	if ( weapon ) {
-		GameItem* item = weapon->GetItem();
-		if ( item->HasRound() ) {
+		if ( weapon->HasRound() ) {
 			// Has round. May be in cooldown.
-			if ( item->CanUse() ) {
+			if ( weapon->CanShoot() ) {
 				BattleMechanics::Shoot(	Context()->chitBag, 
 										parentChit, 
 										leading,
@@ -550,7 +548,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			}
 		}
 		else {
-			item->Reload( parentChit );
+			weapon->Reload( parentChit );
 			// Out of ammo - do something else.
 			currentAction = NO_ACTION;
 		}
@@ -560,7 +558,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
-	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
+	MeleeWeapon* weapon = thisComp.itemComponent->GetMeleeWeapon();
 	ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 	const ChitContext* context = Context();
@@ -578,16 +576,15 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		currentAction = NO_ACTION;
 		return;
 	}
-	GameItem* item = weapon->GetItem();
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString(ISC::sound);
+		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
@@ -605,9 +602,9 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString(ISC::sound);
+		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
@@ -932,8 +929,8 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 	const ChitContext* context = Context();
 
 	// Need a melee weapon to rampage. Ranged is never used.
-	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+	GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
 	if ( !melee && ( !reserve || !reserve->ToMeleeWeapon() ))
 		return false;
 
@@ -1025,7 +1022,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
 
-		IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+		GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
 		if ( reserve && reserve->ToMeleeWeapon() ) {
 			thisComp.itemComponent->SwapWeapons();
 		}
@@ -1497,9 +1494,9 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 		 && AtFriendlyOrNeutralCore()
 		 && thisComp.item->wallet.Gold() )
 	{
-		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-		const IShield* shield = thisComp.itemComponent->GetShield();
+		const MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+		const RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+		const Shield* shield = thisComp.itemComponent->GetShield();
 
 		// Don't want the AIs running to the market all the time if nothing
 		// is there. (And planning to have random market visits anyway.)
@@ -1863,7 +1860,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 				const GameItem* item = thisComp.itemComponent->GetItem( i );
 				if ( item->Intrinsic() )
 					continue;
-				if ( item->ToWeapon() || item->ToShield() )
+				if ( item->ToRangedWeapon() || item->ToMeleeWeapon() || item->ToShield() )
 				{
 					needVaultRun = true;
 					break;
@@ -2196,9 +2193,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
 	const ChitContext* context = Context();
 
-	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
-	if ( ranged && ranged->GetItem()->CanReload() ) {
-		ranged->GetItem()->Reload( parentChit );
+	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
+	if ( ranged && ranged->CanReload() ) {
+		ranged->Reload( parentChit );
 	}
 
 	if (ThinkWanderEatPlants(thisComp))
@@ -2301,16 +2298,16 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2I sector = ToSector( ToWorld2I( pos2 ));
 	
 	// Use the current or reserve - switch out later if we need to.
-	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
-	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
+	RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
+	MeleeWeapon*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
 
-	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+	GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
 	if ( reserve ) {
-		if ( !rangedWeapon && reserve->GetItem()->ToRangedWeapon() ) {
-			rangedWeapon = reserve->GetItem()->ToRangedWeapon();
+		if ( !rangedWeapon && reserve->ToRangedWeapon() ) {
+			rangedWeapon = reserve->ToRangedWeapon();
 		}
-		if ( !meleeWeapon && reserve->GetItem()->ToMeleeWeapon() ) {
-			meleeWeapon = reserve->GetItem()->ToMeleeWeapon();
+		if ( !meleeWeapon && reserve->ToMeleeWeapon() ) {
+			meleeWeapon = reserve->ToMeleeWeapon();
 		}
 	}
 
@@ -2404,7 +2401,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
 		if ( rangedWeapon ) {
-			GameItem* pw = rangedWeapon->GetItem();
 			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
 															rangedWeapon,
 															false,	// SHOOT implies stopping.
@@ -2417,7 +2413,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
 			if (    range > 1.5f 
-				 &&    ( ( pw->HasRound() && !pw->Reloading() )							// we have ammod
+				 &&    ( ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )							// we have ammod
 				    || ( nRangedEnemies == 0 && range > 2.0f && range < longShot ) ) )	// we need to reload
 			{
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
@@ -2431,7 +2427,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				} 
 
 				// Don't blow ourself up:
-				if ( pw->flags & GameItem::EFFECT_EXPLOSIVE ) {
+				if ( rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE ) {
 					if ( range < EXPLOSIVE_RANGE * 2.0f ) {
 						u *= 0.1f;	// blowing ourseves up is bad.
 					}
@@ -2445,7 +2441,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// Move to the effective range?
 			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
-			if ( pw->CanUse() ) {
+			if ( rangedWeapon->CanShoot() ) {
 				// okay;
 			}
 			else {
@@ -2569,12 +2565,12 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		swap = true;
 	}
 	if ( swap && debugFlag ) {
-		IRangedWeaponItem* r = thisComp.itemComponent->GetRangedWeapon(0);
-		IMeleeWeaponItem*  m = thisComp.itemComponent->GetMeleeWeapon();
+		RangedWeapon* r = thisComp.itemComponent->GetRangedWeapon(0);
+		MeleeWeapon*  m = thisComp.itemComponent->GetMeleeWeapon();
 
 		GLOUTPUT(( "ID=%d swapped in r=%s m=%s\n", thisComp.chit->ID(), 
-			r ? r->GetItem()->BestName() : "none",
-			m ? m->GetItem()->BestName() : "none" ));
+			r ? r->BestName() : "none",
+			m ? m->BestName() : "none" ));
 	}
 }
 

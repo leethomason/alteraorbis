@@ -44,49 +44,54 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 	*/
 
 	int i = 0;
-	if ( item->ToRangedWeapon() ) {
-		str.Format( "Ranged Damage\t%.1f\n", item->Traits().Damage() * item->rangedDamage );
+
+	const RangedWeapon* rangedWeapon = item->ToRangedWeapon();
+	const MeleeWeapon* meleeWeapon = item->ToMeleeWeapon();
+	const Shield* shield = item->ToShield();
+
+	if (rangedWeapon) {
+		str.Format("Ranged Damage\t%.1f\n", rangedWeapon->Damage());
 		textBuffer += str.c_str();
 		
-		float radAt1 = BattleMechanics::ComputeRadAt1( user, item->ToRangedWeapon(), false, false );
+		float radAt1 = BattleMechanics::ComputeRadAt1( user, rangedWeapon, false, false );
 		str.Format( "Effective Range\t%.1f\n", BattleMechanics::EffectiveRange( radAt1 ));
 		textBuffer += str.c_str();
 
-		str.Format( "Fire Rate\t%.1f\n", 1.0f / (0.001f * (float)item->cooldown.Threshold()));
+		str.Format( "Fire Rate\t%.1f\n", 1.0f / (0.001f * (float)rangedWeapon->CooldownTime()));
 		textBuffer += str.c_str();
 
-		str.Format( "Clip/Reload\t%d / %.1f\n", item->clipCap, 0.001f * (float)item->reload.Threshold() );
+		str.Format( "Clip/Reload\t%d / %.1f\n", rangedWeapon->ClipCap(), 0.001f * (float)rangedWeapon->ReloadTime() );
 		textBuffer += str.c_str();
 
-		str.Format( "Ranged D/S\t%.1f\n", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
+		str.Format( "Ranged D/S\t%.1f\n", BattleMechanics::RangedDPTU( rangedWeapon, false ));
 		textBuffer += str.c_str();
 	}
 
-	if ( item->ToMeleeWeapon() ) {
+	if (meleeWeapon) {
 		DamageDesc dd;
-		BattleMechanics::CalcMeleeDamage( user, item->ToMeleeWeapon(), &dd );
+		BattleMechanics::CalcMeleeDamage( user, meleeWeapon, &dd );
 
 		str.Format( "Melee Damage\t%.1f\n", dd.damage );
 		textBuffer += str.c_str();
 
-		str.Format( "Melee D/S\t%.1f\n", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
+		str.Format( "Melee D/S\t%.1f\n", BattleMechanics::MeleeDPTU( user, meleeWeapon ));
 		textBuffer += str.c_str();
 
-		float boost = BattleMechanics::ComputeShieldBoost( item->ToMeleeWeapon() );
+		float boost = meleeWeapon->ShieldBoost();
 		if ( boost > 1.0f ) {
 			str.Format( "Shield Boost\t%02d%%\n", int(100.0f * boost) - 100 );
 			textBuffer += str.c_str();
 		}
 	}
-	if ( item->ToShield() ) {
-		str.Format( "Capacity\t%d\n", item->clipCap );
+	if ( shield ) {
+		str.Format( "Capacity\t%d\n", (int)shield->Capacity() );
 		textBuffer += str.c_str();
 
-		str.Format( "Reload\t%.1f\n", 0.001f * (float)item->reload.Threshold() );
+		str.Format("Reload\t%.1f\n", 0.001f * (float)shield->ShieldRechargeTime());
 		textBuffer += str.c_str();
 	}
 
-	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
+	if ( !(meleeWeapon || rangedWeapon || shield)) {
 		str.Format( "Strength\t%d\n", item->Traits().Strength() );
 		textBuffer += str.c_str();
 

@@ -102,12 +102,14 @@
 			x art
 			x animation
 			- special buildings:
-				- fab
 				- sculpture
 			- mantesssan beamgun
 		x Player domain colors, color screen, revisit gob colors
 		- Mantis-men domain
 
+		- refactor
+			- GameItem saving and loading
+			- GameItem XML loading
 		- gob domains don't count in census
 		- strange container-is-item bug when looking at items from census
 		x Start with 0 team id for un-assigned, all domains 1+ team id
@@ -120,6 +122,8 @@
 		- and then re-test with higher limits
 		- markets aren't paying tax
 
+		- special gobman item 
+		- special kamikiri item
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains
 		- Long play test

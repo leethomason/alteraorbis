@@ -1,7 +1,7 @@
 #include "reservebank.h"
 #include "../xarchive/glstreamer.h"
 #include "../grinliz/glstringutil.h"
-#include "../script/forgescript.h"
+#include "../script/itemscript.h"
 #include "../game/gameitem.h"
 
 using namespace grinliz;
@@ -100,12 +100,11 @@ void ReserveBank::Withdraw(Wallet* dst, int gold, const int* crystal)
 const int* ReserveBank::CrystalValue()
 {
 	if (crystalValue[0] == 0) {
-		ForgeScript script(0, 2, 0);
-		GameItem item;
 		TransactAmt wallet;
 		int tech = 0;
-		script.Build(ForgeScript::GUN, ForgeScript::BLASTER, 0, 0, &item, &wallet, &tech, false);
-		crystalValue[0] = int(item.GetValue() + 1.0f);
+		GameItem* item = ItemDefDB::Instance()->Get("blaster").Clone();
+		crystalValue[0] = int(item->GetValue() + 1.0f);
+		delete item; item = 0;
 
 		crystalValue[CRYSTAL_RED] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_RED;
 		crystalValue[CRYSTAL_BLUE] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_BLUE;

@@ -149,7 +149,7 @@ int FarmScript::DoTick( U32 delta )
 		Rectangle2I r = msc->PorchPos();
 
 		const GameItem& def = ItemDefDB::Instance()->Get( "fruit" );
-		GameItem* gameItem = new GameItem( def );
+		GameItem* gameItem = def.Clone();
 		Context()->chitBag->NewItemChit( ToWorld3F( r.min ),
 											 gameItem,
 											 true,

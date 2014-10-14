@@ -1,12 +1,12 @@
 <!--
     Notes:
-      Any carried item will replace the instrinsic item.
-      An item can be RANGED, MELEE, **OR** SHIELD (on none of those)
+      Any carried GameItem will replace the instrinsic GameItem.
+      An GameItem can be RANGED, MELEE, **OR** SHIELD (on none of those)
       Every thing that can battle at all should have an intrinsic melee. (So it doesn't get "stuck")
 -->
 
 <items>
-  <item name="humanFemale"
+  <GameItem name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
 		    flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
@@ -14,179 +14,192 @@
         mob="denizen"
         nameGen="humanFemaleNames"
         cooldown="1500"
-	    mass ="55">
+        baseHP="60"
+	      mass ="55">
     <intrinsics>
-      <item name="hand"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon 
+            name="hand"
+            flags="INTRINSIC"
             hardpoint="trigger"
             impactSound="meleeWAV"
-            meleeDamageMult="0.5">
-      </item>
+            meleeDamage="8">
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="humanMale"
+  <GameItem name="humanMale"
         resource="humanMale"
         uiIcon="human"
         flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
-        mass ="60">
+        baseHP="60"
+        mass ="70">
     <intrinsics>
-      <item name="hand"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon
+            name="hand"
+            flags="INTRINSIC"
             hardpoint="trigger"
             impactSound="meleeWAV"
-            meleeDamageMult="0.5">
-      </item>
+            meleeDamage="8">
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="gob"
+  <GameItem name="gobman"
         resource="gob"
         uiIcon="anvil"
         flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="gobnames"
         mob="denizen"
+        baseHP="40"
         mass ="50">
     <intrinsics>
-      <item name="hand"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="hand"
+            flags="INTRINSIC"
             hardpoint="trigger"
             impactSound="meleeWAV"
-            meleeDamageMult="0.7">
-      </item>
+            meleeDamage="6">
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
 
   <!-- workers are immune to fire and SUBMARINE so that they can build/fix ppols. -->
-  <item name="worker"
+  <GameItem name="worker"
         resource="worker"
         flags="AI_WANDER_HERD AI_DOES_WORK GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE AI_HEAL_AT_CORE"
         hpRegen="0.5"
-        mass="20" >
+        baseHP="20"
+        mass="30" >
     <intrinsics>
-      <item name="claw"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="claw"
+            flags="INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="1"
-            cooldown="500"
-            reload="1000"
-            clipCap="10"
-            speed ="1.5"
-            impactSound="meleeWAV" />
+            meleeDamage="6"
+            impactSound="meleeWAV">
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="visitor"
+  <GameItem name="visitor"
         resource="visitor"
         flags="CLICK_THROUGH DAMAGE_UNDER_WATER"
         speed="1.0"
-        mass="35" >
-  </item>
+        baseHP="25"
+        mass="10" >
+  </GameItem>
 
-  <item name="deity"
+  <GameItem name="deity"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1000" >
-  </item>
+  </GameItem>
 
-  <item name="gold"
+  <GameItem name="gold"
         resource="gold"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="10">
-  </item>
+  </GameItem>
 
-  <item name="crystal_green"
+  <GameItem name="crystal_green"
         resource="crystal_green"
         flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
         mass="1" />
-  <item name="crystal_red"
+  <GameItem name="crystal_red"
         resource="crystal_red"
         flags="INDESTRUCTABLE CLICK_THROUGH FLOAT"
         mass="1" />
-  <item name="crystal_blue"
+  <GameItem name="crystal_blue"
         resource="crystal_blue"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
-  <item name="crystal_violet"
+  <GameItem name="crystal_violet"
         resource="crystal_violet"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
         
-  <item name="tombstone"
+  <GameItem name="tombstone"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="10" />
 
-  <item name="kiosk.m"
+  <GameItem name="kiosk.m"
         resource="kiosk.m"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
+        baseHP="50"
         cost="40" />
 
-  <item name="kiosk.n"
+  <GameItem name="kiosk.n"
         resource="kiosk.n"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
+        baseHP="50"
         cost="40" />
 
-  <item name="kiosk.c"
+  <GameItem name="kiosk.c"
         resource="kiosk.c"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
+        baseHP="50"
         cost="40" />
 
-  <item name="kiosk.s"
+  <GameItem name="kiosk.s"
         resource="kiosk.s"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         mass="50"
+        baseHP="50"
         cost="40" />
 
-  <item name="core"
+  <GameItem name="core"
         resource="core"
         procedural="team"
         flags="CLICK_THROUGH"
-        mass="300"
-        />
-
-  <item name="ruins"
-        resource="ruins1.0"
-        flags="CLICK_THROUGH DAMAGE_UNDER_WATER"
+        baseHP="300"
         mass="100"
         />
 
-  <item name="trollStatue"
+  <GameItem name="ruins"
+        resource="ruins1.0"
+        flags="CLICK_THROUGH DAMAGE_UNDER_WATER"
+        baseHP="100"
+        mass="100"
+        />
+
+  <GameItem name="trollStatue"
         resource="trollStatue"
         flags="CLICK_THROUGH"
         mass="300"
+        baseHP="100"
         cost="100"
         size="2"
         />
 
-  <item name="trollBrazier"
+  <GameItem name="trollBrazier"
         resource="trollBrazier"
         flags="CLICK_THROUGH"
         mass="150"
+        baseHP="100"
         cost="100"
         size="2"
         />
 
-  <item name="vault"
+  <GameItem name="vault"
         resource="vault"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
         mass="200"
+        baseHP="250"
         cost="100"
         zone="industrial"
         />
@@ -197,31 +210,33 @@
   <!-- needs require crystals to use -->
   <!-- need was: 0.4. Seems a little under-used. -->
   <!-- kick the fun up quite high, but add a check in the AI for crystal -->
-  <item name="factory"
+  <GameItem name="factory"
         resource="factory"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
         mass="150"
+        baseHP="150"
         cost="80" 
         zone="industrial"
         
-		need.time="2.0"
+		    need.time="2.0"
         need.fun="0.8"
         />
 
-  <item name="temple"
+  <GameItem name="temple"
         resource="pyramid0"
         flags="DAMAGE_UNDER_WATER"
         porch="0"
         procedural="team"
         size="2"
         mass="150"
+        baseHP="200"
         cost="60"
         zone="natural" />
 
-  <item name="power"
+  <GameItem name="power"
         resource="power"
         flags="DAMAGE_UNDER_WATER EXPLODES SHOCKABLE"
         porch="0"
@@ -230,10 +245,11 @@
         circuit="battery"
         size="1"
         mass="150"
+        baseHP="100"
         cost="40"
         zone="industrial" />
 
-  <item name="turret"
+  <GameItem name="turret"
         resource="turret"
         flags="DAMAGE_UNDER_WATER"
         porch="0"
@@ -241,64 +257,70 @@
         circuit="powerUp"
         size="1"
         mass="100"
+        baseHP="100"
         cost="40"
         zone="industrial" />
 
-  <item name="circuitFab"
+  <GameItem name="circuitFab"
         resource="circuitFab"
         flags="DAMAGE_UNDER_WATER"
         procedural="team"
         size="1"
         mass="100"
+        baseHP="100"
         cost="100"
         zone="industrial" />
 
-  <item name="guardpost"
+  <GameItem name="guardpost"
         resource="guardpost"
         flags="DAMAGE_UNDER_WATER"
         procedural="team"
         size="1"
         mass="100"
+        baseHP="150"
         cost="30"
         script="GuardScript"
         />
 
-  <item name="bed"
+  <GameItem name="bed"
         resource="sleep"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="1"
         mass="100"
+        baseHP="100"
         cost="25"
         zone="natural"
         
-	    need.time="10.0"
+	      need.time="10.0"
         need.energy="1.0"
         />
 
-  <item name="market"
+  <GameItem name="market"
         resource="market"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
         mass="150"
+        baseHP="150"
         cost="50"
         zone="natural"
         
-	    need.time="1.5"
+	      need.time="1.5"
         need.fun="0.4"
         need.social="0.2"
         />
 
-  <item name="exchange"
+  <GameItem name="exchange"
         resource="exchange"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="1"
         mass="100"
+        baseHP="150"
         cost="80"
         zone="industrial"
 
@@ -309,92 +331,98 @@
   <!-- comlpex needs: gives social if others there, 
        gives food if available.
   -->
-  <item name="bar"
+  <GameItem name="bar"
         resource="bar"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
         mass="150"
+        baseHP="150"
         cost="50"
         zone="natural"
         nameGen="barNames"
         
-	    need.time="5.0"
+	      need.time="5.0"
         need.fun="0.2"
         need.social="0.4"
         need.food="1.0"
         />
 
-  <item name="farm"
+  <GameItem name="farm"
         resource="farm"
         procedural="team"
         porch="1"
         size="1"
         mass="80"
+        baseHP="80"
         cost="40"
         script="FarmScript"
         />
   
-  <item name="distillery"
+  <GameItem name="distillery"
         resource="distillery"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"
         size="2"
         mass="200"
+        baseHP="200"
         cost="80"
         script="DistilleryScript"
         zone="industrial"
         />
 
-  <item name="trilobyte"
+  <GameItem name="trilobyte"
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE FLOAT"
         mob="lesser"
         nameGen="monster"
+        baseHP="10"
         mass="10">
     <intrinsics>
-      <item name="stinger"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="stinger"
+            flags="INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="2.0"
+            meleeDamage="12"
             impactSound="meleeWAV">
-      </item>
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="mantis"
+  <GameItem name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP ITEM_PICKUP DAMAGE_UNDER_WATER"
         mob="lesser"
         nameGen="monster"
+        baseHP="40"
         mass="40">
     <intrinsics>
-      <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="pincer"
+            flags="INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="1.6"
+            meleeDamage="18"
             impactSound="meleeWAV">
-      </item>
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="redMantis"
+  <GameItem name="redMantis"
         resource="redmantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP DAMAGE_UNDER_WATER"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP DAMAGE_UNDER_WATER IMMUNE_FIRE"
         mob="lesser"
         nameGen="monster"
+        baseHP="30"
         mass="30">
     <intrinsics>
-      <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="pincer"
+            flags="MELEE_WEAPON INTRINSIC IMMUNE_FIRE"
             hardpoint="trigger"
-            meleeDamage="1.6"
+            meleeDamage="14"
             impactSound="meleeWAV">
-      </item>
-      <item name="beam"
-            flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE"
+      </MeleeWeapon>
+      <RangedWeapon name="beam"
+            flags="INTRINSIC EFFECT_FIRE IMMUNE_FIRE"
             hardpoint="althand"
             cooldown="200"
             reload="2000"
@@ -402,55 +430,60 @@
             speed ="1.0"
             rangedDamage="10"
             sound="firesmallWAV">
-        </item>
+        </RangedWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="troll"
+  <GameItem name="troll"
         resource="troll"
         flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE AI_USES_BUILDINGS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="monster"
         mob="lesser"
+        baseHP="40"
         mass ="40">
     <intrinsics>
-      <item name="hand"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="hand"
+            flags="INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="0.6"
+            meleeDamage="8"
             impactSound="meleeWAV">
-      </item>
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
 
-  <item name="cyclops"
+  <GameItem name="cyclops"
         resource="cyclops"
         flags="GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
+        baseHP="400"
         mass="400">
     <intrinsics>
-      <item name="claw"
-            flags="MELEE_WEAPON INTRINSIC"
+      <MeleeWeapon name="claw"
+            flags="INTRINSIC"
             hardpoint="trigger"
+            meleeDamage="60"
             impactSound="meleeBigWAV">
-      </item>
+      </MeleeWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-   <item name="fireCyclops"
+   <GameItem name="fireCyclops"
         resource="firecyclops"
         flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
+        baseHP="350"
         mass="400">
     <intrinsics>
-      <item name="claw"
+      <MeleeWeapon name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
             hardpoint="trigger"
+            meleeDamage="40"
             impactSound="meleeBigWAV">
-      </item>
-      <item name="breath"
+      </MeleeWeapon>
+      <RangedWeapon name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
             hardpoint="head"
             cooldown="1000"
@@ -459,155 +492,153 @@
             speed ="0.6"
             rangedDamage="30"
             sound="firebigWAV">
-      </item>
+      </RangedWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
  
-   <item name="shockCyclops"
+   <GameItem name="shockCyclops"
         resource="shockcyclops"
         flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
+        baseHP="350"
         mass="400">
     <intrinsics>
-      <item name="claw"
+      <MeleeWeapon name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_SHOCK"
             hardpoint="trigger"
+            meleeDamage="40"
             impactSound="meleeBigWAV">
-      </item>
-      <item name="breath"
+      </MeleeWeapon>
+      <RangedWeapon name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_SHOCK"
             hardpoint="head"
             cooldown="300"
             reload="2000"
             clipCap="10"
             speed ="1.2"
-            rangedDamage="50"
+            rangedDamage="22"
             sound="shockWAV">
-      </item>
+      </RangedWeapon>
     </intrinsics>
-  </item>
+  </GameItem>
 
-  <item name="dummyTarget"
+  <GameItem name="dummyTarget"
         resource="dummyTarget"
         mass="30"
+        baseHP="30"
         />
 
-  <item name="ring"
+  <MeleeWeapon name="ring"
         resource="ring"
         uiIcon="ring"
         flags="MELEE_WEAPON CLICK_THROUGH FLOAT"
 		    procedural="ring"
         nameGen="vikingFemale"
         hardpoint="trigger"
-        meleeDamage="1.4"
+        meleeDamage="16"
         shieldBoost="1.0"
         hpRegen="1.0"
+        mass="2"
+        baseHP="15"
         sound="ringWAV"
         >
-  </item>
+  </MeleeWeapon>
   
-  <item name="pistol"
+  <RangedWeapon name="pistol"
         resource="pistol"
         uiIcon="pistol"
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        baseHP="10"
         accuracy="0.6"
         cooldown="700"
         reload="2000"
         clipCap="4"
-        meleeDamage="0.8"
         rangedDamage="15"
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
         sound="pistolWAV"
         >
-  </item>
+  </RangedWeapon>
 
-  <item name="blaster"
+  <RangedWeapon name="blaster"
         resource="blaster"
         uiIcon="blaster"
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        baseHP="10"
         accuracy="0.8"
         cooldown="500"
         reload="2000"
         clipCap="6"
-        meleeDamage="0.8"
         rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
         sound="blasterWAV"
         >
-  </item>
+  </RangedWeapon>
 
-  <item name="pulse"
+  <RangedWeapon name="pulse"
         resource="pulse"
         uiIcon="pulse"
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="2.0"
-        accuracy="1.0"
+        baseHP="10"
+        accuracy="0.8"
         cooldown="300"
         reload="3000"
         clipCap="12"
-        meleeDamage="0.8"
-        rangedDamage="12"
+        rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
         sound="pulseWAV"
         >
-  </item>
+  </RangedWeapon>
 
-  <item name="beamgun"
+  <RangedWeapon name="beamgun"
         resource="beamgun"
         uiIcon="beamgun"
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        baseHP="10"
         accuracy="1.4"
         cooldown="800"
         reload="3000"
         clipCap="4"
-        meleeDamage="0.8"
-        rangedDamage="20"
+        rangedDamage="18"
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
         sound="beamgunWAV"
         >
-  </item>
+  </RangedWeapon>
 
-  <item name="shield"
+  <Shield name="shield"
         resource="shield"
         uiIcon="shield"
         flags="HELD_AT_HARDPOINT CLICK_THROUGH FLOAT"
         hardpoint="shield"
-        reload ="3000"
-        clipCap="20"
         mass="1.0"
-        absorbsDamage="1.0"
+        baseHP="10"
         procedural="shield"
-        hpRegen="1.0"
+        capacity="40"
+        cooldown="1000"
         >
-  </item>
+  </Shield>
 
-  <item name="xpu"
-        uiIcon="human"
-        flags="CLICK_THROUGH FLOAT SHOCKABLE"
-        mass="1"
-        >
-  </item>
-
-  <item name="tree"
+  <GameItem name="tree"
         resource="tree"
         flags="FLAMMABLE"
         mass ="400"
+        baseHP="400"
         />
 
   <!-- The plant items describe the plants at the smallest height. Scaled from there,
@@ -618,100 +649,110 @@
 
        Don't need DAMAGE_UNDER_WATER: handled by the PlantSim
   -->
-  <item name="plant0"
+  <GameItem name="plant0"
         desc="Orbstalk"
         resource="plant0"
         flags="FLAMMABLE IMMUNE_SHOCK CLICK_THROUGH"
         mass ="5"
+        baseHP="5"
         sun="0.6"
         rain="0.3"
         temperature="0.8"
         />
 
-  <item name="plant1"
+  <GameItem name="plant1"
         desc="Tree"
         resource="plant1"
         flags="FLAMMABLE CLICK_THROUGH"
-        mass ="8"
+        mass="8"
+        baseHP="8"
         sun="0.5"
         rain="0.5"
         temperature="0.5"
         />
 
-  <item name="plant2"
+  <GameItem name="plant2"
         desc="Fern"
         resource="plant2"
         flags="CLICK_THROUGH"
-        mass ="3"
+        mass="3"
+        baseHP="3"
         sun="0.2"
         rain="0.8"
         temperature="0.7"
         />
 
-  <item name="plant3"
+  <GameItem name="plant3"
         desc="CrystalGrass"
         resource="plant3"
         flags="IMMUNE_FIRE SHOCKABLE CLICK_THROUGH"
-        mass ="5"
+        mass="5"
+        baseHP="5"
         sun="0.5"
         rain="0.3"
         temperature="0.1"
         />
 
-  <item name="plant4"
+  <GameItem name="plant4"
         desc="Bamboo"
         resource="plant4"
         flags="FLAMMABLE CLICK_THROUGH"
-        mass ="2"
+        mass="2"
+        baseHP="2.5"
         sun="0.3"
         rain="0.7"
         temperature="0.7"
         />
 
-  <item name="plant5"
+  <GameItem name="plant5"
         desc="Shroom"
         resource="plant5"
         flags="CLICK_THROUGH"
-        mass ="4"
+        mass="4"
+        baseHP="3"
         sun="0.2"
         rain="0.8"
         temperature="0.5"
         />
 
-  <item name="plant6"
+  <GameItem name="plant6"
         desc="SunBloom"
         resource="plant6"
         flags="CLICK_THROUGH"
-        mass ="1.5"
+        mass="1.5"
+        baseHP="1.5"
         sun="0.7"
         rain="0.3"
         temperature="0.7"
         nStage="2"
         />
 
-  <item name="plant7"
+  <GameItem name="plant7"
         desc="MoonBloom"
         resource="plant7"
         flags="CLICK_THROUGH"
-        mass ="1.5"
+        mass="1.5"
+        baseHP="1.5"
         sun="0.7"
         rain="0.3"
         temperature="0.3"
         nStage="2"
         />
 
-  <item name="fruit"
+  <GameItem name="fruit"
         desc="Fruit"
         resource="fruit"
         flags="CLICK_THROUGH"
         mass="5"
+        baseHP="10"
         />
 
-  <item name="elixir"
+  <GameItem name="elixir"
         desc="Elixir"
         resource="elixir"
         flags="CLICK_THROUGH FLAMMABLE SHOCKABLE"
         mass="8"
+        baseHP="10"
         />
 
 </items>
