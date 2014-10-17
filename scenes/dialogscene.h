@@ -21,6 +21,7 @@
 
 class LumosGame;
 class ItemComponent;
+class ReserveBank;
 
 class DialogScene : public Scene
 {
@@ -43,6 +44,7 @@ private:
 	enum { NUM_ITEMS = 4 };
 
 	LumosGame* lumosGame;
+	ReserveBank* reserveBank;
 	gamui::PushButton okay;
 	gamui::PushButton itemArr[NUM_ITEMS];
 

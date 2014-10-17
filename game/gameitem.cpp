@@ -18,6 +18,7 @@
 
 #include "../grinliz/glstringutil.h"
 #include "../engine/serialize.h"
+#include "../engine/model.h"
 
 #include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
@@ -34,9 +35,7 @@ using namespace tinyxml2;
 
 #define READ_FLAG( flags, str, name )	{ if ( strstr( str, #name )) flags |= name; }
 
-#define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
-#define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
-#define READ_BOOL_ATTR( n )				else if ( name == #n ) { n = attr->BoolValue(); }
+#define READ_ATTR( n )			else if ( name == #n ) { ele->QueryAttribute(#n, &n); }
 
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) { f += #name; f += " "; } }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
@@ -75,6 +74,49 @@ void Cooldown::Serialize( XStream* xs, const char* name )
 int GameItem::idPool = 0;
 bool GameItem::trackWallet = true;
 
+
+GameItem* GameItem::Factory(const char* subclass)
+{
+	if (StrEqual(subclass, "GameItem")) {
+		return new GameItem();
+	}
+	else if (StrEqual(subclass, "RangedWeapon")) {
+		return new RangedWeapon();
+	}
+	else if (StrEqual(subclass, "MeleeWeapon")) {
+		return new MeleeWeapon();
+	}
+	else if (StrEqual(subclass, "Shield")) {
+		return new Shield();
+	}
+	GLASSERT(0);
+	return 0;
+}
+
+
+GameItem::GameItem()
+{
+	id = 0;
+	flags = 0;
+	hardpoint  = 0;
+	mass = 1;
+	baseHP = 1;
+	hpRegen = 0;
+	team = 0;
+	traits.Init();
+	personality.Init();
+	GLASSERT(wallet.IsEmpty());
+	wallet.Set(0, 0);
+	keyValues.Clear();
+	historyDB.Clear();
+
+	hp = double(TotalHP());
+	fireTime = 0;
+	shockTime = 0;
+	value			= -1;
+}
+
+
 GameItem::~GameItem()
 { 
 	if (trackWallet) {
@@ -84,64 +126,34 @@ GameItem::~GameItem()
 }
 
 
-// Group all the copy/init in one place!
-void GameItem::CopyFrom( const GameItem* rhs ) {
-	if ( rhs ) {
-		name			= rhs->name;
-		properName		= rhs->properName;
-		key				= rhs->key;
-		resource		= rhs->resource;
-		id				= 0;	// assigned when needed
-		flags			= rhs->flags;
-		hardpoint		= rhs->hardpoint;
-		mass			= rhs->mass;
-		hpRegen			= rhs->hpRegen;
-		team			= rhs->team;
-		meleeDamage		= rhs->meleeDamage;
-		rangedDamage	= rhs->rangedDamage;
-		absorbsDamage	= rhs->absorbsDamage;
-		cooldown		= rhs->cooldown;
-		reload			= rhs->reload;
-		clipCap			= rhs->clipCap;
-		rounds			= rhs->rounds;
-		traits			= rhs->traits;
-		personality		= rhs->personality;
-		wallet			= rhs->wallet;
+GameItem* GameItem::CloneFrom(GameItem* item) const
+{
+	if (!item) item = new GameItem();
+	item->name = name;
+	item->properName = properName;
+	item->resource = resource;
+	item->key = key;
+	item->flags = flags;
+	item->hardpoint = hardpoint;
+	item->mass = mass;
+	item->baseHP = baseHP;
+	item->hpRegen = hpRegen;
+	item->team = team;
+	GLASSERT(wallet.IsEmpty());
+	item->hp = hp;
+	// fireTime, shockTime not copied
+	item->keyValues = keyValues;
+	// History *not* copied.
+	item->traits = traits;
+	item->personality = personality;
+	return item;
+}
 
-		hp				= rhs->hp;
-		fireTime		= rhs->fireTime;
-		shockTime		= rhs->shockTime;
 
-		keyValues		= rhs->keyValues;
-		historyDB		= rhs->historyDB;
-		value			= -1;
-	}
-	else {
-		name = grinliz::IString();
-		properName = grinliz::IString();
-		key  = grinliz::IString();
-		resource = grinliz::IString();
-		id = 0;
-		flags = 0;
-		hardpoint  = 0;
-		mass = 1;
-		hpRegen = 0;
-		team = 0;
-		meleeDamage = 1;
-		rangedDamage = 0;
-		absorbsDamage = 0;
-		clipCap = 0;			// default to no clip and unlimited ammo
-		rounds = clipCap;
-		traits.Init();
-		personality.Init();
-		wallet.EmptyWallet();
-		keyValues.Clear();
-		historyDB.Clear();
-
-		hp = double(TotalHP());
-		fireTime = 0;
-		shockTime = 0;
-		value			= -1;
+void GameItem::Roll(const int *roll)
+{
+	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
+		GetTraitsMutable()->Set( i, roll[i] );
 	}
 }
 
@@ -157,11 +169,6 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, mass );
 	XARC_SER_DEF( xs, hpRegen, 0.0f );
 	XARC_SER_DEF( xs, team, 0 );
-	XARC_SER_DEF( xs, clipCap, 0 );
-	XARC_SER_DEF( xs, rounds, 0 );
-	XARC_SER_DEF( xs, meleeDamage, 1.0f );
-	XARC_SER_DEF( xs, rangedDamage, 0.0f );
-	XARC_SER_DEF( xs, absorbsDamage, 0 );
 	XARC_SER_DEF( xs, fireTime, 0 );
 	XARC_SER_DEF( xs, shockTime, 0 );
 
@@ -170,8 +177,6 @@ void GameItem::Serialize( XStream* xs )
 
 	if ( xs->Saving() ) {
 		CStr<512> f;
-		APPEND_FLAG( flags, f, MELEE_WEAPON );
-		APPEND_FLAG( flags, f, RANGED_WEAPON );
 		APPEND_FLAG( flags, f, INTRINSIC );
 		APPEND_FLAG( flags, f, IMMUNE_FIRE );
 		APPEND_FLAG( flags, f, FLAMMABLE );
@@ -205,8 +210,6 @@ void GameItem::Serialize( XStream* xs )
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
 		if ( attr ) {
 			const char* f = xs->Loading()->Value( attr, 0 );
-			READ_FLAG( flags, f, MELEE_WEAPON );
-			READ_FLAG( flags, f, RANGED_WEAPON );
 			READ_FLAG( flags, f, INTRINSIC );
 			READ_FLAG( flags, f, IMMUNE_FIRE );
 			READ_FLAG( flags, f, FLAMMABLE );
@@ -236,9 +239,6 @@ void GameItem::Serialize( XStream* xs )
 		}
 	}
 
-	cooldown.Serialize( xs, "cooldown" );
-	reload.Serialize( xs, "reload" );
-	
 	keyValues.Serialize( xs, "keyval" );
 	historyDB.Serialize( xs, "historyDB" );
 
@@ -250,113 +250,94 @@ void GameItem::Serialize( XStream* xs )
 	if ( xs->Loading() ) {
 		Track();
 	}
-
-	// In the interest of coding sanity, a weapon
-	// can not be both ranged and melee.
-	GLASSERT( !( (flags & MELEE_WEAPON) && (flags & RANGED_WEAPON) ));
 }
 
 	
-void GameItem::Load( const tinyxml2::XMLElement* ele )
+void GameItem::Load(const tinyxml2::XMLElement* ele)
 {
-	this->CopyFrom( 0 );
-
-	GLASSERT( StrEqual( ele->Name(), "item" ));
-	
-	name		= StringPool::Intern( ele->Attribute( "name" ));
-	properName	= StringPool::Intern( ele->Attribute( "properName" ));
-	resource	= StringPool::Intern( ele->Attribute( "resource" ));
+	name = StringPool::Intern(ele->Attribute("name"));
+	properName = StringPool::Intern(ele->Attribute("properName"));
+	resource = StringPool::Intern(ele->Attribute("resource"));
 	id = 0;
 	flags = 0;
-	const char* f = ele->Attribute( "flags" );
+	const char* f = ele->Attribute("flags");
 
-	if ( f ) {
-		READ_FLAG( flags, f, MELEE_WEAPON );
-		READ_FLAG( flags, f, RANGED_WEAPON );
-		READ_FLAG( flags, f, INTRINSIC );
-		READ_FLAG( flags, f, IMMUNE_FIRE );
-		READ_FLAG( flags, f, FLAMMABLE );
-		READ_FLAG( flags, f, IMMUNE_SHOCK );
-		READ_FLAG( flags, f, SHOCKABLE );
-		READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
-		READ_FLAG( flags, f, EFFECT_FIRE );
-		READ_FLAG( flags, f, EFFECT_SHOCK );
-		READ_FLAG( flags, f, RENDER_TRAIL );
-		READ_FLAG( flags, f, INDESTRUCTABLE );
-		READ_FLAG( flags, f, AI_WANDER_HERD );
-		READ_FLAG( flags, f, AI_WANDER_CIRCLE );
-		READ_FLAG( flags, f, AI_EAT_PLANTS );
-		READ_FLAG( flags, f, AI_HEAL_AT_CORE );
-		READ_FLAG( flags, f, AI_SECTOR_HERD );
-		READ_FLAG( flags, f, AI_SECTOR_WANDER );
-		READ_FLAG( flags, f, AI_USES_BUILDINGS );
-		READ_FLAG( flags, f, AI_DOES_WORK );
-		READ_FLAG( flags, f, GOLD_PICKUP );
-		READ_FLAG( flags, f, ITEM_PICKUP );
-		READ_FLAG( flags, f, HAS_NEEDS );
-		READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
-		READ_FLAG( flags, f, FLOAT );
-		READ_FLAG( flags, f, SUBMARINE );
-		READ_FLAG( flags, f, EXPLODES );
-		READ_FLAG( flags, f, CLICK_THROUGH );
+	if (f) {
+		READ_FLAG(flags, f, INTRINSIC);
+		READ_FLAG(flags, f, IMMUNE_FIRE);
+		READ_FLAG(flags, f, FLAMMABLE);
+		READ_FLAG(flags, f, IMMUNE_SHOCK);
+		READ_FLAG(flags, f, SHOCKABLE);
+		READ_FLAG(flags, f, EFFECT_EXPLOSIVE);
+		READ_FLAG(flags, f, EFFECT_FIRE);
+		READ_FLAG(flags, f, EFFECT_SHOCK);
+		READ_FLAG(flags, f, RENDER_TRAIL);
+		READ_FLAG(flags, f, INDESTRUCTABLE);
+		READ_FLAG(flags, f, AI_WANDER_HERD);
+		READ_FLAG(flags, f, AI_WANDER_CIRCLE);
+		READ_FLAG(flags, f, AI_EAT_PLANTS);
+		READ_FLAG(flags, f, AI_HEAL_AT_CORE);
+		READ_FLAG(flags, f, AI_SECTOR_HERD);
+		READ_FLAG(flags, f, AI_SECTOR_WANDER);
+		READ_FLAG(flags, f, AI_USES_BUILDINGS);
+		READ_FLAG(flags, f, AI_DOES_WORK);
+		READ_FLAG(flags, f, GOLD_PICKUP);
+		READ_FLAG(flags, f, ITEM_PICKUP);
+		READ_FLAG(flags, f, HAS_NEEDS);
+		READ_FLAG(flags, f, DAMAGE_UNDER_WATER);
+		READ_FLAG(flags, f, FLOAT);
+		READ_FLAG(flags, f, SUBMARINE);
+		READ_FLAG(flags, f, EXPLODES);
+		READ_FLAG(flags, f, CLICK_THROUGH);
 	}
-	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
+	for (const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;
-		 attr = attr->Next() )
+		 attr = attr->Next())
 	{
-		IString name = StringPool::Intern( attr->Name() );
-		if ( name == "name" || name == "properName" || name == "desc" || name == "resource" || name == "flags" ) {
+		IString name = StringPool::Intern(attr->Name());
+		if (name == "name" || name == "properName" || name == "desc" || name == "resource" || name == "flags") {
 			// handled above.
 		}
-		else if ( name == "hardpoint" || name == "hp" ) {
+		else if (name == "hardpoint" || name == "hp") {
 			// handled below
 		}
-		else if ( name == "cooldown" ) {
-			cooldown.SetThreshold( attr->IntValue() );
-		}
-		else if ( name == "reload" ) {
-			reload.SetThreshold( attr->IntValue() );
-		}
-		READ_FLOAT_ATTR( mass )
-		READ_FLOAT_ATTR( hpRegen )
-		READ_INT_ATTR( team )
-		READ_FLOAT_ATTR( meleeDamage )
-		READ_FLOAT_ATTR( rangedDamage )
-		READ_FLOAT_ATTR( absorbsDamage )
-		READ_INT_ATTR( clipCap )
-		READ_INT_ATTR( rounds )
-		READ_INT_ATTR( fireTime )
-		READ_INT_ATTR( shockTime )
+		READ_ATTR(mass)
+		READ_ATTR(baseHP)
+		READ_ATTR(hpRegen)
+		READ_ATTR(team)
+		READ_ATTR(fireTime)
+		READ_ATTR(shockTime)
 		else {
 			// What is it??? Tricky stuff.
-			int integer=0;
-			int real=0;
-			int str=0;
+			int integer = 0;
+			int real = 0;
+			int str = 0;
 
-			for( const char* p=attr->Value(); *p; ++p ) {
-				if ( *p == '-' || isdigit(*p) || *p == '+' ) {
+			for (const char* p = attr->Value(); *p; ++p) {
+				if (*p == '-' || isdigit(*p) || *p == '+') {
 					integer++;
 				}
-				else if ( *p == '.' ) {
+				else if (*p == '.') {
 					real++;
 				}
-				else if ( isupper(*p) || islower(*p) ) {
+				else if (isupper(*p) || islower(*p)) {
 					str++;
 				}
 			}
 
-			if ( str )	
-				keyValues.Set( name.c_str(), StringPool::Intern( attr->Value() ));
-			else if ( integer && real )
-				keyValues.Set( name.c_str(), (float)atof( attr->Value()));
-			else if ( integer )
-				keyValues.Set( name.c_str(), atoi( attr->Value()));
+			if (str)
+				keyValues.Set(name.c_str(), StringPool::Intern(attr->Value()));
+			else if (integer && real)
+				keyValues.Set(name.c_str(), (float)atof(attr->Value()));
+			else if (integer)
+				keyValues.Set(name.c_str(), atoi(attr->Value()));
 			else
 				GLASSERT(0);
 		}
 	}
 
-	if ( flags & EFFECT_FIRE )	flags |= IMMUNE_FIRE;
+	if (flags & EFFECT_FIRE)	flags |= IMMUNE_FIRE;
+	GLASSERT((flags & INDESTRUCTABLE) || (baseHP > 1) || (flags & INTRINSIC));
 
 	hardpoint = 0;
 	const char* h = ele->Attribute( "hardpoint" );
@@ -374,8 +355,159 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 }
 
 
-bool GameItem::Use( Chit* parentChit ) {
-	if ( CanUse() ) {
+RangedWeapon::RangedWeapon()
+{
+	rangedDamage = 1;
+	clipCap = 6;
+	accuracy = 1;
+	rounds = clipCap;
+	cooldown.ResetReady();
+	reload.ResetReady();
+}
+
+
+RangedWeapon::~RangedWeapon()
+{}
+
+
+GameItem* RangedWeapon::Clone() const
+{
+	RangedWeapon* r = new RangedWeapon();
+	CloneFrom(r);
+	r->rangedDamage = rangedDamage;
+	r->cooldown = cooldown;
+	r->reload = reload;
+	r->rounds = rounds;
+	r->clipCap = clipCap;
+	r->accuracy = accuracy;
+
+	GLASSERT(r->rangedDamage > 0);
+	GLASSERT(r->rounds > 0);
+	GLASSERT(r->clipCap > 0);
+	GLASSERT(r->accuracy > 0);
+
+	return r;
+}
+
+
+
+void RangedWeapon::Serialize(XStream* xs)
+{
+	XarcOpen( xs, "RangedWeapon" );
+
+	// FIXME: attributes need to be serialized before objects.
+	XARC_SER(xs, clipCap);
+	XARC_SER(xs, rounds);
+	XARC_SER(xs, rangedDamage);
+	XARC_SER(xs, accuracy);
+
+	super::Serialize(xs);
+
+	cooldown.Serialize(xs, "cooldown");
+	reload.Serialize(xs, "reload");
+	XarcClose(xs);
+}
+
+
+void RangedWeapon::Load(const tinyxml2::XMLElement* ele)
+{
+	super::Load(ele);
+	ele->QueryAttribute("clipCap", &clipCap);
+	ele->QueryAttribute("rangedDamage", &rangedDamage);
+	ele->QueryAttribute("accuracy", &accuracy);
+
+	int c = 0, r = 0;
+	ele->QueryAttribute("cooldown", &c);
+	ele->QueryAttribute("reload", &r);
+
+	if (c) cooldown.SetThreshold(c);
+	if (r) reload.SetThreshold(r);
+
+	rounds = clipCap;
+}
+
+
+void RangedWeapon::Roll(const int* roll)
+{
+	super::Roll(roll);
+
+	// Accuracy and Damage are effected by traits + level.
+	// Speed, ClipCap, Reload by traits. (And only at creation.)
+	// Accuracy:	DEX, level		
+	// Damage:		STR, level, rangedDamage
+	//
+	// Fixed at creation:
+	// Cooldown:	WILL
+	// ClipCap:		CHR		
+	// Reload:		INT
+
+	float cool = (float)cooldown.Threshold();
+	// Fire rate can get a little out of control; tune
+	// it down by a factor of 0.5
+	cool *= (0.5f + 0.5f*Dice3D6ToMult(Traits().Get(GameTrait::ALT_COOL)));
+	// FIXME: should be set by constants from itemdef, as these limits
+	// are pulled from that range. Fastest weapon (pulse) at 300 cooldown,
+	// so limit to 1/5 second.
+	cooldown.SetThreshold( Clamp( (int)cool, 200, 3000 ));
+
+	float fcc = (float)clipCap;
+	fcc *= Dice3D6ToMult( Traits().Get( GameTrait::ALT_CAPACITY ));
+	clipCap = Clamp( (int)fcc, 1, 100 );
+
+	float fr = (float)reload.Threshold();
+	fr /= Dice3D6ToMult( Traits().Get( GameTrait::ALT_RELOAD ));
+	reload.SetThreshold( Clamp( (int)fr, 100, 3000 ));
+
+	cooldown.ResetReady();
+	rounds = clipCap;
+	reload.ResetReady();
+}
+
+
+int RangedWeapon::DoTick(U32 delta)
+{
+	int tick = super::DoTick(delta);
+
+	cooldown.Tick(delta);
+	if (reload.Tick(delta)) {
+		rounds = clipCap;
+	}
+
+	if (!cooldown.CanUse() || !reload.CanUse()) {
+		tick = 0;
+	}
+	return tick;
+}
+
+
+float RangedWeapon::BoltSpeed() const
+{
+	static const float SPEED = 10.0f;
+	float speed = 1.0f;
+	keyValues.Get(ISC::speed, &speed);
+	return SPEED * speed;
+}
+
+
+float RangedWeapon::Damage() const
+{
+	return rangedDamage * Traits().Damage();
+}
+
+float RangedWeapon::Accuracy() const
+{
+	return accuracy * Traits().Accuracy();
+}
+
+
+bool RangedWeapon::CanShoot() const 
+{
+	return !CoolingDown() && !Reloading() && HasRound();
+}
+
+
+bool RangedWeapon::Shoot( Chit* parentChit ) {
+	if ( CanShoot() ) {
 		UseRound();
 		cooldown.Use();
 		if ( parentChit ) {
@@ -387,7 +519,8 @@ bool GameItem::Use( Chit* parentChit ) {
 }
 
 
-bool GameItem::Reload( Chit* parentChit ) {
+bool RangedWeapon::Reload( Chit* parentChit ) 
+{
 	if ( CanReload()) {
 		reload.Use();
 		if ( parentChit ) {
@@ -403,7 +536,7 @@ bool GameItem::Reload( Chit* parentChit ) {
 }
 
 
-void GameItem::UseRound() { 
+void RangedWeapon::UseRound() { 
 	if ( clipCap > 0 ) { 
 		GLASSERT( rounds > 0 ); 
 		--rounds; 
@@ -411,19 +544,96 @@ void GameItem::UseRound() {
 }
 
 
+float RangedWeapon::ReloadFraction() const
+{
+	return float(reload.Fraction());
+}
+
+
+float RangedWeapon::RoundsFraction() const
+{
+	if (clipCap) {
+		return float(rounds) / float(clipCap);
+	}
+	return 1;
+}
+
+
+MeleeWeapon::MeleeWeapon()
+{
+	meleeDamage = 10;
+}
+
+
+GameItem* MeleeWeapon::Clone() const
+{
+	MeleeWeapon* m = new MeleeWeapon();
+	CloneFrom(m);
+	m->meleeDamage = meleeDamage;
+	return m;
+}
+
+
+void MeleeWeapon::Serialize(XStream* xs)
+{
+	XarcOpen( xs, "MeleeWeapon" );
+	XARC_SER(xs, meleeDamage);
+	super::Serialize(xs);
+	XarcClose(xs);
+}
+
+
+void MeleeWeapon::Load(const tinyxml2::XMLElement* ele)
+{
+	ele->QueryAttribute("meleeDamage", &meleeDamage);
+	super::Load(ele);
+}
+
+
+void MeleeWeapon::Roll(const int* traits)
+{
+	// nothing set on Roll.
+}
+
+
+float MeleeWeapon::Damage() const
+{
+	return meleeDamage * Traits().Damage();
+}
+
+float MeleeWeapon::ShieldBoost() const
+{
+	float value = 1.0f;
+	keyValues.Get( ISC::shieldBoost, &value ); 
+	float boost = value * Traits().NormalLeveledTrait( GameTrait::CHR );
+	return Max(boost, 1.0f);
+}
+
+
+int MeleeWeapon::CalcMeleeCycleTime() const
+{
+	int meleeTime = 1000;
+	if ( !IResourceName().empty() ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( ResourceName(), false );
+		if ( res ) {
+			IString animName = res->header.animation;
+			if ( !animName.empty() ) {
+				const AnimationResource* animRes = AnimationResourceManager::Instance()->GetResource( animName.c_str() );
+				if ( animRes ) {
+					meleeTime = animRes->Duration( ANIM_MELEE );
+				}
+			}
+		}
+	}
+	return meleeTime;
+}
+
+
 int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
+	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
 	float deltaF = float(delta) * 0.001f;
-
-	cooldown.Tick( delta );
-	if ( reload.Tick( delta ) ) {
-		rounds = clipCap;
-	}
-
-	if ( !cooldown.CanUse() || !reload.CanUse() ) {
-		tick = 0;
-	}
 
 	double savedHP = hp;
 	if ( flags & IMMUNE_FIRE )		fireTime = 0;
@@ -535,12 +745,13 @@ int GameItem::GetValue() const
 		else value = LRintf(v);
 	}
 
-	if ( ToShield() ) {
-		int rounds = ClipCap();
+	const Shield* shield = ToShield();
+	if (shield) {
 		const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
-		int refRounds = basic.ClipCap();
+		const Shield* refShield = basic.ToShield();
+		GLASSERT(refShield);
 
-		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+		float v = float(refShield->ShieldRechargeTime()) * SHIELD_VALUE / float(shield->ShieldRechargeTime());
 
 		if ( flags & GameItem::EFFECT_FIRE )  v *= 2.0f;
 		if ( flags & GameItem::EFFECT_SHOCK ) v *= 2.0f;
@@ -724,3 +935,106 @@ void DamageDesc::Log()
 }
 
 
+Shield::Shield()
+{
+	charge = 0;
+	capacity = 10;
+	cooldown.SetThreshold(10);
+	cooldown.ResetReady();
+}
+
+
+Shield::~Shield()
+{}
+
+
+GameItem* Shield::Clone() const
+{
+	Shield* s = new Shield();
+	CloneFrom(s);
+	s->charge = charge;
+	s->capacity = capacity;
+	s->cooldown = cooldown;
+
+	GLASSERT(s->capacity);
+	return s;
+}
+
+void Shield::Serialize(XStream* xs)
+{
+	XarcOpen( xs, "Shield" );
+
+	// FIXME: attributes need to be serialized before objects.
+	XARC_SER(xs, charge);
+	XARC_SER(xs, capacity);
+
+	super::Serialize(xs);
+
+	cooldown.Serialize(xs, "cooldown");
+	XarcClose(xs);
+}
+
+
+void Shield::Load(const tinyxml2::XMLElement* ele)
+{
+	super::Load(ele);
+	ele->QueryAttribute("capacity", &capacity);
+	charge = capacity;
+
+	int c = 0;
+	ele->QueryAttribute("cooldown", &c);
+
+	if (c) cooldown.SetThreshold(c);
+}
+
+
+int Shield::DoTick(U32 delta)
+{
+	int tick = super::DoTick(delta);
+	if (cooldown.CanUse()) {
+		charge += Travel(capacity / 2.0f, delta);
+		if (charge > capacity)
+			charge = capacity;
+	}
+	cooldown.Tick(delta);
+
+	if (!cooldown.CanUse() || charge < capacity) {
+		return 0;
+	}
+	return tick;
+}
+
+
+void Shield::Roll(const int* traits)
+{
+	super::Roll(traits);
+	float fc = capacity;
+	fc *= Dice3D6ToMult(Traits().Get(GameTrait::ALT_CAPACITY));
+	capacity = fc;
+
+	float fcd = (float)cooldown.Threshold();
+	fcd /= Dice3D6ToMult(Traits().Get(GameTrait::ALT_COOL));
+	cooldown.SetThreshold(int(fcd));
+
+	charge = capacity;
+	cooldown.ResetReady();
+}
+
+
+void Shield::AbsorbDamage(DamageDesc* dd, float boost)
+{
+	if (Active()) {
+		if (flags & EFFECT_FIRE)	dd->effects &= (~EFFECT_FIRE);
+		if (flags & EFFECT_SHOCK)	dd->effects &= (~EFFECT_SHOCK);
+
+		if (charge >= dd->damage) {
+			charge -= dd->damage;
+			dd->damage = 0;
+		}
+		else {
+			dd->damage -= charge;
+			charge = 0;
+		}
+	}
+	cooldown.ResetUnready();
+}

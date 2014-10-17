@@ -415,7 +415,7 @@ public:
 		return temp;
 	}
 
-	int Find( const T& key ) {
+	int Find( const T& key ) const { 
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == key )
 				return i;

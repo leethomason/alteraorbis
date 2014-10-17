@@ -257,12 +257,15 @@ bool RenderComponent::Attach( int metaData, const char* asset )
 	const ChitContext* context = Context();
 	if ( model[metaData] ) {
 		context->engine->FreeModel( model[metaData] );
+		model[metaData] = 0;
 	}
 
-	// If we are already added (model[0] exists) add the attachments.
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
-	model[metaData] = context->engine->AllocModel( res );
-	model[metaData]->userData = parentChit;
+	if (asset && *asset) {
+		// If we are already added (model[0] exists) add the attachments.
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource(asset);
+		model[metaData] = context->engine->AllocModel(res);
+		model[metaData]->userData = parentChit;
+	}
 	return true;
 }
 

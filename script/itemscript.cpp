@@ -38,11 +38,14 @@ void ItemDefDB::Load( const char* path )
 	if ( !doc.Error() ) {
 		const XMLElement* itemsEle = doc.RootElement();
 		GLASSERT( itemsEle );
-		for( const XMLElement* itemEle = itemsEle->FirstChildElement( "item" );
+		for( const XMLElement* itemEle = itemsEle->FirstChildElement();
 			 itemEle;
-			 itemEle = itemEle->NextSiblingElement( "item" ) )
+			 itemEle = itemEle->NextSiblingElement())
 		{
-			GameItem* item = new GameItem();
+			GameItem* item = GameItem::Factory(itemEle->Name());
+			GLASSERT(item);
+			if (!item) continue;
+
 			item->Load( itemEle );
 			item->key = item->IName();
 			GLASSERT( !map.Query( item->key.c_str(), 0 ));
@@ -60,11 +63,12 @@ void ItemDefDB::Load( const char* path )
 			const XMLElement* intrinsicEle = itemEle->FirstChildElement( "intrinsics" );
 			if ( intrinsicEle ) {
 				int nSub = 0;
-				for( const XMLElement* subItemEle = intrinsicEle->FirstChildElement( "item" );
+				for( const XMLElement* subItemEle = intrinsicEle->FirstChildElement();
 					 subItemEle;
-					 subItemEle = subItemEle->NextSiblingElement( "item" ), ++nSub )
+					 subItemEle = subItemEle->NextSiblingElement(), ++nSub )
 				{
-					GameItem* subItem = new GameItem();
+					GameItem* subItem = GameItem::Factory(subItemEle->Name());
+					GLASSERT(subItem);
 					subItem->Load( subItemEle );
 
 					// Patch the name to make a sub-item
@@ -93,11 +97,8 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 	else {
 		map.Query( name, &item );
 	}
-	if ( item ) {
-		return *item;
-	}
-	GLASSERT( 0 );
-	return nullItem;
+	GLASSERT(item);
+	return *item;
 }
 
 
@@ -137,91 +138,60 @@ void ItemDefDB::Get( const char* name, GameItemArr* arr )
 	}
 }
 
-
-void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item )
-{
-	// Accuracy and Damage are effected by traits + level.
-	// Speed, ClipCap, Reload by traits. (And only at creation.)
-	// Accuracy:	DEX, level		
-	// Damage:		STR, level, rangedDamage
-	//
-	// Fixed at creation:
-	// Cooldown:	WILL
-	// ClipCap:		CHR		
-	// Reload:		INT
-
-	*item = base;
-	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-		item->GetTraitsMutable()->Set( i, roll[i] );
-	}
-
-	float cool = (float)item->cooldown.Threshold();
-	// Fire rate can get a little out of control; tune
-	// it down by a factor of 0.5
-	cool *= (0.5f + 0.5f*Dice3D6ToMult(item->Traits().Get(GameTrait::ALT_COOL)));
-	// FIXME: should be set by constants from itemdef, as these limits
-	// are pulled from that range. Fastest weapon (pulse) at 300 cooldown,
-	// so limit to 1/5 second.
-	item->cooldown.SetThreshold( Clamp( (int)cool, 200, 3000 ));
-
-	float clipCap = (float)base.clipCap;
-	clipCap *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_CAPACITY ));
-	item->clipCap = Clamp( (int)clipCap, 1, 100 );
-
-	float reload = (float)base.reload.Threshold();
-	reload /= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_RELOAD ));
-	item->reload.SetThreshold( Clamp( (int)reload, 100, 3000 ));
-}
-
-
 void ItemDefDB::DumpWeaponStats()
 {
-	GameItem humanMale = this->Get( "humanMale" );
+	const GameItem& humanMale = this->Get( "humanMale" );
 
 	GLString path;
 	GetSystemPath(GAME_SAVE_DIR, "weapons.txt", &path);
 	FILE* fp = fopen( path.c_str(), "w" );
 	GLASSERT( fp );
 
-	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s\n", "Name", "Dam", "DPS", "C-DPS", "EffR" );
+	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s %-10s\n", "Name", "Dam", "DPS", "C-DPS", "EffR", "ClosingD" );
 	for( int i=0; i<topNames.Size(); ++i ) {
 		const char* name = topNames[i].c_str();
 		GameItemArr arr;
 		Get( name, &arr );
 
 		for( int j=0; j<arr.Size(); ++j ) {
-			if ( arr[j]->ToMeleeWeapon() ) {
+			const MeleeWeapon* meleeWeapon = arr[j]->ToMeleeWeapon();
+			const RangedWeapon* rangedWeapon = arr[j]->ToRangedWeapon();
+
+			if (meleeWeapon) {
 
 				DamageDesc dd;
 				if ( j>0 ) {
-					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), arr[j]->Name() );
-					BattleMechanics::CalcMeleeDamage( arr[0], arr[j]->ToMeleeWeapon(), &dd );
+					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), meleeWeapon->Name() );
+					BattleMechanics::CalcMeleeDamage( arr[0], meleeWeapon, &dd );
 				}
 				else {			
-					fprintf( fp, "%-25s ", arr[j]->Name() );
-					BattleMechanics::CalcMeleeDamage( &humanMale, arr[j]->ToMeleeWeapon(), &dd );
+					fprintf( fp, "%-25s ", meleeWeapon->Name() );
+					BattleMechanics::CalcMeleeDamage( &humanMale, meleeWeapon, &dd );
 				}
-				fprintf( fp, "%5.1f %5.1f ", dd.damage, BattleMechanics::MeleeDPTU( &humanMale, arr[j]->ToMeleeWeapon()));
+				fprintf( fp, "%5.1f %5.1f ", dd.damage, BattleMechanics::MeleeDPTU( &humanMale, meleeWeapon));
 				fprintf( fp, "\n" ); 
 			}
-			if ( arr[j]->ToRangedWeapon() ) {
+			if (rangedWeapon) {
 				float radAt1 = 1;
 
 				if ( j>0 ) {
-					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), arr[j]->Name() );
-					radAt1 = BattleMechanics::ComputeRadAt1( arr[0], arr[j]->ToRangedWeapon(), false, false );
+					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), rangedWeapon->Name() );
+					radAt1 = BattleMechanics::ComputeRadAt1( arr[0], rangedWeapon, false, false );
 				}
 				else {
-					fprintf( fp, "%-25s ", arr[j]->Name() );
-					radAt1 = BattleMechanics::ComputeRadAt1( &humanMale, arr[j]->ToRangedWeapon(), false, false );
+					fprintf( fp, "%-25s ", rangedWeapon->Name() );
+					radAt1 = BattleMechanics::ComputeRadAt1( &humanMale, rangedWeapon, false, false );
 				}
 
 				float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 
-				float dps  = BattleMechanics::RangedDPTU( arr[j]->ToRangedWeapon(), false );
-				float cdps = BattleMechanics::RangedDPTU( arr[j]->ToRangedWeapon(), true );
+				float dps  = BattleMechanics::RangedDPTU( rangedWeapon, false );
+				float cdps = BattleMechanics::RangedDPTU( rangedWeapon, true );
+				
+				float time = effectiveRange / DEFAULT_MOVE_SPEED;
+				float closingD = cdps * time;
 
-				fprintf( fp, "%5.1f %5.1f %5.1f %5.1f", arr[j]->rangedDamage, dps, cdps, effectiveRange );
+				fprintf( fp, "%5.1f %5.1f %5.1f %5.1f %8.1f", rangedWeapon->Damage(), dps, cdps, effectiveRange, closingD );
 				fprintf( fp, "\n" ); 
 			}
 		}

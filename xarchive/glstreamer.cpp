@@ -457,14 +457,27 @@ void StreamWriter::SetArr( const char* key, const double* value, int n )
 	}
 }
 
-StreamReader::StreamReader( FILE* p_fp ) : XStream(), fp( p_fp ), depth(0), version(0)
+StreamReader::StreamReader(FILE* p_fp) : XStream(), fp(p_fp), depth(0), version(0), peekElementName(0)
 {
 	version = ReadInt();
+}
+
+const char* StreamReader::PeekElement()
+{
+	GLASSERT(peekElementName == 0);
+	peekElementName = OpenElement();
+	return peekElementName;
 }
 
 
 const char* StreamReader::OpenElement()
 {
+	if (peekElementName) {
+		const char* r = peekElementName;
+		peekElementName = 0;
+		return r;
+	}
+
 	int node = ReadInt();
 	GLASSERT( node == BEGIN_ELEMENT );
 	const char* elementName = ReadString();

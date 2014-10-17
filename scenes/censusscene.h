@@ -124,8 +124,7 @@ private:
 	gamui::ToggleButton	radio[NUM_GROUPS];
 
 	// stuff to scan for:
-	Wallet	allWallet, 
-			mobWallet;
+	TransactAmt	allWallet, mobWallet;
 
 	void AddToHistory(const ItemHistory& h);
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryScore> domains;

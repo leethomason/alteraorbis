@@ -4,8 +4,9 @@
 #include "../grinliz/glrandom.h"
 
 class ItemComponent;
-struct Wallet;
+class Wallet;
 class GameItem;
+class TransactAmt;
 
 class ForgeScript
 {
@@ -49,7 +50,7 @@ public:
 
 	static GameItem* DoForge(	int itemType,		// GUN, etc.
 								const Wallet& avail,
-								Wallet* cost,
+								TransactAmt* cost,
 								int partsMask,
 								int effectsMask,
 								int tech,
@@ -57,12 +58,11 @@ public:
 								int seed);
 
 
-	void Build(	int itemType,		// GUN
+	GameItem* Build(	int itemType,		// GUN
 				int subItemType,	// BLASTER
 				int partsFlags,		// WeaponGen::GUN_CELL, etc.	
 				int effectsFlags,	// GameItem effect flags, not enumeration above. GameItem::EFFECT_FIRE, etc.
-				GameItem* target,
-				Wallet* required,
+				TransactAmt* required,
 				int* techRequired,
 				bool randomTraits );			
 

@@ -980,8 +980,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		CoreScript* cs = GetHomeCore();
 		if (cs) {
 			Chit* coreChit = cs->ParentChit();
-			if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
-				Transfer(&ReserveBank::Instance()->bank, &coreChit->GetItem()->wallet, WORKER_BOT_COST);
+			if (coreChit->GetItem()->wallet.Gold() >= WORKER_BOT_COST) {
+				ReserveBank::GetWallet()->Deposit(coreChit->GetWallet(), WORKER_BOT_COST);
 				int team = coreChit->GetItem()->team;
 				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
 			}
@@ -1027,10 +1027,11 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if (item == &swapWeapons) {
-		Chit* player = GetPlayerChit();
-		if (player && player->GetItemComponent()) {
-			player->GetItemComponent()->SwapWeapons();
-		}
+		GLASSERT(0);
+//		Chit* player = GetPlayerChit();
+//		if (player && player->GetItemComponent()) {
+//			player->GetItemComponent()->SwapWeapons();
+//		}
 	}
 	else if ( item == &useBuildingButton ) {
 		sim->UseBuilding();
@@ -1334,8 +1335,7 @@ void GameScene::HandleHotKey( int mask )
 		CoreScript* cs = GetHomeCore();
 		if ( cs ) {
 			static const int GOLD = 100;
-			ReserveBank::Instance()->bank.AddGold( -GOLD );
-			cs->ParentChit()->GetItem()->wallet.AddGold( GOLD );
+			cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), GOLD);
 		}
 	}
 	else if (mask == GAME_HK_CHEAT_ELIXIR) {
@@ -1347,12 +1347,8 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
 		CoreScript* cs = GetHomeCore();
 		if ( cs ) {
-			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-				if ( ReserveBank::Instance()->bank.crystal[i] ) {
-					ReserveBank::Instance()->bank.AddCrystal( i, -1 );
-					cs->ParentChit()->GetItem()->wallet.AddCrystal(i, 1 );
-				}
-			}
+			int crystal[NUM_CRYSTAL_TYPES] = { 1 };
+			cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 0, crystal);
 		}
 	}
 	else if ( mask == GAME_HK_CHEAT_TECH ) {
@@ -2014,7 +2010,7 @@ void GameScene::DialogResult(const char* name, void* data)
 			GLASSERT(parent);
 			GameItem* item = parent->GetItem();
 			GLASSERT(item);
-			Transfer(&item->wallet, &bank->bank, 250);
+			item->wallet.Deposit(&bank->wallet, 250);
 		}
 	}
 	gamui2D.PopDialog();
@@ -2073,10 +2069,10 @@ void GameScene::DrawDebugText()
 		engine->CameraLookingAt( &at );
 	}
 
-	Wallet w = ReserveBank::Instance()->bank;
+	const Wallet& w = ReserveBank::Instance()->wallet;
 	ufoText->Draw( x, y,	"ticks=%d/%d Reserve Au=%d G=%d R=%d B=%d V=%d", 
 							chitBag->NumTicked(), chitBag->NumChits(),
-							w.gold, w.crystal[0], w.crystal[1], w.crystal[2], w.crystal[3] ); 
+							w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3) ); 
 	y += 16;
 
 	int typeCount[NUM_PLANT_TYPES];

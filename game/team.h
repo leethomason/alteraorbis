@@ -37,6 +37,11 @@ enum {
 	NUM_TEAMS
 };
 
+enum {
+	TEAM_ID_LEFT  = 0xfffff1,
+	TEAM_ID_RIGHT = 0xfffff2,
+};
+
 
 enum {
 	RELATE_FRIEND,

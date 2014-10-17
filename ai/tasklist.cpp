@@ -483,10 +483,10 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
 			GLASSERT( nElixir > 0 );
 
-			int index = ic->FindItem(ISC::elixir);
-			GLASSERT(index >= 0);
-			if (index >= 0) {
-				GameItem* item = ic->RemoveFromInventory(index);
+			const GameItem* elixir = ic->FindItem(ISC::elixir);
+			GLASSERT(elixir);
+			if (elixir) {
+				GameItem* item = ic->RemoveFromInventory(elixir);
 				delete item;
 			}
 		}
@@ -533,10 +533,9 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 				crystal[type] = n;
 
-				if (bank->CanBuy(crystal)) {
-					bank->Buy(&thisComp.item->wallet, crystal);
-					usedExchange = true;
-				}
+				// The reserve never runs out of money.
+				bank->Buy(&thisComp.item->wallet, crystal);
+				usedExchange = true;
 			}
 		}
 	}
@@ -555,10 +554,8 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 				crystal[type] = 1;
 
-				if (bank->CanBuy(crystal)) {
-					bank->Buy(&thisComp.item->wallet, crystal);
-					usedExchange = true;
-				}
+				bank->Buy(&thisComp.item->wallet, crystal);
+				usedExchange = true;
 			}
 		}
 	}
@@ -578,30 +575,27 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	// 'ranged', 'melee', and 'shield', so return
 	// if that happens. We can come back later.
 
-	GameItem* ranged = 0, *melee = 0, *shield = 0;
+	const GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	// Transfer money from reserve to market:
-	if (!ReserveBank::Instance() || ReserveBank::Instance()->wallet.Gold() < 1500) {
-		return;
-	}
-	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->wallet, 1000);
+	market->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
 
 	MarketAI marketAI( market );
 
 	// Should be sorted, but just in case:
-	thisComp.itemComponent->SortInventory();
-	market->GetItemComponent()->SortInventory();
+//	thisComp.itemComponent->SortInventory();
+//	market->GetItemComponent()->SortInventory();
 
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-		GameItem* gi = thisComp.itemComponent->GetItem( i );
+		const GameItem* gi = thisComp.itemComponent->GetItem( i );
 		if ( gi && !gi->Intrinsic() ) {
-			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
+			if ( !ranged && gi->ToRangedWeapon()) {
 				ranged = gi;
 			}
-			else if ( !melee && !(gi->flags & GameItem::RANGED_WEAPON) && (gi->flags & GameItem::MELEE_WEAPON) ) {
+			else if ( !melee && gi->ToMeleeWeapon() ) {
 				melee = gi;
 			}
 			else if ( !shield && gi->ToShield() ) {
@@ -614,10 +608,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	bool boughtStuff = false;
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
-		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, 1 );
+		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.Gold(), 1 );
 		if ( i == 1 && !shield )
-			purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
-		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
+			purchase = marketAI.HasShield( thisComp.item->wallet.Gold(), 1 );
+		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.Gold(), 1 );
 		if ( purchase ) {
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
@@ -630,11 +624,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	if (!boughtStuff) {
 		// Sell the extras.
-		int itemToSell = 0;
+		const GameItem* itemToSell = 0;
 		while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
-			GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
-			int value = gi->GetValue();
-			int sold = MarketAI::Transact(gi,
+			int value = itemToSell->GetValue();
+			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
 				thisComp.itemComponent,		// seller
 				0,							// no sales tax when selling to the market.
@@ -652,9 +645,9 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		// by a non-critical. Also, personality probably should factor in to purchasing decisions.
 		for (int i = 0; i < 3; ++i) {
 			const GameItem* purchase = 0;
-			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.gold, ranged->GetValue() * 2);
-			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.gold, shield->GetValue() * 2);
-			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.gold, melee->GetValue() * 2);
+			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.Gold(), ranged->GetValue() * 2);
+			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.Gold(), shield->GetValue() * 2);
+			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.Gold(), melee->GetValue() * 2);
 			if (purchase) {
 
 				MarketAI::Transact(purchase,
@@ -665,7 +658,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			}
 		}
 	}
-	Transfer(&ReserveBank::Instance()->bank, &market->GetItem()->wallet, market->GetItem()->wallet);
+	ReserveBank::GetWallet()->Deposit(market->GetWallet(), *(market->GetWallet()));
 }
 
 
@@ -675,9 +668,9 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		return false;
 	}
 
-	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-	IShield* shield = thisComp.itemComponent->GetShield();
+	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+	Shield* shield = thisComp.itemComponent->GetShield();
 
 	int itemType = 0;
 	Random& random = thisComp.chit->random;
@@ -691,12 +684,12 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 
 	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
 	int level = thisComp.item->Traits().Level();
-	Wallet cost;
+	TransactAmt cost;
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
 	GameItem* item = ForgeScript::DoForge(itemType, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
 	if (item) {
-		Transfer(&item->wallet, &thisComp.item->wallet, cost);
+		item->wallet.Deposit(&thisComp.item->wallet, cost);
 		thisComp.itemComponent->AddToInventory(item);
 		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
 		thisComp.item->historyDB.Increment("Crafted");

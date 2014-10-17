@@ -28,7 +28,7 @@ class XStream;
 class LumosChitBag;
 class Model;
 class Engine;
-struct Wallet;
+class Wallet;
 class Chit;
 
 

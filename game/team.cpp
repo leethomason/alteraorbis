@@ -73,8 +73,9 @@ int Team::GetTeam( const grinliz::IString& itemName )
 int Team::GetRelationship( int _t0, int _t1 )
 {
 	int t0 = 0, t1 = 0;
-	SplitID(_t0, &t0, 0);
-	SplitID(_t1, &t1, 0);
+	int g0 = 0, g1  =0 ;
+	SplitID(_t0, &t0, &g0);
+	SplitID(_t1, &t1, &g1);
 
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
@@ -104,6 +105,14 @@ int Team::GetRelationship( int _t0, int _t1 )
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
 	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);
 	GLASSERT(t1 >= t0);
+
+	// Special handling for left/right battle scene matchups:
+	if (   t0 == t1 
+		&& ((g0 == TEAM_ID_LEFT && g1 == TEAM_ID_RIGHT) || (g0 == TEAM_ID_RIGHT && g1 == TEAM_ID_LEFT))) 
+	{
+		return RELATE_ENEMY;
+	}
+
 	return relate[t0-OFFSET][t1-OFFSET];
 }
 

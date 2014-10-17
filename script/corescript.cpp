@@ -545,7 +545,7 @@ void CoreScript::UpdateScore(int n)
 		}
 	}
 	if (ParentChit()->GetItem()) {
-		achievement.gold = Max(achievement.gold, ParentChit()->GetItem()->wallet.gold);
+		achievement.gold = Max(achievement.gold, ParentChit()->GetItem()->wallet.Gold());
 		achievement.population = Max(achievement.population, citizens.Size());
 	}
 }

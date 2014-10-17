@@ -147,7 +147,7 @@ void AIComponent::OnRemove()
 }
 
 
-bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, const RangedWeapon* weapon )
 {
 	Vector3F origin, dest;
 	GLASSERT( weapon );
@@ -408,9 +408,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 			return;
 		}
 		// Reloading is always a good background task.
-		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-		if ( rangedWeapon && rangedWeapon->GetItem()->CanReload() ) {
-			rangedWeapon->GetItem()->Reload( parentChit );
+		RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+		if ( rangedWeapon && rangedWeapon->CanReload() ) {
+			rangedWeapon->Reload( parentChit );
 		}
 	}
 	else {
@@ -418,16 +418,14 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
-		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-		GameItem* ranged = rangedWeapon ? rangedWeapon->GetItem() : 0;
-
-		if ( ranged ) {
+		RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+		if ( rangedWeapon ) {
 			Vector3F heading = thisComp.spatial->GetHeading();
-			bool explosive = (ranged->GetItem()->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
+			bool explosive = (rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
 
-			if ( ranged->CanUse() ) {
+			if ( rangedWeapon->CanShoot() ) {
 				float radAt1 = BattleMechanics::ComputeRadAt1( thisComp.chit->GetItem(), 
-															   ranged->ToRangedWeapon(),
+															   rangedWeapon,
 															   true,
 															   true );	// Doesn't matter to utility.
 
@@ -437,7 +435,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 						continue;
 					}
 					Vector3F p0;
-					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0 );
+					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, rangedWeapon->BoltSpeed(), &p0 );
 					Vector3F normal = p1 - p0;
 					normal.Normalize();
 					float range = (p0-p1).Length();
@@ -459,9 +457,8 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				}
 			}
 			float utilityReload = 0.0f;
-			GameItem* rangedItem = ranged->GetItem();
-			if ( rangedItem->CanReload() ) {
-				utilityReload = 1.0f - rangedItem->RoundsFraction();
+			if ( rangedWeapon->CanReload() ) {
+				utilityReload = 1.0f - rangedWeapon->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
 				if ( debugFlag ) {
@@ -469,18 +466,18 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				}
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
-					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
+					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, rangedWeapon->BoltSpeed(), 0 );
 					BattleMechanics::Shoot(	Context()->chitBag, 
 											thisComp.chit, 
 											leading, 
 											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
-											ranged->ToRangedWeapon() );
+											rangedWeapon );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->RunAndGun\n" ));
 					}
 				}
 				else {
-					ranged->Reload( parentChit );
+					rangedWeapon->Reload( parentChit );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->Reload\n" ));
 					}
@@ -496,6 +493,9 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	bool pointed = false;
 	Vector3F leading = { 0, 0, 0 };
 	bool isMoving = false;
+	RangedWeapon* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+	GLASSERT(weapon);
+	if (!weapon) return;
 
 	if ( targetDesc.id ) {
 		ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
@@ -504,7 +504,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			return;
 		}
 
-		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, 0 );
+		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, weapon->BoltSpeed(), 0 );
 		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
 	}
 	else if ( !targetDesc.mapPos.IsZero() ) {
@@ -536,12 +536,10 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		return;
 	}
 
-	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 	if ( weapon ) {
-		GameItem* item = weapon->GetItem();
-		if ( item->HasRound() ) {
+		if ( weapon->HasRound() ) {
 			// Has round. May be in cooldown.
-			if ( item->CanUse() ) {
+			if ( weapon->CanShoot() ) {
 				BattleMechanics::Shoot(	Context()->chitBag, 
 										parentChit, 
 										leading,
@@ -550,7 +548,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			}
 		}
 		else {
-			item->Reload( parentChit );
+			weapon->Reload( parentChit );
 			// Out of ammo - do something else.
 			currentAction = NO_ACTION;
 		}
@@ -560,7 +558,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
-	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
+	MeleeWeapon* weapon = thisComp.itemComponent->GetMeleeWeapon();
 	ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 	const ChitContext* context = Context();
@@ -578,16 +576,15 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		currentAction = NO_ACTION;
 		return;
 	}
-	GameItem* item = weapon->GetItem();
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString(ISC::sound);
+		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
@@ -605,9 +602,9 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString(ISC::sound);
+		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
@@ -931,11 +928,9 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 		return false;
 	const ChitContext* context = Context();
 
-	// Need a melee weapon to rampage. Ranged is never used.
-	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-	if ( !melee && ( !reserve || !reserve->ToMeleeWeapon() ))
-		return false;
+	// Need a melee weapon to rampage. Ranged is never used..
+	const MeleeWeapon* melee = thisComp.itemComponent->QuerySelectMelee();
+	if (!melee)	return false;
 
 	// Workers teleport. Rampaging was annoying.
 	if (thisComp.item->flags & GameItem::AI_DOES_WORK) {
@@ -1025,10 +1020,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
 
-		IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-		if ( reserve && reserve->ToMeleeWeapon() ) {
-			thisComp.itemComponent->SwapWeapons();
-		}
+		const GameItem* melee = thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
+		GLASSERT(melee);
 	} 
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
@@ -1220,7 +1213,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 			else {
 				// Should we visit Truulga? Check for a little gold, too.
 				// FIXME: needs tuning!
-				if (thisComp.item->wallet.gold > 15 && parentChit->random.Rand(15) == 0) {
+				if (thisComp.item->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
 					return DoSectorHerd(thisComp, focus, truulgaSector );
 				}
 			}
@@ -1495,11 +1488,11 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 	// a market to buy it, and the means to buy.
 	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
 		 && AtFriendlyOrNeutralCore()
-		 && thisComp.item->wallet.gold )
+		 && thisComp.item->wallet.Gold() )
 	{
-		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-		const IShield* shield = thisComp.itemComponent->GetShield();
+		const MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+		const RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+		const Shield* shield = thisComp.itemComponent->GetShield();
 
 		// Don't want the AIs running to the market all the time if nothing
 		// is there. (And planning to have random market visits anyway.)
@@ -1515,13 +1508,13 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 				const BuildData* bd = buildScript.GetDataFromStructure( ISC::market, 0 );
 				GLASSERT( bd );
 
-				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
+				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
-				if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
+				if ( !shield && marketAI.HasShield( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
-				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
+				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.Gold() )) {
 					goMarket = true;
 				}
 
@@ -1819,22 +1812,24 @@ bool AIComponent::ThinkHungry(const ComponentSet& thisComp)
 		return false;
 	}
 
-	int indexFruit = thisComp.itemComponent->FindItem(ISC::fruit);
-	int indexElixir = thisComp.itemComponent->FindItem(ISC::elixir);
-	bool carrying = (indexFruit >= 0) || (indexElixir >= 0);
+	const GameItem* fruit = thisComp.itemComponent->FindItem(ISC::fruit);
+	const GameItem* elixir = thisComp.itemComponent->FindItem(ISC::elixir);
+	bool carrying = fruit || elixir;
 
 	// Are we carrying fruit?? If so, eat if hungry!
 	if (carrying && (thisComp.item->flags & GameItem::HAS_NEEDS)) {
 		const ai::Needs& needs = GetNeeds();
 		if (needs.Value(Needs::FOOD) < NEED_CRITICAL) {
-			int index = indexFruit;
-			if (indexElixir >= 0) {
-				index = indexElixir;	// prefer elixir
+			if (elixir) {
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory(elixir);
+				delete item;
+				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
 			}
-
-			GameItem* item = thisComp.itemComponent->RemoveFromInventory(index);
-			delete item;
-			this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+			else if (fruit) {
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory(elixir);
+				delete item;
+				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+			}
 			return true;	// did something...?
 		}
 	}
@@ -1863,7 +1858,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 				const GameItem* item = thisComp.itemComponent->GetItem( i );
 				if ( item->Intrinsic() )
 					continue;
-				if ( item->ToWeapon() || item->ToShield() )
+				if ( item->ToRangedWeapon() || item->ToMeleeWeapon() || item->ToShield() )
 				{
 					needVaultRun = true;
 					break;
@@ -1900,8 +1895,8 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			const IString iItem     = (pass == 0) ? ISC::elixir : ISC::fruit;
 			const IString iBuilding = (pass == 0) ? ISC::bar    : ISC::distillery;
 
-			int index = thisComp.itemComponent->FindItem(iItem);
-			if (index >= 0) {
+			const GameItem* item = thisComp.itemComponent->FindItem(iItem);
+			if (item) {
 				Vector2I sector = thisComp.spatial->GetSector();
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
 																  &thisComp.spatial->GetPosition2D(),
@@ -2014,12 +2009,8 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	}
 	*/
 
-	int sellIndex = thisComp.itemComponent->ItemToSell();
-	int sellValue = 0;
-	if (sellIndex) {
-		sellValue = thisComp.itemComponent->GetItem(sellIndex)->GetValue();
-		GLASSERT(sellValue);
-	}
+	const GameItem* sell = thisComp.itemComponent->ItemToSell();
+	int sellValue = sell ? sell->GetValue() : 0;
 
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
@@ -2083,13 +2074,13 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		// The factory fun is set high, but only works if
 		// there is crystal.
 		if (item->IName() == ISC::factory) {
-			if (!thisComp.item->wallet.crystal[CRYSTAL_GREEN]) {
+			if (!thisComp.item->wallet.Crystal(CRYSTAL_GREEN)) {
 				s *= 0.1;
 			}
 		}
 
 		// If we have something to sell, extra interest in markets that can buy.
-		if (item->IName() == ISC::market && sellIndex )
+		if (item->IName() == ISC::market && sell )
 		{
 			s *= 2.0;	// sell sell sell!
 		}
@@ -2196,9 +2187,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
 	const ChitContext* context = Context();
 
-	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
-	if ( ranged && ranged->GetItem()->CanReload() ) {
-		ranged->GetItem()->Reload( parentChit );
+	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
+	if ( ranged && ranged->CanReload() ) {
+		ranged->Reload( parentChit );
 	}
 
 	if (ThinkWanderEatPlants(thisComp))
@@ -2301,18 +2292,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2I sector = ToSector( ToWorld2I( pos2 ));
 	
 	// Use the current or reserve - switch out later if we need to.
-	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
-	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
-
-	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-	if ( reserve ) {
-		if ( !rangedWeapon && reserve->GetItem()->ToRangedWeapon() ) {
-			rangedWeapon = reserve->GetItem()->ToRangedWeapon();
-		}
-		if ( !meleeWeapon && reserve->GetItem()->ToMeleeWeapon() ) {
-			meleeWeapon = reserve->GetItem()->ToMeleeWeapon();
-		}
-	}
+	const RangedWeapon* rangedWeapon = thisComp.itemComponent->QuerySelectRanged();
+	const MeleeWeapon*  meleeWeapon = thisComp.itemComponent->QuerySelectMelee();
 
 	enum {
 		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
@@ -2404,7 +2385,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
 		if ( rangedWeapon ) {
-			GameItem* pw = rangedWeapon->GetItem();
 			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
 															rangedWeapon,
 															false,	// SHOOT implies stopping.
@@ -2417,7 +2397,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
 			if (    range > 1.5f 
-				 &&    ( ( pw->HasRound() && !pw->Reloading() )							// we have ammod
+				 &&    ( ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )							// we have ammod
 				    || ( nRangedEnemies == 0 && range > 2.0f && range < longShot ) ) )	// we need to reload
 			{
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
@@ -2431,7 +2411,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				} 
 
 				// Don't blow ourself up:
-				if ( pw->flags & GameItem::EFFECT_EXPLOSIVE ) {
+				if ( rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE ) {
 					if ( range < EXPLOSIVE_RANGE * 2.0f ) {
 						u *= 0.1f;	// blowing ourseves up is bad.
 					}
@@ -2445,7 +2425,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// Move to the effective range?
 			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
-			if ( pw->CanUse() ) {
+			if ( rangedWeapon->CanShoot() ) {
 				// okay;
 			}
 			else {
@@ -2559,22 +2539,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	// And finally, do a swap if needed!
 	// This logic is minimal: what about the other states?
-	bool swap = false;
-	if ( currentAction == MELEE && reserve && reserve->ToMeleeWeapon() ) {
-		thisComp.itemComponent->SwapWeapons();
-		swap = true;
+	if (currentAction == MELEE) {
+		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
 	}
-	if ( currentAction == SHOOT && reserve && reserve->ToRangedWeapon() ) {
-		thisComp.itemComponent->SwapWeapons();
-		swap = true;
-	}
-	if ( swap && debugFlag ) {
-		IRangedWeaponItem* r = thisComp.itemComponent->GetRangedWeapon(0);
-		IMeleeWeaponItem*  m = thisComp.itemComponent->GetMeleeWeapon();
-
-		GLOUTPUT(( "ID=%d swapped in r=%s m=%s\n", thisComp.chit->ID(), 
-			r ? r->GetItem()->BestName() : "none",
-			m ? m->GetItem()->BestName() : "none" ));
+	else if (currentAction == SHOOT) {
+		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_RANGED);
 	}
 }
 

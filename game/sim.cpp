@@ -519,7 +519,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 
 	// For an avatar, we don't get money, since all the Au goes to the core anyway.
 	if (ReserveBank::Instance()) {
-		Transfer(&ReserveBank::Instance()->bank, &chit->GetItem()->wallet, chit->GetItem()->wallet);
+		ReserveBank::GetWallet()->Deposit(chit->GetWallet(), *(chit->GetWallet()));
 	}
 }
 
@@ -637,8 +637,7 @@ void Sim::DoTick( U32 delta )
 		// may be about to use the wallet!
 		if ( item && !item->wallet.IsEmpty() ) {
 			if ( !context.game->IsScenePushed() && !context.chitBag->IsScenePushed() ) {
-				Wallet w = item->wallet.EmptyWallet();
-				cs->ParentChit()->GetItem()->wallet.Add( w );
+				cs->ParentChit()->GetWallet()->Deposit(&item->wallet, item->wallet);
 			}
 		}
 	}
@@ -895,7 +894,8 @@ void Sim::UseBuilding()
 		// Money and crystal are transferred from the avatar to the core. (But 
 		// not items.) We need to xfer it *back* before using the factor, market,
 		// etc. On the tick, the avatar will restore it to the core.
-		ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+		//ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+		ic->GetItem()->wallet.Deposit(core->GetWallet(), *(core->GetWallet()));
 
 		if ( cs && ic ) {
 			if ( name == ISC::vault ) {
