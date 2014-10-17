@@ -1027,10 +1027,11 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if (item == &swapWeapons) {
-		Chit* player = GetPlayerChit();
-		if (player && player->GetItemComponent()) {
-			player->GetItemComponent()->SwapWeapons();
-		}
+		GLASSERT(0);
+//		Chit* player = GetPlayerChit();
+//		if (player && player->GetItemComponent()) {
+//			player->GetItemComponent()->SwapWeapons();
+//		}
 	}
 	else if ( item == &useBuildingButton ) {
 		sim->UseBuilding();

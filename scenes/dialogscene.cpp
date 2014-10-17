@@ -57,8 +57,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	ItemDefDB* db = ItemDefDB::Instance();
-	const GameItem& human	= db->Get( "humanMale" );
-	const GameItem& troll	= db->Get( "troll" );
+	ItemDefDB::GameItemArr human, troll;
+	db->Get( "humanMale", &human );
+	db->Get( "troll", &troll );
+
 	const GameItem& blaster	= db->Get( "blaster" );
 	const GameItem& pistol	= db->Get( "pistol" );
 	const GameItem& ring	= db->Get( "ring" );
@@ -69,14 +71,16 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 
 	static const int crystal[NUM_CRYSTAL_TYPES] = { 2, 2, 1, 1 };
 
-	itemComponent0 = new ItemComponent(human.Clone());
+	itemComponent0 = new ItemComponent(0);
+	itemComponent0->InitFrom(human.Mem(), human.Size());
 	itemComponent0->AddToInventory(blaster.Clone() );
 	itemComponent0->AddToInventory( pistol.Clone());
 	itemComponent0->AddToInventory(shield.Clone());
 	itemComponent0->AddToInventory(ring.Clone());
 	itemComponent0->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 
-	itemComponent1 = new ItemComponent(troll.Clone());
+	itemComponent1 = new ItemComponent(0);
+	itemComponent1->InitFrom(troll.Mem(), troll.Size());
 	itemComponent1->AddToInventory( blaster.Clone());
 	itemComponent1->AddToInventory( pistol.Clone());
 	itemComponent1->AddToInventory( ring.Clone() );

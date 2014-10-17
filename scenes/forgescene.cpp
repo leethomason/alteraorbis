@@ -262,9 +262,9 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		
 		forgeData->itemComponent->AddCraftXP( count );
 		forgeData->itemComponent->AddToInventory( item );
-		forgeData->itemComponent->GetItem(0)->historyDB.Increment( "Crafted" );
+		forgeData->itemComponent->GetItem()->historyDB.Increment( "Crafted" );
 		// becomes part of the item, and will be returned to Reserve when item is destroyed.
-		item->wallet.Deposit(&forgeData->itemComponent->GetItem(0)->wallet, 0, crystalRequired.Crystal());
+		item->wallet.Deposit(&forgeData->itemComponent->GetItem()->wallet, 0, crystalRequired.Crystal());
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
 		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.

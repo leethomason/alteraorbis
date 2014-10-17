@@ -46,15 +46,19 @@ class Shield;
 /*
 	Items and Inventory.
 
-	Almost everything *is* an item. Characters, walls, plants, guns all
+	Almost everything *is* an item. Characters, guns all
 	have properties, health, etc. Lots of things are items, and therefore
 	have a GameItem in an ItemComponent.
 
+	(Note that walls and plants used to be items, but it over-taxed
+	the system. They are now special cased.)
+
 	Characters (and some other things) *have* items, in an inventory.
-	- Some are built in: hands, claws, pincers. These may be hardpoints.
-	- Some attach to hardpoints: shields
-	- Some over-ride the built in AND attach to hardpoints: gun, sword
-	- Some are carried in the pack
+	- Some are built in: hands, claws, pincers. This is "intrinsic".
+	  They are at a hardpoint, but don't render.
+	- Some attach to hardpoints: shields, guns.
+	- An attached item can over-ride an intrinsic. Gun will override hand.
+	- The rest are carried in the pack
 		
 		Examples:
 			- Human
@@ -62,24 +66,16 @@ class Shield;
 				- "sword" overrides hand and attaches to trigger hardpoint
 				- "shield" attaches to the shield harpoint (but there is no
 				   item that it overrides)
-				- "amulet" is carried, doesn't render, but isn't in pack.
-			- Mantis
-				- "pincer" is an item, but not a hardpoint
 
 	Hardpoints
-	- The possible list of hardpoints lives in the GameItem (as bit flags)
-	- The Render component exposes a list of metadata is supports
-	- The Inventory component translates between the metadata and hardpoints
+	- The possible list is enumerated as EL_NUM_METADATA
+	- The ModelResource has a list that a given model actually supports.
 
 	Constraints:
-	- There can only be one melee weapon / attack. This simplies the animation,
-	  and not having to track which melee hit. (This could be fixed, of course.)
-	  The melee weapon must be on the 'trigger' hardpoint.
-	- Similarly, the shield must be on the 'shield' hardpoint
+	- Can't be multiples. The first Ranged, Shield, Melee is the one 
+	  that gets used.
 	- An item can only attach to one hardpoint. (It would be good if it could attach
 	  to either left or right hands)
-	- In order to carry/use items, a ModelResource must have both a 'trigger' and
-	  and 'shield'. Seems better than adding Yet Another Flag.
 */
 
 class Chit;
@@ -337,6 +333,8 @@ public:
 	// you need to know.
 	bool Significant() const;
 	// Get the value of the item. Currently equivalent to being loot.
+	// Intrinsic items do return a value; gives a pretty
+	// good scale of "how good is the item".
 	int  GetValue() const;
 
 	// name:		blaster						humanFemale					The item name - itemdef.xml
@@ -530,7 +528,7 @@ public:
 
 	virtual int DoTick(U32 delta);
 
-	bool CanShoot();
+	bool CanShoot() const;
 	bool Shoot(Chit* parent);
 	bool Reload(Chit* parent);
 	float BoltSpeed() const;

@@ -500,7 +500,7 @@ float RangedWeapon::Accuracy() const
 }
 
 
-bool RangedWeapon::CanShoot() 
+bool RangedWeapon::CanShoot() const 
 {
 	return !CoolingDown() && !Reloading() && HasRound();
 }
@@ -632,8 +632,8 @@ int MeleeWeapon::CalcMeleeCycleTime() const
 int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
+	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
 	float deltaF = float(delta) * 0.001f;
-
 
 	double savedHP = hp;
 	if ( flags & IMMUNE_FIRE )		fireTime = 0;

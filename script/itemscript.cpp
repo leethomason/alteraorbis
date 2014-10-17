@@ -154,8 +154,8 @@ void ItemDefDB::DumpWeaponStats()
 		Get( name, &arr );
 
 		for( int j=0; j<arr.Size(); ++j ) {
-			MeleeWeapon* meleeWeapon = arr[j]->ToMeleeWeapon();
-			RangedWeapon* rangedWeapon = arr[j]->ToRangedWeapon();
+			const MeleeWeapon* meleeWeapon = arr[j]->ToMeleeWeapon();
+			const RangedWeapon* rangedWeapon = arr[j]->ToRangedWeapon();
 
 			if (meleeWeapon) {
 

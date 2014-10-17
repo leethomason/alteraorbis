@@ -166,7 +166,7 @@ void CensusScene::Scan()
 			if (!ic) continue;
 
 			for (int j = 0; j < ic->NumItems(); ++j) {
-				GameItem* item = ic->GetItem(j);
+				const GameItem* item = ic->GetItem(j);
 				if (!item) continue;
 
 				allWallet.Add(item->wallet);

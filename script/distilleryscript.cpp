@@ -86,10 +86,10 @@ int DistilleryScript::DoTick( U32 delta )
 			progress -= ELIXIR_TIME;
 
 			if ( ic ) {
-				int index = ic->FindItem( ISC::fruit );
-				if ( index >= 0 ) {
+				const GameItem* fruit = ic->FindItem( ISC::fruit );
+				if ( fruit ) {
 					//cs->nElixir += ELIXIR_PER_FRUIT;
-					GameItem* item = ic->RemoveFromInventory( index );
+					GameItem* item = ic->RemoveFromInventory( fruit );
 					delete item;
 
 					const GameItem& def = ItemDefDB::Instance()->Get( "elixir" );

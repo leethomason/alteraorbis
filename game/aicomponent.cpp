@@ -147,7 +147,7 @@ void AIComponent::OnRemove()
 }
 
 
-bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, RangedWeapon* weapon )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, const RangedWeapon* weapon )
 {
 	Vector3F origin, dest;
 	GLASSERT( weapon );
@@ -928,11 +928,9 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 		return false;
 	const ChitContext* context = Context();
 
-	// Need a melee weapon to rampage. Ranged is never used.
-	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
-	GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-	if ( !melee && ( !reserve || !reserve->ToMeleeWeapon() ))
-		return false;
+	// Need a melee weapon to rampage. Ranged is never used..
+	const MeleeWeapon* melee = thisComp.itemComponent->QuerySelectMelee();
+	if (!melee)	return false;
 
 	// Workers teleport. Rampaging was annoying.
 	if (thisComp.item->flags & GameItem::AI_DOES_WORK) {
@@ -1022,10 +1020,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
 
-		GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-		if ( reserve && reserve->ToMeleeWeapon() ) {
-			thisComp.itemComponent->SwapWeapons();
-		}
+		const GameItem* melee = thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
+		GLASSERT(melee);
 	} 
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
@@ -1816,22 +1812,24 @@ bool AIComponent::ThinkHungry(const ComponentSet& thisComp)
 		return false;
 	}
 
-	int indexFruit = thisComp.itemComponent->FindItem(ISC::fruit);
-	int indexElixir = thisComp.itemComponent->FindItem(ISC::elixir);
-	bool carrying = (indexFruit >= 0) || (indexElixir >= 0);
+	const GameItem* fruit = thisComp.itemComponent->FindItem(ISC::fruit);
+	const GameItem* elixir = thisComp.itemComponent->FindItem(ISC::elixir);
+	bool carrying = fruit || elixir;
 
 	// Are we carrying fruit?? If so, eat if hungry!
 	if (carrying && (thisComp.item->flags & GameItem::HAS_NEEDS)) {
 		const ai::Needs& needs = GetNeeds();
 		if (needs.Value(Needs::FOOD) < NEED_CRITICAL) {
-			int index = indexFruit;
-			if (indexElixir >= 0) {
-				index = indexElixir;	// prefer elixir
+			if (elixir) {
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory(elixir);
+				delete item;
+				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
 			}
-
-			GameItem* item = thisComp.itemComponent->RemoveFromInventory(index);
-			delete item;
-			this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+			else if (fruit) {
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory(elixir);
+				delete item;
+				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+			}
 			return true;	// did something...?
 		}
 	}
@@ -1897,8 +1895,8 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			const IString iItem     = (pass == 0) ? ISC::elixir : ISC::fruit;
 			const IString iBuilding = (pass == 0) ? ISC::bar    : ISC::distillery;
 
-			int index = thisComp.itemComponent->FindItem(iItem);
-			if (index >= 0) {
+			const GameItem* item = thisComp.itemComponent->FindItem(iItem);
+			if (item) {
 				Vector2I sector = thisComp.spatial->GetSector();
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
 																  &thisComp.spatial->GetPosition2D(),
@@ -2011,12 +2009,8 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	}
 	*/
 
-	int sellIndex = thisComp.itemComponent->ItemToSell();
-	int sellValue = 0;
-	if (sellIndex) {
-		sellValue = thisComp.itemComponent->GetItem(sellIndex)->GetValue();
-		GLASSERT(sellValue);
-	}
+	const GameItem* sell = thisComp.itemComponent->ItemToSell();
+	int sellValue = sell ? sell->GetValue() : 0;
 
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
@@ -2086,7 +2080,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		}
 
 		// If we have something to sell, extra interest in markets that can buy.
-		if (item->IName() == ISC::market && sellIndex )
+		if (item->IName() == ISC::market && sell )
 		{
 			s *= 2.0;	// sell sell sell!
 		}
@@ -2298,18 +2292,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2I sector = ToSector( ToWorld2I( pos2 ));
 	
 	// Use the current or reserve - switch out later if we need to.
-	RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
-	MeleeWeapon*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
-
-	GameItem* reserve = thisComp.itemComponent->GetReserveWeapon();
-	if ( reserve ) {
-		if ( !rangedWeapon && reserve->ToRangedWeapon() ) {
-			rangedWeapon = reserve->ToRangedWeapon();
-		}
-		if ( !meleeWeapon && reserve->ToMeleeWeapon() ) {
-			meleeWeapon = reserve->ToMeleeWeapon();
-		}
-	}
+	const RangedWeapon* rangedWeapon = thisComp.itemComponent->QuerySelectRanged();
+	const MeleeWeapon*  meleeWeapon = thisComp.itemComponent->QuerySelectMelee();
 
 	enum {
 		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
@@ -2555,22 +2539,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	// And finally, do a swap if needed!
 	// This logic is minimal: what about the other states?
-	bool swap = false;
-	if ( currentAction == MELEE && reserve && reserve->ToMeleeWeapon() ) {
-		thisComp.itemComponent->SwapWeapons();
-		swap = true;
+	if (currentAction == MELEE) {
+		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
 	}
-	if ( currentAction == SHOOT && reserve && reserve->ToRangedWeapon() ) {
-		thisComp.itemComponent->SwapWeapons();
-		swap = true;
-	}
-	if ( swap && debugFlag ) {
-		RangedWeapon* r = thisComp.itemComponent->GetRangedWeapon(0);
-		MeleeWeapon*  m = thisComp.itemComponent->GetMeleeWeapon();
-
-		GLOUTPUT(( "ID=%d swapped in r=%s m=%s\n", thisComp.chit->ID(), 
-			r ? r->BestName() : "none",
-			m ? m->BestName() : "none" ));
+	else if (currentAction == SHOOT) {
+		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_RANGED);
 	}
 }
 

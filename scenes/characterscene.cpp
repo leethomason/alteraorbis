@@ -258,9 +258,9 @@ void CharacterScene::SetButtonText()
 		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
 		const GameItem* mainItem		= ic->GetItem(0);
-		const RangedWeapon* rangedItem = mainItem->ToRangedWeapon();
-		const MeleeWeapon* meleeItem = mainItem->ToMeleeWeapon();
-		const Shield* shieldItem = mainItem->ToShield();
+		const RangedWeapon* rangedItem = ic->QuerySelectRanged();
+		const MeleeWeapon* meleeItem = ic->QuerySelectMelee();
+		const Shield* shieldItem = ic->GetShield();
 
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			const GameItem* item = ic->GetItem(src);
@@ -486,14 +486,14 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		if (startIC && endIC		// move between storage
 			&& startIndex)			// is actually something selected in the start?
 		{
-			GameItem* item = startIC->GetItem(startIndex);
-			int value = item->GetValue();
+			const GameItem* startItem = startIC->GetItem(startIndex);
+			int value = startItem->GetValue();
 			GLASSERT(value);
 
 			bool canAfford = (endIC->GetItem()->wallet.Gold() >= value);
 
 			if (value && canAfford && endIC->CanAddToInventory())  {
-				startIC->RemoveFromInventory(startIndex);
+				GameItem* item = startIC->RemoveFromInventory(startItem);
 				endIC->AddToInventory(item);
 				startIC->GetItem()->wallet.Deposit(&endIC->GetItem()->wallet, value);
 			}
@@ -503,7 +503,8 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		// Only swap.
 		if (startIC && endIC && startIndex) {
 			if (endIC->CanAddToInventory()) {
-				GameItem* item = startIC->RemoveFromInventory(startIndex);
+				const GameItem* startItem = startIC->GetItem(startIndex);
+				GameItem* item = startIC->RemoveFromInventory(startItem);
 				endIC->AddToInventory(item);
 			}
 		}

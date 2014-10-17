@@ -36,7 +36,7 @@ public:
 	bool Has( const char* name );
 	const GameItem& Get( const char* name, int intrinsic=-1 );
 
-	typedef grinliz::CArray<GameItem*, 16> GameItemArr;
+	typedef grinliz::CArray<const GameItem*, 16> GameItemArr;
 	// Query an item and all its intrinsics; main item is
 	// index 0, intrinsic items follow.
 	void Get( const char* name, GameItemArr* arr );

@@ -483,10 +483,10 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
 			GLASSERT( nElixir > 0 );
 
-			int index = ic->FindItem(ISC::elixir);
-			GLASSERT(index >= 0);
-			if (index >= 0) {
-				GameItem* item = ic->RemoveFromInventory(index);
+			const GameItem* elixir = ic->FindItem(ISC::elixir);
+			GLASSERT(elixir);
+			if (elixir) {
+				GameItem* item = ic->RemoveFromInventory(elixir);
 				delete item;
 			}
 		}
@@ -575,7 +575,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	// 'ranged', 'melee', and 'shield', so return
 	// if that happens. We can come back later.
 
-	GameItem* ranged = 0, *melee = 0, *shield = 0;
+	const GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
@@ -586,11 +586,11 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	MarketAI marketAI( market );
 
 	// Should be sorted, but just in case:
-	thisComp.itemComponent->SortInventory();
-	market->GetItemComponent()->SortInventory();
+//	thisComp.itemComponent->SortInventory();
+//	market->GetItemComponent()->SortInventory();
 
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-		GameItem* gi = thisComp.itemComponent->GetItem( i );
+		const GameItem* gi = thisComp.itemComponent->GetItem( i );
 		if ( gi && !gi->Intrinsic() ) {
 			if ( !ranged && gi->ToRangedWeapon()) {
 				ranged = gi;
@@ -624,11 +624,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	if (!boughtStuff) {
 		// Sell the extras.
-		int itemToSell = 0;
+		const GameItem* itemToSell = 0;
 		while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
-			GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
-			int value = gi->GetValue();
-			int sold = MarketAI::Transact(gi,
+			int value = itemToSell->GetValue();
+			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
 				thisComp.itemComponent,		// seller
 				0,							// no sales tax when selling to the market.
