@@ -420,26 +420,23 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 {
 	const ChitContext* context = Context();
-	bool female = true;
-	const char* assetName = "humanFemale";
-	if ( random.Bit() ) {
-		female = false;
-		assetName = "humanMale";
-	}
+	IString itemName;
 
 	switch (Team::Group(team)) {
-		case TEAM_HOUSE: break;		// all is well; the default.
-		case TEAM_GOB:	assetName = "gob";	break;
+		case TEAM_HOUSE:	itemName = (random.Bit()) ? ISC::humanFemale : ISC::humanMale;	break;
+		case TEAM_GOB:		itemName = ISC::gobman;											break;
+		case TEAM_KAMAKIRI:	itemName = ISC::kamakiri;										break;
 		default: GLASSERT(0); break;
 	}
 
 	Chit* chit = NewChit();
+	const GameItem& root = ItemDefDB::Instance()->Get(itemName.safe_str());
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( assetName ));
+	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
 
-	AddItem( assetName, chit, context->engine, team, 0 );
+	AddItem( root.Name(), chit, context->engine, team, 0 );
 	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );

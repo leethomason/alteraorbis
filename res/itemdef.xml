@@ -65,6 +65,23 @@
     </intrinsics>
   </GameItem>
 
+  <GameItem name="kamakiri"
+        resource="mantessa"
+        uiIcon="anvil"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        nameGen="kamakirinames"
+        mob="denizen"
+        baseHP="50"
+        mass ="50">
+    <intrinsics>
+      <MeleeWeapon name="pincer"
+            flags="INTRINSIC"
+            hardpoint="trigger"
+            impactSound="meleeWAV"
+            meleeDamage="20">
+      </MeleeWeapon>
+    </intrinsics>
+  </GameItem>
 
   <!-- workers are immune to fire and SUBMARINE so that they can build/fix ppols. -->
   <GameItem name="worker"

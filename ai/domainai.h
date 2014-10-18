@@ -102,6 +102,23 @@ public:
 private:
 };
 
+class KamakiriDomainAI : public DomainAI
+{
+	typedef DomainAI super;
+public:
+	KamakiriDomainAI();
+	~KamakiriDomainAI();
+
+		virtual const char* Name() const { return "KamakiriDomainAI"; }
+	virtual void Serialize(XStream* xs);
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
+
+	virtual void DoBuild();
+
+};
+
 
 #endif // DOMAINAI_COMPONENT_INCLUDED
 

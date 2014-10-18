@@ -30,7 +30,12 @@ grinliz::IString Team::TeamName(int team)
 		break;
 
 		case TEAM_GOB:
-		str.Format("Gob-%x", id);
+		str.Format("Gobmen-%x", id);
+		name = StringPool::Intern(str.c_str());
+		break;
+
+		case TEAM_KAMAKIRI:
+		str.Format("Kamakiri-%x", id);
 		name = StringPool::Intern(str.c_str());
 		break;
 
@@ -56,8 +61,11 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	else if ( itemName == ISC::troll ) {
 		return TEAM_TROLL;
 	}
-	else if (itemName == ISC::gob) {
+	else if (itemName == ISC::gobman) {
 		return TEAM_GOB;
+	}
+	else if (itemName == ISC::kamakiri) {
+		return TEAM_KAMAKIRI;
 	}
 	else if (    itemName == ISC::cyclops
 		      || itemName == ISC::fireCyclops
@@ -94,13 +102,14 @@ int Team::GetRelationship( int _t0, int _t1 )
 	static const int NUM = NUM_TEAMS - OFFSET;
 
 	static const int relate[NUM][NUM] = {
-		{ F, E, E, E, E, E, E },		// rat
-		{ 0, F, E, N, E, E, E },		// green
-		{ 0, 0, F, N, E, E, E },		// red
-		{ 0, 0, 0, F, E, N, E },		// troll 
-		{ 0, 0, 0, 0, F, N, F },		// house
-		{ 0, 0, 0, 0, 0, F, N },		// gobmen
-		{ 0, 0, 0, 0, 0, 0, F },		// visitor
+		{ F, E, E, E, E, E, E, E },		// rat
+		{ 0, F, E, N, E, E, F, E },		// green
+		{ 0, 0, F, N, E, E, E, E },		// red
+		{ 0, 0, 0, F, E, N, N, E },		// troll 
+		{ 0, 0, 0, 0, F, N, E, F },		// house
+		{ 0, 0, 0, 0, 0, F, E, N },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F, E },		// kamakiri
+		{ 0, 0, 0, 0, 0, 0, 0, F },		// visitor
 	};
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
 	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);

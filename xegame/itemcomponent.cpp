@@ -267,6 +267,7 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 
 bool ItemComponent::ItemActive( const GameItem* item )
 {
+	Validate();
 	return hardpoint.Find(const_cast<GameItem*>(item)) >= 0;
 }
 
@@ -452,10 +453,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 
 		while( itemArr.Size() > 1 ) {
-			if ( itemArr[itemArr.Size()-1]->Intrinsic() ) {
+			const GameItem* remove = itemArr[itemArr.Size() - 1];
+			if (remove->Intrinsic())
 				break;
-			}
-			GameItem* item = itemArr.Pop();
+			GameItem* item = this->RemoveFromInventory(remove);
 			GLASSERT( !item->IName().empty() );
 			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 		}
@@ -476,6 +477,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	else {
 		super::OnChitMsg( chit, msg );
 	}
+	Validate();
 }
 
 
@@ -738,6 +740,7 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 		}
 	}
 	slowTick.SetPeriod( 500 + (chit->ID() & 128));
+	UseBestItems();
 }
 
 
@@ -886,6 +889,7 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 
 GameItem* ItemComponent::RemoveFromInventory( const GameItem* citem )
 {
+	Validate();
 	int index = itemArr.Find(const_cast<GameItem*>(citem));
 	GLASSERT(index > 0);
 	if (index <= 0) return 0;
@@ -908,6 +912,7 @@ GameItem* ItemComponent::RemoveFromInventory( const GameItem* citem )
 	if (needSort) {
 		UseBestItems();
 	}
+	Validate();
 	return item;
 }
 
@@ -919,8 +924,7 @@ void ItemComponent::Drop(const GameItem* citem)
 
 	GameItem* item = RemoveFromInventory(citem);
 	if (item) {
-		Context()->chitBag->NewItemChit(parentChit->GetSpatialComponent()->GetPosition(),
-										item, true, true, 0);
+		Context()->chitBag->NewItemChit(parentChit->GetSpatialComponent()->GetPosition(), item, true, true, 0);
 		return;
 	}
 	GLASSERT(0);	// should have found the item.
@@ -1081,23 +1085,27 @@ void ItemComponent::UseBestItems()
 		}
 	}
 
-	// Lets get that out of the way:
-	for (int i = 1; i < itemArr.Size(); ++i) {
-		GameItem* item = itemArr[i];
+	// Now assigned the carried weapons.
+	if (usesWeapons) {
+		for (int i = 1; i < itemArr.Size(); ++i) {
+			GameItem* item = itemArr[i];
 
-		if (item->Intrinsic()) continue;	// dealt with this alread.
+			if (item->Intrinsic()) continue;	// dealt with this alread.
 
-		int h = item->hardpoint;
-		if (hasHardpoint[h] && (!hardpoint[h] || hardpoint[h]->Intrinsic())) {
-			hardpoint[h] = item;
+			int h = item->hardpoint;
+			if (hasHardpoint[h] && (!hardpoint[h] || hardpoint[h]->Intrinsic())) {
+				hardpoint[h] = item;
+			}
 		}
 	}
+	Validate();
 	hardpointsModified = true;
 }
 
 
 RangedWeapon* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger ) const
 {
+	Validate();
 	for (int i = 1; i < itemArr.Size(); ++i) {
 		GameItem* item = itemArr[i];
 		if (item->ToRangedWeapon() && hardpoint.Find(item) >= 0) {
@@ -1121,6 +1129,7 @@ RangedWeapon* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger ) const
 
 MeleeWeapon* ItemComponent::GetMeleeWeapon() const
 {
+	Validate();
 	for (int i = 1; i < itemArr.Size(); ++i) {
 		GameItem* item = itemArr[i];
 		if (item->ToMeleeWeapon() && hardpoint.Find(item) >= 0) {
@@ -1133,6 +1142,7 @@ MeleeWeapon* ItemComponent::GetMeleeWeapon() const
 
 Shield* ItemComponent::GetShield() const
 {
+	Validate();
 	for (int i = 1; i < itemArr.Size(); ++i) {
 		GameItem* item = itemArr[i];
 		if (item->ToShield() && hardpoint.Find(item) >= 0) {
@@ -1176,6 +1186,23 @@ void ItemComponent::SetHardpoints()
 			}
 		}
 	}
+}
+
+
+void ItemComponent::Validate() const
+{
+#ifdef DEBUG
+	bool usesWeapons = (GetItem()->flags & GameItem::AI_USES_BUILDINGS) != 0;
+
+	for (int i = 0; i < hardpoint.Size(); ++i) {
+		const GameItem* item = hardpoint[i];
+		if (item) {
+			GLASSERT(item->Intrinsic() || usesWeapons);
+			GLASSERT(this->FindItem(item));
+		}
+	}
+
+#endif
 }
 
 

@@ -94,35 +94,36 @@
 			x recruit neutral, wandering gobmen
 			x how to fund gobmen domain??
 			x bug setting face (mantis not working - need fallback to name)
-			- special building
 		x Redo spawn system. 
 			x Spawn trolls from Truulga domain
 			x Domain takeover (by mobs)
-		- Mantessa domain
+		x Kamakiri domain
 			x art
 			x animation
+			x change name
 			- special buildings:
 				- sculpture
-			- mantesssan beamgun
+			- kakakirian beamgun
 		x Player domain colors, color screen, revisit gob colors
-		- Mantis-men domain
 
-		- refactor
-			- GameItem saving and loading
-			- GameItem XML loading
+		x refactor
+			x GameItem saving and loading
+			x GameItem XML loading
+		x ReserveBank needs a "guaranteed withdrawal" to start player domains.
+		x Start with 0 team id for un-assigned, all domains 1+ team id
 		- gob domains don't count in census
 		- strange container-is-item bug when looking at items from census
-		x Start with 0 team id for un-assigned, all domains 1+ team id
 		- AI buildings not connected.
-		- ReserveBank needs a "guaranteed withdrawal" to start player domains.
 		- Spawn Gob-men in 4, more frequently.
 		- When domain falls, teamID->0
 		- Search full domain for farms?
 		- test bank running out of money
 		- and then re-test with higher limits
-		- markets aren't paying tax
+		- markets aren't paying tax (check, think this is working)
+		- re-test battle scenes. balance.
+		- full screen toggle
 
-		- special gobman item 
+		- special gobman item, building
 		- special kamikiri item
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains

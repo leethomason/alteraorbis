@@ -1247,6 +1247,18 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+#if 1	// Create Kamakira domain.
+		{
+			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
+			if (cs) {
+				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				int team = Team::GenTeam(TEAM_KAMAKIRI);
+				cs = sim->CreateCore(sector, team);
+				cs->ParentChit()->Add(new KamakiriDomainAI());
+				cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
+			}
+		}
+#endif
 #if 0	// Unsettle fluids
 		{	
 			Vector2I sector = ToSector(ToWorld2I(at));
@@ -1264,7 +1276,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Monster swarm
+#if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
 			sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_GOB);
 //			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);

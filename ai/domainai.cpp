@@ -602,3 +602,74 @@ void GobDomainAI::DoBuild()
 	} while (false);
 }
 
+
+KamakiriDomainAI::KamakiriDomainAI()
+{
+
+}
+
+
+KamakiriDomainAI::~KamakiriDomainAI()
+{
+
+}
+
+void KamakiriDomainAI::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	this->EndSerialize( xs );
+}
+
+
+void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	return super::OnAdd(chit, initialize);
+}
+
+
+void KamakiriDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+void KamakiriDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+	CChitArray farms;
+	Context()->chitBag->QueryBuilding(ISC::farm, sector, &farms);
+
+	float eff = 0.0f;
+	for (int i = 0; i < farms.Size(); ++i) {
+		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
+		eff += farmScript->Efficiency();
+	}
+
+	do {
+		if (BuyWorkers()) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
+		
+		//if (BuildPlaza(2)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 16 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		/*
+		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
+		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
+		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
+		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
+		if (eff < 2.0f && BuildFarm()) break;
+		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+		*/
+	} while (false);
+}
+

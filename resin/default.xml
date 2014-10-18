@@ -25,6 +25,7 @@
   <markov filename="vikingFemale.txt" assetName="vikingFemale" />
   <markov filename="monster.txt" assetName="monster" />
   <markov filename="gobnames.txt" assetName="gobnames" />
+  <markov filename="kamakirinames.txt" assetName="kamakirinames" />
   <markov-word filename="barNames.txt" assetName="barNames" />
   
   <!-- Icon and UI -->

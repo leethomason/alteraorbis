@@ -1081,7 +1081,7 @@ Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 	// FIXME: generalize "I want a home logic."
 	// See also the EnterGrid(), where it takes over a neutral core.
 	if ( (thisComp.item->flags & GameItem::AI_DOES_WORK )								// workers stay close
-		|| (thisComp.item->IName() == ISC::gob && Team::IsRogue(parentChit->Team())))	// as do denizens trying to find a home.
+		|| (thisComp.item->IName() == ISC::gobman && Team::IsRogue(parentChit->Team())))	// as do denizens trying to find a home.
 	{
 		// workers stay close to core.
 		Vector2F dest = GetWanderOrigin( thisComp );
@@ -2698,7 +2698,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				// Need some team. And some cash.
 				Rectangle2I inner = InnerSectorBounds(sector);
 				CChitArray arr;
-				ItemNameFilter filter(ISC::gob, IChitAccept::MOB);
+				ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
 				Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
 
 				int k = 0;

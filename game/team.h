@@ -32,6 +32,7 @@ enum {
 
 	TEAM_HOUSE,		// denizen houses (primarily human)
 	TEAM_GOB,
+	TEAM_KAMAKIRI,
 	TEAM_VISITOR,
 	
 	NUM_TEAMS

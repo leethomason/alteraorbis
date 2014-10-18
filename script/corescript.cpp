@@ -540,7 +540,7 @@ void CoreScript::UpdateScore(int n)
 			// Score is a 16 bit quantity...
 			int s = achievement.civTechScore;
 			if (s > 65535) s = 65535;
-			gi->keyValues.Set("score", s);
+			gi->keyValues.Set(ISC::score, s);
 			gi->UpdateHistory();
 		}
 	}

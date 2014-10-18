@@ -313,52 +313,62 @@ void Sim::DoSpawn()
 
 void Sim::SpawnDenizens()
 {
-	// FIXME: should track the relative numbers. Spawn more Mantessa
-	// when there are few Mantessa domains. But probably need logic
+	// FIXME: should track the relative numbers. Spawn more Kamakiri
+	// when there are few Kamakiri domains. But probably need logic
 	// to account for both #of Denizens, and Denizens in domains.
 
 	int greater = 0, lesser = 0, denizen = 0;
 	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
-	if (denizen < TYPICAL_DENIZENS) {
-		SectorPort sp;
-		for (int i = 0; i < 4; ++i) {
-			sp.Zero();
-			Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
-			CoreScript* cs = CoreScript::GetCore(sector);
-			if (cs && !cs->InUse()) {
-				const SectorData& sd = context.worldMap->GetSector(sector);
-				GLASSERT(sd.ports);
-				sp.sector = sector;
-				sp.port = sd.RandomPort(&random);
-				break;
+
+	for (int pass = 0; pass < 2; ++pass) {
+		if (denizen < TYPICAL_DENIZENS) {
+			SectorPort sp;
+			for (int i = 0; i < 4; ++i) {
+				sp.Zero();
+				Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+				CoreScript* cs = CoreScript::GetCore(sector);
+				if (cs && !cs->InUse()) {
+					const SectorData& sd = context.worldMap->GetSector(sector);
+					GLASSERT(sd.ports);
+					sp.sector = sector;
+					sp.port = sd.RandomPort(&random);
+					break;
+				}
 			}
-		}
-		if (sp.IsValid()) {
-			static const int NSPAWN = 8;
-			static const int NUM = 1;
-			static const char* greater[NUM] = { "gob" };
-			static const float odds[NUM] = { 0.50f };
-			int index = random.Select(odds, NUM );
+			if (sp.IsValid()) {
+				static const int NSPAWN = 4;
+				static const int NUM = 2;
+				static const char* denizen[NUM] = { "gobman", "kamakiri" };
+				static const float odds[NUM] = { 0.60f, 0.40f };
+				int index = random.Select(odds, NUM);
 
-			for (int i = 0; i < NSPAWN; ++i) {
-				IString ispawn = StringPool::Intern(greater[index], true);
-				int team = Team::GetTeam(ispawn);
-				GLASSERT(team != TEAM_NEUTRAL);
+				for (int i = 0; i < NSPAWN; ++i) {
+					IString ispawn = StringPool::Intern(denizen[index], true);
+					int team = Team::GetTeam(ispawn);
+					GLASSERT(team != TEAM_NEUTRAL);
 
-				Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
-				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+					Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+					Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+					GameItem * item = 0;
 
-				if (random.Bit())
-					context.chitBag->AddItem( "pistol", chit, context.engine, 0, 0 );
-				else
-					context.chitBag->AddItem( "ring", chit, context.engine, 0, 0 );
+					if (random.Bit())
+						item = context.chitBag->AddItem("pistol", chit, context.engine, team, 0);
+					else
+						item = context.chitBag->AddItem("ring", chit, context.engine, team, 0);
 
-				pos.x += 0.2f * float(i);
-				chit->GetSpatialComponent()->SetPosition(pos);
+					if (item) {
+						Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
+						NewsHistory* history = context.chitBag->GetNewsHistory();
+						item->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
+					}
 
-				GridMoveComponent* gmc = new GridMoveComponent();
-				chit->Add(gmc);
-				gmc->SetDest(sp);
+					pos.x += 0.2f * float(i);
+					chit->GetSpatialComponent()->SetPosition(pos);
+
+					GridMoveComponent* gmc = new GridMoveComponent();
+					chit->Add(gmc);
+					gmc->SetDest(sp);
+				}
 			}
 		}
 	}

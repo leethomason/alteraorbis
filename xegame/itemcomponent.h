@@ -118,6 +118,7 @@ private:
 	void SetHardpoints();
 	void UseBestItems();
 	void SortInventory();				// AIs will use the "best" item.
+	void Validate() const;
 
 	void DoSlowTick();
 	void ApplyLootLimits();
