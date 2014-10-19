@@ -45,7 +45,7 @@
 using namespace grinliz;
 
 ItemComponent::ItemComponent( GameItem* item ) 
-: slowTick(500), hardpointsModified(true), lastDamageID(0), debugEnabled(false)
+: slowTick(500), hardpointsModified(true), lastDamageID(0), debugEnabled(false), hardpointsComputed(false)
 {
 	for (int i = 0; i < EL_NUM_METADATA; ++i) {
 		hasHardpoint[i] = false;
@@ -60,16 +60,6 @@ ItemComponent::ItemComponent( GameItem* item )
 	for (int i = 0; i < EL_NUM_METADATA; ++i) {
 		hasHardpoint[i] = false;
 	}
-	if (item) {
-		const ModelResource* modelRes = ModelResourceManager::Instance()->GetModelResource(GetItem()->ResourceName(), false);
-		if (modelRes) {
-			for (int i = 0; i < EL_NUM_METADATA; ++i) {
-				if (modelRes->header.metaData[i].InUse()) {
-					hasHardpoint[i] = true;
-				}
-			}
-		}
-	}
 }
 
 
@@ -83,17 +73,9 @@ ItemComponent::~ItemComponent()
 
 void ItemComponent::InitFrom(const GameItem* items[], int nItems)
 {
-	GLASSERT(itemArr.Size() == 0);
+	GLASSERT(itemArr.Size() == 0 || nItems == 0);
 	for (int i = 0; i < nItems;  ++i) {
 		itemArr.Push(items[i]->Clone());
-	}
-	const ModelResource* modelRes = ModelResourceManager::Instance()->GetModelResource(GetItem()->ResourceName(), false);
-	if (modelRes) {
-		for (int i = 0; i < EL_NUM_METADATA; ++i) {
-			if (modelRes->header.metaData[i].InUse()) {
-				hasHardpoint[i] = true;
-			}
-		}
 	}
 }
 
@@ -1024,10 +1006,12 @@ const GameItem* ItemComponent::QuerySelectWeapon(int type) const
 		for (int i = 1; i < itemArr.Size(); ++i) {
 			GameItem* item = itemArr[i];
 			MeleeWeapon* melee = item->ToMeleeWeapon();
-			if (melee && hasHardpoint[melee->hardpoint]) {
-				result = melee;
-				if (!usesWeapons || !melee->Intrinsic()) {
-					break;
+			if (melee && (usesWeapons || melee->Intrinsic())) {
+				if (hasHardpoint[melee->hardpoint]) {
+					result = melee;
+					if (!usesWeapons || !melee->Intrinsic()) {
+						break;
+					}
 				}
 			}
 		}
@@ -1035,10 +1019,12 @@ const GameItem* ItemComponent::QuerySelectWeapon(int type) const
 	else if (type == SELECT_RANGED) {
 		for (int i = 1; i < itemArr.Size(); ++i) {
 			RangedWeapon* ranged = itemArr[i]->ToRangedWeapon();
-			if (ranged && hasHardpoint[ranged->hardpoint]) {
-				result = ranged;
-				if (!usesWeapons || !ranged->Intrinsic()) {
-					break;
+			if (ranged && (usesWeapons || ranged->Intrinsic())) {
+				if (hasHardpoint[ranged->hardpoint]) {
+					result = ranged;
+					if (!usesWeapons || !ranged->Intrinsic()) {
+						break;
+					}
 				}
 			}
 		}
@@ -1061,8 +1047,26 @@ const GameItem* ItemComponent::SelectWeapon(int type)
 }
 
 
+void ItemComponent::ComputeHardpoints()
+{
+	if (!hardpointsComputed) {
+		const ModelResource* modelRes = ModelResourceManager::Instance()->GetModelResource(GetItem()->ResourceName(), false);
+		if (modelRes) {
+			for (int i = 1; i < EL_NUM_METADATA; ++i) {
+				if (modelRes->header.metaData[i].InUse()) {
+					hasHardpoint[i] = true;
+				}
+			}
+		}
+		hardpointsComputed = true;
+	}
+}
+
+
 void ItemComponent::UseBestItems()
 {
+	ComputeHardpoints();
+
 	bool player = !parentChit || parentChit->PlayerControlled();
 	bool usesWeapons = (GetItem()->flags & GameItem::AI_USES_BUILDINGS) != 0;
 
@@ -1090,10 +1094,10 @@ void ItemComponent::UseBestItems()
 		for (int i = 1; i < itemArr.Size(); ++i) {
 			GameItem* item = itemArr[i];
 
-			if (item->Intrinsic()) continue;	// dealt with this alread.
+			if (item->Intrinsic()) continue;	// dealt with this already.
 
 			int h = item->hardpoint;
-			if (hasHardpoint[h] && (!hardpoint[h] || hardpoint[h]->Intrinsic())) {
+			if (h && hasHardpoint[h] && (!hardpoint[h] || hardpoint[h]->Intrinsic())) {
 				hardpoint[h] = item;
 			}
 		}
@@ -1158,6 +1162,7 @@ void ItemComponent::SetHardpoints()
 	if ( !parentChit->GetRenderComponent() ) {
 		return;
 	}
+	Validate();
 	RenderComponent* rc = parentChit->GetRenderComponent();
 
 	GameItem* mainItem = itemArr[0];
@@ -1167,7 +1172,7 @@ void ItemComponent::SetHardpoints()
 		rc->SetProcedural(0, info);
 	}
 
-	for (int i = 0; i < hardpoint.Size(); ++i) {
+	for (int i = 1; i < hardpoint.Size(); ++i) {
 		GameItem* item = hardpoint[i];
 		if (item) {
 			GLASSERT(item);
@@ -1201,6 +1206,8 @@ void ItemComponent::Validate() const
 			GLASSERT(this->FindItem(item));
 		}
 	}
+
+	GLASSERT(hardpoint[0] == 0);
 
 #endif
 }

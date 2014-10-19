@@ -526,17 +526,18 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 
 	if (personality.Crafting() == Personality::DISLIKES) {
 		// Sell all the crystal
+		int value = 0;
+		int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int n = thisComp.item->wallet.Crystal(type);
-			if (n) {
-				// Gold from bank.
-				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
-				crystal[type] = n;
-
-				// The reserve never runs out of money.
-				bank->Buy(&thisComp.item->wallet, crystal);
-				usedExchange = true;
-			}
+			value += thisComp.item->wallet.Crystal(type) * crystalValue[type];
+			crystal[type] = thisComp.item->wallet.Crystal(type);
+		}
+		if (value) {
+			// Move money from the bank.
+			// Move crystal to the exchange.
+			thisComp.item->wallet.Deposit(&bank->wallet, value);
+			exchange->GetWallet()->Deposit(&thisComp.item->wallet, 0, crystal);
+			usedExchange = true;
 		}
 	}
 	else {
@@ -545,17 +546,18 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 			willSpend = thisComp.item->wallet.Gold() / 2;
 		}
 
-		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.Crystal(type);
-			int nBuy = willSpend / crystalValue[type];
-			nBuy = Min(nBuy, nWant);
-
-			for (int i = 0; i < nBuy; ++i) {
-				int crystal[NUM_CRYSTAL_TYPES] = { 0 };
-				crystal[type] = 1;
-
-				bank->Buy(&thisComp.item->wallet, crystal);
-				usedExchange = true;
+		for (int pass = 0; pass < 3; ++pass) {
+			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= willSpend) {
+					// Money to bank.
+					// Crystal from exchange.
+					int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+					crystal[type] = 1;
+					bank->wallet.Deposit(&thisComp.item->wallet, crystalValue[type]);
+					thisComp.item->wallet.Deposit(exchange->GetWallet(), 0, crystal);
+					willSpend -= crystalValue[type];
+					usedExchange = true;
+				}
 			}
 		}
 	}

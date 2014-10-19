@@ -119,6 +119,7 @@ private:
 	void UseBestItems();
 	void SortInventory();				// AIs will use the "best" item.
 	void Validate() const;
+	void ComputeHardpoints();
 
 	void DoSlowTick();
 	void ApplyLootLimits();
@@ -135,6 +136,7 @@ private:
 	CTicker		slowTick;
 	int			lastDamageID;
 	bool		debugEnabled;
+	bool		hardpointsComputed;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	grinliz::CDynArray< GameItem* > itemArr;

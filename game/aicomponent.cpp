@@ -1826,7 +1826,7 @@ bool AIComponent::ThinkHungry(const ComponentSet& thisComp)
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
 			}
 			else if (fruit) {
-				GameItem* item = thisComp.itemComponent->RemoveFromInventory(elixir);
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory(fruit);
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
 			}
