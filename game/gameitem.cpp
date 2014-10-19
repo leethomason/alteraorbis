@@ -246,10 +246,6 @@ void GameItem::Serialize( XStream* xs )
 	personality.Serialize( xs );
 	wallet.Serialize( xs );
 	XarcClose( xs );
-
-	if ( xs->Loading() ) {
-		Track();
-	}
 }
 
 	

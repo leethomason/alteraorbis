@@ -466,6 +466,7 @@ public:
 	
 	// Generally should be automatic.
 	void UpdateHistory() const					{ UpdateTrack(); }
+	void Track() const;
 
 protected:
 	GameItem* CloneFrom(GameItem* item) const;
@@ -475,7 +476,6 @@ private:
 	Personality personality;
 
 	// Functions to update the ItemDB
-	void Track() const;
 	void UnTrack() const;
 	void UpdateTrack() const;
 

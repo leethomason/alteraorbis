@@ -111,14 +111,15 @@
 			x GameItem XML loading
 		x ReserveBank needs a "guaranteed withdrawal" to start player domains.
 		x Start with 0 team id for un-assigned, all domains 1+ team id
+		x Spawn Gob-men in 4, more frequently.
+		x 2000 gold shields
 		- crazy human colors
 		- memory leak - item code???
 		- no start selection
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		- gob domains don't count in census
-		- strange container-is-item bug when looking at items from census
+		- strange container-is-item bug when looking at items from census. (nothing should be selected...)
 		- AI buildings not connected.
-		- Spawn Gob-men in 4, more frequently.
 		- When domain falls, teamID->0
 		- Search full domain for farms?
 		- test bank running out of money

@@ -102,6 +102,8 @@ void ItemComponent::Serialize( XStream* xs )
 			GameItem* pItem = GameItem::Factory(xs->Loading()->PeekElement());
 			pItem->Serialize(xs);
 			itemArr.Push( pItem );
+			// Needs to be fully loaded before we can track.
+			pItem->Track();
 		}
 	}
 	else {
