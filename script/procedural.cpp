@@ -455,6 +455,13 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		nColors = GL_C_ARRAY_SIZE(GOB_COLORS) / 3;
 		break;
 
+		
+		/*
+		case TEAM_KAMAKIRI:
+		GLASSERT(teamID);
+		colors
+		*/
+
 		case TEAM_NEUTRAL:
 		colors = NEUTRAL_COLORS;
 		nColors = GL_C_ARRAY_SIZE(NEUTRAL_COLORS) / 3;

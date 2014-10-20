@@ -64,6 +64,9 @@ private:
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 	bool cameraHigh;
+	int currentTeamGroup;
+	int currentTeamID;
+	bool reviewMode;
 
 	Engine* engine;
 	TestMap* testMap;
@@ -80,6 +83,8 @@ private:
 	grinliz::Vector2I	paletteVec[NUM_PAL_SEL];
 	gamui::Image		paletteSelector[NUM_PAL_SEL];
 	gamui::TextLabel	paletteLabel[NUM_PAL_SEL];
+	gamui::PushButton	teamButton;
+	gamui::PushButton	teamPlus, teamMinus;
 };
 
 #endif // COLORTESTSCENE_INCLUDED

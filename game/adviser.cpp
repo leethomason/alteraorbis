@@ -36,6 +36,7 @@ void Adviser::Attach(gamui::TextLabel *_text, gamui::Image* _image)
 	text->SetVisible(false);
 	state = DORMANT;
 	timer = 0;
+	rotation = 90;
 }
 
 

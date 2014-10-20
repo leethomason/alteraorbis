@@ -58,6 +58,14 @@ ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( gam
 		paletteVec[i].Set(i * 2, i + 1);
 	}
 	cameraHigh = true;
+
+	currentTeamGroup = 0;
+	currentTeamID = 1;
+	reviewMode = false;
+
+	teamButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	teamPlus.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	teamMinus.Init(&gamui2D, lumosGame->GetButtonLook(0));
 }
 
 
@@ -82,6 +90,11 @@ void ColorTestScene::Resize()
 		paletteSelector[i].SetCapturesTap(true);
 		layout.PosAbs(&paletteLabel[i], i * 2, 2);
 	}
+
+	layout.PosAbs(&teamButton, -3, -1);
+	layout.PosAbs(&teamPlus, -2, -1);
+	layout.PosAbs(&teamMinus, -1, -1);
+
 	DoProcedural();
 }
 
@@ -140,16 +153,17 @@ void ColorTestScene::DoProcedural()
 	base.a() = 0;
 	contrast.a() = 0;
 
+	const int team = Team::CombineID(currentTeamGroup, currentTeamID);
 	{
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		const int team = Team::CombineID(TEAM_HOUSE, 1);
 		AssignProcedural( ISC::suit, false, 0, team, false, 0, 0, &info ); 
 		model[HUMAN_MODEL]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
-		color.SetCol(2, base);
-		//color.Set(3, 2, 0.7f);
+		if (!reviewMode) {
+			color.SetCol(2, base);
+		}
 
 		model[HUMAN_MODEL]->SetColorMap( color );
 		model[HUMAN_MODEL]->SetBoneFilter( info.filterName, info.filter );
@@ -158,15 +172,15 @@ void ColorTestScene::DoProcedural()
 	for (int i = TEMPLE_MODEL; i <= SLEEPTUBE_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		const int team = Team::CombineID(TEAM_HOUSE, 1);
 		AssignProcedural( ISC::team, false, 0, team, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
-		color.SetCol(0, buildBase);
-		color.SetCol(1, buildContrast);
-		color.SetCol(2, buildGlow);
-
+		if (!reviewMode) {
+			color.SetCol(0, buildBase);
+			color.SetCol(1, buildContrast);
+			color.SetCol(2, buildGlow);
+		}
 		model[i]->SetColorMap( color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
@@ -174,12 +188,14 @@ void ColorTestScene::DoProcedural()
 	for(int i=RING_0_MODEL; i<=RING_1_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
-		AssignProcedural( ISC::ring, false, i, Team::CombineID(TEAM_HOUSE, 1), false, 0, 0, &info ); 
+		AssignProcedural( ISC::ring, false, i, team, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
-		color.SetCol(0, base);
-		color.SetCol(1, contrast);
+		if (!reviewMode) {
+			color.SetCol(0, base);
+			color.SetCol(1, contrast);
+		}
 		model[i]->SetColorMap( color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
@@ -188,20 +204,27 @@ void ColorTestScene::DoProcedural()
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
 		static const int EFFECT_ARR[4] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
-		AssignProcedural(ISC::gun, false, 0, TEAM_HOUSE, false, EFFECT_ARR[i-PISTOL_MODEL], 0, &info);
+		AssignProcedural(ISC::gun, false, 0, team, false, EFFECT_ARR[i-PISTOL_MODEL], 0, &info);
 		model[i]->SetTextureXForm( info.te.uvXForm );
 
 		Matrix4 color = info.color;
-		color.SetCol(0, base);
-		color.SetCol(1, contrast);
+		if (!reviewMode) {
+			color.SetCol(0, base);
+			color.SetCol(1, contrast);
+		}
 		model[i]->SetColorMap( color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 
 	for (int i = 0; i < NUM_PAL_SEL; ++i) {
-		CStr<32> str;
-		str.Format("(%d,%d)", paletteVec[i].x, paletteVec[i].y);
-		paletteLabel[i].SetText(str.safe_str());
+		if (reviewMode) {
+			paletteLabel[i].SetText("review");
+		}
+		else {
+			CStr<32> str;
+			str.Format("(%d,%d)", paletteVec[i].x, paletteVec[i].y);
+			paletteLabel[i].SetText(str.safe_str());
+		}
 	}
 }
 
@@ -220,6 +243,30 @@ void ColorTestScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
+	else if (item == &teamButton) {
+		if (currentTeamGroup == TEAM_NEUTRAL || currentTeamGroup == TEAM_KAMAKIRI) currentTeamGroup = TEAM_HOUSE;
+		else if (currentTeamGroup == TEAM_HOUSE) currentTeamGroup = TEAM_TROLL;
+		else if (currentTeamGroup == TEAM_TROLL) currentTeamGroup = TEAM_GOB;
+		else if (currentTeamGroup == TEAM_GOB) currentTeamGroup = TEAM_KAMAKIRI;
+		else GLASSERT(0);
+
+		teamButton.SetText(Team::TeamName(currentTeamGroup).safe_str());
+		reviewMode = true;
+		DoProcedural();
+	}
+	else if (item == &teamPlus) {
+		currentTeamID++;
+		reviewMode = true;
+		DoProcedural();
+	}
+	else if (item == &teamMinus) {
+		currentTeamID--;
+		if (currentTeamID < 1) currentTeamID = 1;
+		reviewMode = true;
+		DoProcedural();
+	}
+
+
 	for (int i = 0; i < NUM_PAL_SEL; ++i) {
 		if (item == &paletteSelector[i]) {
 			float x = 0, y = 0;
@@ -228,6 +275,7 @@ void ColorTestScene::ItemTapped( const gamui::UIItem* item )
 			if (paletteVec[i].x/2 >= paletteVec[i].y) {
 				paletteVec[i].x &= (~1);
 			}
+			reviewMode = false;
 			DoProcedural();
 		}
 	}

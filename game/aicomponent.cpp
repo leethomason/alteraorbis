@@ -1930,43 +1930,45 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 	}
 
 	bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
+	if (!worker) return false;
 
-	if (worker) {
-		BuildingRepairFilter filter;
-		Vector2I sector = thisComp.spatial->GetSector();
+	BuildingRepairFilter filter;
+	Vector2I sector = thisComp.spatial->GetSector();
 
-		Chit* building = Context()->chitBag->FindBuilding(IString(),
-			sector,
-			&thisComp.spatial->GetPosition2D(),
-			LumosChitBag::RANDOM_NEAR, 0, &filter);
+	Chit* building = Context()->chitBag->FindBuilding(IString(),
+		sector,
+		&thisComp.spatial->GetPosition2D(),
+		LumosChitBag::RANDOM_NEAR, 0, &filter);
 
-		if (building) {
-			MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
-			GLASSERT(msc);
-			Rectangle2I repair;
-			repair.Set(0, 0, 0, 0);
-			if (msc) {
-				if (msc->HasPorch()) {
-					repair = msc->PorchPos();
-				}
-				else {
-					repair = msc->Bounds();
-					repair.Outset(1);
-				}
-			}
-			CoreScript* coreScript = CoreScript::GetCore(ToSector(msc->MapPosition()));
-			WorldMap* worldMap = Context()->worldMap;
-			Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	if (!building) return false;
 
-			for (Rectangle2IIterator it(repair); !it.Done(); it.Next()) {
-				if (!coreScript->HasTask(it.Pos()) 
-					&& worldMap->CalcPath( pos2, ToWorld2F(it.Pos()), 0, 0, false)) {
-					taskList.Push(Task::MoveTask(it.Pos()));
-					taskList.Push(Task::StandTask(REPAIR_TIME));
-					taskList.Push(Task::RepairTask(building->ID()));
-					return true;
-				}
-			}
+	MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
+	GLASSERT(msc);
+	Rectangle2I repair;
+	repair.Set(0, 0, 0, 0);
+	if (msc) {
+		if (msc->HasPorch()) {
+			repair = msc->PorchPos();
+		}
+		else {
+			repair = msc->Bounds();
+			repair.Outset(1);
+		}
+	}
+	CoreScript* coreScript = CoreScript::GetCore(ToSector(msc->MapPosition()));
+	if (!coreScript) return false;
+
+	WorldMap* worldMap = Context()->worldMap;
+	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+
+	for (Rectangle2IIterator it(repair); !it.Done(); it.Next()) {
+		if (!coreScript->HasTask(it.Pos()) 
+			&& worldMap->CalcPath( pos2, ToWorld2F(it.Pos()), 0, 0, false)) 
+		{
+			taskList.Push(Task::MoveTask(it.Pos()));
+			taskList.Push(Task::StandTask(REPAIR_TIME));
+			taskList.Push(Task::RepairTask(building->ID()));
+			return true;
 		}
 	}
 	return false;
