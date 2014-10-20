@@ -121,6 +121,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if (name == "GobDomainAI") {
 		return glnew GobDomainAI();
 	}
+	else if (name == "KamakiriDomainAI") {
+		return glnew KamakiriDomainAI();
+	}
 
 
 	GLASSERT( 0 );

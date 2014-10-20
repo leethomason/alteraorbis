@@ -52,9 +52,9 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			itemButton[j][i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
 
-			Button* button = faceWidget.GetButton();
-			if ( button->ToToggleButton() ) {
-				button->ToToggleButton()->AddToToggleGroup( &itemButton[j][i] );
+			Button* firstButton = faceWidget.Visible() ? faceWidget.GetButton() : &itemButton[0][0];
+			if ( firstButton->ToToggleButton() ) {
+				firstButton->ToToggleButton()->AddToToggleGroup( &itemButton[j][i] );
 			}
 		}
 	}

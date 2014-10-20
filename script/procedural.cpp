@@ -411,6 +411,13 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		{ PAL_GRAY * 2, PAL_PURPLE }, { PAL_RED * 2, PAL_PURPLE }, { PAL_GRAY * 2, PAL_PURPLE }
 	};
 
+	static const Vector2I KAMAKIRI_COLORS[] = {
+		{ 4, 1 }, { 6, 0 }, {4, 1},
+		{ 4, 1 }, { 6, 0 }, {10, 3},
+		{ 6, 0 }, { 4, 2 }, { 7, 5 },
+		{ 6, 0 }, { 10, 3 }, {4,0}
+	};
+
 	static const Vector2I HUMAN_COLORS[] = {
 		{ 8, 3 }, { 6, 3 }, { 8, 3 },
 		{8, 3}, {12, 5}, {8, 3},
@@ -418,15 +425,15 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		{10, 3}, {6, 1}, {10, 3},
 		{10, 3}, {4, 2}, {3, 2},
 		{6, 1}, {8, 3}, {6, 1},
-		{8, 1}, {6, 0}, {7, 4},
-		{8, 1}, {12, 5}, {8, 2},
+		//{8, 1}, {6, 0}, {7, 4},
+		//{8, 1}, {12, 5}, {8, 2},
 		{10, 1}, {6, 4}, {10, 1},
 		{6, 2}, {8, 2}, {8, 2},
 		{6, 2}, {10, 2}, {6, 2},
 		{8, 2}, {10, 3}, {10, 3},
 		{10, 2}, {10, 3}, {10, 3},
 		{6, 3}, {6, 1}, {6, 1},
-		{10, 3}, {3, 4}, {3, 4},
+		//{10, 3}, {3, 4}, {3, 4},
 		{10, 3}, {1, 3}, {10, 3}
 	};
 
@@ -455,12 +462,11 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		nColors = GL_C_ARRAY_SIZE(GOB_COLORS) / 3;
 		break;
 
-		
-		/*
 		case TEAM_KAMAKIRI:
 		GLASSERT(teamID);
-		colors
-		*/
+		colors = KAMAKIRI_COLORS;
+		nColors = GL_C_ARRAY_SIZE(KAMAKIRI_COLORS) / 3;
+		break;
 
 		case TEAM_NEUTRAL:
 		colors = NEUTRAL_COLORS;
@@ -482,6 +488,12 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 {
 	static const Vector2I TROLL_COLORS[] = {
 		{ PAL_GRAY * 2, PAL_GREEN }, { PAL_RED * 2, PAL_GREEN }, { PAL_TANGERINE * 2, PAL_GREEN }
+	};
+
+	static const Vector2I KAMAKIRI_COLORS[] = {
+		{ 4, 2 }, { 6, 0 },
+		{ 4, 2 }, { 10, 3 },
+		{ 4, 2 }, { 7, 5 },
 	};
 
 	static const Vector2I GENERAL_COLORS[] = {
@@ -513,6 +525,11 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 		case TEAM_TROLL:
 		colors = TROLL_COLORS;
 		nColors = GL_C_ARRAY_SIZE(TROLL_COLORS) / 2;
+		break;
+
+		case TEAM_KAMAKIRI:
+		colors = KAMAKIRI_COLORS;
+		nColors = GL_C_ARRAY_SIZE(KAMAKIRI_COLORS) / 2;
 		break;
 
 		case TEAM_NEUTRAL:

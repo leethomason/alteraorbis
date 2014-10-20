@@ -393,6 +393,7 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 		break;
 
 		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
 		{
 			tech = MaxTech();
 		}
@@ -564,6 +565,7 @@ int CoreScript::MaxTech()
 		}
 		break;
 
+		case TEAM_KAMAKIRI:
 		case TEAM_GOB:
 		return 1;
 

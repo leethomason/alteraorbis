@@ -1256,6 +1256,11 @@ void GameScene::HandleHotKey( int mask )
 				cs = sim->CreateCore(sector, team);
 				cs->ParentChit()->Add(new KamakiriDomainAI());
 				cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
+
+				for (int i = 0; i<5; ++i) {
+					sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_KAMAKIRI);
+					at.x += 0.5f;
+				}
 			}
 		}
 #endif

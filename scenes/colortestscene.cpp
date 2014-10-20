@@ -92,8 +92,8 @@ void ColorTestScene::Resize()
 	}
 
 	layout.PosAbs(&teamButton, -3, -1);
-	layout.PosAbs(&teamPlus, -2, -1);
-	layout.PosAbs(&teamMinus, -1, -1);
+	layout.PosAbs(&teamPlus, -1, -1);
+	layout.PosAbs(&teamMinus, -2, -1);
 
 	DoProcedural();
 }
@@ -110,6 +110,9 @@ void ColorTestScene::SetupTest()
 
 	model[SLEEPTUBE_MODEL] = engine->AllocModel("sleep");
 	model[SLEEPTUBE_MODEL]->SetPos(4.0f, 0, 1);
+
+	model[CORE_MODEL] = engine->AllocModel("core");
+	model[CORE_MODEL]->SetPos(5.5f, 0, 1);
 
 	for (int i = RING_0_MODEL; i <= RING_1_MODEL; ++i) {
 		model[i] = engine->AllocModel("ring");
@@ -169,7 +172,7 @@ void ColorTestScene::DoProcedural()
 		model[HUMAN_MODEL]->SetBoneFilter( info.filterName, info.filter );
 	}
 
-	for (int i = TEMPLE_MODEL; i <= SLEEPTUBE_MODEL; ++i) {
+	for (int i = TEMPLE_MODEL; i <= CORE_MODEL; ++i) {
 		ProcRenderInfo info;
 		// Use to get the base xform, etc.
 		AssignProcedural( ISC::team, false, 0, team, false, 0, 0, &info ); 
@@ -225,6 +228,12 @@ void ColorTestScene::DoProcedural()
 			str.Format("(%d,%d)", paletteVec[i].x, paletteVec[i].y);
 			paletteLabel[i].SetText(str.safe_str());
 		}
+	}
+	{
+		CStr<32> str;
+		str.Format("+\n%d", currentTeamID);
+		teamPlus.SetText(str.safe_str());
+		teamMinus.SetText("-");
 	}
 }
 
