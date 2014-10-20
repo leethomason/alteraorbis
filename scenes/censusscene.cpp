@@ -74,7 +74,9 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 		if (item == &link[i]) {
 			Chit* chit = chitBag->GetChit((int)link[i].userData);
 			if (chit && chit->GetItemComponent()) {
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				const GameItem* item = ItemDB::Instance()->Find((int)link[i].userData);
+
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, item);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}
@@ -312,7 +314,7 @@ void CensusScene::HandleHotKey(int value)
 			int id = greaterKills[i].tempID;
 			Chit* chit = chitBag->GetChit(id);
 			if (chit && chit->GetItemComponent()) {
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, 0);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}

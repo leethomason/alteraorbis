@@ -46,13 +46,15 @@ public:
 	CharacterSceneData(	ItemComponent* ic,		// character
 						ItemComponent* ic2,		// vault, market, exchange
 						int _type,				// apply markup, costs
-						Wallet* _taxRecipiant)	// who gets sales tax
-		: SceneData(), itemComponent(ic), storageIC(ic2), taxRecipiant(_taxRecipiant), type(_type) { GLASSERT(ic); }
+						Wallet* _taxRecipiant,	// who gets sales tax
+						const GameItem* _select)
+		: SceneData(), itemComponent(ic), storageIC(ic2), taxRecipiant(_taxRecipiant), type(_type), selectItem(_select) { GLASSERT(ic); }
 
 	ItemComponent*	itemComponent;
 	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
 	Wallet*			taxRecipiant;
 	int				type;
+	const GameItem*		selectItem;
 
 	bool IsAvatar() const					{ return type == AVATAR; }
 	bool IsCharacterItem() const			{ return type == CHARACTER_ITEM; }

@@ -1023,7 +1023,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
 							 new CharacterSceneData( chit->GetItemComponent(), 0, 
 							 chit == GetPlayerChit() ? CharacterSceneData::AVATAR : CharacterSceneData::CHARACTER_ITEM, 
-							 0 ));
+							 0, 0 ));
 		}
 	}
 	else if (item == &swapWeapons) {
