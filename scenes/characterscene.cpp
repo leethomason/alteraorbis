@@ -93,11 +93,10 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 
 	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
-	if ( /*data->IsMarket() || */ data->IsExchange() ) {
+	if ( data->IsExchange() ) {
 		moneyWidget[1].SetVisible( true );
 		moneyWidget[1].Set( data->storageIC->GetItem(0)->wallet );
 	}
-	//CalcCrystalValue();
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -106,7 +105,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
-	SetButtonText();
+	SetButtonText(csd->selectItem);
 }
 
 
@@ -236,7 +235,7 @@ void CharacterScene::SetExchangeButtonText()
 }
 
 
-void CharacterScene::SetButtonText()
+void CharacterScene::SetButtonText(const GameItem* select)
 {
 	if (data->IsExchange()) {
 		SetExchangeButtonText();
@@ -288,6 +287,10 @@ void CharacterScene::SetButtonText()
 
 			if ( itemButton[j][count].Down() ) {
 				down = item;
+			}
+			else if (select && item == select) {
+				down = item;
+				itemButton[j][count].SetDown();
 			}
 			++count;
 			++src;
@@ -416,7 +419,7 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 		}
 	}
 
-	SetButtonText();
+	SetButtonText(0);
 }
 
 void CharacterScene::DoTick( U32 deltaTime )
@@ -515,7 +518,7 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		}
 	}
 
-	SetButtonText();
+	SetButtonText(0);
 
 	if (data->itemComponent)
 		moneyWidget[0].Set(data->itemComponent->GetItem()->wallet);

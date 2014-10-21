@@ -89,7 +89,7 @@ public:
 	virtual grinliz::Color4F ClearColor();
 
 private:
-	void SetButtonText();
+	void SetButtonText(const GameItem* selectThis);
 	void SetExchangeButtonText();
 	void SetItemInfo(const GameItem* item, const GameItem* user);
 

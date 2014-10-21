@@ -72,11 +72,13 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	}
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		if (item == &link[i]) {
-			Chit* chit = chitBag->GetChit((int)link[i].userData);
+			Chit* chit = 0; 
+			int itemID = (int)link[i].userData;
+			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
-				const GameItem* item = ItemDB::Instance()->Find((int)link[i].userData);
+				const GameItem* gi = ItemDB::Instance()->Find(itemID);
 
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, item);
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, gi);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}
@@ -130,7 +132,8 @@ void CensusScene::ScanItem(ItemComponent* ic, const GameItem* item)
 
 	ItemHistory h;
 	h.Set(item);
-	h.tempID = ic->ParentChit()->ID();
+	GLASSERT(h.itemID);
+	itemIDToChitMap.Add(h.itemID, ic->ParentChit());
 	AddToHistory(h);
 }
 
@@ -201,7 +204,9 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	}
 	itemHistory.AppendDesc(&str, newsHistory, "\n\t");
 
-	Chit* chit = chitBag->GetChit(itemHistory.tempID);
+	Chit* chit = 0;
+	GLASSERT(itemHistory.itemID);
+	itemIDToChitMap.Query(itemHistory.itemID, &chit);
 	if (chit) {
 		SpatialComponent* sc = chit->GetSpatialComponent();
 		if (sc) {
@@ -214,8 +219,8 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	}
 
 	label[i].SetText(str.c_str());
-	link[i].SetVisible(itemHistory.tempID > 0);
-	link[i].userData = (const void*)itemHistory.tempID;
+	link[i].SetVisible(chit > 0);
+	link[i].userData = (const void*)itemHistory.itemID;
 }
 
 
@@ -285,8 +290,7 @@ void CensusScene::DoLayout()
 			if (mobActive[i].item) {
 				ItemHistory h;
 				h.Set(mobActive[i].item);
-				h.tempID = mobActive[i].ic ? mobActive[i].ic->ParentChit()->ID() : 0;
-
+				itemIDToChitMap.Add(h.itemID, mobActive[i].ic ? mobActive[i].ic->ParentChit() : 0);
 				SetItem(count, NAME[i], h);
 				++count;
 			}
@@ -297,7 +301,7 @@ void CensusScene::DoLayout()
 			if (itemActive[i].item) {
 				ItemHistory h;
 				h.Set(itemActive[i].item);
-				h.tempID = itemActive[i].ic ? itemActive[i].ic->ParentChit()->ID() : 0;
+				itemIDToChitMap.Add(h.itemID, itemActive[i].ic ? itemActive[i].ic->ParentChit() : 0);
 				SetItem(count, NAME[i], h);
 				++count;
 			}
@@ -309,6 +313,7 @@ void CensusScene::DoLayout()
 
 void CensusScene::HandleHotKey(int value)
 {
+	/*
 	if (value == GAME_HK_SPACE) {
 		for (int i = 0; i < greaterKills.Size(); ++i) {
 			int id = greaterKills[i].tempID;
@@ -320,7 +325,9 @@ void CensusScene::HandleHotKey(int value)
 			}
 		}
 	}
-	else {
+	else 
+	*/
+	{
 		super::HandleHotKey(value);
 	}
 }

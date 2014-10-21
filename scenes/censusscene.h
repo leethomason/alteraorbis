@@ -123,6 +123,8 @@ private:
 	gamui::TextLabel	label[MAX_ROWS];
 	gamui::ToggleButton	radio[NUM_GROUPS];
 
+	grinliz::HashTable<int, Chit*>	itemIDToChitMap;
+
 	// stuff to scan for:
 	TransactAmt	allWallet, mobWallet;
 
