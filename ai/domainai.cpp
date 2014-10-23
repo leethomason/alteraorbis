@@ -17,17 +17,16 @@
 #include "../game/team.h"
 #include "../script/procedural.h"
 #include "../script/farmscript.h"
+#include "roadai.h"
 
 using namespace grinliz;
 
 DomainAI::DomainAI()
 {
-
 }
 
 DomainAI::~DomainAI()
 {
-
 }
 
 void DomainAI::OnAdd(Chit* chit, bool initialize)
@@ -38,20 +37,25 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
 	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	roads = new RoadAI(sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE);
+	CDynArray<Vector2I> road;
+
 	for (int i = 0; i < 4; ++i) {
 		int port = 1 << i;
 		if (sectorData.ports & port) {
 			Rectangle2I portLoc = sectorData.GetPortLoc(port);
 			Vector2I it = portLoc.Center();
+			road.Clear();
 			while (it != sectorData.core) {
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it);
 				if (!wg.IsPort()) {
-					road[i].Push(it);
+					road.Push(it);
 				}
 				it = it + wg.Path(0);
 			}
 			// Road goes from core to port:
-			road[i].Reverse();
+			road.Reverse();
+			roads->AddRoad(road.Mem(), road.Size());
 		}
 	}
 }
@@ -60,6 +64,7 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 void DomainAI::OnRemove()
 {
 	super::OnRemove();
+	delete roads;
 }
 
 
@@ -133,9 +138,12 @@ bool DomainAI::BuildRoad()
 	// Check a random road.
 	bool issuedOrders = false;
 
-	for (int p = 0; p < 4 && !issuedOrders; ++p) {
-		for (int i = 0; i < road[p].Size(); ++i) {
-			Vector2I pos2i = road[p][i];
+	for (int p = 0; p < RoadAI::MAX_ROADS && !issuedOrders; ++p) {
+		int n = 0;
+		const Vector2I* road = roads->GetRoad(p, &n);
+
+		for (int i = 0; i < n; ++i) {
+			Vector2I pos2i = road[i];
 			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
 			if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
 				workQueue->AddAction(pos2i, BuildScript::PAVE, 0, pave);
@@ -147,7 +155,7 @@ bool DomainAI::BuildRoad()
 }
 
 
-bool DomainAI::BuildPlaza(int size)
+bool DomainAI::BuildPlaza()
 {
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
@@ -159,32 +167,34 @@ bool DomainAI::BuildPlaza(int size)
 	// Check a random road.
 	bool issuedOrders = false;
 	const SectorData& sd = Context()->worldMap->GetSector(sector);
-	Rectangle2I r;
-	r.min = r.max = sd.core;
-	r.Outset(size);
 
-	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-		if (it.Pos() == sd.core) {
-			continue;
-		}
+	for (int i = 0; i < RoadAI::MAX_PLAZA; ++i) {
+		const Rectangle2I* r = roads->GetPlaza(i);
+		if (r) {
+			for (Rectangle2IIterator it(*r); !it.Done(); it.Next()) {
+				if (it.Pos() == sd.core) {
+					continue;
+				}
 
-		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-		if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
-			workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
-			issuedOrders = true;
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+				if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+					workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
+					issuedOrders = true;
+				}
+			}
 		}
 	}
 	return issuedOrders;
 }
 
 
-bool DomainAI::CanBuild(const grinliz::Rectangle2I& r, int pave)
+bool DomainAI::CanBuild(const grinliz::Rectangle2I& r)
 {
 	bool okay = true;
 	WorldMap* worldMap = Context()->worldMap;
 	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos());
-		if (!wg.IsLand() || (wg.Pave() == pave)) {
+		if (!wg.IsLand()) {
 			okay = false;
 			break;
 		}
@@ -192,16 +202,6 @@ bool DomainAI::CanBuild(const grinliz::Rectangle2I& r, int pave)
 	return okay;
 }
 
-
-int DomainAI::RightVectorToRotation(const grinliz::Vector2I& right)
-{
-	int rotation = 0;
-	if (right.y == 1) rotation = 180;
-	else if (right.x == 1) rotation = 270;
-	else if (right.y == -1) rotation = 0;
-	else if (right.x == -1) rotation = 90;
-	return rotation;
-}
 
 bool DomainAI::BuildBuilding(int id)
 {
@@ -215,39 +215,16 @@ bool DomainAI::BuildBuilding(int id)
 	BuildScript buildScript;
 	const BuildData& bd = buildScript.GetData(id);
 
-	int endIndex = 0;
-	for (int i = 0; i < MAX_ROADS; ++i) {
-		endIndex = Max(endIndex, road[i].Size());
-	}
+	for (roads->Begin(); !roads->Done(); roads->Next()) {
+		int nZones = 0;
+		const RoadAI::BuildZone* zones = roads->CalcZones(&nZones, bd.size, bd.porch);
 
-	for (int index = 2; index < endIndex; ++index) {
-		for (int i = 0; i < MAX_ROADS; ++i) {
-			if (index >= road[i].Size())
-				continue;
+		for (int i = 0; i < nZones; ++i) {
 
-			Vector2I head = road[i][index];
-			Vector2I tail = road[i][index - 1];
-
-			// Mix up the head/tail left/right
-			if (index & 1) {
-				Swap(&head, &tail);
-			}
-
-			Vector2I dir = head - tail;
-			Vector2I left  = { -dir.y, dir.x };
-			Vector2I right = -left;
-			int porch = bd.porch ? 1 : 0;
-
-			Rectangle2I fullBounds, buildBounds, porchBounds;
-			GLASSERT(bd.size == 1 || bd.size == 2);
-			// For building, if the size is one, then the tail is at the location of the head.
-			Vector2I btail = (bd.size == 2) ? tail : head;
-			fullBounds.FromPair(head - left *(porch + bd.size), btail - left);
-			buildBounds.FromPair(head - left*(porch + bd.size), btail - left*(1 + porch));
-			porchBounds.FromPair(head - left, btail - left);
+			const RoadAI::BuildZone& zone = zones[i];
 
 			// Check that we aren't building too close to a farm.
-			Rectangle2I farmCheckBounds = fullBounds;
+			Rectangle2I farmCheckBounds = zone.fullBounds;
 			farmCheckBounds.Outset(FARM_GROW_RAD);
 			if (Context()->chitBag->QueryBuilding(ISC::farm, farmCheckBounds, 0)) {
 				continue;	// Don't build too close to farms!
@@ -256,7 +233,7 @@ bool DomainAI::BuildBuilding(int id)
 			// A little teeny tiny effort to group natural and industrial buildings.
 			if (bd.zone) {
 				IString avoid = (bd.zone == BuildData::ZONE_INDUSTRIAL) ? ISC::natural : ISC::industrial;
-				Rectangle2I conflictBounds = fullBounds;
+				Rectangle2I conflictBounds = zone.fullBounds;
 				conflictBounds.Outset(3);
 				CChitArray conflict;
 				Context()->chitBag->QueryBuilding(IString(), conflictBounds, &conflict);
@@ -272,19 +249,25 @@ bool DomainAI::BuildBuilding(int id)
 				if (hasConflict) continue;	// try another location. 
 			}
 
-			// Why right? The building is to the left, so it faces right.
-			int rotation = RightVectorToRotation(right);
-
-			bool okay = CanBuild(fullBounds, pave);
+			bool okay = CanBuild(zone.fullBounds);
 			if (okay) {
-				Chit* chit = Context()->chitBag->QueryBuilding(IString(), fullBounds, 0);
+				Chit* chit = Context()->chitBag->QueryBuilding(IString(), zone.fullBounds, 0);
 				okay = !chit;
+				if (!chit) {
+					for (Rectangle2IIterator it(zone.fullBounds); !it.Done(); it.Next()) {
+						const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+						if (wg.Porch()) {
+							okay = false;
+							break;
+						}
+					}
+				}
 			}
 
 			if (okay) {
-				workQueue->AddAction(buildBounds.min, id, (float)rotation, 0);
+				workQueue->AddAction(zone.buildBounds.min, id, (float)zone.rotation, 0);
 				if (bd.porch) {
-					for (Rectangle2IIterator it(porchBounds); !it.Done(); it.Next()) {
+					for (Rectangle2IIterator it(zone.porchBounds); !it.Done(); it.Next()) {
 						workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 					}
 				}
@@ -305,48 +288,27 @@ bool DomainAI::BuildFarm()
 	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return false;
 
-	int endIndex = 0;
-	for (int i = 0; i < MAX_ROADS; ++i) {
-		endIndex = Max(endIndex, road[i].Size());
-	}
-
 	int bestScore = 0;
-	Vector2I bestFarm = { 0, 0 }, bestRight = { 0, 0 };
-	Rectangle2I bestPave;
+	RoadAI::BuildZone bestZone;
 
-	for (int index = 7; index < endIndex; ++index) {
-		for (int i = 0; i < MAX_ROADS; ++i) {
-			if (index >= road[i].Size())
-				continue;
+	for (roads->Begin(7); !roads->Done(); roads->Next()) {
 
-			Vector2I head = road[i][index];
-			Vector2I tail = road[i][index - 1];
+		int nZones = 0;
+		const RoadAI::BuildZone* zones = roads->CalcFarmZones(&nZones);
+		
+		for (int i = 0; i < nZones; ++i) {
+			const RoadAI::BuildZone& zone = zones[i];
 
-			// Mix up the head/tail left/right
-			if (index & 0) {
-				Swap(&head, &tail);
-			}
-
-			Vector2I dir = head - tail;
-			Vector2I left = { -dir.y, dir.x };
-			Vector2I right = -left;
-
-			Vector2I solar = head - left * 3;
-			Rectangle2I paveBounds;
-			paveBounds.FromPair(head - left * 2, head - left);
-			Rectangle2I fullBounds;
-			fullBounds.min = fullBounds.max = solar;
-			fullBounds.Outset(FARM_GROW_RAD);
-			Rectangle2I buildBounds = paveBounds;
-			buildBounds.DoUnion(solar);
-			Rectangle2I extendedBounds = fullBounds;
+			Rectangle2I extendedBounds = zone.fullBounds;
 			extendedBounds.Outset(2);
+			Rectangle2I clearBounds = zone.porchBounds;
+			clearBounds.DoUnion(zone.buildBounds);
 
 			// Can we build the pave and the solar farm?
-			if (CanBuild(buildBounds, pave) && !Context()->chitBag->QueryBuilding(IString(), extendedBounds, 0)) {
+			if (CanBuild(zone.fullBounds) && !Context()->chitBag->QueryBuilding(IString(), extendedBounds, 0)) {
 				int score = 0;
-				for (Rectangle2IIterator it(fullBounds); !it.Done(); it.Next()) {
-					if (!buildBounds.Contains(it.Pos())) {
+				for (Rectangle2IIterator it(zone.fullBounds); !it.Done(); it.Next()) {
+					if (!clearBounds.Contains(it.Pos())) {
 						const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
 						if (wg.Plant()) {
 							int stage = wg.PlantStage() + 1;
@@ -354,21 +316,16 @@ bool DomainAI::BuildFarm()
 						}
 					}
 				}
-				score = score / index;	// don't want it TOO far from center.
-
 				if (score > bestScore) {
 					bestScore = score;
-					bestFarm = solar;
-					bestPave = paveBounds;
-					bestRight = right;
+					bestZone = zone;
 				}
 			}
 		}
 	}
 	if (bestScore) {
-		int rotation = RightVectorToRotation(bestRight);
-		workQueue->AddAction(bestFarm, BuildScript::FARM, (float)rotation, 0);
-		for (Rectangle2IIterator it(bestPave); !it.Done(); it.Next()) {
+		workQueue->AddAction(bestZone.buildBounds.min, BuildScript::FARM, (float)bestZone.rotation, 0);
+		for (Rectangle2IIterator it(bestZone.porchBounds); !it.Done(); it.Next()) {
 			workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 		}
 		return true;
@@ -439,8 +396,16 @@ void TrollDomainAI::Serialize( XStream* xs )
 
 void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
 {
-	return super::OnAdd(chit, initialize);
+	super::OnAdd(chit, initialize);
 	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+
+	Vector2I c = sectorData.core;
+	Rectangle2I plaza0;
+	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
+	roads->AddPlaza(plaza0);
 }
 
 
@@ -527,7 +492,7 @@ void TrollDomainAI::DoBuild()
 	do {
 		if (BuyWorkers()) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
-		if (BuildPlaza(2)) break;
+		if (BuildPlaza()) break;
 		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
@@ -556,7 +521,15 @@ void GobDomainAI::Serialize( XStream* xs )
 
 void GobDomainAI::OnAdd(Chit* chit, bool initialize)
 {
-	return super::OnAdd(chit, initialize);
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+
+	Vector2I c = sectorData.core;
+	Rectangle2I plaza0;
+	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
+	roads->AddPlaza(plaza0);
 }
 
 
@@ -588,7 +561,7 @@ void GobDomainAI::DoBuild()
 	do {
 		if (BuyWorkers()) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
-		if (BuildPlaza(2)) break;
+		if (BuildPlaza()) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
 		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
@@ -624,7 +597,18 @@ void KamakiriDomainAI::Serialize( XStream* xs )
 
 void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 {
-	return super::OnAdd(chit, initialize);
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+
+	Vector2I c = sectorData.core;
+	Rectangle2I plaza0, plaza1;
+	plaza0.FromPair(c.x - 3, c.y - 1, c.x + 3, c.y + 1);
+	plaza1.FromPair(c.x - 1, c.y - 3, c.x + 1, c.y + 3);
+
+	roads->AddPlaza(plaza0);
+	roads->AddPlaza(plaza1);
 }
 
 
@@ -657,19 +641,19 @@ void KamakiriDomainAI::DoBuild()
 		if (BuyWorkers()) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 		
-		//if (BuildPlaza(2)) break;
-		if (arr[BuildScript::SLEEPTUBE] < 16 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		/*
+		if (BuildPlaza()) break;
+		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
 		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
 		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
 		if (eff < 2.0f && BuildFarm()) break;
-		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+		if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-		*/
 	} while (false);
 }
 

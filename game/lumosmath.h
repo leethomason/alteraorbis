@@ -100,6 +100,26 @@ inline int SectorIndex( const grinliz::Vector2I& sector ) {
 }
 
 
+// Assumes +Z axis is 0 rotation. 
+// NOT consistent. (Ick.)
+inline int WorldRotation(const grinliz::Vector2I& normal) {
+	GLASSERT(abs(normal.x) + abs(normal.y) == 1);
+	if (normal.y == 1) return 0;
+	else if (normal.x == 1) return 90;
+	else if (normal.y == -1) return 180;
+	else if (normal.x == -1) return 270;
+	GLASSERT(0);
+	return 0;
+}
+
+
+// Positive 90 degree rotation.
+inline grinliz::Vector2I RotateWorldVec(const grinliz::Vector2I& vec)
+{
+	grinliz::Vector2I r = { vec.y, -vec.x };
+	return r;
+}
+
 // Convert 3-18 (actually 1-20) to 0.4->2.0
 // 10.5 is normal -> 1.0, how to map? The highest shouldn't be 20x the lowest, probably.
 // Aim for a little moderation in the constants.

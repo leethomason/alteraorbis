@@ -91,6 +91,7 @@
     <ClCompile Include="..\ai\domainai.cpp" />
     <ClCompile Include="..\ai\marketai.cpp" />
     <ClCompile Include="..\ai\rebuildai.cpp" />
+    <ClCompile Include="..\ai\roadai.cpp" />
     <ClCompile Include="..\ai\tasklist.cpp" />
     <ClCompile Include="..\audio\xenoaudio.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="..\ai\domainai.h" />
     <ClInclude Include="..\ai\marketai.h" />
     <ClInclude Include="..\ai\rebuildai.h" />
+    <ClInclude Include="..\ai\roadai.h" />
     <ClInclude Include="..\ai\tasklist.h" />
     <ClInclude Include="..\audio\xenoaudio.h" />
     <ClInclude Include="..\engine\animation.h" />

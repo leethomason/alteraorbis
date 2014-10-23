@@ -115,13 +115,13 @@
 		x 2000 gold shields
 		x full screen toggle
 		x crazy human colors
-		- AI buildings not connected.
-		- memory leak - item code???
-		- no start selection
-		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		x no start selection
 		x gob domains don't count in census
 		x strange container-is-item bug when looking at items from census. (nothing should be selected...)
-		- partially fixed....should select correct item when entering container screen
+		x partially fixed....should select correct item when entering container screen
+		- AI buildings not connected.
+		- memory leak - item code???
+		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		- When domain falls, teamID->0
 		- Search full domain for farms?
 		- test bank running out of money
@@ -131,6 +131,7 @@
 		- update trilobyte to match sketch
 		- map icons for MOBs aren't square
 		- does history get tracked correctly when core gets taken over?
+		- advisor still comes up in weird states.
 		- clean up UI. less clutter.
 
 		- special gobman item, building

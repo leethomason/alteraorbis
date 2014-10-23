@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class CoreScript;
 class WorkQueue;
+class RoadAI;
 
 class DomainAI : public Component, public IChitListener
 {
@@ -44,17 +45,15 @@ public:
 
 protected:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
-	bool CanBuild(const grinliz::Rectangle2I& r, int pave);	// clear of water and pave
-	int RightVectorToRotation(const grinliz::Vector2I& right);
+	bool CanBuild(const grinliz::Rectangle2I& r);
 
 	bool BuyWorkers();
 	bool BuildRoad();
-	bool BuildPlaza(int size);
+	bool BuildPlaza();
 	bool BuildBuilding(int id);
 	bool BuildFarm();
 
-	enum { MAX_ROADS = 4};
-	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
+	RoadAI*	roads;
 
 private:
 	CTicker ticker;			// build logic ticker.
