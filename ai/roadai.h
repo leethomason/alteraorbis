@@ -7,6 +7,8 @@
 #include "../grinliz/glbitarray.h"
 #include "../game/gamelimits.h"
 
+class MapSpatialComponent;
+
 class RoadAI
 {
 public:
@@ -26,6 +28,8 @@ public:
 	void Next();
 
 	struct BuildZone {
+		int roadID;
+		int roadDistance;
 		int rotation;
 		grinliz::Rectangle2I fullBounds;
 		grinliz::Rectangle2I buildBounds;
@@ -37,8 +41,12 @@ public:
 	// buildBounds: the 1x1 solar farm
 	// porchbounds: where the access road should go
 	const BuildZone* CalcFarmZones(int* n);
+
+	bool IsOnRoad(MapSpatialComponent* msc);
 	
 private:
+	bool UseMapEmpty(const grinliz::Rectangle2I& w);
+
 	grinliz::CDynArray<grinliz::Vector2I> road[MAX_ROADS];
 	grinliz::CArray<BuildZone, MAX_ROADS * 2> buildZones;
 	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> useMap;

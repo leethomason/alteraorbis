@@ -120,6 +120,7 @@
 		x strange container-is-item bug when looking at items from census. (nothing should be selected...)
 		x partially fixed....should select correct item when entering container screen
 		- AI buildings not connected.
+		- recruitment of neutral/friendly doesn't seem to work
 		- memory leak - item code???
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		- When domain falls, teamID->0

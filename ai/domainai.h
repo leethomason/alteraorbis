@@ -47,8 +47,10 @@ protected:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
 	bool CanBuild(const grinliz::Rectangle2I& r);
 
+	bool ClearDisconnected();
 	bool BuyWorkers();
 	bool BuildRoad();
+	bool BuildRoad(int road, int distance);
 	bool BuildPlaza();
 	bool BuildBuilding(int id);
 	bool BuildFarm();

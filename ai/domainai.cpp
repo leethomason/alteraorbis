@@ -17,6 +17,7 @@
 #include "../game/team.h"
 #include "../script/procedural.h"
 #include "../script/farmscript.h"
+#include "../game/mapspatialcomponent.h"
 #include "roadai.h"
 
 using namespace grinliz;
@@ -126,6 +127,34 @@ bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** 
 }
 
 
+bool DomainAI::BuildRoad(int i, int d)
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return false;
+
+	// Check a random road.
+	bool issuedOrders = false;
+
+	int n = 0;
+	const Vector2I* road = roads->GetRoad(i, &n);
+	n = Min(n, d);
+
+	for (int i = 0; i < n; ++i) {
+		Vector2I pos2i = road[i];
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+		if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+			workQueue->AddAction(pos2i, BuildScript::PAVE, 0, pave);
+			issuedOrders = true;
+		}
+	}
+	return issuedOrders;
+}
+
+
 bool DomainAI::BuildRoad()
 {
 	Vector2I sector = { 0, 0 };
@@ -141,14 +170,8 @@ bool DomainAI::BuildRoad()
 	for (int p = 0; p < RoadAI::MAX_ROADS && !issuedOrders; ++p) {
 		int n = 0;
 		const Vector2I* road = roads->GetRoad(p, &n);
-
-		for (int i = 0; i < n; ++i) {
-			Vector2I pos2i = road[i];
-			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-			if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
-				workQueue->AddAction(pos2i, BuildScript::PAVE, 0, pave);
-				issuedOrders = true;
-			}
+		if (road) {
+			issuedOrders = BuildRoad(p, INT_MAX);
 		}
 	}
 	return issuedOrders;
@@ -265,6 +288,7 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			if (okay) {
+				BuildRoad(zone.roadID, zone.roadDistance);
 				workQueue->AddAction(zone.buildBounds.min, id, (float)zone.rotation, 0);
 				if (bd.porch) {
 					for (Rectangle2IIterator it(zone.porchBounds); !it.Done(); it.Next()) {
@@ -324,11 +348,39 @@ bool DomainAI::BuildFarm()
 		}
 	}
 	if (bestScore) {
+		BuildRoad(bestZone.roadID, bestZone.roadDistance);
 		workQueue->AddAction(bestZone.buildBounds.min, BuildScript::FARM, (float)bestZone.rotation, 0);
 		for (Rectangle2IIterator it(bestZone.porchBounds); !it.Done(); it.Next()) {
 			workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 		}
 		return true;
+	}
+	return false;
+}
+
+
+bool DomainAI::ClearDisconnected()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return false;
+
+	// FIXME: handle case where there are more than 32 buildings. Cache dynarray?
+	CChitArray arr;
+	Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
+	Context()->chitBag->QueryBuilding(IString(), inner, &arr);
+
+	for (int i = 0; i < arr.Size(); ++i) {
+		MapSpatialComponent* msc = arr[i]->GetSpatialComponent()->ToMapSpatialComponent();
+		if (msc) {
+			if (!roads->IsOnRoad(msc)) {
+				workQueue->AddAction(msc->Bounds().min, BuildScript::CLEAR, 0, 0);
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -491,11 +543,11 @@ void TrollDomainAI::DoBuild()
 
 	do {
 		if (BuyWorkers()) break;
-		if (BuildRoad()) break;	// will return true until all roads are built.
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
 
@@ -560,7 +612,6 @@ void GobDomainAI::DoBuild()
 
 	do {
 		if (BuyWorkers()) break;
-		if (BuildRoad()) break;	// will return true until all roads are built.
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
@@ -638,9 +689,7 @@ void KamakiriDomainAI::DoBuild()
 	}
 
 	do {
-		if (BuyWorkers()) break;
-		if (BuildRoad()) break;	// will return true until all roads are built.
-		
+		if (BuyWorkers()) break;		
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
@@ -654,6 +703,7 @@ void KamakiriDomainAI::DoBuild()
 		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 		if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
 
