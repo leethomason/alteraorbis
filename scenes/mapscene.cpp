@@ -251,9 +251,12 @@ void MapScene::SetText()
 
 				for (int k = 0; k < counter.Size() && k < MAX_COL && nFace < MAX_FACE; ++k) {
 					RenderAtom atom = LumosGame::CalcUIIconAtom(counter[k].name.c_str(), true);
+
+					float fraction = (atom.tx1 - atom.tx0) / (atom.ty1 - atom.ty0);
+
 					atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
 					face[nFace].SetAtom(atom);
-					face[nFace].SetSize(h, h);
+					face[nFace].SetSize(h * fraction, h);
 					face[nFace].SetPos(x + float(k)*h, y);
 					face[nFace].SetVisible(true);
 					++nFace;

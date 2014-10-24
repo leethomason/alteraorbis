@@ -124,13 +124,13 @@
 		- memory leak - item code???
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		- When domain falls, teamID->0
-		- Search full domain for farms?
+		x Search full domain for farms?
 		- test bank running out of money
 		- and then re-test with higher limits
 		- markets aren't paying tax (check, think this is working)
 		- re-test battle scenes. balance.
 		- update trilobyte to match sketch
-		- map icons for MOBs aren't square
+		x map icons for MOBs aren't square
 		- does history get tracked correctly when core gets taken over?
 		- advisor still comes up in weird states.
 		- clean up UI. less clutter.
