@@ -116,7 +116,7 @@
 		x full screen toggle
 		x crazy human colors
 		- AI buildings not connected.
-		- memory leak - item code???
+		x memory leak - item code???
 		- no start selection
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		x gob domains don't count in census

@@ -42,6 +42,8 @@ distribution.
 #include <time.h>
 #include "glstringutil.h"
 
+#define GRINLIZ_STACKTRACE
+
 bool gDebugging = true;
 
 void SetCheckGLError(bool error)
@@ -189,33 +191,31 @@ void PrintStack()
 */
 
 #ifdef GRINLIZ_STACKTRACE
-void GetAllocator( char* name, int n )
+void GetAllocator(char* name, int n)
 {
-     void         * stack[ 100 ];
-     unsigned short frames;
-     static SYMBOL_INFO  * symbol = 0;
-     HANDLE         process;
+	void         * stack[100];
+	unsigned short frames;
+	U8				symbolMem[sizeof(SYMBOL_INFO)+256];
 
-	 if ( !symbol )
-	     symbol = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
-	 else
-		 memset( symbol, 0, sizeof( SYMBOL_INFO ) + 256 * sizeof( char ) );
+	SYMBOL_INFO* symbol = (SYMBOL_INFO*)symbolMem;
+	HANDLE         process;
 
+	memset(symbol, 0, sizeof(SYMBOL_INFO)+256);
+	process = GetCurrentProcess();
 
-     process = GetCurrentProcess();
+	SymInitialize(process, NULL, TRUE);
 
-     SymInitialize( process, NULL, TRUE );
+	frames = CaptureStackBackTrace(3, 1, stack, NULL);
+	symbol->MaxNameLen = 255;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
-     frames               = CaptureStackBackTrace( 3, 1, stack, NULL );
-     symbol->MaxNameLen   = 255;
-     symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
-
-     SymFromAddr( process, ( DWORD64 )( stack[ 0 ] ), 0, symbol );
-	 //GLOUTPUT(( "%s\n", symbol->Name ));
-	 if ( name && n ) {
-		 memcpy( name, symbol->Name, n );
-		 name[n-1] = 0;
-	 }
+	SymFromAddr(process, (DWORD64)(stack[0]), 0, symbol);
+	//GLOUTPUT(( "%s\n", symbol->Name ));
+	if (name && n) {
+		int c = n - 1 < (int)symbol->NameLen ? n - 1 : symbol->NameLen;
+		memcpy(name, symbol->Name, c);
+		name[c] = 0;
+	}
 }
 #endif
 

@@ -41,88 +41,88 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	IString name = StringPool::Intern(_name);
 
 	if ( name == "SpatialComponent" ) {
-		return glnew SpatialComponent();
+		return new SpatialComponent();
 	}
 	else if ( name == "PathMoveComponent" ) {
-		return glnew PathMoveComponent();
+		return new PathMoveComponent();
 	}
 	else if ( name == "ItemComponent" ) {
-		return glnew ItemComponent( 0 );
+		return new ItemComponent( 0 );
 	}
 	else if ( name == "DebugStateComponent" ) {
-		return glnew DebugStateComponent();
+		return new DebugStateComponent();
 	}
 	else if ( name == "DebugPathComponent" ) {
-		return glnew DebugPathComponent();
+		return new DebugPathComponent();
 	}
 	else if ( name == "HealthComponent" ) {
-		return glnew HealthComponent();
+		return new HealthComponent();
 	}
 	else if ( name == "RenderComponent" ) {
-		return glnew RenderComponent( 0 );
+		return new RenderComponent( 0 );
 	}
 	else if ( name == "CameraComponent" ) {
-		return glnew CameraComponent( &context->engine->camera );
+		return new CameraComponent( &context->engine->camera );
 	}
 	else if ( name == "MapSpatialComponent" ) {
-		return glnew MapSpatialComponent();
+		return new MapSpatialComponent();
 	}
 	else if ( name == "AIComponent" ) {
-		return glnew AIComponent();
+		return new AIComponent();
 	}
 	else if ( name == "GridMoveComponent" ) {
-		return glnew GridMoveComponent();
+		return new GridMoveComponent();
 	}
 	else if (name == "GameMoveComponent") {
-		return glnew GameMoveComponent();
+		return new GameMoveComponent();
 	}
 	else if ( name == "VisitorStateComponent" ) {
-		return glnew VisitorStateComponent();
+		return new VisitorStateComponent();
 	}
 	else if ( name == "TrackingMoveComponent" ) {
-		return glnew TrackingMoveComponent();
+		return new TrackingMoveComponent();
 	}
 	else if ( name == "PhysicsMoveComponent" ) {
-		return glnew PhysicsMoveComponent();
+		return new PhysicsMoveComponent();
 	}
 	else if ( name == "TowComponent" ) {
-		return glnew TowComponent();
+		return new TowComponent();
 	}
 	if ( name == "VolcanoScript") {
-		return glnew VolcanoScript();
+		return new VolcanoScript();
 	}
 	else if (name == "CoreScript") {
-		return glnew CoreScript();
+		return new CoreScript();
 	}
 	else if (name == "CountDownScript") {
-		return glnew CountDownScript(1000);
+		return new CountDownScript(1000);
 	}
 	else if (name == "FarmScript") {
-		return glnew FarmScript();
+		return new FarmScript();
 	}
 	else if (name == "DistilleryScript") {
-		return glnew DistilleryScript();
+		return new DistilleryScript();
 	}
 	else if (name == "EvalBuildingScript") {
-		return glnew EvalBuildingScript();
+		return new EvalBuildingScript();
 	}
 	else if (name == "GuardScript") {
-		return glnew GuardScript();
+		return new GuardScript();
 	}
 	else if (name == "RebuildAIComponent") {
-		return glnew RebuildAIComponent();
+		return new RebuildAIComponent();
 	}
 	else if (name == "BatteryComponent") {
-		return glnew BatteryComponent();
+		return new BatteryComponent();
 	}
 	else if (name == "TrollDomainAI") {
-		return glnew TrollDomainAI();
+		return new TrollDomainAI();
 	}
 	else if (name == "GobDomainAI") {
-		return glnew GobDomainAI();
+		return new GobDomainAI();
 	}
 	else if (name == "KamakiriDomainAI") {
-		return glnew KamakiriDomainAI();
+		return new KamakiriDomainAI();
 	}
 
 
