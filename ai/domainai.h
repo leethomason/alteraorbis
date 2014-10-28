@@ -43,6 +43,8 @@ public:
 	// subclasses implement to place build orders.
 	virtual void DoBuild() = 0;
 
+	static DomainAI* Factory(int team);
+
 protected:
 	bool Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave);
 	bool CanBuild(const grinliz::Rectangle2I& r);

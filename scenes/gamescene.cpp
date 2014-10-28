@@ -183,7 +183,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
 		summaryBars.SetBarText(i+1, ai::Needs::Name(i));
 	}
-	summaryBars.SetBarText(0, "Morale");
+	summaryBars.SetBarText(0, "morale");
 
 	chitTracking = GetPlayerChitID();
 
@@ -318,17 +318,20 @@ void GameScene::Resize()
 	tabBar1.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
 	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
+
+	layout.PosAbs( &dateLabel,   -3, 0 );
+	layout.PosAbs(&summaryBars, -1, -2, 1, 1);
+
 	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
 	layout.PosAbs( &targetFaceWidget, -4, 0, 1, 1 );
-	layout.PosAbs(&summaryBars, -3, 1);
+	
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
-	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
@@ -363,12 +366,18 @@ void GameScene::Resize()
 }
 
 
-void GameScene::SetBars( Chit* chit )
+void GameScene::SetBars( Chit* chit, bool isAvatar )
 {
 	ItemComponent* ic = chit ? chit->GetItemComponent() : 0;
 	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
 
 	faceWidget.SetMeta( ic, ai );
+	if (isAvatar) {
+		faceWidget.SetFlags(faceWidget.Flags() & (~FaceWidget::NEED_BARS));
+	}
+	else {
+		faceWidget.SetFlags(faceWidget.Flags() | FaceWidget::NEED_BARS);
+	}
 }
 
 
@@ -1253,7 +1262,7 @@ void GameScene::HandleHotKey( int mask )
 			if (cs) {
 				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
 				int team = Team::GenTeam(TEAM_KAMAKIRI);
-				cs = sim->CreateCore(sector, team);
+				cs = CoreScript::CreateCore(sector, team, sim->Context());
 				cs->ParentChit()->Add(new KamakiriDomainAI());
 				cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
 
@@ -1493,7 +1502,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	// Enforce the sleep tube limit.
 	CStr<32> str;
 	int techLevel = Min(nTemples, 3);
-	int maxTubes  = 4 << techLevel;
+	int maxTubes = CoreScript::MaxCitizens(TEAM_HOUSE, nTemples);
 
 	BuildScript buildScript;
 	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(ISC::bed, 0);
@@ -1720,7 +1729,7 @@ void GameScene::DoTick( U32 delta )
 		targetFaceWidget.SetFace(&uiRenderer, 0);
 	}
 
-	SetBars(track);
+	SetBars(track, track == playerChit);
 	CStr<64> str;
 
 	{
@@ -2016,7 +2025,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		int team = Team::GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
-		sim->CreateCore(ToSector(sd->x, sd->y), team);
+		CoreScript::CreateCore(ToSector(sd->x, sd->y), team, sim->Context());
 		ForceHerd(ToSector(sd->x, sd->y));
 
 		ReserveBank* bank = ReserveBank::Instance();

@@ -151,9 +151,7 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		}
 		--maxIt;
 	}
-	GLASSERT(maxIt);	// should have seen success...
-	if (!maxIt) return 0;
-
+	GLOUTPUT(("Warning. Item not created in forgescript.\n"));
 	return item;
 }
 

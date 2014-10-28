@@ -194,6 +194,7 @@ RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 	Vector2I c = { 0, 0 };
 	Texture* texture = TextureManager::Instance()->GetTexture( "palette" );
 
+	// FIXME: should be normal_opaque?
 	RenderAtom atom( (const void*)(UIRenderer::RENDERSTATE_UI_NORMAL), (const void*)texture, u, v, u, v );
 	return atom;
 }
@@ -219,10 +220,10 @@ RenderAtom LumosGame::CalcIconAtom( const char* asset )
 gamui::LayoutCalculator LumosGame::DefaultLayout()
 {
 	const Screenport& port = GetScreenport();
-	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
-	layout.SetGutter( 10.0f, 10.0f );
-	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-	layout.SetSpacing( 5.0f );
+	LayoutCalculator layout(port.UIWidth(), port.UIHeight());
+	layout.SetGutter(LAYOUT_GUTTER, LAYOUT_GUTTER);
+	layout.SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+	layout.SetSpacing(LAYOUT_SPACING);
 	return layout;
 }
 

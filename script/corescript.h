@@ -25,6 +25,7 @@ class WorkQueue;
 class LumosChitBag;
 class CoreScript;
 class Model;
+struct ChitContext;
 
 struct CoreInfo
 {
@@ -65,6 +66,8 @@ public:
 	virtual const char* Name() const	{ return "CoreScript"; }
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
+
 	int GetPave();
 
 	void AddCitizen( Chit* chit );
@@ -72,7 +75,10 @@ public:
 	bool IsCitizen( int id );
 	Chit*  CitizenAtIndex( int id );
 	int    FindCitizenIndex( Chit* chit ); 
-	int  NumCitizens();
+	int NumCitizens();
+
+	static int MaxCitizens(int team, int nTemples);
+	int MaxCitizens();
 
 	void AddFlag(const grinliz::Vector2I& pos);
 	void RemoveFlag(const grinliz::Vector2I& pos);
@@ -111,6 +117,7 @@ public:
 		return GetCoreInfo(sector).coreScript;
 	}
 	static CoreScript* GetCoreFromTeam(int team);
+	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
 
 private:
 	void UpdateAI();

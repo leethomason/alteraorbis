@@ -16,6 +16,7 @@
 #include "../game/lumosmath.h"
 #include "../game/gameitem.h"
 #include "../game/sim.h"
+#include "../game/worldinfo.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -25,6 +26,7 @@
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
+#include "../script/guardscript.h"
 
 /*
 	See also SectorHerd() for where this gets implemented.
@@ -178,6 +180,22 @@ void CoreScript::OnRemove()
 	}
 
 	super::OnRemove();
+}
+
+
+void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		while (!citizens.Empty()) {
+			int citizenID = citizens.Pop();
+			Chit* citizen = Context()->chitBag->GetChit(citizenID);
+			if (citizen && citizen->GetItem()) {
+				// Set to rogue team.
+				citizen->GetItem()->team = Team::Group(citizen->GetItem()->team);
+			}
+		}
+	}
 }
 
 
@@ -380,6 +398,54 @@ int CoreScript::DoTick(U32 delta)
 }
 
 
+int CoreScript::MaxCitizens(int team, int nTemples)
+{
+	team = Team::Group(team);
+	int citizens = 0;
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			static const int N = 5;
+			static const int limit[5] = { 4, 8, 12, 16, 20 };
+			int n = Clamp(nTemples, 0, N - 1);
+			citizens = limit[n];
+		}
+		break;
+
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		citizens = 16;
+		break;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		break;
+
+		default:
+		GLASSERT(0);
+		break;
+	}
+	return citizens;
+}
+
+
+int CoreScript::MaxCitizens()
+{
+	int team = parentChit->Team();
+
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
+	int nBeds = chitArr.Size();
+	chitArr.Clear();
+	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
+	int nTemples = chitArr.Size();
+
+	int n = CoreScript::MaxCitizens(team, nTemples);
+	return Min(n, nBeds);
+}
+
+
+
 void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
 	int team = Team::Group(parentChit->Team());
@@ -416,11 +482,10 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 	if ( nSpawnTicks ) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
-		CChitArray chitArr;
-		Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
+		int maxCitizens = this->MaxCitizens();
 
-		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
+		if ( nCitizens < maxCitizens ) {
 			if (!RecruitNeutral()) {
 				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
 				this->AddCitizen( chit );
@@ -627,6 +692,64 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 	}
 	return 0;
 }
+
+
+CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const ChitContext* context)
+{
+	// Destroy the existing core.
+	// Create a new core, attached to the player.
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (cs) {
+		Chit* core = cs->ParentChit();
+		GLASSERT(core);
+
+		CDynArray< Chit* > queryArr;
+
+		// Tell all the AIs the core is going away.
+		ChitHasAIComponent filter;
+		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+		context->chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
+		for (int i = 0; i < queryArr.Size(); ++i) {
+			queryArr[i]->GetAIComponent()->ClearTaskList();
+		}
+
+		//context.chitBag->QueueDelete(core);
+		// QueueDelete is safer, but all kinds of asserts fire (correctly)
+		// if 2 cores are in the same place. This may cause an issue
+		// if CreateCore is called during the DoTick()
+		context->chitBag->DeleteChit(core);
+	}
+
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	const GameItem& coreItem = itemDefDB->Get("core");
+
+	const SectorData* sectorDataArr = context->worldMap->GetSectorData();
+	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
+	if (sd.HasCore()) {
+		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", 0);
+
+		// 'in use' instead of blocking.
+		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+		GLASSERT(ms);
+		ms->SetMode(GRID_IN_USE);
+		CoreScript* cs = new CoreScript();
+		chit->Add(cs);
+
+		chit->GetItem()->SetProperName(sd.name);
+
+		if (team != TEAM_NEUTRAL) {
+			cs->ParentChit()->GetItem()->team = team;
+			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
+			context->chitBag->GetNewsHistory()->Add(news);
+			// Make the dwellers defend the core.
+			chit->Add(new GuardScript());
+		}
+
+		return cs;
+	}
+	return 0;
+}
+
 
 
 int CoreScript::GetPave()

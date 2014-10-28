@@ -77,7 +77,7 @@ private:
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
 	void SetSelectionModel( const grinliz::Vector2F& view );
-	void SetBars(Chit* chit);
+	void SetBars(Chit* chit, bool isAvatar);
 
 	void SetPickupButtons();	// if the avatar can pick things up
 	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items

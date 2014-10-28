@@ -120,20 +120,21 @@
 		x strange container-is-item bug when looking at items from census. (nothing should be selected...)
 		x partially fixed....should select correct item when entering container screen
 		- AI buildings not connected.
-		- recruitment of neutral/friendly doesn't seem to work
+		t recruitment of neutral/friendly doesn't seem to work
 		- memory leak - item code???
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
-		- When domain falls, teamID->0
+		x When domain falls, teamID->0
 		x Search full domain for farms?
 		- test bank running out of money
-		- and then re-test with higher limits
-		- markets aren't paying tax (check, think this is working)
+		x and then re-test with higher limits
+		x markets aren't paying tax (check, think this is working)
 		- re-test battle scenes. balance.
 		- update trilobyte to match sketch
 		x map icons for MOBs aren't square
-		- does history get tracked correctly when core gets taken over?
+		t does history get tracked correctly when core gets taken over?
 		- advisor still comes up in weird states.
-		- clean up UI. less clutter.
+		t clean up UI. less clutter.
+		t redundant news posts
 
 		- special gobman item, building
 		- special kamikiri item

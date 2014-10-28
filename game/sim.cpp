@@ -240,7 +240,7 @@ void Sim::CreateCores()
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
-			CoreScript* cs = CreateCore(sector, TEAM_NEUTRAL);
+			CoreScript* cs = CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 
 			if (cs) {
 				++ncores;
@@ -254,6 +254,7 @@ void Sim::CreateCores()
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
 		if (chit->GetComponent("CoreScript")) {
 			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
 			Vector2I sector = ToSector(pos2i);
@@ -262,7 +263,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->Team() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
 				context.chitBag->GetNewsHistory()->Add(news);
-				
+
 				// All the buildings become neutral. Some become ruins...
 				BuildingFilter filter;
 				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
@@ -432,67 +433,12 @@ void Sim::CreateTruulgaCore()
 		Vector2I newSector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
 		CoreScript* cs = CoreScript::GetCore(newSector);
 		if (cs && cs->ParentChit()->Team() == 0) {
-			CoreScript* troll = CreateCore(newSector, TEAM_TROLL);
+			CoreScript* troll = CoreScript::CreateCore(newSector, TEAM_TROLL, &context);
 			troll->ParentChit()->Add(new TrollDomainAI());
 			truulga->GetSpatialComponent()->SetPosition(troll->ParentChit()->GetSpatialComponent()->GetPosition());
 			GLOUTPUT(("Truulga domain created at %x%x\n", newSector.x, newSector.y));
 		}
 	}
-}
-
-
-CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
-{
-	// Destroy the existing core.
-	// Create a new core, attached to the player.
-	CoreScript* cs = CoreScript::GetCore(sector);
-	if (cs) {
-		Chit* core = cs->ParentChit();
-		GLASSERT(core);
-
-		// Tell all the AIs the core is going away.
-		ChitHasAIComponent filter;
-		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
-		context.chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
-		for (int i = 0; i < queryArr.Size(); ++i) {
-			queryArr[i]->GetAIComponent()->ClearTaskList();
-		}
-
-		//context.chitBag->QueueDelete(core);
-		// QueueDelete is safer, but all kinds of asserts fire (correctly)
-		// if 2 cores are in the same place. This may cause an issue
-		// if CreateCore is called during the DoTick()
-		context.chitBag->DeleteChit(core);
-	}
-
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	const GameItem& coreItem = itemDefDB->Get("core");
-
-	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
-	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
-	if (sd.HasCore()) {
-		Chit* chit = context.chitBag->NewBuilding(sd.core, "core", 0);
-
-		// 'in use' instead of blocking.
-		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-		GLASSERT(ms);
-		ms->SetMode(GRID_IN_USE);
-		CoreScript* cs = new CoreScript();
-		chit->Add(cs);
-
-		chit->GetItem()->SetProperName(sd.name);
-
-		if (team != TEAM_NEUTRAL) {
-			cs->ParentChit()->GetItem()->team = team;
-			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
-			context.chitBag->GetNewsHistory()->Add(news);
-			// Make the dwellers defend the core.
-			chit->Add(new GuardScript());
-		}
-
-		return cs;
-	}
-	return 0;
 }
 
 
@@ -560,7 +506,7 @@ void Sim::DoTick( U32 delta )
 		Vector2I sector = coreCreateList[i];
 		CoreScript* sc = CoreScript::GetCore(sector);
 		if (!sc) {
-			CreateCore(sector, TEAM_NEUTRAL);
+			CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 			coreCreateList.SwapRemove(i);
 			--i;
 		}

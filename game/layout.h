@@ -28,6 +28,8 @@ static const float LAYOUT_SQUARE = 40.0f;
 static const float LAYOUT_SIZE_X = 72.0f;
 static const float LAYOUT_SIZE_Y = 40.0f;
 static const float TEXT_HEIGHT   = 16.0f;
+static const float LAYOUT_SPACING = 5.0f;
+static const float LAYOUT_GUTTER = 10.0f;
 #endif
 
 #endif // LAYOUT_ALTERA_INCLUDED

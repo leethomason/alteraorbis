@@ -167,6 +167,8 @@ class CDynArray
 {
 	enum { CACHE = 4 };
 public:
+	typedef T ElementType;
+
 	CDynArray() : size( 0 ), capacity( CACHE ), nAlloc(0) {
 		mem = reinterpret_cast<T*>(cache);
 		GLASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
@@ -369,6 +371,8 @@ template < class T, int CAPACITY >
 class CArray
 {
 public:
+	typedef T ElementType;
+
 	// construction
 	CArray() : size( 0 )	{}
 	~CArray()				{}
@@ -433,6 +437,7 @@ public:
 	bool Empty() const		{ return size==0; }
 	T*		 Mem() 			{ return mem; }
 	const T* Mem() const	{ return mem; }
+	const T* End() const	{ return mem + size; }
 
 	void SwapRemove( int i ) {
 		GLASSERT( i >= 0 && i < (int)size );
@@ -469,6 +474,35 @@ private:
 	int size;
 };
 
+ // 'auto' in a #define. could be a lamba? or clean up? not sure if C11 is going to give me trouble.
+#define GL_ARRAY_FILTER( arr, f ) {		\
+	int _k_ = 0;						\
+	while (_k_ < arr.Size()) {			\
+		auto& ele = arr[_k_];			\
+		if (f) {						\
+			++_k_;						\
+		}								\
+		else {							\
+			arr.SwapRemove(_k_);		\
+		}								\
+	}									\
+}
+
+
+#define GL_ARRAY_FILTER_ORDERED( arr, f ) {		\
+	int _k_ = 0;						\
+	while (_k_ < arr.Size()) {			\
+		auto& ele = arr[_k_];			\
+		if (f) {						\
+			++_k_;						\
+		}								\
+		else {							\
+			arr.Remove(_k_);			\
+		}								\
+	}									\
+}
+
+#define GL_FOR_EACH( it, list )	for( auto *it = list.Mem(), *last = list.End(); it != last; ++it )
 
 class CompCharPtr {
 public:

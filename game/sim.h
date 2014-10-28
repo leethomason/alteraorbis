@@ -64,6 +64,7 @@ public:
 	Chit*			GetPlayerChit();
 
 	// use with caution: not a clear separation between sim and game
+	const ChitContext* Context()	{ return &context; }
 	Engine*			GetEngine()		{ return context.engine; }
 	LumosChitBag*	GetChitBag()	{ return context.chitBag; }
 	WorldMap*		GetWorldMap()	{ return context.worldMap; }
@@ -83,7 +84,7 @@ public:
 	
 	// If this sector has a core, create it.
 	// Will delete and replace an existing core.
-	CoreScript* CreateCore(const grinliz::Vector2I& sector, int team);
+	//CoreScript* CreateCore(const grinliz::Vector2I& sector, int team);
 	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
 	void AbandonDomain();

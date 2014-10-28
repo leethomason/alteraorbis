@@ -2696,36 +2696,28 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 			&& !cs->InUse()
 			&& cs->ParentChit()->GetSpatialComponent()->GetPosition2DI() == pos2i)
 		{
-			if (Team::Group(thisComp.chit->Team()) == TEAM_GOB) {
-				// Need some team. And some cash.
-				Rectangle2I inner = InnerSectorBounds(sector);
-				CChitArray arr;
-				ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
-				Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
+			// Need some team. And some cash.
+			Rectangle2I inner = InnerSectorBounds(sector);
+			CChitArray arr;
+			ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
+			Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
 
-				int k = 0;
-				while (k <arr.Size()) {
-					if (arr[k]->GetItem() && Team::IsRogue(arr[k]->GetItem()->team)) {
-						// okay, good fit.
-						++k;
-					}
-					else {
-						arr.SwapRemove(k);
-					}
-				}
+			GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->team)));
 
-				if (arr.Size() > 3) {
-					thisComp.item->team = Team::GenTeam(TEAM_GOB);
-					cs->ParentChit()->GetItem()->team = thisComp.item->team;
-					cs->ParentChit()->Add(new GobDomainAI());
-					cs->AddCitizen(thisComp.chit);
+			if (arr.Size() > 3) {
+				DomainAI* ai = DomainAI::Factory(thisComp.item->team);
+				if (ai) {
+					thisComp.item->team = Team::GenTeam(thisComp.item->team);
+					CoreScript* newCS = CoreScript::CreateCore(sector, thisComp.item->team, Context());
+					newCS->ParentChit()->Add(ai);
+					newCS->AddCitizen(thisComp.chit);
 
 					for (int i = 0; i < arr.Size(); ++i) {
-						cs->AddCitizen(arr[i]);
+						newCS->AddCitizen(arr[i]);
 					}
 
-					NewsEvent news(NewsEvent::DOMAIN_CONQUER, cs->ParentChit()->GetSpatialComponent()->GetPosition2D(),
-								   cs->ParentChit(), parentChit);
+					NewsEvent news(NewsEvent::DOMAIN_CONQUER, newCS->ParentChit()->GetSpatialComponent()->GetPosition2D(),
+								   newCS->ParentChit(), parentChit);
 					Context()->chitBag->GetNewsHistory()->Add(news);
 				}
 			}

@@ -63,6 +63,7 @@ public:
 
 	// Take a team, and add an id to it.
 	static int GenTeam(int teamGroup) {
+		teamGroup = Group(teamGroup);
 		int team = teamGroup | ((++idPool) << 8);
 		return team;
 	}

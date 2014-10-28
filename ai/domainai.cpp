@@ -22,6 +22,21 @@
 
 using namespace grinliz;
 
+
+DomainAI* DomainAI::Factory(int team)
+{
+	switch (Team::Group(team)) {
+		case TEAM_TROLL:	return new TrollDomainAI();
+		case TEAM_GOB:		return new GobDomainAI();
+		case TEAM_KAMAKIRI:	return new KamakiriDomainAI();
+		default:
+		break;
+	}
+	GLASSERT(0);
+	return 0;
+}
+
+
 DomainAI::DomainAI()
 {
 }
