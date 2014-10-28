@@ -113,9 +113,7 @@ void relprintf( const char* format, ... );
 		void MemLeakCheck();
 		void MemStartCheck();
 		void MemHeapCheck();
-		#define glnew new(__FILE__, __LINE__)
 	#else
-		#define glnew new
 		inline void MemLeakCheck()	{}
 		inline void MemStartCheck()	{}
 		inline void MemHeapCheck()	{}
@@ -136,7 +134,6 @@ void relprintf( const char* format, ... );
 		}
 	#endif
 #else
-	#define glnew new
 	inline void MemLeakCheck()	{}
 	inline void MemStartCheck()	{}
 	inline void* Malloc( size_t size ) {

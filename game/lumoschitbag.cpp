@@ -264,9 +264,9 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	msc->SetBuilding(porch != 0, circuit);
 	chit->Add(msc);
 
-	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new RenderComponent(item->ResourceName()));
 	chit->Add(new HealthComponent());
-	AddItem(name, chit, context->engine, team, 0);
+	AddItem(item, chit, context->engine, team, 0);
 
 	IString script = rootItem.keyValues.GetIString("script");
 	if (!script.empty()) {

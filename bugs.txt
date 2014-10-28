@@ -121,7 +121,7 @@
 		x partially fixed....should select correct item when entering container screen
 		- AI buildings not connected.
 		t recruitment of neutral/friendly doesn't seem to work
-		- memory leak - item code???
+		x memory leak - item code???
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		x When domain falls, teamID->0
 		x Search full domain for farms?
