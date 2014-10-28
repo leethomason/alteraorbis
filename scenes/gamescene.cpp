@@ -327,7 +327,6 @@ void GameScene::Resize()
 	layout.PosAbs(&atlasButton, -2, 2);	// to set size and x-value
 	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
 	layout.PosAbs( &targetFaceWidget, -4, 0, 1, 1 );
-	
 
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
