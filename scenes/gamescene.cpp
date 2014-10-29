@@ -1731,13 +1731,13 @@ void GameScene::DoTick( U32 delta )
 	SetBars(track, track == playerChit);
 	CStr<64> str;
 
-	{
+	if (coreScript) {
 		double sum[ai::Needs::NUM_NEEDS+1] = { 0 };
 		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
+		Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
 	
-		if (coreScript && coreScript->NumCitizens()) {
-			Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+		if (coreScript->NumCitizens()) {
 			for (int i = 0; i < coreScript->NumCitizens(); i++) {
 				Chit* chit = coreScript->CitizenAtIndex(i);
 				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
@@ -1771,7 +1771,13 @@ void GameScene::DoTick( U32 delta )
 			summaryBars.SetBarRatio(k+1, float(sum[k]));
 		}
 
-		str.Format("Date %.2f\n%s\n%d Denizens", sim->AgeF(), sd.name.c_str(), nActive + (playerChit ? 1 : 0));
+		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
+		sim->GetChitBag()->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
+
+		str.Format("Date %.2f\n%s\nPop %d/%d", 
+				   sim->AgeF(), 
+				   sd.name.safe_str(), 
+				   coreScript->NumCitizens(), CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
 

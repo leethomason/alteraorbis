@@ -81,6 +81,7 @@ public:
 	void CreateVolcano( int x, int y );
 	// type=-1 will scan for natural plant choice
 	bool CreatePlant( int x, int y, int type );
+	void SeedPlants();
 	
 	// If this sector has a core, create it.
 	// Will delete and replace an existing core.

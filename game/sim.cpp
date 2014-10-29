@@ -759,6 +759,26 @@ void Sim::CreateVolcano( int x, int y )
 }
 
 
+void Sim::SeedPlants()
+{
+	Rectangle2I bounds = context.worldMap->Bounds();
+	bounds.Outset(-SECTOR_SIZE);
+
+	int type = 0;
+	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
+		int x = it.Pos().x;
+		int y = it.Pos().y;
+
+		if ((x + y) & 1) {
+			CreatePlant(x, y, type);
+			type++;
+			if (type == NUM_PLANT_TYPES)
+				type = 0;
+		}
+	}
+}
+
+
 bool Sim::CreatePlant( int x, int y, int type )
 {
 	// Pull in plants from edges - don't want to check

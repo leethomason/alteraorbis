@@ -78,7 +78,7 @@
             flags="INTRINSIC"
             hardpoint="trigger"
             impactSound="meleeWAV"
-            meleeDamage="20">
+            meleeDamage="15">
       </MeleeWeapon>
     </intrinsics>
   </GameItem>
@@ -647,7 +647,7 @@
         baseHP="10"
         procedural="shield"
         capacity="40"
-        cooldown="1000"
+        cooldown="2000"
         >
   </Shield>
 

@@ -24,6 +24,7 @@ class Wallet
 {
 public:
 	Wallet() {
+		closed = false;
 		gold = 0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i) crystal[i] = 0; 
 	}
@@ -52,6 +53,7 @@ public:
 	// we don't need a Withdraw() function since money is 
 	// always being moved from one Wallet to another.
 	void Deposit(Wallet* src, int g) {
+		GLASSERT(!closed);
 		GLASSERT(g >= 0);	// the checks for 'enough gold' aren't correct if negative.
 		GLASSERT(src->canGoUnderwater || src->gold >= g);
 		gold += g;
@@ -103,11 +105,15 @@ public:
 		return !(operator<=(rhs));
 	}
 
+	// Debugging; this wallet is no longer accepting deposits.
+	void SetClosed() { closed = true; }
+
 private:
 	Wallet(const Wallet& w);	// private, unimplemented.
 
 protected:
 	bool canGoUnderwater;
+	bool closed;
 	int gold;
 	int crystal[NUM_CRYSTAL_TYPES];
 };

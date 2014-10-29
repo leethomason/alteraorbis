@@ -119,25 +119,29 @@
 		x gob domains don't count in census
 		x strange container-is-item bug when looking at items from census. (nothing should be selected...)
 		x partially fixed....should select correct item when entering container screen
-		- AI buildings not connected.
 		t recruitment of neutral/friendly doesn't seem to work
 		x memory leak - item code???
-		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		x When domain falls, teamID->0
 		x Search full domain for farms?
-		- test bank running out of money
 		x and then re-test with higher limits
 		x markets aren't paying tax (check, think this is working)
-		- re-test battle scenes. balance.
-		- update trilobyte to match sketch
 		x map icons for MOBs aren't square
+		x special kamikiri item
+		x re-test battle scenes. balance.
+
 		t does history get tracked correctly when core gets taken over?
-		- advisor still comes up in weird states.
 		t clean up UI. less clutter.
 		t redundant news posts
+		t AI buildings not connected.
+		- test bank running out of money
+		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		- update trilobyte to match sketch
+		- UI icons for gobmen, kamakiri, others?
+		- ClearDisconnected() not handling farms correctly
 
+		- advisor still comes up in weird states.
+		- Fix map to track travel destination
 		- special gobman item, building
-		- special kamikiri item
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains
 		- Long play test

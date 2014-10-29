@@ -457,6 +457,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 		GLASSERT(parentChit->GetWallet()->IsEmpty());
+		parentChit->GetWallet()->SetClosed();
 	}
 	else {
 		super::OnChitMsg( chit, msg );

@@ -528,7 +528,7 @@ int TrollDomainAI::DoTick(U32 delta)
 			}
 
 			TransactAmt cost;
-			GameItem* item = ForgeScript::DoForge(itemType, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
+			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
 			if (item) {
 				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 				market->GetItemComponent()->AddToInventory(item);
@@ -555,6 +555,7 @@ void TrollDomainAI::DoBuild()
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 	int nBraziers = 4 + (parentChit->ID() % 4);
+	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;
@@ -624,6 +625,7 @@ void GobDomainAI::DoBuild()
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
 		eff += farmScript->Efficiency();
 	}
+	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;
@@ -702,6 +704,7 @@ void KamakiriDomainAI::DoBuild()
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
 		eff += farmScript->Efficiency();
 	}
+	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;		

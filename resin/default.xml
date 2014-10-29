@@ -328,6 +328,7 @@
 
   <model filename="weapons2.ac"         modelName="blaster"     origin="0 0.5 -1"   shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="beamgun"     origin="0 0.5 0"    shadowCaster="true" bones="true"/>
+  <model filename="weapons2.ac"         modelName="kamabeamgun" origin="0 0.5 1"    shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pistol"      origin="0 0 -1"     shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pulse"       origin="0 0 0"      shadowCaster="true" bones="true"/>
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />

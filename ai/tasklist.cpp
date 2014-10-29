@@ -679,7 +679,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 
 	if ( !ranged )		itemType = ForgeScript::GUN;
 	else if ( !shield ) itemType = ForgeScript::SHIELD;
-	else if ( !melee )	itemType = ForgeScript::SHIELD;
+	else if ( !melee )	itemType = ForgeScript::RING;
 	else {
 		itemType = random.Rand( ForgeScript::NUM_ITEM_TYPES );
 	}
@@ -687,10 +687,31 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
 	int level = thisComp.item->Traits().Level();
 	TransactAmt cost;
+	int partsMask = 0xffffffff;
+	int team = Team::Group(thisComp.chit->Team());
+	int subItem = -1;
+	const char* altRes = "";
+
+	// Special rules.
+	if (itemType == ForgeScript::RING) {
+		// Only trolls and gobs use the blades.
+		if (team == TEAM_TROLL || team == TEAM_GOB) 
+			partsMask &= (~WeaponGen::RING_TRIAD);
+		else 
+			partsMask &= (~WeaponGen::RING_BLADE);
+	}
+	if (itemType == ForgeScript::GUN && team == TEAM_KAMAKIRI) {
+		subItem = ForgeScript::BEAMGUN;
+		altRes = "kamabeamgun";
+	}
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
-	GameItem* item = ForgeScript::DoForge(itemType, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
+	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
 	if (item) {
+		if (altRes) {
+			item->SetResource(altRes);
+		}
+
 		item->wallet.Deposit(&thisComp.item->wallet, cost);
 		thisComp.itemComponent->AddToInventory(item);
 		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());

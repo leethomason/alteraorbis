@@ -24,12 +24,12 @@ static const float LAYOUT_SIZE_Y = 50.0f;
 static const float TEXT_HEIGHT   = 18.0f;
 #else
 // Laptop/Desktop
-static const float LAYOUT_SQUARE = 40.0f;
-static const float LAYOUT_SIZE_X = 72.0f;
-static const float LAYOUT_SIZE_Y = 40.0f;
-static const float TEXT_HEIGHT   = 16.0f;
-static const float LAYOUT_SPACING = 5.0f;
-static const float LAYOUT_GUTTER = 10.0f;
+static const float LAYOUT_SQUARE = 35.0f;
+static const float LAYOUT_SIZE_X = 60.0f;
+static const float LAYOUT_SIZE_Y = LAYOUT_SQUARE;
+static const float TEXT_HEIGHT   = 14.0f;
+static const float LAYOUT_SPACING = 4.0f;
+static const float LAYOUT_GUTTER =  8.0f;
 #endif
 
 #endif // LAYOUT_ALTERA_INCLUDED

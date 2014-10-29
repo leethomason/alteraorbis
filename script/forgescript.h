@@ -49,6 +49,7 @@ public:
 	static const char* Effect( int effect );
 
 	static GameItem* DoForge(	int itemType,		// GUN, etc.
+								int subItem,		// -1 for any
 								const Wallet& avail,
 								TransactAmt* cost,
 								int partsMask,

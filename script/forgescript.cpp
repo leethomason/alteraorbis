@@ -65,6 +65,7 @@ const char* ForgeScript::Effect( int effect )
 
 
 GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
+							   int subItemType,
 							   const Wallet& avail,
 							   TransactAmt* cost,	// in/out
 							   int partsMask,
@@ -93,11 +94,16 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 	effects = effects & effectsMask;
 
 	if (itemType == ForgeScript::GUN) {
-		if (tech == 0)
-			subType = random.Rand(ForgeScript::NUM_TECH0_GUNS);
-		else
-			subType = random.Rand(ForgeScript::NUM_GUN_TYPES);
-		parts = WeaponGen::PART_MASK & partsMask;
+		if (subItemType >= 0) {
+			subType = subItemType;
+		}
+		else {
+			if (tech == 0)
+				subType = random.Rand(ForgeScript::NUM_TECH0_GUNS);
+			else
+				subType = random.Rand(ForgeScript::NUM_GUN_TYPES);
+			parts = WeaponGen::PART_MASK & partsMask;
+		}
 	}
 	else if (itemType == ForgeScript::RING) {
 		parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;

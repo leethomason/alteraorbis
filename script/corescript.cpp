@@ -361,6 +361,7 @@ bool CoreScript::RecruitNeutral()
 
 				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(), chit, 0);
 				Context()->chitBag->GetNewsHistory()->Add(news);
+				return true;
 			}
 		}
 	}
@@ -405,8 +406,8 @@ int CoreScript::MaxCitizens(int team, int nTemples)
 	switch (team) {
 		case TEAM_HOUSE:
 		{
-			static const int N = 5;
-			static const int limit[5] = { 4, 8, 12, 16, 20 };
+			static const int N = 4;
+			static const int limit[N] = { 4, 8, 16, 20 };
 			int n = Clamp(nTemples, 0, N - 1);
 			citizens = limit[n];
 		}

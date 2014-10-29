@@ -62,6 +62,7 @@ void FaceWidget::SetFlags(int f)
 	for( int i=0; i<MAX_BARS; ++i ) {
 		barStack.SetBarVisible(i, (flags & (1 << i)) != 0);
 	}
+	barStack.SetVisible(this->Visible());
 }
 
 
