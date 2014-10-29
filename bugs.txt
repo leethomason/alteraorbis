@@ -138,9 +138,9 @@
 		- update trilobyte to match sketch
 		- UI icons for gobmen, kamakiri, others?
 		- ClearDisconnected() not handling farms correctly
+		- Fix map to track travel destination, allow view
 
 		- advisor still comes up in weird states.
-		- Fix map to track travel destination
 		- special gobman item, building
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains

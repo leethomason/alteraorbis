@@ -1177,8 +1177,8 @@ void ItemComponent::SetHardpoints()
 
 	for (int i = 1; i < hardpoint.Size(); ++i) {
 		GameItem* item = hardpoint[i];
+		
 		if (item) {
-			GLASSERT(item);
 			GLASSERT(item->hardpoint == i);
 			if (item->Intrinsic()) {
 				rc->Attach(item->hardpoint, 0);
@@ -1187,6 +1187,7 @@ void ItemComponent::SetHardpoints()
 				rc->Attach(item->hardpoint, item->ResourceName());
 
 				if (item->keyValues.Has(ISC::procedural)) {
+					GLASSERT(item->hardpoint == i);
 					ProcRenderInfo info;
 					AssignProcedural(item, &info);
 					rc->SetProcedural((i == 0) ? 0 : item->hardpoint, info);

@@ -437,6 +437,8 @@ public:
 	bool Empty() const		{ return size==0; }
 	T*		 Mem() 			{ return mem; }
 	const T* Mem() const	{ return mem; }
+
+	const T* End() 			{ return mem + size; }
 	const T* End() const	{ return mem + size; }
 
 	void SwapRemove( int i ) {
@@ -502,7 +504,15 @@ private:
 	}									\
 }
 
-#define GL_FOR_EACH( it, list )	for( auto *it = list.Mem(), *last = list.End(); it != last; ++it )
+/*
+//#ifdef DEBUG
+//#define GL_FOR_EACH( T, it, list )	for( T *it = list.Mem(), *first = list.Mem(), *last = list.End(); GL_FUNC_ASSERT(first == list.Mem()), GL_FUNC_ASSERT(last == list.End(), it != last; ++it )
+//#define GL_FOR_EACH_VAL( T, ref, list )	for( T *it = list.Mem(), *first = list.Mem(), *last = list.End(), ref = ((it!=last)?*it:T()); GL_FUNC_ASSERT(first == list.Mem()), GL_FUNC_ASSERT(last == list.End(), it != last; ref = *(++it))
+//#else
+#define GL_FOR_EACH( T, it, list )	for( T *it = list.Mem(), *last = list.End(); it != last; ++it )
+#define GL_FOR_EACH_VAL( T, ref, list )	for( T *it = list.Mem(), *first = list.Mem(), *last = list.End(), ref = ((it!=last)?*it:T()); it != last; ref = *(++it))
+//#endif
+*/
 
 class CompCharPtr {
 public:
