@@ -1184,10 +1184,10 @@ void ItemComponent::SetHardpoints()
 				rc->Attach(item->hardpoint, 0);
 			}
 			else {
+				GLASSERT(!item->IResourceName().empty());
 				rc->Attach(item->hardpoint, item->ResourceName());
 
 				if (item->keyValues.Has(ISC::procedural)) {
-					GLASSERT(item->hardpoint == i);
 					ProcRenderInfo info;
 					AssignProcedural(item, &info);
 					rc->SetProcedural((i == 0) ? 0 : item->hardpoint, info);

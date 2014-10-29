@@ -641,7 +641,7 @@
   <Shield name="shield"
         resource="shield"
         uiIcon="shield"
-        flags="HELD_AT_HARDPOINT CLICK_THROUGH FLOAT"
+        flags="CLICK_THROUGH FLOAT"
         hardpoint="shield"
         mass="1.0"
         baseHP="10"

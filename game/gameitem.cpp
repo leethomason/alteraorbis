@@ -254,6 +254,9 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 	name = StringPool::Intern(ele->Attribute("name"));
 	properName = StringPool::Intern(ele->Attribute("properName"));
 	resource = StringPool::Intern(ele->Attribute("resource"));
+
+	GLASSERT(!name.empty());
+
 	id = 0;
 	flags = 0;
 	const char* f = ele->Attribute("flags");
@@ -340,6 +343,7 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 	if ( h ) {
 		hardpoint = MetaDataToID( h );
 		GLASSERT( hardpoint > 0 );
+		GLASSERT((flags & INTRINSIC) || (!resource.empty()));
 	}
 
 	hp = double(this->TotalHP());
