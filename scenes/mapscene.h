@@ -17,7 +17,8 @@ public:
 		SceneData(),
 		lumosChitBag(lcb),
 		worldMap(wm),
-		player(pc) 
+		player(pc),
+		view(false)
 	{
 		destSector.Zero();
 	}
@@ -28,6 +29,7 @@ public:
 
 	// Read/Write	
 	grinliz::Vector2I	destSector;	// fast travel. request going in, destination coming out.
+	bool				view;		// if true, request is to view, not grid travel.
 };
 
 class MapScene : public Scene
@@ -78,7 +80,7 @@ private:
 	MapSceneData*		data;
 
 	gamui::PushButton	okay;
-	gamui::PushButton	gridTravel;
+	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
 	gamui::Image		face[MAX_FACE];

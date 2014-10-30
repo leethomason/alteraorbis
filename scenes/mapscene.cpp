@@ -27,6 +27,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	this->data   = data;
 
 	gridTravel.Init( &gamui2D, lumosGame->GetButtonLook(0) );
+	viewButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	viewButton.SetText("View");
 
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
 	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
@@ -108,8 +110,9 @@ void MapScene::Resize()
 	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	
-	layout.PosAbs( &gridTravel, 1, -1 );
-	gridTravel.SetSize( gridTravel.Width()*2.f, gridTravel.Height() );	// double the button size
+	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
+	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
+	//gridTravel.SetSize( gridTravel.Width()*2.f, gridTravel.Height() );	// double the button size
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -252,7 +255,7 @@ void MapScene::DrawMap()
 		gridTravel.SetEnabled( true );
 	}
 	else {
-		gridTravel.SetText( "GridTravel" );
+		gridTravel.SetText( "Grid Travel" );
 		gridTravel.SetEnabled( false );
 	}
 
@@ -301,6 +304,10 @@ void MapScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &gridTravel ) {
 		lumosGame->PopScene();
 	}
+	else if ( item == &viewButton ) {
+		data->view = true;
+		lumosGame->PopScene();
+	}
 	else if ( item == &mapImage ) {
 		float x=0, y=0;
 		gamui2D.GetRelativeTap( &x, &y );
@@ -312,7 +319,9 @@ void MapScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &mapImage2 ) {
 		float x=0, y=0;
 		gamui2D.GetRelativeTap( &x, &y );
-
+		Rectangle2I b = MapBounds2();
+		sector.x = b.min.x + int( x * float(b.Width()) );
+		sector.y = b.min.y + int( y * float(b.Height()) );
 		data->destSector = sector;
 		DrawMap();
 	}

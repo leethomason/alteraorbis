@@ -2165,11 +2165,19 @@ void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 		// Hardpoint setting is now automatic
 	}
 	else if ( sceneID == LumosGame::SCENE_MAP ) {
+		const MapSceneData* msd = (const MapSceneData*)data;
 		// Works like a tap. Reconstruct map coordinates.
-		Vector2I sector = ((MapSceneData*)data)->destSector;
+		Vector2I sector = msd->destSector;
 		if ( !sector.IsZero() ) {
 			Vector2F dest = { float(sector.x*SECTOR_SIZE + SECTOR_SIZE/2), float(sector.y*SECTOR_SIZE + SECTOR_SIZE/2) };
-			DoDestTapped( dest );
+			if (msd->view) {
+				sim->GetEngine()->CameraLookAt(dest.x, dest.y);
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				cc->SetTrack(0);
+			}
+			else {
+				DoDestTapped(dest);
+			}
 		}
 	}
 }
