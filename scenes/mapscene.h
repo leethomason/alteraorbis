@@ -45,8 +45,10 @@ public:
 	virtual void HandleHotKey( int value );
 
 private:
+	grinliz::Rectangle2I MapBounds2();
 	grinliz::Rectangle2F GridBounds2(int x, int y, bool gutter);
-	void SetText();
+	grinliz::Vector2F ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
+	void DrawMap();
 
 	struct MCount {
 		MCount() : count(0) {}
@@ -75,18 +77,15 @@ private:
 	Chit*				player;
 	MapSceneData*		data;
 
-	grinliz::Rectangle2I sectorBounds;
-	grinliz::Rectangle2F map2Bounds;
-
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
 	gamui::Image		face[MAX_FACE];
 
-	gamui::Image		playerMark, playerMark2;
-	gamui::Image		homeMark,	homeMark2;
-	gamui::Image		travelMark, travelMark2;
+	gamui::Image		playerMark[2];
+	gamui::Image		homeMark[2];
+	gamui::Image		travelMark[2];
 	gamui::TextLabel	map2Text[MAP2_SIZE2];
 };
 

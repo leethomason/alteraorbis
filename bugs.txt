@@ -133,10 +133,12 @@
 		t clean up UI. less clutter.
 		t redundant news posts
 		t AI buildings not connected.
+		x update trilobyte to match sketch
 		- test bank running out of money
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
-		- update trilobyte to match sketch
 		- UI icons for gobmen, kamakiri, others?
+		- "human" UI icon
+		- "home" icon vs. grid travel icon
 		- ClearDisconnected() not handling farms correctly
 
 		- advisor still comes up in weird states.
