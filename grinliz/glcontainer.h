@@ -518,7 +518,7 @@ private:
 	- nastier syntax
 */
 
-#define GL_FOR_EACH_BEGIN(T, ref, list ) { auto* first = list.Mem(); auto* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
+#define GL_FOR_EACH_BEGIN(T, ref, list ) { const T const * first = list.Mem(); const T const* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
 #define GL_FOR_EACH_END }}
 
 class CompCharPtr {

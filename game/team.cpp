@@ -78,6 +78,11 @@ int Team::GetTeam( const grinliz::IString& itemName )
 }
 
 
+bool Team::IsDefault(const IString& str, int team)
+{
+	return GetTeam(str) == Group(team);
+}
+
 int Team::GetRelationship( int _t0, int _t1 )
 {
 	int t0 = 0, t1 = 0;

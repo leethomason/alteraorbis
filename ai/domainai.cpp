@@ -724,9 +724,18 @@ void KamakiriDomainAI::DoBuild()
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
 		eff += farmScript->Efficiency();
 	}
-	ClearDisconnected();
 
-	FIXME check for food in bars before building more denizens/sleep tubes.
+	CChitArray bars;
+	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
+	int nElixir = 0;
+	for (int i = 0; i < bars.Size(); ++i) {
+		ItemComponent* ic = bars[i]->GetItemComponent();
+		if (ic) {
+			nElixir += ic->NumCarriedItems(ISC::elixir);
+		}
+	}
+
+	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;		
@@ -741,10 +750,11 @@ void KamakiriDomainAI::DoBuild()
 		if (eff < 2.0f && BuildFarm()) break;
 
 		// Check efficiency to curtail over-building.
-		if (eff > 1) {
+		if (eff > 1 && nElixir > 4) {
 			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		}
-		if (eff >= 2) {
+		if (eff >= 2 && nElixir > 4) {
+			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
 			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;

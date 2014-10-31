@@ -92,6 +92,8 @@ public:
 		return (team & 0xffffff00) == 0;
 	}
 
+	static bool IsDefault(const grinliz::IString& name, int team);
+
 private:
 	static int idPool;
 };

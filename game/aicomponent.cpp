@@ -2687,7 +2687,8 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 
 	// Domain Takeover.
 	if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen
-		&& Team::IsRogue(thisComp.chit->Team()))
+		&& Team::IsRogue(thisComp.chit->Team())
+		&& Team::IsDefault(thisComp.item->IName(), thisComp.chit->Team()))
 	{
 		// FIXME: refactor this to somewhere. Part of CoreScript?
 		Vector2I sector = ToSector(pos2i);
