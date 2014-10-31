@@ -200,6 +200,15 @@
         size="2"
         />
 
+  <GameItem name="kamaStatue"
+        resource="kamaStatue"
+        flags="CLICK_THROUGH"
+        mass="100"
+        baseHP="50"
+        cost="30"
+        size="1"
+        />
+
   <GameItem name="trollBrazier"
         resource="trollBrazier"
         flags="CLICK_THROUGH"

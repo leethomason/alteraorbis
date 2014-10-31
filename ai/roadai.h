@@ -28,6 +28,8 @@ public:
 	void Next();
 
 	struct BuildZone {
+		BuildZone() : roadID(0), roadDistance(0), rotation(0) { fullBounds.Set(0, 0, 0, 0); buildBounds.Set(0, 0, 0, 0); porchBounds.Set(0, 0, 0, 0); }
+
 		int roadID;
 		int roadDistance;
 		int rotation;
@@ -42,7 +44,8 @@ public:
 	// porchbounds: where the access road should go
 	const BuildZone* CalcFarmZones(int* n);
 
-	bool IsOnRoad(MapSpatialComponent* msc);
+	bool IsOnRoad(MapSpatialComponent* msc, bool farm);
+	bool IsOnRoad(const grinliz::Rectangle2I& bounds, bool porch, int rotation, bool farm);
 	
 private:
 	bool UseMapEmpty(const grinliz::Rectangle2I& w);

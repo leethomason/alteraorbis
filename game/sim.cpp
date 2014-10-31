@@ -770,7 +770,7 @@ void Sim::SeedPlants()
 		int y = it.Pos().y;
 
 		if ((x + y) & 1) {
-			CreatePlant(x, y, type);
+			CreatePlant(x, y, type, ((x+y) & 3));
 			type++;
 			if (type == NUM_PLANT_TYPES)
 				type = 0;
@@ -779,7 +779,7 @@ void Sim::SeedPlants()
 }
 
 
-bool Sim::CreatePlant( int x, int y, int type )
+bool Sim::CreatePlant( int x, int y, int type, int stage )
 {
 	// Pull in plants from edges - don't want to check
 	// growth bounds later.
@@ -795,10 +795,12 @@ bool Sim::CreatePlant( int x, int y, int type )
 	}
 
 	// About 50,000 plants seems about right.
-	int count = context.worldMap->CountPlants();
-	if (count > TYPICAL_PLANTS) {
-		return false;
-	}
+	// This doesn't seem to matter - it isn't getting
+	// overwhelmed in tests.
+//	int count = context.worldMap->CountPlants();
+//	if (count > TYPICAL_PLANTS) {
+//		return false;
+//	}
 
 	Vector2I sector = ToSector(x, y);
 	CoreScript* cs = CoreScript::GetCore(sector);
@@ -843,8 +845,12 @@ bool Sim::CreatePlant( int x, int y, int type )
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
+		// FIXME: magic plant #s
+		if (type == 6 || type == 7) {
+			stage = Min(1, stage);
+		}
 		context.worldMap->SetPave(x, y, 0);
-		context.worldMap->SetPlant(x, y, type + 1, 0);
+		context.worldMap->SetPlant(x, y, type + 1, stage);
 		return true;
 	}
 	return false;

@@ -130,6 +130,7 @@
   <model assetName="distillery" filename="distillery.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="exchange" filename="exchange.ac"                       shading="flat" polyRemoval="pre" />
   <model assetName="circuitFab" filename="circuitFab.ac"                   shading="flat" polyRemoval="pre" />
+  <model assetName="kamaStatue" filename="kamaStatue.ac"                   shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />

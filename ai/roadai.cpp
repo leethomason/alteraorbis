@@ -89,8 +89,9 @@ const RoadAI::BuildZone* RoadAI::CalcZones(int* n, int size, bool _porch)
 			Vector2I btail = (size == 2) ? tail : head;
 			zone.fullBounds.FromPair(  head + left * (porch + size),	btail + left);
 			zone.buildBounds.FromPair( head + left * (porch + size),	btail + left*(1 + porch));
-			zone.porchBounds.FromPair( head + left,						btail + left);
-
+			if (porch) {
+				zone.porchBounds.FromPair(head + left, btail + left);
+			}
 			zone.rotation = WorldNormalToRotation(right);
 
 		if (UseMapEmpty(zone.fullBounds) && buildZones.HasCap()) {
@@ -176,33 +177,43 @@ const Rectangle2I* RoadAI::GetPlaza(int i)
 }
 
 
-bool RoadAI::IsOnRoad(MapSpatialComponent* msc)
+bool RoadAI::IsOnRoad(const grinliz::Rectangle2I& bounds, bool _porch, int rotation, bool farm)
 {
-	Rectangle2I bounds = msc->Bounds();
-	int rotation = LRint(msc->GetYRotation());
-	int porch = msc->HasPorch() ? 1 : 0;
-
 	Vector2I normal = WorldRotationToNormal(rotation);
 	Rectangle2I landing;
+	int porch = _porch ? 1 : 0;
 
-	if (rotation == 0) {
-		int y = bounds.max.y + 1 + porch;
-		landing.Set(bounds.min.x, y, bounds.max.x, y);
+	if (farm) {
+		landing.min = landing.max = bounds.min + normal * (FARM_GROW_RAD + 1);
 	}
-	else if (rotation == 90) {
-		int x = bounds.max.x + 1 + porch;
-		landing.Set(x, bounds.min.y, x, bounds.max.y);
-	}
-	else if (rotation == 180) {
-		int y = bounds.min.y - 1 - porch;
-		landing.Set(bounds.min.x, y, bounds.max.x, y);
-	}
-	else if (rotation == 270) {
-		int x = bounds.min.x - 1 - porch;
-		landing.Set(x, bounds.min.y, x, bounds.max.y);
+	else {
+		if (rotation == 0) {
+			int y = bounds.max.y + 1 + porch;
+			landing.Set(bounds.min.x, y, bounds.max.x, y);
+		}
+		else if (rotation == 90) {
+			int x = bounds.max.x + 1 + porch;
+			landing.Set(x, bounds.min.y, x, bounds.max.y);
+		}
+		else if (rotation == 180) {
+			int y = bounds.min.y - 1 - porch;
+			landing.Set(bounds.min.x, y, bounds.max.x, y);
+		}
+		else if (rotation == 270) {
+			int x = bounds.min.x - 1 - porch;
+			landing.Set(x, bounds.min.y, x, bounds.max.y);
+		}
 	}
 	landing.min -= offset;
 	landing.max -= offset;
 	return !useMap.IsRectEmpty(landing);	// touching at any point is sufficient.
+}
+
+
+bool RoadAI::IsOnRoad(MapSpatialComponent* msc, bool farm)
+{
+	Rectangle2I bounds = msc->Bounds();
+	int rotation = LRint(msc->GetYRotation());
+	return IsOnRoad(bounds, msc->HasPorch(), rotation, farm);
 }
 

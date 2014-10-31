@@ -80,7 +80,7 @@ public:
 	void SetAllRock();
 	void CreateVolcano( int x, int y );
 	// type=-1 will scan for natural plant choice
-	bool CreatePlant( int x, int y, int type );
+	bool CreatePlant( int x, int y, int type, int stage=0 );
 	void SeedPlants();
 	
 	// If this sector has a core, create it.

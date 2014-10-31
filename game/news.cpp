@@ -230,7 +230,8 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		break;
 
 		case GREATER_MOB_CREATED:
-		str->Format("%.2f: %s " MOB_created " at %s.", age, itemName.c_str(), domain.c_str());
+		// They get created at the center, then sent. So the domain is meaningless.
+		str->Format("%.2f: %s " MOB_created ".", age, itemName.c_str());
 		break;
 
 		case DOMAIN_CREATED:

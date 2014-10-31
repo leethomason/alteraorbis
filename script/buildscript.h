@@ -81,6 +81,7 @@ public:
 		// Start non-player buildings.
 		TROLL_STATUE = NUM_PLAYER_OPTIONS,
 		TROLL_BRAZIER,
+		KAMAKIRI_STATUE,
 
 		NUM_TOTAL_OPTIONS,
 

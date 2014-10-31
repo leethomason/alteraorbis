@@ -215,7 +215,7 @@ bool DomainAI::BuildPlaza()
 				}
 
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if ( (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+				if ( wg.IsLand() && (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
 					workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 					issuedOrders = true;
 				}
@@ -291,18 +291,22 @@ bool DomainAI::BuildBuilding(int id)
 			if (okay) {
 				Chit* chit = Context()->chitBag->QueryBuilding(IString(), zone.fullBounds, 0);
 				okay = !chit;
-				if (!chit) {
+				if (okay) {
 					for (Rectangle2IIterator it(zone.fullBounds); !it.Done(); it.Next()) {
+						GLASSERT(!Context()->chitBag->QueryBuilding(IString(), it.Pos(), 0));
 						const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-						if (wg.Porch()) {
+						if (wg.Porch() || wg.IsPort()) {
 							okay = false;
 							break;
 						}
+						GLASSERT(!Context()->chitBag->QueryPorch(it.Pos(), 0));
 					}
 				}
 			}
 
 			if (okay) {
+				GLASSERT(roads->IsOnRoad(zone.buildBounds, !zone.porchBounds.min.IsZero(), zone.rotation, false));
+
 				BuildRoad(zone.roadID, zone.roadDistance);
 				workQueue->AddAction(zone.buildBounds.min, id, (float)zone.rotation, 0);
 				if (bd.porch) {
@@ -329,6 +333,7 @@ bool DomainAI::BuildFarm()
 
 	int bestScore = 0;
 	RoadAI::BuildZone bestZone;
+	Vector2I center = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
 
 	for (roads->Begin(7); !roads->Done(); roads->Next()) {
 
@@ -344,6 +349,7 @@ bool DomainAI::BuildFarm()
 			clearBounds.DoUnion(zone.buildBounds);
 
 			// Can we build the pave and the solar farm?
+			bool okay = true;
 			if (CanBuild(zone.fullBounds) && !Context()->chitBag->QueryBuilding(IString(), extendedBounds, 0)) {
 				int score = 0;
 				for (Rectangle2IIterator it(zone.fullBounds); !it.Done(); it.Next()) {
@@ -353,9 +359,18 @@ bool DomainAI::BuildFarm()
 							int stage = wg.PlantStage() + 1;
 							score += stage * stage;
 						}
+						if (wg.IsPort()) {
+							okay = false;
+						}
 					}
 				}
-				if (score > bestScore) {
+
+				Vector2I d = center - zone.buildBounds.min;
+				int len = Min(abs(d.x), abs(d.y));
+				score = score - len;	// closer in farms are more efficient.
+
+				// score>10 prevents lots of super-low value farms.
+				if (okay && score > 10 && score > bestScore) {
 					bestScore = score;
 					bestZone = zone;
 				}
@@ -363,6 +378,7 @@ bool DomainAI::BuildFarm()
 		}
 	}
 	if (bestScore) {
+		GLASSERT(roads->IsOnRoad(bestZone.buildBounds, false, bestZone.rotation, true));
 		BuildRoad(bestZone.roadID, bestZone.roadDistance);
 		workQueue->AddAction(bestZone.buildBounds.min, BuildScript::FARM, (float)bestZone.rotation, 0);
 		for (Rectangle2IIterator it(bestZone.porchBounds); !it.Done(); it.Next()) {
@@ -388,15 +404,15 @@ bool DomainAI::ClearDisconnected()
 	Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
 	Context()->chitBag->QueryBuilding(IString(), inner, &arr);
 
-	for (int i = 0; i < arr.Size(); ++i) {
-		MapSpatialComponent* msc = arr[i]->GetSpatialComponent()->ToMapSpatialComponent();
-		if (msc) {
-			if (!roads->IsOnRoad(msc)) {
+	GL_FOR_EACH_BEGIN(Chit*, chit, arr) {
+		MapSpatialComponent* msc = chit->GetSpatialComponent()->ToMapSpatialComponent();
+		if (msc && chit->GetItem()) {
+			if (!roads->IsOnRoad(msc, chit->GetItem()->IName() == ISC::farm)) {
 				workQueue->AddAction(msc->Bounds().min, BuildScript::CLEAR, 0, 0);
 				return true;
 			}
 		}
-	}
+	} GL_FOR_EACH_END
 	return false;
 }
 
@@ -637,9 +653,11 @@ void GobDomainAI::DoBuild()
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
 		if (eff < 2.0f && BuildFarm()) break;
-		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
-		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+		if (eff >= 2) {
+			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+		}
 	} while (false);
 }
 
@@ -695,9 +713,11 @@ void KamakiriDomainAI::DoBuild()
 		return;
 
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Rectangle2I sectorBounds = SectorBounds(sector);
+
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 	CChitArray farms;
-	Context()->chitBag->QueryBuilding(ISC::farm, sector, &farms);
+	Context()->chitBag->QueryBuilding(ISC::farm, sectorBounds, &farms);
 
 	float eff = 0.0f;
 	for (int i = 0; i < farms.Size(); ++i) {
@@ -706,6 +726,8 @@ void KamakiriDomainAI::DoBuild()
 	}
 	ClearDisconnected();
 
+	FIXME check for food in bars before building more denizens/sleep tubes.
+
 	do {
 		if (BuyWorkers()) break;		
 		if (BuildPlaza()) break;
@@ -713,15 +735,22 @@ void KamakiriDomainAI::DoBuild()
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
 		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
 		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
-		if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::KAMAKIRI_STATUE] < 4 && BuildBuilding(BuildScript::KAMAKIRI_STATUE)) break;
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
 		if (eff < 2.0f && BuildFarm()) break;
-		if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
-		if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-		if (BuildRoad()) break;	// will return true until all roads are built.
+
+		// Check efficiency to curtail over-building.
+		if (eff > 1) {
+			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		}
+		if (eff >= 2) {
+			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+			if (BuildRoad()) break;	// will return true until all roads are built.
+		}
 	} while (false);
 }
 
