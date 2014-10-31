@@ -437,6 +437,8 @@ public:
 	bool Empty() const		{ return size==0; }
 	T*		 Mem() 			{ return mem; }
 	const T* Mem() const	{ return mem; }
+
+	const T* End() 			{ return mem + size; }
 	const T* End() const	{ return mem + size; }
 
 	void SwapRemove( int i ) {
@@ -518,7 +520,6 @@ private:
 
 #define GL_FOR_EACH_BEGIN(T, ref, list ) { auto* first = list.Mem(); auto* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
 #define GL_FOR_EACH_END }}
-
 
 class CompCharPtr {
 public:

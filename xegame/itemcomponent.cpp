@@ -1177,13 +1177,14 @@ void ItemComponent::SetHardpoints()
 
 	for (int i = 1; i < hardpoint.Size(); ++i) {
 		GameItem* item = hardpoint[i];
+		
 		if (item) {
-			GLASSERT(item);
 			GLASSERT(item->hardpoint == i);
 			if (item->Intrinsic()) {
 				rc->Attach(item->hardpoint, 0);
 			}
 			else {
+				GLASSERT(!item->IResourceName().empty());
 				rc->Attach(item->hardpoint, item->ResourceName());
 
 				if (item->keyValues.Has(ISC::procedural)) {

@@ -139,6 +139,8 @@
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon
+		- ClearDisconnected() not handling farms correctly
+		- Fix map to track travel destination, allow view
 
 		- map show the full 5x5 highlight in the left view
 		- being underwater (plant) should make fire go out.
