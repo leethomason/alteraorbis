@@ -134,8 +134,11 @@
 		x ClearDisconnected() not handling farms correctly
 		x kamakiri building
 		x Fix map to track travel destination
+		- keep porches clear
+		- red mantis way over powered?
 		- test bank running out of money
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon

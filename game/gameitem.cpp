@@ -146,6 +146,11 @@ GameItem* GameItem::CloneFrom(GameItem* item) const
 	// History *not* copied.
 	item->traits = traits;
 	item->personality = personality;
+
+	if (this->hardpoint) {
+		GLASSERT(Intrinsic() || !resource.empty());
+	}
+
 	return item;
 }
 

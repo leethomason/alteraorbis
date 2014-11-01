@@ -201,47 +201,6 @@ private:
 };
 
 
-/*
-class IMeleeWeapon
-{
-public:
-	virtual float Damage() const = 0;
-	virtual int CalcMeleeCycleTime() const = 0;	
-
-	virtual const GameItem* GetItem() const = 0;	
-	virtual GameItem* GetItem() = 0;	
-};
-
-class IRangedWeapon
-{
-public:
-	virtual bool CanShoot() = 0;
-	virtual bool Shoot(Chit* parent) = 0;
-	virtual bool Reload(Chit* parent) = 0;
-
-	virtual float BoltSpeed() const = 0;
-	virtual int ClipCap() const = 0;
-	virtual int ReloadTime() const = 0;
-	virtual int CooldownTime() const = 0;
-	
-	virtual float Damage() const = 0;
-
-	virtual const GameItem* GetItem() const = 0;	
-	virtual GameItem* GetItem() = 0;	
-};
-
-class IShield
-{
-public:
-	virtual int ShieldRechargeTime() const = 0;
-	virtual bool Active() const = 0;		// is shield on?
-	virtual void AbsorbDamage(DamageDesc* dd, float boost) = 0;
-
-	virtual const GameItem* GetItem() const = 0;	
-	virtual GameItem* GetItem() = 0;	
-};
-*/
-
 class Cooldown
 {
 public:
@@ -359,7 +318,7 @@ public:
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const grinliz::IString& n );
-	void SetResource( const char* n )			{ resource = grinliz::StringPool::Intern( n ); }
+	void SetResource(const char* n)				{ GLASSERT(n && *n);  resource = grinliz::StringPool::Intern(n); }
 
 	// Sets this item to be tracked. Also records the team that created it, 
 	// for generating colors when applicable.

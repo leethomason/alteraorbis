@@ -159,6 +159,7 @@ void FloatEncoding(XStream* xs)
 }
 
 
+//inline bool GL_FUNC_ASSERT(bool x) { GLASSERT(x); return x; }
 
 int main( int argc, const char* argv[] ) 
 {
@@ -322,6 +323,42 @@ int main( int argc, const char* argv[] )
 			printf("[%f] %d  ", float(i)/4.0f, fbucket[i]);
 		}
 		printf("\n");
+	}
+
+	{
+		CDynArray<Random> rArr;
+		CDynArray<GLString> sArr;
+		CDynArray<GLString*> pArr;
+		CDynArray<const GLString*> cpArr;
+		const CDynArray<GLString>& sArrRef = sArr;
+		CDynArray<int> iArr;
+
+#define GL_FOR_EACH( C, T, it, list )						\
+		if ( C const*  first = list.Mem())					\
+			if ( C const * last = list.End())				\
+				if (int i = 0) {} else						\
+					for (T it = list[0]; i < list.Size() && GL_FUNC_ASSERT(first == list.Mem()) && GL_FUNC_ASSERT(last == list.End()); ++i, it = list[i])
+
+		GL_FOR_EACH(Random, Random&, r, rArr) {
+			printf("%d\n", r.Bit());
+		}
+		GL_FOR_EACH(GLString, GLString&, str, sArr) {
+			printf("%s\n", str.c_str());
+		}		
+		GL_FOR_EACH(GLString*, GLString*, str, pArr) {
+			printf("%s\n", str->c_str());
+		}
+		GL_FOR_EACH(const GLString*, const GLString*, str, cpArr) {
+			printf("%s\n", str->c_str());
+		}
+		/*
+		GL_FOR_EACH(GLString, const GLString&, str, sArrRef) {
+			printf("%s\n", str.c_str());
+		}
+		*/
+		GL_FOR_EACH(int, int&, i, iArr) {
+			printf("%s\n", i);
+		}
 	}
 
 	return 0;
