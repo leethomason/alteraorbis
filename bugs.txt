@@ -139,6 +139,8 @@
 		x ToUI doesn't set bounds...
 		- test bank running out of money
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		- asserts for neutral in procedural aren't correct
+		- food/elixir above kamakiri heads
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
