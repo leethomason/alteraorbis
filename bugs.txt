@@ -141,6 +141,7 @@
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		- asserts for neutral in procedural aren't correct
 		- food/elixir above kamakiri heads
+		- negative numbers of crystal in the bank
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
