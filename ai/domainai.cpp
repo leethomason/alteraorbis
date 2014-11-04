@@ -502,7 +502,7 @@ int TrollDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
+	if (!parentChit->Destroyed() && item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
 		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
 	}
 

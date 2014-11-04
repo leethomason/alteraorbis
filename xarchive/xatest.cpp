@@ -325,6 +325,7 @@ int main( int argc, const char* argv[] )
 		printf("\n");
 	}
 
+#if 1
 	{
 		CDynArray<Random> rArr;
 		CDynArray<GLString> sArr;
@@ -333,11 +334,20 @@ int main( int argc, const char* argv[] )
 		const CDynArray<GLString>& sArrRef = sArr;
 		CDynArray<int> iArr;
 
+		iArr.Push(0);
+		iArr.Push(1);
+		iArr.Push(2);
+
+		// Not working.
+		// The it = list[++i] reads off end of array.
+		// Forsyth has the same bug, as far as 
+		// I can tell.
 #define GL_FOR_EACH( C, T, it, list )						\
 		if ( C const*  first = list.Mem())					\
 			if ( C const * last = list.End())				\
-				if (int i = 0) {} else						\
-					for (T it = list[0]; i < list.Size() && GL_FUNC_ASSERT(first == list.Mem()) && GL_FUNC_ASSERT(last == list.End()); ++i, it = list[i])
+			if (first != last)								\
+			if (int _i_ = 0) {} else						\
+			for (T it = list[0]; GL_FUNC_ASSERT(first == list.Mem()) && GL_FUNC_ASSERT(last == list.End()) && _i_ < list.Size(); it = list[++_i_])
 
 		GL_FOR_EACH(Random, Random&, r, rArr) {
 			printf("%d\n", r.Bit());
@@ -356,10 +366,11 @@ int main( int argc, const char* argv[] )
 			printf("%s\n", str.c_str());
 		}
 		*/
-		GL_FOR_EACH(int, int&, i, iArr) {
-			printf("%s\n", i);
+		GL_FOR_EACH(int, int&, intVal, iArr) {
+			printf("%d\n", intVal);
 		}
 	}
+#endif
 
 	return 0;
 }
