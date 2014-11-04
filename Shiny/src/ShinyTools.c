@@ -36,7 +36,7 @@ THE SOFTWARE.
 /*---------------------------------------------------------------------------*/
 
 const ShinyTimeUnit* ShinyGetTimeUnit(float ticks) {
-	static ShinyTimeUnit units[4] = { {0} };
+	static ShinyTimeUnit units[4] = { { 0 } };
 
 	if (units[0].tickFreq == 0) { /* auto initialize first time */
 		units[0].tickFreq = ShinyGetTickFreq() / 1.0f;
@@ -56,10 +56,15 @@ const ShinyTimeUnit* ShinyGetTimeUnit(float ticks) {
 		units[3].suffix = "ns";
 	}
 
+#ifdef SHINY_ALWAYS_MILLISECONDS
+	if (units[0].tickFreq < ticks) return &units[0];
+	else return &units[1];
+#else
 	if (units[0].tickFreq < ticks) return &units[0];
 	else if (units[1].tickFreq < ticks) return &units[1];
 	else if (units[2].tickFreq < ticks) return &units[2];
 	else return &units[3];
+#endif
 }
 
 

@@ -52,6 +52,7 @@ THE SOFTWARE.
 /*---------------------------------------------------------------------------*/
 
 SHINY_INLINE char* printHeader(char *output, const char *a_title) {
+
 	snprintf(output, OUTPUT_WIDTH_SUM + TRAILING,
 		"%-*s %*s %*s %*s",
 		OUTPUT_WIDTH_NAME, a_title,
@@ -71,7 +72,11 @@ SHINY_INLINE char* printData(char *output, const ShinyData *a_data, float a_tope
 	const ShinyTimeUnit *totalUnit = ShinyGetTimeUnit(totalTicksAvg);
 
 	snprintf(output, OUTPUT_WIDTH_DATA + TRAILING,
-		" %*.1f %*.0f %-2s %*.0f%% %*.0f %-2s %*.0f%%",
+#ifdef SHINY_ALWAYS_MILLISECONDS
+		 " %*.1f %*.1f %-2s %*.0f%% %*.1f %-2s %*.0f%%",
+#else
+		 " %*.1f %*.0f %-2s %*.0f%% %*.0f %-2s %*.0f%%",
+#endif
 		OUTPUT_WIDTH_CALL, a_data->entryCount.avg,
 		OUTPUT_WIDTH_TIME, a_data->selfTicks.avg * selfUnit->invTickFreq, selfUnit->suffix,
 		OUTPUT_WIDTH_PERC, a_data->selfTicks.avg * a_topercent,

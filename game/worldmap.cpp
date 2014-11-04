@@ -655,7 +655,9 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 		// flammability is reflected in the chance
 		// of it catching fire; once on fire, everything
 		// has the same chance of the fire going out.
-		if (wg->PlantOnFire() && random.Uniform() < CHANCE_FIRE_OUT) {
+		bool underWater = wg->FluidHeight() && (wg->FluidType() == WorldGrid::FLUID_WATER);
+
+		if (wg->PlantOnFire() && (random.Uniform() < CHANCE_FIRE_OUT || underWater)) {
 			wg->SetPlantOnFire(false);
 		}
 		if (wg->PlantOnShock() && random.Uniform() < CHANCE_FIRE_OUT) {

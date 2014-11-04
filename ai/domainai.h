@@ -50,6 +50,7 @@ protected:
 	bool CanBuild(const grinliz::Rectangle2I& r);
 
 	bool ClearDisconnected();
+	bool ClearRoadsAndPorches();
 	bool BuyWorkers();
 	bool BuildRoad();
 	bool BuildRoad(int road, int distance);
@@ -60,7 +61,9 @@ protected:
 	RoadAI*	roads;
 
 private:
+	enum { MAX_ROADS = 4};
 	CTicker ticker;			// build logic ticker.
+	int buildDistance[MAX_ROADS];	// records how far the road is built, so we can check to keep it clear
 };
 
 

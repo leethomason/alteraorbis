@@ -16,10 +16,10 @@
 #include "shadermanager.h"
 #include "platformgl.h"
 #include "texture.h"
-#include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
 #include <direct.h>
 #include "../xegame/cgame.h"
+#include "../grinliz/glperformance.h"
 
 #define DEBUG_OUTPUT
 

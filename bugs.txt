@@ -124,7 +124,6 @@
 		x markets aren't paying tax (check, think this is working)
 		x map icons for MOBs aren't square
 		x special kamikiri item
-		x re-test battle scenes. balance.
 
 		t does history get tracked correctly when core gets taken over?
 		t clean up UI. less clutter.
@@ -134,23 +133,23 @@
 		x ClearDisconnected() not handling farms correctly
 		x kamakiri building
 		x Fix map to track travel destination
-		- keep porches clear
-		- red mantis way over powered?
+		x keep porches clear
+		x red mantis way over powered?
+		x map show the full 5x5 highlight in the left view
+		x ToUI doesn't set bounds...
 		- test bank running out of money
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon
-		- ClearDisconnected() not handling farms correctly
-		- Fix map to track travel destination, allow view
 
-		- map show the full 5x5 highlight in the left view
-		- being underwater (plant) should make fire go out.
+		x being underwater (plant) should make fire go out.
 		- advisor still comes up in weird states.
 		- special gobman item, building
 		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains
+		- re-test battle scenes. balance.
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution

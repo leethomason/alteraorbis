@@ -80,6 +80,7 @@ int Team::GetTeam( const grinliz::IString& itemName )
 
 bool Team::IsDefault(const IString& str, int team)
 {
+	if (team == TEAM_NEUTRAL || team == TEAM_CHAOS) return true;
 	return GetTeam(str) == Group(team);
 }
 

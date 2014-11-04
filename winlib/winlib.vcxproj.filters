@@ -88,9 +88,6 @@
     <ClCompile Include="..\grinliz\glmemorypool.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
-    <ClCompile Include="..\grinliz\glperformance.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
     <ClCompile Include="..\grinliz\glprime.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
@@ -147,6 +144,9 @@
     </ClCompile>
     <ClCompile Include="..\Shiny\src\ShinyZone.c">
       <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\grinliz\glperformance.cpp">
+      <Filter>Source Files\grinliz</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -214,9 +214,6 @@
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\glmemorypool.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glperformance.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\glprime.h">
@@ -302,6 +299,9 @@
     </ClInclude>
     <ClInclude Include="..\Shiny\include\ShinyZone.h">
       <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\grinliz\glperformance.h">
+      <Filter>Source Files\grinliz</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
