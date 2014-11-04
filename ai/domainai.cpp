@@ -18,6 +18,7 @@
 #include "../script/procedural.h"
 #include "../script/farmscript.h"
 #include "../game/mapspatialcomponent.h"
+#include "../Shiny/include/Shiny.h"
 #include "roadai.h"
 
 using namespace grinliz;
@@ -39,6 +40,10 @@ DomainAI* DomainAI::Factory(int team)
 
 DomainAI::DomainAI()
 {
+	GLASSERT(MAX_ROADS == RoadAI::MAX_ROADS);
+	for (int i = 0; i < MAX_ROADS; ++i) {
+		buildDistance[i] = 0;
+	}
 }
 
 DomainAI::~DomainAI()
@@ -87,6 +92,7 @@ void DomainAI::OnRemove()
 void DomainAI::Serialize(XStream* xs)
 {
 	this->BeginSerialize(xs, Name());
+	XARC_SER_ARR(xs, buildDistance, MAX_ROADS);
 	this->EndSerialize(xs);
 }
 
@@ -142,7 +148,7 @@ bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** 
 }
 
 
-bool DomainAI::BuildRoad(int i, int d)
+bool DomainAI::BuildRoad(int roadID, int d)
 {
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;
@@ -155,8 +161,9 @@ bool DomainAI::BuildRoad(int i, int d)
 	bool issuedOrders = false;
 
 	int n = 0;
-	const Vector2I* road = roads->GetRoad(i, &n);
+	const Vector2I* road = roads->GetRoad(roadID, &n);
 	n = Min(n, d);
+	buildDistance[roadID] = Max(buildDistance[roadID], n);
 
 	for (int i = 0; i < n; ++i) {
 		Vector2I pos2i = road[i];
@@ -417,8 +424,55 @@ bool DomainAI::ClearDisconnected()
 }
 
 
+bool DomainAI::ClearRoadsAndPorches()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return false;
+
+	bool issued = false;
+
+	// Clear out the roads.
+	for (int i = 0; i < MAX_ROADS; ++i) {
+		int n = 0;
+		const Vector2I* road = roads->GetRoad(i, &n);
+		for (int k = 0; road && k < n; ++k) {
+			Vector2I pos = road[k];
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
+			if (wg.IsLand() && (wg.Plant() || wg.RockHeight())) {
+				workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
+				issued = true;
+			}
+		}
+	}
+
+	// Clear out the porches.
+	Rectangle2I bounds = SectorBounds(sector);
+	CChitArray arr;
+	Context()->chitBag->QueryBuilding(IString(), bounds, &arr);
+	for (int i = 0; i < arr.Size(); ++i) {
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
+		if (msc && msc->HasPorch()) {
+			Rectangle2I pb = msc->PorchPos();
+			for (Rectangle2IIterator it(pb); !it.Done(); it.Next()) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+				if (wg.IsLand() && (wg.Plant() || wg.RockHeight())) {
+					workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
+					issued = true;
+				}
+			}
+		}
+	}
+	return issued;
+}
+
+
 int DomainAI::DoTick(U32 delta)
 {
+	PROFILE_FUNC();
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if (!spatial || !parentChit->GetItem()) return ticker.Next();
 
@@ -571,10 +625,11 @@ void TrollDomainAI::DoBuild()
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 	int nBraziers = 4 + (parentChit->ID() % 4);
-	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
@@ -641,10 +696,11 @@ void GobDomainAI::DoBuild()
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
 		eff += farmScript->Efficiency();
 	}
-	ClearDisconnected();
 
 	do {
 		if (BuyWorkers()) break;
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
@@ -735,10 +791,10 @@ void KamakiriDomainAI::DoBuild()
 		}
 	}
 
-	ClearDisconnected();
-
 	do {
 		if (BuyWorkers()) break;		
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
 		if (BuildPlaza()) break;
 		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;

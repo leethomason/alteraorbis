@@ -128,6 +128,7 @@ private:
 	U32* total;
 };
 
+#if 0
 static const int GL_MAX_PERF_SAMPLES = 1000*1000;
 
 struct PerfData
@@ -225,7 +226,7 @@ struct PerformanceTracker
 	#define GRINLIZ_PERFTRACK_NAME( x )	{}
 #endif
 
+#endif
 
 };		
-
 #endif

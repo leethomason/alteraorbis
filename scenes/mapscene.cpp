@@ -60,6 +60,9 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	travelMark[0].Init( &gamui2D, travelAtom, true );
 	travelMark[1].Init( &gamui2D, travelAtom, true );
 
+	RenderAtom selectionAtom = lumosGame->CalcUIIconAtom("mapSelection", true);
+	selectionMark.Init(&gamui2D, selectionAtom, true);
+
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
 		map2Text[i].Init( &gamui2D );
 	}
@@ -132,6 +135,7 @@ void MapScene::Resize()
 		homeMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 		travelMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	}
+	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 	DrawMap();
 }
 
@@ -289,6 +293,11 @@ void MapScene::DrawMap()
 		v = ToUI(i,pos, b, &inBounds);
 		travelMark[i].SetPos(v.x, v.y);
 		travelMark[i].SetVisible(inBounds && !data->destSector.IsZero());
+	}
+	{
+		Vector2F world = { (float)map2Bounds.min.x, (float)map2Bounds.min.y };
+		Vector2F pos = ToUI(0, world, mapBounds, 0);
+		selectionMark.SetPos(pos.x, pos.y);
 	}
 }
 

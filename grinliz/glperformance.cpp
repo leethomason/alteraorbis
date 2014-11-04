@@ -56,6 +56,8 @@ U64 grinliz::FastFrequency()
 }
 #endif
 
+#if 0
+
 Performance::Sample* Performance::samples = 0;
 int Performance::nSamples = 0;
 PerfData* Performance::perfData = 0;
@@ -145,3 +147,4 @@ void Performance::WalkRec( int depth, const PerfData* data, IPerformancePrinter*
 		}
 	}
 }
+#endif
