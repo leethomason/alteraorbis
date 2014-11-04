@@ -102,6 +102,10 @@ Vector2F MapScene::ToUI(int select, const grinliz::Vector2F& pos, const grinliz:
 	const gamui::Image& image = (select == 0) ? mapImage : mapImage2;
 	v.x = image.X() + dx * image.Width();
 	v.y = image.Y() + dy * image.Height();
+
+	if (inBounds) {
+		*inBounds = dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1;
+	}
 	return v;
 }
 

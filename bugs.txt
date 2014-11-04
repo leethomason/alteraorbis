@@ -136,15 +136,15 @@
 		x keep porches clear
 		x red mantis way over powered?
 		x map show the full 5x5 highlight in the left view
+		x ToUI doesn't set bounds...
 		- test bank running out of money
 		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
-		- ToUI doesn't set bounds...
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon
 
-		- being underwater (plant) should make fire go out.
+		x being underwater (plant) should make fire go out.
 		- advisor still comes up in weird states.
 		- special gobman item, building
 		- Census: actual census. # trolls, # mantis, etc. etc.
