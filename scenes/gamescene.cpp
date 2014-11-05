@@ -1592,11 +1592,7 @@ void GameScene::ProcessNewsToConsole()
 	LumosChitBag* chitBag = sim->GetChitBag();
 	CoreScript* coreScript = GetHomeCore();
 
-	Vector2I avatarSector = { 0, 0 };
 	Chit* playerChit = GetPlayerChit();
-	if ( playerChit && playerChit->GetSpatialComponent() ) {
-		avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
-	}
 	Vector2I homeSector = GetHomeSector();
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
@@ -1663,7 +1659,6 @@ void GameScene::ProcessNewsToConsole()
 			break;
 		}
 		if ( !str.empty() ) {
-			//consoleWidget.Push( str );
 			consoleWidget.Push(str, atom, pos2);
 		}
 	}

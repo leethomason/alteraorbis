@@ -84,7 +84,7 @@
 			x logic for Truulga creation, destruction, spawning. destroy cores.
 			x see Truulga on map
 		x debug: attach to domain
-		- Gob-men domain
+		x Gob-men domain
 			x need gob names
 			x need ui icon
 			x gob building colors
@@ -124,6 +124,22 @@
 		x markets aren't paying tax (check, think this is working)
 		x map icons for MOBs aren't square
 		x special kamikiri item
+		x Goblin Half Man
+			x http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
+			x model
+			x animation
+		x Mantis Man
+			x concept
+			x model 
+			x animation
+		x Troll
+			x concept
+			x model 
+			x animation
+			x spawn strategy : switch to arachnoid approach once there are more options
+			x item pickup / use AI
+		x Arachnoid
+		  x update tail and texturing
 
 		t does history get tracked correctly when core gets taken over?
 		t clean up UI. less clutter.
@@ -143,26 +159,31 @@
 		x negative numbers of crystal in the bank
 		x being underwater (plant) should make fire go out.
 		x Census: actual census. # trolls, # mantis, etc. etc.
-		- test bank running out of money
 		
+		- test bank running out of money
 		- UI icons for gobmen, kamakiri, others?
+		- red mantis -> all red
 		- "human" UI icon
-		- "home" icon vs. grid travel icon
+		x "home" icon vs. grid travel icon
 		- test: build a home domain
 
-		- advisor still comes up in weird states.
-		- special gobman item, building
 		- Denizen domains
-		- re-test battle scenes. balance.
-		- Long play test
-			- Troll distribution
-			- Troll gun distribution
+		- Visitor role
+			- Visitor travel
+			- Visitor trails on map
 		- Squads
 			- squad control:
 				- defend
 				- attack
 				- adventure
 				- follow avatar
+
+		- advisor still comes up in weird states.
+		- special gobman item, building
+		- re-test battle scenes. balance.
+		- Long play test
+			- Troll distribution
+			- Troll gun distribution
 
 	- World Gen
 		- less techy, more interesting world gen
@@ -250,30 +271,14 @@
 
 ** Art **
 
-- Goblin Half Man
-	- http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
-	- model
-	- animation
-- Mantis Man
-	- concept
-	- model 
-	- animation
-x Troll
-	x concept
-	x model 
-	x animation
-	- spawn strategy : switch to arachnoid approach once there are more options
-	x item pickup / use AI
 - Dragon
 	- concept
 	- model 
 	- animation
-- Arachnoid
-  - update tail and texturing
-	
+
 - wilder, more digital face colors
 - filter face colors to matching effect
-- more natural skin tones
+x more natural skin tones
 
 ** Releasing **
 - set version
