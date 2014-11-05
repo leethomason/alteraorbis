@@ -52,21 +52,21 @@ static const int TECH_ATTRACTS_GREATER = 4;
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;
-static const int TYPICAL_DENIZENS	= TYPICAL_DOMAINS * 20;		// fixme: not used or tracked
-static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;		// fixme: not used or tracked
-static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
+static const int TYPICAL_DENIZENS	= 800;
+static const int TYPICAL_LESSER		= 1500;
 static const int TYPICAL_GREATER	= 10;						// These guys get overwhelming fast - they can clear a domain.
 static const int TYPICAL_PLANTS		= 50 * 1000;
 
 static const int GOLD_PER_DENIZEN  = 100;
-static const int GOLD_PER_BEASTMAN =  20;
-static const int GOLD_PER_MONSTER  =  10;
-static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN 
-							+ TYPICAL_BEASTMEN*GOLD_PER_BEASTMAN
-							+ TYPICAL_MONSTERS*GOLD_PER_MONSTER;
+static const int GOLD_PER_LESSER   =  10;
+static const int GOLD_PER_GREATER  = 100;
+static const int ALL_GOLD =   TYPICAL_DENIZENS * GOLD_PER_DENIZEN
+							+ TYPICAL_LESSER * GOLD_PER_LESSER
+							+ TYPICAL_GREATER * GOLD_PER_GREATER;
 
-static const int MAX_LESSER_GOLD	= GOLD_PER_MONSTER *  10;
-static const int MAX_GREATER_GOLD	= GOLD_PER_MONSTER * 100;
+// Values to prevent huge accumulation in one very lucky MOB.
+static const int MAX_LESSER_GOLD	= 100;
+static const int MAX_GREATER_GOLD	= 1000;
 static const int MAX_LESSER_MOB_CRYSTAL = 4;
 static const int MAX_GREATER_MOB_CRYSTAL = 12;
 
@@ -109,8 +109,8 @@ static const U32   COOLDOWN_TIME	= 750;
 
 static const float EXPLOSIVE_RANGE	= 1.5f;			// explosions go through walls. Make this too big,
 													// that becomes an issue. Too small, explosions aren't fun.
-static const float LONGEST_WEAPON_RANGE = 20.0f;	// effects AI logic, queries
-static const float EFFECT_DAMAGE_PER_SEC = 10.0f;
+static const float LONGEST_WEAPON_RANGE  = 20.0f;	// effects AI logic, queries
+static const float EFFECT_DAMAGE_PER_SEC =  5.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const int   EFFECT_MAX_TIME = 2000;
 static const float MASS_TO_EXPLOSION_DAMAGE = 0.40f;

@@ -97,17 +97,12 @@ int DebugStateComponent::DoTick( U32 delta )
 	if ( !pItem )
 		return VERY_LONG_TICK;
 
-	GameItem* weapon = 0;
-	GameItem* shield = 0;
+	RangedWeapon* weapon = 0;
+	Shield* shield = 0;
 
 	if ( parentChit->GetItemComponent() ) {
-		IShield* ishield = parentChit->GetItemComponent()->GetShield();
-		IRangedWeaponItem* iweapon = parentChit->GetItemComponent()->GetRangedWeapon(0);
-
-		if ( ishield )
-			shield = ishield->GetItem();
-		if ( iweapon )
-			weapon = iweapon->GetItem();
+		shield = parentChit->GetItemComponent()->GetShield();
+		weapon = parentChit->GetItemComponent()->GetRangedWeapon(0);
 	}
 
 	healthBar.SetRange( (float) pItem->HPFraction() );
@@ -132,7 +127,7 @@ int DebugStateComponent::DoTick( U32 delta )
 	}
 	if ( shield ) {
 		// will tweak out if there are multiple absorbers.
-		float r = shield->RoundsFraction();
+		float r = shield->ChargeFraction();
 		shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 	}
 

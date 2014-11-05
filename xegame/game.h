@@ -130,6 +130,10 @@ public:
 			return colors[i];
 		}
 
+		grinliz::Color4F Get4F(const grinliz::Vector2I& p) const {
+			return Get4F(p.x, p.y);
+		}
+
 		grinliz::Color4F Get4F( int x, int y ) const {
 			GLASSERT( x >= 0 && x < dx && y >= 0 && y < dy );
 			int i = y*dx + x;

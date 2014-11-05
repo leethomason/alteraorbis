@@ -20,48 +20,66 @@
 
 class XStream;
 
-struct Wallet
+class Wallet
 {
+public:
 	Wallet() {
+		closed = false;
 		gold = 0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i) crystal[i] = 0; 
 	}
-
-	void AddGold( int g ) {
-		this->gold += g;
-		GLASSERT( this->gold >= 0 );
-	}
-
-	// Does the check before the increment.
-	void AddCrystal( int id, int n=1 ) {
-		if ( id < NUM_CRYSTAL_TYPES ) {
-			crystal[id] += n;
-			GLASSERT( crystal[id] >= 0 );
+	
+	// Only to be called by the reserve bank.
+	void Set(int g, const int* c) {
+		this->gold = g;
+		if (c) {
+			for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+				crystal[i] = c[i];
+			}
 		}
 	}
 
-	void Add( const Wallet& w ) {
-		this->gold += w.gold;
-		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i )
-			this->crystal[i] += w.crystal[i];
+	// Only set true for the reserve bank.
+	// NOT serialized.
+	void SetCanBeUnderwater(bool under) { canGoUnderwater = under; }
+
+	int Gold() const				{ return gold; }
+	bool HasGold(int g) const		{ return gold >= g; }
+	int Crystal(int i) const		{ GLASSERT(i >= 0 && i < NUM_CRYSTAL_TYPES); return crystal[i]; }
+	const int* Crystal() const		{ return crystal; }
+
+	// Move money from one wallet to another. The only way
+	// to create money is the Set() method. With that,
+	// we don't need a Withdraw() function since money is 
+	// always being moved from one Wallet to another.
+	void Deposit(Wallet* src, int g) {
+		GLASSERT(!closed);
+		GLASSERT(g >= 0);	// the checks for 'enough gold' aren't correct if negative.
+		GLASSERT(src->canGoUnderwater || src->gold >= g);
+		gold += g;
+		src->gold -= g;
 	}
 
-	void Remove( const Wallet& w ) {
-		this->gold -= w.gold;
-		GLASSERT( this->gold >= 0 );
-		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-			this->crystal[i] -= w.crystal[i];
-			GLASSERT( this->crystal[i] >= 0 );
+	void Deposit(Wallet* src, int g, const int* c) {
+		Deposit(src, g);
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			GLASSERT(c[i] >= 0);
+			GLASSERT(src->canGoUnderwater || src->crystal[i] >= c[i]);
+			crystal[i] += c[i];
+			src->crystal[i] -= c[i];
 		}
+	}
+
+	// the amount can be the src or target.
+	void Deposit(Wallet* src, const Wallet& amount) {
+		Deposit(src, amount.Gold(), amount.Crystal());
+	}
+
+	void DepositAll(Wallet* src) {
+		Deposit(src, src->Gold(), src->Crystal());
 	}
 
 	bool IsEmpty() const;
-	Wallet EmptyWallet() {
-		Wallet w = *this;
-		Wallet empty;
-		*this = empty;
-		return w;
-	}
 
 	int NumCrystals() const {
 		int count=0;
@@ -87,51 +105,46 @@ struct Wallet
 		return !(operator<=(rhs));
 	}
 
+	// Debugging; this wallet is no longer accepting deposits.
+	void SetClosed() { closed = true; }
+
+private:
+	Wallet(const Wallet& w);	// private, unimplemented.
+
+protected:
+	bool canGoUnderwater;
+	bool closed;
 	int gold;
 	int crystal[NUM_CRYSTAL_TYPES];
 };
 
 
-inline void Transfer(Wallet* to, Wallet* from, int gold) {
-	GLASSERT(from->gold >= gold);
-	from->gold -= gold;
-	to->gold += gold;
-}
-
-inline void Transfer(Wallet* to, Wallet* from, const Wallet& w)
+class TransactAmt : public Wallet
 {
-	// The amount to transfer is commonly the 'from' wallet.
-	// So operate on 'to' before 'from'
-	GLASSERT(from->gold >= w.gold);
-	GLASSERT(to != &w);
-	to->gold += w.gold;
-	from->gold -= w.gold;
-
-	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
-		GLASSERT(from->crystal[i] >= w.crystal[i]);
-		to->crystal[i] += w.crystal[i];
-		from->crystal[i] -= w.crystal[i];
-	}
-}
-
-inline bool CanTransfer(const Wallet* to, const Wallet* from, int gold) {
-	return(from->gold >= gold);
-}
-
-inline bool CanTransfer(const Wallet* to, const Wallet* from, const Wallet& w)
-{
-	// The amount to transfer is commonly the 'from' wallet.
-	// So operate on 'to' before 'from'
-	if (from->gold >= w.gold) {
+public:
+	void Clear() {
+		gold = 0;
 		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
-			if (from->crystal[i] < w.crystal[i]) {
-				return false;
-			}
+			crystal[i] = 0;
 		}
-		return true;
 	}
-	return false;
-}
+
+	void Add(const Wallet& w) {
+		gold += w.Gold();
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			crystal[i] += w.Crystal(i);
+		}
+	}
+
+	void AddCrystal(int type, int count) {
+		GLASSERT(type >= 0 && type < NUM_CRYSTAL_TYPES);
+		crystal[type] += count;
+	}
+
+	void AddGold(int g) {
+		gold += g;
+	}
+};
 
 #endif
 

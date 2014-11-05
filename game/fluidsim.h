@@ -50,7 +50,6 @@ public:
 
 private:
 	void Reset(int x, int y);
-	//U32 Hash();
 	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent, int* type);
 	void PressureStep();
 

@@ -47,7 +47,7 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 {
 	int size = 1;
 	if ( !structure.empty() ) {
-		if ( structure == IStringConst::pave || structure == IStringConst::ice ) {
+		if ( structure == ISC::pave || structure == ISC::ice ) {
 			size = 1;
 		}
 		else {
@@ -149,7 +149,7 @@ void WorkQueue::Remove(const grinliz::Vector2I& pos)
 }
 
 
-bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation)
+bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation, int variation)
 {
 	if ( ToSector( pos2i ) != sector ) {
 		// wrong sector.
@@ -160,6 +160,11 @@ bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, flo
 	item.buildScriptID = buildScriptID;
 	item.pos = pos2i;
 	item.rotation = rotation;
+	item.variation = variation;
+
+#ifdef DEBUG
+	if (item.buildScriptID == BuildScript::PAVE) GLASSERT(item.variation);
+#endif
 
 	if ( !TaskCanComplete( item )) {
 		return false;
@@ -182,7 +187,7 @@ void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 	// Notify near.
 	CChitArray array;
-	ItemNameFilter workerFilter( IStringConst::worker, IChitAccept::MOB );
+	ItemNameFilter workerFilter( ISC::worker, IChitAccept::MOB );
 	chitBag->QuerySpatialHash( &array, pos2, NOTIFICATION_RAD, 0, &workerFilter );
 	for( int i=0; i<array.Size(); ++i ) {
 		ChitMsg msg( ChitMsg::WORKQUEUE_UPDATE );
@@ -209,6 +214,16 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 		}
 	}
 	return 0;
+}
+
+
+bool WorkQueue::HasAssignedJob() const
+{
+	for (int i = 0; i < queue.Size(); ++i) {
+		if (queue[i].assigned)
+			return true;
+	}
+	return false;
 }
 
 
@@ -295,7 +310,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	const BuildData& buildData = buildScript.GetData(action);
 	int size = buildData.size;
 
-	if (available.gold < buildData.cost) {
+	if (available.Gold() < buildData.cost) {
 		return false;
 	}
 
@@ -325,7 +340,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			else if (wg.RockHeight()) {
 				++removable;
 			}
-			else if (chitBag->QueryBuilding(v)) {
+			else if (chitBag->QueryBuilding(IString(),v,0)) {
 				++building;	// building
 			}
 		}
@@ -380,13 +395,14 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 	}
 	else if (BuildScript::IsBuild(item.buildScriptID)) {
 		if (item.buildScriptID == BuildScript::PAVE) {
-			return wg.Pave() > 0;
+			GLASSERT(item.variation);
+			return (wg.Pave() == item.variation) || item.variation == 0;
 		}
 		else if (item.buildScriptID == BuildScript::ICE) {
 			return wg.RockHeight() > 0;
 		}
 		else {
-			Chit* building = context->chitBag->QueryBuilding(item.pos);
+			Chit* building = context->chitBag->QueryBuilding(IString(),item.pos,0);
 			if (building && building->GetItem() && building->GetItem()->IName() == buildData.structure) {
 				return true;
 			}
@@ -448,6 +464,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER(xs, buildScriptID);
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
+	XARC_SER( xs, variation );
 	XarcClose( xs );
 }
 

@@ -55,12 +55,9 @@ private:
 		   NUM_MODELS = 16,
 		   NUM_CONTROL = 6 };
 
-	void SetupTest0();
-	void SetupTest1();
-
+	void SetupTest();
 	void LoadLighting();
 
-	int testID;
 	int glowLayer;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;

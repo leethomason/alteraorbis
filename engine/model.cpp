@@ -944,7 +944,8 @@ void ModelResourceManager::AddModelResource( ModelResource* res )
 
 const ModelResource* ModelResourceManager::GetModelResource( const char* name, bool errorIfNotFound )
 {
-	GLASSERT( name );
+	GLASSERT( name || !errorIfNotFound);
+	if (!name || !*name) return 0;
 
 	ModelResource* res = 0;
 	bool found = map.Query( name, &res );

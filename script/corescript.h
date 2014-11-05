@@ -25,6 +25,7 @@ class WorkQueue;
 class LumosChitBag;
 class CoreScript;
 class Model;
+struct ChitContext;
 
 struct CoreInfo
 {
@@ -65,12 +66,19 @@ public:
 	virtual const char* Name() const	{ return "CoreScript"; }
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
+
+	int GetPave();
+
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
 	bool IsCitizen( int id );
 	Chit*  CitizenAtIndex( int id );
 	int    FindCitizenIndex( Chit* chit ); 
-	int  NumCitizens();
+	int NumCitizens();
+
+	static int MaxCitizens(int team, int nTemples);
+	int MaxCitizens();
 
 	void AddFlag(const grinliz::Vector2I& pos);
 	void RemoveFlag(const grinliz::Vector2I& pos);
@@ -89,8 +97,6 @@ public:
 	// The number of temples+1:
 	int   MaxTech();
 	void  AddTech();
-
-//	int nElixir;
 
 	// Each task pushes a position for that task,
 	// and removes it when done/cancelled. (Some careful
@@ -111,10 +117,14 @@ public:
 		return GetCoreInfo(sector).coreScript;
 	}
 	static CoreScript* GetCoreFromTeam(int team);
+	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
 
 private:
 	void UpdateAI();
 	void UpdateScore(int n);
+	bool RecruitNeutral();
+	void DoTickNeutral(int delta, int nSpawnTicks);
+	void DoTickInUse(int delta, int nSpawnTicks);
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
@@ -129,6 +139,7 @@ private:
 	double		tech;
 	int			summonGreater;
 	bool		autoRebuild;
+	int			pave;
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;

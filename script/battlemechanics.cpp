@@ -110,7 +110,7 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 }
 
 
-bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
+bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapon )
 {
 	GLASSERT( engine && src && weapon );
 	ChitBag* chitBag = src->Context()->chitBag;
@@ -172,10 +172,10 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 				float dot = DotProduct(toTarget, srcHeading);
 				float scale = 0.5f + 0.5f*dot;
 
-				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s'\n", 
-						src->ID(), src->GetItemComponent()->GetItem()->Name(),
-						weapon->GetItem()->Name(),
-						target->ID(), targetComp.item->Name() ));
+//				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s'\n", 
+//						src->ID(), src->GetItemComponent()->GetItem()->Name(),
+//						weapon->GetItem()->Name(),
+//						target->ID(), targetComp.item->Name() ));
 
 				dd.damage = damage*scale;	// the info holds a reference - non obvious
 				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
@@ -211,7 +211,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	}
 
 	if (impact && XenoAudio::Instance()) {
-		IString impactSound = weapon->GetItem()->keyValues.GetIString("impactSound");
+		IString impactSound = weapon->keyValues.GetIString("impactSound");
 		if (!impactSound.empty()) {
 			Vector3F pos3 = src->GetSpatialComponent()->GetPosition();
 			XenoAudio::Instance()->PlayVariation(impactSound, src->random.Rand(), &pos3 );
@@ -222,46 +222,32 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 
 
-void BattleMechanics::CalcMeleeDamage( const GameItem* mainItem, const IMeleeWeaponItem* weapon, DamageDesc* dd )
+void BattleMechanics::CalcMeleeDamage( const GameItem* weilder, const MeleeWeapon* weapon, DamageDesc* dd )
 {
-	const GameItem* item     = weapon->GetItem();
+	GLASSERT( weapon );
+	if ( !weapon ) return;
 
-	GLASSERT( item );
-	if ( !item ) return;
-
-	// The effect is the union of the item and the mainItem.
-	// A fire creature imparts fire to the sword it holds.
-	// ...I think that makes sense.
-	int effect = item->flags & GameItem::EFFECT_MASK;
-	if ( mainItem ) {	
-		effect |= mainItem->flags & GameItem::EFFECT_MASK; 
-	}
+	int effect = weapon->flags & GameItem::EFFECT_MASK;
 
 	// Remove explosive melee effect. It would only be funny 10 or 20 times.
 	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
-	// Now about mass.
-	// Use the sum; using another approach can yield surprising damage calc.
-	float mass = item->mass;
-	if ( mainItem ) {
-		mass += mainItem->mass;
-	}
-
-	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
-
-	float trait0 = item->Traits().Damage();
-	float trait2 = 1;
-	if ( mainItem ) {
-		trait2 = mainItem->Traits().Damage(); 
-	}
-
-	dd->damage = mass * item->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
+	// I keep going back and forth on the weilder, and the imapact it
+	// has on the damage. There is no "hit" calculation with melee;
+	// they always hit. So the only variable is the damage. Heavier units
+	// should probably do more damage, but there isn't much real
+	// variation there. But do add in the the affect of the weilders 
+	// Damage() skill.
+	if (weilder)
+		dd->damage = weapon->Damage() * weilder->Traits().Damage();
+	else
+		dd->damage = weapon->Damage();
 	dd->effects = effect;
 }
 
 
 float BattleMechanics::ComputeRadAt1(	const GameItem* shooter, 
-										const IRangedWeaponItem* weapon,
+										const RangedWeapon* weapon,
 										bool shooterMoving,
 										bool targetMoving )
 {
@@ -278,13 +264,7 @@ float BattleMechanics::ComputeRadAt1(	const GameItem* shooter,
 		accuracy *= shooter->Traits().Accuracy();
 	}
 	if ( weapon ) {
-		// There is both a built in accuracy (the type of gun) and
-		// the accuracy from the traits (quality/variance of the weapon)
-		float weaponAcc = 1;
-		weapon->GetItem()->keyValues.Get( ISC::accuracy, &weaponAcc );
-
-		accuracy *= weaponAcc;
-		accuracy *= weapon->GetItem()->Traits().Accuracy();
+		accuracy *= weapon->Accuracy();
 	}
 
  	float radAt1 = BASE_ACCURACY / accuracy;
@@ -292,38 +272,35 @@ float BattleMechanics::ComputeRadAt1(	const GameItem* shooter,
 }
 
 
-void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _target, bool targetMoving, IRangedWeaponItem* weapon )
+void BattleMechanics::Shoot(ChitBag* bag, Chit* src, const grinliz::Vector3F& _target, bool targetMoving, RangedWeapon* weapon)
 {
 	Vector3F aimAt = _target;
-	GameItem* weaponItem = weapon->GetItem();
-	GLASSERT( weaponItem->CanUse() );
-	bool okay = weaponItem->Use( src );
-	if ( !okay ) {
+	GLASSERT(weapon->CanShoot());
+	bool okay = weapon->Shoot(src);
+	if (!okay) {
 		return;
 	}
-	GameItem* item = weapon->GetItem();
-
 	Vector3F p0;
-	GLASSERT( src->GetRenderComponent() );
-	src->GetRenderComponent()->CalcTrigger( &p0, 0 );
+	GLASSERT(src->GetRenderComponent());
+	src->GetRenderComponent()->CalcTrigger(&p0, 0);
 
-	IString sound  = weaponItem->keyValues.GetIString(IStringConst::sound);
+	IString sound = weapon->keyValues.GetIString(ISC::sound);
 	if (!sound.empty() && XenoAudio::Instance()) {
-		XenoAudio::Instance()->PlayVariation(sound, item->ID(), &p0);
+		XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &p0);
 	}
 
 	// Explosives shoot at feet.
-	if ( weaponItem->flags & GameItem::EFFECT_EXPLOSIVE ) {
+	if (weapon->flags & GameItem::EFFECT_EXPLOSIVE) {
 		aimAt.y = 0;
 	}
-	
-	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), targetMoving );
-	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
-	Bolt* bolt = bag->ToLumos()->NewBolt( p0, dir, item->Effects(), src->ID(),
-											item->rangedDamage * item->Traits().Damage(),
-											item->CalcBoltSpeed(),
-											(item->flags & GameItem::RENDER_TRAIL) ? true : false );
+	float radAt1 = ComputeRadAt1(src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), targetMoving);
+	Vector3F dir = FuzzyAim(p0, aimAt, radAt1);
+
+	Bolt* bolt = bag->ToLumos()->NewBolt(p0, dir, weapon->Effects(), src->ID(),
+										 weapon->Damage(),
+										 weapon->BoltSpeed(),
+										 (weapon->flags & GameItem::RENDER_TRAIL) ? true : false);
 }
 
 
@@ -435,7 +412,7 @@ Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, 
 }
 
 
-Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector3F* p0 )
+Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, float boltSpeed, Vector3F* p0 )
 {
 	Vector3F trigger = { 0, 0, 0 };
 	Vector3F t = { 0, 0, 0 };
@@ -457,7 +434,6 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 
 	GameItem* item = origin->GetItem();
 	GLASSERT( item );
-	float speed = item->CalcBoltSpeed();
 
 	if ( origin->GetRenderComponent() ) {
 		RenderComponent* rc = origin->GetRenderComponent();
@@ -478,57 +454,27 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 	if ( p0 ) {
 		*p0 = trigger;
 	}
-	return ComputeLeadingShot( trigger, t, v, speed );
+	return ComputeLeadingShot( trigger, t, v, boltSpeed );
 }
 
 
-float BattleMechanics::MeleeDPTU( const GameItem* wielder, const IMeleeWeaponItem* _weapon )
+float BattleMechanics::MeleeDPTU( const GameItem* wielder, const MeleeWeapon* weapon)
 {
-	const GameItem* weapon = _weapon->GetItem();
-	int meleeTime = 1000;
-	if ( !weapon->IResourceName().empty() ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( weapon->ResourceName(), false );
-		if ( res ) {
-			IString animName = res->header.animation;
-			if ( !animName.empty() ) {
-				const AnimationResource* animRes = AnimationResourceManager::Instance()->GetResource( animName.c_str() );
-				if ( animRes ) {
-					meleeTime = animRes->Duration( ANIM_MELEE );
-				}
-			}
-		}
-	}
+	int meleeTime = weapon->CalcMeleeCycleTime();
 	DamageDesc dd;
-	CalcMeleeDamage( wielder, _weapon, &dd );
-	
+	CalcMeleeDamage( wielder, weapon, &dd );
 	return dd.damage*1000.0f/(float)meleeTime;
 }
 
 
-float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
+float BattleMechanics::RangedDPTU( const RangedWeapon* weapon, bool continuous )
 {
-	if ( !weapon ) return 1.0f;
+	float secpershot = 1000.0f / (float)weapon->CooldownTime();
+	float csecpershot = (float)weapon->ClipCap() * 1000.0f / 
+							(float)(weapon->CooldownTime()*weapon->ClipCap() + weapon->ReloadTime()); 
 
-	const GameItem* item = weapon->GetItem();
-	float value = 0;
-	item->keyValues.Get( ISC::shieldBoost, &value ); 
-	if ( value ) {
-		float boost = value * item->Traits().NormalLeveledTrait( GameTrait::CHR );
-		return Max( boost, 1.0f );
-	}
-	return 1.0f;
-}
-
-
-float BattleMechanics::RangedDPTU( const IRangedWeaponItem* _weapon, bool continuous )
-{
-	const GameItem* weapon = _weapon->GetItem();
-	float secpershot  = 1000.0f / (float)weapon->cooldown.Threshold();
-	float csecpershot = (float)weapon->clipCap * 1000.0f / 
-							(float)(weapon->cooldown.Threshold()*weapon->clipCap + weapon->reload.Threshold()); 
-
-	float dps  = weapon->rangedDamage * weapon->GetItem()->Traits().Damage() * 0.5f * secpershot;
-	float cdps = weapon->rangedDamage * weapon->GetItem()->Traits().Damage() * 0.5f * csecpershot;
+	float dps  = weapon->Damage() * 0.5f * secpershot;
+	float cdps = weapon->Damage() * 0.5f * csecpershot;
 
 	return continuous ? cdps : dps;
 }

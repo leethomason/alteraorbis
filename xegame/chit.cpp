@@ -322,6 +322,16 @@ GameItem* Chit::GetItem()
 }
 
 
+Wallet* Chit::GetWallet()
+{
+	GameItem* item = GetItem();
+	if (item) {
+		return &item->wallet;
+	}
+	return 0;
+}
+
+
 void Chit::QueueDelete()
 {
 	if (GetItem() && GameItem::trackWallet) {

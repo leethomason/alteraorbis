@@ -37,6 +37,7 @@ public:
 		GREATER_MOB_KILLED,			//  killed		killer		killed
 		DOMAIN_CREATED,				//  domain					domain
 		DOMAIN_DESTROYED,			//  domain		killer		domain	
+		ROQUE_DENIZEN_JOINS_TEAM,	// denizen					denizen
 
 		FORGED,						//	item		maker		maker		
 		UN_FORGED,					//  item		killer	
@@ -46,6 +47,7 @@ public:
 		BLOOD_RAGE,					//  victim					victim
 		VISION_QUEST,				//	victim					victim
 		GREATER_SUMMON_TECH,		//  mob
+		DOMAIN_CONQUER,				//	conquered	conquerer	conquered
 
 		// Current events, but not logged:
 		START_CURRENT,
@@ -61,12 +63,22 @@ public:
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
+												|| what == DOMAIN_CREATED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
-	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
-	grinliz::IString	IDToName( int id, bool shortName ) const;
 
+	int What() const { return what; }
+	const grinliz::Vector2F& Pos() const { return pos; }
+	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
+
+	int	FirstChitID() const { return chitID; }
+	int FirstItemID() const { return itemID; }
+	int SecondItemID() const { return secondItemID; }
+
+	static grinliz::IString IDToName( int id, bool shortName );
+
+private:
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened
 	// Use Items instead of Chits so we can look up history.
@@ -74,6 +86,7 @@ public:
 	int					itemID;			// whom the news in about (subject)
 	int					secondItemID;	// secondary player
 	U32					date;			// when it happened, in msec
+	int					team;			// team of the primary item
 
 	void Clear() {
 		what = 0;
@@ -81,6 +94,7 @@ public:
 		itemID = 0;
 		secondItemID = 0;
 		date = 0;
+		team = 0;
 	}
 };
 

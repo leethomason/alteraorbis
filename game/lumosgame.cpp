@@ -22,6 +22,7 @@
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
 #include "../scenes/rendertestscene.h"
+#include "../scenes/colortestscene.h"
 #include "../scenes/particlescene.h"
 #include "../scenes/navtestscene.h"
 #include "../scenes/navtest2scene.h"
@@ -92,6 +93,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
 	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );		break;
+	case SCENE_COLORTEST:	scene = new ColorTestScene(this);			break;
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
 	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;
@@ -192,6 +194,7 @@ RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 	Vector2I c = { 0, 0 };
 	Texture* texture = TextureManager::Instance()->GetTexture( "palette" );
 
+	// FIXME: should be normal_opaque?
 	RenderAtom atom( (const void*)(UIRenderer::RENDERSTATE_UI_NORMAL), (const void*)texture, u, v, u, v );
 	return atom;
 }
@@ -217,10 +220,10 @@ RenderAtom LumosGame::CalcIconAtom( const char* asset )
 gamui::LayoutCalculator LumosGame::DefaultLayout()
 {
 	const Screenport& port = GetScreenport();
-	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
-	layout.SetGutter( 10.0f, 10.0f );
-	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-	layout.SetSpacing( 5.0f );
+	LayoutCalculator layout(port.UIWidth(), port.UIHeight());
+	layout.SetGutter(LAYOUT_GUTTER, LAYOUT_GUTTER);
+	layout.SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+	layout.SetSpacing(LAYOUT_SPACING);
 	return layout;
 }
 

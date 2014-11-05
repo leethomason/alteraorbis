@@ -8,7 +8,7 @@
 
 class LumosGame;
 class ItemComponent;
-class ChitBag;
+class LumosChitBag;
 class GameItem;
 
 struct ItemHistoryScore
@@ -54,10 +54,10 @@ struct ItemHistoryItems
 class CensusSceneData : public SceneData
 {
 public:
-	CensusSceneData( ChitBag* _chitBag )				// apply markup, costs
+	CensusSceneData( LumosChitBag* _chitBag )				// apply markup, costs
 		: SceneData(), chitBag(_chitBag) { GLASSERT(chitBag); }
 
-	ChitBag* chitBag;
+	LumosChitBag* chitBag;
 };
 
 
@@ -81,7 +81,7 @@ public:
 private:
 	void Scan();
 	void ScanItem( ItemComponent* ic, const GameItem* );
-	void DoLayout();
+	void DoLayout(bool first);
 	void SetItem(int i, const char* label, const ItemHistory& history);
 
 	enum {
@@ -108,6 +108,7 @@ private:
 		GROUP_ITEMS,
 		GROUP_CRAFTING,
 		GROUP_DOMAINS,
+		GROUP_DATA,
 		NUM_GROUPS
 	};
 
@@ -116,16 +117,18 @@ private:
 	};
 
 	LumosGame*			lumosGame;
-	ChitBag*			chitBag;
+	LumosChitBag*		chitBag;
 	grinliz::GLString	str;		// avoid allocations
 	gamui::PushButton	okay;
 	gamui::PushButton	link[MAX_ROWS];
 	gamui::TextLabel	label[MAX_ROWS];
 	gamui::ToggleButton	radio[NUM_GROUPS];
+	gamui::TextLabel	censusData;
+
+	grinliz::HashTable<int, Chit*>	itemIDToChitMap;
 
 	// stuff to scan for:
-	Wallet	allWallet, 
-			mobWallet;
+	TransactAmt	allWallet, mobWallet;
 
 	void AddToHistory(const ItemHistory& h);
 	grinliz::SortedDynArray<ItemHistory, grinliz::ValueSem, ItemHistoryScore> domains;

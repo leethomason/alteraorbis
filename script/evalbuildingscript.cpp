@@ -44,7 +44,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		GLASSERT(item);
 		reachable = true;
 
-		IString consume = item->keyValues.GetIString("zoneConsume");
+		IString consume = item->keyValues.GetIString(ISC::zone);
 		if (consume.empty()) {
 			eval = 0;
 			return eval;
@@ -115,7 +115,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 						GLASSERT(buildingMSC);
 						if (buildingMSC->Bounds().Contains(p)) {
 							hitBuilding = true;
-							double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
+							double thisSys = arr[i]->GetItem()->GetBuildingIndustrial();
 
 							hitB++;
 							if (thisSys <= -0.5) hitNBuilding++;

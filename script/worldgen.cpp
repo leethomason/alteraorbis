@@ -508,6 +508,20 @@ Rectangle2I SectorData::InnerBounds() const {
 }
 
 
+int SectorData::RandomPort(Random* random) const
+{
+	int arr[4] = { 1, 2, 4, 8 };
+	random->ShuffleArray(arr, 4);
+	for (int i = 0; i < 4; ++i) {
+		if (arr[i] & ports) {
+			return arr[i];
+		}
+	}
+	GLASSERT(0);
+	return 0;
+}
+
+
 int SectorData::NearestPort( const grinliz::Vector2I& pos ) const
 {
 	int bestDist = INT_MAX;

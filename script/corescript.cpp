@@ -16,6 +16,7 @@
 #include "../game/lumosmath.h"
 #include "../game/gameitem.h"
 #include "../game/sim.h"
+#include "../game/worldinfo.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -25,6 +26,7 @@
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
+#include "../script/guardscript.h"
 
 /*
 	See also SectorHerd() for where this gets implemented.
@@ -82,7 +84,7 @@ CoreScript::CoreScript()
 	tech = 0;
 	achievement.Clear();
 	workQueue = 0;
-//	nElixir = 0;
+	pave = 0;
 	sector.Zero();
 }
 
@@ -105,9 +107,9 @@ void CoreScript::Serialize(XStream* xs)
 {
 	BeginSerialize(xs, Name());
 	XARC_SER(xs, tech);
-//	XARC_SER(xs, nElixir);
 	XARC_SER(xs, summonGreater);
 	XARC_SER(xs, autoRebuild);
+	XARC_SER(xs, pave);
 
 	XARC_SER(xs, defaultSpawn);
 
@@ -181,9 +183,30 @@ void CoreScript::OnRemove()
 }
 
 
+void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		while (!citizens.Empty()) {
+			int citizenID = citizens.Pop();
+			Chit* citizen = Context()->chitBag->GetChit(citizenID);
+			if (citizen && citizen->GetItem()) {
+				// Set to rogue team.
+				citizen->GetItem()->team = Team::Group(citizen->GetItem()->team);
+			}
+		}
+	}
+}
+
+
 void CoreScript::AddCitizen( Chit* chit )
 {
+	GLASSERT(ParentChit()->Team());
+	GLASSERT(!Team::IsRogue(ParentChit()->Team()));
 	GLASSERT( citizens.Find( chit->ID()) < 0 );
+	GLASSERT(Team::IsRogue(chit->Team()) || (chit->Team() == ParentChit()->Team()));
+
+	chit->GetItem()->team = ParentChit()->Team();
 	citizens.Push( chit->ID() );
 }
 
@@ -240,7 +263,7 @@ int CoreScript::NumCitizens()
 			if ( sc ) {
 				Vector2F pos2 = sc->GetPosition2D();
 				Vector2I sector = ToSector( ToWorld2I( pos2 ));
-				Chit* bed = scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
+				Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
 				if ( bed && bed->GetItem() ) {
 					bed->GetItem()->hp = 0;
 					bed->SetTickNeeded();
@@ -312,62 +335,165 @@ void CoreScript::UpdateAI()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	CoreInfo* info = &coreInfoArr[index];
 	GLASSERT(info->coreScript == this);
+}
 
-	/*
-	if (this->InUse()) {
-		info->approxTeam = PrimaryTeam();
-		CChitArray chitArr;
-		scriptContext->chitBag->FindBuildingCC(IStringConst::power, sector, 0, 0, &chitArr, 0);
-		info->approxNTemples = chitArr.Size();
+
+bool CoreScript::RecruitNeutral()
+{
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Rectangle2I inner = InnerSectorBounds(sector);
+
+	MOBKeyFilter filter;
+	filter.value = ISC::denizen;
+	CChitArray arr;
+	Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), 0, &filter);
+
+	for (int i = 0; i < arr.Size(); ++i) {
+		Chit* chit = arr[i];
+		if (Team::GetRelationship(chit, parentChit) != RELATE_ENEMY) {
+			if (this->IsCitizen(chit)) continue;
+			if (!chit->GetItem()) continue;
+
+			if (Team::IsRogue(chit->Team())) {
+				// ronin! denizen without a core.
+				this->AddCitizen( chit );
+				GLASSERT(chit->GetItem()->Significant());
+
+				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(), chit, 0);
+				Context()->chitBag->GetNewsHistory()->Add(news);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+int CoreScript::DoTick(U32 delta)
+{
+	if ( parentChit->Team() != team ) {
+		team = parentChit->Team();
+		ProcRenderInfo info;
+		AssignProcedural(parentChit->GetItem(), &info);
+		parentChit->GetRenderComponent()->SetProcedural( 0, info );
+	}
+
+	int nScoreTicks = scoreTicker.Delta(delta);
+	int nAITicks = aiTicker.Delta(delta);
+	int nSpawnTicks = spawnTick.Delta(delta);
+
+	if (InUse()) {
+		DoTickInUse(delta, nSpawnTicks);
+		UpdateScore(nScoreTicks);
 	}
 	else {
-		info->approxNTemples = 0;
-		info->approxTeam = 0;
+		DoTickNeutral(delta, nSpawnTicks);
 	}
-	*/
+	workQueue->DoTick();
+
+	if (nAITicks) {
+		UpdateAI();
+	}
+
+	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
+}
+
+
+int CoreScript::MaxCitizens(int team, int nTemples)
+{
+	team = Team::Group(team);
+	int citizens = 0;
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			static const int N = 4;
+			static const int limit[N] = { 4, 8, 16, 20 };
+			int n = Clamp(nTemples, 0, N - 1);
+			citizens = limit[n];
+		}
+		break;
+
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		citizens = 16;
+		break;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		break;
+
+		default:
+		GLASSERT(0);
+		break;
+	}
+	return citizens;
+}
+
+
+int CoreScript::MaxCitizens()
+{
+	int team = parentChit->Team();
+
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
+	int nBeds = chitArr.Size();
+	chitArr.Clear();
+	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
+	int nTemples = chitArr.Size();
+
+	int n = CoreScript::MaxCitizens(team, nTemples);
+	return Min(n, nBeds);
 }
 
 
 
-int CoreScript::DoTick( U32 delta )
+void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
-	static const int RADIUS = 4;
+	int team = Team::Group(parentChit->Team());
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
+			int maxTech = MaxTech();
+			tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
+		}
+		break;
 
-	if ( parentChit->Team() != team ) {
-		team = parentChit->Team();
-		TeamGen gen;
-		ProcRenderInfo info;
-		gen.Assign( team, &info );
-		parentChit->GetRenderComponent()->SetProcedural( 0, info );
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		{
+			tech = MaxTech();
+		}
+		break;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		tech = 0;
+		break;
+
+		default:
+		GLASSERT(0);
 	}
-
-	bool normalPossible = Context()->chitBag->census.normalMOBs < TYPICAL_MONSTERS;
-	bool greaterPossible = Context()->chitBag->census.greaterMOBs < TYPICAL_GREATER;
-
-	bool inUse = InUse();
-
-	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/double(TECH_MAX) );
-	int maxTech = MaxTech();
-	tech = Clamp( tech, 0.0, double(maxTech)-0.01 );
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-	int tickd = spawnTick.Delta( delta );
 
-	if ( tickd && inUse ) {
-		// FIXME: essentially caps the #citizens to the capacity of CChitArray (32)
+	if ( nSpawnTicks ) {
+		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
-		CChitArray chitArr;
-		Context()->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
+		int maxCitizens = this->MaxCitizens();
 
-		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
-			Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
+		if ( nCitizens < maxCitizens ) {
+			if (!RecruitNeutral()) {
+				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
+				this->AddCitizen( chit );
+			}
 		}
 
-		if (maxTech >= TECH_ATTRACTS_GREATER) {
+		if ( (Team::Group(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
 			summonGreater += spawnTick.Period();
 			if (summonGreater > SUMMON_GREATER_TIME) {
 				// Find a greater and bring 'em in!
@@ -379,9 +505,21 @@ int CoreScript::DoTick( U32 delta )
 			}
 		}
 	}
-	else if (    tickd 
-			  && !inUse
-			  && ( normalPossible || greaterPossible ))
+}
+
+
+void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
+{
+	int lesser, greater, denizen;
+	Context()->chitBag->census.NumByType(&lesser, &greater, &denizen);
+	bool lesserPossible = lesser < TYPICAL_LESSER;
+
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
+	GLASSERT( ms );
+	Vector2I pos2i = ms->MapPosition();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
+	if ( nSpawnTicks && lesserPossible)
 	{
 #ifdef SPAWN_MOBS
 		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
@@ -429,26 +567,15 @@ int CoreScript::DoTick( U32 delta )
 					defaultSpawn = StringPool::Intern(SPAWN[outland]);
 				}
 
-				float greater = (float)(outland*outland) / (float)(80 * 256);
 				static const float rat = 0.25f;
 				const char* spawn = 0;
 
-				if (outland > 4 && defaultSpawn == IStringConst::trilobyte) {
-					greater *= 4.f;	// special spots for greaters to spawn.
-				}
-
 				float roll = parentChit->random.Uniform();
-				bool isGreater = false;
 
-				if (greaterPossible && roll < greater) {
-					const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
-					spawn = greater[parentChit->random.Rand(greater.Size())].c_str();
-					isGreater = true;
-				}
-				if (!spawn && normalPossible && (roll < rat)) {
+				if (!spawn && lesserPossible && (roll < rat)) {
 					spawn = "trilobyte";
 				}
-				if (!spawn && normalPossible) {
+				if (!spawn && lesserPossible) {
 					spawn = defaultSpawn.c_str();
 				}
 				if (spawn) {
@@ -461,29 +588,10 @@ int CoreScript::DoTick( U32 delta )
 		}
 #endif
 	}
-	if ( !inUse ) {
-		// Clear the work queue - chit is gone that controls this.
-		delete workQueue;
-		workQueue = new WorkQueue();
-		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
-
-		TeamGen gen;
-		ProcRenderInfo info;
-		gen.Assign( 0, &info );
-		parentChit->GetRenderComponent()->SetProcedural( 0, info );
-	}
-	workQueue->DoTick();
-
-	if (aiTicker.Delta(delta)) {
-		UpdateAI();
-	}
-
-	int nScoreTicks = scoreTicker.Delta(delta);
-	if (inUse) {
-		UpdateScore(nScoreTicks);
-	}
-
-	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
+	// Clear the work queue - chit is gone that controls this.
+	delete workQueue;
+	workQueue = new WorkQueue();
+	workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
 }
 
 
@@ -499,12 +607,12 @@ void CoreScript::UpdateScore(int n)
 			// Score is a 16 bit quantity...
 			int s = achievement.civTechScore;
 			if (s > 65535) s = 65535;
-			gi->keyValues.Set("score", s);
+			gi->keyValues.Set(ISC::score, s);
 			gi->UpdateHistory();
 		}
 	}
 	if (ParentChit()->GetItem()) {
-		achievement.gold = Max(achievement.gold, ParentChit()->GetItem()->wallet.gold);
+		achievement.gold = Max(achievement.gold, ParentChit()->GetItem()->wallet.Gold());
 		achievement.population = Max(achievement.population, citizens.Size());
 	}
 }
@@ -512,10 +620,29 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	Vector2I sector = ToSector( parentChit->GetSpatialComponent()->GetPosition2DI() );
-	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC( IStringConst::temple, sector, 0, 0, &chitArr, 0 );
-	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
+	int team = Team::Group(parentChit->Team());
+	switch (team) {
+		case TEAM_HOUSE:
+		{
+			Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
+			CChitArray chitArr;
+			Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
+			return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
+		}
+		break;
+
+		case TEAM_KAMAKIRI:
+		case TEAM_GOB:
+		return 1;
+
+		case TEAM_NEUTRAL:
+		case TEAM_TROLL:
+		return 0;
+
+		default:
+		GLASSERT(0);
+		break;
+	}
 }
 
 
@@ -565,4 +692,97 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 		}
 	}
 	return 0;
+}
+
+
+CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const ChitContext* context)
+{
+	// Destroy the existing core.
+	// Create a new core, attached to the player.
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (cs) {
+		Chit* core = cs->ParentChit();
+		GLASSERT(core);
+
+		CDynArray< Chit* > queryArr;
+
+		// Tell all the AIs the core is going away.
+		ChitHasAIComponent filter;
+		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+		context->chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
+		for (int i = 0; i < queryArr.Size(); ++i) {
+			queryArr[i]->GetAIComponent()->ClearTaskList();
+		}
+
+		//context.chitBag->QueueDelete(core);
+		// QueueDelete is safer, but all kinds of asserts fire (correctly)
+		// if 2 cores are in the same place. This may cause an issue
+		// if CreateCore is called during the DoTick()
+		context->chitBag->DeleteChit(core);
+	}
+
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	const GameItem& coreItem = itemDefDB->Get("core");
+
+	const SectorData* sectorDataArr = context->worldMap->GetSectorData();
+	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
+	if (sd.HasCore()) {
+		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", 0);
+
+		// 'in use' instead of blocking.
+		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+		GLASSERT(ms);
+		ms->SetMode(GRID_IN_USE);
+		CoreScript* cs = new CoreScript();
+		chit->Add(cs);
+
+		chit->GetItem()->SetProperName(sd.name);
+
+		if (team != TEAM_NEUTRAL) {
+			cs->ParentChit()->GetItem()->team = team;
+			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
+			context->chitBag->GetNewsHistory()->Add(news);
+			// Make the dwellers defend the core.
+			chit->Add(new GuardScript());
+		}
+
+		return cs;
+	}
+	return 0;
+}
+
+
+
+int CoreScript::GetPave()
+{
+	if (pave) {
+		return pave;
+	}
+
+	// Pavement is used as a flag for "this is a road" by the AI.
+	// It's important to use the least common pave in a domain
+	// so that building isn't interfered with.
+	CArray<int, WorldGrid::NUM_PAVE> nPave;
+	for (int i = 0; i < WorldGrid::NUM_PAVE; ++i) nPave.Push(0);
+
+	if (pave == 0) {
+		Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
+		for (Rectangle2IIterator it(inner); !it.Done(); it.Next()) {
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+			nPave[wg.Pave()] += 1;
+		}
+	}
+
+	nPave[0] = 0;
+	if (nPave.Max() == 0) {
+		pave = 1 + parentChit->random.Rand(WorldGrid::NUM_PAVE - 1);
+	}
+	else {
+		nPave[0] = SECTOR_SIZE*SECTOR_SIZE;
+		nPave.Min(&pave);
+	}
+	if (pave == 0) {
+		pave = 1;
+	}
+	return pave;
 }

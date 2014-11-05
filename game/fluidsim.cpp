@@ -198,6 +198,10 @@ bool FluidSim::DoStep()
 				eWG->fluidHeight++;
 				settled = false;
 			}
+			else if ((int)eWG->fluidHeight > height * FLUID_PER_ROCK) {
+				eWG->fluidHeight--;
+				settled = false;
+			}
 			pressure[j*SECTOR_SIZE + i] = 1;
 			int h = eWG->fluidHeight;
 			for (int k = 1; k < fillLocal.Size(); ++k) {
@@ -283,13 +287,10 @@ void FluidSim::PressureStep()
 				if (h<0) {
 					h = -h;
 					if (h > maxH) {
-						maxH = h;
 						magma = true;
 					}
 				}
-				else {
-					maxH = Max(h, maxH);
-				}
+				maxH = Max(h, maxH);
 			}
 			// Only go up if there isn't rock present: keeps water from
 			// flowing through rocks.
@@ -363,10 +364,6 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 	while (!stack.Empty() && fill.HasCap()) {
 		Vector2I p = stack.PopFront();	// Need to PopFront() to get 'round' areas and not go depth-first
 		fill.Push(p);
-		if (p.x == 288 && p.y == 547){
-			int debug = 1;
-		}
-
 		int index = worldMap->INDEX(p);
 		const WorldGrid& wg = worldMap->grid[index];
 

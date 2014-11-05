@@ -230,7 +230,7 @@ bool CircuitSim::ElectronArrives(Electron* pe)
 			if (dir == 0 || pe->charge == 0) {
 				// The working direction, or a spark from anywhere.
 				if (chitBag) {
-					Chit* power = chitBag->QueryBuilding(pe->pos);
+					Chit* power = chitBag->QueryBuilding(IString(), pe->pos, 0);
 					if (power) {
 						BatteryComponent* battery = (BatteryComponent*)power->GetComponent("BatteryComponent");
 						if (battery) {
@@ -330,7 +330,7 @@ void CircuitSim::ApplyPowerUp(const grinliz::Vector2I& pos, int charge)
 	if (chitBag) {
 		DamageDesc dd(float(5 * charge), GameItem::EFFECT_SHOCK);
 
-		Chit* building = chitBag->QueryBuilding(pos);
+		Chit* building = chitBag->QueryBuilding(IString(), pos, 0);
 		if (building && building->GetItem() && building->GetItem()->IName() == ISC::turret && building->GetRenderComponent()) {
 			Quaternion q = building->GetRenderComponent()->MainModel()->GetRotation();
 			Matrix4 rot;

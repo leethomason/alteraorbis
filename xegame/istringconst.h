@@ -25,6 +25,10 @@ public:
 	static void Init();
 	
 	static grinliz::IString main;
+	static grinliz::IString procedural;
+	static grinliz::IString team;
+	static grinliz::IString suit;
+	static grinliz::IString gun;
 	static grinliz::IString trigger;
 	static grinliz::IString target;
 	static grinliz::IString althand;
@@ -98,16 +102,16 @@ public:
 	static grinliz::IString turret;
 	static grinliz::IString circuitFab;
 
-	static grinliz::IString zoneCreate;
-	static grinliz::IString zoneConsume;
+	static grinliz::IString zone;
 	static grinliz::IString industrial;
 	static grinliz::IString natural;
-	static grinliz::IString commercial;
 
 	static grinliz::IString trilobyte;
 	static grinliz::IString mantis;
 	static grinliz::IString redMantis;
 	static grinliz::IString troll;
+	static grinliz::IString gobman;
+	static grinliz::IString kamakiri;
 	static grinliz::IString cyclops;
 	static grinliz::IString fireCyclops;
 	static grinliz::IString shockCyclops;
@@ -134,6 +138,8 @@ public:
 	static grinliz::IString porch;
 	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
+
+	static grinliz::IString Truulga;
 
 	// double underscore -> '.'
 	static grinliz::IString kiosk__n;

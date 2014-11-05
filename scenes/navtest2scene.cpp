@@ -61,6 +61,7 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	context.chitBag = new LumosChitBag( context, 0 );
 	context.worldMap->AttachEngine( 0, context.chitBag );	// connect up the pather, but we do the render.
+	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	LoadMap();
 

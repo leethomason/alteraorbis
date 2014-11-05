@@ -53,6 +53,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	debugFPS = false;
 	spawnDate = 0.90f;
 	worldGenDone = 1.0f;
+	seedPlants = false;
 }
 
 
@@ -100,6 +101,7 @@ void SettingsManager::Save()
 		printer.PushAttribute("audioOn", audioOn);
 		printer.PushAttribute("spawnDate", spawnDate);
 		printer.PushAttribute("worldGenDone", worldGenDone);
+		printer.PushAttribute("seedPlants", seedPlants);
 		printer.CloseElement();
 
 		printer.OpenElement("Debug");
@@ -123,6 +125,7 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 			gameElement->QueryAttribute("audioOn", &audioOn);
 			gameElement->QueryAttribute("spawnDate", &spawnDate);
 			gameElement->QueryAttribute("worldGenDone", &worldGenDone);
+			gameElement->QueryAttribute("seedPlants", &seedPlants);
 		}
 		const XMLElement* debugElement = root->FirstChildElement("Debug");
 		if (debugElement) {

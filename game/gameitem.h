@@ -37,19 +37,28 @@
 
 class DamageDesc;
 class XStream;
+class NewsHistory;
+
+class MeleeWeapon;
+class RangedWeapon;
+class Shield;
 
 /*
 	Items and Inventory.
 
-	Almost everything *is* an item. Characters, walls, plants, guns all
+	Almost everything *is* an item. Characters, guns all
 	have properties, health, etc. Lots of things are items, and therefore
 	have a GameItem in an ItemComponent.
 
+	(Note that walls and plants used to be items, but it over-taxed
+	the system. They are now special cased.)
+
 	Characters (and some other things) *have* items, in an inventory.
-	- Some are built in: hands, claws, pincers. These may be hardpoints.
-	- Some attach to hardpoints: shields
-	- Some over-ride the built in AND attach to hardpoints: gun, sword
-	- Some are carried in the pack
+	- Some are built in: hands, claws, pincers. This is "intrinsic".
+	  They are at a hardpoint, but don't render.
+	- Some attach to hardpoints: shields, guns.
+	- An attached item can over-ride an intrinsic. Gun will override hand.
+	- The rest are carried in the pack
 		
 		Examples:
 			- Human
@@ -57,24 +66,16 @@ class XStream;
 				- "sword" overrides hand and attaches to trigger hardpoint
 				- "shield" attaches to the shield harpoint (but there is no
 				   item that it overrides)
-				- "amulet" is carried, doesn't render, but isn't in pack.
-			- Mantis
-				- "pincer" is an item, but not a hardpoint
 
 	Hardpoints
-	- The possible list of hardpoints lives in the GameItem (as bit flags)
-	- The Render component exposes a list of metadata is supports
-	- The Inventory component translates between the metadata and hardpoints
+	- The possible list is enumerated as EL_NUM_METADATA
+	- The ModelResource has a list that a given model actually supports.
 
 	Constraints:
-	- There can only be one melee weapon / attack. This simplies the animation,
-	  and not having to track which melee hit. (This could be fixed, of course.)
-	  The melee weapon must be on the 'trigger' hardpoint.
-	- Similarly, the shield must be on the 'shield' hardpoint
+	- Can't be multiples. The first Ranged, Shield, Melee is the one 
+	  that gets used.
 	- An item can only attach to one hardpoint. (It would be good if it could attach
 	  to either left or right hands)
-	- In order to carry/use items, a ModelResource must have both a 'trigger' and
-	  and 'shield'. Seems better than adding Yet Another Flag.
 */
 
 class Chit;
@@ -117,6 +118,10 @@ public:
 		GLASSERT( i >= 0 && i < NUM_TRAITS );
 		GLASSERT( value > 0 && value <= 20 );
 		trait[i] = value;
+	}
+
+	const int * Get() const {
+		return trait;
 	}
 
 	int Get( int i ) const {
@@ -196,39 +201,6 @@ private:
 };
 
 
-class IMeleeWeaponItem;
-class IRangedWeaponItem;
-
-class IWeaponItem 
-{
-public:
-	virtual GameItem* GetItem() = 0;
-	virtual const GameItem* GetItem() const = 0;
-
-	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return 0; }
-	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return 0; }
-};
-
-class IMeleeWeaponItem : virtual public IWeaponItem
-{
-public:
-	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return this; }
-};
-
-class IRangedWeaponItem : virtual public IWeaponItem
-{
-public:
-	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return this; }
-};
-
-class IShield
-{
-public:
-	virtual GameItem* GetItem() = 0;
-	virtual const GameItem* GetItem() const = 0;
-};
-
-
 class Cooldown
 {
 public:
@@ -271,7 +243,7 @@ public:
 		}
 		return false;
 	}
-	void Serialize( XStream* xs, const char* name );
+	void Serialize( XStream* xs, const char* name);
 	
 	void SetThreshold( int t )	{ threshold = t; }
 	void SetCurrent( int t )	{ time = t; }
@@ -283,10 +255,7 @@ private:
 };
 
 
-// FIXME: memory pool
-class GameItem :	private IMeleeWeaponItem, 
-					private IRangedWeaponItem,
-					private IShield
+class GameItem
 {
 private:
 	// ------ description ------
@@ -294,21 +263,24 @@ private:
 	grinliz::IString		properName;	// the proper name, if the item has one "John"
 	grinliz::IString		resource;	// resource used to  render the item
 
+	GameItem(const GameItem& rhs);
+	void operator=(const GameItem& rhs);
+
 public:
-	GameItem()								{ CopyFrom(0); Track();			}
-	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs ); Track();	}
-	void operator=( const GameItem& rhs )	{ int savedID = id; CopyFrom( &rhs ); id = savedID; UpdateTrack();	}
+
+	static GameItem* Factory(const char* subclass);
+
+	GameItem();
 
 	static bool trackWallet;
 	virtual ~GameItem();
 
-	virtual GameItem* GetItem() { return this; }
-	virtual const GameItem* GetItem() const { return this; }
-
+	virtual GameItem* Clone() const { return CloneFrom(0); }
+	virtual void Roll(const int* values);
 	int ID() const;
 
 	virtual void Load( const tinyxml2::XMLElement* doc );
-	virtual void Serialize( XStream* xs );
+	virtual void Serialize( XStream* xs);
 
 	// If an intrinsic sub item has a trait - say, FIRE - that
 	// implies that the parent is immune to fire. Apply() sets
@@ -320,6 +292,8 @@ public:
 	// you need to know.
 	bool Significant() const;
 	// Get the value of the item. Currently equivalent to being loot.
+	// Intrinsic items do return a value; gives a pretty
+	// good scale of "how good is the item".
 	int  GetValue() const;
 
 	// name:		blaster						humanFemale					The item name - itemdef.xml
@@ -344,13 +318,14 @@ public:
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const grinliz::IString& n );
-	void SetResource( const char* n )			{ resource = grinliz::StringPool::Intern( n ); }
+	void SetResource(const char* n)				{ GLASSERT(n && *n);  resource = grinliz::StringPool::Intern(n); }
+
+	// Sets this item to be tracked. Also records the team that created it, 
+	// for generating colors when applicable.
+	void SetSignificant(NewsHistory* history, const grinliz::Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator);
 
 	enum {
 		// Type(s) of the item
-		MELEE_WEAPON		= (1<<1),
-		RANGED_WEAPON		= (1<<2),
-
 		INTRINSIC			= (1<<3),				// built in item: pinters for example. Always "held".
 
 		IMMUNE_FIRE			= (1<<6),				// doesn't burn *at all*
@@ -394,20 +369,14 @@ public:
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
+	float	baseHP;
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
-	int		team;			// which team this item is aligned with
-	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
-	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
-	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
-	Cooldown cooldown;		// time between uses.
-	Cooldown reload;		// time to reload once clip is used up
-	int		clipCap;		// possible rounds in the clip
+	int		team;			// which team this item is aligned with (or created it, for items.)
 
 	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
 	// ------- current --------
 	double	hp;				// current hp for this item. concerned float isn't enough if small time slices in use
-	int		rounds;			// current rounds in the clip
 	int		fireTime;		// time to fire goes out
 	int  	shockTime;		// time to shock goes out
 
@@ -417,71 +386,27 @@ public:
 	grinliz::MicroDB keyValues;
 	grinliz::MicroDB historyDB;
 
-	float CalcBoltSpeed() const {
-		static const float SPEED = 10.0f;
-		float speed = 1.0f;
-		keyValues.Get( ISC::speed, &speed );
-		return SPEED * speed;
-	}
-
-	void InitState() {
-		hp = double(TotalHP());
-		fireTime = 0;
-		shockTime = 0;
-		cooldown.ResetReady();
-		reload.ResetReady();
-		rounds = clipCap;
-	}
-
 	bool Intrinsic() const	{ return (flags & INTRINSIC) != 0; }
 
-	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
-	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
+	virtual MeleeWeapon*	ToMeleeWeapon()		{ return 0; }
+	virtual RangedWeapon*	ToRangedWeapon()	{ return 0; }
+	virtual Shield*			ToShield()			{ return 0; }
 
-	virtual const IMeleeWeaponItem*		ToMeleeWeapon() const	{ return (flags & MELEE_WEAPON) ? this : 0; }
-	virtual const IRangedWeaponItem*	ToRangedWeapon() const	{ return (flags & RANGED_WEAPON) ? this : 0; }
-
-	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
-	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
-
-	virtual IShield*			ToShield()			{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
-	virtual const IShield*		ToShield() const	{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
+	virtual const MeleeWeapon*	ToMeleeWeapon() const	{ return 0; }
+	virtual const RangedWeapon*	ToRangedWeapon() const	{ return 0; }
+	virtual const Shield*		ToShield() const		{ return 0; }
 
 	// Convenience method to get the natural-industrial scale
-	// true: what it creates
-	// false: what it consumes
-	double GetBuildingIndustrial( bool create ) const;
+	double GetBuildingIndustrial() const;
 
 	int Effects() const { return flags & EFFECT_MASK; }
-	int DoTick( U32 delta );
+	virtual int DoTick( U32 delta );
 	
-	// States:
-	//		Ready
-
-	//		Cooldown (just used)
-	//		Reloading
-	//		Out of rounds
-	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
-	bool Use( Chit* parent );
-
-	bool CoolingDown() const		{ return !cooldown.CanUse(); }
-
-	bool Reloading() const			{ return clipCap > 0 && !reload.CanUse(); }
-	bool Reload( Chit* parent );
-	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
-
-	int Rounds() const { return rounds; }
-	int ClipCap() const { return clipCap; }
-	bool HasRound() const { 
-		GLASSERT( rounds <= clipCap );
-		return rounds || clipCap == 0; 
-	}
-	void UseRound();
 	bool OnFire() const  { return fireTime > 0; }
 	bool OnShock() const { return shockTime > 0; }
 
 	// Note that the current HP, if it has one, 
-	int   TotalHP() const	{ return grinliz::Max( 1, (int)grinliz::LRintf( mass*traits.Toughness())); }
+	int   TotalHP() const	{ return grinliz::Max( 1, (int)grinliz::LRintf( baseHP*traits.Toughness())); }
 
 	double HPFraction() const	{ 
 		double f = hp / double(TotalHP()); 
@@ -489,21 +414,6 @@ public:
 		return f;
 	} 
 
-	float ReloadFraction() const {
-		if ( Reloading() ) {
-			return reload.Fraction();
-		}
-		return 1.0f;
-	}
-
-	float RoundsFraction() const {
-		if ( clipCap ) {
-			return (float)rounds / (float)clipCap;
-		}
-		return 1.0f;
-	}
-
-	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( const DamageDesc& dd );
 
 	static int idPool;
@@ -515,15 +425,16 @@ public:
 	
 	// Generally should be automatic.
 	void UpdateHistory() const					{ UpdateTrack(); }
+	void Track() const;
+
+protected:
+	GameItem* CloneFrom(GameItem* item) const;
 
 private:
-	void CopyFrom( const GameItem* rhs );
-
 	GameTrait	traits;
 	Personality personality;
 
 	// Functions to update the ItemDB
-	void Track() const;
 	void UnTrack() const;
 	void UpdateTrack() const;
 
@@ -532,6 +443,120 @@ private:
 	mutable int value;					// not serialized, but cached
 };
 
+
+class MeleeWeapon : public GameItem
+{
+	typedef GameItem super;
+public:
+	MeleeWeapon();
+	~MeleeWeapon()	{}
+	GameItem* Clone() const;
+
+	virtual MeleeWeapon* ToMeleeWeapon() { return this;  }
+	virtual const MeleeWeapon* ToMeleeWeapon() const { return this;  }
+
+	virtual void Roll(const int* roll);
+	float Damage() const;
+	int CalcMeleeCycleTime() const;	
+	float ShieldBoost() const;
+
+	void Serialize( XStream* xs);
+	virtual void Load( const tinyxml2::XMLElement* doc );
+
+private:
+	float meleeDamage;
+};
+
+
+class RangedWeapon : public GameItem
+{
+	typedef GameItem super;
+
+public:
+	RangedWeapon();
+	~RangedWeapon();
+
+	virtual RangedWeapon* ToRangedWeapon() { return this;  }
+	virtual const RangedWeapon* ToRangedWeapon() const { return this;  }
+
+
+	void Serialize( XStream* xs);
+	virtual void Load( const tinyxml2::XMLElement* doc );
+	virtual void Roll(const int* roll);
+	GameItem* Clone() const;
+
+	virtual int DoTick(U32 delta);
+
+	bool CanShoot() const;
+	bool Shoot(Chit* parent);
+	bool Reload(Chit* parent);
+	float BoltSpeed() const;
+	int ClipCap() const				{ return clipCap; }
+	int ReloadTime() const			{ return reload.Threshold(); }
+	int CooldownTime() const		{ return cooldown.Threshold(); }
+	float Damage() const;
+	float Accuracy() const;
+
+	bool CoolingDown() const		{ return !cooldown.CanUse(); }
+	bool Reloading() const			{ return clipCap > 0 && !reload.CanUse(); }
+	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
+	bool HasRound() const			{ GLASSERT( rounds <= clipCap );	return rounds || clipCap == 0; }
+	
+	float ReloadFraction() const;
+	float RoundsFraction() const;
+
+private:
+	void Init();
+	void UseRound();
+
+	float	 rangedDamage;	// base ranged damage, applied before stats.Damage()
+	Cooldown cooldown;		// time between uses.
+	Cooldown reload;		// time to reload once clip is used up
+	int		 rounds;		// current rounds in the clip
+	int		 clipCap;		// possible rounds in the clip
+	float	 accuracy;
+};
+
+
+class Shield : public GameItem
+{
+	typedef GameItem super;
+
+public:
+	Shield();
+	~Shield();
+
+	virtual Shield* ToShield() { return this;  }
+	virtual const Shield* ToShield() const { return this; }
+
+	void Serialize(XStream* xs);
+	virtual void Load(const tinyxml2::XMLElement* doc);
+	virtual GameItem* Clone() const;
+	virtual void Roll(const int* roll);
+
+	virtual int DoTick(U32 delta);
+
+	int ShieldRechargeTime() const	{ return cooldown.Threshold(); }
+	// Is shield on and working?
+	bool Active() const	{ return charge > 0; }
+	void AbsorbDamage(DamageDesc* dd, float boost);
+	
+	float ChargeFraction() const {
+		if (capacity) {
+			return float(charge) / float(capacity);
+		}
+		else
+			return 1;
+	}
+	float Capacity() const { return capacity; }
+
+protected:
+
+private:
+	float charge;
+	float capacity;
+	Cooldown cooldown;
+};
 
 
 #endif // GAMEITEM_INCLUDED

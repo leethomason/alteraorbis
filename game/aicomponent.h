@@ -28,7 +28,7 @@ class Engine;
 struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
-class IRangedWeaponItem;
+class RangedWeapon;
 
 namespace ai {
 	class TaskList;
@@ -75,10 +75,8 @@ public:
 	void Target(const grinliz::Vector2I& voxel, bool focused);
 
 	Chit* GetTarget();
-	//bool RockBreak( const grinliz::Vector2I& pos );
 	void MakeAware( const int* enemyIDs, int n );
 	
-	// Use a null IString for ICE.
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
@@ -124,7 +122,7 @@ private:
 				   grinliz::Vector2F* pos, float* distance );
 
 	// Compute the line of site
-	bool LineOfSight( const ComponentSet& thisComp, Chit* target, IRangedWeaponItem* weapon );
+	bool LineOfSight( const ComponentSet& thisComp, Chit* target, const RangedWeapon* weapon );
 	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
@@ -140,6 +138,7 @@ private:
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);
+	bool TravelHome(const ComponentSet& thisComp, bool focus);
 	void WorkQueueToTask(  const ComponentSet& thisComp );			// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );	// moves tasks along, mark tasks completed, do special actions
 
@@ -224,6 +223,7 @@ private:
 	void DoMove( const ComponentSet& thisComp );
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp, bool focus );	// "upper" function: look for dest, etc.
+	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector);	// lower function: go
 	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
 	void EnterNewGrid( const ComponentSet& thisComp );
 

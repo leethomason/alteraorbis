@@ -26,6 +26,8 @@
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
 
+#include "../ai/domainai.h"
+
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
@@ -39,6 +41,7 @@
 #include "team.h"
 #include "lumosmath.h"
 #include "circuitsim.h"
+#include "gridmovecomponent.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -233,23 +236,17 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 void Sim::CreateCores()
 {
 	int ncores = 0;
-	CoreScript* cold = 0;
-	CoreScript* hot  = 0;
 
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
-			CoreScript* cs = CreateCore(sector, TEAM_NEUTRAL);
+			CoreScript* cs = CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 
 			if (cs) {
-				if (!cold) cold = cs;	// first
-				hot = cs;	// last
 				++ncores;
 			}
 		}
 	}
-	cold->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
-	hot->SetDefaultSpawn( StringPool::Intern( "trilobyte" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
@@ -257,6 +254,7 @@ void Sim::CreateCores()
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
 		if (chit->GetComponent("CoreScript")) {
 			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
 			Vector2I sector = ToSector(pos2i);
@@ -265,7 +263,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->Team() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
 				context.chitBag->GetNewsHistory()->Add(news);
-				
+
 				// All the buildings become neutral. Some become ruins...
 				BuildingFilter filter;
 				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
@@ -307,58 +305,140 @@ void Sim::AbandonDomain()
 }
 
 
-CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
+void Sim::DoSpawn()
 {
-	// Destroy the existing core.
-	// Create a new core, attached to the player.
+	SpawnGreater();
+	SpawnDenizens();
+}
+
+
+void Sim::SpawnDenizens()
+{
+	// FIXME: should track the relative numbers. Spawn more Kamakiri
+	// when there are few Kamakiri domains. But probably need logic
+	// to account for both #of Denizens, and Denizens in domains.
+
+	int greater = 0, lesser = 0, denizen = 0;
+	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
+
+	for (int pass = 0; pass < 2; ++pass) {
+		if (denizen < TYPICAL_DENIZENS) {
+			SectorPort sp;
+			for (int i = 0; i < 4; ++i) {
+				sp.Zero();
+				Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+				CoreScript* cs = CoreScript::GetCore(sector);
+				if (cs && !cs->InUse()) {
+					const SectorData& sd = context.worldMap->GetSector(sector);
+					GLASSERT(sd.ports);
+					sp.sector = sector;
+					sp.port = sd.RandomPort(&random);
+					break;
+				}
+			}
+			if (sp.IsValid()) {
+				static const int NSPAWN = 4;
+				static const int NUM = 2;
+				static const char* denizen[NUM] = { "gobman", "kamakiri" };
+				static const float odds[NUM] = { 0.60f, 0.40f };
+				int index = random.Select(odds, NUM);
+
+				for (int i = 0; i < NSPAWN; ++i) {
+					IString ispawn = StringPool::Intern(denizen[index], true);
+					int team = Team::GetTeam(ispawn);
+					GLASSERT(team != TEAM_NEUTRAL);
+
+					Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+					Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+					GameItem * item = 0;
+
+					if (random.Bit())
+						item = context.chitBag->AddItem("pistol", chit, context.engine, team, 0);
+					else
+						item = context.chitBag->AddItem("ring", chit, context.engine, team, 0);
+
+					if (item) {
+						Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
+						NewsHistory* history = context.chitBag->GetNewsHistory();
+						item->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
+					}
+
+					pos.x += 0.2f * float(i);
+					chit->GetSpatialComponent()->SetPosition(pos);
+
+					GridMoveComponent* gmc = new GridMoveComponent();
+					chit->Add(gmc);
+					gmc->SetDest(sp);
+				}
+			}
+		}
+	}
+}
+
+void Sim::SpawnGreater()
+{
+	int lesser = 0, greater = 0, denizen = 0;
+	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
+	if (greater < TYPICAL_GREATER) {
+		SectorPort sp;
+		for (int i = 0; i < 4; ++i) {
+			sp.Zero();
+			Vector2I sector = RandomInOutland(&random);
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && !cs->InUse()) {
+				const SectorData& sd = context.worldMap->GetSector(sector);
+				GLASSERT(sd.ports);
+				sp.sector = sector;
+				sp.port = sd.RandomPort(&random);
+				break;
+			}
+		}
+		if (sp.IsValid()) {
+
+			static const int NUM_GREATER = 3;
+			static const char* greater[NUM_GREATER] = { "cyclops", "fireCyclops", "shockCyclops" };
+			static const float odds[NUM_GREATER] = { 0.50f, 0.35f, 0.15f };
+			int index = random.Select(odds, 3);
+
+			IString ispawn = StringPool::Intern(greater[index], true);
+			int team = Team::GetTeam(ispawn);
+			GLASSERT(team != TEAM_NEUTRAL);
+
+			Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+			Chit* mob = context.chitBag->NewMonsterChit(pos, ispawn.c_str(), team);
+			GridMoveComponent* gmc = new GridMoveComponent();
+			mob->Add(gmc);
+			gmc->SetDest(sp);
+		}
+	}
+}
+
+
+void Sim::CreateTruulgaCore()
+{
+	Chit* truulga = context.chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
+	if (!truulga) return;
+
+	Vector2I sector = truulga->GetSpatialComponent()->GetSector();
 	CoreScript* cs = CoreScript::GetCore(sector);
+
+	int team = 0;
 	if (cs) {
-		Chit* core = cs->ParentChit();
-		GLASSERT(core);
-
-		// Tell all the AIs the core is going away.
-		ChitHasAIComponent filter;
-		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
-		context.chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
-		for (int i = 0; i < queryArr.Size(); ++i) {
-			queryArr[i]->GetAIComponent()->ClearTaskList();
-		}
-
-		//context.chitBag->QueueDelete(core);
-		// QueueDelete is safer, but all kinds of asserts fire (correctly)
-		// if 2 cores are in the same place. This may cause an issue
-		// if CreateCore is called during the DoTick()
-		context.chitBag->DeleteChit(core);
+		team = cs->ParentChit()->Team();
+		team = Team::Group(team);
 	}
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	const GameItem& coreItem = itemDefDB->Get("core");
-
-	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
-	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
-	if (sd.HasCore()) {
-		Chit* chit = context.chitBag->NewBuilding(sd.core, "core", 0);
-
-		// 'in use' instead of blocking.
-		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-		GLASSERT(ms);
-		ms->SetMode(GRID_IN_USE);
-		CoreScript* cs = new CoreScript();
-		chit->Add(cs);
-
-		chit->GetItem()->SetProperName(sd.name);
-
-		if (team != TEAM_NEUTRAL) {
-			cs->ParentChit()->GetItem()->team = team;
-			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
-			context.chitBag->GetNewsHistory()->Add(news);
-			// Make the dwellers defend the core.
-			chit->Add(new GuardScript());
+	if (team != TEAM_TROLL) {
+		// Need a new core for Truulga.
+		Vector2I newSector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+		CoreScript* cs = CoreScript::GetCore(newSector);
+		if (cs && cs->ParentChit()->Team() == 0) {
+			CoreScript* troll = CoreScript::CreateCore(newSector, TEAM_TROLL, &context);
+			troll->ParentChit()->Add(new TrollDomainAI());
+			truulga->GetSpatialComponent()->SetPosition(troll->ParentChit()->GetSpatialComponent()->GetPosition());
+			GLOUTPUT(("Truulga domain created at %x%x\n", newSector.x, newSector.y));
 		}
-
-		return cs;
 	}
-	return 0;
 }
 
 
@@ -369,6 +449,8 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	Chit* chit = context.chitBag->NewDenizen(pos, context.chitBag->GetHomeTeam());
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
+	CoreScript::GetCore( ToSector(pos) )->AddCitizen( chit );
+
 	context.chitBag->GetCamera( context.engine )->SetTrack( playerID );
 
 	GameItem* items[3] = { 0, 0, 0 };
@@ -379,9 +461,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	NewsHistory* history = context.chitBag->GetNewsHistory();
 	Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
 	for (int i = 0; i < 3; i++) {
-		items[i]->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
-		NewsEvent news(NewsEvent::FORGED, ToWorld2F(pos), items[i], deity);
-		history->Add(news);
+		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
 	}
 
 	chit->GetAIComponent()->EnableDebug( true );
@@ -395,7 +475,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 
 	// For an avatar, we don't get money, since all the Au goes to the core anyway.
 	if (ReserveBank::Instance()) {
-		Transfer(&ReserveBank::Instance()->bank, &chit->GetItem()->wallet, chit->GetItem()->wallet);
+		ReserveBank::GetWallet()->Deposit(chit->GetWallet(), *(chit->GetWallet()));
 	}
 }
 
@@ -426,15 +506,20 @@ void Sim::DoTick( U32 delta )
 		Vector2I sector = coreCreateList[i];
 		CoreScript* sc = CoreScript::GetCore(sector);
 		if (!sc) {
-			CreateCore(sector, TEAM_NEUTRAL);
+			CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 			coreCreateList.SwapRemove(i);
 			--i;
 		}
 	}
+	CreateTruulgaCore();
 
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
+
+	if (minuteTick) {
+		DoSpawn();
+	}
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = VolcanoScript::MAX_RAD;
@@ -508,8 +593,7 @@ void Sim::DoTick( U32 delta )
 		// may be about to use the wallet!
 		if ( item && !item->wallet.IsEmpty() ) {
 			if ( !context.game->IsScenePushed() && !context.chitBag->IsScenePushed() ) {
-				Wallet w = item->wallet.EmptyWallet();
-				cs->ParentChit()->GetItem()->wallet.Add( w );
+				cs->ParentChit()->GetWallet()->Deposit(&item->wallet, item->wallet);
 			}
 		}
 	}
@@ -613,7 +697,7 @@ void Sim::Draw3D( U32 deltaTime )
 		CompositingShader debug( BLEND_NORMAL );
 		debug.SetColor( 1, 1, 1, 0.5f );
 		CChitArray arr;
-		context.chitBag->FindBuilding(	IStringConst::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
+		context.chitBag->FindBuilding(	ISC::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
 								0, LumosChitBag::NEAREST, &arr );
 		for( int i=0; i<arr.Size(); ++i ) {
 			Rectangle2I p = GET_SUB_COMPONENT( arr[i], SpatialComponent, MapSpatialComponent )->PorchPos();
@@ -675,7 +759,27 @@ void Sim::CreateVolcano( int x, int y )
 }
 
 
-bool Sim::CreatePlant( int x, int y, int type )
+void Sim::SeedPlants()
+{
+	Rectangle2I bounds = context.worldMap->Bounds();
+	bounds.Outset(-SECTOR_SIZE);
+
+	int type = 0;
+	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
+		int x = it.Pos().x;
+		int y = it.Pos().y;
+
+		if ((x + y) & 1) {
+			CreatePlant(x, y, type, ((x+y) & 3));
+			type++;
+			if (type == NUM_PLANT_TYPES)
+				type = 0;
+		}
+	}
+}
+
+
+bool Sim::CreatePlant( int x, int y, int type, int stage )
 {
 	// Pull in plants from edges - don't want to check
 	// growth bounds later.
@@ -691,13 +795,25 @@ bool Sim::CreatePlant( int x, int y, int type )
 	}
 
 	// About 50,000 plants seems about right.
-	int count = context.worldMap->CountPlants();
-	if (count > TYPICAL_PLANTS) {
-		return false;
+	// This doesn't seem to matter - it isn't getting
+	// overwhelmed in tests.
+//	int count = context.worldMap->CountPlants();
+//	if (count > TYPICAL_PLANTS) {
+//		return false;
+//	}
+
+	Vector2I sector = ToSector(x, y);
+	CoreScript* cs = CoreScript::GetCore(sector);
+	bool paveBlocks = false;
+	if (cs && cs->ParentChit()->Team()) {
+		paveBlocks = true;
 	}
 
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
+	if (paveBlocks && wg.Pave()) {
+		return false;
+	}
+	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
 		return false;
 	}
 
@@ -729,7 +845,12 @@ bool Sim::CreatePlant( int x, int y, int type )
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
-		context.worldMap->SetPlant(x, y, type + 1, 0);
+		// FIXME: magic plant #s
+		if (type == 6 || type == 7) {
+			stage = Min(1, stage);
+		}
+		context.worldMap->SetPave(x, y, 0);
+		context.worldMap->SetPlant(x, y, type + 1, stage);
 		return true;
 	}
 	return false;
@@ -755,23 +876,24 @@ void Sim::UseBuilding()
 		// Money and crystal are transferred from the avatar to the core. (But 
 		// not items.) We need to xfer it *back* before using the factor, market,
 		// etc. On the tick, the avatar will restore it to the core.
-		ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+		//ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+		ic->GetItem()->wallet.Deposit(core->GetWallet(), *(core->GetWallet()));
 
 		if ( cs && ic ) {
-			if ( name == IStringConst::vault ) {
+			if ( name == ISC::vault ) {
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0 ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0, 0 ));
 			}
-			else if ( name == IStringConst::market ) {
+			else if ( name == ISC::market ) {
 				// The avatar doesn't pay sales tax.
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0 ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0, 0 ));
 			}
-			else if (name == IStringConst::exchange) {
+			else if (name == ISC::exchange) {
 				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
-					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0));
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0, 0));
 			}
-			else if ( name == IStringConst::factory ) {
+			else if ( name == ISC::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
 				data->tech = int(cs->GetTech());
 				data->itemComponent = ic;

@@ -34,17 +34,10 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	game->InitStd( &gamui2D, &okay, &cancel );
+	game->InitStd( &gamui2D, &okay, 0 );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
 	dropButton.SetVisible( data->IsAvatar() );
-
-	reset.Init( &gamui2D, lumosGame->GetButtonLook(0));
-	reset.SetText( "Reset" );
-	reset.SetVisible( data->IsMarket() );
-
-	billOfSale.Init( &gamui2D );
-	billOfSale.SetVisible( data->IsMarket() );
 
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0, 0 );
 	const GameItem* mainItem = data->itemComponent->GetItem(0);
@@ -59,9 +52,9 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			itemButton[j][i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
 
-			Button* button = faceWidget.GetButton();
-			if ( button->ToToggleButton() ) {
-				button->ToToggleButton()->AddToToggleGroup( &itemButton[j][i] );
+			Button* firstButton = faceWidget.Visible() ? faceWidget.GetButton() : &itemButton[0][0];
+			if ( firstButton->ToToggleButton() ) {
+				firstButton->ToToggleButton()->AddToToggleGroup( &itemButton[j][i] );
 			}
 		}
 	}
@@ -100,11 +93,10 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 
 	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
-	if ( data->IsMarket() || data->IsExchange() ) {
+	if ( data->IsExchange() ) {
 		moneyWidget[1].SetVisible( true );
 		moneyWidget[1].Set( data->storageIC->GetItem(0)->wallet );
 	}
-	CalcCrystalValue();
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -113,7 +105,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
-	SetButtonText();
+	SetButtonText(csd->selectItem);
 }
 
 
@@ -130,7 +122,7 @@ void CharacterScene::Resize()
 	const Screenport& port = game->GetScreenport();
 	engine->GetScreenportMutable()->Resize( port.PhysicalWidth(), port.PhysicalHeight() );
 
-	lumosGame->PositionStd( &okay, &cancel );
+	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
@@ -156,10 +148,7 @@ void CharacterScene::Resize()
 	layout.PosAbs( &moneyWidget[0], 1, 0, false );
 	layout.PosAbs( &moneyWidget[1], -4, 0, false );
 	layout.PosAbs( &dropButton, 1, 7 );
-	layout.PosAbs( &billOfSale, 1, 6 );	
-	layout.PosAbs( &reset, -1, -2 );
 	layout.PosAbs(&helpText, 1, -3);
-	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
 	if (data->IsAvatar()) {
 		// Need space for the history text
 		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
@@ -169,7 +158,6 @@ void CharacterScene::Resize()
 		layout.PosAbs(&crystalButton[0][i], 1, 1 + i);
 		layout.PosAbs(&crystalButton[1][i], -4, 1 + i);
 	}
-	cancel.SetVisible(!data->IsExchange());
 
 	if (data->IsAvatarCharacterItem()) {
 		layout.PosAbs(&desc, -4, 0);
@@ -193,22 +181,6 @@ void CharacterScene::Resize()
 
 	itemDescWidget.SetLayout(layout);
 	itemDescWidget.SetPos(itemDescWidget.X(), itemDescWidget.Y());	// bug in the desc widgets
-}
-
-
-void CharacterScene::CalcCrystalValue()
-{
-	ForgeScript script(0, 2, 0);
-	GameItem* item = new GameItem();
-	Wallet wallet;
-	int tech = 0;
-	script.Build(ForgeScript::GUN, ForgeScript::BLASTER, 0, 0, item, &wallet, &tech, false);
-	crystalValue[0] = int(item->GetValue()+1.0f);
-	delete item;
-
-	crystalValue[CRYSTAL_RED]		= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_RED;
-	crystalValue[CRYSTAL_BLUE]		= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_BLUE;
-	crystalValue[CRYSTAL_VIOLET]	= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_VIOLET;
 }
 
 
@@ -239,6 +211,9 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 
 void CharacterScene::SetExchangeButtonText()
 {
+	ReserveBank* bank = ReserveBank::Instance();
+	GLASSERT(bank);
+
 	for (int j = 0; j < 2; ++j) {
 		for (int i = 0; i < NUM_ITEM_BUTTONS; ++i) {
 			itemButton[j][i].SetVisible(false);
@@ -252,7 +227,7 @@ void CharacterScene::SetExchangeButtonText()
 			crystalButton[j][i].SetVisible(true);
 
 			CStr<32> str;
-			str.Format("%s\n%d", NAMES[i], crystalValue[i]);
+			str.Format("%s\n%d", NAMES[i], bank->CrystalValue(i));
 			crystalButton[j][i].SetText(str.c_str());
 			crystalButton[j][i].SetDeco(atom, atom);
 		}
@@ -260,7 +235,7 @@ void CharacterScene::SetExchangeButtonText()
 }
 
 
-void CharacterScene::SetButtonText()
+void CharacterScene::SetButtonText(const GameItem* select)
 {
 	if (data->IsExchange()) {
 		SetExchangeButtonText();
@@ -282,16 +257,9 @@ void CharacterScene::SetButtonText()
 		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
 		const GameItem* mainItem		= ic->GetItem(0);
-		const IRangedWeaponItem* ranged = ic->GetRangedWeapon(0);
-		const IMeleeWeaponItem*  melee  = ic->GetMeleeWeapon();
-		const IShield*           shield = ic->GetShield();
-		const GameItem* rangedItem		= ranged ? ranged->GetItem() : 0;
-		const GameItem* meleeItem		= melee  ? melee->GetItem() : 0;
-		const GameItem* shieldItem		= shield ? shield->GetItem() : 0;
-		float costMult = 0;
-		if ( data->IsMarket() ) {
-			costMult = 1.0f + SALES_TAX;
-		}
+		const RangedWeapon* rangedItem = ic->QuerySelectRanged();
+		const MeleeWeapon* meleeItem = ic->QuerySelectMelee();
+		const Shield* shieldItem = ic->GetShield();
 
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			const GameItem* item = ic->GetItem(src);
@@ -320,6 +288,10 @@ void CharacterScene::SetButtonText()
 			if ( itemButton[j][count].Down() ) {
 				down = item;
 			}
+			else if (select && item == select) {
+				down = item;
+				itemButton[j][count].SetDown();
+			}
 			++count;
 			++src;
 		}
@@ -342,7 +314,7 @@ void CharacterScene::SetButtonText()
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
-			if (down->GetItem()->IName() == ISC::shield) {
+			if (down->IName() == ISC::shield) {
 				Quaternion q;
 				Matrix4 m;
 				m.ConcatRotation(90.0f, 0);
@@ -350,7 +322,7 @@ void CharacterScene::SetButtonText()
 				q.FromRotationMatrix(m);
 				model->SetRotation(q);
 			}
-			else if (down->GetItem()->keyValues.GetIString(ISC::mob) == IString()) {
+			else if (down->keyValues.GetIString(ISC::mob) == IString()) {
 				model->SetYRotation(90.0f);
 			}
 			else {
@@ -369,17 +341,8 @@ void CharacterScene::SetButtonText()
 			IString proc = down->keyValues.GetIString( "procedural" );
 			if ( !proc.empty() ) {
 				ProcRenderInfo info;
-				int features = 0;
-				down->keyValues.Get( ISC::features, &features );
+				AssignProcedural(down, &info);
 
-				AssignProcedural(	proc.c_str(), 
-									strstr( down->Name(), "emale" )!=0, 
-									down->ID(), 
-									down->team, 
-									false, 
-									down->flags & GameItem::EFFECT_MASK, 
-									features,
-									&info );
 				model->SetTextureXForm( info.te.uvXForm );
 				model->SetColorMap( info.color );
 				model->SetBoneFilter( info.filterName, info.filter );
@@ -393,88 +356,29 @@ void CharacterScene::SetButtonText()
 	else {
 		SetItemInfo( down, 0 );
 	}
-
-	int bought=0, sold=0;
-	CalcCost( &bought, &sold );
-
-	if ( data->IsMarket() ) {
-		CStr<100> str;
-		str.Format( "Buy: %d\n"
-					"Sell: %d\n"
-					"%s: %d\n", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
-
-		int bought=0, sold=0;
-		CalcCost( &bought, &sold);
-		int cost = bought - sold;
-
-		if ( bought > sold ) {
-			const Wallet& wallet = data->itemComponent->GetItem()->wallet;
-			bool enoughInWallet = cost <= wallet.gold;
-			okay.SetEnabled( enoughInWallet );
-			if ( !enoughInWallet ) {
-				str.AppendFormat( "%s", "Not enough Au in wallet." );
-			}
-		}
-		else {
-			const Wallet& wallet = data->storageIC->GetItem()->wallet;
-			bool enoughInMarket = -cost <= wallet.gold;
-			okay.SetEnabled( enoughInMarket );
-			if ( !enoughInMarket ) {
-				str.AppendFormat( "%s", "Market has insufficient Au." );
-			}
-		}
-		billOfSale.SetText( str.c_str() );
-	}
-}
-
-
-void CharacterScene::ResetInventory()
-{
-	CDynArray< GameItem* > player, store; 
-
-	// Remove everything so we don't overflow
-	// an inventory. And then add stuff back.
-	for( int i=0; i<boughtList.Size(); ++i ) {
-		int index = data->itemComponent->FindItem( boughtList[i] );
-		GLASSERT( index >= 0 );
-		store.Push( data->itemComponent->RemoveFromInventory( index ));
-	}
-	for( int i=0; i<soldList.Size(); ++i ) {
-		int index = data->storageIC->FindItem( soldList[i] );
-		GLASSERT( index >= 0 );
-		player.Push( data->storageIC->RemoveFromInventory( index ));
-	}
-
-	for( int i=0; i<player.Size(); ++i ) {
-		data->itemComponent->AddToInventory( player[i] );
-	}
-	for( int i=0; i<store.Size(); ++i ) {
-		data->storageIC->AddToInventory( store[i] );
-	}
-	boughtList.Clear();
-	soldList.Clear();
 }
 
 
 void CharacterScene::Activate()
 {
-	if ((data->IsExchange() || data->IsMarket()) && ReserveBank::Instance()) {
+	if ((data->IsExchange() || data->IsMarket() ) && ReserveBank::Instance()) {
 		// The exchange works with the ReserveBank, else it
 		// would be running out of money, and have a fixed
 		// limit to the crystal/Au transaction.
-		int d = 1000 - data->storageIC->GetItem()->wallet.gold;
-		d = Min(d, ReserveBank::Instance()->bank.gold);
-		Transfer(&data->storageIC->GetItem()->wallet, &ReserveBank::Instance()->bank, d);
-		moneyWidget[1].Set(data->storageIC->GetItem()->wallet);
+		int d = 1000;
+		// The reserve bank has infinite funds, so we don't
+		// need to range check.
+		data->storageIC->GetItem()->wallet.Deposit(&ReserveBank::Instance()->wallet, d);
 	}
 }
 
 
 void CharacterScene::DeActivate()
 {
-	if ((data->IsExchange() || data->IsMarket()) && ReserveBank::Instance()) {
+	if ((data->IsExchange() || data->IsMarket() ) && ReserveBank::Instance()) {
 		// Move all the gold to the reserve
-		Transfer(&ReserveBank::Instance()->bank, &data->storageIC->GetItem()->wallet, data->storageIC->GetItem()->wallet.gold);
+		Wallet* w = &data->storageIC->GetItem()->wallet;
+		ReserveBank::Instance()->wallet.Deposit(w, w->Gold(), w->Crystal());
 	}
 }
 
@@ -482,51 +386,30 @@ void CharacterScene::DeActivate()
 void CharacterScene::ItemTapped(const gamui::UIItem* item)
 {
 	if ( item == &okay ) {
-		if ( data->IsMarket() ) {
-			int bought=0, sold=0, salesTax=0;
-			CalcCost( &bought, &sold);
-
-			int cost = bought - sold;
-			data->itemComponent->GetItem(0)->wallet.AddGold( -cost );
-			data->storageIC->GetItem(0)->wallet.AddGold( cost );
-
-			if (data->taxRecipiant) {
-				GLASSERT(data->storageIC->GetItem(0)->wallet.gold > salesTax);
-				Transfer(data->taxRecipiant, &data->storageIC->GetItem(0)->wallet, salesTax);
-			}
-		}
 		lumosGame->PopScene();
-		billOfSale.SetVisible(false);	// so errant warning can't be seen.
-	}
-	if ( item == &cancel ) {
-		ResetInventory();
-		lumosGame->PopScene();
-	}
-	if ( item == &reset ) {
-		ResetInventory();
 	}
 
 	for (int origin = 0; origin < 2; ++origin) {
 		for (int crystal = 0; crystal < NUM_CRYSTAL_TYPES; ++crystal) {
 			if (item == &crystalButton[origin][crystal]) {
-				Wallet transferCrystal;
-				transferCrystal.crystal[crystal] = 1;
-				Wallet transferGold;
-				transferGold.gold = crystalValue[crystal];
+				TransactAmt transferCrystal;
+				transferCrystal.AddCrystal(crystal, 1);
+				TransactAmt transferGold;
+				transferGold.Set(ReserveBank::Instance()->CrystalValue(crystal), 0);
 
 				Wallet* avatarWallet = &data->itemComponent->GetItem()->wallet;
 				Wallet* exchangeWallet = &data->storageIC->GetItem()->wallet;
 
 				if (origin == 0) {
 					if (transferCrystal <= *avatarWallet && transferGold <= *exchangeWallet) {
-						Transfer(exchangeWallet, avatarWallet, transferCrystal);
-						Transfer(avatarWallet, exchangeWallet, transferGold);
+						exchangeWallet->Deposit(avatarWallet, transferCrystal);
+						avatarWallet->Deposit(exchangeWallet, transferGold);
 					}
 				}
 				else {
 					if (transferCrystal <= *exchangeWallet && transferGold <= *avatarWallet) {
-						Transfer(avatarWallet, exchangeWallet, transferCrystal);
-						Transfer(exchangeWallet, avatarWallet, transferGold);
+						avatarWallet->Deposit(exchangeWallet, transferCrystal);
+						exchangeWallet->Deposit(avatarWallet, transferGold);
 					}
 				}
 				moneyWidget[0].Set(data->itemComponent->GetItem()->wallet);
@@ -536,7 +419,7 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 		}
 	}
 
-	SetButtonText();
+	SetButtonText(0);
 }
 
 void CharacterScene::DoTick( U32 deltaTime )
@@ -573,86 +456,72 @@ gamui::RenderAtom CharacterScene::DragStart( const gamui::UIItem* item )
 
 void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )
 {
-	int startIndex = 0;
+	int startIndex = -1;
+	int endIndex   = -1;
 	ItemComponent* startIC = 0;
-	int endIndex   = 0;
 	ItemComponent* endIC = 0;
 
 	for( int j=0; j<nStorage; ++j ) {
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			if ( start == &itemButton[j][i] ) {
+				startIC = (j == 0) ? data->itemComponent : data->storageIC;
 				startIndex = itemButtonIndex[j][i];
-				startIC = (j==0) ? data->itemComponent : data->storageIC;
 				break;
 			}
 		}
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			if ( end == &itemButton[j][i] ) {
+				endIC = (j == 0) ? data->itemComponent : data->storageIC;
 				endIndex = itemButtonIndex[j][i];
-				endIC = (j==0) ? data->itemComponent : data->storageIC;
 				break;
 			}
 		}
 	}
-	if ( startIndex && endIndex ) {
-		ItemComponent::Swap2( startIC, startIndex, endIC, endIndex );
-	}
-	else if ( startIndex && endIC ) {
-		GameItem* item = startIC->RemoveFromInventory( startIndex );
-		if ( item ) {
-			endIC->AddToInventory( item );
 
-			if ( endIC != startIC ) {
-				// Moved from one inventory to the other.
-				// Buying or selling?
-				if ( startIC == data->itemComponent ) {
-					// we are selling:
-					int i = boughtList.Find( item );
-					if ( i >= 0 ) {
-						// changed our minds - return to store.
-						boughtList.SwapRemove( i );
-					}
-					else {
-						GLASSERT( soldList.Find( item ) < 0 );
-						soldList.Push( item );
-					}
-				}
-				else {
-					// we are buying:
-					int i = soldList.Find( item );
-					if ( i >= 0 ) {
-						// changed our minds - back to inventory.
-						soldList.SwapRemove( i );
-					}
-					else {
-						GLASSERT( boughtList.Find( item ) < 0 );
-						boughtList.Push( item );
-					}
-				}
+	if (startIC == endIC) {
+		// Moving around in the same inventory.
+		if ( startIndex && endIndex ) {
+			ItemComponent::Swap2( startIC, startIndex, endIC, endIndex );
+		}
+	}
+	else if (data->IsMarket()) {
+		// Buy and Sell, don't swap
+		if (startIC && endIC		// move between storage
+			&& startIndex)			// is actually something selected in the start?
+		{
+			const GameItem* startItem = startIC->GetItem(startIndex);
+			int value = startItem->GetValue();
+			GLASSERT(value);
+
+			bool canAfford = (endIC->GetItem()->wallet.Gold() >= value);
+
+			if (value && canAfford && endIC->CanAddToInventory())  {
+				GameItem* item = startIC->RemoveFromInventory(startItem);
+				endIC->AddToInventory(item);
+				startIC->GetItem()->wallet.Deposit(&endIC->GetItem()->wallet, value);
 			}
 		}
 	}
-
-
-	if ( data->IsAvatar() && start && startIndex && end == &dropButton ) {
-		data->itemComponent->Drop( data->itemComponent->GetItem( startIndex ));
+	else if (data->IsVault()) {
+		// Only swap.
+		if (startIC && endIC && startIndex) {
+			if (endIC->CanAddToInventory()) {
+				const GameItem* startItem = startIC->GetItem(startIndex);
+				GameItem* item = startIC->RemoveFromInventory(startItem);
+				endIC->AddToInventory(item);
+			}
+		}
+	}
+	else if ( data->IsAvatar() ) {
+		if (startIC && startIndex && (end == &dropButton)) {
+			data->itemComponent->Drop(data->itemComponent->GetItem(startIndex));
+		}
 	}
 
-	SetButtonText();
-}
+	SetButtonText(0);
 
-
-void CharacterScene::CalcCost( int* bought, int* sold )
-{
-	*bought = 0;
-	*sold = 0;
-
-	for( int i=0; i<boughtList.Size(); ++i ) {
-		int value = boughtList[i]->GetValue();
-		*bought += value;
-	}
-	for( int i=0; i<soldList.Size(); ++i ) {
-		int value = soldList[i]->GetValue();
-		*sold += value;
-	}
+	if (data->itemComponent)
+		moneyWidget[0].Set(data->itemComponent->GetItem()->wallet);
+	if (data->storageIC)
+		moneyWidget[1].Set(data->storageIC->GetItem()->wallet);
 }

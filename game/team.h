@@ -23,7 +23,7 @@ class XStream;
 
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
-	TEAM_VISITOR,
+	TEAM_CHAOS,
 	
 	TEAM_RAT,	
 	TEAM_GREEN_MANTIS,
@@ -31,8 +31,16 @@ enum {
 	TEAM_TROLL,
 
 	TEAM_HOUSE,		// denizen houses (primarily human)
+	TEAM_GOB,
+	TEAM_KAMAKIRI,
+	TEAM_VISITOR,
 	
-	TEAM_CHAOS
+	NUM_TEAMS
+};
+
+enum {
+	TEAM_ID_LEFT  = 0xfffff1,
+	TEAM_ID_RIGHT = 0xfffff2,
 };
 
 
@@ -55,6 +63,7 @@ public:
 
 	// Take a team, and add an id to it.
 	static int GenTeam(int teamGroup) {
+		teamGroup = Group(teamGroup);
 		int team = teamGroup | ((++idPool) << 8);
 		return team;
 	}
@@ -69,8 +78,25 @@ public:
 			*id = ((t & 0xffffff00) >> 8);
 	}
 
+	static int CombineID(int group, int id) {
+		GLASSERT(group >= 0 && group < 256);
+		GLASSERT(id >= 0);
+ 		return group | (id << 8);
+	}
+
+	static int Group(int team) {
+		return team & 0xff;
+	}
+
+	static bool IsRogue(int team) {
+		return (team & 0xffffff00) == 0;
+	}
+
+	static bool IsDefault(const grinliz::IString& name, int team);
+
 private:
 	static int idPool;
 };
+
 
 #endif // LUMOS_TEAM_INCLUDED

@@ -48,7 +48,8 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	background.Init( &gamui2D, batom, false );
 
 	static const char* testSceneName[NUM_TESTS] = { "Dialog", 
-													"Render0", "Render1", 
+													"Render", 
+													"Color", 
 													"Particle", 
 													"Nav", "Nav2", 
 													"Battle", 
@@ -132,14 +133,16 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	engine->CameraLookAt(CAM, TARGET);
 	{
-		HumanGen gen(true, 99, TEAM_HOUSE, false);
+		const int team = Team::CombineID(TEAM_HOUSE, 1);
+		HumanGen gen(true, 99, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
 		model[HUMAN_FEMALE]->SetColorMap(info.color);
 	}
 	{
-		HumanGen gen(false, 1, TEAM_HOUSE, false);
+		const int team = Team::CombineID(TEAM_HOUSE, 5);
+		HumanGen gen(false, 1, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
 		model[HUMAN_MALE]->SetTextureXForm(info.te.uvXForm);
@@ -256,11 +259,11 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &testScene[TEST_DIALOG] ) {
 		game->PushScene( LumosGame::SCENE_DIALOG, 0 );
 	}
-	else if ( item == &testScene[TEST_RENDER_0] ) {
+	else if ( item == &testScene[TEST_RENDER] ) {
 		game->PushScene( LumosGame::SCENE_RENDERTEST, new RenderTestSceneData( 0 ) );
 	}
-	else if ( item == &testScene[TEST_RENDER_1] ) {
-		game->PushScene( LumosGame::SCENE_RENDERTEST, new RenderTestSceneData( 1 ) );
+	else if ( item == &testScene[TEST_COLOR] ) {
+		game->PushScene( LumosGame::SCENE_COLORTEST, 0 );
 	}
 	else if ( item == &testScene[TEST_PARTICLE] ) {
 		game->PushScene( LumosGame::SCENE_PARTICLE, 0 );

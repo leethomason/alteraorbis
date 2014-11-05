@@ -31,11 +31,10 @@ private:
 	typedef Component super;
 
 public:
-	// Creates an item from an item definiton.
-	ItemComponent( const GameItem& _item );
 	// Moves the item to this component
 	ItemComponent( GameItem* item );
 	virtual ~ItemComponent();
+	void InitFrom(const GameItem* items[], int nItems);
 
 	virtual const char* Name() const { return "ItemComponent"; }
 	virtual ItemComponent* ToItemComponent() { return this; }
@@ -50,47 +49,46 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual void OnChitEvent( const ChitEvent& event );
 
-	int NumItems() const				{ return itemArr.Size(); }
-	GameItem* GetItem( int index=0 )				{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	int NumItems() const							{ return itemArr.Size(); }
+	GameItem* GetItem()								{ return itemArr[0]; }
 	const GameItem* GetItem( int index=0 ) const	{ return ( index < itemArr.Size()) ? itemArr[index] : 0; }
 
-	int FindItem( const GameItem* item ) const { 
+	const GameItem* FindItem( const GameItem* item ) const { 
 		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( itemArr[i] == item ) return i;
+			if (itemArr[i] == item) return item;
 		}
-		return -1;
+		return 0;
 	}
-	int FindItem( const grinliz::IString& name ) const {
+	const GameItem* FindItem( const grinliz::IString& name ) const {
 		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( itemArr[i]->IName() == name ) return i;
+			if (itemArr[i]->IName() == name) return itemArr[i];
 		}
-		return -1;
+		return 0;
 	}
 
-	bool SwapWeapons();			// swap between the melee and ranged weapons
+	enum { SELECT_MELEE, SELECT_RANGED};
+	const GameItem* SelectWeapon(int type);
+	const GameItem* QuerySelectWeapon(int type) const;	// queries what will be swapped to, but doesn't swap
+	const RangedWeapon* QuerySelectRanged() const;
+	const MeleeWeapon* QuerySelectMelee() const;
+
 	bool Swap( int i, int j );	// swap 2 slots 
 
 	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents
 
-	/*	Weapon queries. Seem simple, but aren't.
-		GetRanged/Melee: returns the currently equipped weapon. Can
-			be intrinsic OR held. Can be null. Can both be null.
-		GetActive/Reserved: returns the a held weapon. Either in hand,
-			or can be swapped in.
+	/*	Weapon queries. Seems simple to do...but wow I have re-written this code.
+		Gets the *active* weapon. Can be Intrinsic or Held.
+		Can be null.
 	*/
-
-	// Gets the *currently* in use:
-	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
-	IMeleeWeaponItem*	GetMeleeWeapon()	{ return melee; }
-	IShield*			GetShield()			{ return shield; }
-
-	// Always returns a HELD weapon, or null.
-	IWeaponItem*		GetReserveWeapon()	{ return reserve; }
+	RangedWeapon*	GetRangedWeapon( grinliz::Vector3F* trigger ) const;	// optionally returns trigger
+	MeleeWeapon*	GetMeleeWeapon() const;
+	Shield*			GetShield() const;
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
 	int  NumCarriedItems(const grinliz::IString& str) const;
-	int  ItemToSell() const;	// returns 0 or the cheapest item that can be sold
+
+	const GameItem* ItemToSell() const;	// returns 0 or the cheapest item that can be sold
 
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
@@ -101,7 +99,7 @@ public:
 
 	// Removes an item from the inventory. Returns
 	// null if that item cannot be removed.
-	GameItem* RemoveFromInventory( int index );
+	GameItem* RemoveFromInventory( const GameItem* );
 
 	// drops the item from the inventory (which owns the memory)
 	void Drop( const GameItem* item );
@@ -113,44 +111,35 @@ public:
 	// Very crude assessment of the power of this MOB.
 	float PowerRating() const;
 
-	// Normally don't call this directly, but there is some "just in case" code.
-	void SortInventory();				// AIs will use the "best" item.
+	void EnableDebug(bool d) { debugEnabled = d;  }
 
 private:
 	// If there is a RenderComponent, bring it in sync with the inventory.
 	void SetHardpoints();
-	// Update the active/reserve/melee/ranged. Call whenever inventory changes.
-	void UpdateActive();
+	void UseBestItems();
+	void SortInventory();				// AIs will use the "best" item.
+	void Validate() const;
+	void ComputeHardpoints();
 
 	void DoSlowTick();
 	void ApplyLootLimits();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
-	bool ItemActive( int index ) const	{ return activeArr[index]; }
-	bool ItemActive( const GameItem* );	// expensive: needs a search.
+	bool ItemActive( const GameItem* );
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
 	int ProcessEffect( int delta);	// look around for environment that effects this itemComp, and apply those effects
 
 	// Not serialized:
-	bool				hardpointsModified;
-	int					lastDamageID;			// the last thing that hit us.
-	IRangedWeaponItem*	ranged;		// may be 0, active, or neither
-	IMeleeWeaponItem*	melee;		// may be 0, active, or neither
-	IWeaponItem*		reserve;	// remember: always held
-	IShield*			shield;
-	CTicker				slowTick;
+	bool		hardpointsModified;
+	grinliz::CArray<GameItem*, EL_NUM_METADATA>	hardpoint;	// a CArray for the search, etc.
+	bool		hasHardpoint[EL_NUM_METADATA];
+	CTicker		slowTick;
+	int			lastDamageID;
+	bool		debugEnabled;
+	bool		hardpointsComputed;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
-	//
-	// Some items are active just by having them (although this isn't implemented yet)
-	// And some items (weapons, shields) only do something if they are the active hardpoint. The 
-	// hardpoint question is the tricky one. The GameItem::hardpoint is the hardpoint desired.
-	// But are we at that hardpoint? All shield resources are the same. And what if the
-	// render component isn't attached? That's where order matters: the first object in the
-	// array gets the hardpoints, and we get the hardpoints from the ModelResource. (So
-	// we do not need the RenderComponent.)
 	grinliz::CDynArray< GameItem* > itemArr;
-	grinliz::CDynArray< bool >		activeArr;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

@@ -106,7 +106,7 @@ class Random
 //		return float(double(r) * INV);
 
 		static const float INV = 1.0f / 255.0f;
-		U32 r = Rand() & 0xff;	// random series in the low bits.
+		U32 r = Rand(256);	// random series in the low bits.
 		return float(r) * INV;
 	}
 

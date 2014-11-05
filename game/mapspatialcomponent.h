@@ -61,6 +61,10 @@ public:
 	// mostly internal: called when the porch changes.
 	void UpdatePorch(bool clearPorch);
 
+	// Utility code for dealing with porches
+	// 'pos' in minimum coordinates, size=1 or 2, rotation 0-270
+	static grinliz::Rectangle2I CalcPorchPos(const grinliz::Vector2I& pos, int size, float rotation);
+
 private:
 	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
 

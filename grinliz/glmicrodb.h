@@ -53,7 +53,10 @@ public:
 	void Set( const IString& key, float value );
 	void Set( const IString& key, const IString& value );
 
-	int Get( const char* key, int* value ) const;
+	bool Has(const char* key) const;
+	bool Has(const IString& key) const;
+
+	int Get(const char* key, int* value) const;
 	int Get( const char* key, float* value ) const;
 	int Get( const char* key, IString* value ) const;
 

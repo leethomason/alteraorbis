@@ -221,6 +221,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	if ( flags == RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
 			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
+			if (len < 1) len = 1;
 			findWeight.Push( 1.0f/len );
 		}
 		int index = random.Select( findWeight.Mem(), findWeight.Size() );
@@ -238,13 +239,14 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
-	GameItem rootItem = ItemDefDB::Instance()->Get(name);
+	const GameItem& rootItem = ItemDefDB::Instance()->Get(name);
+	GameItem* item = rootItem.Clone();
 
 	// Hack...how to do this better??
-	if (rootItem.IResourceName() == "pyramid0") {
+	if (item->IResourceName() == "pyramid0") {
 		CStr<32> str;
 		str.Format("pyramid%d", random.Rand(3));
-		rootItem.SetResource(str.c_str());
+		item->SetResource(str.c_str());
 	}
 
 	int cx = 1;
@@ -262,9 +264,9 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	msc->SetBuilding(porch != 0, circuit);
 	chit->Add(msc);
 
-	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new RenderComponent(item->ResourceName()));
 	chit->Add(new HealthComponent());
-	AddItem(name, chit, context->engine, team, 0);
+	AddItem(item, chit, context->engine, team, 0);
 
 	IString script = rootItem.keyValues.GetIString("script");
 	if (!script.empty()) {
@@ -275,13 +277,12 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString proc = rootItem.keyValues.GetIString("procedural");
 	if (!proc.empty()) {
-		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, &info);
+		AssignProcedural(chit->GetItem(), &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
-	IString consumes = rootItem.keyValues.GetIString(IStringConst::zoneConsume);
+	IString consumes = rootItem.keyValues.GetIString(ISC::zone);
 	if (!consumes.empty()) {
 		Component* s = ComponentFactory::Factory("EvalBuildingScript", &chitContext);
 		GLASSERT(s);
@@ -317,32 +318,31 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
-	GameItem rootItem = ItemDefDB::Instance()->Get(name);
+	GameItem* rootItem = ItemDefDB::Instance()->Get(name).Clone();
 
 	// Hack...how to do this better??
-	if (rootItem.IResourceName() == "ruins1.0") {
+	if (rootItem->IResourceName() == "ruins1.0") {
 		CStr<32> str;
 		str.Format("ruins1.%d", random.Rand(2));
-		rootItem.SetResource(str.c_str());
+		rootItem->SetResource(str.c_str());
 	}
 
 	int cx = 1;
-	rootItem.keyValues.Get(ISC::size, &cx);
+	rootItem->keyValues.Get(ISC::size, &cx);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
 	msc->SetMode(GRID_BLOCKED);
 
 	chit->Add(msc);
-	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new RenderComponent(rootItem->ResourceName()));
 	chit->Add(new HealthComponent());
-	AddItem(name, chit, context->engine, team, 0);
+	AddItem(rootItem, chit, context->engine, team, 0);
 
-	IString proc = rootItem.keyValues.GetIString("procedural");
+	IString proc = rootItem->keyValues.GetIString("procedural");
 	if (!proc.empty()) {
-		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign(team, &info);
+		AssignProcedural(chit->GetItem(), &info);
 		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 	
@@ -366,10 +366,20 @@ Chit* LumosChitBag::GetDeity(int id)
 		chit = NewChit();
 		deityID[id] = chit->ID();
 
-		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "BeastCore", "ShogScrift" };
+		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "Truulga", "BeastCore", "ShogScrift" };
 		AddItem("deity", chit, context->engine, 0, 0);
 		chit->GetItem()->SetProperName(NAME[id]);
 	}
+
+	if (id == DEITY_TRUULGA) chit->GetItem()->team = TEAM_TROLL;
+	if (!chit->GetSpatialComponent()) {
+		// Have a spatial component but not a render component.
+		// Used to set the "focus" of the deity, and mark
+		// the location of a home core. (Truulga's base, for 
+		// example.)
+		chit->Add(new SpatialComponent());
+	}
+
 	return chit;
 }
 
@@ -390,20 +400,14 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 
 	chit->Add( new HealthComponent());
 
-	Wallet w;
+	IString mob = chit->GetItem()->keyValues.GetIString(ISC::mob);
 	if (ReserveBank::Instance()) {
-		w = ReserveBank::Instance()->WithdrawMonster();
+		ReserveBank::Instance()->WithdrawMonster(chit->GetWallet(), mob == ISC::greater);
 	}
-	if ( chit->GetItem()->keyValues.GetIString( ISC::mob ) == ISC::greater ) {
-		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
-		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
-		
+	if (mob == ISC::greater) {
 		// Mark this item as important with a destroyMsg:
-		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
-		NewsHistory* history = GetNewsHistory();
-		history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::GREATER_MOB_CREATED, NewsEvent::GREATER_MOB_KILLED, 0);
 	}
-	chit->GetItem()->wallet.Add( w );	
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
 
 	if (XenoAudio::Instance()) {
@@ -416,21 +420,24 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 {
 	const ChitContext* context = Context();
-	bool female = true;
-	const char* assetName = "humanFemale";
-	if ( random.Bit() ) {
-		female = false;
-		assetName = "humanMale";
+	IString itemName;
+
+	switch (Team::Group(team)) {
+		case TEAM_HOUSE:	itemName = (random.Bit()) ? ISC::humanFemale : ISC::humanMale;	break;
+		case TEAM_GOB:		itemName = ISC::gobman;											break;
+		case TEAM_KAMAKIRI:	itemName = ISC::kamakiri;										break;
+		default: GLASSERT(0); break;
 	}
 
 	Chit* chit = NewChit();
+	const GameItem& root = ItemDefDB::Instance()->Get(itemName.safe_str());
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( assetName ));
+	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
 
-	AddItem( assetName, chit, context->engine, team, 0 );
-	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
+	AddItem( root.Name(), chit, context->engine, team, 0 );
+	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
 
@@ -452,11 +459,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	Vector2I sector = ToSector( pos );
-	CoreScript::GetCore( sector )->AddCitizen( chit );
-
-	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
-	NewsHistory* history = GetNewsHistory();
-	history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
@@ -550,16 +553,24 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 }
 
 
-Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
+Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr )
 {
 	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
 	Vector2I sector = ToSector( bounds.min );
 
 	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->Bounds().Intersect( bounds )) {
-//			GLASSERT( it->Building() );
-			return it->ParentChit();
+			Chit* chit = it->ParentChit();
+			if (name.empty() || (chit->GetItem() && chit->GetItem()->IName() == name)) {
+				if (!arr) {
+					return chit;
+				}
+				arr->Push(chit);
+			}
 		}
+	}
+	if (arr && !arr->Empty()) {
+		return (*arr)[0];
 	}
 	return 0;
 }
@@ -580,15 +591,16 @@ Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos, int *type )
 }
 
 
-Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
+Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 {
-	if ( !amount )
-		return 0;
+	GLASSERT(src);
+	if (src->Gold() == 0) return 0;
+
 	const ChitContext* context = Context();
 
 	Vector2F v2 = { pos.x, pos.z };
 
-	ItemNameFilter goldFilter( IStringConst::gold, IChitAccept::MOB );
+	ItemNameFilter goldFilter( ISC::gold, IChitAccept::MOB );
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 
@@ -611,18 +623,28 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		chit->GetSpatialComponent()->SetPosition( pos );
 		chit->Add(new GameMoveComponent());
 	}
-	chit->GetItem()->wallet.AddGold( amount );
+	chit->GetWallet()->Deposit(src, src->Gold());
 	return chit;
 }
 
 
-Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzz )
+Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzz )
 {
 	Vector2F v2 = { pos.x, pos.z };
 	if ( fuzz ) {
 		v2.x = floorf(pos.x) + random.Uniform();
 		v2.y = floorf(pos.y) + random.Uniform();
 	}
+
+	int crystal = -1;
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		if (src->Crystal(i)) {
+			crystal = i;
+			break;
+		}
+	}
+
+	if (crystal == -1) return 0;	// done
 
 	const char* name = 0;
 	switch ( crystal ) {
@@ -642,21 +664,20 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 
 	chit->GetSpatialComponent()->SetPosition( pos );
 	
-	Wallet w;
-	w.AddCrystal( crystal );
-	chit->GetItem()->wallet.Add( w );
+	int c[NUM_CRYSTAL_TYPES] = { 0 };
+	c[crystal] = 1;
+
+	chit->GetWallet()->Deposit(src, 0, c);
 
 	return chit;
 }
 
 
-void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet )
+void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, Wallet* wallet )
 {
-	NewGoldChit( pos, wallet.gold );
+	NewGoldChit(pos, wallet);
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		for( int j=0; j<wallet.crystal[i]; ++j ) {
-			NewCrystalChit( pos, i, true );
-		}
+		while (NewCrystalChit(pos, wallet, true)) {}
 	}
 }
 
@@ -756,36 +777,51 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-GameItem* LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes )
+GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes)
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( name, &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
+	itemDefDB->Get(name, &itemDefArr);
+	GLASSERT(itemDefArr.Size() > 0);
 
-	GameItem item = *(itemDefArr[0]);
-	if ( altRes ) {
-		item.SetResource( altRes );
+	GameItem* item = itemDefArr[0]->Clone();
+	if (altRes) {
+		item->SetResource(altRes);
 	}
-	item.team = team;
-	item.GetTraitsMutable()->SetExpFromLevel( level );
-	item.InitState();
+	item->team = team;
+	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->Roll(item->Traits().Get());
 
-	GameItem* gi = 0;
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
-			gi = new GameItem(*(itemDefArr[i]));
+			GameItem* gi = itemDefArr[i]->Clone();
 			ic->AddToInventory(gi);
 		}
 	}
 	else {
 		GLASSERT( itemDefArr.Size() == 1 );
-		gi = new GameItem(item);
-		chit->GetItemComponent()->AddToInventory(gi);
+		chit->GetItemComponent()->AddToInventory(item);
 	}
-	return gi;
+	return item;
+}
+
+
+GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int team, int level)
+{
+	item->team = team;
+	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->Roll(item->Traits().Get());
+
+	if ( !chit->GetItemComponent() ) {
+		ItemComponent* ic = new ItemComponent( item );
+		chit->Add( ic );
+	}
+	else {
+		chit->GetItemComponent()->AddToInventory(item);
+	}
+	return item;
 }
 
 
@@ -894,11 +930,11 @@ bool ItemNameFilter::Accept( Chit* chit )
 
 GoldCrystalFilter::GoldCrystalFilter()
 {
-	arr[0] = IStringConst::gold;
-	arr[1] = IStringConst::crystal_green;
-	arr[2] = IStringConst::crystal_red;
-	arr[3] = IStringConst::crystal_blue;
-	arr[4] = IStringConst::crystal_violet;
+	arr[0] = ISC::gold;
+	arr[1] = ISC::crystal_green;
+	arr[2] = ISC::crystal_red;
+	arr[3] = ISC::crystal_blue;
+	arr[4] = ISC::crystal_violet;
 	names = arr;
 	count = 5;
 	type = MOB;
@@ -973,7 +1009,7 @@ bool MOBIshFilter::Accept(Chit* chit)
 		return RelationshipFilter::Accept(chit);
 	}
 	GameItem* item = chit->GetItem();
-	if (item && item->IName() == IStringConst::dummyTarget) {
+	if (item && item->IName() == ISC::dummyTarget) {
 		return RelationshipFilter::Accept(chit);
 	}
 	return false;

@@ -17,6 +17,7 @@
 
 #include "../game/lumosgame.h"
 #include "../game/lumosmath.h"
+#include "../game/team.h"
 
 #include "../engine/engine.h"
 #include "../engine/model.h"
@@ -199,7 +200,8 @@ void AnimationScene::LoadModel()
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 
 		if ( colorMap ) {
-			HumanGen gen( false, j+4, 1, false );
+			const int team = Team::CombineID(TEAM_HOUSE, j + 1);
+			HumanGen gen(false, j, team, false);
 			ProcRenderInfo info;
 			gen.AssignSuit( &info );
 			model[j]->SetColorMap( info.color );

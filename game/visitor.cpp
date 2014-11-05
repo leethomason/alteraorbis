@@ -208,10 +208,10 @@ grinliz::IString VisitorData::CurrentKioskWant()
 		return IString();
 
 	switch ( wants[nWants] ) {
-	case KIOSK_N:	return IStringConst::kiosk__n;
-	case KIOSK_M:	return IStringConst::kiosk__m;
-	case KIOSK_C:	return IStringConst::kiosk__c;
-	case KIOSK_S:	return IStringConst::kiosk__s;
+	case KIOSK_N:	return ISC::kiosk__n;
+	case KIOSK_M:	return ISC::kiosk__m;
+	case KIOSK_C:	return ISC::kiosk__c;
+	case KIOSK_S:	return ISC::kiosk__s;
 	}
 	GLASSERT( 0 );	// Bad values?
 	return IString();

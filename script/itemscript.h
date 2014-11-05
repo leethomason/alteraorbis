@@ -36,7 +36,7 @@ public:
 	bool Has( const char* name );
 	const GameItem& Get( const char* name, int intrinsic=-1 );
 
-	typedef grinliz::CArray<GameItem*, 16> GameItemArr;
+	typedef grinliz::CArray<const GameItem*, 16> GameItemArr;
 	// Query an item and all its intrinsics; main item is
 	// index 0, intrinsic items follow.
 	void Get( const char* name, GameItemArr* arr );
@@ -51,8 +51,6 @@ public:
 	const grinliz::CDynArray< grinliz::IString >& LesserMOBs() const  { return lesserMOBs; }
 
 private:
-	GameItem nullItem;
-
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;
@@ -62,13 +60,12 @@ private:
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
-	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0), score(0), tempID(0) {}
+	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0), score(0) {}
 
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
 	int					itemID;
-	int					tempID;		// only used by census scene - generally 0
 	grinliz::IString	titledName;
 	U16					level;
 	U16					value;

@@ -63,18 +63,116 @@ const char* ForgeScript::Effect( int effect )
 }
 
 
-void ForgeScript::Build(	int type,			// GUN
-							int subType,		// BLASTER
-							int partsFlags,		
-							int effectFlags,
-							GameItem* item,
-							Wallet* required,
-							int *techRequired,
-							bool doRandom )
+
+GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
+							   int subItemType,
+							   const Wallet& avail,
+							   TransactAmt* cost,	// in/out
+							   int partsMask,
+							   int effectsMask,
+							   int tech,
+							   int level,
+							   int seed)
+{
+	// Guarentee we can build something:
+	if (avail.Crystal(0) == 0) {
+		return 0;
+	}
+
+	int subType = 0;
+	int parts = 1;		// always have body.
+	Random random(seed);
+
+	int partsArr[] = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
+	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK };	// don't allow explosive to be manufactured, yet: , GameItem::EFFECT_EXPLOSIVE
+
+	// Get the inital to "everything"
+	int effects = 0;
+	for (int i = 0; i < GL_C_ARRAY_SIZE(effectsArr); ++i) {
+		effects |= effectsArr[i];
+	}
+	effects = effects & effectsMask;
+
+	if (itemType == ForgeScript::GUN) {
+		if (subItemType >= 0) {
+			subType = subItemType;
+		}
+		else {
+			if (tech == 0)
+				subType = random.Rand(ForgeScript::NUM_TECH0_GUNS);
+			else
+				subType = random.Rand(ForgeScript::NUM_GUN_TYPES);
+			parts = WeaponGen::PART_MASK & partsMask;
+		}
+	}
+	else if (itemType == ForgeScript::RING) {
+		parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;
+		parts = parts & partsMask;
+	}
+
+	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
+	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
+
+	ForgeScript forge(random.Rand(), level, tech);
+
+	int cp = 0;
+	int ce = 0;
+
+	// Given we have a crystal, we should always be able to build something.
+	// Remove sub-parts and effects until we succeed. As the forge 
+	// changes, this is no longer a hard rule.
+	int maxIt = 10;
+	GameItem* item = 0;
+	while (maxIt) {
+		delete item; item = 0;
+
+		cost->Clear();
+		int techRequired = 0;
+		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true);
+
+		if (*cost <= avail && techRequired <= tech) {
+			break;
+		}
+
+		bool didSomething = false;
+		if (*cost > avail && ce < GL_C_ARRAY_SIZE(effectsArr)) {
+			effects &= ~(effectsArr[ce++]);
+			didSomething = true;
+		}
+		if (techRequired > tech && cp < GL_C_ARRAY_SIZE(partsArr)) {
+			parts &= ~(partsArr[cp++]);
+			didSomething = true;
+		}
+
+		// The equations between cost are more complex; the
+		// model above doesn't capture all the combos any more.
+		// Make sure something changes every loop.
+		if (!didSomething) {
+			if (ce < GL_C_ARRAY_SIZE(effectsArr)) {
+				effects &= ~(effectsArr[ce++]);
+			}
+			if (cp < GL_C_ARRAY_SIZE(partsArr)) {
+				parts &= ~(partsArr[cp++]);
+			}
+		}
+		--maxIt;
+	}
+	GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	return item;
+}
+
+
+GameItem* ForgeScript::Build(	int type,			// GUN
+								int subType,		// BLASTER
+								int partsFlags,		
+								int effectFlags,
+								TransactAmt* required,
+								int *techRequired,
+								bool doRandom )
 {
 	*techRequired = 0;
-	required->EmptyWallet();
-	required->crystal[CRYSTAL_GREEN] += 1;
+	required->Clear();
+	required->AddCrystal(CRYSTAL_GREEN, 1);
 
 	// Random, but can't leave forge and come back
 	// to get different numbers.
@@ -124,7 +222,7 @@ void ForgeScript::Build(	int type,			// GUN
 			++nParts;
 		}
 		if (nParts > 1) {
-			required->crystal[0] += (nParts - 1)*(nParts - 1);
+			required->AddCrystal(0, (nParts - 1)*(nParts - 1));
 		}
 	}
 	else if ( type == ForgeScript::RING ) {
@@ -154,24 +252,23 @@ void ForgeScript::Build(	int type,			// GUN
 		roll[i] = Clamp(roll[i], 1, 20);
 	}
 
-	if ( item ) {
-		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
-		*item = itemDef;
-		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
-	}
+	
+	const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
+	GameItem* item = itemDef.Clone();
+	item->Roll(roll);
 
 	if ( effectFlags & GameItem::EFFECT_FIRE ) {
-		required->crystal[CRYSTAL_RED] += 1;
+		required->AddCrystal(CRYSTAL_RED, 1);
 	}
 	if ( effectFlags & GameItem::EFFECT_SHOCK ) {
-		required->crystal[CRYSTAL_BLUE] += 1;
+		required->AddCrystal(CRYSTAL_BLUE, 1);
 	}
 	if ( effectFlags & GameItem::EFFECT_EXPLOSIVE ) {
-		required->crystal[CRYSTAL_VIOLET] += 1;
+		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 	// 2 effects adds a 2nd violet crystal
 	if ( FloorPowerOf2( effectFlags ) != effectFlags ) {
-		required->crystal[CRYSTAL_VIOLET] += 1;
+		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 
 	if ( item ) {
@@ -179,5 +276,6 @@ void ForgeScript::Build(	int type,			// GUN
 		item->flags &= ~GameItem::EFFECT_MASK;
 		item->flags |= effectFlags;
 	}
+	return item;
 }
 

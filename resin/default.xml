@@ -24,6 +24,8 @@
   <markov filename="vikingMale.txt" assetName="vikingMale" />
   <markov filename="vikingFemale.txt" assetName="vikingFemale" />
   <markov filename="monster.txt" assetName="monster" />
+  <markov filename="gobnames.txt" assetName="gobnames" />
+  <markov filename="kamakirinames.txt" assetName="kamakirinames" />
   <markov-word filename="barNames.txt" assetName="barNames" />
   
   <!-- Icon and UI -->
@@ -128,6 +130,7 @@
   <model assetName="distillery" filename="distillery.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="exchange" filename="exchange.ac"                       shading="flat" polyRemoval="pre" />
   <model assetName="circuitFab" filename="circuitFab.ac"                   shading="flat" polyRemoval="pre" />
+  <model assetName="kamaStatue" filename="kamaStatue.ac"                   shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />
@@ -136,6 +139,11 @@
   <model filename="elixir.ac"                                              shading="flat" />
   <model filename="ruins.ac"  modelName="ruins1.0"  origin="1.5 0 -0.5"    shading="flat" polyRemoval="pre" />
   <model filename="ruins.ac"  modelName="ruins1.1"  origin="3.5 0 -0.5"    shading="flat" polyRemoval="pre" />
+  <model filename="trollStatue.ac"       shading="flat" polyRemoval="pre" />
+  <model filename="trollBrazier.ac"      shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="0 0.67 0" />
+    <particle name="fire"  meta="trigger" />
+  </model>
 
   <model filename="spark.ac"    assetName="spark"                          shading="flat" />
   <model filename="electron.ac" assetName="charge"                         shading="flat" />
@@ -235,6 +243,26 @@
     <meta name="shield"  pos="0 0.60 -0.08" rot="1 0 0 80" boneName="torso" />
   </model>
 
+  <animation filename="gob/gob_.bvh" assetName="gobAnimation" >
+    <meta animation="melee" name="impact" time="500" />
+  </animation>
+
+  <model filename="gob/gob.ac" shading="flat" animation="gobAnimation" animationSpeed="1.25" >
+    <meta name="trigger" pos="-0.17 0.36 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.64 0"/>
+    <meta name="shield"  pos="0 0.64 -0.12" rot="1 0 0 80" boneName="torso" />
+  </model>
+
+  <animation filename="mantessa/mantessa_.bvh" assetName="mantessaAnimation" >
+    <meta animation="melee" name="impact" time="500" />
+  </animation>
+
+  <model filename="mantessa/mantessa.ac" shading="flat" animation="mantessaAnimation" animationSpeed="1.25" >
+    <meta name="trigger" pos="-0.14 0.50 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.93 0"/>
+    <meta name="shield"  pos="0 0.91 -0.13" rot="1 0 0 80" boneName="torso" />
+  </model>
+    
   <model filename="visitor.ac" animation="nullAnimation" shading="flat">
     <meta name="target" pos="0 0.71 0" />
   </model>
@@ -301,6 +329,7 @@
 
   <model filename="weapons2.ac"         modelName="blaster"     origin="0 0.5 -1"   shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="beamgun"     origin="0 0.5 0"    shadowCaster="true" bones="true"/>
+  <model filename="weapons2.ac"         modelName="kamabeamgun" origin="0 0.5 1"    shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pistol"      origin="0 0 -1"     shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pulse"       origin="0 0 0"      shadowCaster="true" bones="true"/>
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />

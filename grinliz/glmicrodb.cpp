@@ -76,6 +76,20 @@ void MicroDB::Set( const IString& key, const IString& value )
 }
 
 
+bool MicroDB::Has(const char* key) const
+{
+	GLASSERT(key && *key);
+	return Has(StringPool::Intern(key));
+}
+
+
+bool MicroDB::Has(const IString& key) const
+{
+	const Entry* e = Find(key);
+	return e != 0;
+}
+
+
 int MicroDB::Get( const char* key, int* value ) const
 {
 	GLASSERT( key && *key );

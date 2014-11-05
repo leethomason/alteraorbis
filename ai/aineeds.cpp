@@ -16,7 +16,7 @@ double Needs::DecayTime() { return DECAY_TIME; }
 {
 	GLASSERT( i >= 0 && i < NUM_NEEDS );
 
-	static const char* name[NUM_NEEDS] = { "food", "social", "energy", "fun" };
+	static const char* name[NUM_NEEDS] = { "food", "energy", "fun" };
 	GLASSERT( GL_C_ARRAY_SIZE( name ) == NUM_NEEDS );
 	return name[i];
 }
@@ -31,11 +31,16 @@ Needs::Needs()
 }
 
 
+void Needs::DoTravelTick(U32 delta)
+{
+	double dMorale= double(delta) * 0.001 * 0.05 / DECAY_TIME;
+	morale -= dMorale;
+	morale = Clamp( morale, 0.0, 1.0 );
+}
+
 
 void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Personality* personality )
 {
-	// if 'lowerDifficulty' is true, then don't decay social.
-	//
 	double dNeed = double(delta) * 0.001 / DECAY_TIME;
 	if (lowerDifficulty)
 		dNeed *= 0.5f;
@@ -50,7 +55,6 @@ void Needs::DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Person
 	}
 	else {
 		need[FOOD]   -= dNeed;
-		need[SOCIAL] -= dNeed * Dice3D6ToMult(personality->IntroExtro());	// social decays faster for extroverts
 		need[ENERGY] -= dNeed;
 		need[FUN]	 -= dNeed;
 
@@ -86,11 +90,6 @@ void Needs::ClampNeeds()
 {
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] = Clamp( need[i], 0.0, 1.0 );
-	}
-
-	// Hack for beta3:
-	if (need[SOCIAL] < 0.4) {
-		need[SOCIAL] = 0.4;
 	}
 }
 

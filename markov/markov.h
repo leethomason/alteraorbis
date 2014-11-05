@@ -72,6 +72,8 @@ public:
 	void Analyze();
 
 private:
+	enum {MAX_BUF = 64};
+	
 	void FindPair( char a, char b, int* start, int* count );
 	void AnalyzeRec(char* buf, int nChar, int* options);
 

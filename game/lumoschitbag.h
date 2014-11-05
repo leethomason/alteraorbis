@@ -23,7 +23,7 @@
 #include "visitor.h"
 
 class WorldMap;
-struct Wallet;
+class Wallet;
 class CoreScript;
 class LumosGame;
 class MapSpatialComponent;
@@ -226,6 +226,7 @@ public:
 		DEITY_MOTHER_CODE,	// master control
 		DEITY_Q_CORE,		// logistics, infrastructure
 		DEITY_R1K_CORE,		// adventures
+		DEITY_TRUULGA,		// troll deity
 
 		// in progress:
 		DEITY_BEAST_CORE,	// beast-man core. name TBD
@@ -235,8 +236,8 @@ public:
 	Chit* GetDeity(int id);
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
-	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
-	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
+	Chit* NewGoldChit( const grinliz::Vector3F& pos, Wallet* src );		// consumes the gold!
+	Chit* NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzzPos );	// consumes the 1st crystal!
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
@@ -258,8 +259,9 @@ public:
 					float speed,
 					bool trail );
 	// Creates enough chits to empty the wallet.
-	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
+	void NewWalletChits( const grinliz::Vector3F& pos, Wallet* srcWallet );
 	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0 );
+	GameItem* AddItem( GameItem* item, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
@@ -277,13 +279,17 @@ public:
 
 	// Query the porch at the location.
 	Chit* QueryPorch( const grinliz::Vector2I& pos, int* type );
+
 	// Query the first building in the bounds.
-	Chit* QueryBuilding( const grinliz::Vector2I& pos ) {
+	// If !name.empty, filters for that type.
+	// If arr != null, returns all the matches.
+	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Vector2I& pos, CChitArray* arr ) {
 		grinliz::Rectangle2I r;
 		r.Set( pos.x, pos.y, pos.x, pos.y );
-		return QueryBuilding( r );
+		return QueryBuilding( name, r, arr );
 	}
-	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
+	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr );
+
 	Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 	//LumosGame* GetLumosGame() { return lumosGame; }

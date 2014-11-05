@@ -23,10 +23,7 @@ static const float FAR  = 10.0f;
 ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) 
 	:	Scene( game ), 
 		lumosGame( game ), 
-		screenport( game->GetScreenport()),
-		forgeScript(data->itemComponent->GetItem()->ID() ^ data->itemComponent->GetItem()->Traits().Experience(),
-					data->itemComponent->GetItem()->Traits().Level(),
-					data->tech )
+		screenport( game->GetScreenport())
 {
 	forgeData = data;
 	item = new GameItem();
@@ -152,9 +149,10 @@ void ForgeScene::Resize()
 
 void ForgeScene::SetModel( bool randomTraits )
 {
-	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
+	const GameItem& humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
-	crystalRequired.EmptyWallet();
+	int crystalArr[NUM_CRYSTAL_TYPES] = { 0 };
+	crystalRequired.Set(0, crystalArr);
 
 	int type	= ForgeScript::RING;
 	int subType = 0;
@@ -193,9 +191,17 @@ void ForgeScene::SetModel( bool randomTraits )
 	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
 	//if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
 
-	forgeScript.Build(	type, subType, 
+	const GameItem* mainItem = forgeData->itemComponent->GetItem();
+	int seed = mainItem->ID() ^ mainItem->Traits().Experience();
+	ForgeScript forgeScript(seed,
+							mainItem->Traits().Level(),
+							forgeData->tech);
+
+	GameItem* newItem = forgeScript.Build( type, subType, 
 						partsFlags, effectFlags, 
-						item, &crystalRequired, &techRequired, randomTraits );
+						&crystalRequired, &techRequired, randomTraits );
+	delete item;
+	item = newItem;
 
 	Chit* parentChit = forgeData->itemComponent->ParentChit();;
 	LumosChitBag* chitBag = 0;
@@ -216,7 +222,7 @@ void ForgeScene::SetModel( bool randomTraits )
 		q.FromAxisAngle( AXIS, type == ForgeScript::SHIELD ? -90.0f : 0.0f );
 		model->SetRotation( q );
 
-		AssignProcedural( item->ResourceName(), false, item->ID(), 0, false, effectFlags, partsFlags, &info );
+		AssignProcedural(item, &info);
 
 		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
@@ -252,23 +258,20 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		// apply the features and make the die roll.
 		SetModel( true );
 
-		int count=0;
-		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) count += crystalRequired.crystal[i];
+		int count = crystalRequired.NumCrystals();
 		
 		forgeData->itemComponent->AddCraftXP( count );
 		forgeData->itemComponent->AddToInventory( item );
-		forgeData->itemComponent->GetItem(0)->historyDB.Increment( "Crafted" );
-		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
-		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
+		forgeData->itemComponent->GetItem()->historyDB.Increment( "Crafted" );
+		// becomes part of the item, and will be returned to Reserve when item is destroyed.
+		item->wallet.Deposit(&forgeData->itemComponent->GetItem()->wallet, 0, crystalRequired.Crystal());
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
 		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.
 		if (chit && history) {
 			Vector2F pos = { 0, 0 };
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
-			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
-			NewsEvent news( NewsEvent::FORGED, pos, item, forgeData->itemComponent->ParentChit() ); 
-			history->Add( news );
+			chit->GetItem()->SetSignificant(history, pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
 		}
 
 		logText.AppendFormat("%s forged! Value=%d.\n", item->Name(), item->GetValue());

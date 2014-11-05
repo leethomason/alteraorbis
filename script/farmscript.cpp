@@ -80,7 +80,7 @@ void FarmScript::ComputeFarmBound()
 	// FffgG		If within 4.eps, may impact us.
 
 	float rad = float(FARM_GROW_RAD)*2.f + 0.1f;
-	ItemNameFilter filter(IStringConst::farm, IChitAccept::MAP);
+	ItemNameFilter filter(ISC::farm, IChitAccept::MAP);
 	CChitArray array;
 	Context()->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, parentChit, &filter);
 
@@ -107,6 +107,7 @@ void FarmScript::ComputeFarmBound()
 	baseImage.SetSize(float(farmBounds.Width()), float(farmBounds.Height()));
 	baseImage.SetPos(float(farmBounds.min.x), float(farmBounds.min.y));
 }
+
 
 int FarmScript::DoTick( U32 delta )
 {
@@ -148,7 +149,7 @@ int FarmScript::DoTick( U32 delta )
 		Rectangle2I r = msc->PorchPos();
 
 		const GameItem& def = ItemDefDB::Instance()->Get( "fruit" );
-		GameItem* gameItem = new GameItem( def );
+		GameItem* gameItem = def.Clone();
 		Context()->chitBag->NewItemChit( ToWorld3F( r.min ),
 											 gameItem,
 											 true,

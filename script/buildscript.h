@@ -21,10 +21,10 @@ struct BuildData
 	grinliz::IString	structure;		// "vault"
 	ai::Needs			needs;			// needs advertised by the building
 	int					standTime;
+	bool				porch;
 
 	enum {ZONE_NONE, ZONE_INDUSTRIAL, ZONE_NATURAL};
-	int					zoneCreate;
-	int					zoneConsume;
+	int					zone;
 };
 
 
@@ -76,17 +76,26 @@ public:
 		BUILD_CIRCUIT_DETECT_ENEMY,
 		BUILD_CIRCUIT_TRANSISTOR,
 
-		NUM_OPTIONS,
+		NUM_PLAYER_OPTIONS,
+
+		// Start non-player buildings.
+		TROLL_STATUE = NUM_PLAYER_OPTIONS,
+		TROLL_BRAZIER,
+		KAMAKIRI_STATUE,
+
+		NUM_TOTAL_OPTIONS,
 
 		GROUP_UTILITY = 0,
 		GROUP_VISITOR,
 		GROUP_ECONOMY,
 		GROUP_BATTLE,
-		GROUP_INDUSTRY
+		GROUP_INDUSTRY,
+
+		END_CIRCUITS = NUM_PLAYER_OPTIONS,
 	};
 
 	static bool IsCircuit(int action) {
-		if (action >= BUILD_CIRCUIT_SWITCH && action < NUM_OPTIONS && action != BATTERY) {
+		if (action >= BUILD_CIRCUIT_SWITCH && action < END_CIRCUITS && action != BATTERY) {
 			return true;
 		}
 		return false;
@@ -98,7 +107,7 @@ public:
 	const BuildData* GetDataFromStructure( const grinliz::IString& structure, int* id );
 
 private:
-	static BuildData buildData[NUM_OPTIONS];
+	static BuildData buildData[NUM_TOTAL_OPTIONS];
 };
 
 #endif // BUILD_SCRIPT_INCLUDED

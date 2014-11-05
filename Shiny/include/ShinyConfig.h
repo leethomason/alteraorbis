@@ -70,4 +70,6 @@ THE SOFTWARE.
 #define SHINY_OUTPUT_MODE		SHINY_OUTPUT_MODE_BOTH
 #endif
 
+#define SHINY_ALWAYS_MILLISECONDS
+
 #endif /* end of include guard */

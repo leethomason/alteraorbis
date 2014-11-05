@@ -70,11 +70,9 @@ private:
 
 	ForgeSceneData*		forgeData;
 	int					techRequired;
-	Wallet				crystalRequired;
+	TransactAmt			crystalRequired;
 	GameItem*			item;
 	grinliz::GLString	logText;
-
-	ForgeScript			forgeScript;
 
 	gamui::ToggleButton	itemType[ForgeScript::NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[ForgeScript::NUM_GUN_TYPES];

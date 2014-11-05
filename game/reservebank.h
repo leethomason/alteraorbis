@@ -30,19 +30,33 @@ public:
 	ReserveBank();
 	~ReserveBank();
 
-	Wallet bank;
+	Wallet wallet;
 
 	void Serialize( XStream* xs );
 
-	int WithdrawDenizen();
-	Wallet WithdrawMonster();
-	const int* CrystalValue();
+	void WithdrawDenizen(Wallet* dst);
+	void WithdrawMonster(Wallet* dst, bool greater);
 
-	// Withdraws 1 or 0 crystals. type is returned.
-	int WithdrawRandomCrystal();
+	const int* CrystalValue();
+	int CrystalValue(int type) {
+		GLASSERT(type >= 0 && type < NUM_CRYSTAL_TYPES);
+		return *(CrystalValue() + type);
+	}
+
+	// There is no CanBuy(), because having the economy
+	// falter because the bank is out of money is 
+	// crazy. Buy() still works. However, Withdraw()
+	// and other functions will get cut way back if
+	// the bank is under water.
+	void Buy(Wallet* src, const int* crystals);
+
 	static ReserveBank* Instance() { return instance; }
+	static Wallet* GetWallet() { return &Instance()->wallet; }
 
 private:
+	void Withdraw(Wallet* dst, int gold, const int* crystal);
+	int RandomCrystal();
+
 	static ReserveBank* instance;
 	grinliz::Random random;
 	int crystalValue[NUM_CRYSTAL_TYPES];

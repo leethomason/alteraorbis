@@ -84,11 +84,11 @@ int RebuildAIComponent::DoTick(U32 delta)
 		// Create workers, if needed.
 		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
 		CChitArray arr;
-		ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
+		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 		if (arr.Empty()) {
-			if (mainItem->wallet.gold >= WORKER_BOT_COST) {
-				Transfer(&ReserveBank::Instance()->bank, &mainItem->wallet, WORKER_BOT_COST);
+			if (mainItem->wallet.Gold() >= WORKER_BOT_COST) {
+				ReserveBank::GetWallet()->Deposit(&mainItem->wallet, WORKER_BOT_COST);
 				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
 			}
 		}
@@ -101,7 +101,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 				BuildScript buildScript;
 				int id = 0;
 				buildScript.GetDataFromStructure(wi.structure, &id);
-				if (workQueue->AddAction(wi.pos, id, float(wi.rot))) {
+				if (workQueue->AddAction(wi.pos, id, float(wi.rot), 0)) {
 					GLOUTPUT(("ReBuild: Structure %s at %d,%d r=%d POP to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y, int(wi.rot)));
 				}
 				else {

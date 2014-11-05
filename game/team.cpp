@@ -7,22 +7,48 @@
 
 using namespace grinliz;
 
-int Team::idPool = 0;
+int Team::idPool = 1;	// id=0 is rogue.
 
-grinliz::IString Team::TeamName( int team )
+grinliz::IString Team::TeamName(int team)
 {
 	IString name;
 	CStr<64> str;
 	int group = 0, id = 0;
 	SplitID(team, &group, &id);
 
-	switch ( group ) {
-	case TEAM_HOUSE:
-		str.Format("House-%x", id);
-		name = StringPool::Intern( str.c_str() );	
+	switch (group) {
+		case TEAM_HOUSE:
+		if (id)
+			str.Format("House-%x", id);
+		else
+			str = "House";
+		name = StringPool::Intern(str.c_str());
 		break;
 
-	default:
+		case TEAM_TROLL:
+		// Since Trolls can't build anything,
+		// any troll core is by definition
+		// Truulga. (At least at this point.)
+		name = ISC::Truulga;
+		break;
+
+		case TEAM_GOB:
+		if (id)
+			str.Format("Gobmen-%x", id);
+		else
+			str = "Gobmen";
+		name = StringPool::Intern(str.c_str());
+		break;
+
+		case TEAM_KAMAKIRI:
+		if (id)
+			str.Format("Kamakiri-%x", id);
+		else
+			str = "Kamakiri";
+		name = StringPool::Intern(str.c_str());
+		break;
+
+		default:
 		break;
 	}
 
@@ -32,21 +58,27 @@ grinliz::IString Team::TeamName( int team )
 
 int Team::GetTeam( const grinliz::IString& itemName )
 {
-	if (itemName == IStringConst::trilobyte) {
+	if (itemName == ISC::trilobyte) {
 		return TEAM_RAT;
 	}
-	else if ( itemName == IStringConst::mantis ) {
+	else if ( itemName == ISC::mantis ) {
 		return TEAM_GREEN_MANTIS;
 	}
-	else if ( itemName == IStringConst::redMantis ) {
+	else if ( itemName == ISC::redMantis ) {
 		return TEAM_RED_MANTIS;
 	}
-	else if ( itemName == IStringConst::troll ) {
+	else if ( itemName == ISC::troll ) {
 		return TEAM_TROLL;
 	}
-	else if (    itemName == IStringConst::cyclops
-		      || itemName == IStringConst::fireCyclops
-		      || itemName == IStringConst::shockCyclops )
+	else if (itemName == ISC::gobman) {
+		return TEAM_GOB;
+	}
+	else if (itemName == ISC::kamakiri) {
+		return TEAM_KAMAKIRI;
+	}
+	else if (    itemName == ISC::cyclops
+		      || itemName == ISC::fireCyclops
+		      || itemName == ISC::shockCyclops )
 	{
 		return TEAM_CHAOS;
 	}
@@ -55,43 +87,57 @@ int Team::GetTeam( const grinliz::IString& itemName )
 }
 
 
+bool Team::IsDefault(const IString& str, int team)
+{
+	if (team == TEAM_NEUTRAL || team == TEAM_CHAOS) return true;
+	return GetTeam(str) == Group(team);
+}
+
 int Team::GetRelationship( int _t0, int _t1 )
 {
 	int t0 = 0, t1 = 0;
-	SplitID(_t0, &t0, 0);
-	SplitID(_t1, &t1, 0);
+	int g0 = 0, g1  =0 ;
+	SplitID(_t0, &t0, &g0);
+	SplitID(_t1, &t1, &g1);
 
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
 
-	// Likewise, neutral is neutral even to themselves.
-	if (t0 == TEAM_NEUTRAL)
-		return RELATE_NEUTRAL;
 	// CHAOS hates all - even each other.
-	if ( t1 == TEAM_CHAOS )   
+	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
 		return RELATE_ENEMY;
-	// Exceptions handled: everyone is friends with themselves.
-	if ( t0 == t1 ) 
-		return RELATE_FRIEND;
+	// Likewise, neutral is neutral even to themselves.
+	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
+		return RELATE_NEUTRAL;
 
-	// Everyone hates RAT
-	if ( t1 == TEAM_RAT )
+	static const int F = RELATE_FRIEND;
+	static const int E = RELATE_ENEMY;
+	static const int N = RELATE_NEUTRAL;
+	static const int OFFSET = TEAM_RAT;
+	static const int NUM = NUM_TEAMS - OFFSET;
+
+	static const int relate[NUM][NUM] = {
+		{ F, E, E, E, E, E, E, E },		// rat
+		{ 0, F, E, N, E, E, F, E },		// green
+		{ 0, 0, F, N, E, E, E, E },		// red
+		{ 0, 0, 0, F, E, N, N, E },		// troll 
+		{ 0, 0, 0, 0, F, N, E, F },		// house
+		{ 0, 0, 0, 0, 0, F, E, N },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F, E },		// kamakiri
+		{ 0, 0, 0, 0, 0, 0, 0, F },		// visitor
+	};
+	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
+	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);
+	GLASSERT(t1 >= t0);
+
+	// Special handling for left/right battle scene matchups:
+	if (   t0 == t1 
+		&& ((g0 == TEAM_ID_LEFT && g1 == TEAM_ID_RIGHT) || (g0 == TEAM_ID_RIGHT && g1 == TEAM_ID_LEFT))) 
+	{
 		return RELATE_ENEMY;
-
-	if ( t0 == TEAM_VISITOR ) {
-		if ( t1 == TEAM_HOUSE )
-			return RELATE_FRIEND;
-		else
-			return RELATE_ENEMY;
 	}
 
-	// Trolls are neutral to the mantis, so they can disperse out.
-	if ( t1 == TEAM_TROLL ) {
-		if ( t0 == TEAM_GREEN_MANTIS || t0 == TEAM_RED_MANTIS )
-			return RELATE_NEUTRAL;
-	}
-
-	return RELATE_ENEMY;
+	return relate[t0-OFFSET][t1-OFFSET];
 }
 
 

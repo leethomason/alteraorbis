@@ -71,13 +71,13 @@ public:
 private:
 	void Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world);
 	void Load();
-	void SetBars( Chit* chit );
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
 	void SetSelectionModel( const grinliz::Vector2F& view );
+	void SetBars(Chit* chit, bool isAvatar);
 
 	void SetPickupButtons();	// if the avatar can pick things up
 	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
@@ -94,6 +94,11 @@ private:
 	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
 	void DoAvatarButton();
+
+	Chit* GetPlayerChit();	// wraps up the call to account for being attached to any domain.
+	int GetPlayerChitID();
+	CoreScript* GetHomeCore();
+	grinliz::Vector2I GetHomeSector();
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,
@@ -135,12 +140,9 @@ private:
 
 	LumosGame*	lumosGame;
 	Sim*		sim;
-	bool		fastMode;
-	int			simTimer;		// used to count sim ticks/second
-	int			simCount;
-	float		simPS;
 	int			endTimer;
 
+	grinliz::Vector2I	attached;
 	int					targetChit;
 	int					possibleChit;
 	int					infoID;
@@ -164,7 +166,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	saveButton, loadButton;
-	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
+	gamui::ToggleButton	buildButton[BuildScript::NUM_PLAYER_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;
 	gamui::PushButton	cameraHomeButton;

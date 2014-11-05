@@ -45,11 +45,9 @@ public:
 	float DestroyedFraction() const;
 
 private:
+	// There is debugging code in chit.cpp that hardcodes the '800'
 	enum { COUNTDOWN = 800 };
 	void DeltaHealth();
-
-	//U32 destroyed;
-	//BattleMechanics battleMechanics;
 };
 
 

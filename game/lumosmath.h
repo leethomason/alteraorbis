@@ -100,6 +100,36 @@ inline int SectorIndex( const grinliz::Vector2I& sector ) {
 }
 
 
+// Assumes +Z axis is 0 rotation. 
+// NOT consistent. (Ick.)
+inline int WorldNormalToRotation(const grinliz::Vector2I& normal) {
+	GLASSERT(abs(normal.x) + abs(normal.y) == 1);
+	if (normal.y == 1) return 0;
+	else if (normal.x == 1) return 90;
+	else if (normal.y == -1) return 180;
+	else if (normal.x == -1) return 270;
+	GLASSERT(0);
+	return 0;
+}
+
+
+inline grinliz::Vector2I WorldRotationToNormal(int rotation) {
+	grinliz::Vector2I v = { 1, 0 };
+	if (rotation == 0) v.Set(0, 1);
+	else if (rotation == 90) v.Set(1, 0);
+	else if (rotation == 180) v.Set(0, -1);
+	else if (rotation == 270) v.Set(-1, 0);
+	else GLASSERT(0);
+	return v;
+}
+
+// Positive 90 degree rotation.
+inline grinliz::Vector2I RotateWorldVec(const grinliz::Vector2I& vec)
+{
+	grinliz::Vector2I r = { vec.y, -vec.x };
+	return r;
+}
+
 // Convert 3-18 (actually 1-20) to 0.4->2.0
 // 10.5 is normal -> 1.0, how to map? The highest shouldn't be 20x the lowest, probably.
 // Aim for a little moderation in the constants.
@@ -135,6 +165,23 @@ inline grinliz::Vector2F RandomInRect(const grinliz::Rectangle2I& r, grinliz::Ra
 	grinliz::Rectangle2F rect2f = ToWorld(r);
 	grinliz::Vector2F v = { rect2f.min.x + random->Uniform()*rect2f.Width(), 
 		                    rect2f.min.y + random->Uniform()*rect2f.Height() };
+	return v;
+}
+
+inline grinliz::Vector2I RandomInOutland(grinliz::Random* random) 
+{
+	static const int OUTLAND = NUM_SECTORS / 4 + 1;
+
+
+	grinliz::Vector2I v = { 0, 0 };
+	for (int i = 0; i < 2; ++i) {
+		if (random->Bit())
+			v.X(i) = NUM_SECTORS - OUTLAND + random->Rand(OUTLAND);
+		else
+			v.X(i) = random->Rand(OUTLAND);
+
+		GLASSERT(v.X(i) >= 0 && v.X(i) < NUM_SECTORS);
+	}
 	return v;
 }
 

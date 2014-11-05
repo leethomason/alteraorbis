@@ -108,9 +108,6 @@ private:
 		RIGHT_MOB,
 		RIGHT_WEAPON,
 		RIGHT_LEVEL,
-
-		LEFT_TEAM,
-		RIGHT_TEAM
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
 	gamui::TextLabel label[2];

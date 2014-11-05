@@ -18,18 +18,33 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
-#include "../game/gamelimits.h"
+#include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 
 class Census
 {
 public:
 	Census() {
-		normalMOBs = 0;
-		greaterMOBs = 0;
 	}
 
-	int	normalMOBs;		// the number of general MoBs (with AIs). Generally TYPICAL_MONSTERS
-	int greaterMOBs;	// greater mobs, generally TYPICAL_GREATER
+	void Add(const grinliz::IString& name);
+	void Remove(const grinliz::IString& name);
+
+	void NumByType(int *lesser, int *greater, int *denizen);
+
+	struct MOBItem {
+		MOBItem() : count(0) {}
+		bool operator<(const MOBItem& rhs) const { return name < rhs.name; }
+		bool operator==(const MOBItem& rhs) const { return name == rhs.name; }
+
+		grinliz::IString name;
+		int count;
+	};
+
+	const grinliz::CDynArray<MOBItem>& MOBItems() const { return mobItems; }
+
+private:
+	grinliz::CDynArray<MOBItem> mobItems;
 };
 
 #endif 

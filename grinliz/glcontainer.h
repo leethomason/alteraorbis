@@ -167,6 +167,8 @@ class CDynArray
 {
 	enum { CACHE = 4 };
 public:
+	typedef T ElementType;
+
 	CDynArray() : size( 0 ), capacity( CACHE ), nAlloc(0) {
 		mem = reinterpret_cast<T*>(cache);
 		GLASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
@@ -258,6 +260,12 @@ public:
 		Pop();
 	}
 
+	void Reverse() {
+		for (int i = 0; i < size / 2; ++i) {
+			Swap(&mem[i], &mem[size - 1 - i]);
+		}
+	}
+
 	int Find( const T& t ) const {
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == t )
@@ -293,6 +301,8 @@ public:
 			}
 		}
 	}
+
+	void Sort() { grinliz::Sort<T, CompValue>(mem, size); }
 
 	// Binary Search: array must be sorted!
 	// near: an optional parameter that returns something near an insertion point.
@@ -363,6 +373,8 @@ template < class T, int CAPACITY >
 class CArray
 {
 public:
+	typedef T ElementType;
+
 	// construction
 	CArray() : size( 0 )	{}
 	~CArray()				{}
@@ -409,7 +421,7 @@ public:
 		return temp;
 	}
 
-	int Find( const T& key ) {
+	int Find( const T& key ) const { 
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == key )
 				return i;
@@ -428,26 +440,35 @@ public:
 	T*		 Mem() 			{ return mem; }
 	const T* Mem() const	{ return mem; }
 
+	const T* End() 			{ return mem + size; }
+	const T* End() const	{ return mem + size; }
+
 	void SwapRemove( int i ) {
 		GLASSERT( i >= 0 && i < (int)size );
 		mem[i] = mem[size-1];
 		Pop();
 	}
 
-	const T& Max() const {
+	const T& Max(int *index = 0) const {
 		int m = 0;
+		if (index) *index = 0;
 		for( int i=1; i<size; ++i ) {
-			if ( mem[i] > mem[m] )
+			if (mem[i] > mem[m]) {
 				m = i;
+				if (index) *index = i;
+			}
 		}
 		return mem[m];
 	}
 
-	const T& Min() const {
+	const T& Min(int *index = 0) const {
 		int m = 0;
+		if (index) *index = 0;
 		for( int i=1; i<size; ++i ) {
-			if ( mem[i] < mem[m] )
+			if (mem[i] < mem[m]) {
 				m = i;
+				if (index) *index = i;
+			}
 		}
 		return mem[m];
 	}
@@ -457,6 +478,50 @@ private:
 	int size;
 };
 
+ // 'auto' in a #define. could be a lamba? or clean up? not sure if C11 is going to give me trouble.
+#define GL_ARRAY_FILTER( arr, f ) {		\
+	int _k_ = 0;						\
+	while (_k_ < arr.Size()) {			\
+		auto& ele = arr[_k_];			\
+		if (f) {						\
+			++_k_;						\
+		}								\
+		else {							\
+			arr.SwapRemove(_k_);		\
+		}								\
+	}									\
+}
+
+
+#define GL_ARRAY_FILTER_ORDERED( arr, f ) {		\
+	int _k_ = 0;						\
+	while (_k_ < arr.Size()) {			\
+		auto& ele = arr[_k_];			\
+		if (f) {						\
+			++_k_;						\
+		}								\
+		else {							\
+			arr.Remove(_k_);			\
+		}								\
+	}									\
+}
+
+/*	Tom Forsyth's foreach is amazing, and I learned something about programming from studying it.
+	Since all the variables declared in the 'for' have to be "pointer variants" of the same type,
+	it's tricky to get right. Also the functional assert, while cool, is a little inconvenient.
+
+	I don't claim this is better, but some pros:
+	- Much less fidly about const, type, and references
+	- The type T can be const if the list isn't.
+	- There's only one variant: make T a pointer, reference, or value as appropriate
+	- still debug checks!
+
+	Con:
+	- nastier syntax
+*/
+
+#define GL_FOR_EACH_BEGIN(T, ref, list ) { const T const * first = list.Mem(); const T const* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
+#define GL_FOR_EACH_END }}
 
 class CompCharPtr {
 public:

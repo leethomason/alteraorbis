@@ -1,7 +1,11 @@
 #include "barstack.h"
 #include "../game/lumosgame.h"
+#include "../game/layout.h"
 
 using namespace gamui;
+
+static const float HEIGHT_FRACTION = 0.75f;
+static const float BAR_ALPHA = 0.80f;
 
 BarStackWidget::BarStackWidget()
 {
@@ -16,12 +20,16 @@ void BarStackWidget::Init(gamui::Gamui* g, int _nBars)
 	GLASSERT(deltaY == 0);
 	GLASSERT(_nBars <= MAX_BARS);
 	nBars = _nBars;
-	height = g->GetTextHeight() * 0.8f;
-	deltaY = g->GetTextHeight();
 
-//	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
+	float rowHeight = LAYOUT_SIZE_Y * 0.5f;
+	deltaY = rowHeight;
+	height = deltaY * HEIGHT_FRACTION;
+
 	RenderAtom gray  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
+
+	gray.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+	blue.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
 
 	for (int i = 0; i < nBars; ++i) {
 		barArr[i].Init(g, 2, blue, gray);
@@ -31,7 +39,7 @@ void BarStackWidget::Init(gamui::Gamui* g, int _nBars)
 }
 
 
-void BarStackWidget::SetSize(float w, float _h)
+void BarStackWidget::SetSize(float w, float /*h*/ )
 {
 	for (int i = 0; i < nBars; ++i) {
 		barArr[i].SetSize(w, height);
@@ -69,7 +77,9 @@ void BarStackWidget::SetBarRatio(int i, float ratio)
 
 void BarStackWidget::SetBarColor(int i, const gamui::RenderAtom& atom)
 {
-	barArr[i].SetLowerAtom(atom);
+	RenderAtom a = atom;
+	a.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+	barArr[i].SetLowerAtom(a);
 }
 
 

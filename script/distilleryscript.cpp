@@ -42,7 +42,7 @@ void DistilleryScript::SetInfoText()
 	if ( ic && rc ) {
 		int nFruit = 0;
 		for( int i=1; i<ic->NumItems(); ++i ) {
-			if ( ic->GetItem( i )->IName() == IStringConst::fruit ) {
+			if ( ic->GetItem( i )->IName() == ISC::fruit ) {
 				++nFruit;
 			}
 		}
@@ -68,13 +68,16 @@ int DistilleryScript::DoTick( U32 delta )
 		Vector2I sector = msc->GetSector();
 		Rectangle2I porch = msc->PorchPos();
 		CoreScript* cs = CoreScript::GetCore( sector );
+		GLASSERT(cs);
+		if (!cs) return VERY_LONG_TICK;
+
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");
 	
 		float tech = Max(cs->GetTech(), 0.8f);
 		double dProg = double(tech) * double(progressTick.Period()) / double(TECH_MAX);
 		double p = dProg*double(n);
 		if (evalScript) {
-			p *= 0.5 + 0.5*evalScript->EvalIndustrial(false);
+			p *= 0.65 + 0.35*evalScript->EvalIndustrial(false);
 		}
 
 		progress += int(p);
@@ -83,16 +86,16 @@ int DistilleryScript::DoTick( U32 delta )
 			progress -= ELIXIR_TIME;
 
 			if ( ic ) {
-				int index = ic->FindItem( IStringConst::fruit );
-				if ( index >= 0 ) {
+				const GameItem* fruit = ic->FindItem( ISC::fruit );
+				if ( fruit ) {
 					//cs->nElixir += ELIXIR_PER_FRUIT;
-					GameItem* item = ic->RemoveFromInventory( index );
+					GameItem* item = ic->RemoveFromInventory( fruit );
 					delete item;
 
 					const GameItem& def = ItemDefDB::Instance()->Get( "elixir" );
 
 					for (int k = 0; k < ELIXIR_PER_FRUIT; ++k) {
-						GameItem* gameItem = new GameItem( def );
+						GameItem* gameItem = def.Clone();
 						Vector2F pos2 = RandomInRect(porch, &parentChit->random);
 						static const int ELIXIR_SELF_DESTRUCT = 60*1000;
 						Context()->chitBag->NewItemChit(ToWorld3F(pos2), gameItem, false, true, ELIXIR_SELF_DESTRUCT);
@@ -102,7 +105,7 @@ int DistilleryScript::DoTick( U32 delta )
 		}
 	}
 	
-	if (ic && ic->FindItem(IStringConst::fruit) < 0) {
+	if (ic && ic->FindItem(ISC::fruit) < 0) {
 		// No fruit, no progress.
 		progress = 0;
 	}

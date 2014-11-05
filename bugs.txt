@@ -67,11 +67,125 @@
 		- tune EmitterGenerator - meander length
 
 	- Beta 3
-		- remove social
-		- domain AI
-		- troll deity
-		- Gob-men domain
-		- Mantis-men domain
+		x remove social
+		x domain AI
+			x left + right support in the AI for building
+			x use the least common pave
+			x save pave, test
+		x troll deity
+			x torches
+			x create items (Truulga). limit creation to culture.
+			x colors
+				x items
+				x buildings (Truulga okay)
+			x logic to adjust needs to travel
+				x summon trolls
+				x depart trolls
+			x avatar use
+			x destroy and steal items with markets
+			x logic for Truulga creation, destruction, spawning. destroy cores.
+			x see Truulga on map
+		x debug: attach to domain
+		x Gob-men domain
+			x need gob names
+			x need ui icon
+			x gob building colors
+			d gob bar names
+			x better logic for farm building: how many should build based on efficiency?
+			x gob alignment (team, enemy, friend)
+			x recruit neutral, wandering gobmen
+			x how to fund gobmen domain??
+			x bug setting face (mantis not working - need fallback to name)
+		x Redo spawn system. 
+			x Spawn trolls from Truulga domain
+			x Domain takeover (by mobs)
+		x Kamakiri domain
+			x art
+			x animation
+			x change name
+		x Player domain colors, color screen, revisit gob colors
+
+		x refactor
+			x GameItem saving and loading
+			x GameItem XML loading
+		x ReserveBank needs a "guaranteed withdrawal" to start player domains.
+		x Start with 0 team id for un-assigned, all domains 1+ team id
+		x Spawn Gob-men in 4, more frequently.
+		x 2000 gold shields
+		x full screen toggle
+		x crazy human colors
+		x no start selection
+		x gob domains don't count in census
+		x strange container-is-item bug when looking at items from census. (nothing should be selected...)
+		x partially fixed....should select correct item when entering container screen
+		t recruitment of neutral/friendly doesn't seem to work
+		x memory leak - item code???
+		x When domain falls, teamID->0
+		x Search full domain for farms?
+		x and then re-test with higher limits
+		x markets aren't paying tax (check, think this is working)
+		x map icons for MOBs aren't square
+		x special kamikiri item
+		x Goblin Half Man
+			x http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
+			x model
+			x animation
+		x Mantis Man
+			x concept
+			x model 
+			x animation
+		x Troll
+			x concept
+			x model 
+			x animation
+			x spawn strategy : switch to arachnoid approach once there are more options
+			x item pickup / use AI
+		x Arachnoid
+		  x update tail and texturing
+
+		t does history get tracked correctly when core gets taken over?
+		t clean up UI. less clutter.
+		t redundant news posts
+		t AI buildings not connected.
+		x update trilobyte to match sketch
+		x ClearDisconnected() not handling farms correctly
+		x kamakiri building
+		x Fix map to track travel destination
+		x keep porches clear
+		x red mantis way over powered?
+		x map show the full 5x5 highlight in the left view
+		x ToUI doesn't set bounds...
+		x race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		x asserts for neutral in procedural aren't correct
+		x food/elixir above kamakiri heads
+		x negative numbers of crystal in the bank
+		x being underwater (plant) should make fire go out.
+		x Census: actual census. # trolls, # mantis, etc. etc.
+		
+		- test bank running out of money
+		- UI icons for gobmen, kamakiri, others?
+		- red mantis -> all red
+		- "human" UI icon
+		x "home" icon vs. grid travel icon
+		- test: build a home domain
+
+		- Denizen domains
+		- Visitor role
+			- Visitor travel
+			- Visitor trails on map
+		- Squads
+			- squad control:
+				- defend
+				- attack
+				- adventure
+				- follow avatar
+
+		- advisor still comes up in weird states.
+		- special gobman item, building
+		- re-test battle scenes. balance.
+		- Long play test
+			- Troll distribution
+			- Troll gun distribution
 
 	- World Gen
 		- less techy, more interesting world gen
@@ -84,21 +198,21 @@
 	- Census
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
-		- money checks optional
-		- needs to feel interactive
-		- browsing of items/people
-		- redo UI layout
+		x money checks optional
+		x needs to feel interactive
+		x browsing of items/people
+		x redo UI layout
 
 	- Market
 		- world effects morale/needs: water, tombstones, temples, etc.
-		- proper game start: location, selection of team color, icons
-		- turret
-		- team colors
+		x proper game start: location, selection of team color, icons
+		x turret
+		x team colors
 		- battle flags
     	- time scale culling
-		- vault:
-			- item limit
-		- what to do with full vaults?
+		x vault:
+			x item limit
+		x what to do with full vaults?
 		- marking build zones
 			- dragging, rows
 			- top view?
@@ -159,30 +273,14 @@
 
 ** Art **
 
-- Goblin Half Man
-	- http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
-	- model
-	- animation
-- Mantis Man
-	- concept
-	- model 
-	- animation
-x Troll
-	x concept
-	x model 
-	x animation
-	- spawn strategy : switch to arachnoid approach once there are more options
-	x item pickup / use AI
 - Dragon
 	- concept
 	- model 
 	- animation
-- Arachnoid
-  - update tail and texturing
-	
+
 - wilder, more digital face colors
 - filter face colors to matching effect
-- more natural skin tones
+x more natural skin tones
 
 ** Releasing **
 - set version

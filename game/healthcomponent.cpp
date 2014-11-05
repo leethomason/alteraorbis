@@ -143,7 +143,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 									// was lost before impact, in which case this assert should
 									// be removed.
 
-			IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
+			MeleeWeapon* item=inventory->GetMeleeWeapon();
 			if ( render && inventory && item  ) { /* okay */ }
 			else return;
 

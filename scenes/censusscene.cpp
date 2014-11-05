@@ -1,5 +1,5 @@
 #include "censusscene.h"
-#include "../xegame/chitbag.h"
+#include "../game/lumoschitbag.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
@@ -8,6 +8,8 @@
 #include "../game/reservebank.h"
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
+#include "../game/team.h"
+#include "../script/corescript.h"
 #include "../engine/engine.h"
 #include "characterscene.h"
 
@@ -28,15 +30,61 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 		label[i].SetTab(100);
 	}
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		static const char* NAME[NUM_GROUPS] = { "Notable", MOB_KILLS, "Greater\n" MOB_KILLS, "Items", "Crafting", "Domains" };
+		static const char* NAME[NUM_GROUPS] = { "Notable", MOB_KILLS, "Greater\n" MOB_KILLS, "Items", "Crafting", "Domains", "Data" };
 		radio[i].Init(&gamui2D, game->GetButtonLook(0));
 		radio[i].SetText(NAME[i]);
 		radio[0].AddToToggleGroup(&radio[i]);
 	}
 	radio[0].SetDown();
+	censusData.Init(&gamui2D);
 
 	Scan();
-	DoLayout();
+
+	// Run through and do the actually census data, place it in the text field.
+	GLString simStr;
+	simStr.Format("Population\n\n");
+
+	const Census& census = d->chitBag->census;
+	for (int i = 0; i < census.MOBItems().Size(); ++i) {
+		const Census::MOBItem& mobItem = census.MOBItems()[i];
+		simStr.AppendFormat("%s\t%d\n", mobItem.name.safe_str(), mobItem.count);
+	}
+
+	simStr.AppendFormat("\n\nDomains\n\n");
+
+	CDynArray<Census::MOBItem> domains;
+	for (int j = 0; j < NUM_SECTORS; j++) {
+		for (int i = 0; i < NUM_SECTORS; i++) {
+			Vector2I sector = { i, j };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && cs->ParentChit()->Team()) {
+				int group = Team::Group(cs->ParentChit()->Team());
+				IString team = Team::TeamName(group);
+				Census::MOBItem item;
+				item.name = team; item.count = 1;
+				
+				int index = domains.Find(item);
+				if (index >= 0) {
+					domains[index].count++;
+				}
+				else {
+					domains.Push(item);
+				}
+			}
+		}
+	}
+
+	domains.Sort();
+	for (int i = 0; i < domains.Size(); ++i) {
+		const Census::MOBItem& item = domains[i];
+		simStr.AppendFormat("%s\t%d\n", item.name.safe_str(), item.count);
+	}
+	simStr.append("\n\n");
+
+	censusData.SetText(simStr.safe_str());
+	censusData.SetVisible(false);
+
+	DoLayout(true);
 }
 
 
@@ -52,9 +100,6 @@ void CensusScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	const Screenport& port = lumosGame->GetScreenport();
 
-	// --- half size --- //
-	//layout.SetSize(layout.Width(), 0.5f*layout.Height());
-
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		layout.PosAbs(&link[i], 2, i);
 		layout.PosAbs(&label[i], 3, i);
@@ -62,6 +107,10 @@ void CensusScene::Resize()
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		layout.PosAbs(&radio[i], 0, i);
 	}
+
+	layout.PosAbs(&censusData, 3, 0);
+	//censusData.SetBounds(port.UIWidth() / 2, 0);
+	censusData.SetTab(layout.Width()*2.0f);
 }
 
 
@@ -72,9 +121,13 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	}
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		if (item == &link[i]) {
-			Chit* chit = chitBag->GetChit((int)link[i].userData);
+			Chit* chit = 0; 
+			int itemID = (int)link[i].userData;
+			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				const GameItem* gi = ItemDB::Instance()->Find(itemID);
+
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, gi);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}
@@ -82,7 +135,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	}
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		if (item == &radio[i]) {
-			DoLayout();
+			DoLayout(false);
 		}
 	}
 }
@@ -128,7 +181,8 @@ void CensusScene::ScanItem(ItemComponent* ic, const GameItem* item)
 
 	ItemHistory h;
 	h.Set(item);
-	h.tempID = ic->ParentChit()->ID();
+	GLASSERT(h.itemID);
+	itemIDToChitMap.Add(h.itemID, ic->ParentChit());
 	AddToHistory(h);
 }
 
@@ -166,7 +220,7 @@ void CensusScene::Scan()
 			if (!ic) continue;
 
 			for (int j = 0; j < ic->NumItems(); ++j) {
-				GameItem* item = ic->GetItem(j);
+				const GameItem* item = ic->GetItem(j);
 				if (!item) continue;
 
 				allWallet.Add(item->wallet);
@@ -199,7 +253,9 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	}
 	itemHistory.AppendDesc(&str, newsHistory, "\n\t");
 
-	Chit* chit = chitBag->GetChit(itemHistory.tempID);
+	Chit* chit = 0;
+	GLASSERT(itemHistory.itemID);
+	itemIDToChitMap.Query(itemHistory.itemID, &chit);
 	if (chit) {
 		SpatialComponent* sc = chit->GetSpatialComponent();
 		if (sc) {
@@ -212,31 +268,41 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	}
 
 	label[i].SetText(str.c_str());
-	link[i].SetVisible(itemHistory.tempID > 0);
-	link[i].userData = (const void*)itemHistory.tempID;
+	link[i].SetVisible(chit > 0);
+	link[i].userData = (const void*)itemHistory.itemID;
 }
 
 
-void CensusScene::DoLayout()
+void CensusScene::DoLayout(bool first)
 {
 	ReserveBank* reserve = ReserveBank::Instance();
-	const Wallet& reserveWallet = reserve->bank;
+	const Wallet& reserveWallet = reserve->wallet;
 	NewsHistory* history = chitBag->GetNewsHistory();
-
-	GLString debug;
 	GLString str;
-	debug.AppendFormat( "Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
-	debug.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
-	debug.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
-	debug.AppendFormat( "Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
-		allWallet.gold + reserveWallet.gold, 
-		allWallet.crystal[0] + reserveWallet.crystal[0], 
-		allWallet.crystal[1] + reserveWallet.crystal[1], 
-		allWallet.crystal[2] + reserveWallet.crystal[2], 
-		allWallet.crystal[3] + reserveWallet.crystal[3] );
 
-	debug.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
-	debug.append( "\n" );
+	if (first) {
+		GLString debug;
+
+		debug.AppendFormat("Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET);
+		debug.AppendFormat("InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.Gold(), allWallet.Crystal(0), allWallet.Crystal(1), allWallet.Crystal(2), allWallet.Crystal(3));
+		debug.AppendFormat("InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.Gold(), reserveWallet.Crystal(1), reserveWallet.Crystal(1), reserveWallet.Crystal(2), reserveWallet.Crystal(3));
+		debug.AppendFormat("Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n",
+						   allWallet.Gold() + reserveWallet.Gold(),
+						   allWallet.Crystal(0) + reserveWallet.Crystal(0),
+						   allWallet.Crystal(1) + reserveWallet.Crystal(1),
+						   allWallet.Crystal(2) + reserveWallet.Crystal(2),
+						   allWallet.Crystal(3) + reserveWallet.Crystal(3));
+
+		debug.AppendFormat("MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.Gold(), mobWallet.Crystal(0), mobWallet.Crystal(1), mobWallet.Crystal(2), mobWallet.Crystal(3));
+		debug.append("\n");
+		GLOUTPUT(("%s", debug.safe_str()));
+
+#ifdef DEBUG
+		GLString tfield = censusData.GetText();
+		tfield.append(debug);
+		censusData.SetText(tfield.safe_str());
+#endif
+	}
 
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		//group[i].SetVisible(false);
@@ -283,8 +349,7 @@ void CensusScene::DoLayout()
 			if (mobActive[i].item) {
 				ItemHistory h;
 				h.Set(mobActive[i].item);
-				h.tempID = mobActive[i].ic ? mobActive[i].ic->ParentChit()->ID() : 0;
-
+				itemIDToChitMap.Add(h.itemID, mobActive[i].ic ? mobActive[i].ic->ParentChit() : 0);
 				SetItem(count, NAME[i], h);
 				++count;
 			}
@@ -295,30 +360,33 @@ void CensusScene::DoLayout()
 			if (itemActive[i].item) {
 				ItemHistory h;
 				h.Set(itemActive[i].item);
-				h.tempID = itemActive[i].ic ? itemActive[i].ic->ParentChit()->ID() : 0;
+				itemIDToChitMap.Add(h.itemID, itemActive[i].ic ? itemActive[i].ic->ParentChit() : 0);
 				SetItem(count, NAME[i], h);
 				++count;
 			}
 		}
 	}
-	GLOUTPUT(("%s", debug.safe_str()));
+	censusData.SetVisible(radio[GROUP_DATA].Down());
 }
 
 
 void CensusScene::HandleHotKey(int value)
 {
+	/*
 	if (value == GAME_HK_SPACE) {
 		for (int i = 0; i < greaterKills.Size(); ++i) {
 			int id = greaterKills[i].tempID;
 			Chit* chit = chitBag->GetChit(id);
 			if (chit && chit->GetItemComponent()) {
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0);
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, 0);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}
 		}
 	}
-	else {
+	else 
+	*/
+	{
 		super::HandleHotKey(value);
 	}
 }

@@ -28,7 +28,7 @@ class XStream;
 class LumosChitBag;
 class Model;
 class Engine;
-struct Wallet;
+class Wallet;
 class Chit;
 
 
@@ -44,7 +44,7 @@ public:
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
-		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0) { pos.Zero(); }
+		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0), variation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
 
@@ -56,12 +56,16 @@ public:
 		int					assigned;		// id of worker assigned this task.			
 		Model*				model;			// model used to show map work location
 		float				rotation;
+		int					variation;		// which PAVE
 	};
 
 	void Serialize( XStream* xs );
 	// Manages what jobs there are to do:
-	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation = 0);	// add an action to do
+	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation, int variation);	// add an action to do
 	void Remove( const grinliz::Vector2I& pos );
+
+	bool HasJob() const				{ return !queue.Empty(); }
+	bool HasAssignedJob() const;
 	
 	// Manages which chits are doing a job:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
@@ -93,7 +97,6 @@ private:
 	void SendNotification( const grinliz::Vector2I& pos );
 
 	Chit				*parentChit;
-	//int					idPool;
 	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do
 };

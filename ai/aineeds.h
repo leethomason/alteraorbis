@@ -20,9 +20,26 @@ namespace ai {
 	food=0 is starving.
 
 	- food (elixir,plants)
-	- social (bar, club, squad)
 	- energy (sleep tube)
 	- fun (battle, bar, club, work, adventuring, crafting)
+
+	Removed social, made part of 'fun'. (It's fun to talk to other
+	people if you are extroverted.)
+
+	HAS_NEEDS and USES_BUILDINGS aren't quite orthogonal.
+
+	HAS_NEEDS, USES_BUILDINGS (denizen)
+		wandering: morale reduces slowly.	morale==SMALL goes home
+		-- avoiding for more code: arrive home: morale increased to 1/2
+		at friendly: morale/needs consumed. morale==SMALL goes home
+		at home: morale/needs consumed. morale==0 goes bad
+
+	!HAS_NEEDS, USES_BUILDINGS (troll)
+		at friendly/home: needs reduce, and buildings provide needs,
+		but morale isn't changed by needs
+
+	HAS_NEEDS, !USES_BUILDINGS
+		senseless at this time.
 */
 class Needs
 {
@@ -31,7 +48,6 @@ public:
 
 	enum {
 		FOOD,
-		SOCIAL,
 		ENERGY,
 		FUN,
 		NUM_NEEDS
@@ -60,6 +76,8 @@ public:
 
 	// Intended to be pretty long - every second or so.
 	void DoTick( U32 delta, bool inBattle, bool lowerDifficulty, const Personality* );
+	// A morale-only tick, generally if a mob (with HAS_NEEDS) is travelling.
+	void DoTravelTick(U32 delta);
 
 	// Needs to load from XML - declared in the itemdef.xml
 	void Serialize( XStream* xs );

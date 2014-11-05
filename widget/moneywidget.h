@@ -4,7 +4,7 @@
 #include "../gamui/gamui.h"
 #include "../game/gamelimits.h"
 
-struct Wallet;
+class Wallet;
 
 class MoneyWidget : public gamui::IWidget
 {

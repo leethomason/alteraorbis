@@ -655,7 +655,9 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 		// flammability is reflected in the chance
 		// of it catching fire; once on fire, everything
 		// has the same chance of the fire going out.
-		if (wg->PlantOnFire() && random.Uniform() < CHANCE_FIRE_OUT) {
+		bool underWater = wg->FluidHeight() && (wg->FluidType() == WorldGrid::FLUID_WATER);
+
+		if (wg->PlantOnFire() && (random.Uniform() < CHANCE_FIRE_OUT || underWater)) {
 			wg->SetPlantOnFire(false);
 		}
 		if (wg->PlantOnShock() && random.Uniform() < CHANCE_FIRE_OUT) {
@@ -699,6 +701,12 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 			chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 		}
 	}
+}
+
+
+void WorldMap::Unsettle(const grinliz::Vector2I& sector)
+{
+	fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
 }
 
 
@@ -1590,23 +1598,6 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 }
 
 
-/*
-bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
-							const grinliz::Vector2F& end,
-							grinliz::Vector2F* bestEnd,
-							float* totalCost)
-{
-	bool okay = CalcPath(start, end, 0, totalCost, false);
-	if (okay) {
-		*bestEnd = end;
-		return true;
-	}
-	okay = CalcPathBeside(start, end, bestEnd, totalCost);
-	return okay;
-}
-*/
-
-
 bool WorldMap::CalcWorkPath(const grinliz::Vector2F& start,
 							const grinliz::Rectangle2I& end,
 							grinliz::Vector2F* bestEnd,
@@ -2223,10 +2214,14 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 	}
 	voxelBuffer.Clear();
 	nTrees = 0;
-	ParticleSystem* ps = engine->particleSystem;
-	const ParticleDef& fireDef = ps->GetPD(ISC::fire);
-	const ParticleDef& smokeDef = ps->GetPD(ISC::smoke);
-	const ParticleDef& shockDef = ps->GetPD(ISC::shock);
+	ParticleSystem* ps = 0;
+	const ParticleDef *fireDef = 0, *smokeDef = 0, *shockDef = 0;
+	if (engine) {
+		ps = engine->particleSystem;
+		fireDef  = &ps->GetPD(ISC::fire);
+		smokeDef = &ps->GetPD(ISC::smoke);
+		shockDef = &ps->GetPD(ISC::shock);
+	}
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2271,11 +2266,15 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 
 						Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
 						if (wg.PlantOnFire()) {
-							ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
-							ps->EmitPD(fireDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							if (ps) {
+								ps->EmitPD(*smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+								ps->EmitPD(*fireDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							}
 						}
 						if (wg.PlantOnShock()) {
-							ps->EmitPD(shockDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							if (ps) {
+								ps->EmitPD(*shockDef, pos3f, V3F_UP, STD_FRAME_TIME);
+							}
 						}
 					}
 				}
@@ -2302,7 +2301,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
 
 					Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
-					ps->EmitPD(smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+					if (ps) {
+						ps->EmitPD(*smokeDef, pos3f, V3F_UP, STD_FRAME_TIME);
+					}
 				}
 				else if ( wg.RockHeight() ) {
 					id = (wg.RockType() == WorldGrid::ROCK) ? ROCK : ICE;

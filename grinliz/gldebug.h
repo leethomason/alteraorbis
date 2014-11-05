@@ -47,7 +47,8 @@ void relprintf( const char* format, ... );
 		void logprintf( const char* format, ... );
 		void WinDebugBreak();
 		
-		#define GLASSERT( x )			if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
+		#define GLASSERT( x )		if ( !(x)) { _asm { int 3 } }
+		inline bool GL_FUNC_ASSERT(bool x)	{ GLASSERT(x); return x; }
 		#define GLOUTPUT( x )		dprintf x
 		#define GLLOG( x )			logprintf x
 		#define GLOUTPUT_REL( x )	relprintf x
@@ -113,9 +114,7 @@ void relprintf( const char* format, ... );
 		void MemLeakCheck();
 		void MemStartCheck();
 		void MemHeapCheck();
-		#define glnew new(__FILE__, __LINE__)
 	#else
-		#define glnew new
 		inline void MemLeakCheck()	{}
 		inline void MemStartCheck()	{}
 		inline void MemHeapCheck()	{}
@@ -136,7 +135,6 @@ void relprintf( const char* format, ... );
 		}
 	#endif
 #else
-	#define glnew new
 	inline void MemLeakCheck()	{}
 	inline void MemStartCheck()	{}
 	inline void* Malloc( size_t size ) {

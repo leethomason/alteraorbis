@@ -21,13 +21,12 @@ public:
 		LEVEL_BAR = 0x08,
 		MORALE_BAR = 0x10,
 
-		FOOD_BAR = 0x020,
-		SOCIAL_BAR = 0x040,
-		ENERGY_BAR = 0x080,
-		FUN_BAR = 0x100,
+		FOOD_BAR   = 0x020,
+		ENERGY_BAR = 0x040,
+		FUN_BAR    = 0x080,
 
 		BATTLE_BARS = HP_BAR | AMMO_BAR | SHIELD_BAR | LEVEL_BAR,
-		NEED_BARS	= MORALE_BAR | FOOD_BAR | SOCIAL_BAR | ENERGY_BAR | FUN_BAR,
+		NEED_BARS	= MORALE_BAR | FOOD_BAR | ENERGY_BAR | FUN_BAR,
 		ALL_BARS	= NEED_BARS | LEVEL_BAR | SHIELD_BAR | AMMO_BAR | HP_BAR,
 
 		SHOW_NAME	= 0x200,
@@ -52,6 +51,9 @@ public:
 	virtual const gamui::Button* GetButton() const = 0;
 	virtual gamui::Button* GetButton() = 0;
 
+	int Flags() const { return flags; }
+	void SetFlags(int f);
+
 protected:
 	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags, int id );
 
@@ -60,17 +62,15 @@ protected:
 	gamui::TextLabel	upper;
 	enum {
 		BAR_HP,
-		BAR_AMMO,
 		BAR_SHIELD,
+		BAR_AMMO,
 		BAR_LEVEL,
 		BAR_MORALE,
 		BAR_FOOD,
-		BAR_SOCIAL,
 		BAR_ENERY,
 		BAR_FUN,
 		MAX_BARS
 	};
-//	gamui::DigitalBar	bar[MAX_BARS];
 	BarStackWidget barStack;
 };
 

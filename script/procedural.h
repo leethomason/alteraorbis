@@ -71,9 +71,9 @@ public:
 
 private:
 
-	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c );
-	void GetHairColor( int index0, grinliz::Color4F* c );
-	void GetGlassesColor( int index0, int index1, float fade, grinliz::Color4F* c );
+	void GetSkinColor( int index, grinliz::Color4F* c );
+	void GetHairColor( int index, grinliz::Color4F* c );
+	void GetGlassesColor( int index, grinliz::Color4F* c );
 	void GetSuitColor( grinliz::Vector4F* c );
 	
 	enum {
@@ -101,10 +101,13 @@ public:
 		RING_TRIAD	= 0x04,	// boosts damage
 		RING_BLADE	= 0x08,	// boosts damage, decrease shield coupling
 
+		DENIZEN_RING_PART_MASK = RING_GUARD | RING_TRIAD,
+		TROLL_RING_PART_MASK   = RING_BLADE,
+
 		PART_MASK   = 0x0f
 	};
 
-	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}
+	WeaponGen(U32 _seed, int _team, int _effectFlags, int _features);
 	void AssignRing( ProcRenderInfo* info );
 	void AssignGun( ProcRenderInfo* info );
 	void AssignShield( ProcRenderInfo* info );
@@ -113,7 +116,7 @@ public:
 	static grinliz::Color4F GetEffectColor(int effect);
 
 private:
-	void GetColors( int i, int effectFlags, grinliz::Color4F* array );
+	void GetColors( int effectFlags, grinliz::Color4F* array );
 	enum {
 		BASE,
 		CONTRAST,
@@ -123,6 +126,7 @@ private:
 		NUM_ROWS = 8
 	};
 	U32 seed;
+	int team;	// the group part
 	int effectFlags;
 	int features;
 };
@@ -131,14 +135,19 @@ private:
 class TeamGen
 {
 public:
-	void Assign( int seed, ProcRenderInfo* info );
+	static void Assign( U32 seed, int team, ProcRenderInfo* info );
+	static void TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast, grinliz::Vector2I* glow);
+	static void TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast);
 };
 
 
-void AssignProcedural( const char* name,
+// Easier form.
+void AssignProcedural(const GameItem* item, ProcRenderInfo* info);
+
+void AssignProcedural( const grinliz::IString& procedure,
 					   bool female, 
 					   U32 seed,			// random #
-					   int team,			// team, from PrimaryTeam() (0 if not needed)
+					   int team,			// team, full value (id & group)
 					   bool electric,		// more colorface face rendering
 					   int effectFlags,		// EFFECT_FIRE etc.
 					   int features,		// which parts of the weapon are in use

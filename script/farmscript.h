@@ -33,6 +33,7 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual const char* Name() const { return "FarmScript"; }
 
+	float Efficiency() const	{ return float(efficiency) * 0.01f; }
 	static int GrowFruitTime( int plantStage, int nPlants );
 
 private:

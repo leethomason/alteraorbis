@@ -19,6 +19,7 @@
 #include "../engine/texture.h"
 #include "../xegame/itemcomponent.h"
 #include "../game/lumosgame.h"
+#include "../game/reservebank.h"
 #include "../script/itemscript.h"
 
 #include "../scenes/characterscene.h"
@@ -56,50 +57,61 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	ItemDefDB* db = ItemDefDB::Instance();
-	const GameItem& human	= db->Get( "humanMale" );
-	const GameItem& troll	= db->Get( "troll" );
+	ItemDefDB::GameItemArr human, troll;
+	db->Get( "humanMale", &human );
+	db->Get( "troll", &troll );
+
 	const GameItem& blaster	= db->Get( "blaster" );
 	const GameItem& pistol	= db->Get( "pistol" );
 	const GameItem& ring	= db->Get( "ring" );
 	const GameItem& market  = db->Get("market");
 	const GameItem& shield  = db->Get("shield");
 
-	itemComponent0 = new ItemComponent( new GameItem( human ));
-	itemComponent0->AddToInventory( new GameItem( blaster ));
-	itemComponent0->AddToInventory( new GameItem( pistol ));
-	itemComponent0->AddToInventory(new GameItem(shield));
-	itemComponent0->AddToInventory(new GameItem(ring));
+	reserveBank = new ReserveBank();
 
-	itemComponent1 = new ItemComponent( new GameItem( troll ));
-	itemComponent1->AddToInventory( new GameItem( blaster ));
-	itemComponent1->AddToInventory( new GameItem( pistol ));
-	itemComponent1->AddToInventory( new GameItem( ring ));
-	itemComponent1->AddToInventory( new GameItem( ring ));
-	itemComponent1->GetItem()->wallet.AddGold( 200 );
+	static const int crystal[NUM_CRYSTAL_TYPES] = { 2, 2, 1, 1 };
 
-	marketComponent = new ItemComponent( new GameItem( market ));
-	marketComponent->GetItem(0)->wallet.AddGold( 100 );
-	marketComponent->AddToInventory( new GameItem( blaster ));
-	marketComponent->AddToInventory( new GameItem( blaster ));
-	marketComponent->AddToInventory( new GameItem( pistol ));
+	itemComponent0 = new ItemComponent(0);
+	itemComponent0->InitFrom(human.Mem(), human.Size());
+	itemComponent0->AddToInventory(blaster.Clone() );
+	itemComponent0->AddToInventory( pistol.Clone());
+	itemComponent0->AddToInventory(shield.Clone());
+	itemComponent0->AddToInventory(ring.Clone());
+	itemComponent0->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
 
-	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		itemComponent0->GetItem(0)->wallet.AddCrystal( i, 2 );
-	}
-	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
-	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
-	itemComponent0->GetItem()->SetProperName("Worvaka");
+	itemComponent1 = new ItemComponent(0);
+	itemComponent1->InitFrom(troll.Mem(), troll.Size());
+	itemComponent1->AddToInventory( blaster.Clone());
+	itemComponent1->AddToInventory( pistol.Clone());
+	itemComponent1->AddToInventory( ring.Clone() );
+	itemComponent1->AddToInventory( ring.Clone());
+	itemComponent1->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
+
+	marketComponent = new ItemComponent( market.Clone());
+	marketComponent->GetItem()->wallet.Deposit(ReserveBank::GetWallet(), 200, crystal);
+	marketComponent->AddToInventory( blaster.Clone());
+	marketComponent->AddToInventory( blaster.Clone());
+	marketComponent->AddToInventory( pistol.Clone());
+
+//	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
+//	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
+//	itemComponent0->GetItem()->SetProperName("Worvaka");
 }
 
 DialogScene::~DialogScene()
 {
-	itemComponent0->GetItem()->wallet.EmptyWallet();
-	itemComponent1->GetItem()->wallet.EmptyWallet();
-	marketComponent->GetItem()->wallet.EmptyWallet();
+//	reserveBank->wallet.Deposit(&itemComponent0->GetItem()->wallet, itemComponent0->GetItem()->wallet);
+//	reserveBank->wallet.Deposit(&itemComponent1->GetItem()->wallet, itemComponent1->GetItem()->wallet);
+//	reserveBank->wallet.Deposit(&marketComponent->GetItem()->wallet, marketComponent->GetItem()->wallet);
+	GameItem::trackWallet = false;
 
 	delete itemComponent0;
 	delete itemComponent1;
 	delete marketComponent;
+	delete reserveBank;
+
+	GameItem::trackWallet = true;
+
 }
 
 
@@ -135,16 +147,16 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &sceneButtons[CHARACTER] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::AVATAR, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::AVATAR, 0, 0 ));
 	}
 	else if ( item == &sceneButtons[VAULT] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, CharacterSceneData::VAULT, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, CharacterSceneData::VAULT, 0, 0 ));
 	}
 	else if ( item == &sceneButtons[MARKET] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, CharacterSceneData::MARKET, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, CharacterSceneData::MARKET, 0, 0 ));
 	}
 	else if (item == &sceneButtons[EXCHANGE]) {
-		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::EXCHANGE, 0));
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::EXCHANGE, 0, 0));
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
 		ForgeSceneData* data = new ForgeSceneData();

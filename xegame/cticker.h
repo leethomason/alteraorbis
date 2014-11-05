@@ -23,6 +23,7 @@ class XStream;
 class CTicker
 {
 public:
+	CTicker() : period(1000), time(1000) {}
 	explicit CTicker( int _period ) : period(_period), time(_period) {}
 
 	// Sets time passed. Returns the number of times

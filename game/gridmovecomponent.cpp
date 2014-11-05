@@ -79,6 +79,7 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 	}
 
 	destSectorPort = sp;
+	GLASSERT(sp.IsValid());
 	// Error check:
 	//const ChitContext* context = this->GetChitContext();
 	//context->worldMap->GetWorldInfo().GetGridEdge( destSectorPort.sector, destSectorPort.port );
@@ -130,6 +131,7 @@ int GridMoveComponent::DoTick( U32 delta )
 		{
 			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y );
 			int port = sd.NearestPort( pos );
+			GLASSERT(port);
 			Vector2I sector = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
 			GridBlock gridBlock = worldInfo.GetGridBlock( sector, port );
 			GLASSERT(!gridBlock.IsZero());

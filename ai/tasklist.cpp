@@ -266,7 +266,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE);
 					}
 					else if (task->buildScriptID == BuildScript::PAVE) {
-						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, chit->Team() % 3 + 1);
+						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, coreScript->GetPave());
 					}
 					else if (buildData.circuit) {
 						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
@@ -277,7 +277,8 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
 						Chit* building = chitBag->NewBuilding(task->pos2i, buildData.cStructure, chit->Team());
-						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
+
+						building->GetWallet()->Deposit(&controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
 						building->GetSpatialComponent()->SetYRotation(float(task->data));
 					}
@@ -391,9 +392,14 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 
 	// Okay, passed checks. Give social happiness.
 //	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
-	double social = double(arr.Size()) * 0.10;
 	for( int i=0; i<arr.Size(); ++i ) {
-		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
+		const Personality& personality = thisComp.item->GetPersonality();
+		double social = double(arr.Size()) * 0.10;
+		if (personality.Introvert()) {
+			social *= 0.5;	// introverts get less reward from social interaction (go build stuff)
+		}
+
+		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::FUN, social );
 		if ( thisComp.chit->GetRenderComponent() ) {
 			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
 		}
@@ -411,10 +417,11 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	ItemComponent* ic		= building->GetItemComponent();
 
 	// Workers:
-	if ( buildingName == IStringConst::vault ) {
+	if ( buildingName == ISC::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
-		Transfer(&vaultItem->wallet, &thisComp.item->wallet, thisComp.item->wallet);
+		GLASSERT(building->GetWallet());
+		building->GetWallet()->Deposit(&thisComp.item->wallet, thisComp.item->wallet);
 
 		// Put everything in the vault.
 		ItemComponent* vaultIC = building->GetItemComponent();
@@ -422,19 +429,19 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		// Move gold & crystal to the owner.
 		if ( controller && controller->GetItemComponent() ) {
-			Transfer(&controller->GetItem()->wallet, &vaultItem->wallet, vaultItem->wallet);
+			controller->GetWallet()->Deposit(&vaultItem->wallet, vaultItem->wallet);
 		}
 		building->SetTickNeeded();
 		return;
 	}
-	if ( buildingName == IStringConst::distillery ) {
+	if ( buildingName == ISC::distillery ) {
 		GLASSERT( ic );
-		ic->TransferInventory( thisComp.itemComponent, false, IStringConst::fruit );
+		ic->TransferInventory( thisComp.itemComponent, false, ISC::fruit );
 		building->SetTickNeeded();
 		return;
 	}
 	if (buildingName == ISC::bar) {
-		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, IStringConst::elixir );
+		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, ISC::elixir );
 		building->SetTickNeeded();
 		if (nTransfer) {
 			return;	// only return on transfer. else use the bar!
@@ -453,20 +460,20 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			supply.SetZero();
 		}
 
-		if ( buildingName == IStringConst::market ) {
+		if ( buildingName == ISC::market ) {
 			GoShopping( thisComp, building );
 		}
-		else if (buildingName == IStringConst::exchange) {
+		else if (buildingName == ISC::exchange) {
 			GoExchange(thisComp, building);
 		}
-		else if ( buildingName == IStringConst::factory ) {
+		else if ( buildingName == ISC::factory ) {
 			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
 			if ( !used ) supply.SetZero();
 		}
-		else if ( buildingName == IStringConst::bed ) {
+		else if ( buildingName == ISC::bed ) {
 			// Apply the needs as is.
 		}
-		else if ( buildingName == IStringConst::bar ) {
+		else if ( buildingName == ISC::bar ) {
 			// Apply the needs as is...if there is Elixir.
 		}
 		else {
@@ -476,21 +483,21 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
 			GLASSERT( nElixir > 0 );
 
-			int index = ic->FindItem(ISC::elixir);
-			GLASSERT(index >= 0);
-			if (index >= 0) {
-				GameItem* item = ic->RemoveFromInventory(index);
+			const GameItem* elixir = ic->FindItem(ISC::elixir);
+			GLASSERT(elixir);
+			if (elixir) {
+				GameItem* item = ic->RemoveFromInventory(elixir);
 				delete item;
 			}
 		}
 		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
-		supply.Set(Needs::SOCIAL, 0);
+		//supply.Set(Needs::SOCIAL, 0);
 
 		double scale = 1.0;
 
 		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
 		if (evalScript) {
-			double industry = building->GetItem()->GetBuildingIndustrial(false);
+			double industry = building->GetItem()->GetBuildingIndustrial();
 			double score = evalScript->EvalIndustrial(true);
 			double dot = score * industry;
 			scale = 0.55 + 0.45 * dot;
@@ -515,52 +522,41 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 	const Personality& personality = thisComp.item->GetPersonality();
 	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
 	bool usedExchange = false;
+	ReserveBank* bank = ReserveBank::Instance();
 
 	if (personality.Crafting() == Personality::DISLIKES) {
 		// Sell all the crystal
+		int value = 0;
+		int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int n = thisComp.item->wallet.crystal[type];
-			if (n) {
-				// Gold from bank.
-				Wallet c;
-				c.crystal[type] = n;
-
-				if (CanTransfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type])) {
-					Transfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type]);
-					Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, c);
-					usedExchange = true;
-				}
-			}
+			value += thisComp.item->wallet.Crystal(type) * crystalValue[type];
+			crystal[type] = thisComp.item->wallet.Crystal(type);
+		}
+		if (value) {
+			// Move money from the bank.
+			// Move crystal to the exchange.
+			thisComp.item->wallet.Deposit(&bank->wallet, value);
+			exchange->GetWallet()->Deposit(&thisComp.item->wallet, 0, crystal);
+			usedExchange = true;
 		}
 	}
 	else {
-		int willSpend = thisComp.item->wallet.gold / 5;
+		int willSpend = thisComp.item->wallet.Gold() / 5;
 		if (personality.Crafting() == Personality::LIKES) {
-			willSpend = thisComp.item->wallet.gold / 2;
+			willSpend = thisComp.item->wallet.Gold() / 2;
 		}
 
-		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.crystal[type];
-	
-			while (nWant) {
-				int cost = crystalValue[type];
-				if (cost < willSpend) {
-					Wallet c;
-					c.crystal[type] = 1;
-
-					if (CanTransfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c)) {
-						Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, cost);
-						Transfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c);
-						--nWant;
-						willSpend -= cost;
-						usedExchange = true;
-					}
-					else {
-						break;
-					}
-				}
-				else {
-					break;
+		for (int pass = 0; pass < 3; ++pass) {
+			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= willSpend) {
+					// Money to bank.
+					// Crystal from exchange.
+					int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+					crystal[type] = 1;
+					bank->wallet.Deposit(&thisComp.item->wallet, crystalValue[type]);
+					thisComp.item->wallet.Deposit(exchange->GetWallet(), 0, crystal);
+					willSpend -= crystalValue[type];
+					usedExchange = true;
 				}
 			}
 		}
@@ -581,30 +577,27 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	// 'ranged', 'melee', and 'shield', so return
 	// if that happens. We can come back later.
 
-	GameItem* ranged = 0, *melee = 0, *shield = 0;
+	const GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
 	// Transfer money from reserve to market:
-	if (!ReserveBank::Instance() || ReserveBank::Instance()->bank.gold < 1500) {
-		return;
-	}
-	Transfer(&market->GetItem()->wallet, &ReserveBank::Instance()->bank, 1000);
+	market->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
 
 	MarketAI marketAI( market );
 
 	// Should be sorted, but just in case:
-	thisComp.itemComponent->SortInventory();
-	market->GetItemComponent()->SortInventory();
+//	thisComp.itemComponent->SortInventory();
+//	market->GetItemComponent()->SortInventory();
 
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-		GameItem* gi = thisComp.itemComponent->GetItem( i );
+		const GameItem* gi = thisComp.itemComponent->GetItem( i );
 		if ( gi && !gi->Intrinsic() ) {
-			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
+			if ( !ranged && gi->ToRangedWeapon()) {
 				ranged = gi;
 			}
-			else if ( !melee && !(gi->flags & GameItem::RANGED_WEAPON) && (gi->flags & GameItem::MELEE_WEAPON) ) {
+			else if ( !melee && gi->ToMeleeWeapon() ) {
 				melee = gi;
 			}
 			else if ( !shield && gi->ToShield() ) {
@@ -617,10 +610,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	bool boughtStuff = false;
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
-		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, 1 );
+		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.Gold(), 1 );
 		if ( i == 1 && !shield )
-			purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
-		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
+			purchase = marketAI.HasShield( thisComp.item->wallet.Gold(), 1 );
+		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.Gold(), 1 );
 		if ( purchase ) {
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
@@ -633,11 +626,10 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	if (!boughtStuff) {
 		// Sell the extras.
-		int itemToSell = 0;
+		const GameItem* itemToSell = 0;
 		while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
-			GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
-			int value = gi->GetValue();
-			int sold = MarketAI::Transact(gi,
+			int value = itemToSell->GetValue();
+			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
 				thisComp.itemComponent,		// seller
 				0,							// no sales tax when selling to the market.
@@ -655,9 +647,9 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		// by a non-critical. Also, personality probably should factor in to purchasing decisions.
 		for (int i = 0; i < 3; ++i) {
 			const GameItem* purchase = 0;
-			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.gold, ranged->GetValue() * 2);
-			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.gold, shield->GetValue() * 2);
-			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.gold, melee->GetValue() * 2);
+			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.Gold(), ranged->GetValue() * 2);
+			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.Gold(), shield->GetValue() * 2);
+			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.Gold(), melee->GetValue() * 2);
 			if (purchase) {
 
 				MarketAI::Transact(purchase,
@@ -668,131 +660,75 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			}
 		}
 	}
-	Transfer(&ReserveBank::Instance()->bank, &market->GetItem()->wallet, market->GetItem()->wallet);
+	ReserveBank::GetWallet()->Deposit(market->GetWallet(), *(market->GetWallet()));
 }
 
 
 bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech )
 {
-	// Guarentee we can build something:
-	if ( thisComp.item->wallet.crystal[0] == 0 ) {
-		return false;
-	}
 	if ( !thisComp.itemComponent->CanAddToInventory() ) {
 		return false;
 	}
 
-	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
-	IShield* shield = thisComp.itemComponent->GetShield();
+	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
+	Shield* shield = thisComp.itemComponent->GetShield();
 
 	int itemType = 0;
-	int subType = 0;
-	int parts = 1;		// always have body.
 	Random& random = thisComp.chit->random;
-
-	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
-	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK };	// don't allow explosive to be manufactured, yet: , GameItem::EFFECT_EXPLOSIVE
-
-	// Get the inital to "everything"
-	int effects = 0;
-	for (int i = 0; i < GL_C_ARRAY_SIZE(effectsArr); ++i) {
-		effects |= effectsArr[i];
-	}
 
 	if ( !ranged )		itemType = ForgeScript::GUN;
 	else if ( !shield ) itemType = ForgeScript::SHIELD;
-	else if ( !melee )	itemType = ForgeScript::SHIELD;
+	else if ( !melee )	itemType = ForgeScript::RING;
 	else {
 		itemType = random.Rand( ForgeScript::NUM_ITEM_TYPES );
 	}
 
-	if ( itemType == ForgeScript::GUN ) {
-		if ( tech == 0 )
-			subType = random.Rand( ForgeScript::NUM_TECH0_GUNS );
-		else
-			subType = random.Rand( ForgeScript::NUM_GUN_TYPES );
-		parts = WeaponGen::PART_MASK;
-	}
-	else if ( itemType == ForgeScript::RING ) {
-		if ( (tech < 2) && random.Bit() ) {
-			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;
-		}
-		else {
-			// Don't use the blade at higher tech levels.
-			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD;
-		}
-	}
-
-	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
-	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
-
 	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
 	int level = thisComp.item->Traits().Level();
-	ForgeScript forge( seed, level, tech );
-	GameItem* item = new GameItem();
+	TransactAmt cost;
+	int partsMask = 0xffffffff;
+	int team = Team::Group(thisComp.chit->Team());
+	int subItem = -1;
+	const char* altRes = "";
 
-	int cp = 0;
-	int ce = 0;
-	Wallet wallet;
-
-	// Given we have a crystal, we should always be able to build something.
-	// Remove sub-parts and effects until we succeed. As the forge 
-	// changes, this is no longer a hard rule.
-	int maxIt = 10;
-	while( maxIt ) {
-		wallet.EmptyWallet();
-		int techRequired = 0;
-		forge.Build( itemType, subType, parts, effects, item, &wallet, &techRequired, true );
-
-		if ( wallet <= thisComp.item->wallet && techRequired <= tech ) {
-			break;
-		}
-
-		bool didSomething = false;
-		if (wallet > thisComp.item->wallet && ce < GL_C_ARRAY_SIZE(effectsArr)) {
-			effects &= ~(effectsArr[ce++]);
-			didSomething = true;
-		}
-		if (techRequired > tech && cp < GL_C_ARRAY_SIZE(partsArr)) {
-			parts &= ~(partsArr[cp++]);
-			didSomething = true;
-		}
-
-		// The equations between cost are more complex; the
-		// model above doesn't capture all the combos any more.
-		// Make sure something changes every loop.
-		if (!didSomething) {
-			if (ce < GL_C_ARRAY_SIZE(effectsArr)) {
-				effects &= ~(effectsArr[ce++]);
-			}
-			if (cp < GL_C_ARRAY_SIZE(partsArr)) {
-				parts &= ~(partsArr[cp++]);
-			}
-		}
-		--maxIt;
+	// Special rules.
+	if (itemType == ForgeScript::RING) {
+		// Only trolls and gobs use the blades.
+		if (team == TEAM_TROLL || team == TEAM_GOB) 
+			partsMask &= (~WeaponGen::RING_TRIAD);
+		else 
+			partsMask &= (~WeaponGen::RING_BLADE);
 	}
-	GLASSERT(maxIt);	// should have seen success...
-	if (!maxIt) return false;
+	if (itemType == ForgeScript::GUN && team == TEAM_KAMAKIRI) {
+		subItem = ForgeScript::BEAMGUN;
+		altRes = "kamabeamgun";
+	}
 
-	Transfer(&item->wallet, &thisComp.item->wallet, wallet);
-	thisComp.itemComponent->AddToInventory( item );
-	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );
-	thisComp.item->historyDB.Increment( "Crafted" );
+	// FIXME: the parts mask (0xff) is set for denizen domains.
+	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
+	if (item) {
+		if (altRes && *altRes) {
+			item->SetResource(altRes);
+		}
 
-	Vector2I sector = thisComp.spatial->GetPosition2DI();
-	GLOUTPUT(( "'%s' forged the item '%s' at sector=%x,%x\n",
-		thisComp.item->BestName(),
-		item->BestName(),
-		sector.x, sector.y ));
+		item->wallet.Deposit(&thisComp.item->wallet, cost);
+		thisComp.itemComponent->AddToInventory(item);
+		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
+		thisComp.item->historyDB.Increment("Crafted");
 
-	// Mark this item as important with a destroyMsg:
-	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
-	NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
-	NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
-	history->Add( news );
+		Vector2I sector = thisComp.spatial->GetPosition2DI();
+		GLOUTPUT(("'%s' forged the item '%s' at sector=%x,%x\n",
+			thisComp.item->BestName(),
+			item->BestName(),
+			sector.x, sector.y));
 
-	return true;
+		item->SetSignificant(thisComp.chit->Context()->chitBag->GetNewsHistory(), 
+							 thisComp.spatial->GetPosition2D(),
+							 NewsEvent::FORGED, NewsEvent::UN_FORGED, thisComp.chit);
+		return true;
+	}
+	return false;
 }
 
 
