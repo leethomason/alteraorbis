@@ -384,7 +384,8 @@ public:
 	// Push on
 	void Push( const T& t ) {
 		GLASSERT( size < CAPACITY );
-		mem[size++] = t;
+		if (size < CAPACITY) 
+			mem[size++] = t;
 	}
 
 	void Insert(int index, const T& t) {
