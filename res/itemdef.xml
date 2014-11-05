@@ -146,7 +146,7 @@
         porch="1"
         procedural="team"
         mass="50"
-        baseHP="50"
+        baseHP="150"
         cost="40" />
 
   <GameItem name="kiosk.n"
@@ -155,7 +155,7 @@
         porch="1"
         procedural="team"
         mass="50"
-        baseHP="50"
+        baseHP="150"
         cost="40" />
 
   <GameItem name="kiosk.c"
@@ -164,7 +164,7 @@
         porch="1"
         procedural="team"
         mass="50"
-        baseHP="50"
+        baseHP="150"
         cost="40" />
 
   <GameItem name="kiosk.s"
@@ -173,7 +173,7 @@
         porch="1"
         procedural="team"
         mass="50"
-        baseHP="50"
+        baseHP="150"
         cost="40" />
 
   <GameItem name="core"
@@ -195,7 +195,7 @@
         resource="trollStatue"
         flags="CLICK_THROUGH"
         mass="300"
-        baseHP="100"
+        baseHP="200"
         cost="100"
         size="2"
         />
@@ -204,7 +204,7 @@
         resource="kamaStatue"
         flags="CLICK_THROUGH"
         mass="100"
-        baseHP="50"
+        baseHP="150"
         cost="30"
         size="1"
         />
@@ -225,7 +225,7 @@
         procedural="team"
         size="2"
         mass="200"
-        baseHP="250"
+        baseHP="300"
         cost="100"
         zone="industrial"
         />
@@ -243,7 +243,7 @@
         procedural="team"
         size="2"
         mass="150"
-        baseHP="150"
+        baseHP="250"
         cost="80" 
         zone="industrial"
         
@@ -258,7 +258,7 @@
         procedural="team"
         size="2"
         mass="150"
-        baseHP="200"
+        baseHP="250"
         cost="60"
         zone="natural" />
 
@@ -271,7 +271,7 @@
         circuit="battery"
         size="1"
         mass="150"
-        baseHP="100"
+        baseHP="150"
         cost="40"
         zone="industrial" />
 
@@ -315,7 +315,7 @@
         procedural="team"
         size="1"
         mass="100"
-        baseHP="100"
+        baseHP="150"
         cost="25"
         zone="natural"
         
@@ -364,12 +364,12 @@
         procedural="team"
         size="2"
         mass="150"
-        baseHP="150"
+        baseHP="200"
         cost="50"
         zone="natural"
         nameGen="barNames"
         
-	      need.time="5.0"
+        need.time="5.0"
         need.fun="0.2"
         need.social="0.4"
         need.food="1.0"
@@ -381,7 +381,7 @@
         porch="1"
         size="1"
         mass="80"
-        baseHP="80"
+        baseHP="150"
         cost="40"
         script="FarmScript"
         />
@@ -393,7 +393,7 @@
         procedural="team"
         size="2"
         mass="200"
-        baseHP="200"
+        baseHP="250"
         cost="80"
         script="DistilleryScript"
         zone="industrial"
