@@ -137,17 +137,18 @@
 		x red mantis way over powered?
 		x map show the full 5x5 highlight in the left view
 		x ToUI doesn't set bounds...
+		x race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		x asserts for neutral in procedural aren't correct
+		x food/elixir above kamakiri heads
+		x negative numbers of crystal in the bank
+		x being underwater (plant) should make fire go out.
 		- test bank running out of money
-		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
-		- asserts for neutral in procedural aren't correct
-		- food/elixir above kamakiri heads
-		- negative numbers of crystal in the bank
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon
+		- build a home domain
 
-		x being underwater (plant) should make fire go out.
 		- advisor still comes up in weird states.
 		- special gobman item, building
 		- Census: actual census. # trolls, # mantis, etc. etc.

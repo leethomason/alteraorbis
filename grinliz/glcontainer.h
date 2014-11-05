@@ -302,6 +302,8 @@ public:
 		}
 	}
 
+	void Sort() { grinliz::Sort<T, CompValue>(mem, size); }
+
 	// Binary Search: array must be sorted!
 	// near: an optional parameter that returns something near an insertion point.
 	int BSearch( const T& t ) const {

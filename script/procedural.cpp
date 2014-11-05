@@ -446,7 +446,6 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 
 	switch (teamGroup) {
 		case TEAM_HOUSE:	
-		GLASSERT(teamID);	// how can a neutral ID be building?
 		colors = HUMAN_COLORS;
 		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
 		break;
@@ -457,13 +456,11 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		break;
 
 		case TEAM_GOB:
-		GLASSERT(teamID);	// how can a neutral ID be building?
 		colors = GOB_COLORS;
 		nColors = GL_C_ARRAY_SIZE(GOB_COLORS) / 3;
 		break;
 
 		case TEAM_KAMAKIRI:
-		GLASSERT(teamID);
 		colors = KAMAKIRI_COLORS;
 		nColors = GL_C_ARRAY_SIZE(KAMAKIRI_COLORS) / 3;
 		break;
@@ -474,7 +471,10 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		break;
 
 		default:
-		GLASSERT(0);	// team not implemented?
+		GLASSERT(0);	// team not implemented? may be fine; just need to check.
+		colors = HUMAN_COLORS;
+		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
+		break;
 	}
 
 	int index = abs(teamID) % nColors;
@@ -517,7 +517,6 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 	switch (teamGroup) {
 		case TEAM_HOUSE:	
 		case TEAM_GOB:
-		GLASSERT(teamID);	// how can a neutral ID be building?
 		colors = GENERAL_COLORS;
 		nColors = GL_C_ARRAY_SIZE(GENERAL_COLORS) / 2;
 		break;
@@ -534,7 +533,10 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 
 		case TEAM_NEUTRAL:
 		default:
-		GLASSERT(0);	// team not implemented?
+		GLASSERT(0);	// team not implemented? unexpected?
+		colors = GENERAL_COLORS;
+		nColors = GL_C_ARRAY_SIZE(GENERAL_COLORS) / 2;
+		break;
 	}
 
 	int index = abs(teamID) % nColors;

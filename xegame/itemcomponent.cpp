@@ -686,11 +686,7 @@ int ItemComponent::DoTick( U32 delta )
 		}
 	}
 
-	// FIXME: hack for ui. shouldn't use specific names.
-	if (    mainItem->IName() == ISC::humanMale
-		 || mainItem->IName() == ISC::humanFemale
-		 || mainItem->IName() == ISC::worker ) 
-	{
+	if (mainItem->keyValues.GetIString(ISC::mob) == ISC::denizen) {
 		if ( parentChit->GetRenderComponent() ) {
 			const GameItem* fruit = this->FindItem( ISC::fruit );
 			if ( fruit ) {

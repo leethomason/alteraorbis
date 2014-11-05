@@ -70,24 +70,33 @@ void ReserveBank::Serialize( XStream* xs )
 
 void ReserveBank::WithdrawDenizen(Wallet* dst)
 {
-	int crystal[NUM_CRYSTAL_TYPES] = { 0 };
-	Withdraw(dst, GOLD_PER_DENIZEN, crystal);
+	TransactAmt amt;
+	amt.AddGold(GOLD_PER_DENIZEN);
+
+	// If bank is low, don't give new spawns money.
+	if (wallet > amt) {
+		dst->Deposit(&wallet, amt);
+	}
 }
 
 
 void ReserveBank::WithdrawMonster(Wallet* dst, bool greater)
 {
+	TransactAmt amt;
 	int gold = greater ? GOLD_PER_GREATER : GOLD_PER_LESSER;
-	int crystal[NUM_CRYSTAL_TYPES] = { 0 };
+	amt.AddGold(gold);
 
 	static const float score[NUM_CRYSTAL_TYPES] = { 100, 50, 10, 1 };
 	int pass = greater ? random.Rand(4) : random.Rand(2);
 
 	for (int i = 0; i < pass; ++i) {
 		int index = random.Select(score, NUM_CRYSTAL_TYPES);
-		crystal[index] += 1;
+		amt.AddCrystal(index, 1);
 	}
-	Withdraw(dst, gold, crystal);
+	// If bank is low, don't give new spawns money.
+	if (wallet > amt) {
+		dst->Deposit(&wallet, amt);
+	}
 }
 
 
