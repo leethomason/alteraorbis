@@ -322,7 +322,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 
-		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
+//		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
+		if (parentChit->PlayerControlled()) {
+			int debug = 1;
+		}
 
 		DamageDesc dd = ddorig;
 		Shield* shield = this->GetShield();
