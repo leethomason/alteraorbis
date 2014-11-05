@@ -565,7 +565,9 @@ Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle
 				if (!arr) {
 					return chit;
 				}
-				arr->Push(chit);
+				if (arr->HasCap()) {
+					arr->Push(chit);
+				}
 			}
 		}
 	}
