@@ -34,6 +34,8 @@ public:
 
 	struct MOBItem {
 		MOBItem() : count(0) {}
+		bool operator<(const MOBItem& rhs) const { return name < rhs.name; }
+		bool operator==(const MOBItem& rhs) const { return name == rhs.name; }
 
 		grinliz::IString name;
 		int count;

@@ -15,6 +15,8 @@ void Census::Add(const grinliz::IString& name)
 	item.name = name;
 	item.count = 1;
 	mobItems.Push(item);
+
+	mobItems.Sort();
 }
 
 

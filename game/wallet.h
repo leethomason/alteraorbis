@@ -140,6 +140,10 @@ public:
 		GLASSERT(type >= 0 && type < NUM_CRYSTAL_TYPES);
 		crystal[type] += count;
 	}
+
+	void AddGold(int g) {
+		gold += g;
+	}
 };
 
 #endif

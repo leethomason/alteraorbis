@@ -137,20 +137,21 @@
 		x red mantis way over powered?
 		x map show the full 5x5 highlight in the left view
 		x ToUI doesn't set bounds...
+		x race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
+		x asserts for neutral in procedural aren't correct
+		x food/elixir above kamakiri heads
+		x negative numbers of crystal in the bank
+		x being underwater (plant) should make fire go out.
+		x Census: actual census. # trolls, # mantis, etc. etc.
 		- test bank running out of money
-		- race condition when adding money while item being destroyed. remove money in onRemove if destroyed??
-		- asserts for neutral in procedural aren't correct
-		- food/elixir above kamakiri heads
-		- negative numbers of crystal in the bank
 		
 		- UI icons for gobmen, kamakiri, others?
 		- "human" UI icon
 		- "home" icon vs. grid travel icon
+		- test: build a home domain
 
-		x being underwater (plant) should make fire go out.
 		- advisor still comes up in weird states.
 		- special gobman item, building
-		- Census: actual census. # trolls, # mantis, etc. etc.
 		- Denizen domains
 		- re-test battle scenes. balance.
 		- Long play test
@@ -174,21 +175,21 @@
 	- Census
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
-		- money checks optional
-		- needs to feel interactive
-		- browsing of items/people
-		- redo UI layout
+		x money checks optional
+		x needs to feel interactive
+		x browsing of items/people
+		x redo UI layout
 
 	- Market
 		- world effects morale/needs: water, tombstones, temples, etc.
-		- proper game start: location, selection of team color, icons
-		- turret
-		- team colors
+		x proper game start: location, selection of team color, icons
+		x turret
+		x team colors
 		- battle flags
     	- time scale culling
-		- vault:
-			- item limit
-		- what to do with full vaults?
+		x vault:
+			x item limit
+		x what to do with full vaults?
 		- marking build zones
 			- dragging, rows
 			- top view?

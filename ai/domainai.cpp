@@ -808,6 +808,7 @@ void KamakiriDomainAI::DoBuild()
 		// Check efficiency to curtail over-building.
 		if (eff > 1 && nElixir > 4) {
 			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::GUARDPOST] < 2 && BuildBuilding(BuildScript::GUARDPOST)) break;
 		}
 		if (eff >= 2 && nElixir > 4) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;

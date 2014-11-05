@@ -18,7 +18,10 @@ grinliz::IString Team::TeamName(int team)
 
 	switch (group) {
 		case TEAM_HOUSE:
-		str.Format("House-%x", id);
+		if (id)
+			str.Format("House-%x", id);
+		else
+			str = "House";
 		name = StringPool::Intern(str.c_str());
 		break;
 
@@ -30,12 +33,18 @@ grinliz::IString Team::TeamName(int team)
 		break;
 
 		case TEAM_GOB:
-		str.Format("Gobmen-%x", id);
+		if (id)
+			str.Format("Gobmen-%x", id);
+		else
+			str = "Gobmen";
 		name = StringPool::Intern(str.c_str());
 		break;
 
 		case TEAM_KAMAKIRI:
-		str.Format("Kamakiri-%x", id);
+		if (id)
+			str.Format("Kamakiri-%x", id);
+		else
+			str = "Kamakiri";
 		name = StringPool::Intern(str.c_str());
 		break;
 
