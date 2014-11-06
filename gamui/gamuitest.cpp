@@ -22,7 +22,7 @@
 */
 
 #include "glew.h"
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 
 #include "gamui.h"
 #include <stdio.h>
@@ -52,10 +52,16 @@ PFN_IMG_LOAD libIMG_Load;
 
 class Renderer : public IGamuiRenderer
 {
+	const uint16_t* m_index;
+	const Gamui::Vertex* m_vertex;
+
 public:
-	virtual void BeginRender()
+	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
 	{
 		TESTGLERR();
+
+		m_index = index;
+		m_vertex = vertex;
 		
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -119,12 +125,12 @@ public:
 	}
 
 
-	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
+	virtual void Render( const void* renderState, const void* textureHandle, int start, int count )
 	{
 		TESTGLERR();
-		glVertexPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &vertex->x );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &vertex->tx );
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, index );
+		glVertexPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->x );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->tx );
+		glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_SHORT, m_index + start );
 		TESTGLERR();
 	}
 };
@@ -172,25 +178,17 @@ int main( int argc, char **argv )
 	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
-	SDL_EnableKeyRepeat( 0, 0 );
-	SDL_EnableUNICODE( 1 );
-
-	const SDL_version* sversion = SDL_Linked_Version();
-
-	void* handle = SDL_LoadObject( "SDL_image" );
-	libIMG_Load = (PFN_IMG_LOAD)SDL_LoadFunction( handle, "IMG_Load" );
-
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
-
-	int	videoFlags  = SDL_OPENGL;      /* Enable OpenGL in SDL */
-	videoFlags |= SDL_GL_DOUBLEBUFFER; /* Enable double buffering */
-
-	surface = SDL_SetVideoMode( SCREEN_X, SCREEN_Y, 32, videoFlags );
+	SDL_Window *screen = SDL_CreateWindow(	"Altera",
+											50, 50,
+											1024, 768,
+											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "stdfont2.bmp" );
@@ -235,7 +233,6 @@ int main( int argc, char **argv )
 	TextMetrics textMetrics;
 	Renderer renderer;
 
-
 	Gamui gamui( &renderer, textAtom, textAtomD, &textMetrics );
 
 	TextLabel textLabel[2];
@@ -250,7 +247,7 @@ int main( int argc, char **argv )
 	image0.SetPos( 50, 50 );
 	image0.SetSize( 100, 100 );
 
-	TextBox block;
+	TextLabel block;
 	block.Init( &gamui );
 	block.SetPos( 50, 50 );
 	block.SetSize( 100, 100 );
@@ -304,8 +301,7 @@ int main( int argc, char **argv )
 	ToggleButton toggle( &gamui, up, upD, down, downD, decoAtom, decoAtomD );
 	toggle.SetPos( 350, 250 );
 	toggle.SetSize( 150, 50 );
-	toggle.SetText( "Toggle" );
-	toggle.SetText2( "Line 2" );
+	toggle.SetText( "Toggle\nLine 2" );
 
 	ToggleButton toggle0( &gamui, up, upD, down, downD, decoAtom, decoAtomD );
 	toggle0.SetPos( 350, 325 );
@@ -332,8 +328,8 @@ int main( int argc, char **argv )
 	tick2.SetCoord( 190.f/256.f, 180.f/256.f, 205.f/256.f, 210.f/256.f );
 	tick1.SetCoord( 230.f/256.f, 225.f/256.f, 245.f/256.f, 1 );
 
-	DigitalBar bar( &gamui, 10, tick0, tick1, tick2 );
-	bar.SetRange( 0.33f, 0.66f );
+	DigitalBar bar( &gamui, 10, tick0, tick1 );
+//	bar.SetRange( 0.33f, 0.66f );
 	bar.SetPos( 20, 350 );
 	bar.SetSize( 100, 20 );
 
@@ -376,7 +372,7 @@ int main( int argc, char **argv )
 							range += 0.1f;
 							if ( range > 1.0f )
 								range = 0.0f;
-							bar.SetRange( 0, range );
+//							bar.SetRange( 0, range );
 						}
 					}
 					break;
@@ -396,7 +392,7 @@ int main( int argc, char **argv )
 		image2d.SetRotationZ( rotation );
 		gamui.Render();
 
-		SDL_GL_SwapBuffers();
+		SDL_GL_SwapWindow( screen );
 	}
 
 
