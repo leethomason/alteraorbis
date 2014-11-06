@@ -170,86 +170,23 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, name );
 	XARC_SER_DEF( xs, properName, IString() );
 	XARC_SER( xs, resource );
-	XARC_SER( xs, id );
+	XARC_SER(xs, flags);
+	XARC_SER_DEF( xs, hardpoint, 0 );
 	XARC_SER( xs, mass );
+	XARC_SER( xs, baseHP );
 	XARC_SER_DEF( xs, hpRegen, 0.0f );
 	XARC_SER_DEF( xs, team, 0 );
+	XARC_SER( xs, hp );
 	XARC_SER_DEF( xs, fireTime, 0 );
 	XARC_SER_DEF( xs, shockTime, 0 );
+	XARC_SER( xs, id );
 
-	XARC_SER_DEF( xs, hardpoint, 0 );
-	XARC_SER( xs, hp );
-
-	if ( xs->Saving() ) {
-		CStr<512> f;
-		APPEND_FLAG( flags, f, INTRINSIC );
-		APPEND_FLAG( flags, f, IMMUNE_FIRE );
-		APPEND_FLAG( flags, f, FLAMMABLE );
-		APPEND_FLAG( flags, f, IMMUNE_SHOCK );
-		APPEND_FLAG( flags, f, SHOCKABLE );
-		APPEND_FLAG( flags, f, EFFECT_EXPLOSIVE );
-		APPEND_FLAG( flags, f, EFFECT_FIRE );
-		APPEND_FLAG( flags, f, EFFECT_SHOCK );
-		APPEND_FLAG( flags, f, RENDER_TRAIL );
-		APPEND_FLAG( flags, f, INDESTRUCTABLE );
-		APPEND_FLAG( flags, f, AI_WANDER_HERD );
-		APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
-		APPEND_FLAG( flags, f, AI_EAT_PLANTS );
-		APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
-		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
-		APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
-		APPEND_FLAG( flags, f, AI_USES_BUILDINGS );
-		APPEND_FLAG( flags, f, AI_DOES_WORK );
-		APPEND_FLAG( flags, f, GOLD_PICKUP );
-		APPEND_FLAG( flags, f, ITEM_PICKUP );
-		APPEND_FLAG( flags, f, HAS_NEEDS );
-		APPEND_FLAG( flags, f, DAMAGE_UNDER_WATER );
-		APPEND_FLAG( flags, f, FLOAT );
-		APPEND_FLAG( flags, f, SUBMARINE );
-		APPEND_FLAG(flags, f, EXPLODES);
-		APPEND_FLAG( flags, f, CLICK_THROUGH );
-
-		xs->Saving()->Set( "flags", f.c_str() );
-	}
-	else {
-		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
-		if ( attr ) {
-			const char* f = xs->Loading()->Value( attr, 0 );
-			READ_FLAG( flags, f, INTRINSIC );
-			READ_FLAG( flags, f, IMMUNE_FIRE );
-			READ_FLAG( flags, f, FLAMMABLE );
-			READ_FLAG( flags, f, IMMUNE_SHOCK );
-			READ_FLAG( flags, f, SHOCKABLE );
-			READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
-			READ_FLAG( flags, f, EFFECT_FIRE );
-			READ_FLAG( flags, f, EFFECT_SHOCK );
-			READ_FLAG( flags, f, RENDER_TRAIL );
-			READ_FLAG( flags, f, INDESTRUCTABLE );
-			READ_FLAG( flags, f, AI_WANDER_HERD );
-			READ_FLAG( flags, f, AI_WANDER_CIRCLE );
-			READ_FLAG( flags, f, AI_EAT_PLANTS );
-			READ_FLAG( flags, f, AI_HEAL_AT_CORE );
-			READ_FLAG( flags, f, AI_SECTOR_HERD );
-			READ_FLAG( flags, f, AI_SECTOR_WANDER );
-			READ_FLAG( flags, f, AI_USES_BUILDINGS );
-			READ_FLAG( flags, f, AI_DOES_WORK );
-			READ_FLAG( flags, f, GOLD_PICKUP );
-			READ_FLAG( flags, f, ITEM_PICKUP );
-			READ_FLAG( flags, f, HAS_NEEDS );
-			READ_FLAG( flags, f, DAMAGE_UNDER_WATER );
-			READ_FLAG( flags, f, FLOAT );
-			READ_FLAG( flags, f, SUBMARINE );
-			READ_FLAG( flags, f, EXPLODES );
-			READ_FLAG( flags, f, CLICK_THROUGH );
-		}
-	}
-
+	wallet.Serialize( xs );
 	keyValues.Serialize( xs, "keyval" );
 	historyDB.Serialize( xs, "historyDB" );
-
 	traits.Serialize( xs );
 	personality.Serialize( xs );
-	wallet.Serialize( xs );
+
 	XarcClose( xs );
 }
 

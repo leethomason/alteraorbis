@@ -1,5 +1,5 @@
 ﻿Altera Orbis 
-Beta 2
+Beta 3a
 
 Thanks for playing Altera Orbis!
 grinninglizard.com/altera
@@ -25,35 +25,31 @@ thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
 
-Changes in Beta2c
------------------
-- Improved map screen
-- Help adviser improves help system and adds cool image
-- "flick-rotate". if in build mode, but no building selected,
-  click and drag rotates buildings
-- Show average fun, energy, social, and food for your domain
-- Target portrait
-- Updated to new stable SDL
-- Enemies will now attack turrents
-- Bug fixes, especially teleport home while in grid travel
+Changes in Beta3
+----------------
 
-Changes in Beta 2
------------------
+Key:
+- AI controlled domains. Logic, roads, build plan, management, taxation.
+  - AI domain for Truulga, the Troll deity. Truulga is essentially
+    an arms supplier for Trolls.
+  - Gobmen domains. Neutral denizens.
+  - Kamakiri domains. Aggressive denizens.
+- 
 
-- Fluid physics. Floating objects. Water, magma, and lava affect plants
-  and mobs. 
-- Circuits to create traps, machine, control water and magma, and defend your 
-  domain.
-- Deeper integration of the effects of fire, shock, and water. (Although more 
-  needs to be done.)
-- Improved world generation.
-- Vastly improved memory usage. Smaller and faster save files.
-- Simplified code architecture.
-- New, simplified, much more stable grid travel code.
-- Art improvements.
-- The Arachnoid is now called a Trilobyte
-- Drones no longer carry fruit and care heal at domain cores.
+Changes:
+- 'social' need has been removed, and integrated with 'fun'
+- significant map screen improvements
+- better random colors for domains and weapons
+- neutral units can now be recruited to a domain
+- improvements to census and census scene
+- new spawn strategy for Kamakiri and Gobmen
 
+Bug fixes:
+- significant refactoring of internal Game Items to make the
+  system more reliable
+- re-write of internal gold/crystal and banking system
+  to (try to) guarentee money isn't created or destroyed
+- many, many small bug fixes and crashes addressed.
 
 FAQ
 ---
@@ -79,6 +75,7 @@ Controls
 
 Left-click moves the avatar, selects things, builds.
 Left-click & drag builds lots of pavement or ice at once, or clears an area.
+Shift-left-click on rock or plants attack the rock/plants.
 
 Right-click & drag moves the camera.
 Ctrl-Right-click & drag rotates and zooms the camera.
@@ -88,6 +85,9 @@ Ctrl-Arrow keys or ctrl-WASD rotates and zooms.
 
 If in build mode, but no building selected (so click "Build" but don't select
 a building), then left-click & drag rotates buildings.
+
+F11 toggles full screen.
+F3 saves a screenshots. (In Documents/Altera Orbis)
 
 
 Install

@@ -765,15 +765,19 @@ void Sim::SeedPlants()
 	bounds.Outset(-SECTOR_SIZE);
 
 	int type = 0;
+	int stage = 0;
 	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
 		int x = it.Pos().x;
 		int y = it.Pos().y;
 
-		if ((x + y) & 1) {
-			CreatePlant(x, y, type, ((x+y) & 3));
+		if (((x + y) %4) == 0) {
+			CreatePlant(x, y, type, stage);
 			type++;
+			stage++;
 			if (type == NUM_PLANT_TYPES)
 				type = 0;
+			if (stage == 4)
+				stage = 0;
 		}
 	}
 }

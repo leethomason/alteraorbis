@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C++ Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lumos", "lumos.vcxproj", "{3546E8AC-901F-4611-8C20-0BF16609F212}"
 	ProjectSection(ProjectDependencies) = postProject
 		{28433181-007B-4BF5-AECC-CC52F97E69A1} = {28433181-007B-4BF5-AECC-CC52F97E69A1}
