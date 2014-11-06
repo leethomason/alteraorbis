@@ -230,7 +230,7 @@ void BattleMechanics::CalcMeleeDamage( const GameItem* weilder, const MeleeWeapo
 	int effect = weapon->flags & GameItem::EFFECT_MASK;
 
 	// Remove explosive melee effect. It would only be funny 10 or 20 times.
-	effect ^= GameItem::EFFECT_EXPLOSIVE;
+	effect &= (~GameItem::EFFECT_EXPLOSIVE);
 
 	// I keep going back and forth on the weilder, and the imapact it
 	// has on the damage. There is no "hit" calculation with melee;
@@ -523,7 +523,7 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 	ChitAcceptAll acceptAll;
 	chitBag->QuerySpatialHash( &hashQuery, origin2, EXPLOSIVE_RANGE, 0, &acceptAll );
 
-	GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", origin.x, origin.y, origin.z ));
+//	GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", origin.x, origin.y, origin.z ));
 	//WorldMap* worldMap = engine->GetMap() ? engine->GetMap()->ToWorldMap() : 0;
 
 	for( int i=0; i<hashQuery.Size(); ++i ) {
@@ -581,7 +581,7 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 			}
 		}
 	}
-	GLLOG(( "</Explosion>\n" ));
+//	GLLOG(( "</Explosion>\n" ));
 }
 
 void BattleMechanics::GenerateExplosion(const DamageDesc& dd,

@@ -288,9 +288,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				}
 				for( int i=0; i<sequence[type].nBones; ++i ) {
 					BoneData::Bone* bone = &sequence[type].boneData.bone[i];
-					GLLOG(( "An %s Sq %d Fr %2d Bn %16s Ref %5.2f,%5.2f,%5.2f\n",
-						resName, type, frame, bone->name.c_str(), 
-						bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
+//					GLLOG(( "An %s Sq %d Fr %2d Bn %16s Ref %5.2f,%5.2f,%5.2f\n",
+//						resName, type, frame, bone->name.c_str(), 
+//						bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
 				}
 			}
 		}

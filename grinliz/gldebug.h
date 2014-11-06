@@ -50,7 +50,6 @@ void relprintf( const char* format, ... );
 		#define GLASSERT( x )		if ( !(x)) { _asm { int 3 } }
 		inline bool GL_FUNC_ASSERT(bool x)	{ GLASSERT(x); return x; }
 		#define GLOUTPUT( x )		dprintf x
-		#define GLLOG( x )			logprintf x
 		#define GLOUTPUT_REL( x )	relprintf x
 	#elif defined (ANDROID_NDK)
 		#include <android/log.h>

@@ -154,7 +154,7 @@ RenderAtom LumosGame::CalcIconAtom( int id, bool enabled )
 }
 
 
-RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled )
+RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled, float* ratio )
 {
 	const Texture* texture = TextureManager::Instance()->GetTexture( "uiIcon" );
 	if ( !name || !*name ) {
@@ -170,6 +170,10 @@ RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled )
 			texture,
 			te.uv.x, te.uv.y, te.uv.z, te.uv.w);
 		atom = a;
+
+		if (ratio) {
+			*ratio = (float(texture->Width()) * (atom.tx1 - atom.tx0)) / (float(texture->Height()) * (atom.ty1 - atom.ty0));
+		}
 
 		if (!enabled) {
 			atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;

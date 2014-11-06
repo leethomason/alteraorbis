@@ -873,7 +873,7 @@ float DamageDesc::Score() const
 
 void DamageDesc::Log()
 {
-	GLLOG(( "[damage=%.1f]", damage ));
+//	GLLOG(( "[damage=%.1f]", damage ));
 }
 
 

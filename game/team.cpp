@@ -82,6 +82,11 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	{
 		return TEAM_CHAOS;
 	}
+	else if (    itemName == ISC::humanFemale
+			  || itemName == ISC::humanMale) 
+	{
+		return TEAM_HOUSE;
+	}
 	GLASSERT(0);
 	return TEAM_NEUTRAL;
 }

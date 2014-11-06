@@ -210,10 +210,23 @@ void MapScene::DrawMap()
 
 		for (int pass = 0; pass < 2; ++pass) {
 			MOBKeyFilter mobFilter;
-			mobFilter.value = (pass == 0) ? ISC::lesser : ISC::greater;
-
 			CChitArray query;
-			lumosChitBag->QuerySpatialHash(&query, ToWorld(inner), 0, &mobFilter);
+			if (pass == 0) {
+				CChitArray arr0;
+				mobFilter.value = ISC::lesser;
+				lumosChitBag->QuerySpatialHash(&query, ToWorld(inner), 0, &mobFilter);
+				mobFilter.value = ISC::denizen;
+				lumosChitBag->QuerySpatialHash(&arr0, ToWorld(inner), 0, &mobFilter);
+				for (int i = 0; i < arr0.Size(); ++i) {
+					if (query.HasCap()) {
+						query.Push(arr0[i]);
+					}
+				}
+			}
+			else {
+				mobFilter.value = ISC::greater;
+				lumosChitBag->QuerySpatialHash(&query, ToWorld(inner), 0, &mobFilter);
+			}
 
 			CArray<MCount, 16> counter;
 			for (int k = 0; k < query.Size(); ++k) {
@@ -236,13 +249,11 @@ void MapScene::DrawMap()
 			float y = r.min.y + h * float(pass + 1);
 
 			for (int k = 0; k < counter.Size() && k < MAX_COL && nFace < MAX_FACE; ++k) {
-				RenderAtom atom = LumosGame::CalcUIIconAtom(counter[k].name.c_str(), true);
-
-				float fraction = (atom.tx1 - atom.tx0) / (atom.ty1 - atom.ty0);
-
+				float ratio = 1;
+				RenderAtom atom = LumosGame::CalcUIIconAtom(counter[k].name.c_str(), true, &ratio);
 				atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
 				face[nFace].SetAtom(atom);
-				face[nFace].SetSize(h * fraction, h);
+				face[nFace].SetSize(ratio * h, h);
 				face[nFace].SetPos(x + float(k)*h, y);
 				face[nFace].SetVisible(true);
 				++nFace;

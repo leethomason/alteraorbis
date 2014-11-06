@@ -293,7 +293,7 @@ void BattleTestScene::HandleHotKey( int mask )
 
 void BattleTestScene::GoScene()
 {
-	GLLOG(( "---- GO ---- \n" ));
+//	GLLOG(( "---- GO ---- \n" ));
 	battleStarted = true;
 	Rectangle2F b;
 	b.Set( 0, 0, (float)context.worldMap->Width(), (float)context.worldMap->Height() );

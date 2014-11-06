@@ -565,7 +565,9 @@ Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle
 				if (!arr) {
 					return chit;
 				}
-				arr->Push(chit);
+				if (arr->HasCap()) {
+					arr->Push(chit);
+				}
 			}
 		}
 	}
@@ -1100,7 +1102,7 @@ Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 void LumosChitBag::PushScene( int id, SceneData* data )
 {
 	if ( sceneID >= 0 ) {
-		GLLOG(( "Dupe scene pushed.\n" ));
+//		GLLOG(( "Dupe scene pushed.\n" ));
 		delete data;
 	}
 	else {

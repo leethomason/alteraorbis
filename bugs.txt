@@ -41,6 +41,8 @@
 
 - game
 	- Beta 2d
+		- clean up UI layout
+		- persisting fluids bugs
 		- pause
 			- basic
 			- tactical
@@ -160,11 +162,11 @@
 		x being underwater (plant) should make fire go out.
 		x Census: actual census. # trolls, # mantis, etc. etc.
 		
-		- test bank running out of money
-		- UI icons for gobmen, kamakiri, others?
-		- red mantis -> all red
-		- "human" UI icon
+		x UI icons for gobmen, kamakiri, others?
+		x red mantis -> all red
+		x "human" UI icon
 		x "home" icon vs. grid travel icon
+		- test bank running out of money
 		- test: build a home domain
 
 		- Denizen domains
