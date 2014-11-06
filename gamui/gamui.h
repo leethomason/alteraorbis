@@ -27,7 +27,6 @@
 #include <stdint.h>
 #include <memory.h>
 #include <string.h>
-#include "../grinliz/glcontainer.h"
 
 #if defined( _DEBUG ) || defined( DEBUG )
 #	if defined( _MSC_VER )
@@ -53,6 +52,157 @@ class TextLabel;
 class PushButton;
 class ToggleButton;
 class Image;
+
+
+template < class T >
+class PODArray
+{
+	enum { CACHE = 4 };
+public:
+	typedef T ElementType;
+
+	PODArray() : size( 0 ), capacity( CACHE ), nAlloc(0) {
+		mem = reinterpret_cast<T*>(cache);
+		GAMUIASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
+	}
+
+	~PODArray() {
+		Clear();
+		if ( mem != reinterpret_cast<T*>(cache) ) {
+			free( mem );
+		}
+		GAMUIASSERT( nAlloc == 0 );
+	}
+
+	T& operator[]( int i )				{ GAMUIASSERT( i>=0 && i<(int)size ); return mem[i]; }
+	const T& operator[]( int i ) const	{ GAMUIASSERT( i>=0 && i<(int)size ); return mem[i]; }
+
+	void Push( const T& t ) {
+		EnsureCap( size+1 );
+		mem[size] = t;
+		++size;
+		++nAlloc;
+	}
+
+
+	void PushFront( const T& t ) {
+		EnsureCap( size+1 );
+		for( int i=size; i>0; --i ) {
+			mem[i] = mem[i-1];
+		}
+		mem[0] = t;
+		++size;
+		++nAlloc;
+	}
+
+	T* PushArr( int count ) {
+		EnsureCap( size+count );
+		T* result = &mem[size];
+		size += count;
+		nAlloc += count;
+		return result;
+	}
+
+	T Pop() {
+		GAMUIASSERT( size > 0 );
+		--size;
+		--nAlloc;
+		return mem[size];
+	}
+
+	void Remove( int i ) {
+		GAMUIASSERT( i < (int)size );
+		// Copy down.
+		for( int j=i; j<size-1; ++j ) {
+			mem[j] = mem[j+1];
+		}
+		// Get rid of the end:
+		Pop();
+	}
+
+	void SwapRemove( int i ) {
+		if (i < 0) {
+			GAMUIASSERT(i == -1);
+			return;
+		}
+		GAMUIASSERT( i<(int)size );
+		GAMUIASSERT( size > 0 );
+		
+		mem[i] = mem[size-1];
+		Pop();
+	}
+
+	int Find( const T& t ) const {
+		for( int i=0; i<size; ++i ) {
+			if ( mem[i] == t )
+				return i;
+		}
+		return -1;
+	}
+
+	int Size() const		{ return size; }
+	
+	void Clear()			{ 
+		while( !Empty() ) 
+			Pop();
+		GAMUIASSERT( nAlloc == 0 );
+		GAMUIASSERT( size == 0 );
+	}
+	bool Empty() const		{ return size==0; }
+	const T* Mem() const	{ return mem; }
+	T* Mem()				{ return mem; }
+	const T* End() const	{ return mem + size; }	// mem never 0, because of cache
+
+	void Reserve(int n) { EnsureCap(n); }
+
+	void EnsureCap( int count ) {
+		if ( count > capacity ) {
+			if (count < 16) capacity = 16;
+			while (capacity < count) capacity *= 2;
+			if ( mem == reinterpret_cast<T*>(cache) ) {
+				mem = (T*)malloc( capacity*sizeof(T) );
+				memcpy( mem, cache, size*sizeof(T) );
+			}
+			else {
+				mem = (T*)realloc( mem, capacity*sizeof(T) );
+			}
+		}
+	}
+
+	void Sort() { Sort<T, CompValue>(mem, size); }
+
+	// Binary Search: array must be sorted!
+	// near: an optional parameter that returns something near an insertion point.
+	int BSearch( const T& t ) const {
+		int low = 0;
+		int high = Size();
+
+		while (low < high) {
+			int mid = low + (high - low) / 2;
+			if ( KCOMPARE::Less(mem[mid],t ))
+				low = mid + 1; 
+			else
+				high = mid; 
+		}
+		if ((low < Size()) && KCOMPARE::Equal(mem[low], t))
+			return low;
+
+		return -1;
+	}
+
+protected:
+	PODArray( const PODArray<T>& );	// not allowed. Add a missing '&' in the code.
+	void operator=( const PODArray< T >& rhs );	// hard to implement with ownership semantics
+
+	T* mem;
+	int size;
+	int capacity;
+	int nAlloc;
+	enum { 
+		CACHE_SIZE = (CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)
+	};
+	int cache[CACHE_SIZE];
+};
 
 
 /**
@@ -270,7 +420,7 @@ private:
 
 	bool			m_orderChanged;
 	bool			m_modified;
-	grinliz::CDynArray<UIItem*> m_itemArr;
+	PODArray<UIItem*> m_itemArr;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
 	float			m_textHeight;
@@ -294,11 +444,11 @@ private:
 		int				group;
 	};
 
-	grinliz::CDynArray< unsigned >			m_dialogStack;
-	grinliz::CDynArray< FocusItem >			m_focusItems;
-	grinliz::CDynArray< State >				m_stateBuffer;
-	grinliz::CDynArray< uint16_t >			m_indexBuffer;
-	grinliz::CDynArray< Vertex >			m_vertexBuffer;
+	PODArray< unsigned >			m_dialogStack;
+	PODArray< FocusItem >			m_focusItems;
+	PODArray< State >				m_stateBuffer;
+	PODArray< uint16_t >			m_indexBuffer;
+	PODArray< Vertex >				m_vertexBuffer;
 };
 
 
@@ -419,7 +569,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const = 0;
 	virtual bool DoLayout() = 0;
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) = 0;
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex ) = 0;
 
 	virtual void Clear()	{ m_gamui = 0; }
 
@@ -446,7 +596,7 @@ protected:
 	template <class T> T Min( T a, T b ) const		{ return a<b ? a : b; }
 	template <class T> T Max( T a, T b ) const		{ return a>b ? a : b; }
 	float Mean( float a, float b ) const			{ return (a+b)*0.5f; }
-	static Gamui::Vertex* PushQuad( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	static Gamui::Vertex* PushQuad( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 	void Modify()		{ if ( m_gamui ) m_gamui->Modify(); }
 	void OrderChanged()	{ if ( m_gamui ) m_gamui->OrderChanged(); }
 
@@ -492,12 +642,12 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
 	float WordWidth( const char* p, IGamuiText* iText ) const;
 	// Always sets the width and height (which are mutable for that reason.)
-	void ConstQueue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) const;
+	void ConstQueue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex ) const;
 
 	enum { ALLOCATED = 16 };
 	char  m_buf[ALLOCATED];
@@ -534,7 +684,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 	virtual bool HandleTap( TapAction action, float x, float y );
 
 private:
@@ -564,7 +714,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 	virtual int CX() const = 0;
 	virtual int CY() const = 0;
@@ -660,7 +810,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 	virtual PushButton* ToPushButton() { return 0; }
 	virtual ToggleButton* ToToggleButton() { return 0; }
@@ -835,7 +985,7 @@ private:
 	ToggleButton* m_next;
 	ToggleButton* m_prev;
 	bool m_wasUp;
-	grinliz::CDynArray< UIItem* >* m_subItemArr;
+	PODArray< UIItem* >* m_subItemArr;
 };
 
 
@@ -875,7 +1025,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
 	enum { MAX_TICKS = 10 };

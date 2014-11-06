@@ -2,6 +2,7 @@
 #define START_GAME_WIDGET
 
 #include "../gamui/gamui.h"
+#include "../grinliz/glcontainer.h"
 
 class SectorData;
 class Engine;

@@ -46,9 +46,6 @@ enum {
 const int SCREEN_X = 600;
 const int SCREEN_Y = 400;
 
-typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
-PFN_IMG_LOAD libIMG_Load;
-
 
 class Renderer : public IGamuiRenderer
 {
@@ -185,14 +182,16 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
-	SDL_Window *screen = SDL_CreateWindow(	"Altera",
+	SDL_Window *screen = SDL_CreateWindow(	"Gamui",
 											50, 50,
-											1024, 768,
-											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
+											SCREEN_X, SCREEN_Y,
+											SDL_WINDOW_OPENGL );
+	SDL_GL_CreateContext( screen );
 
 	// Load text texture
-	SDL_Surface* textSurface = SDL_LoadBMP( "stdfont2.bmp" );
+	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
 
+	TESTGLERR();
 	GLuint textTextureID;
 	glGenTextures( 1, &textTextureID );
 	glBindTexture( GL_TEXTURE_2D, textTextureID );
@@ -202,10 +201,19 @@ int main( int argc, char **argv )
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_ALPHA, textSurface->w, textSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, textSurface->pixels );
 	SDL_FreeSurface( textSurface );
-
+	TESTGLERR();
 
 	// Load a bitmap
-	SDL_Surface* imageSurface = libIMG_Load( "buttons.png" );
+	SDL_Surface* imageSurface = SDL_LoadBMP( "./gamui/buttons.bmp" );
+	for (int j = 0; j < imageSurface->h; ++j) {
+		for (int i = 0; i < imageSurface->w; ++i) {
+			uint8_t* p0 = (uint8_t*)imageSurface->pixels + j * imageSurface->pitch + i * 3;
+			uint8_t* p1 = p0 + 2;
+			uint8_t t = *p0;
+			*p0 = *p1;
+			*p1 = t;
+		}
+	}
 
 	GLuint imageTextureID;
 	glGenTextures( 1, &imageTextureID );
@@ -214,8 +222,11 @@ int main( int argc, char **argv )
 	glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageSurface->pixels );
+	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSurface->pixels );
+	TESTGLERR();
 	SDL_FreeSurface( imageSurface );
+
+	RenderAtom nullAtom;
 
 	// 256, 128
 	RenderAtom textAtom( (const void*)RENDERSTATE_TEXT, (const void*)textTextureID, 0, 0, 0, 0 );
@@ -226,13 +237,15 @@ int main( int argc, char **argv )
 	RenderAtom imageAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.5f, 0.5f, 228.f/256.f, 28.f/256.f );
 
 	// 50x50
-	RenderAtom decoAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.25f, 0.25f, 0.f );
+	//RenderAtom decoAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.25f, 0.25f, 0.f );
+	RenderAtom decoAtom = nullAtom; 
 	RenderAtom decoAtomD = decoAtom;
 	decoAtomD.renderState = (const void*) RENDERSTATE_DISABLED;
 
 	TextMetrics textMetrics;
 	Renderer renderer;
 
+	TESTGLERR();
 	Gamui gamui( &renderer, textAtom, textAtomD, &textMetrics );
 
 	TextLabel textLabel[2];
@@ -333,8 +346,6 @@ int main( int argc, char **argv )
 	bar.SetPos( 20, 350 );
 	bar.SetSize( 100, 20 );
 
-	RenderAtom nullAtom;
-
 	TiledImage<2, 2> tiled( &gamui );
 	tiled.SetPos( 520, 20 );
 	tiled.SetSize( 50, 50 );
@@ -362,12 +373,12 @@ int main( int argc, char **argv )
 				break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					gamui.TapDown( event.button.x, event.button.y );
+					gamui.TapDown( (float)event.button.x, (float)event.button.y );
 					break;
 
 				case SDL_MOUSEBUTTONUP:
 					{
-						const UIItem* item = gamui.TapUp( event.button.x, event.button.y );
+						const UIItem* item = gamui.TapUp( (float)event.button.x, (float)event.button.y );
 						if ( item ) {
 							range += 0.1f;
 							if ( range > 1.0f )
@@ -394,9 +405,6 @@ int main( int argc, char **argv )
 
 		SDL_GL_SwapWindow( screen );
 	}
-
-
-
 	SDL_Quit();
 	return 0;
 }

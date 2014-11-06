@@ -29,7 +29,6 @@
 
 using namespace gamui;
 using namespace std;
-using namespace grinliz;
 
 static const float PI = 3.1415926535897932384626433832795f;
 
@@ -116,7 +115,7 @@ UIItem::~UIItem()
 }
 
 
-Gamui::Vertex* UIItem::PushQuad( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+Gamui::Vertex* UIItem::PushQuad( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	int base = vertexBuf->Size();
 	uint16_t *index = indexBuf->PushArr( 6 );
@@ -276,12 +275,12 @@ float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 }
 
 
-void TextLabel::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) 
+void TextLabel::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf ) 
 {
 	ConstQueue( indexBuf, vertexBuf );
 }
 
-void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) const
+void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf ) const
 {
 	if ( !m_gamui )
 		return;
@@ -351,7 +350,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		// committed and can run in a tight loop.
 		//y = round(y); doesn't help - why?
 		while( p && *p && *p != '\n' && *p != '\t' ) {
-			x = round(x);
+			//x = floorf(x+0.5f);
 			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
 
 			float x0 = x+metrics.x;
@@ -594,7 +593,7 @@ bool TiledImageBase::DoLayout()
 }
 
 
-void TiledImageBase::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	int startVertex = vertexBuf->Size();
 
@@ -635,7 +634,7 @@ const RenderAtom* Image::GetRenderAtom() const
 }
 
 
-void Image::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	if ( m_atom.textureHandle == 0 ) {
 		return;
@@ -916,7 +915,7 @@ bool Button::DoLayout()
 }
 
 
-void Button::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void Button::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	// does nothing - children draw
 }
@@ -1049,7 +1048,7 @@ void ToggleButton::AddSubItem( UIItem* item )
 	GAMUIASSERT( item->SuperItem() == 0 );
 
 	if ( !m_subItemArr ) {
-		m_subItemArr = new CDynArray< UIItem* >();
+		m_subItemArr = new PODArray< UIItem* >();
 	}
 	m_subItemArr->Push( item );
 	item->SetSuperItem( this );
@@ -1060,7 +1059,7 @@ void ToggleButton::RemoveSubItem( UIItem* item )
 {
 	GAMUIASSERT( m_subItemArr );
 	int index = m_subItemArr->Find( item );
-	GLASSERT( index >= 0 );
+	GAMUIASSERT( index >= 0 );
 	item->SetSuperItem( 0 );
 	m_subItemArr->Remove( index );
 }
@@ -1233,7 +1232,7 @@ bool DigitalBar::DoLayout()
 }
 
 
-void DigitalBar::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void DigitalBar::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	// does nothing - children draw
 }
