@@ -168,6 +168,7 @@
 		x "home" icon vs. grid travel icon
 		- test bank running out of money
 		- test: build a home domain
+		- female face coming up with male name and model
 
 		- Denizen domains
 		- Visitor role
