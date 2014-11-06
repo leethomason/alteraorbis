@@ -8,8 +8,8 @@
 <items>
   <GameItem name="humanFemale"
         resource="humanFemale"
-        uiIcon="humanMale"
-		    flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        uiIcon="humanFemale"
+	    flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
@@ -29,7 +29,7 @@
 
   <GameItem name="humanMale"
         resource="humanMale"
-        uiIcon="humanFemale"
+        uiIcon="humanMale"
         flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         nameGen="humanMaleNames"

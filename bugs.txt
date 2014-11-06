@@ -169,7 +169,6 @@
 		x female face coming up with male name and model
 		- test bank running out of money
 		- test: build a home domain
-		- news multi-prints. start avatar, close window, start avatar.
 
 		- Denizen domains
 		- Visitor role
@@ -182,6 +181,7 @@
 				- adventure
 				- follow avatar
 
+		- news multi-prints. start avatar, close window, start avatar.
 		- advisor still comes up in weird states.
 		- special gobman item, building
 		- re-test battle scenes. balance.
