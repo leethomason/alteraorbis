@@ -351,7 +351,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		// committed and can run in a tight loop.
 		//y = round(y); doesn't help - why?
 		while( p && *p && *p != '\n' && *p != '\t' ) {
-			x = round(x);
+			//x = floorf(x + 0.5f); causes text wiggle.
 			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
 
 			float x0 = x+metrics.x;

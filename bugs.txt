@@ -166,9 +166,10 @@
 		x red mantis -> all red
 		x "human" UI icon
 		x "home" icon vs. grid travel icon
+		x female face coming up with male name and model
 		- test bank running out of money
 		- test: build a home domain
-		- female face coming up with male name and model
+		- news multi-prints. start avatar, close window, start avatar.
 
 		- Denizen domains
 		- Visitor role
