@@ -42,7 +42,6 @@
 
 namespace gamui
 {
-
 class Gamui;
 class IGamuiRenderer;
 class IGamuiText;
@@ -167,27 +166,6 @@ public:
 				mem = (T*)realloc( mem, capacity*sizeof(T) );
 			}
 		}
-	}
-
-	void Sort() { Sort<T, CompValue>(mem, size); }
-
-	// Binary Search: array must be sorted!
-	// near: an optional parameter that returns something near an insertion point.
-	int BSearch( const T& t ) const {
-		int low = 0;
-		int high = Size();
-
-		while (low < high) {
-			int mid = low + (high - low) / 2;
-			if ( KCOMPARE::Less(mem[mid],t ))
-				low = mid + 1; 
-			else
-				high = mid; 
-		}
-		if ((low < Size()) && KCOMPARE::Equal(mem[low], t))
-			return low;
-
-		return -1;
 	}
 
 protected:
