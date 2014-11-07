@@ -439,12 +439,16 @@ bool DomainAI::ClearRoadsAndPorches()
 	for (int i = 0; i < MAX_ROADS; ++i) {
 		int n = 0;
 		const Vector2I* road = roads->GetRoad(i, &n);
+		n = Min(n, buildDistance[i]);
+
 		for (int k = 0; road && k < n; ++k) {
 			Vector2I pos = road[k];
 			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
-			if (wg.IsLand() && (wg.Plant() || wg.RockHeight())) {
-				workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
-				issued = true;
+			if (wg.IsLand()) {
+				if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
+					workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
+					issued = true;
+				}
 			}
 		}
 	}
