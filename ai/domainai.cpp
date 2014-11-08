@@ -459,13 +459,28 @@ bool DomainAI::ClearRoadsAndPorches()
 	Context()->chitBag->QueryBuilding(IString(), bounds, &arr);
 	for (int i = 0; i < arr.Size(); ++i) {
 		MapSpatialComponent* msc = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
-		if (msc && msc->HasPorch()) {
-			Rectangle2I pb = msc->PorchPos();
+		Rectangle2I pb;
+		pb.SetInvalid();
+
+		if (msc && arr[i]->GetItem() && arr[i]->GetItem()->IName() == ISC::farm) {
+			Vector2I normal = WorldRotationToNormal(LRint(msc->GetYRotation()));
+			Vector2I p0 = msc->GetPosition2DI() + normal;
+			Vector2I p1 = msc->GetPosition2DI() + normal * FARM_GROW_RAD;
+			pb.FromPair(p0, p1);
+		}
+		else if (msc && msc->HasPorch()) {
+			pb = msc->PorchPos();
+		}
+
+		if (pb.IsValid()) {
 			for (Rectangle2IIterator it(pb); !it.Done(); it.Next()) {
-				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if (wg.IsLand() && (wg.Plant() || wg.RockHeight())) {
-					workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
-					issued = true;
+				Vector2I pos = it.Pos();
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
+				if (wg.IsLand()) {
+					if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
+						workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
+						issued = true;
+					}
 				}
 			}
 		}
@@ -513,6 +528,23 @@ int DomainAI::DoTick(U32 delta)
 	}
 	return ticker.Next();
 }
+
+
+float DomainAI::CalcFarmEfficiency(const grinliz::Vector2I& sector)
+{
+	CChitArray farms;
+	Context()->chitBag->QueryBuilding(ISC::farm, InnerSectorBounds(sector), &farms);
+
+	float eff = 0;
+	for (int i = 0; i < farms.Size(); ++i) {
+		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
+		if (farmScript) {
+			eff += farmScript->Efficiency();
+		}
+	}
+	return eff;
+}
+
 
 
 TrollDomainAI::TrollDomainAI()
@@ -604,12 +636,18 @@ int TrollDomainAI::DoTick(U32 delta)
 			TransactAmt cost;
 			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
 			if (item) {
-				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
-				market->GetItemComponent()->AddToInventory(item);
+				if (ReserveBank::GetWallet()->CanWithdraw(cost)) {
 
-				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, 
-									 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+					item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+					market->GetItemComponent()->AddToInventory(item);
+
+					// Mark this item as important with a destroyMsg:
+					item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
+										 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+				}
+				else {
+					delete item;
+				}
 			}
 		}
 	}
@@ -692,16 +730,8 @@ void GobDomainAI::DoBuild()
 
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	CChitArray farms;
-	Context()->chitBag->QueryBuilding(ISC::farm, sector, &farms);
 
-	float eff = 0.0f;
-	for (int i = 0; i < farms.Size(); ++i) {
-		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		if (farmScript) {
-			eff += farmScript->Efficiency();
-		}
-	}
+	float eff = CalcFarmEfficiency(sector);
 
 	do {
 		if (BuyWorkers()) break;
@@ -715,8 +745,12 @@ void GobDomainAI::DoBuild()
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
 		if (eff < 2.0f && BuildFarm()) break;
+		if (eff > 1.5f) {
+			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		}
 		if (eff >= 2) {
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
 			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 		}
@@ -778,16 +812,7 @@ void KamakiriDomainAI::DoBuild()
 	Rectangle2I sectorBounds = SectorBounds(sector);
 
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	CChitArray farms;
-	Context()->chitBag->QueryBuilding(ISC::farm, sectorBounds, &farms);
-
-	float eff = 0.0f;
-	for (int i = 0; i < farms.Size(); ++i) {
-		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		if (farmScript) {
-			eff += farmScript->Efficiency();
-		}
-	}
+	float eff = CalcFarmEfficiency(sector);
 
 	CChitArray bars;
 	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);

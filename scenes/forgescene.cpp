@@ -236,7 +236,7 @@ void ForgeScene::SetModel( bool randomTraits )
 	
 	if (   item 
 		&& forgeData->itemComponent->CanAddToInventory()
-		&& crystalRequired <= forgeData->itemComponent->GetItem()->wallet
+		&& forgeData->itemComponent->GetItem()->wallet.CanWithdraw(crystalRequired)
 		&& techRequired <= forgeData->tech ) 
 	{ 
 		buildButton.SetEnabled( true );
