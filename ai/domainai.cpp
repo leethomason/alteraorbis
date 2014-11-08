@@ -698,7 +698,9 @@ void GobDomainAI::DoBuild()
 	float eff = 0.0f;
 	for (int i = 0; i < farms.Size(); ++i) {
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		eff += farmScript->Efficiency();
+		if (farmScript) {
+			eff += farmScript->Efficiency();
+		}
 	}
 
 	do {
@@ -782,7 +784,9 @@ void KamakiriDomainAI::DoBuild()
 	float eff = 0.0f;
 	for (int i = 0; i < farms.Size(); ++i) {
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		eff += farmScript->Efficiency();
+		if (farmScript) {
+			eff += farmScript->Efficiency();
+		}
 	}
 
 	CChitArray bars;
