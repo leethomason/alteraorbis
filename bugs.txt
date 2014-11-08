@@ -172,6 +172,8 @@
 		x reconstruct roads (porches) from farms back to road.
 		x check gob domain efficiency
 
+		- retest truulga item gen
+
 		- Denizen domains
 		- Visitor role
 			- Visitor travel

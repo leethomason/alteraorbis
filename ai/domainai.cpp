@@ -579,13 +579,8 @@ int TrollDomainAI::DoTick(U32 delta)
 		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
 	}
 
-	TransactAmt amt;
-	amt.AddCrystal(CRYSTAL_GREEN, 1);
-	amt.AddCrystal(CRYSTAL_RED, 1);
-	amt.AddCrystal(CRYSTAL_BLUE, 1);
-
 	// Build stuff for the trolls to buy.
-	if (forgeTicker.Delta(delta) && ReserveBank::GetWallet()->CanWithdraw(amt)) {
+	if (forgeTicker.Delta(delta)) {
 		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
 
 		// find a market.
@@ -624,12 +619,18 @@ int TrollDomainAI::DoTick(U32 delta)
 			TransactAmt cost;
 			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
 			if (item) {
-				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
-				market->GetItemComponent()->AddToInventory(item);
+				if (ReserveBank::GetWallet()->CanWithdraw(cost)) {
 
-				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, 
-									 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+					item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+					market->GetItemComponent()->AddToInventory(item);
+
+					// Mark this item as important with a destroyMsg:
+					item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
+										 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+				}
+				else {
+					delete item;
+				}
 			}
 		}
 	}
