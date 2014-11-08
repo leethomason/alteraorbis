@@ -58,6 +58,8 @@ protected:
 	bool BuildBuilding(int id);
 	bool BuildFarm();
 
+	float CalcFarmEfficiency(const grinliz::Vector2I& sector);
+
 	RoadAI*	roads;
 
 private:

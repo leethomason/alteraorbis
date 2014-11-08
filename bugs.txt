@@ -185,7 +185,7 @@
 				- adventure
 				- follow avatar
 
-		- build tasts aren't getting serialized correctly. wrong rotation?
+		- build tasks aren't getting serialized correctly. wrong rotation?
 		- gems running too-negative. Truulga?? Something else?
 		- news multi-prints. start avatar, close window, start avatar.
 		- advisor still comes up in weird states.

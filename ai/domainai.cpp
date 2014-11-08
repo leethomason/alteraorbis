@@ -530,6 +530,21 @@ int DomainAI::DoTick(U32 delta)
 }
 
 
+float DomainAI::CalcFarmEfficiency(const grinliz::Vector2I& sector)
+{
+	CChitArray farms;
+	Context()->chitBag->QueryBuilding(ISC::farm, InnerSectorBounds(sector), &farms);
+
+	float eff = 0;
+	for (int i = 0; i < farms.Size(); ++i) {
+		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
+		eff += farmScript->Efficiency();
+	}
+	return eff;
+}
+
+
+
 TrollDomainAI::TrollDomainAI()
 {
 
@@ -713,14 +728,8 @@ void GobDomainAI::DoBuild()
 
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	CChitArray farms;
-	Context()->chitBag->QueryBuilding(ISC::farm, InnerSectorBounds(sector), &farms);
 
-	float eff = 0.0f;
-	for (int i = 0; i < farms.Size(); ++i) {
-		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		eff += farmScript->Efficiency();
-	}
+	float eff = CalcFarmEfficiency(sector);
 
 	do {
 		if (BuyWorkers()) break;
@@ -801,14 +810,7 @@ void KamakiriDomainAI::DoBuild()
 	Rectangle2I sectorBounds = SectorBounds(sector);
 
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	CChitArray farms;
-	Context()->chitBag->QueryBuilding(ISC::farm, sectorBounds, &farms);
-
-	float eff = 0.0f;
-	for (int i = 0; i < farms.Size(); ++i) {
-		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		eff += farmScript->Efficiency();
-	}
+	float eff = CalcFarmEfficiency(sector);
 
 	CChitArray bars;
 	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
