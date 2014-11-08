@@ -41,25 +41,25 @@
 
 - game
 	- Beta 2d
-		- clean up UI layout
-		- persisting fluids bugs
+		x clean up UI layout
+		- persisting fluids bugs. switch to simpler model of pressure / not pressure
 		- pause
 			- basic
 			- tactical
 		- replace build with click/drag?
 		- zoom out to full domain
 		- map travel: lanes?
-		- worldgen: only run fluids past a certain time
+		- worldgen: only run fluids past a certain time?
 		- Linux
 		- Android
-		- Download tracking
+		x Download tracking
 		d more aggressively seed plants? (Fire takes out a lot.)
 		d some kind of shock source - lighting? electric water??
 		- slow down awareness. only notify friends we can see.
 		- denizen spawn rate. hmm..
     	- face icon generation; icon into build (mantis?)
-		- Circuit Fab does nothing
-		- name of Bar
+		x Circuit Fab does nothing
+		x name of Bar
 		- out of gold shouldn't cancel build orders
 	    - plants look repetetive
 		- walk target for the avatar
@@ -169,7 +169,8 @@
 		x female face coming up with male name and model
 		x test bank running out of money
 		x test: build a home domain
-		- reconstruct roads (porches) from farms back to road.
+		x reconstruct roads (porches) from farms back to road.
+		x check gob domain efficiency
 
 		- Denizen domains
 		- Visitor role
@@ -182,6 +183,7 @@
 				- adventure
 				- follow avatar
 
+		- build tasts aren't getting serialized correctly. wrong rotation?
 		- gems running too-negative. Truulga?? Something else?
 		- news multi-prints. start avatar, close window, start avatar.
 		- advisor still comes up in weird states.
