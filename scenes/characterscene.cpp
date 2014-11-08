@@ -401,13 +401,13 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 				Wallet* exchangeWallet = &data->storageIC->GetItem()->wallet;
 
 				if (origin == 0) {
-					if (transferCrystal <= *avatarWallet && transferGold <= *exchangeWallet) {
+					if (avatarWallet->CanWithdraw(transferCrystal) && exchangeWallet->CanWithdraw(transferGold)) {
 						exchangeWallet->Deposit(avatarWallet, transferCrystal);
 						avatarWallet->Deposit(exchangeWallet, transferGold);
 					}
 				}
 				else {
-					if (transferCrystal <= *exchangeWallet && transferGold <= *avatarWallet) {
+					if (exchangeWallet->CanWithdraw(transferCrystal) && avatarWallet->CanWithdraw(transferGold)) {
 						avatarWallet->Deposit(exchangeWallet, transferCrystal);
 						exchangeWallet->Deposit(avatarWallet, transferGold);
 					}

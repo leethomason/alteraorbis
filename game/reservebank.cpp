@@ -74,7 +74,7 @@ void ReserveBank::WithdrawDenizen(Wallet* dst)
 	amt.AddGold(GOLD_PER_DENIZEN);
 
 	// If bank is low, don't give new spawns money.
-	if (wallet > amt) {
+	if (wallet.CanWithdraw(amt)) {
 		dst->Deposit(&wallet, amt);
 	}
 }
@@ -94,7 +94,7 @@ void ReserveBank::WithdrawMonster(Wallet* dst, bool greater)
 		amt.AddCrystal(index, 1);
 	}
 	// If bank is low, don't give new spawns money.
-	if (wallet > amt) {
+	if (wallet.CanWithdraw(amt)) {
 		dst->Deposit(&wallet, amt);
 	}
 }

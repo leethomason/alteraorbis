@@ -585,7 +585,7 @@ int TrollDomainAI::DoTick(U32 delta)
 	amt.AddCrystal(CRYSTAL_BLUE, 1);
 
 	// Build stuff for the trolls to buy.
-	if (forgeTicker.Delta(delta) && (*ReserveBank::GetWallet() > amt) ) {
+	if (forgeTicker.Delta(delta) && ReserveBank::GetWallet()->CanWithdraw(amt)) {
 		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
 
 		// find a market.
