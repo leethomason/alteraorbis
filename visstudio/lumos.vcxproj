@@ -132,6 +132,7 @@
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\news.cpp" />
+    <ClCompile Include="..\game\newsconsole.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\personality.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="..\game\lumosmath.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\news.h" />
+    <ClInclude Include="..\game\newsconsole.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\personality.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />

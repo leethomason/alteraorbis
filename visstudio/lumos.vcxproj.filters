@@ -412,6 +412,9 @@
     <ClCompile Include="..\ai\roadai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\newsconsole.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -824,6 +827,9 @@
     </ClInclude>
     <ClInclude Include="..\ai\roadai.h">
       <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\newsconsole.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

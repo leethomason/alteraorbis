@@ -22,7 +22,7 @@
 
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
-#include "../widget/consolewidget.h"
+#include "../game/newsconsole.h"
 #include "../widget/startwidget.h"
 #include "../widget/endwidget.h"
 #include "../widget/barstack.h"
@@ -149,7 +149,6 @@ private:
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
 	int					chitTracking;
-	int					currentNews;	// index of the last news item put in the console
 	int					coreWarningTimer, domainWarningTimer;
 	grinliz::Vector2F	coreWarningPos, domainWarningPos;
 	int					poolView;
@@ -197,7 +196,7 @@ private:
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
-	ConsoleWidget		consoleWidget;
+	NewsConsole			newsConsole;
 	StartGameWidget		startGameWidget;
 	EndGameWidget		endGameWidget;
 
