@@ -2473,7 +2473,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		}
 		else {
 			float range = (pos - targetDesc.MapTarget()).Length();
-			if (range > 3.0f && range < LONGEST_WEAPON_RANGE && LineOfSight(thisComp, targetDesc.mapPos)) {
+			if (rangedWeapon && range > 3.0f && range < LONGEST_WEAPON_RANGE && LineOfSight(thisComp, targetDesc.mapPos)) {
 				utility[OPTION_SHOOT] = 1.0f;
 			}
 			else { //if (BattleMechanics::InMeleeZone(Context()->engine, parentChit, targetDesc.mapPos)) {
