@@ -57,7 +57,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	selectionModel = 0;
 	buildActive = 0;
 	chitTracking = 0;
-	currentNews = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
 	domainWarningTimer = 0;
@@ -198,7 +197,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	dateLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
-	consoleWidget.Init( &gamui2D );
+	newsConsole.Init( &gamui2D, sim->GetChitBag() );
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -337,9 +336,9 @@ void GameScene::Resize()
 	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
-	layout.PosAbs(&consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
-	float consoleHeight = okay.Y() - consoleWidget.Y();
-	consoleWidget.SetBounds( 0, consoleHeight );
+	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
+	float consoleHeight = okay.Y() - newsConsole.consoleWidget.Y();
+	newsConsole.consoleWidget.SetBounds(0, consoleHeight);
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
@@ -1095,7 +1094,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 
 	Vector2F pos2 = { 0, 0 };
-	if (consoleWidget.IsItem(item, &pos2)) {
+	if (newsConsole.consoleWidget.IsItem(item, &pos2)) {
 		if (!pos2.IsZero()) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 			if (cc) {
@@ -1584,87 +1583,6 @@ void GameScene::SetPickupButtons()
 }
 
 
-void GameScene::ProcessNewsToConsole()
-{
-	NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-	currentNews = Max( currentNews, history->NumNews() - 40 );
-	GLString str;
-	LumosChitBag* chitBag = sim->GetChitBag();
-	CoreScript* coreScript = GetHomeCore();
-
-	Chit* playerChit = GetPlayerChit();
-	Vector2I homeSector = GetHomeSector();
-
-	// Check if news sector is 1)current avatar sector, or 2)domain sector
-
-	RenderAtom atom;
-	Vector2F pos2 = { 0, 0 };
-
-	for ( ;currentNews < history->NumNews(); ++currentNews ) {
-		const NewsEvent& ne = history->News( currentNews );
-		Vector2I sector = ne.Sector();
-		Chit* chit = chitBag->GetChit(ne.FirstChitID());
-		SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
-
-		str = "";
-
-		switch( ne.What() ) {
-		case NewsEvent::DENIZEN_CREATED:
-		case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
-			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
-				ne.Console( &str, chitBag, 0 );
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("greeninfo");
-			}
-			break;
-
-		case NewsEvent::DENIZEN_KILLED:
-		case NewsEvent::STARVATION:
-		case NewsEvent::BLOOD_RAGE:
-		case NewsEvent::VISION_QUEST:
-			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
-				ne.Console( &str, chitBag, 0 );
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("warning");
-			}
-			break;
-
-		case NewsEvent::FORGED:
-		case NewsEvent::UN_FORGED:
-		case NewsEvent::PURCHASED:
-			if ((coreScript && coreScript->IsCitizen(ne.FirstChitID() ))
-				|| sector == homeSector)
-			{
-				ne.Console(&str, chitBag, 0);
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("greeninfo");
-			}
-			break;
-
-		case NewsEvent::GREATER_MOB_CREATED:
-		case NewsEvent::GREATER_MOB_KILLED:
-			ne.Console( &str, chitBag, 0 );
-			if (sc) pos2 = sc->GetPosition2D();
-			atom = LumosGame::CalcUIIconAtom("greeninfo");
-			break;
-
-		case NewsEvent::DOMAIN_CREATED:
-		case NewsEvent::DOMAIN_DESTROYED:
-		case NewsEvent::GREATER_SUMMON_TECH:
-		case NewsEvent::DOMAIN_CONQUER:
-			ne.Console( &str, chitBag, 0 );
-			break;
-
-		default:
-			break;
-		}
-		if ( !str.empty() ) {
-			consoleWidget.Push(str, atom, pos2);
-		}
-	}
-}
-
-
 void GameScene::DoTick( U32 delta )
 {
 	clock_t startTime = clock();
@@ -1856,8 +1774,7 @@ void GameScene::DoTick( U32 delta )
 			autoRebuild.SetUp();
 	}
 
-	consoleWidget.DoTick( delta );
-	ProcessNewsToConsole();
+	newsConsole.DoTick( delta, sim->GetChitBag()->GetHomeCore() );
 
 	bool useBuildingVisible = false;
 	if ( AvatarSelected() ) {
