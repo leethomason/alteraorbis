@@ -14,6 +14,10 @@ public:
 	~NewsConsole();
 
 	void Init(gamui::Gamui* gamui2D, LumosChitBag* chitBag);
+	void AttachChitBag(LumosChitBag* cb) {
+		GLASSERT(!chitBag);
+		chitBag = cb;
+	}
 
 	ConsoleWidget consoleWidget;
 

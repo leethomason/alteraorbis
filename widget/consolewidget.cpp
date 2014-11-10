@@ -14,6 +14,7 @@ using namespace gamui;
 ConsoleWidget::ConsoleWidget()
 {
 	nLines = NUM_LINES;
+	ageTime = AGE_TIME;
 }
 
 
@@ -73,7 +74,7 @@ void ConsoleWidget::DoTick( U32 delta )
 			last = i;
 		}
 	}
-	if (last >= 0 && lines[last].age > AGE_TIME) {
+	if (last >= 0 && lines[last].age > ageTime) {
 		RenderAtom nullAtom;
 		lines[last].age = 0;
 		lines[last].pos.Zero();

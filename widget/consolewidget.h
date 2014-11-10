@@ -28,6 +28,8 @@ public:
 	void DoTick( U32 delta );
 	bool IsItem(const gamui::UIItem* item, grinliz::Vector2F* pos);
 
+	void SetTime(int time) { ageTime = time; }
+
 private:
 	void Scroll();
 
@@ -45,6 +47,7 @@ private:
 		AGE_TIME  = 40*1000,	// msec
 	};
 	gamui::Gamui*		gamui;
+	int					ageTime;
 	int					nLines;
 	Line				lines[NUM_LINES];
 };
