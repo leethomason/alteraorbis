@@ -538,7 +538,9 @@ float DomainAI::CalcFarmEfficiency(const grinliz::Vector2I& sector)
 	float eff = 0;
 	for (int i = 0; i < farms.Size(); ++i) {
 		FarmScript* farmScript = (FarmScript*) farms[i]->GetComponent("FarmScript");
-		eff += farmScript->Efficiency();
+		if (farmScript) {
+			eff += farmScript->Efficiency();
+		}
 	}
 	return eff;
 }

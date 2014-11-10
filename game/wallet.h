@@ -24,6 +24,7 @@ class Wallet
 {
 public:
 	Wallet() {
+		canGoUnderwater = false;
 		closed = false;
 		gold = 0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i) crystal[i] = 0; 
