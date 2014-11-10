@@ -130,12 +130,12 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		int techRequired = 0;
 		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true);
 
-		if (*cost <= avail && techRequired <= tech) {
+		if (avail.CanWithdraw(*cost) && techRequired <= tech) {
 			break;
 		}
 
 		bool didSomething = false;
-		if (*cost > avail && ce < GL_C_ARRAY_SIZE(effectsArr)) {
+		if (avail.CanWithdraw(*cost) && ce < GL_C_ARRAY_SIZE(effectsArr)) {
 			effects &= ~(effectsArr[ce++]);
 			didSomething = true;
 		}

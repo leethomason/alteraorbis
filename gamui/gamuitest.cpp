@@ -43,9 +43,11 @@ enum {
 	RENDERSTATE_DISABLED
 };
 
-const int SCREEN_X = 600;
-const int SCREEN_Y = 400;
+const int VIRTUAL_X = 600;
+const int VIRTUAL_Y = 400;
 
+int screenX = VIRTUAL_X;
+int screenY = VIRTUAL_Y;
 
 class Renderer : public IGamuiRenderer
 {
@@ -59,10 +61,10 @@ public:
 
 		m_index = index;
 		m_vertex = vertex;
-		
+
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho( 0, SCREEN_X, SCREEN_Y, 0, 1, -1 );
+		glOrtho( 0, screenX, screenY, 0, 1, -1 );
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();				// model
@@ -184,8 +186,8 @@ int main( int argc, char **argv )
 
 	SDL_Window *screen = SDL_CreateWindow(	"Gamui",
 											50, 50,
-											SCREEN_X, SCREEN_Y,
-											SDL_WINDOW_OPENGL );
+											screenX, screenY,
+											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	SDL_GL_CreateContext( screen );
 
 	// Load text texture
@@ -246,7 +248,9 @@ int main( int argc, char **argv )
 	Renderer renderer;
 
 	TESTGLERR();
-	Gamui gamui( &renderer, textAtom, textAtomD, &textMetrics );
+	Gamui gamui;
+	gamui.Init(&renderer, textAtom, textAtomD, &textMetrics);
+	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
 	TextLabel textLabel[2];
 	textLabel[0].Init( &gamui );
@@ -360,6 +364,14 @@ int main( int argc, char **argv )
 		SDL_Event event;
 		if ( SDL_PollEvent( &event ) ) {
 			switch( event.type ) {
+	
+				case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					screenX = event.window.data1;
+					screenY = event.window.data2;
+					gamui.SetScale(screenX, screenY, VIRTUAL_Y);
+				}
+				break;
 
 				case SDL_KEYDOWN:
 				{

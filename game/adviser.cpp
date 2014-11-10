@@ -121,7 +121,7 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 							str.Format("Build a %s kiosk to attract Visitors.", data.cName);
 						}
 						else if (id == BuildScript::TEMPLE) {
-							str.Format("Building a Temple increases our potential.\nAnd attracts monsters.");
+							str.Format("Building a Temple increases our\npotential, and attracts monsters.");
 						}
 						else {
 							//str.Format("A(n) %s is recommended.", data.cName);
@@ -129,7 +129,7 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 						}
 					}
 					else {
-						str.Format("We need Au. Collect Au by defeating attackers\nor raiding domains.");
+						str.Format("We need Au. Collect Au by defeating\nattackers or raiding domains.");
 					}
 					break;
 				}

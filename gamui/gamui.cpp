@@ -288,7 +288,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 
 	const char* p = m_str;
 	float x = X();
-	float y = Y(); //floorf( Y()+0.5f );	// snapping seems to hurt quality. Text is so tricky.
+	float y = Y();
 
 	float xmax = x;
 
@@ -350,17 +350,16 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		// committed and can run in a tight loop.
 		//y = round(y); doesn't help - why?
 		while( p && *p && *p != '\n' && *p != '\t' ) {
-			//x = floorf(x+0.5f);
 			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
-
-			float x0 = x+metrics.x;
-			float x1 = x+metrics.x+metrics.w;
-			float y0 = y+metrics.y;
-			float y1 = y+metrics.y+metrics.h;
 
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 		
+				float x0 = Transform(x+metrics.x);
+				float x1 = Transform(x+metrics.x+metrics.w);
+				float y0 = Transform(y+metrics.y);
+				float y1 = Transform(y+metrics.y+metrics.h);
+
 				vertex[0].Set( x0, y0,				
 							   metrics.tx0, metrics.ty0 );
 				vertex[1].Set( x0, y1, 
@@ -611,10 +610,10 @@ void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 			if (*mem >= 0 && *mem < MAX_ATOMS && m_atom[*mem].textureHandle ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 
-				vertex[0].Set( x,	y,		m_atom[*mem].tx0, m_atom[*mem].ty1 );
-				vertex[1].Set( x,	y+dy,	m_atom[*mem].tx0, m_atom[*mem].ty0 );
-				vertex[2].Set( x+dx, y+dy,	m_atom[*mem].tx1, m_atom[*mem].ty0 );
-				vertex[3].Set( x+dx, y,		m_atom[*mem].tx1, m_atom[*mem].ty1 );
+				vertex[0].Set( Transform(x),	Transform(y),		m_atom[*mem].tx0, m_atom[*mem].ty1 );
+				vertex[1].Set( Transform(x),	Transform(y+dy),	m_atom[*mem].tx0, m_atom[*mem].ty0 );
+				vertex[2].Set( Transform(x+dx), Transform(y+dy),	m_atom[*mem].tx1, m_atom[*mem].ty0 );
+				vertex[3].Set( Transform(x+dx), Transform(y),		m_atom[*mem].tx1, m_atom[*mem].ty1 );
 
 				++count;
 			}
@@ -650,10 +649,10 @@ void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *ve
 	{
 		Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 
-		float x0 = X();
-		float y0 = Y();
-		float x1 = X() + m_width;
-		float y1 = Y() + m_height;
+		float x0 = Transform(X());
+		float y0 = Transform(Y());
+		float x1 = Transform(X() + m_width);
+		float y1 = Transform(Y() + m_height);
 
 		vertex[0].Set( x0, y0, m_atom.tx0, m_atom.ty1 );
 		vertex[1].Set( x0, y1, m_atom.tx0, m_atom.ty0 );
@@ -1243,6 +1242,9 @@ Gamui::Gamui()
 		m_disabledItemTapped(0),
 		m_iText( 0 ),
 		m_orderChanged( true ),
+		m_physicalWidth(800),
+		m_physicalHeight(600),
+		m_virtualHeight(600),
 		m_modified( true ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
@@ -1253,24 +1255,6 @@ Gamui::Gamui()
 		m_focusImage( 0 ),
 		m_currentDialog(0)
 {
-}
-
-
-Gamui::Gamui(	IGamuiRenderer* renderer,
-				const RenderAtom& textEnabled, 
-				const RenderAtom& textDisabled,
-				IGamuiText* iText ) 
-	:	m_itemTapped( 0 ),
-		m_disabledItemTapped(0),
-		m_iText( 0 ),
-		m_orderChanged( true ),
-		m_modified( true ),
-		m_textHeight( 16 ),
-		m_focus( -1 ),
-		m_focusImage( 0 ),
-		m_currentDialog(0)
-{
-	Init( renderer, textEnabled, textDisabled, iText );
 }
 
 
@@ -1292,6 +1276,15 @@ void Gamui::Init(	IGamuiRenderer* renderer,
 	m_textAtomEnabled = textEnabled;
 	m_textAtomDisabled = textDisabled;
 	m_iText = iText;
+}
+
+
+void Gamui::SetScale(int pixelWidth, int pixelHeight, int virtualHeight)
+{
+	// FIXME: flush the glyph cache
+	m_physicalWidth  = pixelWidth;
+	m_physicalHeight = pixelHeight;
+	m_virtualHeight  = virtualHeight;
 }
 
 
@@ -1403,6 +1396,7 @@ void Gamui::TapCancel()
 	m_itemTapped = 0;
 	m_disabledItemTapped = 0;
 }
+
 
 int Gamui::SortItems( const void* _a, const void* _b )
 { 

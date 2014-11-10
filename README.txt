@@ -34,7 +34,6 @@ Key:
     an arms supplier for Trolls.
   - Gobmen domains. Neutral denizens.
   - Kamakiri domains. Aggressive denizens.
-- 
 
 Changes:
 - 'social' need has been removed, and integrated with 'fun'

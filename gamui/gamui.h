@@ -307,11 +307,6 @@ public:
 
 	/// Construct and Init later.
 	Gamui();
-	/// Constructor
-	Gamui(	IGamuiRenderer* renderer,
-			const RenderAtom& textEnabled, 
-			const RenderAtom& textDisabled,
-			IGamuiText* iText );
 	~Gamui();
 
 	/// Required if the default constructor used.
@@ -319,6 +314,8 @@ public:
 				const RenderAtom& textEnabled, 
 				const RenderAtom& textDisabled,
 				IGamuiText* iText );
+
+	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
 
 	void StartDialog(const char* name);
 	void EndDialog();
@@ -377,6 +374,8 @@ public:
 	float			GetFocusX();
 	float			GetFocusY();
 
+	float			Transform(float x) const { return x * float(m_physicalHeight) / float(m_virtualHeight); }
+
 private:
 	static int SortItems( const void* a, const void* b );
 	unsigned Hash(const char* p)
@@ -396,6 +395,7 @@ private:
 	IGamuiRenderer*					m_iRenderer;
 	IGamuiText*						m_iText;
 
+	int				m_physicalWidth, m_physicalHeight, m_virtualHeight;
 	bool			m_orderChanged;
 	bool			m_modified;
 	PODArray<UIItem*> m_itemArr;
@@ -552,6 +552,7 @@ public:
 	virtual void Clear()	{ m_gamui = 0; }
 
 	// internal
+	float Transform(float x) const { return m_gamui->Transform(x); }
 	void SetSuperItem( ToggleButton* tb ) { m_superItem = tb; }
 	ToggleButton* SuperItem() const		  { return m_superItem; }
 	void DoPreLayout();

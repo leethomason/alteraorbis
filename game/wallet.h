@@ -24,6 +24,7 @@ class Wallet
 {
 public:
 	Wallet() {
+		canGoUnderwater = false;
 		closed = false;
 		gold = 0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i) crystal[i] = 0; 
@@ -91,18 +92,15 @@ public:
 
 	void Serialize( XStream* xs );
 
-	bool operator<=(const Wallet& rhs ) const {
-		if ( gold <= rhs.gold ) {
-			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-				if ( crystal[i] > rhs.crystal[i] ) return false;
-			}
-			return true;
-		}
-		return false;
-	}
+	bool CanWithdraw(const Wallet& amt) const {
+		if (amt.Gold() > Gold()) return false;
 
-	bool operator>(const Wallet& rhs ) const {
-		return !(operator<=(rhs));
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; i++) {
+			if (amt.Crystal(i) > Crystal(i)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// Debugging; this wallet is no longer accepting deposits.
