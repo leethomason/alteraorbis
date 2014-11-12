@@ -2637,7 +2637,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 		break;
 
 	case BLOODRAGE:
-		thisComp.item->team = TEAM_CHAOS;
+		thisComp.item->SetChaos();
 		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit, 0));
 		break;
 
@@ -2703,13 +2703,14 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 			ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
 			Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
 
-			GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->team)));
+			GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
 
 			if (arr.Size() > 3) {
-				DomainAI* ai = DomainAI::Factory(thisComp.item->team);
+				DomainAI* ai = DomainAI::Factory(thisComp.item->Team());
 				if (ai) {
-					thisComp.item->team = Team::GenTeam(thisComp.item->team);
-					CoreScript* newCS = CoreScript::CreateCore(sector, thisComp.item->team, Context());
+					GLASSERT(Team::IsRogue(thisComp.item->Team()));
+					int newCoreTeam = Team::GenTeam(thisComp.item->Team());
+					CoreScript* newCS = CoreScript::CreateCore(sector, newCoreTeam, Context());
 					newCS->ParentChit()->Add(ai);
 					newCS->AddCitizen(thisComp.chit);
 

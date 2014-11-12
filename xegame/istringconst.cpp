@@ -35,6 +35,7 @@ IString IStringConst::teleport;
 IString IStringConst::construction;
 IString IStringConst::useBuilding;
 IString IStringConst::repair;
+IString IStringConst::human;
 IString IStringConst::humanFemale;
 IString IStringConst::humanMale;
 IString IStringConst::worker;
@@ -148,6 +149,7 @@ void IStringConst::Init()
 	construction = StringPool::Intern( "construction", true );
 	useBuilding = StringPool::Intern( "useBuilding", true );
 	repair = StringPool::Intern( "repair", true );
+	human = StringPool::Intern( "human", true );
 	humanFemale = StringPool::Intern( "humanFemale", true );
 	humanMale = StringPool::Intern( "humanMale", true );
 	worker = StringPool::Intern( "worker", true );

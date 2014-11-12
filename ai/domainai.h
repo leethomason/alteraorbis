@@ -63,7 +63,7 @@ protected:
 	RoadAI*	roads;
 
 private:
-	enum { MAX_ROADS = 4};
+	enum { MAX_ROADS = 8};
 	CTicker ticker;			// build logic ticker.
 	int buildDistance[MAX_ROADS];	// records how far the road is built, so we can check to keep it clear
 };
@@ -127,6 +127,21 @@ public:
 
 };
 
+class HumanDomainAI : public DomainAI
+{
+	typedef DomainAI super;
+public:
+	HumanDomainAI();
+	~HumanDomainAI();
+
+	virtual const char* Name() const { return "HumanDomainAI"; }
+	virtual void Serialize(XStream* xs);
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
+
+	virtual void DoBuild();
+};
 
 #endif // DOMAINAI_COMPONENT_INCLUDED
 

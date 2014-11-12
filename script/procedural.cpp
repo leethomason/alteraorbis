@@ -445,7 +445,8 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 	Team::SplitID(team, &teamGroup, &teamID);
 
 	switch (teamGroup) {
-		case TEAM_HOUSE:	
+		case TEAM_HOUSE:
+		case TEAM_CHAOS:
 		colors = HUMAN_COLORS;
 		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
 		break;
@@ -578,7 +579,7 @@ void AssignProcedural(const GameItem* item, ProcRenderInfo* info)
 
 	bool female = (item->IName() == ISC::humanFemale);
 	U32 seed = item->ID();
-	int team = item->team;
+	int team = item->Team();
 	bool electric = false;	// not using; FIXME revisit 'electric'
 	int effects = item->Effects();
 	int features = 0;

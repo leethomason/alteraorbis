@@ -58,6 +58,7 @@ public:
 	static grinliz::IString useBuilding;
 	static grinliz::IString repair;
 
+	static grinliz::IString human;
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
 	static grinliz::IString worker;

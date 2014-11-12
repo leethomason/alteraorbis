@@ -989,7 +989,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			Chit* coreChit = cs->ParentChit();
 			if (coreChit->GetItem()->wallet.Gold() >= WORKER_BOT_COST) {
 				ReserveBank::GetWallet()->Deposit(coreChit->GetWallet(), WORKER_BOT_COST);
-				int team = coreChit->GetItem()->team;
+				int team = coreChit->GetItem()->Team();
 				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
 			}
 		}
@@ -1254,7 +1254,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Create Kamakira domain.
+#if 0	// Create Kamakira domain.
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
@@ -1266,6 +1266,23 @@ void GameScene::HandleHotKey( int mask )
 
 				for (int i = 0; i<5; ++i) {
 					sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_KAMAKIRI);
+					at.x += 0.5f;
+				}
+			}
+		}
+#endif
+#if 1	// Create Human domain.
+		{
+			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
+			if (cs) {
+				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				int team = Team::GenTeam(TEAM_HOUSE);
+				cs = CoreScript::CreateCore(sector, team, sim->Context());
+				cs->ParentChit()->Add(new HumanDomainAI());
+				cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
+
+				for (int i = 0; i<5; ++i) {
+					sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_HOUSE);
 					at.x += 0.5f;
 				}
 			}

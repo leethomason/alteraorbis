@@ -82,7 +82,8 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	{
 		return TEAM_CHAOS;
 	}
-	else if (    itemName == ISC::humanFemale
+	else if (    itemName == ISC::human
+			  || itemName == ISC::humanFemale
 			  || itemName == ISC::humanMale) 
 	{
 		return TEAM_HOUSE;
@@ -149,8 +150,8 @@ int Team::GetRelationship( int _t0, int _t1 )
 int Team::GetRelationship( Chit* chit0, Chit* chit1 )
 {
 	if ( chit0->GetItem() && chit1->GetItem() ) {
-		return GetRelationship( chit0->GetItem()->team,
-								chit1->GetItem()->team );
+		return GetRelationship( chit0->GetItem()->Team(),
+								chit1->GetItem()->Team() );
 	}
 	return RELATE_NEUTRAL;
 }

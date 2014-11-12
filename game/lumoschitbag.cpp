@@ -371,7 +371,6 @@ Chit* LumosChitBag::GetDeity(int id)
 		chit->GetItem()->SetProperName(NAME[id]);
 	}
 
-	if (id == DEITY_TRUULGA) chit->GetItem()->team = TEAM_TROLL;
 	if (!chit->GetSpatialComponent()) {
 		// Have a spatial component but not a render component.
 		// Used to set the "focus" of the deity, and mark
@@ -726,7 +725,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
 	int shooterTeam = -1;
 	if ( chitShooter && chitShooter->GetItemComponent() ) {
-		shooterTeam = chitShooter->GetItemComponent()->GetItem()->team;
+		shooterTeam = chitShooter->GetItemComponent()->GetItem()->Team();
 	}
 	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
@@ -738,7 +737,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 			if ( chitHit ) {
 				GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 				if ( chitHit->GetItemComponent() &&
-					 chitHit->GetItemComponent()->GetItem()->team == shooterTeam ) 
+					 chitHit->GetItemComponent()->GetItem()->Team() == shooterTeam ) 
 				{
 					// do nothing. don't shoot own team.
 				}
@@ -790,9 +789,8 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 	if (altRes) {
 		item->SetResource(altRes);
 	}
-	item->team = team;
+	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
-	item->Roll(item->Traits().Get());
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
@@ -812,9 +810,8 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 
 GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int team, int level)
 {
-	item->team = team;
+	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
-	item->Roll(item->Traits().Get());
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );

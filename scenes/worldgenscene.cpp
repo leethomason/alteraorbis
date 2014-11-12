@@ -79,7 +79,7 @@ void WorldGenScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 
 	const float DY = 16.0f;
-	const float CONSOLE_HEIGHT = DY * 12.0f;
+	const float CONSOLE_HEIGHT = DY * 8.0f;
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), headerText.Y() + DY*3.0f);
@@ -388,7 +388,12 @@ void WorldGenScene::DoTick(U32 delta)
 			const Census& census = sim->GetChitBag()->census;
 			for (int i = 0; i < census.MOBItems().Size(); ++i) {
 				const Census::MOBItem& mobItem = census.MOBItems()[i];
-				simStr.AppendFormat("%s=%d\n", mobItem.name.safe_str(), mobItem.count);
+				simStr.AppendFormat("%s\t%d\n", mobItem.name.safe_str(), mobItem.count);
+			}
+			simStr.AppendFormat("\n\n");
+			for (int i = 0; i < census.CoreItems().Size(); ++i) {
+				const Census::MOBItem& coreItem = census.CoreItems()[i];
+				simStr.AppendFormat("%s\t%d\n", coreItem.name.safe_str(), coreItem.count);
 			}
 
 			statText.SetText(simStr.c_str());

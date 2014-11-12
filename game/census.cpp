@@ -3,35 +3,55 @@
 #include "../script/itemscript.h"
 
 
-void Census::Add(const grinliz::IString& name)
+void Census::AddMOB(const grinliz::IString& name)
 {
-	for (int i = 0; i < mobItems.Size(); ++i) {
-		if (mobItems[i].name == name) {
-			mobItems[i].count += 1;
-			return;
-		}
-	}
-	MOBItem item;
-	item.name = name;
-	item.count = 1;
-	mobItems.Push(item);
+	MOBItem item(name);
 
+	int i = mobItems.Find(item);
+	if (i >= 0) {
+		mobItems[i].count += 1;
+		return;
+	}
+	mobItems.Push(item);
 	mobItems.Sort();
 }
 
 
-void Census::Remove(const grinliz::IString& name)
+void Census::RemoveMOB(const grinliz::IString& name)
 {
-	for (int i = 0; i < mobItems.Size(); ++i) {
-		if (mobItems[i].name == name) {
-			GLASSERT(mobItems[i].count > 0);
-			mobItems[i].count -= 1;
-			return;
-		}
+	MOBItem item(name);
+
+	int i = mobItems.Find(name);
+	GLASSERT(i >= 0);
+	if (i >= 0) {
+		mobItems[i].count -= 1;
 	}
-	GLASSERT(false);
 }
 
+
+void Census::AddCore(const grinliz::IString& name)
+{
+	MOBItem item(name);
+
+	int i = coreItems.Find(name);
+	if (i >= 0) {
+		coreItems[i].count += 1;
+		return;
+	}
+	coreItems.Push(item);
+	coreItems.Sort();
+}
+
+
+void Census::RemoveCore(const grinliz::IString& name)
+{
+	MOBItem item(name);
+	int i = coreItems.Find(item);
+	GLASSERT(i >= 0);
+	if (i >= 0) {
+		coreItems[i].count -= 1;
+	}
+}
 
 void Census::NumByType(int *lesser, int *greater, int *denizen)
 {

@@ -124,6 +124,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if (name == "KamakiriDomainAI") {
 		return new KamakiriDomainAI();
 	}
+	else if (name == "HumanDomainAI") {
+		return new HumanDomainAI();
+	}
 
 
 	GLASSERT( 0 );

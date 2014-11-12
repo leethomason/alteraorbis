@@ -30,6 +30,7 @@ DomainAI* DomainAI::Factory(int team)
 		case TEAM_TROLL:	return new TrollDomainAI();
 		case TEAM_GOB:		return new GobDomainAI();
 		case TEAM_KAMAKIRI:	return new KamakiriDomainAI();
+		case TEAM_HOUSE:	return new HumanDomainAI();
 		default:
 		break;
 	}
@@ -634,7 +635,7 @@ int TrollDomainAI::DoTick(U32 delta)
 			}
 
 			TransactAmt cost;
-			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
+			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed, parentChit->Team());
 			if (item) {
 				if (ReserveBank::GetWallet()->CanWithdraw(cost)) {
 
@@ -836,18 +837,148 @@ void KamakiriDomainAI::DoBuild()
 		if (arr[BuildScript::KAMAKIRI_STATUE] < 4 && BuildBuilding(BuildScript::KAMAKIRI_STATUE)) break;
 		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
 		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
-		if (eff < 2.0f && BuildFarm()) break;
+		if (eff <= 1.0f && BuildFarm()) break;
 
 		// Check efficiency to curtail over-building.
 		if (eff > 1 && nElixir > 4) {
 			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::GUARDPOST] < 2 && BuildBuilding(BuildScript::GUARDPOST)) break;
+			if (eff < 2 && BuildFarm()) break;
 		}
 		if (eff >= 2 && nElixir > 4) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
 			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+			if (BuildRoad()) break;	// will return true until all roads are built.
+		}
+	} while (false);
+}
+
+
+HumanDomainAI::HumanDomainAI()
+{
+
+}
+
+
+HumanDomainAI::~HumanDomainAI()
+{
+
+}
+
+void HumanDomainAI::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	this->EndSerialize( xs );
+}
+
+
+void HumanDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	Vector2I c = sectorData.core;
+	Rectangle2I innerBounds = InnerSectorBounds(sector);
+
+	// Humans use up to 8 roads - the diagonals as well
+	// as the cardinals. Reach out and see which are valid.
+	static const int D = SECTOR_SIZE / 2 - 4;
+	Vector2I altRoad[4] = {
+		{ c.x + D, c.y + D }, { c.x - D, c.y + D }, { c.x + D, c.y - D }, { c.x - D, c.y - D }
+	};
+
+	CDynArray<Vector2I> road;
+	for (int i = 0; i < 4; ++i) {
+		const WorldGrid& endWG = Context()->worldMap->GetWorldGrid(altRoad[i]);
+		if (innerBounds.Contains(altRoad[i]) && endWG.IsLand()) {
+			Vector2I it = altRoad[i];
+			road.Clear();
+			while (it != sectorData.core) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it);
+				if (!wg.IsPort()) {
+					road.Push(it);
+				}
+				it = it + wg.Path(0);
+			}
+			// Road goes from core to port:
+			road.Reverse();
+			roads->AddRoad(road.Mem(), road.Size());
+		}
+	}
+
+	Rectangle2I plaza;
+	plaza.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
+
+	roads->AddPlaza(plaza);
+}
+
+
+void HumanDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+void HumanDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
+	Rectangle2I sectorBounds = SectorBounds(sector);
+
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
+	float eff = CalcFarmEfficiency(sector);
+
+	CChitArray bars;
+	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
+	int nElixir = 0;
+	for (int i = 0; i < bars.Size(); ++i) {
+		ItemComponent* ic = bars[i]->GetItemComponent();
+		if (ic) {
+			nElixir += ic->NumCarriedItems(ISC::elixir);
+		}
+	}
+
+	do {
+		if (BuyWorkers()) break;		
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
+		if (BuildPlaza()) break;
+
+		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
+		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
+		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+
+		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
+		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
+
+		if (eff < 1 && BuildFarm()) break;
+
+		// Check efficiency to curtail over-building.
+		int wantedCitizens = CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]);
+
+		if (eff >= 1) {
+			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
+
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::GUARDPOST] < 1 && BuildBuilding(BuildScript::GUARDPOST)) break;
+			if (eff < 2 && BuildFarm()) break;
+		}
+		if (eff >= 2) {
+			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
+			if (arr[BuildScript::TEMPLE] < CoreScript::MAX_TEMPLES && BuildBuilding(BuildScript::TEMPLE)) break;
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 			if (BuildRoad()) break;	// will return true until all roads are built.
 		}

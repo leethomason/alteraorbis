@@ -128,6 +128,7 @@ private:
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
 	int ProcessEffect( int delta);	// look around for environment that effects this itemComp, and apply those effects
+	void InformCensus(bool add);
 
 	// Not serialized:
 	bool		hardpointsModified;

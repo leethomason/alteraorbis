@@ -40,7 +40,6 @@
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 Beta 3b
-		- retest truulga item generation
 		- Denizen domains
 		- Visitor role
 			- Visitor travel
@@ -54,6 +53,9 @@ Beta 3b
 
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?
+
+		- move sim spawn to its own times
+		- retest truulga item generation
 		- denizen red on red color scheme way too much
 		- build tasks aren't getting serialized correctly. wrong rotation?
 		- news multi-prints. start avatar, close window, start avatar.
@@ -65,6 +67,10 @@ Beta 3b
 			- Troll gun distribution
 
 		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
+		- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
+		- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
+		- [Reenen] Circuits are way complex... (see post)
+		- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
 		- build to an efficiency level with distilleries (1 or 2)
 		- in census, cores/domains should show team
 		- how many trolls visit Truulga??

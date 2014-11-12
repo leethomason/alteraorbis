@@ -276,7 +276,7 @@ public:
 	virtual ~GameItem();
 
 	virtual GameItem* Clone() const { return CloneFrom(0); }
-	virtual void Roll(const int* values);
+	virtual void Roll(int team, const int* values);
 	int ID() const;
 
 	virtual void Load( const tinyxml2::XMLElement* doc );
@@ -371,7 +371,15 @@ public:
 	float	mass;			// mass (kg)
 	float	baseHP;
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
+
+private:
 	int		team;			// which team this item is aligned with (or created it, for items.)
+public:
+	bool	IsDenizen() const{ return keyValues.GetIString(ISC::mob) == ISC::denizen; }
+	int		Team() const	{ return team; }
+	void	SetRogue();
+	void	SetChaos();
+	void	SetTeam(int team);
 
 	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
@@ -455,7 +463,7 @@ public:
 	virtual MeleeWeapon* ToMeleeWeapon() { return this;  }
 	virtual const MeleeWeapon* ToMeleeWeapon() const { return this;  }
 
-	virtual void Roll(const int* roll);
+	virtual void Roll(int team, const int* roll);
 	float Damage() const;
 	int CalcMeleeCycleTime() const;	
 	float ShieldBoost() const;
@@ -482,7 +490,7 @@ public:
 
 	void Serialize( XStream* xs);
 	virtual void Load( const tinyxml2::XMLElement* doc );
-	virtual void Roll(const int* roll);
+	virtual void Roll(int team, const int* roll);
 	GameItem* Clone() const;
 
 	virtual int DoTick(U32 delta);
@@ -532,7 +540,7 @@ public:
 	void Serialize(XStream* xs);
 	virtual void Load(const tinyxml2::XMLElement* doc);
 	virtual GameItem* Clone() const;
-	virtual void Roll(const int* roll);
+	virtual void Roll(int team, const int* roll);
 
 	virtual int DoTick(U32 delta);
 

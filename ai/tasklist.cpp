@@ -706,7 +706,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	}
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
-	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
+	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed, thisComp.chit->Team());
 	if (item) {
 		if (altRes && *altRes) {
 			item->SetResource(altRes);

@@ -197,9 +197,11 @@ void ForgeScene::SetModel( bool randomTraits )
 							mainItem->Traits().Level(),
 							forgeData->tech);
 
+	int team = forgeData->itemComponent->ParentChit() ? forgeData->itemComponent->ParentChit()->Team() : 0;
+
 	GameItem* newItem = forgeScript.Build( type, subType, 
 						partsFlags, effectFlags, 
-						&crystalRequired, &techRequired, randomTraits );
+						&crystalRequired, &techRequired, randomTraits, 0 );
 	delete item;
 	item = newItem;
 

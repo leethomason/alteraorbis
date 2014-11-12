@@ -192,7 +192,7 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			Chit* citizen = Context()->chitBag->GetChit(citizenID);
 			if (citizen && citizen->GetItem()) {
 				// Set to rogue team.
-				citizen->GetItem()->team = Team::Group(citizen->GetItem()->team);
+				citizen->GetItem()->SetRogue();
 			}
 		}
 	}
@@ -206,7 +206,7 @@ void CoreScript::AddCitizen( Chit* chit )
 	GLASSERT( citizens.Find( chit->ID()) < 0 );
 	GLASSERT(Team::IsRogue(chit->Team()) || (chit->Team() == ParentChit()->Team()));
 
-	chit->GetItem()->team = ParentChit()->Team();
+	chit->GetItem()->SetTeam(ParentChit()->Team());
 	citizens.Push( chit->ID() );
 }
 
@@ -406,7 +406,7 @@ int CoreScript::MaxCitizens(int team, int nTemples)
 	switch (team) {
 		case TEAM_HOUSE:
 		{
-			static const int N = 4;
+			static const int N = MAX_TEMPLES+1;
 			static const int limit[N] = { 4, 8, 16, 20 };
 			int n = Clamp(nTemples, 0, N - 1);
 			citizens = limit[n];
@@ -727,7 +727,8 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 	const SectorData* sectorDataArr = context->worldMap->GetSectorData();
 	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
 	if (sd.HasCore()) {
-		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", 0);
+		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::ID(team));
+		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
@@ -739,7 +740,6 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			cs->ParentChit()->GetItem()->team = team;
 			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
 			context->chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.

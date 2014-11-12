@@ -77,6 +77,7 @@ public:
 	int    FindCitizenIndex( Chit* chit ); 
 	int NumCitizens();
 
+	enum { MAX_TEMPLES = 3};	// max # of temples that do something
 	static int MaxCitizens(int team, int nTemples);
 	int MaxCitizens();
 

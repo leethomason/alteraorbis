@@ -338,13 +338,26 @@ void Sim::SpawnDenizens()
 			}
 			if (sp.IsValid()) {
 				static const int NSPAWN = 4;
-				static const int NUM = 2;
-				static const char* denizen[NUM] = { "gobman", "kamakiri" };
-				static const float odds[NUM] = { 0.60f, 0.40f };
+				static const int NUM = 3;
+				IString denizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
+				float odds[NUM] = { 1.0f, 0.8f, 0.8f };
+
+				const Census& census = context.chitBag->census;
+				const grinliz::CDynArray<Census::MOBItem>& coreItems = census.CoreItems();
+				for (int i = 0; i < coreItems.Size(); ++i) {
+					const IString& name = coreItems[i].name;
+					float value = 1.0f + coreItems[i].count;
+					for (int k = 0; k < NUM; ++k) {
+						if (denizen[k] == name) {
+							odds[k] /= value;
+						}
+					}
+				}
+
 				int index = random.Select(odds, NUM);
 
 				for (int i = 0; i < NSPAWN; ++i) {
-					IString ispawn = StringPool::Intern(denizen[index], true);
+					IString ispawn = denizen[index];
 					int team = Team::GetTeam(ispawn);
 					GLASSERT(team != TEAM_NEUTRAL);
 
@@ -446,7 +459,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
 	GLASSERT(context.chitBag->GetHomeTeam());
 	GLASSERT(context.chitBag->GetHomeCore());
-	Chit* chit = context.chitBag->NewDenizen(pos, context.chitBag->GetHomeTeam());
+	Chit* chit = context.chitBag->NewDenizen(pos, TEAM_HOUSE);	// real team assigned with AddCitizen
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
 	CoreScript::GetCore( ToSector(pos) )->AddCitizen( chit );

@@ -84,7 +84,7 @@ void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
 	int group = 0, id = 0;
-	Team::SplitID(item->team, &group, &id);
+	Team::SplitID(item->Team(), &group, &id);
 	str->AppendFormat( "[Item] %s hp=%.1f/%d tm=%d,%d ", 
 		item->Name(), item->hp, item->TotalHP(),
 		group, id );
@@ -710,19 +710,40 @@ int ItemComponent::DoTick( U32 delta )
 }
 
 
+void ItemComponent::InformCensus(bool add)
+{
+	GameItem* mainItem = itemArr[0];
+	if (Context()->chitBag) {
+		IString mob = mainItem->keyValues.GetIString("mob");
+		IString core = mainItem->IName();
+
+		if (!mob.empty()) {
+			if (add)
+				Context()->chitBag->census.AddMOB(mainItem->IName());
+			else
+				Context()->chitBag->census.RemoveMOB(mainItem->IName());
+		}
+		else if (core == "core") {
+			int team = parentChit->Team();
+			if (team) {
+				IString team = Team::TeamName(Team::Group(parentChit->Team()));
+				if (add)
+					Context()->chitBag->census.AddCore(team);
+				else
+					Context()->chitBag->census.RemoveCore(team);
+			}
+		}
+	}
+}
+
 void ItemComponent::OnAdd( Chit* chit, bool init )
 {
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit, init );
 	hardpointsModified = true;
+	InformCensus(true);
 
-	if ( Context()->chitBag ) {
-		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if (!mob.empty()) {
-			Context()->chitBag->census.Add(mainItem->IName());
-		}
-	}
 	slowTick.SetPeriod( 500 + (chit->ID() & 128));
 	UseBestItems();
 }
@@ -731,12 +752,7 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 void ItemComponent::OnRemove() 
 {
 	GameItem* mainItem = itemArr[0];
-	if ( Context()->chitBag ) {
-		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if (!mob.empty()) {
-			Context()->chitBag->census.Remove(mainItem->IName());
-		}
-	}
+	InformCensus(false);
 	super::OnRemove();
 }
 

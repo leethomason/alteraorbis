@@ -15,6 +15,7 @@
 
 #include "gameitem.h"
 #include "news.h"
+#include "team.h"
 
 #include "../grinliz/glstringutil.h"
 #include "../engine/serialize.h"
@@ -155,8 +156,10 @@ GameItem* GameItem::CloneFrom(GameItem* item) const
 }
 
 
-void GameItem::Roll(const int *roll)
+void GameItem::Roll(int newTeam, const int *roll)
 {
+	GLASSERT(team == 0);
+	team = newTeam;
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
 		GetTraitsMutable()->Set( i, roll[i] );
 	}
@@ -369,9 +372,9 @@ void RangedWeapon::Load(const tinyxml2::XMLElement* ele)
 }
 
 
-void RangedWeapon::Roll(const int* roll)
+void RangedWeapon::Roll(int newTeam, const int* roll)
 {
-	super::Roll(roll);
+	super::Roll(newTeam, roll);
 
 	// Accuracy and Damage are effected by traits + level.
 	// Speed, ClipCap, Reload by traits. (And only at creation.)
@@ -532,8 +535,9 @@ void MeleeWeapon::Load(const tinyxml2::XMLElement* ele)
 }
 
 
-void MeleeWeapon::Roll(const int* traits)
+void MeleeWeapon::Roll(int newTeam, const int* traits)
 {
+	super::Roll(newTeam, traits);
 	// nothing set on Roll.
 }
 
@@ -947,9 +951,9 @@ int Shield::DoTick(U32 delta)
 }
 
 
-void Shield::Roll(const int* traits)
+void Shield::Roll(int newTeam, const int* traits)
 {
-	super::Roll(traits);
+	super::Roll(newTeam, traits);
 	float fc = capacity;
 	fc *= Dice3D6ToMult(Traits().Get(GameTrait::ALT_CAPACITY));
 	capacity = fc;
@@ -979,4 +983,27 @@ void Shield::AbsorbDamage(DamageDesc* dd, float boost)
 		}
 	}
 	cooldown.ResetUnready();
+}
+
+
+void GameItem::SetRogue()
+{
+	GLASSERT(IsDenizen()); 
+	team = Team::Group(team);
+}
+
+
+void GameItem::SetChaos()
+{
+	GLASSERT(IsDenizen());
+	team = TEAM_CHAOS;
+}
+
+
+void GameItem::SetTeam(int newTeam)
+{
+	GLASSERT(IsDenizen());
+	GLASSERT(Team::ID(team) == 0);
+	GLASSERT(Team::ID(newTeam) != 0);
+	team = newTeam;
 }

@@ -88,6 +88,10 @@ public:
 		return team & 0xff;
 	}
 
+	static int ID(int team) {
+		return ((team & 0xffffff00) >> 8);
+	}
+
 	static bool IsRogue(int team) {
 		return (team & 0xffffff00) == 0;
 	}
