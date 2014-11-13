@@ -103,7 +103,6 @@ private:
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
 
-	void DoSpawn();
 	void SpawnGreater();
 	void SpawnDenizens();
 	void CreateTruulgaCore();
@@ -120,7 +119,8 @@ private:
 	int avatarTimer;
 	CTicker minuteClock, 
 			secondClock, 
-			volcTimer;
+			volcTimer,
+			spawnClock;
 	int currentVisitor;
 	bool spawnEnabled;
 

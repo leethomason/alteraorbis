@@ -39,8 +39,8 @@ enum {
 };
 
 enum {
-	TEAM_ID_LEFT  = 0xfffff1,
-	TEAM_ID_RIGHT = 0xfffff2,
+	TEAM_ID_LEFT  = 0x1fffff,
+	TEAM_ID_RIGHT = 0x2fffff,
 };
 
 
