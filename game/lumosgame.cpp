@@ -46,6 +46,7 @@ LumosGame::LumosGame(  int width, int height, int rotation )
 	: Game( width, height, rotation, 600 )
 {
 	InitButtonLooks();
+	CoreScript::Init();
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
@@ -54,6 +55,7 @@ LumosGame::LumosGame(  int width, int height, int rotation )
 
 LumosGame::~LumosGame()
 {
+	CoreScript::Free();
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 }
 

@@ -641,6 +641,19 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 
 	if (coreScript && uiMode[UI_CONTROL].Down()) {
 		coreScript->ToggleFlag(plane2i);
+
+#if 1
+		if (coreScript) {
+			CArray<int, 32> citizens;
+			for (int i = 0; i < coreScript->NumCitizens(); ++i) {
+				Chit* c = coreScript->CitizenAtIndex(i);
+				GLASSERT(c);
+				citizens.Push(c->ID());
+			}
+			coreScript->SetWaypoints(citizens.Mem(), citizens.Size(), plane2i);
+		}
+#endif
+
 		return;
 	}
 
@@ -1205,7 +1218,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 			{
 				// Find the nearest port. (Somewhat arbitrary.)
 				sectorPort.sector = destSector;
-				sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
+				sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
 			}
 			if ( sectorPort.IsValid() ) {
 				ai->Move( sectorPort, true );
@@ -1845,7 +1858,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
-				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
+				const SectorData& sd = sim->GetWorldMap()->GetSectorData(sector);
 				endGameWidget.SetData(	chit->Context()->chitBag->GetNewsHistory(),
 										this, 
 										sd.name, chit->GetItem()->ID(), 
@@ -1909,7 +1922,7 @@ void GameScene::CheckGameStage(U32 delta)
 
 		CArray<SectorInfo, NUM_SECTORS * NUM_SECTORS> arr;
 		for (Rectangle2IIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
-			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
+			const SectorData* sd = &sim->GetWorldMap()->GetSectorData(it.Pos());
 			if (sd->HasCore() && arr.HasCap()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
 				CoreScript* cs = CoreScript::GetCore(sector);

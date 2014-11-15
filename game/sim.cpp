@@ -219,6 +219,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &writer, "minuteClock" );
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
+			spawnClock.Serialize(&writer, "spawnClock");
 			Team::Serialize(&writer);
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
@@ -322,7 +323,7 @@ void Sim::SpawnDenizens()
 			Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && !cs->InUse()) {
-				const SectorData& sd = context.worldMap->GetSector(sector);
+				const SectorData& sd = context.worldMap->GetSectorData(sector);
 				GLASSERT(sd.ports);
 				sp.sector = sector;
 				sp.port = sd.RandomPort(&random);
@@ -391,7 +392,7 @@ void Sim::SpawnGreater()
 			Vector2I sector = RandomInOutland(&random);
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && !cs->InUse()) {
-				const SectorData& sd = context.worldMap->GetSector(sector);
+				const SectorData& sd = context.worldMap->GetSectorData(sector);
 				GLASSERT(sd.ports);
 				sp.sector = sector;
 				sp.port = sd.RandomPort(&random);
@@ -720,15 +721,17 @@ void Sim::Draw3D( U32 deltaTime )
 
 void Sim::CreateRockInOutland()
 {
-	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
-	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
-		const SectorData& sd = sectorDataArr[i];
-		if ( !sd.HasCore() ) {
-			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
-				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
-					if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
-						context.worldMap->SetPlant(i, j, 0, 0);
-						context.worldMap->SetRock(i, j, -1, false, 0);
+	for (int sj = 0; sj < NUM_SECTORS; ++sj) {
+		for (int si = 0; si < NUM_SECTORS; ++si) {
+			Vector2I sector = { si, sj };
+			const SectorData& sd = context.worldMap->GetSectorData(sector);
+			if (!sd.HasCore()) {
+				for (int j = sd.y; j < sd.y + SECTOR_SIZE; ++j) {
+					for (int i = sd.x; i < sd.x + SECTOR_SIZE; ++i) {
+						if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
+							context.worldMap->SetPlant(i, j, 0, 0);
+							context.worldMap->SetRock(i, j, -1, false, 0);
+						}
 					}
 				}
 			}
@@ -749,7 +752,7 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y )
 {
-	const SectorData& sd = context.worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSectorData( x, y );
 	if ( sd.ports == 0 ) {
 		// no point to volcanoes in the outland
 		return;
@@ -800,7 +803,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 	if ( !bounds.Contains( x, y ) ) {
 		return false;
 	}
-	const SectorData& sd = context.worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSectorData( x, y );
 	if (sd.HasCore() && sd.core.x == x && sd.core.y == y ) {
 		// no plants on cores.
 		return false;

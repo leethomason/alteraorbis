@@ -86,6 +86,11 @@ public:
 	void ToggleFlag(const grinliz::Vector2I& pos);
 	grinliz::Vector2I GetFlag();
 
+	void SetWaypoints(const int* ids, int n, const grinliz::Vector2I& dest);
+	grinliz::Vector2I GetWaypoint(int chitID);
+	const int* WaypointGroup(int chitID, int* n);
+	void PopWaypoint(int chitID);
+
 	bool InUse() const;
 
 	WorkQueue* GetWorkQueue()		{ return workQueue; }
@@ -114,11 +119,12 @@ public:
 		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
 	}
 
-	static CoreScript* GetCore(const grinliz::Vector2I& sector) {
-		return GetCoreInfo(sector).coreScript;
-	}
+	static CoreScript* GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
 	static CoreScript* GetCoreFromTeam(int team);
 	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
+
+	static void Init();
+	static void Free();
 
 private:
 	void UpdateAI();
@@ -155,7 +161,12 @@ private:
 	};
 	grinliz::CDynArray< Flag > flags;
 
+	enum { MAX_WAY_GROUPS = 4};
+	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_WAY_GROUPS];
+	grinliz::CDynArray<int> travellers[MAX_WAY_GROUPS];
+
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+	static grinliz::HashTable<int, int>* teamToCoreInfo;
 };
 
 #endif // CORESCRIPT_INCLUDED

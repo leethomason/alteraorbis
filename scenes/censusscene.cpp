@@ -262,7 +262,7 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 			Vector2I sector = ToSector(sc->GetPosition2DI());
 
 			WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
-			const SectorData& sd = map->GetSector(sector);
+			const SectorData& sd = map->GetSectorData(sector);
 			str.AppendFormat("at %s", sd.name.safe_str());
 		}
 	}

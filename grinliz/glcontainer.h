@@ -184,6 +184,22 @@ public:
 
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
+	bool operator==(const CDynArray<T, SEM, KCOMPARE>& rhs) const {
+		bool match = false;
+		if (this->Size() == rhs.Size()) {
+			match = true;
+			for (int i = 0; i < Size(); ++i) {
+				if ((*this)[i] == rhs[i]) {
+					// all good
+				}
+				else {
+					match = false;
+					break;
+				}
+			}
+		}
+		return match;
+	}
 
 	void Push( const T& t ) {
 		EnsureCap( size+1 );
