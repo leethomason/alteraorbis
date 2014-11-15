@@ -18,7 +18,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	// Denizen
 	{ "SleepTube", "bed",			1, "Increases population." },
 	{ "Temple", "temple",			1, "Increases Tech cap, increases population cap, attracts monsters.", "Requires a SleepTube." },
-	{ "GuardPost", "guardpost",		1, "Gathering point for guards. Summons denizens if monster approach.", "Requires a Temple." },
+	{ "GuardPost", "guardpost",		1, "Gathering point for guards. Notifies denizens of monster approach.", "Requires a Temple." },
 	// Agronomy
 	{ "Solar Farm", "farm",			2, "Harvests fruit from plants." },
 	{ "Distillery", "distillery",	2, "Converts fruit to elixir.", "Requires a Solar Farm." },

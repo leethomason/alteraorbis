@@ -67,10 +67,13 @@ Beta 3b
 			- Troll gun distribution
 
 		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
+		- [Reenen] Abandon domain
+		- [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
 		- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
 		- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 		- [Reenen] Circuits are way complex... (see post)
 		- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
+		- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
 		- build to an efficiency level with distilleries (1 or 2)
 		- in census, cores/domains should show team
 		- how many trolls visit Truulga??
