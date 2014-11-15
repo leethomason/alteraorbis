@@ -272,9 +272,8 @@ public:
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
 	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
-	const SectorData* GetSectorData() const;
-	const SectorData& GetSector( int mapx, int mapy ) const;
-	const SectorData& GetSector( const grinliz::Vector2I& sector ) const;
+	const SectorData& GetSectorData( int mapx, int mapy ) const;
+	const SectorData& GetSectorData( const grinliz::Vector2I& sector ) const;
 	void SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name);
 
 	// Find random land on the largest continent

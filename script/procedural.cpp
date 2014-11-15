@@ -447,6 +447,7 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 	switch (teamGroup) {
 		case TEAM_HOUSE:
 		case TEAM_CHAOS:
+		case TEAM_ID_LEFT:
 		colors = HUMAN_COLORS;
 		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
 		break;
@@ -462,6 +463,7 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		break;
 
 		case TEAM_KAMAKIRI:
+		case TEAM_ID_RIGHT:
 		colors = KAMAKIRI_COLORS;
 		nColors = GL_C_ARRAY_SIZE(KAMAKIRI_COLORS) / 3;
 		break;

@@ -184,7 +184,7 @@ void MapScene::DrawMap()
 
 	for (Rectangle2IIterator it(subBounds); !it.Done(); it.Next()) {
 		Vector2I sector = it.Pos();
-		const SectorData& sd = worldMap->GetSector( sector );
+		const SectorData& sd = worldMap->GetSectorData( sector );
 
 		int i = (sector.x - subBounds.min.x);
 		int j = (sector.y - subBounds.min.y);
@@ -267,7 +267,7 @@ void MapScene::DrawMap()
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
 	if ( !data->destSector.IsZero() && data->destSector != homeSector ) {
-		const SectorData& sd = worldMap->GetSector( data->destSector );
+		const SectorData& sd = worldMap->GetSectorData( data->destSector );
 		CStr<64> str;
 		str.Format( "Grid Travel\n%s", sd.name.c_str() );
 		gridTravel.SetText(  str.c_str() );

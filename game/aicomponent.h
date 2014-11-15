@@ -76,6 +76,9 @@ public:
 
 	Chit* GetTarget();
 	void MakeAware( const int* enemyIDs, int n );
+
+	bool AtWaypoint();
+	grinliz::Vector2I GetWaypoint();
 	
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
@@ -126,7 +129,7 @@ private:
 	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
-	void ThinkWander( const ComponentSet& thisComp );
+	void ThinkNormal( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
@@ -135,6 +138,7 @@ private:
 	bool ThinkDelivery( const ComponentSet& thisComp );
 	bool ThinkRepair(const ComponentSet& thisComp);
 	bool ThinkFlag(const ComponentSet& thisComp);
+	bool ThinkWaypoints(const ComponentSet& thisComp);
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);

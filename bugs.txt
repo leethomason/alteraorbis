@@ -40,21 +40,25 @@
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 
 Beta 3b
-		- Denizen domains
+		x Denizen domains
 		- Visitor role
 			- Visitor travel
 			- Visitor trails on map
 		- Squads
-			- squad control:
-				- defend
-				- attack
-				- adventure
+			- squad control: clear flag, place flag, follow
+				- stand down - no flag
+				- defend - flag in own domain
+				- attack - flag in enemy domain
+				- adventure - flag in un-held domain
 				- follow avatar
+		- "Diplomacy"
+			- enemies, neutral, friends
+			- switch to war mode
 
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?
 
-		- move sim spawn to its own times
+		x move sim spawn to its own times
 		- retest truulga item generation
 		- denizen red on red color scheme way too much
 		- build tasks aren't getting serialized correctly. wrong rotation?

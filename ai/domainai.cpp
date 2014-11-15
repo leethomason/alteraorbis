@@ -58,7 +58,7 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 	roads = new RoadAI(sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE);
 	CDynArray<Vector2I> road;
 
@@ -212,7 +212,7 @@ bool DomainAI::BuildPlaza()
 
 	// Check a random road.
 	bool issuedOrders = false;
-	const SectorData& sd = Context()->worldMap->GetSector(sector);
+	const SectorData& sd = Context()->worldMap->GetSectorData(sector);
 
 	for (int i = 0; i < RoadAI::MAX_PLAZA; ++i) {
 		const Rectangle2I* r = roads->GetPlaza(i);
@@ -574,7 +574,7 @@ void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
 	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0;
@@ -706,7 +706,7 @@ void GobDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0;
@@ -783,7 +783,7 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0, plaza1;
@@ -881,7 +881,7 @@ void HumanDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 	Vector2I c = sectorData.core;
 	Rectangle2I innerBounds = InnerSectorBounds(sector);
 

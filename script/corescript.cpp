@@ -48,6 +48,18 @@ using namespace grinliz;
 #define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
+
+void CoreScript::Init()
+{
+	teamToCoreInfo = new HashTable<int, int>();
+}
+
+void CoreScript::Free()
+{
+	delete teamToCoreInfo;
+}
+
 
 const char* CoreAchievement::CivTechDescription(int score)
 {
@@ -117,8 +129,6 @@ void CoreScript::Serialize(XStream* xs)
 		int size = 0;
 		XarcGet(xs, "citizens.size", size);
 		citizens.PushArr(size);
-		if (size)
-			int debug = 1;
 	}
 	else {
 		XarcSet(xs, "citizens.size", citizens.Size());
@@ -680,14 +690,25 @@ bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 
 CoreScript* CoreScript::GetCoreFromTeam(int team)
 {
-	static int last = 0;
-	if (coreInfoArr[last].coreScript && coreInfoArr[last].coreScript->ParentChit()->Team() == team) {
-		return coreInfoArr[last].coreScript;
+	int group = 0, id = 0;
+	Team::SplitID(team, &group, &id);
+	if (id == 0) 
+		return 0;
+
+	int index = 0;
+	if (teamToCoreInfo->Query(team, &index)) {
+		// Make sure it is current:
+		GLASSERT(index >= 0 && index < NUM_SECTORS*NUM_SECTORS);
+		CoreScript* cs = coreInfoArr[index].coreScript;
+		GLASSERT(cs);
+		if (cs && cs->ParentChit()->Team() == team) {
+			return cs;
+		}
 	}
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
 		if (coreInfoArr[i].coreScript && coreInfoArr[i].coreScript->ParentChit()->Team() == team) {
-			last = i;
+			teamToCoreInfo->Add(team, i);
 			return coreInfoArr[i].coreScript;
 		}
 	}
@@ -724,8 +745,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	const GameItem& coreItem = itemDefDB->Get("core");
 
-	const SectorData* sectorDataArr = context->worldMap->GetSectorData();
-	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
+	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {
 		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::ID(team));
 		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
@@ -785,4 +805,101 @@ int CoreScript::GetPave()
 		pave = 1;
 	}
 	return pave;
+}
+
+
+Vector2I CoreScript::GetWaypoint(int chitID)
+{
+	static const Vector2I zero = { 0, 0 };
+	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
+		if (travellers[i].Find(chitID) >= 0) {
+			if (waypoints[i].Empty()) {
+				// all done!
+				travellers[i].Clear();
+				return zero;
+			}
+			return waypoints[i][0];
+		}
+	}
+	return zero;
+}
+
+
+const int* CoreScript::WaypointGroup(int chitID, int* n)
+{
+	*n = 0;
+	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
+		if (travellers[i].Find(chitID) >= 0) {
+			*n = travellers[i].Size();
+			return travellers[i].Empty() ? 0 : travellers[i].Mem();
+		}
+	}
+	return 0;
+}
+
+
+void CoreScript::PopWaypoint(int chitID)
+{
+	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
+		if (travellers[i].Find(chitID) >= 0) {
+			waypoints[i].Remove(0);
+			return;
+		}
+	}
+	GLASSERT(0);	// not found
+}
+
+
+void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& dest)
+{
+	Chit* chit = 0;
+	for (int i = 0; !chit && i < n; ++i) {
+		chit = Context()->chitBag->GetChit(idArr[i]);
+	}
+
+	Vector2I currectSector = chit->GetSpatialComponent()->GetSector();
+	Vector2I destSector = ToSector(dest);
+
+	int slot = 0;
+	while (slot < MAX_WAY_GROUPS && !waypoints[slot].Empty())
+		++slot;
+	GLASSERT(slot < MAX_WAY_GROUPS);
+	if (slot >= MAX_WAY_GROUPS) return;
+
+	waypoints[slot].Clear();
+	travellers[slot].Clear();
+
+	// - Current port
+	// - grid travel (implies both sector and target port)
+	// - dest port (regroup)
+	// - destination
+
+	if (currectSector != destSector) {
+		const SectorData& currentSD = Context()->worldMap->GetSectorData(currectSector);
+		int currentPort = currentSD.NearestPort(chit->GetSpatialComponent()->GetPosition2D());
+
+		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
+		int destPort = destSD.NearestPort(ToWorld2F(dest));
+
+		waypoints[slot].Push(currentSD.GetPortLoc(currentPort).Center());
+		waypoints[slot].Push(destSD.GetPortLoc(destPort).Center());
+	}
+	waypoints[slot].Push(dest);
+
+	travellers[slot].Clear();
+	for (int i = 0; i < n; ++i) {
+		travellers[slot].Push(idArr[i]);
+	}
+
+	// Remove from other slots.
+	for (int k = 0; k < MAX_WAY_GROUPS; ++k) {
+		if (k != slot) {
+			for (int i = 0; i < n; ++i) {
+				int index = travellers[k].Find(idArr[i]);
+				if (index >= 0) {
+					travellers[k].SwapRemove(index);
+				}
+			}
+		}
+	}
 }

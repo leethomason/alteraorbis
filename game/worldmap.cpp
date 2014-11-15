@@ -174,12 +174,6 @@ void WorldMap::FreeVBOs()
 }
 
 
-const SectorData* WorldMap::GetSectorData() const
-{
-	return worldInfo->SectorDataMem();
-}
-
-
 void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name)
 {
 	SectorData* data = worldInfo->SectorDataMemMutable();
@@ -190,14 +184,14 @@ void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::ISt
 }
 
 
-const SectorData& WorldMap::GetSector( int x, int y ) const
+const SectorData& WorldMap::GetSectorData( int x, int y ) const
 {
-	Vector2I sector = { x / SECTOR_SIZE, y/SECTOR_SIZE };
+	Vector2I sector = ToSector(x, y);
 	return worldInfo->GetSector( sector );
 }
 
 
-const SectorData& WorldMap::GetSector( const Vector2I& sector ) const
+const SectorData& WorldMap::GetSectorData( const Vector2I& sector ) const
 {
 	return worldInfo->GetSector( sector );
 }
@@ -1517,7 +1511,7 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 	SectorPort sp;
 	while ( true ) {
 		Vector2I sector = { random->Rand( NUM_SECTORS ), random->Rand( NUM_SECTORS ) };
-		const SectorData& sd = GetSector( sector );
+		const SectorData& sd = GetSectorData( sector );
 		if ( sd.HasCore() ) {
 			GLASSERT( sd.ports );
 			sp.sector.Set( sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE );
@@ -2427,7 +2421,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 			if (!Bounds().Contains(bounds)) continue;
 
 			// At this point, don't put emitters in the outland.
-			if (!GetSector(sector).HasCore()) continue;
+			if (!GetSectorData(sector).HasCore()) continue;
 
 			static const int PATCH_SIZE = 8;
 			static const int NUM_PATCHES = SECTOR_SIZE / PATCH_SIZE;
@@ -2441,7 +2435,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 						(px + 1)*PATCH_SIZE + i*SECTOR_SIZE - 2, (py + 1)*PATCH_SIZE + j*SECTOR_SIZE - 2);
 					
 					// Don't up emitters too close to Cores. It's annoying.
-					if (r.Contains(GetSector(sector).core)) continue;
+					if (r.Contains(GetSectorData(sector).core)) continue;
 
 					// ----- Find "good" emitters ---- //
 					int bestArea = 0;

@@ -122,7 +122,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 	static const int ATTEMPTS = 6;
 	for( int i=0; i<ATTEMPTS; ++i ) {
 		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
-		const SectorData& sd = map->GetSector( sector );
+		const SectorData& sd = map->GetSectorData( sector );
 		CoreScript* cs = CoreScript::GetCore( sector );
 		if ( sd.ports && cs && cs->InUse() ) {
 			break;
@@ -133,7 +133,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 	// Go to any random sector.
 	while( sector.IsZero() ) {
 		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
-		const SectorData& sd = map->GetSector( sector );
+		const SectorData& sd = map->GetSectorData( sector );
 		if ( sd.ports ) 
 			break;
 		sector.Zero();
@@ -141,7 +141,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 
 	GLASSERT( !sector.IsZero() );
 
-	const SectorData& sd = map->GetSector( sector );
+	const SectorData& sd = map->GetSectorData( sector );
 	GLASSERT( sd.ports );
 
 	int ports[4] = { 1, 2, 4, 8 };

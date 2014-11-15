@@ -691,7 +691,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 			// Are we on a core?
 			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 			Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-			const SectorData& sd = context->worldMap->GetSector( sector );
+			const SectorData& sd = context->worldMap->GetSectorData( sector );
 			if ( sd.core == pos2i ) {
 				ChitMsg heal( ChitMsg::CHIT_HEAL );
 				heal.dataF = Travel( CORE_HP_PER_SEC, time );
@@ -762,7 +762,7 @@ void AIComponent::Think( const ComponentSet& thisComp )
 		if ( visitorIndex >= 0 )
 			ThinkVisitor( thisComp );
 		else
-			ThinkWander( thisComp );	
+			ThinkNormal( thisComp );	
 		break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
 	case RAMPAGE_MODE:		ThinkRampage( thisComp );	break;
@@ -776,7 +776,7 @@ bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)
 	if (!cs) return false;
 
 	Vector2I dstSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
-	const SectorData& dstSD = Context()->worldMap->GetSector(dstSector);
+	const SectorData& dstSD = Context()->worldMap->GetSectorData(dstSector);
 
 	SectorPort dstSP;
 	dstSP.sector = dstSector;
@@ -793,13 +793,13 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 	const ChitContext* context = Context();
 	if ( pmc && sc ) {
 		// Read our destination port information:
-		const SectorData& sd = context->worldMap->GetSector( sp.sector );
+		const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
 				
 		// Read our local get-on-the-grid info
 		SectorPort local = context->worldMap->NearestPort( sc->GetPosition2D() );
 		// Completely possible this chit can't actually path anywhere.
 		if ( local.IsValid() ) {
-			const SectorData& localSD = context->worldMap->GetSector( local.sector );
+			const SectorData& localSD = context->worldMap->GetSectorData( local.sector );
 			// Local path to remote dst
 			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
 			pmc->QueueDest( dest2, 0, &sp );
@@ -952,7 +952,7 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 	// Go for a rampage: remember, if the path is clear,
 	// it's essentially just a random walk.
 	destinationBlocked = 0;
-	const SectorData& sd = context->worldMap->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
+	const SectorData& sd = context->worldMap->GetSectorData( ToSector( thisComp.spatial->GetPosition2DI() ));
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 
 	CArray< int, 5 > targetArr;
@@ -978,7 +978,7 @@ bool AIComponent::RampageDone(const ComponentSet& thisComp)
 {
 	const ChitContext* context = Context();
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	const SectorData& sd = context->worldMap->GetSector(ToSector(pos2i));
+	const SectorData& sd = context->worldMap->GetSectorData(ToSector(pos2i));
 	Rectangle2I dest;
 
 	switch (rampageTarget) {
@@ -1008,7 +1008,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	const WorldGrid& wg0	= context->worldMap->GetWorldGrid( pos2i.x, pos2i.y );
 	Vector2I next			= pos2i + wg0.Path( rampageTarget );
 	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
-	const SectorData& sd	= context->worldMap->GetSector( ToSector( pos2i ));
+	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
 
 	if ( RampageDone(thisComp)) {
 		aiMode = NORMAL_MODE;
@@ -1285,7 +1285,7 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const g
 {
 	SectorPort dest;
 	dest.sector = sector;
-	const SectorData& destSD = Context()->worldMap->GetSector(dest.sector);
+	const SectorData& destSD = Context()->worldMap->GetSectorData(dest.sector);
 	GLASSERT(thisComp.spatial);
 	dest.port = destSD.NearestPort(thisComp.spatial->GetPosition2D());
 	return DoSectorHerd(thisComp, focus, dest);
@@ -1465,7 +1465,7 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 		const ChitContext* context = Context();
 
 		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
-		const SectorData& sd = context->worldMap->GetSector( sector );
+		const SectorData& sd = context->worldMap->GetSectorData( sector );
 		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
 			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
 				this->Move( ToWorld2F( sd.core ), false );
@@ -2173,7 +2173,7 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 }
 
 
-void AIComponent::ThinkWander( const ComponentSet& thisComp )
+void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 {
 	// Wander in some sort of directed fashion.
 	// - get close to friends
@@ -2211,6 +2211,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if (ThinkFlag(thisComp))
 		return;
+	if (ThinkWaypoints(thisComp))
+		return;
 	if (ThinkNeeds(thisComp))
 		return;
 	if (ThinkRepair(thisComp))
@@ -2236,7 +2238,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			if (!techSector.IsZero()) {
 				SectorPort dest;
 				dest.sector = techSector;
-				const SectorData& destSD = context->worldMap->GetSector(dest.sector);
+				const SectorData& destSD = context->worldMap->GetSectorData(dest.sector);
 				dest.port = destSD.NearestPort(pos2);
 
 				// The announcement of an incoming greater is made later.
@@ -2648,7 +2650,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 			Vector2I sector = { 0, 0 };
 			for( int i=0; i<16; ++i ) {
 				sector.Set( parentChit->random.Rand( NUM_SECTORS ), parentChit->random.Rand( NUM_SECTORS ));
-				sd = &Context()->worldMap->GetSector( sector );
+				sd = &Context()->worldMap->GetSectorData( sector );
 				if ( sd->HasCore() ) {
 					break;
 				}
@@ -2770,6 +2772,89 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		}
 	}
 }
+
+
+Vector2I AIComponent::GetWaypoint()
+{
+	Vector2I waypoint = { 0, 0 };
+	CoreScript* cs = CoreScript::GetCoreFromTeam(ParentChit()->Team());
+	GLASSERT(cs);
+	if (!cs) return waypoint;
+	
+	waypoint = cs->GetWaypoint(parentChit->ID());
+	return waypoint;
+}
+
+bool AIComponent::AtWaypoint()
+{
+	Vector2I waypoint = GetWaypoint();
+	if (waypoint.IsZero()) return false;
+
+	Vector2F dest2 = ToWorld2F(waypoint);
+
+	static const float DEST_RANGE = 1.0f;
+	Vector2F pos2 = ParentChit()->GetSpatialComponent()->GetPosition2D();
+	float len = (dest2 - pos2).Length();
+	return len < DEST_RANGE;
+}
+
+
+bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
+{
+	if (parentChit->PlayerControlled()) return false;
+
+	CoreScript* cs = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
+	if (!cs) return false;
+	
+	Vector2I dest = cs->GetWaypoint(parentChit->ID());
+	if (dest.IsZero()) return false;
+
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(ParentChit(), MoveComponent, PathMoveComponent);
+	if (!pmc) return false;
+
+	if (AtWaypoint()) {
+		bool allHere = true;
+		pmc->Stop();
+		int nTravellers = 0;
+		const int* travellers = cs->WaypointGroup(parentChit->ID(), &nTravellers);
+
+		for (int i = 0; i < nTravellers; ++i) {
+			Chit* traveller = Context()->chitBag->GetChit(travellers[i]);
+			if (traveller && traveller->GetAIComponent() && !traveller->PlayerControlled()) {
+				if (!traveller->GetAIComponent()->AtWaypoint()) {
+					allHere = false;
+					break;
+				}
+			}
+		}
+		if (allHere) {
+			GLOUTPUT(("Waypoint All Here.\n"));
+			cs->PopWaypoint(parentChit->ID());
+		}
+		return true;
+	}
+
+	Vector2F dest2 = ToWorld2F(dest);
+	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+
+	static const float FRIEND_RANGE = 2.0f;
+
+	Vector2I destSector = ToSector(dest);
+	Vector2I currentSector = thisComp.spatial->GetSector();
+
+	if (destSector == currentSector) {
+		this->Move(dest2, false);
+	}
+	else {
+		SectorPort sp;
+		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
+		int destPort = destSD.NearestPort(dest2);
+		this->Move(sp, false);
+	}
+	return true;
+}
+
+
 
 
 int AIComponent::DoTick( U32 deltaTime )
