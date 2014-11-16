@@ -779,9 +779,10 @@ int CoreScript::GetPave()
 		return pave;
 	}
 
-	// Pavement is used as a flag for "this is a road" by the AI.
+	// OLD: Pavement is used as a flag for "this is a road" by the AI.
 	// It's important to use the least common pave in a domain
 	// so that building isn't interfered with.
+	// NOW: Just use least common pave to spread things out.
 	CArray<int, WorldGrid::NUM_PAVE> nPave;
 	for (int i = 0; i < WorldGrid::NUM_PAVE; ++i) nPave.Push(0);
 
@@ -842,6 +843,7 @@ void CoreScript::PopWaypoint(int chitID)
 {
 	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
 		if (travellers[i].Find(chitID) >= 0) {
+			GLOUTPUT(("Waypoint popped. %d:%d,%d\n", i, waypoints[i][0].x, waypoints[i][0].y));
 			waypoints[i].Remove(0);
 			return;
 		}
@@ -874,6 +876,8 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 	// - dest port (regroup)
 	// - destination
 
+	GLOUTPUT(("SetWaypoints: #chits=%d slot=%d:", n, slot));
+
 	if (currectSector != destSector) {
 		const SectorData& currentSD = Context()->worldMap->GetSectorData(currectSector);
 		int currentPort = currentSD.NearestPort(chit->GetSpatialComponent()->GetPosition2D());
@@ -881,9 +885,13 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
 		int destPort = destSD.NearestPort(ToWorld2F(dest));
 
-		waypoints[slot].Push(currentSD.GetPortLoc(currentPort).Center());
-		waypoints[slot].Push(destSD.GetPortLoc(destPort).Center());
+		Vector2I p0 = currentSD.GetPortLoc(currentPort).Center();
+		Vector2I p1 = destSD.GetPortLoc(destPort).Center();
+		waypoints[slot].Push(p0);
+		waypoints[slot].Push(p1);
+		GLOUTPUT(("%d,%d [s %d,%d] %d,%d [s %d,%d] ", p0.x, p0.y, p0.x/SECTOR_SIZE, p0.y/SECTOR_SIZE, p1.x, p1.y, p1.x/SECTOR_SIZE, p1.y/SECTOR_SIZE));
 	}
+	GLOUTPUT(("%d,%d [s %d,%d]\n", dest.x, dest.y, dest.x/SECTOR_SIZE, dest.y/SECTOR_SIZE));
 	waypoints[slot].Push(dest);
 
 	travellers[slot].Clear();
@@ -897,6 +905,7 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 			for (int i = 0; i < n; ++i) {
 				int index = travellers[k].Find(idArr[i]);
 				if (index >= 0) {
+					GLOUTPUT(("Waypoint chit=%d scrubbed from slot=%d\n", travellers[k][index], k));
 					travellers[k].SwapRemove(index);
 				}
 			}

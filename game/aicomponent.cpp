@@ -1786,19 +1786,29 @@ bool AIComponent::ThinkFlag(const ComponentSet& thisComp)
 	if (parentChit->PlayerControlled()) {
 		return false;
 	}
+	bool usesBuilding = (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) != 0;
+	if (!usesBuilding) {
+		return false;
+	}
 
 	// Flags are done by denizens, NOT workers.
-	bool usesBuilding = (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) != 0;
-	if (usesBuilding) {
-		CoreScript* coreScript = CoreScript::GetCore(thisComp.spatial->GetSector());
-		if (coreScript && coreScript->IsCitizen(parentChit->ID())) {
-			Vector2I flag = coreScript->GetFlag();
-			if (!flag.IsZero()) {
-				if (!coreScript->HasTask(flag)) {
-					taskList.Push(Task::MoveTask(flag));
-					taskList.Push(Task::FlagTask());
-					return true;
-				}
+	// This handles flags in the same domain.
+	CoreScript* homeCoreScript = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
+	if (!homeCoreScript)
+		return false;
+
+	Vector2I homeCoreSector = homeCoreScript->ParentChit()->GetSpatialComponent()->GetSector();
+	Vector2I sector = thisComp.spatial->GetSector();
+
+	if (   homeCoreScript->IsCitizen(parentChit->ID())
+		&& ( homeCoreSector == sector))
+	{
+		Vector2I flag = homeCoreScript->GetFlag();
+		if (!flag.IsZero()) {
+			if (!homeCoreScript->HasTask(flag)) {
+				taskList.Push(Task::MoveTask(flag));
+				taskList.Push(Task::FlagTask());
+				return true;
 			}
 		}
 	}
@@ -2778,7 +2788,6 @@ Vector2I AIComponent::GetWaypoint()
 {
 	Vector2I waypoint = { 0, 0 };
 	CoreScript* cs = CoreScript::GetCoreFromTeam(ParentChit()->Team());
-	GLASSERT(cs);
 	if (!cs) return waypoint;
 	
 	waypoint = cs->GetWaypoint(parentChit->ID());
