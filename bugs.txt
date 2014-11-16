@@ -78,6 +78,15 @@ Beta 3b
 		- [Reenen] Circuits are way complex... (see post)
 		- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
 		- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+		- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
+		- console: Foo is taken over by Foo for House-1(core)
+		- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+		- way too much CivTech score for just the Avatar hanging around
+		- cyclops should eat rock to heal
+		- namegen: re-use too common. switch to loop
+		- clean up world gen layout
+		- background for console (full, none, dynamic)
+		- DomainAI: don't clear existing pave? (Depends on AI?)
 		- build to an efficiency level with distilleries (1 or 2)
 		- in census, cores/domains should show team
 		- how many trolls visit Truulga??

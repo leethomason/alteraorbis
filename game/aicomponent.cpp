@@ -2214,14 +2214,15 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		return;
 	if (ThinkHungry(thisComp))
 		return;
+	if (ThinkWaypoints(thisComp))
+		return;
+
 	// Be sure to deliver before collecting!
 	if (ThinkDelivery(thisComp))
 		return;
 	if (ThinkFruitCollect(thisComp))
 		return;
 	if (ThinkFlag(thisComp))
-		return;
-	if (ThinkWaypoints(thisComp))
 		return;
 	if (ThinkNeeds(thisComp))
 		return;
@@ -2858,6 +2859,9 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 		SectorPort sp;
 		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
 		int destPort = destSD.NearestPort(dest2);
+
+		sp.sector = destSector;
+		sp.port = destPort;
 		this->Move(sp, false);
 	}
 	return true;

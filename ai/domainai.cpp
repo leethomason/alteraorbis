@@ -898,16 +898,21 @@ void HumanDomainAI::OnAdd(Chit* chit, bool initialize)
 		if (innerBounds.Contains(altRoad[i]) && endWG.IsLand()) {
 			Vector2I it = altRoad[i];
 			road.Clear();
+			bool valid = true;
 			while (it != sectorData.core) {
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it);
-				if (!wg.IsPort()) {
-					road.Push(it);
+				if (wg.IsPort()) {
+					valid = false;
 				}
+				road.Push(it);
 				it = it + wg.Path(0);
 			}
-			// Road goes from core to port:
-			road.Reverse();
-			roads->AddRoad(road.Mem(), road.Size());
+			if (valid) {
+				// Road goes from corner to core.
+				// Hitting a port on the way invalidates it.
+				road.Reverse();
+				roads->AddRoad(road.Mem(), road.Size());
+			}
 		}
 	}
 
