@@ -640,18 +640,17 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	BuildAction(plane2i);
 
 	if (coreScript && uiMode[UI_CONTROL].Down()) {
-		coreScript->ToggleFlag(plane2i);
 
-#if 1
-		if (coreScript) {
-			CArray<int, 32> citizens;
-			for (int i = 0; i < coreScript->NumCitizens(); ++i) {
-				Chit* c = coreScript->CitizenAtIndex(i);
-				GLASSERT(c);
-				citizens.Push(c->ID());
-			}
-			coreScript->SetWaypoints(citizens.Mem(), citizens.Size(), plane2i);
+#if 0
+		coreScript->ToggleFlag(plane2i);
+#else
+		CArray<int, 32> citizens;
+		for (int i = 0; i < coreScript->NumCitizens(); ++i) {
+			Chit* c = coreScript->CitizenAtIndex(i);
+			GLASSERT(c);
+			citizens.Push(c->ID());
 		}
+		coreScript->SetWaypoints(citizens.Mem(), citizens.Size(), plane2i);
 #endif
 
 		return;
