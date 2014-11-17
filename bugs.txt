@@ -41,9 +41,6 @@
 
 Beta 3b
 		x Denizen domains
-		- Visitor role
-			- Visitor travel
-			- Visitor trails on map
 		- Squads
 			- squad control: clear flag, place flag, follow
 				- stand down - no flag
@@ -51,6 +48,9 @@ Beta 3b
 				- attack - flag in enemy domain
 				- adventure - flag in un-held domain
 				- follow avatar
+		- Visitor role
+			- Visitor travel
+			- Visitor trails on map
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
@@ -78,6 +78,8 @@ Beta 3b
 		- [Reenen] Circuits are way complex... (see post)
 		- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
 		- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+		- [Reenen] Cyclops heal at rocks.
+		- Mini map flash of battles.
 		- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 		- console: Foo is taken over by Foo for House-1(core)
 		- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)

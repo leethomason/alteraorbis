@@ -2830,7 +2830,7 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 
 		for (int i = 0; i < nTravellers; ++i) {
 			Chit* traveller = Context()->chitBag->GetChit(travellers[i]);
-			if (traveller && traveller->GetAIComponent() && !traveller->PlayerControlled()) {
+			if (traveller && traveller->GetAIComponent() && !traveller->PlayerControlled() && !traveller->GetAIComponent()->Rampaging()) {
 				if (!traveller->GetAIComponent()->AtWaypoint()) {
 					allHere = false;
 					break;

@@ -854,9 +854,31 @@ void CoreScript::PopWaypoint(int chitID)
 
 void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& dest)
 {
+	// FIXME: serialize
+	// Remove from other slots.
+	for (int k = 0; k < MAX_WAY_GROUPS; ++k) {
+		for (int i = 0; i < n; ++i) {
+			int index = travellers[k].Find(idArr[i]);
+			if (index >= 0) {
+				GLOUTPUT(("Waypoint chit=%d scrubbed from slot=%d\n", travellers[k][index], k));
+				travellers[k].SwapRemove(index);
+			}
+		}
+	}
+
+	// Use the first chit to choose the starting location:
+	bool startInSameSector = true;
+	Vector2I startSector = { 0, 0 };
 	Chit* chit = 0;
 	for (int i = 0; !chit && i < n; ++i) {
 		chit = Context()->chitBag->GetChit(idArr[i]);
+		if (chit) {
+			if (startSector.IsZero())
+				startSector = chit->GetSpatialComponent()->GetSector();
+			else
+				if (startSector != chit->GetSpatialComponent()->GetSector())
+					startInSameSector = false;
+		}
 	}
 
 	Vector2I currectSector = chit->GetSpatialComponent()->GetSector();
@@ -884,12 +906,15 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 
 		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
 		int destPort = destSD.NearestPort(ToWorld2F(dest));
+		Vector2I p0 = { 0, 0 };
 
-		Vector2I p0 = currentSD.GetPortLoc(currentPort).Center();
-		//Vector2I p1 = destSD.GetPortLoc(destPort).Center();	// don't need regroup at other side - should arrive in cluster.
+		if (startInSameSector) {
+			p0 = currentSD.GetPortLoc(currentPort).Center();	// meet at the STARTING port
+		}
+		else {
+			p0 = destSD.GetPortLoc(destPort).Center();			// meet at the DESTINATION port
+		}
 		waypoints[slot].Push(p0);
-		//waypoints[slot].Push(p1);
-//		GLOUTPUT(("%d,%d [s%x%x] %d,%d [s%x%x] ", p0.x, p0.y, p0.x / SECTOR_SIZE, p0.y / SECTOR_SIZE, p1.x, p1.y, p1.x / SECTOR_SIZE, p1.y / SECTOR_SIZE));
 		GLOUTPUT(("%d,%d [s%x%x]  ", p0.x, p0.y, p0.x / SECTOR_SIZE, p0.y / SECTOR_SIZE));
 	}
 	GLOUTPUT(("%d,%d [s%x%x]\n", dest.x, dest.y, dest.x/SECTOR_SIZE, dest.y/SECTOR_SIZE));
@@ -898,18 +923,5 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 	travellers[slot].Clear();
 	for (int i = 0; i < n; ++i) {
 		travellers[slot].Push(idArr[i]);
-	}
-
-	// Remove from other slots.
-	for (int k = 0; k < MAX_WAY_GROUPS; ++k) {
-		if (k != slot) {
-			for (int i = 0; i < n; ++i) {
-				int index = travellers[k].Find(idArr[i]);
-				if (index >= 0) {
-					GLOUTPUT(("Waypoint chit=%d scrubbed from slot=%d\n", travellers[k][index], k));
-					travellers[k].SwapRemove(index);
-				}
-			}
-		}
 	}
 }

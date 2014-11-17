@@ -69,6 +69,7 @@ public:
 	void Pickup( Chit* item );
 	void Stand();
 	void Rampage( int dest );
+	bool Rampaging() const { return aiMode == RAMPAGE_MODE;  }
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
