@@ -86,6 +86,11 @@ Beta 3b
 		- way too much CivTech score for just the Avatar hanging around
 		- cyclops should eat rock to heal
 		- namegen: re-use too common. switch to loop
+		- balance spawn based on # in world 
+		- check human spawn: correctly handling male/female
+		- increase drive to make weapons
+		- weapons, on destruction, should drop crystal
+		- buildings, on destruction, should drop items (market, vault, etc.)
 		- clean up world gen layout
 		- background for console (full, none, dynamic)
 		- DomainAI: don't clear existing pave? (Depends on AI?)

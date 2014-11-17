@@ -2204,6 +2204,9 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		ranged->Reload( parentChit );
 	}
 
+	if (ThinkWaypoints(thisComp))
+		return;
+
 	if (ThinkWanderEatPlants(thisComp))
 		return;
 	if (ThinkWanderHealAtCore(thisComp))
@@ -2213,8 +2216,6 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 	if (ThinkCriticalShopping(thisComp))
 		return;
 	if (ThinkHungry(thisComp))
-		return;
-	if (ThinkWaypoints(thisComp))
 		return;
 
 	// Be sure to deliver before collecting!
