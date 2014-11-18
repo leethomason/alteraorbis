@@ -79,6 +79,7 @@ Beta 3b
 		- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
 		- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
 		- [Reenen] Cyclops heal at rocks.
+    - denizens pay taxes (100% marginal tax above G Au and K crystal)
 		- Mini map flash of battles.
 		- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 		- console: Foo is taken over by Foo for House-1(core)
@@ -120,6 +121,11 @@ Beta 3b
 		- walk target for the avatar
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
+    - Squad Enhancement
+      - "special forces" and other achievemet designation
+      - healer item, role?
+      - support buffs, items
+      - mix "types" in squad (healer, support, long range, short range)
 
 	- World Gen
 		- less techy, more interesting world gen
@@ -162,6 +168,14 @@ Beta 3b
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
+         
+  - Stories
+    - overall story arcs, grand theme, AI controller
+      - old deities, beings of darkness
+      - zombie arc
+      - lord of the rings arc
+      - bug controller arc
+    - cursed items
 
     - TBD
 		- monster ecology
