@@ -90,6 +90,7 @@ private:
 	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
+	void ControlTap(int slot, const grinliz::Vector2I& pos);
 
 	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
@@ -106,7 +107,8 @@ private:
 		NUM_NEWS_BUTTONS = 12,
 		NEWS_BUTTON_WIDTH  = 60,
 		NEWS_BUTTON_HEIGHT = 25,
-		NUM_BUILD_MARKS = 100
+		NUM_BUILD_MARKS = 100,
+		NUM_SQUAD_BUTTONS = MAX_SQUADS+1,	// "local" control, plus the squads
 	};
 	enum {
 		NUM_BUILD_MODES = 6
@@ -164,7 +166,7 @@ private:
 	BuildScript			buildScript;
 
 	gamui::PushButton	okay;
-	gamui::PushButton	saveButton, loadButton;
+	gamui::PushButton	saveButton;
 	gamui::ToggleButton	buildButton[BuildScript::NUM_PLAYER_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;
@@ -182,12 +184,14 @@ private:
 	gamui::PushButton	coreWarningIcon;
 	gamui::PushButton	domainWarningIcon;
 	gamui::PushButton	atlasButton;
-	gamui::ToggleButton	autoRebuild;
 	gamui::PushButton	abandonButton;
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
 	gamui::Image		helpImage;
 	gamui::TextLabel	helpText;
+	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
+	gamui::TextLabel	squadText[NUM_SQUAD_BUTTONS];
+
 	BarStackWidget		summaryBars;
 
 	FacePushWidget		faceWidget,

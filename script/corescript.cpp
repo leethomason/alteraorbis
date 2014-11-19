@@ -1,6 +1,7 @@
 #include "corescript.h"
 
 #include "../grinliz/glvector.h"
+#include "../grinliz/glarrayutil.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -209,6 +210,57 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 }
 
 
+void CoreScript::AssignToSquads()
+{
+	// First, how many do we actually have?
+	// Filter out everyone that has gone away.
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		GL_ARRAY_FILTER(squadID[i], (this->IsCitizen(ele)));
+	}
+	int nSquaddies = 0;
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		nSquaddies += squadID[i].Size();
+	}
+
+	CChitArray recruits;
+	int nCitizens = Citizens(&recruits);
+	int nExpected = nCitizens - CITIZEN_BASE;
+	if (nSquaddies >= nExpected) return;
+
+	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && !ele->PlayerControlled() ));
+	// Sort the best recruits to the end.
+	GL_ARRAY_SORT_EXPR(recruits.Mem(), recruits.Size(), 
+		(-1 * ele->GetItem()->Traits().Level() * (ele->GetItem()->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1)));
+
+	while (nSquaddies < nExpected) {
+		for (int i = 0; i < MAX_SQUADS; ++i) {
+			if (squadID[i].Size() < SQUAD_SIZE) {
+				Chit* chit = recruits.Pop();
+				squadID[i].Push(chit->ID());
+				++nSquaddies;
+				break;
+			}
+		}
+	}
+}
+
+
+int CoreScript::Squaddies(int id, CChitArray* arr)
+{
+	GLASSERT(id >= 0 && id < MAX_SQUADS);
+	if (arr) arr->Clear();
+	GL_ARRAY_FILTER(squadID[id], (this->IsCitizen(ele)));
+	if (arr) {
+		for (int i = 0; i < squadID[id].Size(); ++i) {
+			Chit* c = Context()->chitBag->GetChit(squadID[id][i]);
+			GLASSERT(c);
+			arr->Push(c);
+		}
+	}
+	return squadID[id].Size();
+}
+
+
 void CoreScript::AddCitizen( Chit* chit )
 {
 	GLASSERT(ParentChit()->Team());
@@ -218,6 +270,7 @@ void CoreScript::AddCitizen( Chit* chit )
 
 	chit->GetItem()->SetTeam(ParentChit()->Team());
 	citizens.Push( chit->ID() );
+	AssignToSquads();
 }
 
 
@@ -233,56 +286,52 @@ bool CoreScript::IsCitizen( int id )
 }
 
 
-Chit* CoreScript::CitizenAtIndex( int index )
+int CoreScript::SquadID(int id)
 {
-	int id = citizens[index];
-	return Context()->chitBag->GetChit( id );
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squadID[i].Find(id) >= 0) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 
-int CoreScript::FindCitizenIndex( Chit* chit )
-{
-	GLASSERT( chit );
-	int id = chit->ID();
-	return citizens.Find( id );
-}
-
-
-int CoreScript::NumCitizens()
+int CoreScript::Citizens(CChitArray* arr)
 {
 	int i=0;
-	int count=0;
-	while ( i < citizens.Size() ) {
+	while (i < citizens.Size()) {
 		int id = citizens[i];
-		if ( Context()->chitBag->GetChit( id ) ) {
-			++count;
+		Chit* chit = Context()->chitBag->GetChit(id);
+		if (chit) {
+			if (arr) arr->Push(chit);
 			++i;
 		}
 		else {
 			// Dead and gone.
-			citizens.SwapRemove( i );
+			citizens.SwapRemove(i);
 			// Reset the timer so that there is a little time
 			// between a dead citizen and re-spawn
 			spawnTick.Reset();
-#if 0
-			// This is annoying: seeing if cranking down the spawn rate and not
-			// destroying the sleep tube achieves success.
-			// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
-			SpatialComponent* sc = parentChit->GetSpatialComponent();
-			GLASSERT( sc );
-			if ( sc ) {
-				Vector2F pos2 = sc->GetPosition2D();
-				Vector2I sector = ToSector( ToWorld2I( pos2 ));
-				Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
-				if ( bed && bed->GetItem() ) {
-					bed->GetItem()->hp = 0;
-					bed->SetTickNeeded();
-				}
-			}
-#endif
 		}
 	}
-	return count;
+#if 0
+	// This is annoying: seeing if cranking down the spawn rate and not
+	// destroying the sleep tube achieves success.
+	// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	GLASSERT( sc );
+	if ( sc ) {
+		Vector2F pos2 = sc->GetPosition2D();
+		Vector2I sector = ToSector( ToWorld2I( pos2 ));
+		Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
+		if ( bed && bed->GetItem() ) {
+			bed->GetItem()->hp = 0;
+			bed->SetTickNeeded();
+		}
+	}
+#endif
+	return citizens.Size();
 }
 
 
@@ -417,7 +466,7 @@ int CoreScript::MaxCitizens(int team, int nTemples)
 		case TEAM_HOUSE:
 		{
 			static const int N = MAX_TEMPLES+1;
-			static const int limit[N] = { 4, 8, 16, 20 };
+			static const int limit[N] = { 8, 12, 16, 20, 24 };
 			int n = Clamp(nTemples, 0, N - 1);
 			citizens = limit[n];
 		}
@@ -493,7 +542,7 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 	if ( nSpawnTicks ) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
-		int nCitizens = this->NumCitizens();
+		int nCitizens = this->Citizens(0);
 		int maxCitizens = this->MaxCitizens();
 
 		if ( nCitizens < maxCitizens ) {

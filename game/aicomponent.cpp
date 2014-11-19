@@ -52,6 +52,8 @@
 #include "../xegame/istringconst.h"
 
 #include "../grinliz/glrectangle.h"
+#include "../grinliz/glarrayutil.h"
+
 #include "../Shiny/include/Shiny.h"
 #include <climits>
 
@@ -2678,6 +2680,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 				}
 				this->Move( sectorPort, true );
 				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit, 0));
+				thisComp.item->SetRogue();
 			}
 		}
 		break;
@@ -2942,7 +2945,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
 		bool goesToBattle = (thisComp.item->IName() != ISC::worker)
-			|| (cs && cs->NumCitizens() <= 4);
+			|| (cs && cs->Citizens(0) <= 4);
 
 		if (    aiMode != BATTLE_MODE 
 			 && goesToBattle

@@ -412,7 +412,8 @@ bool DomainAI::ClearDisconnected()
 	Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
 	Context()->chitBag->QueryBuilding(IString(), inner, &arr);
 
-	GL_FOR_EACH_BEGIN(Chit*, chit, arr) {
+	for (int i = 0; i < arr.Size(); ++i) {
+		Chit* chit = arr[i];
 		MapSpatialComponent* msc = chit->GetSpatialComponent()->ToMapSpatialComponent();
 		if (msc && chit->GetItem()) {
 			if (!roads->IsOnRoad(msc, chit->GetItem()->IName() == ISC::farm)) {
@@ -420,7 +421,7 @@ bool DomainAI::ClearDisconnected()
 				return true;
 			}
 		}
-	} GL_FOR_EACH_END
+	}
 	return false;
 }
 
@@ -507,14 +508,17 @@ int DomainAI::DoTick(U32 delta)
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
 		int gold = parentChit->GetItem()->wallet.Gold();
-		for (int i = 0; i < cs->NumCitizens(); ++i) {
-			Chit* citizen = cs->CitizenAtIndex(i);
-			if (citizen->GetItem()) {
-				int citizenGold = citizen->GetItem()->wallet.Gold();
+		CChitArray citizens;
+		cs->Citizens(&citizens);
+
+		for (int i = 0; i < citizens.Size(); ++i) {
+			Chit* c = citizens[i];
+			if (c->GetItem()) {
+				int citizenGold = c->GetItem()->wallet.Gold();
 				if (citizenGold > gold / 4) {
 					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
 					if (tax > 0) {
-						parentChit->GetWallet()->Deposit( &citizen->GetItem()->wallet, tax);
+						parentChit->GetWallet()->Deposit( &c->GetItem()->wallet, tax);
 					}
 				}
 			}
@@ -981,7 +985,7 @@ void HumanDomainAI::DoBuild()
 		}
 		if (eff >= 2) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
-			if (arr[BuildScript::TEMPLE] < CoreScript::MAX_TEMPLES && BuildBuilding(BuildScript::TEMPLE)) break;
+			if (arr[BuildScript::TEMPLE] < MAX_TEMPLES && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.

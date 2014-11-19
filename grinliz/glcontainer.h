@@ -495,50 +495,6 @@ private:
 	int size;
 };
 
- // 'auto' in a #define. could be a lamba? or clean up? not sure if C11 is going to give me trouble.
-#define GL_ARRAY_FILTER( arr, f ) {		\
-	int _k_ = 0;						\
-	while (_k_ < arr.Size()) {			\
-		auto& ele = arr[_k_];			\
-		if (f) {						\
-			++_k_;						\
-		}								\
-		else {							\
-			arr.SwapRemove(_k_);		\
-		}								\
-	}									\
-}
-
-
-#define GL_ARRAY_FILTER_ORDERED( arr, f ) {		\
-	int _k_ = 0;						\
-	while (_k_ < arr.Size()) {			\
-		auto& ele = arr[_k_];			\
-		if (f) {						\
-			++_k_;						\
-		}								\
-		else {							\
-			arr.Remove(_k_);			\
-		}								\
-	}									\
-}
-
-/*	Tom Forsyth's foreach is amazing, and I learned something about programming from studying it.
-	Since all the variables declared in the 'for' have to be "pointer variants" of the same type,
-	it's tricky to get right. Also the functional assert, while cool, is a little inconvenient.
-
-	I don't claim this is better, but some pros:
-	- Much less fidly about const, type, and references
-	- The type T can be const if the list isn't.
-	- There's only one variant: make T a pointer, reference, or value as appropriate
-	- still debug checks!
-
-	Con:
-	- nastier syntax
-*/
-
-#define GL_FOR_EACH_BEGIN(T, ref, list ) { const T const * first = list.Mem(); const T const* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
-#define GL_FOR_EACH_END }}
 
 class CompCharPtr {
 public:

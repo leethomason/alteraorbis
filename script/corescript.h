@@ -19,6 +19,7 @@
 #include "../xegame/cticker.h"
 #include "../game/gamelimits.h"
 #include "../xegame/component.h"
+#include "../xegame/chitbag.h"
 
 class WorldMap;
 class WorkQueue;
@@ -73,11 +74,12 @@ public:
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
 	bool IsCitizen( int id );
-	Chit*  CitizenAtIndex( int id );
-	int    FindCitizenIndex( Chit* chit ); 
-	int NumCitizens();
+	int  Citizens(CChitArray* arr);
 
-	enum { MAX_TEMPLES = 3};	// max # of temples that do something
+	// 0-3, -1 if not in squad
+	int SquadID(int id);
+	int Squaddies(int squadID, CChitArray* arr);
+
 	static int MaxCitizens(int team, int nTemples);
 	int MaxCitizens();
 
@@ -132,6 +134,7 @@ private:
 	bool RecruitNeutral();
 	void DoTickNeutral(int delta, int nSpawnTicks);
 	void DoTickInUse(int delta, int nSpawnTicks);
+	void AssignToSquads();
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
@@ -147,6 +150,7 @@ private:
 	int			summonGreater;
 	bool		autoRebuild;
 	int			pave;
+	grinliz::CArray<int, SQUAD_SIZE> squadID[MAX_SQUADS];
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;

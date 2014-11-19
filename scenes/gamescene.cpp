@@ -85,9 +85,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	saveButton.Init( &gamui2D, game->GetButtonLook(0) );
 	saveButton.SetText( "Save" );
 
-	loadButton.Init(&gamui2D, game->GetButtonLook(0));
-	loadButton.SetText("Load");
-
 	useBuildingButton.Init(&gamui2D, game->GetButtonLook(0));
 	useBuildingButton.SetText( "Use" );
 	useBuildingButton.SetVisible( false );
@@ -141,10 +138,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
-
-	autoRebuild.Init(&gamui2D, game->GetButtonLook(0));
-	autoRebuild.SetText("Auto\nRebuild");
-	autoRebuild.SetVisible(false);
 
 	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
 	abandonButton.SetText("Abandon");
@@ -232,6 +225,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
 
 	adviser->Attach(&helpText, &helpImage);
+
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		static const char* NAMES[NUM_SQUAD_BUTTONS] = { "Local", "Alpha", "Beta", "Delta", "Omega" };
+		squadButton[i].Init(&gamui2D, game->GetButtonLook(0));
+		squadButton[i].SetText(NAMES[i]);
+		squadButton[0].AddToToggleGroup(&squadButton[i]);
+		squadText[i].Init(&gamui2D);
+	}
 }
 
 
@@ -255,7 +256,6 @@ void GameScene::Resize()
 	layout.PosAbs(&helpImage, 1, -1);
 	layout.PosAbs(&helpText, 2, -1);
 	layout.PosAbs(&saveButton, 1, -1);
-	layout.PosAbs(&loadButton, 2, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
 
@@ -265,6 +265,12 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		layout.PosAbs(&squadButton[i], i, 1);
+		layout.PosAbs(&squadText[i], i, 2);
+		squadText[i].SetBounds(squadButton[i].Width(), 0);
+	}
 
 	static float SIZE_BOOST = 1.3f;
 	helpImage.SetPos(helpImage.X() + layout.Width() * 0.3f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
@@ -296,7 +302,6 @@ void GameScene::Resize()
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
 	layout.PosAbs(&createWorkerButton, 0, 3);
-	layout.PosAbs(&autoRebuild, 1, 3);
 	layout.PosAbs(&abandonButton, 2, 3);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
@@ -359,7 +364,6 @@ void GameScene::Resize()
 
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
-	loadButton.SetVisible(visible);
 	okay.SetVisible(visible);
 }
 
@@ -640,10 +644,12 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	BuildAction(plane2i);
 
 	if (coreScript && uiMode[UI_CONTROL].Down()) {
-
+		for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+			if (squadButton[i].Down()) {
+				ControlTap(i, plane2i);
+			}
+		}
 #if 0
-		coreScript->ToggleFlag(plane2i);
-#else
 		CArray<int, 32> citizens;
 		for (int i = 0; i < coreScript->NumCitizens(); ++i) {
 			Chit* c = coreScript->CitizenAtIndex(i);
@@ -772,6 +778,27 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 			}
 			wq->AddAction(pos2i, buildActive, 0, variation);
 		}
+	}
+}
+
+
+void GameScene::ControlTap(int slot, const Vector2I& pos2i)
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	if (!cs) return;
+
+	if (slot == 0) {
+		// Local control.
+		Vector2I sector = ToSector(pos2i);
+		Vector2I coreSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+		if (sector == coreSector) {
+			cs->ToggleFlag(pos2i);
+		}
+	}
+	else {
+		int squad = slot - 1;
+		GLASSERT(squad >= 0 && squad < MAX_SQUADS);
+		//cs->SetWaypoints()
 	}
 }
 
@@ -984,11 +1011,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &saveButton ) {
 		Save();
 	}
-	else if ( item == &loadButton ) {
-		delete sim;
-		sim = new Sim( lumosGame );
-		Load();
-	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
@@ -1003,21 +1025,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				ReserveBank::GetWallet()->Deposit(coreChit->GetWallet(), WORKER_BOT_COST);
 				int team = coreChit->GetItem()->Team();
 				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
-			}
-		}
-	}
-	else if (item == &autoRebuild) {
-		CoreScript* cs = GetHomeCore();
-		if (cs) {
-			Chit* coreChit = cs->ParentChit();
-			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
-
-			if (autoRebuild.Down() && !rebuild) {
-				coreChit->Add(new RebuildAIComponent());
-			}
-			else if (!autoRebuild.Down() && rebuild) {
-				coreChit->Remove(rebuild);
-				delete rebuild;
 			}
 		}
 	}
@@ -1068,27 +1075,29 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if (item == &prevUnit) bias = -1;
 		if (item == &nextUnit) bias = 1;
 
-		if (coreScript && coreScript->NumCitizens()) {
-			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-			int index = 0;
-			if (chit) {
-				index = coreScript->FindCitizenIndex(chit);
-			}
+		if (coreScript ) {
+			CChitArray citizens;
+			int nCitizens = coreScript->Citizens(&citizens);
+			if (nCitizens) {
 
-			if (index < 0)
-				index = 0;
-			else
-				index = index + bias;
+				Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+				int index = citizens.Find(chit);
 
-			if (index < 0) index += coreScript->NumCitizens();
-			if (index >= coreScript->NumCitizens()) index = 0;
+				if (index < 0)
+					index = 0;
+				else
+					index = index + bias;
 
-			chit = coreScript->CitizenAtIndex(index);
+				if (index < 0) index += nCitizens;
+				if (index >= nCitizens) index = 0;
 
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-			if (cc && chit) {
-				chitTracking = chit->ID();
-				cc->SetTrack(chitTracking);
+				chit = citizens[index];
+
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				if (cc && chit) {
+					chitTracking = chit->ID();
+					cc->SetTrack(chitTracking);
+				}
 			}
 		}
 	}
@@ -1614,8 +1623,6 @@ void GameScene::SetPickupButtons()
 
 void GameScene::DoTick( U32 delta )
 {
-	clock_t startTime = clock();
-
 	sim->DoTick( delta );
 
 	SetPickupButtons();
@@ -1636,8 +1643,6 @@ void GameScene::DoTick( U32 delta )
 			newsButton[i].SetEnabled( false );
 		}
 	}
-
-	clock_t endTime = clock();
 
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
@@ -1678,10 +1683,13 @@ void GameScene::DoTick( U32 delta )
 		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
 		Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+
+		CChitArray citizens;
+		coreScript->Citizens(&citizens);
 	
-		if (coreScript->NumCitizens()) {
-			for (int i = 0; i < coreScript->NumCitizens(); i++) {
-				Chit* chit = coreScript->CitizenAtIndex(i);
+		if (citizens.Size()) {
+			for (int i = 0; i < citizens.Size(); i++) {
+				Chit* chit = citizens[i];
 				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
 					++nActive;
 					const ai::Needs& needs = chit->GetAIComponent()->GetNeeds();
@@ -1719,7 +1727,7 @@ void GameScene::DoTick( U32 delta )
 		str.Format("Date %.2f\n%s\nPop %d/%d", 
 				   sim->AgeF(), 
 				   sd.name.safe_str(), 
-				   coreScript->NumCitizens(), CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]));
+				   citizens.Size(), CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
 
@@ -1751,7 +1759,6 @@ void GameScene::DoTick( U32 delta )
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
 	bool visible = game->GetDebugUI();
-	autoRebuild.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
 	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
 
 	str.Clear();
@@ -1792,17 +1799,7 @@ void GameScene::DoTick( U32 delta )
 		adviser->DoTick(delta, coreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
-	autoRebuild.SetEnabled(coreScript != 0);
 	abandonButton.SetEnabled(coreScript != 0);
-	if (coreScript) {
-		// auto rebuild
-		Component* rebuild = coreScript->ParentChit()->GetComponent("RebuildAIComponent");
-		if (rebuild)
-			autoRebuild.SetDown();
-		else
-			autoRebuild.SetUp();
-	}
-
 	newsConsole.DoTick( delta, sim->GetChitBag()->GetHomeCore() );
 
 	bool useBuildingVisible = false;
@@ -1845,6 +1842,28 @@ void GameScene::DoTick( U32 delta )
 
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
+
+	bool squadVisible = uiMode[UI_CONTROL].Down();
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		squadButton[i].SetVisible(squadVisible);
+		squadText[i].SetVisible(squadVisible);
+	}
+	if (squadVisible) {
+		for (int i = 0; i < MAX_SQUADS; ++i) {
+			GLString str;
+			if (coreScript) {
+				CChitArray squaddies;
+				coreScript->Squaddies(i, &squaddies);
+				for (int k = 0; k < squaddies.Size(); ++k) {
+					const GameItem* item = squaddies[k]->GetItem();
+					if (item) {
+						str.AppendFormat("%s %d\n", item->BestName(), item->Traits().Level());
+					}
+				}
+			}
+			squadText[i+1].SetText(str.safe_str());
+		}
+	}
 }
 
 
