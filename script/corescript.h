@@ -83,15 +83,24 @@ public:
 	static int MaxCitizens(int team, int nTemples);
 	int MaxCitizens();
 
+	/*	Controls flags are simple "denizen attractors"
+		in the same domain. When a denizen arrives
+		the flag is cleared. They are assigned to the
+		first available denizen.
+	*/
 	void AddFlag(const grinliz::Vector2I& pos);
 	void RemoveFlag(const grinliz::Vector2I& pos);
 	void ToggleFlag(const grinliz::Vector2I& pos);
 	grinliz::Vector2I GetFlag();
 
-	void SetWaypoints(const int* ids, int n, const grinliz::Vector2I& dest);
-	grinliz::Vector2I GetWaypoint(int chitID);
-	const int* WaypointGroup(int chitID, int* n);
-	void PopWaypoint(int chitID);
+	/*	Waypoints are destinations that may involve
+		grid travel. Waypoints are assigned to 
+		a particular squad, and movement 
+		can be coordinated.
+	*/
+	void SetWaypoints(int squadID, const grinliz::Vector2I& dest);
+	grinliz::Vector2I GetWaypoint(int squadID);
+	void PopWaypoint(int squadID);
 
 	bool InUse() const;
 
@@ -150,10 +159,10 @@ private:
 	int			summonGreater;
 	bool		autoRebuild;
 	int			pave;
-	grinliz::CArray<int, SQUAD_SIZE> squadID[MAX_SQUADS];
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
+	grinliz::CArray<int, SQUAD_SIZE> squads[MAX_SQUADS];
 	grinliz::CDynArray< grinliz::Vector2I > tasks;
 	
 	struct Flag {
@@ -165,9 +174,8 @@ private:
 	};
 	grinliz::CDynArray< Flag > flags;
 
-	enum { MAX_WAY_GROUPS = 4};
-	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_WAY_GROUPS];
-	grinliz::CDynArray<int> travellers[MAX_WAY_GROUPS];
+	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_SQUADS];
+	Model* waypointFlags[MAX_SQUADS];
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 	static grinliz::HashTable<int, int>* teamToCoreInfo;

@@ -99,6 +99,9 @@ CoreScript::CoreScript()
 	workQueue = 0;
 	pave = 0;
 	sector.Zero();
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		waypointFlags[i] = 0;
+	}
 }
 
 
@@ -125,16 +128,25 @@ void CoreScript::Serialize(XStream* xs)
 	XARC_SER(xs, pave);
 
 	XARC_SER(xs, defaultSpawn);
+	XARC_SER_VAL_CARRAY(xs, citizens);
+	
+	GLASSERT(MAX_SQUADS == 4);
+	XARC_SER_VAL_CARRAY(xs, squads[0]);
+	XARC_SER_VAL_CARRAY(xs, squads[1]);
+	XARC_SER_VAL_CARRAY(xs, squads[2]);
+	XARC_SER_VAL_CARRAY(xs, squads[3]);
 
-	if (xs->Loading()) {
-		int size = 0;
-		XarcGet(xs, "citizens.size", size);
-		citizens.PushArr(size);
-	}
-	else {
-		XarcSet(xs, "citizens.size", citizens.Size());
-	}
-	XARC_SER_ARR(xs, citizens.Mem(), citizens.Size());
+/*
+	GLASSERT(MAX_WAY_GROUPS == 4);
+	XARC_SER_VAL_CARRAY(xs, waypoints[0]);
+	XARC_SER_VAL_CARRAY(xs, travellers[0]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[1]);
+	XARC_SER_VAL_CARRAY(xs, travellers[1]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[2]);
+	XARC_SER_VAL_CARRAY(xs, travellers[2]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[3]);
+	XARC_SER_VAL_CARRAY(xs, travellers[3]);
+*/
 	XARC_SER_CARRAY(xs, flags);
 
 	spawnTick.Serialize(xs, "spawn");
@@ -173,6 +185,13 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 		m->SetPos(ToWorld3F(flags[i].pos));
 		flags[i].model = m;
 	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		waypointFlags[i] = 0;
+		if (!waypoints[i].Empty()) {
+			waypointFlags[i] = Context()->engine->AllocModel("flag");
+			waypointFlags[i]->SetPos(ToWorld3F(waypoints[i].Last()));
+		}
+	}
 }
 
 
@@ -188,6 +207,10 @@ void CoreScript::OnRemove()
 	for (int i = 0; i < flags.Size(); ++i) {
 		Context()->engine->FreeModel(flags[i].model);
 		flags[i].model = 0;
+	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		Context()->engine->FreeModel(waypointFlags[i]);
+		waypointFlags[i] = 0;
 	}
 
 	super::OnRemove();
@@ -215,11 +238,17 @@ void CoreScript::AssignToSquads()
 	// First, how many do we actually have?
 	// Filter out everyone that has gone away.
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		GL_ARRAY_FILTER(squadID[i], (this->IsCitizen(ele)));
+		GL_ARRAY_FILTER(squads[i], (this->IsCitizen(ele)));
+		if (squads[i].Empty()) {
+			// Flush out dead squads so they don't have 
+			// control flags laying around.
+			waypoints[i].Clear();
+			Context()->engine->FreeModel(waypointFlags[i]);
+		}
 	}
 	int nSquaddies = 0;
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		nSquaddies += squadID[i].Size();
+		nSquaddies += squads[i].Size();
 	}
 
 	CChitArray recruits;
@@ -234,9 +263,9 @@ void CoreScript::AssignToSquads()
 
 	while (nSquaddies < nExpected) {
 		for (int i = 0; i < MAX_SQUADS; ++i) {
-			if (squadID[i].Size() < SQUAD_SIZE) {
+			if (squads[i].Size() < SQUAD_SIZE) {
 				Chit* chit = recruits.Pop();
-				squadID[i].Push(chit->ID());
+				squads[i].Push(chit->ID());
 				++nSquaddies;
 				break;
 			}
@@ -249,15 +278,15 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 {
 	GLASSERT(id >= 0 && id < MAX_SQUADS);
 	if (arr) arr->Clear();
-	GL_ARRAY_FILTER(squadID[id], (this->IsCitizen(ele)));
+	GL_ARRAY_FILTER(squads[id], (this->IsCitizen(ele)));
 	if (arr) {
-		for (int i = 0; i < squadID[id].Size(); ++i) {
-			Chit* c = Context()->chitBag->GetChit(squadID[id][i]);
+		for (int i = 0; i < squads[id].Size(); ++i) {
+			Chit* c = Context()->chitBag->GetChit(squads[id][i]);
 			GLASSERT(c);
 			arr->Push(c);
 		}
 	}
-	return squadID[id].Size();
+	return squads[id].Size();
 }
 
 
@@ -289,7 +318,7 @@ bool CoreScript::IsCitizen( int id )
 int CoreScript::SquadID(int id)
 {
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		if (squadID[i].Find(id) >= 0) {
+		if (squads[i].Find(id) >= 0) {
 			return i;
 		}
 	}
@@ -858,52 +887,34 @@ int CoreScript::GetPave()
 }
 
 
-Vector2I CoreScript::GetWaypoint(int chitID)
+Vector2I CoreScript::GetWaypoint(int squadID)
 {
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
 	static const Vector2I zero = { 0, 0 };
-	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
-		if (travellers[i].Find(chitID) >= 0) {
-			if (waypoints[i].Empty()) {
-				// all done!
-				travellers[i].Clear();
-				return zero;
-			}
-			return waypoints[i][0];
-		}
+	if (!waypoints[squadID].Empty()) {
+		return waypoints[squadID][0];
 	}
 	return zero;
 }
 
 
-const int* CoreScript::WaypointGroup(int chitID, int* n)
+void CoreScript::PopWaypoint(int squadID)
 {
-	*n = 0;
-	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
-		if (travellers[i].Find(chitID) >= 0) {
-			*n = travellers[i].Size();
-			return travellers[i].Empty() ? 0 : travellers[i].Mem();
-		}
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	GLASSERT(waypoints[squadID].Size());
+	GLOUTPUT(("Waypoint popped. %d:%d,%d %d remain.\n", squadID, waypoints[squadID][0].x, waypoints[squadID][0].y, waypoints[squadID].Size()-1));
+	waypoints[squadID].Remove(0);
+	if (waypoints[squadID].Empty()) {
+		Context()->engine->FreeModel(waypointFlags[squadID]);
+		waypointFlags[squadID] = 0;
 	}
-	return 0;
 }
 
 
-void CoreScript::PopWaypoint(int chitID)
+void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 {
-	for (int i = 0; i < MAX_WAY_GROUPS; ++i) {
-		if (travellers[i].Find(chitID) >= 0) {
-			GLOUTPUT(("Waypoint popped. %d:%d,%d %d remain.\n", i, waypoints[i][0].x, waypoints[i][0].y, waypoints[i].Size()-1));
-			waypoints[i].Remove(0);
-			return;
-		}
-	}
-	GLASSERT(0);	// not found
-}
-
-
-void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& dest)
-{
-	// FIXME: serialize
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	/*
 	// Remove from other slots.
 	for (int k = 0; k < MAX_WAY_GROUPS; ++k) {
 		for (int i = 0; i < n; ++i) {
@@ -914,43 +925,36 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 			}
 		}
 	}
-
+	*/
 	// Use the first chit to choose the starting location:
 	bool startInSameSector = true;
 	Vector2I startSector = { 0, 0 };
-	Chit* chit = 0;
-	for (int i = 0; !chit && i < n; ++i) {
-		chit = Context()->chitBag->GetChit(idArr[i]);
-		if (chit) {
-			if (startSector.IsZero())
-				startSector = chit->GetSpatialComponent()->GetSector();
-			else
-				if (startSector != chit->GetSpatialComponent()->GetSector())
-					startInSameSector = false;
-		}
+	CChitArray chitArr;
+	Squaddies(squadID, &chitArr);
+	if (chitArr.Empty()) return;
+
+	for (int i = 0; i<chitArr.Size(); ++i) {
+		Chit* chit = chitArr[i];
+		if (startSector.IsZero())
+			startSector = chit->GetSpatialComponent()->GetSector();
+		else
+			if (startSector != chit->GetSpatialComponent()->GetSector())
+				startInSameSector = false;
 	}
 
-	Vector2I currectSector = chit->GetSpatialComponent()->GetSector();
 	Vector2I destSector = ToSector(dest);
-
-	int slot = 0;
-	while (slot < MAX_WAY_GROUPS && !waypoints[slot].Empty())
-		++slot;
-	GLASSERT(slot < MAX_WAY_GROUPS);
-	if (slot >= MAX_WAY_GROUPS) return;
-
-	waypoints[slot].Clear();
-	travellers[slot].Clear();
+	waypoints[squadID].Clear();
 
 	// - Current port
 	// - grid travel (implies both sector and target port)
 	// - dest port (regroup)
 	// - destination
 
-	GLOUTPUT(("SetWaypoints: #chits=%d slot=%d:", n, slot));
+	GLOUTPUT(("SetWaypoints: #chits=%d squadID=%d:", chitArr.Size(), squadID));
 
-	if (currectSector != destSector) {
-		const SectorData& currentSD = Context()->worldMap->GetSectorData(currectSector);
+	if (startSector != destSector) {
+		Chit* chit = chitArr[0];
+		const SectorData& currentSD = Context()->worldMap->GetSectorData(chit->GetSpatialComponent()->GetSector());
 		int currentPort = currentSD.NearestPort(chit->GetSpatialComponent()->GetPosition2D());
 
 		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
@@ -963,14 +967,14 @@ void CoreScript::SetWaypoints(const int* idArr, int n, const grinliz::Vector2I& 
 		else {
 			p0 = destSD.GetPortLoc(destPort).Center();			// meet at the DESTINATION port
 		}
-		waypoints[slot].Push(p0);
+		waypoints[squadID].Push(p0);
 		GLOUTPUT(("%d,%d [s%x%x]  ", p0.x, p0.y, p0.x / SECTOR_SIZE, p0.y / SECTOR_SIZE));
 	}
 	GLOUTPUT(("%d,%d [s%x%x]\n", dest.x, dest.y, dest.x/SECTOR_SIZE, dest.y/SECTOR_SIZE));
-	waypoints[slot].Push(dest);
+	waypoints[squadID].Push(dest);
 
-	travellers[slot].Clear();
-	for (int i = 0; i < n; ++i) {
-		travellers[slot].Push(idArr[i]);
+	if (!waypointFlags[squadID]) {
+		waypointFlags[squadID] = Context()->engine->AllocModel("flag");
 	}
+	waypointFlags[squadID]->SetPos(ToWorld3F(waypoints[squadID].Last()));
 }

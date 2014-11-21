@@ -79,7 +79,6 @@ public:
 	void MakeAware( const int* enemyIDs, int n );
 
 	bool AtWaypoint();
-	grinliz::Vector2I GetWaypoint();
 	
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 

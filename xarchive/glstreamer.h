@@ -353,11 +353,11 @@ void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v );
 
 #define XARC_SER_CARRAY( stream, arr ) {					\
 	if ( (stream)->Saving() ) {								\
-		(stream)->Saving()->Set( "size", arr.Size() );		\
+		(stream)->Saving()->Set( #arr ".size", arr.Size() );\
 	}														\
 	else {													\
 		int _size = 0;										\
-		XarcGet( stream, "size", _size );					\
+		XarcGet( stream, #arr ".size", _size );				\
 		arr.Clear();										\
 		arr.PushArr( _size );								\
 	}														\
@@ -366,5 +366,18 @@ void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v );
 	}														\
 }
 
+#define XARC_SER_VAL_CARRAY( stream, arr ) {				\
+	if ( (stream)->Saving() ) {								\
+		(stream)->Saving()->Set( #arr ".size", arr.Size()); \
+		XarcSetArr(stream, #arr, arr.Mem(), arr.Size());	\
+	}														\
+	else {													\
+		int _size = 0;										\
+		XarcGet( stream, #arr ".size", _size );				\
+		arr.Clear();										\
+		arr.PushArr( _size );								\
+		XarcGetArr(stream, #arr, arr.Mem(), arr.Size());	\
+	}														\
+}
 
 #endif // GRINLIZ_STREAMER_INCLUDED

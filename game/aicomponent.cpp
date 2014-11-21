@@ -2789,20 +2789,19 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 }
 
 
-Vector2I AIComponent::GetWaypoint()
-{
-	Vector2I waypoint = { 0, 0 };
-	CoreScript* cs = CoreScript::GetCoreFromTeam(ParentChit()->Team());
-	if (!cs) return waypoint;
-	
-	waypoint = cs->GetWaypoint(parentChit->ID());
-	return waypoint;
-}
-
 bool AIComponent::AtWaypoint()
 {
-	Vector2I waypoint = GetWaypoint();
-	if (waypoint.IsZero()) return false;
+	CoreScript* cs = CoreScript::GetCoreFromTeam(parentChit->Team());
+	if (!cs) 
+		return false;
+
+	int squad = cs->SquadID(parentChit->ID());
+	if ( squad < 0) 
+		return false;
+
+	Vector2I waypoint = cs->GetWaypoint(squad);
+	if (waypoint.IsZero()) 
+		return false;
 
 	Vector2F dest2 = ToWorld2F(waypoint);
 
@@ -2820,8 +2819,13 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 	CoreScript* cs = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
 	if (!cs) return false;
 	
-	Vector2I dest = cs->GetWaypoint(parentChit->ID());
-	if (dest.IsZero()) return false;
+	int squad = cs->SquadID(parentChit->ID());
+	if ( squad < 0) 
+		return false;
+
+	Vector2I waypoint = cs->GetWaypoint(squad);
+	if (waypoint.IsZero()) 
+		return false;
 
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(ParentChit(), MoveComponent, PathMoveComponent);
 	if (!pmc) return false;
@@ -2829,11 +2833,11 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 	if (AtWaypoint()) {
 		bool allHere = true;
 		pmc->Stop();
-		int nTravellers = 0;
-		const int* travellers = cs->WaypointGroup(parentChit->ID(), &nTravellers);
+		CChitArray squaddies;
+		cs->Squaddies(squad, &squaddies);
 
-		for (int i = 0; i < nTravellers; ++i) {
-			Chit* traveller = Context()->chitBag->GetChit(travellers[i]);
+		for (int i = 0; i < squaddies.Size(); ++i) {
+			Chit* traveller = squaddies[i];
 			if (traveller && traveller->GetAIComponent() && !traveller->PlayerControlled() && !traveller->GetAIComponent()->Rampaging()) {
 				if (!traveller->GetAIComponent()->AtWaypoint()) {
 					allHere = false;
@@ -2842,18 +2846,18 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 			}
 		}
 		if (allHere) {
-			GLOUTPUT(("Waypoint All Here.\n"));
-			cs->PopWaypoint(parentChit->ID());
+			GLOUTPUT(("Waypoint All Here. squad=%d\n", squad));
+			cs->PopWaypoint(squad);
 		}
 		return true;
 	}
 
-	Vector2F dest2 = ToWorld2F(dest);
+	Vector2F dest2 = ToWorld2F(waypoint);
 	Vector2F pos2 = thisComp.spatial->GetPosition2D();
 
 	static const float FRIEND_RANGE = 2.0f;
 
-	Vector2I destSector = ToSector(dest);
+	Vector2I destSector = ToSector(waypoint);
 	Vector2I currentSector = thisComp.spatial->GetSector();
 
 	if (destSector == currentSector) {

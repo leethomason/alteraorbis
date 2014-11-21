@@ -646,7 +646,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	if (coreScript && uiMode[UI_CONTROL].Down()) {
 		for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 			if (squadButton[i].Down()) {
-				ControlTap(i, plane2i);
+				ControlTap(i-1, plane2i);
 			}
 		}
 #if 0
@@ -787,7 +787,7 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
 	if (!cs) return;
 
-	if (slot == 0) {
+	if (slot == -1) {
 		// Local control.
 		Vector2I sector = ToSector(pos2i);
 		Vector2I coreSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
@@ -796,9 +796,8 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 		}
 	}
 	else {
-		int squad = slot - 1;
-		GLASSERT(squad >= 0 && squad < MAX_SQUADS);
-		//cs->SetWaypoints()
+		GLASSERT(slot >= 0 && slot < MAX_SQUADS);
+		cs->SetWaypoints(slot, pos2i);
 	}
 }
 

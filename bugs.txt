@@ -42,18 +42,22 @@
 Beta 3b
 		x Denizen domains
 		- Squads
-			- squad control: clear flag, place flag, follow
-				- stand down - no flag
-				- defend - flag in own domain
-				- attack - flag in enemy domain
-				- adventure - flag in un-held domain
-				- follow avatar
-		- Visitor role
-			- Visitor travel
-			- Visitor trails on map
+			x squad motion
+			x basic sorting into squads
+			- serialization
+			t place squad flags
+			- clear squad flags
+			- hp + shield display, add to control view
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
+			- AI attacks
+			- AI adventures
+			- squad adventure mode?
+			- AI take over mode?
+		- Visitor role
+			- Visitor travel
+			- Visitor trails on map
 
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?
@@ -69,6 +73,7 @@ Beta 3b
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution
+		- fix world get layout / text / debugging display		
 
 		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
 		- [Reenen] Abandon domain

@@ -201,6 +201,9 @@ public:
 		return match;
 	}
 
+	const T& First() const { GLASSERT(size); return mem[0]; }
+	const T& Last() const { GLASSERT(size); return mem[size - 1]; }
+
 	void Push( const T& t ) {
 		EnsureCap( size+1 );
 		#pragma warning ( push )
