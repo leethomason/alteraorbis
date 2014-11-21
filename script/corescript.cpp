@@ -256,8 +256,10 @@ void CoreScript::AssignToSquads()
 	int nExpected = nCitizens - CITIZEN_BASE;
 	if (nSquaddies >= nExpected) return;
 
+	// Filter to: not in squad AND not player controlled
 	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && !ele->PlayerControlled() ));
 	// Sort the best recruits to the end.
+	// FIXME: better if there was a (working) power approximation
 	GL_ARRAY_SORT_EXPR(recruits.Mem(), recruits.Size(), 
 		(-1 * ele->GetItem()->Traits().Level() * (ele->GetItem()->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1)));
 
