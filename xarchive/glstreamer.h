@@ -230,7 +230,7 @@ inline bool XarcGetArr( XStream* stream, const char* key, T* value, int n )		{
 }
 
 template< class T >
-inline bool XarcGetVectorArr( XStream* stream, const char* key, grinliz::Vector2<T>* value, int n ) {
+inline bool XarcGetArr( XStream* stream, const char* key, grinliz::Vector2<T>* value, int n ) {
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
 	if ( attr ) {
@@ -260,7 +260,7 @@ inline void XarcSetArr( XStream* stream, const char* key, const grinliz::IString
 }
 
 template< class T >
-inline void XarcSetVectorArr( XStream* stream, const char* key, const grinliz::Vector2<T>* value, int n ) {
+inline void XarcSetArr( XStream* stream, const char* key, const grinliz::Vector2<T>* value, int n ) {
 	GLASSERT( stream->Saving() );
 	stream->Saving()->SetArr( key, &value->x, n*2 );
 }

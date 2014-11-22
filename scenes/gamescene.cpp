@@ -173,9 +173,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS + 1);
 	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
-		summaryBars.SetBarText(i+1, ai::Needs::Name(i));
+		summaryBars.barArr[i+1].SetText(ai::Needs::Name(i));
 	}
-	summaryBars.SetBarText(0, "morale");
+	summaryBars.barArr[0].SetText("morale");
 
 	chitTracking = GetPlayerChitID();
 
@@ -797,7 +797,14 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 	}
 	else {
 		GLASSERT(slot >= 0 && slot < MAX_SQUADS);
-		cs->SetWaypoints(slot, pos2i);
+		Vector2I waypoint = cs->GetWaypoint(slot);
+		static const Vector2I ZERO = { 0, 0 };
+		if (waypoint == pos2i) {
+			cs->SetWaypoints(slot, ZERO);
+		}
+		else {
+			cs->SetWaypoints(slot, pos2i);
+		}
 	}
 }
 
@@ -1713,11 +1720,11 @@ void GameScene::DoTick( U32 delta )
 		}
 		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
-		summaryBars.SetBarColor(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
-		summaryBars.SetBarRatio(0, float(sum[ai::Needs::NUM_NEEDS]));
+		summaryBars.barArr[0].SetAtom(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
+		summaryBars.barArr[0].SetRange( float(sum[ai::Needs::NUM_NEEDS]));
 		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
-			summaryBars.SetBarColor(k+1, critical[k] ? red : blue);
-			summaryBars.SetBarRatio(k+1, float(sum[k]));
+			summaryBars.barArr[k+1].SetAtom(0, critical[k] ? red : blue);
+			summaryBars.barArr[k+1].SetRange(float(sum[k]));
 		}
 
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };

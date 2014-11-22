@@ -175,7 +175,7 @@ void MapScene::DrawMap()
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
 	float map2Y = float(subBounds.min.x) / float(NUM_SECTORS);
-	RenderAtom subAtom = *mapImage.GetRenderAtom();
+	RenderAtom subAtom = mapImage.GetRenderAtom();
 	subAtom.tx0 = map2X;
 	subAtom.ty0 = map2Y;
 	subAtom.tx1 = map2X + float(MAP2_SIZE) / float(NUM_SECTORS);

@@ -47,7 +47,7 @@ void VisitorStateComponent::OnAdd( Chit* chit, bool init )
 
 	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
 	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
-	bar.Init( &context->worldMap->overlay0, 10, green, gray );
+	bar.Init( &context->worldMap->overlay0, green, gray );
 	bar.SetVisible( false );
 
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {

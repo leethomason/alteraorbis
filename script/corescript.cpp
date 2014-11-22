@@ -136,17 +136,11 @@ void CoreScript::Serialize(XStream* xs)
 	XARC_SER_VAL_CARRAY(xs, squads[2]);
 	XARC_SER_VAL_CARRAY(xs, squads[3]);
 
-/*
-	GLASSERT(MAX_WAY_GROUPS == 4);
 	XARC_SER_VAL_CARRAY(xs, waypoints[0]);
-	XARC_SER_VAL_CARRAY(xs, travellers[0]);
 	XARC_SER_VAL_CARRAY(xs, waypoints[1]);
-	XARC_SER_VAL_CARRAY(xs, travellers[1]);
 	XARC_SER_VAL_CARRAY(xs, waypoints[2]);
-	XARC_SER_VAL_CARRAY(xs, travellers[2]);
 	XARC_SER_VAL_CARRAY(xs, waypoints[3]);
-	XARC_SER_VAL_CARRAY(xs, travellers[3]);
-*/
+
 	XARC_SER_CARRAY(xs, flags);
 
 	spawnTick.Serialize(xs, "spawn");
@@ -916,18 +910,13 @@ void CoreScript::PopWaypoint(int squadID)
 void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 {
 	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
-	/*
-	// Remove from other slots.
-	for (int k = 0; k < MAX_WAY_GROUPS; ++k) {
-		for (int i = 0; i < n; ++i) {
-			int index = travellers[k].Find(idArr[i]);
-			if (index >= 0) {
-				GLOUTPUT(("Waypoint chit=%d scrubbed from slot=%d\n", travellers[k][index], k));
-				travellers[k].SwapRemove(index);
-			}
-		}
+	if (dest.IsZero()) {
+		waypoints[squadID].Clear();
+		Context()->engine->FreeModel(waypointFlags[squadID]);
+		waypointFlags[squadID] = 0;
+		return;
 	}
-	*/
+
 	// Use the first chit to choose the starting location:
 	bool startInSameSector = true;
 	Vector2I startSector = { 0, 0 };

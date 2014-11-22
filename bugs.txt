@@ -44,10 +44,12 @@ Beta 3b
 		- Squads
 			x squad motion
 			x basic sorting into squads
-			- serialization
-			t place squad flags
-			- clear squad flags
-			- hp + shield display, add to control view
+			x place squad flags
+			x clear squad flags
+			x hp + shield display, add to control view
+			t serialization
+			- squaddies abandon mission
+			- flag art
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode

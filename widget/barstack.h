@@ -23,18 +23,15 @@ public:
 	virtual bool Visible() const					{ return barArr[0].Visible(); }
 	virtual void SetVisible(bool vis);
 
-	void SetBarColor(int i, const gamui::RenderAtom& atom);
-	void SetBarText(int i, const char*);
-	void SetBarVisible(int i, bool vis);
-	void SetBarRatio(int i, float ratio);
+	// Helper functions just obscurred things:
+	enum { MAX_BARS = 10};	// tacky; but UIItems don't support operator=. Still compiles, which is bugging me.
+	gamui::DigitalBar barArr[MAX_BARS];
 
 private:
-	enum { MAX_BARS = 10};	// tacky; but UIItems don't support operator=. Still compiles, which is bugging me.
 
 	float height, deltaY;
 	int nBars;
 	bool visibleArr[MAX_BARS];
-	gamui::DigitalBar barArr[MAX_BARS];
 };
 
 

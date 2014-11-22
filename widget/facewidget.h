@@ -15,9 +15,8 @@ public:
 	FaceWidget()	{}
 
 	enum {
-		HP_BAR = 0x01,
+		HP_BAR = 0x01,		// also shield
 		AMMO_BAR = 0x02,
-		SHIELD_BAR = 0x04,
 		LEVEL_BAR = 0x08,
 		MORALE_BAR = 0x10,
 
@@ -25,9 +24,9 @@ public:
 		ENERGY_BAR = 0x040,
 		FUN_BAR    = 0x080,
 
-		BATTLE_BARS = HP_BAR | AMMO_BAR | SHIELD_BAR | LEVEL_BAR,
+		BATTLE_BARS = HP_BAR | AMMO_BAR | LEVEL_BAR,
 		NEED_BARS	= MORALE_BAR | FOOD_BAR | ENERGY_BAR | FUN_BAR,
-		ALL_BARS	= NEED_BARS | LEVEL_BAR | SHIELD_BAR | AMMO_BAR | HP_BAR,
+		ALL_BARS	= NEED_BARS | LEVEL_BAR | AMMO_BAR | HP_BAR,
 
 		SHOW_NAME	= 0x200,
 		ALL			= 0xffff
@@ -61,8 +60,7 @@ protected:
 	int					id;
 	gamui::TextLabel	upper;
 	enum {
-		BAR_HP,
-		BAR_SHIELD,
+		BAR_HP,			// also shield
 		BAR_AMMO,
 		BAR_LEVEL,
 		BAR_MORALE,

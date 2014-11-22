@@ -210,8 +210,8 @@ public:
 	/// Call to begin the rendering pass and commit all the UIItems to the display.
 	void Render();
 
-	RenderAtom* GetTextAtom() 				{ return &m_textAtomEnabled; }
-	RenderAtom* GetDisabledTextAtom()		{ return &m_textAtomDisabled; }
+	const RenderAtom& GetTextAtom() 			{ return m_textAtomEnabled; }
+	const RenderAtom& GetDisabledTextAtom()		{ return m_textAtomDisabled; }
 
 	IGamuiText* GetTextInterface() const	{ return m_iText; }
 	void SetTextHeight( float h )			{ m_textHeight = h; }
@@ -249,6 +249,8 @@ public:
 	float			GetFocusX();
 	float			GetFocusY();
 
+	static const RenderAtom& NullAtom() { return m_nullAtom; }
+
 private:
 	static int SortItems( const void* a, const void* b );
 	unsigned Hash(const char* p)
@@ -260,6 +262,8 @@ private:
 		}
 		return h;
 	}
+
+	static RenderAtom m_nullAtom;
 
 	UIItem*							m_itemTapped;
 	UIItem*							m_disabledItemTapped;
@@ -417,7 +421,7 @@ public:
 	virtual bool CanHandleTap()											{ return false; }
 	virtual bool HandleTap( TapAction action, float x, float y )		{ return false; }
 
-	virtual const RenderAtom* GetRenderAtom() const = 0;
+	virtual const RenderAtom& GetRenderAtom() const = 0;
 	virtual bool DoLayout() = 0;
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) = 0;
 
@@ -490,7 +494,7 @@ public:
 		}
 	}
 
-	virtual const RenderAtom* GetRenderAtom() const;
+	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
@@ -532,7 +536,7 @@ public:
 	virtual float Width() const											{ return m_width; }
 	virtual float Height() const										{ return m_height; }
 
-	virtual const RenderAtom* GetRenderAtom() const;
+	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 	virtual bool HandleTap( TapAction action, float x, float y );
@@ -562,7 +566,7 @@ public:
 	virtual float Height() const										{ return m_height; }
 	void Clear();
 
-	virtual const RenderAtom* GetRenderAtom() const;
+	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
@@ -658,7 +662,7 @@ public:
 	void SetTextLayout( int alignment, float dx=0.0f, float dy=0.0f )		{ m_textLayout = alignment; m_textDX = dx; m_textDY = dy; Modify(); }
 	void SetDecoLayout( int alignment, float dx=0.0f, float dy=0.0f )		{ m_decoLayout = alignment; m_decoDX = dx; m_decoDY = dy; Modify(); }
 
-	virtual const RenderAtom* GetRenderAtom() const;
+	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
@@ -843,49 +847,39 @@ class DigitalBar : public UIItem
 {
 public:
 	DigitalBar();
-	DigitalBar( Gamui* gamui,
-				int nTicks,							// if 2, continuous
-				const RenderAtom& atomLower,		// lit
-				const RenderAtom& atomHigher )		// un-lit
-		: UIItem( Gamui::LEVEL_FOREGROUND )
-	{
-		Init( gamui, nTicks, atomLower, atomHigher );
-	}
 	virtual ~DigitalBar()		{}
 
 	void Init(	Gamui* gamui, 
-				int nTicks,
 				const RenderAtom& atomLower,		// lit
 				const RenderAtom& atomHigher );		// un-lit
 
 	// t between 0 and 1. The lower atom will be used
 	// below t, the higher atom above
-	void SetRange( float t );
-	float GetRange() const					{ return m_t; }
+	void SetRange( float t, int bar=0 );
+	float GetRange(int bar = 0) const					{ GAMUIASSERT(bar == 0 || bar == 1); return m_t[bar]; }
 
 	virtual float Width() const;
 	virtual float Height() const;
 	virtual void SetVisible( bool visible );
 	void SetSize( float w, float h );
 
-	void SetLowerAtom( const RenderAtom& );
-	void SetHigherAtom( const RenderAtom& );
+	void EnableDouble(bool doubleBar)	{ if (doubleBar != m_double) { m_double = doubleBar; Modify(); } }
+	enum {LOWER, HIGHER};
+	void SetAtom( int which, const RenderAtom&, int bar=0 );
 
 	void SetText( const char* text )		{ m_textLabel.SetText( text ); }
 
-	virtual const RenderAtom* GetRenderAtom() const;
+	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
-	enum { MAX_TICKS = 10 };
-	int			m_nTicks;
-	float		m_t;
-	RenderAtom	m_atomLower;
-	RenderAtom	m_atomHigher;
+	float		m_t[2];
+	bool		m_double;
 	float		m_width, m_height;
 	TextLabel	m_textLabel;
-	Image		m_image[MAX_TICKS];
+	enum {NUM_IMAGE = 4};
+	Image		m_image[NUM_IMAGE];
 };
 
 
