@@ -104,7 +104,8 @@ static const int MAX_SQUADS				= 4;
 static const int CITIZEN_BASE			= 8;		// Base # of citizens before squads form
 static const int SQUAD_SIZE				= 4;
 static const int MAX_TEMPLES			= 4;		// # that do something; each temple is a squad
-static const int MAX_CITIZENS			= 32;		// WARNING: also the size of the CChitArray
+// WARNING: needs to equal or less than size of the CChitArray
+static const int MAX_CITIZENS			= CITIZEN_BASE + SQUAD_SIZE * MAX_SQUADS;	
 
 // Debugging values:
 static const float ROTATION_LIMIT	= 45.0f;

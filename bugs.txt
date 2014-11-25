@@ -50,6 +50,7 @@ Beta 3b
 			t serialization
 			- squaddies abandon mission
 			- flag art
+			- restore alpha blending on hp display and squad text
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode

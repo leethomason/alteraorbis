@@ -34,33 +34,31 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	flags = f;
 	upper.Init( gamui );
 
-	barStack.Init(gamui, MAX_BARS);
+	barStack.Init(gamui, 1, MAX_BARS-1);
 
 	// Must keep the Needs and Bars in sync.
 	GLASSERT( BAR_FOOD + ai::Needs::NUM_NEEDS == MAX_BARS );
 
-	barStack.barArr[BAR_HP].SetText("HP");
-	barStack.barArr[BAR_AMMO].SetText("Weapon");
-	barStack.barArr[BAR_MORALE].SetText("morale");
-	barStack.barArr[BAR_HP].EnableDouble(true);
+	barStack.barArr[BAR_AMMO]->SetText("Weapon");
+	barStack.barArr[BAR_MORALE]->SetText("morale");
 
 	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
 		GLASSERT( i < MAX_BARS );
-		barStack.barArr[i+BAR_FOOD].SetText(ai::Needs::Name(i));
+		barStack.barArr[i+BAR_FOOD]->SetText(ai::Needs::Name(i));
 	}
 
 	upper.SetVisible( false );
 	for( int i=0; i<MAX_BARS; ++i ) {
-		barStack.barArr[i].SetVisible((flags & (1 << i)) != 0);
+		barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
 	}
 }
 
-
+	
 void FaceWidget::SetFlags(int f)
 {
 	flags = f;
 	for( int i=0; i<MAX_BARS; ++i ) {
-		barStack.barArr[i].SetVisible((flags & (1 << i)) != 0);
+		barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
 	}
 	barStack.SetVisible(this->Visible());
 }
@@ -118,8 +116,8 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-	RenderAtom red	  = LumosGame::CalcPaletteAtom( 0, 1 );	
-	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
+	//RenderAtom red	  = LumosGame::CalcPaletteAtom( 0, 1 );	
+	//RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 
 	CStr<30> str;
 
@@ -127,9 +125,8 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 		const GameItem* item = ic->GetItem(0);
 
 		if ( flags & LEVEL_BAR ) {
-			barStack.barArr[BAR_HP].SetRange((float)item->HPFraction(), 1);
-			barStack.barArr[BAR_HP].SetAtom(0, green, 1);
-			barStack.barArr[BAR_HP].SetAtom(1, red, 1);
+			HPBar* hpbar = static_cast<HPBar*>(barStack.barArr[0]);
+			hpbar->Set(item, ic->GetShield(), "HP");
 
 			int lev = item->Traits().Level();
 			int xp  = item->Traits().Experience();
@@ -137,8 +134,8 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 			int pxp = item->Traits().LevelToExperience( item->Traits().Level() );
 
 			str.Format( "Level %d", lev );
-			barStack.barArr[BAR_LEVEL].SetText(str.safe_str());
-			barStack.barArr[BAR_LEVEL].SetRange(float(xp - pxp) / float(nxp - pxp));
+			barStack.barArr[BAR_LEVEL]->SetText(str.safe_str());
+			barStack.barArr[BAR_LEVEL]->SetRange(float(xp - pxp) / float(nxp - pxp));
 		}
 		Shield* ishield			= ic->GetShield();
 		RangedWeapon* iweapon	= ic->GetRangedWeapon(0);
@@ -147,34 +144,25 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 			float r = 0;
 			if ( iweapon->Reloading() ) {
 				r = iweapon->ReloadFraction();
-				barStack.barArr[BAR_AMMO].SetAtom(0, orange);
+				barStack.barArr[BAR_AMMO]->SetAtom(0, orange);
 			}
 			else {
 				r = iweapon->RoundsFraction();
-				barStack.barArr[BAR_AMMO].SetAtom(0, blue);
+				barStack.barArr[BAR_AMMO]->SetAtom(0, blue);
 			}
-			barStack.barArr[BAR_AMMO].SetRange(r);
+			barStack.barArr[BAR_AMMO]->SetRange(r);
 		}
 		else {
-			barStack.barArr[BAR_AMMO].SetRange(0);
-		}
-
-		barStack.barArr[BAR_HP].SetAtom(0, orange, 0);
-		if ( ishield ) {
-			float r = ishield->ChargeFraction();
-			barStack.barArr[BAR_HP].SetRange(r, 0);
-		}
-		else {
-			barStack.barArr[BAR_HP].SetRange(0, 0);
+			barStack.barArr[BAR_AMMO]->SetRange(0);
 		}
 	}
 
 	if ( ai ) {
 		const ai::Needs& needs = ai->GetNeeds();
 		for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-			barStack.barArr[i + BAR_FOOD].SetRange( (float)needs.Value(i));
+			barStack.barArr[i + BAR_FOOD]->SetRange( (float)needs.Value(i));
 		}
-		barStack.barArr[BAR_MORALE].SetRange((float)needs.Morale());
+		barStack.barArr[BAR_MORALE]->SetRange((float)needs.Morale());
 	}
 }
 
@@ -185,7 +173,7 @@ void FaceWidget::SetPos( float x, float y )
 	upper.SetPos( x, y ); 
 
 	float cy = GetButton()->Y() + GetButton()->Height() + 5.0f;
-	barStack.SetPos(x, cy);
+	barStack.SetPos(x, cy );
 }
 
 

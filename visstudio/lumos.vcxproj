@@ -188,6 +188,7 @@
     <ClCompile Include="..\widget\consolewidget.cpp" />
     <ClCompile Include="..\widget\endwidget.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
+    <ClCompile Include="..\widget\hpbar.cpp" />
     <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
     <ClCompile Include="..\widget\startwidget.cpp" />
@@ -325,6 +326,7 @@
     <ClInclude Include="..\widget\consolewidget.h" />
     <ClInclude Include="..\widget\endwidget.h" />
     <ClInclude Include="..\widget\facewidget.h" />
+    <ClInclude Include="..\widget\hpbar.h" />
     <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
     <ClInclude Include="..\widget\startwidget.h" />

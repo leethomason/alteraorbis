@@ -1128,7 +1128,7 @@ void DigitalBar::SetAtom( int which, const RenderAtom& atom, int n )
 	GAMUIASSERT(n == 0 || n == 1);
 	if ( !atom.Equal( m_image[n*2+which].GetRenderAtom() )) {
 		m_image[n * 2 + which].SetAtom(atom);
-//		Modify();
+		Modify();
 	}
 }
 
@@ -1179,12 +1179,14 @@ bool DigitalBar::DoLayout()
 	float mult = m_double ? 0.5f : 1.0f;
 	m_image[0].SetSize(m_width * m_t[0], m_height*mult);
 	m_image[1].SetSize(m_width * (1.0f - m_t[0]), m_height*mult);
+
 	m_image[0].SetPos(X(), Y());
 	m_image[1].SetPos(X() + m_width*m_t[0], Y());
 
 	if (m_double) {
 		m_image[2].SetSize(m_width * m_t[1], m_height*mult);
 		m_image[3].SetSize(m_width * (1.0f - m_t[1]), m_height*mult);
+
 		m_image[2].SetPos(X(), Y() + m_height*mult);
 		m_image[3].SetPos(X() + m_width*m_t[1], Y() + m_height*mult);
 

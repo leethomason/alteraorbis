@@ -286,6 +286,17 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 }
 
 
+bool CoreScript::IsSquaddieOnMission(int chitID)
+{
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squads[i].Find(chitID) >= 0) {
+			return !waypoints[i].Empty();
+		}
+	}
+	return false;
+}
+
+
 void CoreScript::AddCitizen( Chit* chit )
 {
 	GLASSERT(ParentChit()->Team());

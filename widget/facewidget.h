@@ -3,6 +3,7 @@
 
 #include "../gamui/gamui.h"
 #include "barstack.h"
+#include "hpbar.h"
 
 class GameItem;
 class UIRenderer;
@@ -60,7 +61,7 @@ protected:
 	int					id;
 	gamui::TextLabel	upper;
 	enum {
-		BAR_HP,			// also shield
+		BAR_HP,
 		BAR_AMMO,
 		BAR_LEVEL,
 		BAR_MORALE,
@@ -69,7 +70,7 @@ protected:
 		BAR_FUN,
 		MAX_BARS
 	};
-	BarStackWidget barStack;
+	BarStackWidget	barStack;
 };
 
 

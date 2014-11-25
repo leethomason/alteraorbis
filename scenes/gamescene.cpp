@@ -171,11 +171,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
 	targetFaceWidget.SetSize(100, 100);
 
-	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS + 1);
+	summaryBars.Init(&gamui2D, 0, ai::Needs::NUM_NEEDS + 1);
 	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
-		summaryBars.barArr[i+1].SetText(ai::Needs::Name(i));
+		summaryBars.barArr[i+1]->SetText(ai::Needs::Name(i));
 	}
-	summaryBars.barArr[0].SetText("morale");
+	summaryBars.barArr[0]->SetText("morale");
 
 	chitTracking = GetPlayerChitID();
 
@@ -231,7 +231,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		squadButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		squadButton[i].SetText(NAMES[i]);
 		squadButton[0].AddToToggleGroup(&squadButton[i]);
-		squadText[i].Init(&gamui2D);
+	}
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		squadBar[i].Init(&gamui2D);
 	}
 }
 
@@ -266,10 +268,13 @@ void GameScene::Resize()
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
 
+	int squadTextCount = 0;
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		layout.PosAbs(&squadButton[i], i, 1);
-		layout.PosAbs(&squadText[i], i, 2);
-		squadText[i].SetBounds(squadButton[i].Width(), 0);
+		for (int j = 0; j < ((i == 0) ? CITIZEN_BASE : SQUAD_SIZE); ++j) {
+			layout.PosAbs(&squadBar[squadTextCount], i, 2 + j);
+			squadTextCount++;
+		}
 	}
 
 	static float SIZE_BOOST = 1.3f;
@@ -1720,11 +1725,11 @@ void GameScene::DoTick( U32 delta )
 		}
 		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
-		summaryBars.barArr[0].SetAtom(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
-		summaryBars.barArr[0].SetRange( float(sum[ai::Needs::NUM_NEEDS]));
+		summaryBars.barArr[0]->SetAtom(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
+		summaryBars.barArr[0]->SetRange( float(sum[ai::Needs::NUM_NEEDS]));
 		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
-			summaryBars.barArr[k+1].SetAtom(0, critical[k] ? red : blue);
-			summaryBars.barArr[k+1].SetRange(float(sum[k]));
+			summaryBars.barArr[k+1]->SetAtom(0, critical[k] ? red : blue);
+			summaryBars.barArr[k+1]->SetRange(float(sum[k]));
 		}
 
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
@@ -1852,24 +1857,23 @@ void GameScene::DoTick( U32 delta )
 	bool squadVisible = uiMode[UI_CONTROL].Down();
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		squadButton[i].SetVisible(squadVisible);
-		squadText[i].SetVisible(squadVisible);
+		squadBar[i].SetVisible(squadVisible);
 	}
+	/*
 	if (squadVisible) {
+		GLString str;
 		for (int i = 0; i < MAX_SQUADS; ++i) {
-			GLString str;
 			if (coreScript) {
 				CChitArray squaddies;
 				coreScript->Squaddies(i, &squaddies);
 				for (int k = 0; k < squaddies.Size(); ++k) {
-					const GameItem* item = squaddies[k]->GetItem();
-					if (item) {
-						str.AppendFormat("%s %d\n", item->BestName(), item->Traits().Level());
-					}
+					const GameItem* item = squaddies[k]->GetItem(); 
+					squadBar[CITIZEN_BASE + i*SQUAD_SIZE + k].Set(item, item ? item->ToShield() : 0, 0);
 				}
 			}
-			squadText[i+1].SetText(str.safe_str());
 		}
 	}
+	*/
 }
 
 

@@ -3000,32 +3000,40 @@ int AIComponent::DoTick( U32 deltaTime )
 			CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
 			bool atHomeCore = cs && cs->IsCitizen(parentChit->ID());
 
-			static const double LOW_MORALE = 0.25;
+			// Squaddies, on missions, don't have needs. Keeps them 
+			// from running off or falling apart in the middle.
+			CoreScript* homeCore = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
+			// FIXME: this assert fires. working on a different bug.
+			//GLASSERT(!atHomeCore || (cs == homeCore));
+			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID())) {
 
-			if (AtFriendlyOrNeutralCore()) {
-				needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, false, &thisComp.item->GetPersonality());
+				static const double LOW_MORALE = 0.25;
 
-				if (thisComp.chit->PlayerControlled()) {
-					needs.SetFull();
-				}
-				else if (!(thisComp.item->flags & GameItem::HAS_NEEDS)) {
-					needs.SetMorale(1.0);	// no needs, so morale doesn't change.
-				}
-				else if (atHomeCore && needs.Morale() == 0) {
-					DoMoraleZero(thisComp);
-				}
-				else if (!atHomeCore && needs.Morale() < LOW_MORALE) {
-					bool okay = TravelHome(thisComp, true);
-					if (!okay) needs.SetMorale(1.0);
-				}
-			}
-			else {
-				// We are wandering the world.
-				if ((thisComp.item->flags & GameItem::HAS_NEEDS) && !thisComp.chit->PlayerControlled()) {
-					needs.DoTravelTick(deltaTime);
-					if (needs.Morale() == 0) {
+				if (AtFriendlyOrNeutralCore()) {
+					needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, false, &thisComp.item->GetPersonality());
+
+					if (thisComp.chit->PlayerControlled()) {
+						needs.SetFull();
+					}
+					else if (!(thisComp.item->flags & GameItem::HAS_NEEDS)) {
+						needs.SetMorale(1.0);	// no needs, so morale doesn't change.
+					}
+					else if (atHomeCore && needs.Morale() == 0) {
+						DoMoraleZero(thisComp);
+					}
+					else if (!atHomeCore && needs.Morale() < LOW_MORALE) {
 						bool okay = TravelHome(thisComp, true);
 						if (!okay) needs.SetMorale(1.0);
+					}
+				}
+				else {
+					// We are wandering the world.
+					if ((thisComp.item->flags & GameItem::HAS_NEEDS) && !thisComp.chit->PlayerControlled()) {
+						needs.DoTravelTick(deltaTime);
+						if (needs.Morale() == 0) {
+							bool okay = TravelHome(thisComp, true);
+							if (!okay) needs.SetMorale(1.0);
+						}
 					}
 				}
 			}

@@ -26,6 +26,7 @@
 #include "../widget/startwidget.h"
 #include "../widget/endwidget.h"
 #include "../widget/barstack.h"
+#include "../widget/hpbar.h"
 
 #include "../script/buildscript.h"
 
@@ -190,7 +191,7 @@ private:
 	gamui::Image		helpImage;
 	gamui::TextLabel	helpText;
 	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
-	gamui::TextLabel	squadText[NUM_SQUAD_BUTTONS];
+	HPBar				squadBar[MAX_CITIZENS];
 
 	BarStackWidget		summaryBars;
 
