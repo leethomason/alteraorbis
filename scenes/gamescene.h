@@ -192,6 +192,7 @@ private:
 	gamui::TextLabel	helpText;
 	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
 	HPBar				squadBar[MAX_CITIZENS];
+	gamui::Image		uiBackground;
 
 	BarStackWidget		summaryBars;
 

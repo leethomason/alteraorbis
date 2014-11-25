@@ -192,6 +192,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	moneyWidget.Init( &gamui2D );
 	newsConsole.Init( &gamui2D, sim->GetChitBag() );
 
+	RenderAtom darkPurple = LumosGame::CalcPaletteAtom( 10, 5 );
+	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+	uiBackground.Init(&gamui2D, darkPurple, false);
+
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 	endGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -268,13 +272,8 @@ void GameScene::Resize()
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
 
-	int squadTextCount = 0;
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		layout.PosAbs(&squadButton[i], i, 1);
-		for (int j = 0; j < ((i == 0) ? CITIZEN_BASE : SQUAD_SIZE); ++j) {
-			layout.PosAbs(&squadBar[squadTextCount], i, 2 + j);
-			squadTextCount++;
-		}
 	}
 
 	static float SIZE_BOOST = 1.3f;
@@ -370,6 +369,23 @@ void GameScene::Resize()
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
 	okay.SetVisible(visible);
+
+	// ------- SQUAD LAYOUT ------ //
+	layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	layout.SetSize(layout.Width(), layout.Height()*0.5f);
+	for (int j = 0; j < CITIZEN_BASE; ++j) {
+		layout.PosAbs(&squadBar[j], 0, 2*2 + j);
+	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		for (int j = 0; j < SQUAD_SIZE; ++j) {
+			layout.PosAbs(&squadBar[CITIZEN_BASE + SQUAD_SIZE*i + j], i+1, 2*2 + j);
+		}
+	}
+
+	// --- calculated ----
+	uiBackground.SetPos(squadBar[0].X(), squadBar[0].Y());
+	uiBackground.SetSize(squadBar[MAX_CITIZENS - 1].X() + squadBar[MAX_CITIZENS - 1].Width() - squadBar[0].X(),
+						 squadBar[CITIZEN_BASE - 1].Y() + squadBar[CITIZEN_BASE - 1].Height() - squadBar[0].Y());
 }
 
 
@@ -1859,21 +1875,42 @@ void GameScene::DoTick( U32 delta )
 		squadButton[i].SetVisible(squadVisible);
 		squadBar[i].SetVisible(squadVisible);
 	}
-	/*
-	if (squadVisible) {
+	bool inUse[MAX_CITIZENS] = { false };
+	uiBackground.SetVisible(squadVisible);
+	if (squadVisible && cs) {
+		int count[NUM_SQUAD_BUTTONS] = { 0 };
 		GLString str;
-		for (int i = 0; i < MAX_SQUADS; ++i) {
-			if (coreScript) {
-				CChitArray squaddies;
-				coreScript->Squaddies(i, &squaddies);
-				for (int k = 0; k < squaddies.Size(); ++k) {
-					const GameItem* item = squaddies[k]->GetItem(); 
-					squadBar[CITIZEN_BASE + i*SQUAD_SIZE + k].Set(item, item ? item->ToShield() : 0, 0);
+		CChitArray citizens;
+		cs->Citizens(&citizens);
+
+		for (int i = 0; i < citizens.Size(); ++i) {
+			int c = cs->SquadID(citizens[i]->ID()) + 1;
+			GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
+			if (count[c] < ((c==0) ? CITIZEN_BASE : SQUAD_SIZE)) {
+				const GameItem* item = citizens[i]->GetItem(); 
+				int index = 0;
+				if (c == 0) {
+					index = count[0];
+					GLASSERT(index >= 0 && index < CITIZEN_BASE);
 				}
+				else {
+					index = CITIZEN_BASE + (c - 1)*SQUAD_SIZE + count[c];
+					GLASSERT(index >= CITIZEN_BASE && index < MAX_CITIZENS);
+				}
+				count[c] += 1;
+				GLASSERT(index >= 0 && index < MAX_CITIZENS);
+				ItemComponent* itemComponent = citizens[i]->GetItemComponent();
+				squadBar[index].Set(item, itemComponent ? itemComponent->GetShield() : 0, 0);
+				squadBar[index].SetVisible(true);
+				inUse[index] = true;
 			}
 		}
 	}
-	*/
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		if (!inUse[i]) {
+			squadBar[i].SetVisible(false);
+		}
+	}
 }
 
 

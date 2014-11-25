@@ -48,9 +48,9 @@ Beta 3b
 			x clear squad flags
 			x hp + shield display, add to control view
 			t serialization
-			- squaddies abandon mission
+			t squaddies abandon mission
 			- flag art
-			- restore alpha blending on hp display and squad text
+			t restore alpha blending on hp display and squad text
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
