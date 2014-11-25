@@ -49,8 +49,9 @@ Beta 3b
 			x hp + shield display, add to control view
 			t serialization
 			t squaddies abandon mission
-			- flag art
 			t restore alpha blending on hp display and squad text
+			- switch over domain growth to be in line with new squad rules
+			- flag art
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode

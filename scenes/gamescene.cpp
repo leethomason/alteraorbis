@@ -1870,7 +1870,14 @@ void GameScene::DoTick( U32 delta )
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
 
-	bool squadVisible = uiMode[UI_CONTROL].Down();
+	SetSquadDisplay(uiMode[UI_CONTROL].Down());
+}
+
+
+void GameScene::SetSquadDisplay(bool squadVisible)
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		squadButton[i].SetVisible(squadVisible);
 		squadBar[i].SetVisible(squadVisible);
@@ -1886,8 +1893,8 @@ void GameScene::DoTick( U32 delta )
 		for (int i = 0; i < citizens.Size(); ++i) {
 			int c = cs->SquadID(citizens[i]->ID()) + 1;
 			GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
-			if (count[c] < ((c==0) ? CITIZEN_BASE : SQUAD_SIZE)) {
-				const GameItem* item = citizens[i]->GetItem(); 
+			if (count[c] < ((c == 0) ? CITIZEN_BASE : SQUAD_SIZE)) {
+				const GameItem* item = citizens[i]->GetItem();
 				int index = 0;
 				if (c == 0) {
 					index = count[0];
@@ -1911,8 +1918,39 @@ void GameScene::DoTick( U32 delta )
 			squadBar[i].SetVisible(false);
 		}
 	}
-}
 
+	if (squadVisible) {
+		for (int i = 0; i < MAX_SQUADS; ++i) {
+			static const char* NAME[MAX_SQUADS] = { "Alpha", "Beta", "Delta", "Omega" };
+			// Ready, Resting, On Route
+			Vector2I waypoint = { 0, 0 };
+			CChitArray squaddies;
+			if (cs) {
+				waypoint = cs->GetWaypoint(i);
+				cs->Squaddies(i, &squaddies);
+			}
+			double totalMorale = 0;
+			for (int k = 0; k < squaddies.Size(); ++k) {
+				if (squaddies[k]->GetAIComponent()) {
+					totalMorale += squaddies[k]->GetAIComponent()->GetNeeds().Morale();
+				}
+			}
+			double moraleAve = squaddies.Size() ? (totalMorale / double(squaddies.Size())) : 0;
+
+			CStr<32> str = NAME[i];
+			if (squaddies.Size() && !waypoint.IsZero()) {
+				str.Format("%s\nRoute %x%x", NAME[i], waypoint.x, waypoint.y);
+			}
+			else if (squaddies.Size() && moraleAve > 0.95) {
+				str.Format("%s\nReady", NAME[i]);
+			}
+			else if (squaddies.Size()) {
+				str.Format("%s\nRest %d%%", NAME[i], int(moraleAve*100.0f));
+			}
+			squadButton[i + 1].SetText(str.safe_str());
+		}
+	}
+}
 
 
 void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
