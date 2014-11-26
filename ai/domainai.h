@@ -41,7 +41,14 @@ public:
 	virtual int DoTick(U32 delta);
 
 	// subclasses implement to place build orders.
-	virtual void DoBuild() = 0;
+	virtual void DoBuild();
+	// If using DoBuild(), a subclass can still override
+	// what happens at special stages.
+	enum {
+		AFTER_ROADS,
+		AFTER_BAR,
+	};
+	virtual bool DoSpecialBuild(int stage)	{ return false; }
 
 	static DomainAI* Factory(int team);
 
@@ -60,7 +67,12 @@ protected:
 
 	float CalcFarmEfficiency(const grinliz::Vector2I& sector);
 
+	// The 4 default roads are set up by the DomainAI super class.
+	// Additional roads should be set up by the sub-class
+	// in OnAdd. Likewise, popCap is defaulted, but should
+	// be set in the subclass.
 	RoadAI*	roads;
+	int populationCap;
 
 private:
 	enum { MAX_ROADS = 8};
@@ -105,7 +117,8 @@ public:
 	virtual void OnAdd(Chit* chit, bool initialize);
 	virtual void OnRemove();
 
-	virtual void DoBuild();
+	// Uses default.
+	//virtual void DoBuild();
 
 private:
 };
@@ -117,14 +130,14 @@ public:
 	KamakiriDomainAI();
 	~KamakiriDomainAI();
 
-		virtual const char* Name() const { return "KamakiriDomainAI"; }
+	virtual const char* Name() const { return "KamakiriDomainAI"; }
 	virtual void Serialize(XStream* xs);
 
 	virtual void OnAdd(Chit* chit, bool initialize);
 	virtual void OnRemove();
 
-	virtual void DoBuild();
-
+	//virtual void DoBuild();
+	virtual bool DoSpecialBuild(int stage);
 };
 
 class HumanDomainAI : public DomainAI
@@ -140,7 +153,7 @@ public:
 	virtual void OnAdd(Chit* chit, bool initialize);
 	virtual void OnRemove();
 
-	virtual void DoBuild();
+	//virtual void DoBuild();
 };
 
 #endif // DOMAINAI_COMPONENT_INCLUDED

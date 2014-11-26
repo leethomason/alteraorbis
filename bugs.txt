@@ -50,8 +50,9 @@ Beta 3b
 			t serialization
 			t squaddies abandon mission
 			t restore alpha blending on hp display and squad text
-			- switch over domain growth to be in line with new squad rules
+			x switch over domain growth to be in line with new squad rules
 			- flag art
+			- squad destination on main map
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
@@ -62,6 +63,8 @@ Beta 3b
 		- Visitor role
 			- Visitor travel
 			- Visitor trails on map
+			- Limit squad control to "power radius"
+			- Switch to tech tree model for visitors? Do they bring gems??
 
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?

@@ -81,7 +81,7 @@ public:
 	int Squaddies(int squadID, CChitArray* arr);
 	bool IsSquaddieOnMission(int chitID);
 
-	static int MaxCitizens(int team, int nTemples);
+	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
 
 	/*	Controls flags are simple "denizen attractors"

@@ -45,6 +45,7 @@ DomainAI::DomainAI()
 	for (int i = 0; i < MAX_ROADS; ++i) {
 		buildDistance[i] = 0;
 	}
+	populationCap = MAX_CITIZENS;
 }
 
 DomainAI::~DomainAI()
@@ -551,6 +552,70 @@ float DomainAI::CalcFarmEfficiency(const grinliz::Vector2I& sector)
 }
 
 
+void DomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Rectangle2I sectorBounds = SectorBounds(sector);
+
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+	float eff = CalcFarmEfficiency(sector);
+
+	CChitArray bars;
+	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
+	int nElixir = 0;
+	for (int i = 0; i < bars.Size(); ++i) {
+		ItemComponent* ic = bars[i]->GetItemComponent();
+		if (ic) {
+			nElixir += ic->NumCarriedItems(ISC::elixir);
+		}
+	}
+
+	do {
+		if (BuyWorkers()) break;		
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
+		if (BuildPlaza()) break;
+
+		if (DoSpecialBuild(AFTER_ROADS)) break;
+		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
+		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
+		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+		if (DoSpecialBuild(AFTER_BAR)) break;
+
+		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
+		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
+
+		if (eff < 1 && BuildFarm()) break;
+
+		// Check efficiency to curtail over-building.
+		int wantedCitizens = Min(CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]), populationCap);
+
+		if (eff >= 1) {
+			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
+
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::GUARDPOST] < 1 && BuildBuilding(BuildScript::GUARDPOST)) break;
+			if (eff < 2 && BuildFarm()) break;
+		}
+		if (eff >= 2) {
+			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
+			if (arr[BuildScript::TEMPLE] < MAX_TEMPLES && BuildBuilding(BuildScript::TEMPLE)) break;
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+			if (BuildRoad()) break;	// will return true until all roads are built.
+		}
+	} while (false);
+}
+
 
 TrollDomainAI::TrollDomainAI()
 {
@@ -716,6 +781,7 @@ void GobDomainAI::OnAdd(Chit* chit, bool initialize)
 	Rectangle2I plaza0;
 	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
 	roads->AddPlaza(plaza0);
+	populationCap = MAX_GOBMAN_CITIZENS;
 }
 
 
@@ -724,6 +790,8 @@ void GobDomainAI::OnRemove()
 	return super::OnRemove();
 }
 
+
+/*
 void GobDomainAI::DoBuild()
 {
 	Vector2I sector = { 0, 0 };
@@ -761,7 +829,7 @@ void GobDomainAI::DoBuild()
 		}
 	} while (false);
 }
-
+*/
 
 KamakiriDomainAI::KamakiriDomainAI()
 {
@@ -796,6 +864,7 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 
 	roads->AddPlaza(plaza0);
 	roads->AddPlaza(plaza1);
+	populationCap = MAX_KAMAKIRI_CITIZENS;
 }
 
 
@@ -804,6 +873,30 @@ void KamakiriDomainAI::OnRemove()
 	return super::OnRemove();
 }
 
+
+bool KamakiriDomainAI::DoSpecialBuild(int stage)
+{
+	if (stage == AFTER_BAR) {
+		Vector2I sector = { 0, 0 };
+		CoreScript* cs = 0;
+		WorkQueue* workQueue = 0;
+		int pave = 0;
+		if (!Preamble(&sector, &cs, &workQueue, &pave))
+			return false;
+
+		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+		Rectangle2I sectorBounds = SectorBounds(sector);
+		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+
+		if (arr[BuildScript::KAMAKIRI_STATUE] < 4) {
+			return BuildBuilding(BuildScript::KAMAKIRI_STATUE);
+		}
+	}
+	return false;
+}
+
+
+/*
 void KamakiriDomainAI::DoBuild()
 {
 	Vector2I sector = { 0, 0 };
@@ -859,7 +952,7 @@ void KamakiriDomainAI::DoBuild()
 		}
 	} while (false);
 }
-
+*/
 
 HumanDomainAI::HumanDomainAI()
 {
@@ -932,6 +1025,8 @@ void HumanDomainAI::OnRemove()
 	return super::OnRemove();
 }
 
+
+/*
 void HumanDomainAI::DoBuild()
 {
 	Vector2I sector = { 0, 0 };
@@ -993,4 +1088,5 @@ void HumanDomainAI::DoBuild()
 		}
 	} while (false);
 }
+*/
 

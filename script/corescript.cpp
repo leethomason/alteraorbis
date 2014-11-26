@@ -494,34 +494,9 @@ int CoreScript::DoTick(U32 delta)
 }
 
 
-int CoreScript::MaxCitizens(int team, int nTemples)
+int CoreScript::MaxCitizens(int nTemples)
 {
-	team = Team::Group(team);
-	int citizens = 0;
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			static const int N = MAX_TEMPLES+1;
-			static const int limit[N] = { 8, 12, 16, 20, 24 };
-			int n = Clamp(nTemples, 0, N - 1);
-			citizens = limit[n];
-		}
-		break;
-
-		case TEAM_GOB:
-		case TEAM_KAMAKIRI:
-		citizens = 16;
-		break;
-
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		break;
-
-		default:
-		GLASSERT(0);
-		break;
-	}
-	return citizens;
+	return CITIZEN_BASE + Min(nTemples, MAX_SQUADS)*SQUAD_SIZE;
 }
 
 
@@ -536,7 +511,7 @@ int CoreScript::MaxCitizens()
 	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
 	int nTemples = chitArr.Size();
 
-	int n = CoreScript::MaxCitizens(team, nTemples);
+	int n = CoreScript::MaxCitizens(nTemples);
 	return Min(n, nBeds);
 }
 

@@ -1565,7 +1565,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	// Enforce the sleep tube limit.
 	CStr<32> str;
 	int techLevel = Min(nTemples, 3);
-	int maxTubes = CoreScript::MaxCitizens(TEAM_HOUSE, nTemples);
+	int maxTubes = CoreScript::MaxCitizens(nTemples);
 
 	BuildScript buildScript;
 	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(ISC::bed, 0);
@@ -1754,7 +1754,7 @@ void GameScene::DoTick( U32 delta )
 		str.Format("Date %.2f\n%s\nPop %d/%d", 
 				   sim->AgeF(), 
 				   sd.name.safe_str(), 
-				   citizens.Size(), CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]));
+				   citizens.Size(), CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
 
