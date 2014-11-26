@@ -57,10 +57,12 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 void FaceWidget::SetFlags(int f)
 {
 	flags = f;
-	for( int i=0; i<MAX_BARS; ++i ) {
-		barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
-	}
 	barStack.SetVisible(this->Visible());
+	if (this->Visible()) {
+		for (int i = 0; i < MAX_BARS; ++i) {
+			barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
+		}
+	}
 }
 
 

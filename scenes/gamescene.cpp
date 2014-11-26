@@ -1033,6 +1033,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		at.z = Clamp(at.z, 0.0f, sim->GetWorldMap()->Height() - 1.0f);
 
 		data->destSector = ToSector(ToWorld2I(at));
+		CoreScript* cc = sim->GetChitBag()->GetHomeCore();
+		for (int i = 0; cc && i < MAX_SQUADS; ++i) {
+			data->squadDest[i] = cc->GetLastWaypoint(i);
+		}
 		game->PushScene( LumosGame::SCENE_MAP, data );
 	}
 	else if ( item == &saveButton ) {
@@ -1418,7 +1422,12 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if ( mask == GAME_HK_MAP ) {
 		Chit* playerChit = GetPlayerChit();
-		game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
+		MapSceneData* data = new MapSceneData(sim->GetChitBag(), sim->GetWorldMap(), playerChit);
+		CoreScript* cc = sim->GetChitBag()->GetHomeCore();
+		for (int i = 0; cc && i < MAX_SQUADS; ++i) {
+			data->squadDest[i] = cc->GetLastWaypoint(i);
+		}
+		game->PushScene( LumosGame::SCENE_MAP, data);
 	}
 	else if ( mask == GAME_HK_CHEAT_GOLD ) {
 		CoreScript* cs = GetHomeCore();

@@ -519,6 +519,7 @@ int CoreScript::MaxCitizens()
 
 void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
+	// FIXME shouldn't need special tech rules.
 	int team = Team::Group(parentChit->Team());
 	switch (team) {
 		case TEAM_HOUSE:
@@ -690,29 +691,10 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	int team = Team::Group(parentChit->Team());
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
-			CChitArray chitArr;
-			Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
-			return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
-		}
-		break;
-
-		case TEAM_KAMAKIRI:
-		case TEAM_GOB:
-		return 1;
-
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		return 0;
-
-		default:
-		GLASSERT(0);
-		break;
-	}
+	Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
+	return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
 }
 
 
@@ -875,6 +857,17 @@ Vector2I CoreScript::GetWaypoint(int squadID)
 	static const Vector2I zero = { 0, 0 };
 	if (!waypoints[squadID].Empty()) {
 		return waypoints[squadID][0];
+	}
+	return zero;
+}
+
+
+Vector2I CoreScript::GetLastWaypoint(int squadID)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	static const Vector2I zero = { 0, 0 };
+	if (!waypoints[squadID].Empty()) {
+		return waypoints[squadID].Last();
 	}
 	return zero;
 }

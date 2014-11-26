@@ -69,10 +69,10 @@ protected:
 
 	// The 4 default roads are set up by the DomainAI super class.
 	// Additional roads should be set up by the sub-class
-	// in OnAdd. Likewise, popCap is defaulted, but should
+	// in OnAdd. Likewise, templeCap is defaulted, but should
 	// be set in the subclass.
 	RoadAI*	roads;
-	int populationCap;
+	int templeCap;
 
 private:
 	enum { MAX_ROADS = 8};

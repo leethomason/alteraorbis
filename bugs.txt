@@ -52,7 +52,7 @@ Beta 3b
 			t restore alpha blending on hp display and squad text
 			x switch over domain growth to be in line with new squad rules
 			- flag art
-			- squad destination on main map
+			t squad destination on main map
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
@@ -80,7 +80,12 @@ Beta 3b
 		- Long play test
 			- Troll distribution
 			- Troll gun distribution
-		- fix world get layout / text / debugging display		
+		- fix world get layout / text / debugging display	
+		- remove sleep tube cap?
+		- remove disabled building choices?
+		- optimize hit testing (and correct for xform)	
+		- test destination marks
+		- test squad motion in general
 
 		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
 		- [Reenen] Abandon domain

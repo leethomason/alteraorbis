@@ -55,6 +55,13 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	homeMark[0].Init( &gamui2D, atom, true );
 	homeMark[1].Init( &gamui2D, atom, true );
 
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		static const char* NAME[MAX_SQUADS] = { "alphaMark", "betaMark", "deltaMark", "omegaMark" };
+		RenderAtom atom = lumosGame->CalcUIIconAtom(NAME[i], true);
+		squadMark[0][i].Init(&gamui2D, atom, true);
+		squadMark[1][i].Init(&gamui2D, atom, true);
+	}
+
 	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
 	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 	travelMark[0].Init( &gamui2D, travelAtom, true );
@@ -308,6 +315,12 @@ void MapScene::DrawMap()
 		v = ToUI(i,pos, b, &inBounds);
 		travelMark[i].SetPos(v.x, v.y);
 		travelMark[i].SetVisible(inBounds && !data->destSector.IsZero());
+
+		for (int k = 0; k < MAX_SQUADS; ++k) {
+			v = ToUI(i, ToWorld2F(data->squadDest[k]), b, &inBounds);
+			squadMark[i][k].SetCenterPos(v.x, v.y);
+			squadMark[i][k].SetVisible(!data->squadDest[k].IsZero() && inBounds);
+		}
 	}
 	{
 		Vector2F world = { (float)map2Bounds.min.x, (float)map2Bounds.min.y };
