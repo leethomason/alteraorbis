@@ -660,9 +660,11 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 #endif
 	}
 	// Clear the work queue - chit is gone that controls this.
-	delete workQueue;
-	workQueue = new WorkQueue();
-	workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
+	if (!workQueue || workQueue->HasJob()) {
+		delete workQueue;
+		workQueue = new WorkQueue();
+		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
+	}
 }
 
 

@@ -102,8 +102,8 @@ Rectangle2F MapScene::GridBounds2(int x, int y, bool useGutter)
 
 Vector2F MapScene::ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds)
 {
-	float dx = pos.x / (float(bounds.max.x) - float(bounds.min.x));
-	float dy = pos.y / (float(bounds.max.y) - float(bounds.min.y));
+	float dx = (pos.x - float(bounds.min.x)) / (float(bounds.max.x) - float(bounds.min.x));
+	float dy = (pos.y - float(bounds.min.y)) / (float(bounds.max.y) - float(bounds.min.y));
 
 	Vector2F v = { 0, 0 };
 	const gamui::Image& image = (select == 0) ? mapImage : mapImage2;
@@ -126,7 +126,6 @@ void MapScene::Resize()
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
 	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
-	//gridTravel.SetSize( gridTravel.Width()*2.f, gridTravel.Height() );	// double the button size
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -142,9 +141,13 @@ void MapScene::Resize()
 
 	for (int i = 0; i < 2; ++i) {
 		const float MARK_SIZE = 5;
+		const float SQUAD_MARK_SIZE = 20;
 		playerMark[i].SetSize(MARK_SIZE, MARK_SIZE);
 		homeMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 		travelMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+		for (int k = 0; k < MAX_SQUADS; ++k) {
+			squadMark[i][k].SetSize(SQUAD_MARK_SIZE, SQUAD_MARK_SIZE);
+		}
 	}
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 	DrawMap();

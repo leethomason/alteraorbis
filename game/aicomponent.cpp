@@ -167,7 +167,11 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, const Rang
 	thisComp.render->GetModelList( &ignore );
 
 	const ChitContext* context = Context();
-	ModelVoxel mv = context->engine->IntersectModelVoxel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem() );
+	// FIXME: was TEST_TRI, which is less accurate. But also fundamentally incorrect, since
+	// the TEST_TRI doesn't account for bone xforms. Deep bug - but surprisingly hard to see
+	// in the game. Switched to the faster TEST_HIT_AABB, but it would be nice to clean
+	// up TEST_TRI and just make it fast.
+	ModelVoxel mv = context->engine->IntersectModelVoxel( origin, dir, length, TEST_HIT_AABB, 0, 0, ignore.Mem() );
 	if ( mv.model ) {
 		target.render->GetModelList( &targetModels );
 		return targetModels.Find( mv.model ) >= 0;
