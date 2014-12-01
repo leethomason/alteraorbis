@@ -113,6 +113,9 @@ IString IStringConst::kiosk__n;
 IString IStringConst::kiosk__m;
 IString IStringConst::kiosk__c;
 IString IStringConst::kiosk__s;
+IString IStringConst::need__food;
+IString IStringConst::need__energy;
+IString IStringConst::need__fun;
 
 void IStringConst::Init()
 {
@@ -227,4 +230,7 @@ void IStringConst::Init()
 	kiosk__m = StringPool::Intern( "kiosk.m", true );
 	kiosk__c = StringPool::Intern( "kiosk.c", true );
 	kiosk__s = StringPool::Intern( "kiosk.s", true );
+	need__food = StringPool::Intern( "need.food", true );
+	need__energy = StringPool::Intern( "need.energy", true );
+	need__fun = StringPool::Intern( "need.fun", true );
 }

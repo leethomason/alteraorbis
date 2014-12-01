@@ -25,6 +25,7 @@
 #include "workqueue.h"
 #include "team.h"
 #include "circuitsim.h"
+#include "reservebank.h"
 
 // move to tasklist file
 #include "lumoschitbag.h"
@@ -2010,16 +2011,19 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 	
-	const ai::Needs& needs = thisComp.ai->GetNeeds();
 	BuildScript buildScript;
-	int    best=-1;
-	double score=0;
-	double needVal=0;
-	const BuildData* bestBD = 0;
-	Vector2I bestPorch = { 0, 0 };
-	CChitArray mobs;
+	int					bestIndex=-1;
+	double				bestScore=0;
+	const BuildData*	bestBD = 0;
+	Vector2I			bestPorch = { 0, 0 };
 
 	bool logNeeds = false;
+	Vector3<double> myNeeds = thisComp.ai->GetNeeds().GetOneMinus();
+	// Don't eat when not hungry; depletes food.
+	if (myNeeds.X(Needs::FOOD) < 0.5) {
+		myNeeds.X(Needs::FOOD) = 0;
+	}
+
 	/*
 	bool logNeeds = thisComp.item->IProperName() == "Tria";
 	if (logNeeds) {
@@ -2027,105 +2031,50 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	}
 	*/
 
-	const GameItem* sell = thisComp.itemComponent->ItemToSell();
-	int sellValue = sell ? sell->GetValue() : 0;
-
-	// Score the buildings as a fit for the needs.
-	// future: consider distance to building
-	// FIXME: only use sleep pods in home sector
-	// FIXME: add "adventure" - visit neighbor sector, as a need,
-	//        and a way to get back.
-
 	for( int i=0; i<chitArr.Size(); ++i ) {
-		Chit* chit = chitArr[i];
-		const GameItem* item = chit->GetItem();
-		GLASSERT( item );
-		const BuildData* bd = buildScript.GetDataFromStructure( item->IName(), 0 );
-		if ( !bd || bd->needs.IsZero() ) 
-			continue;
+		Chit* building = chitArr[i];
+		GLASSERT( building->GetItem() );
+		const BuildData* bd = buildScript.GetDataFromStructure( building->GetItem()->IName(), 0 );
+		if (!bd || bd->needs.IsZero()) continue;
 
-		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( building, SpatialComponent, MapSpatialComponent );
 		GLASSERT( msc );
 
 		Vector2I porch = { 0, 0 };
 		Rectangle2I porchRect = msc->PorchPos();
 		for (Rectangle2IIterator it(porchRect); !it.Done(); it.Next()) {
-			// FIXME: is this the correct coreScript? The home core vs. the local core.
 			if (!coreScript->HasTask(it.Pos())) {
 				porch = it.Pos();
 				break;
 			}
 		}
-		if (porch.IsZero())
-			continue;
+		if (porch.IsZero())	continue;
 
-		// A building that supplies food MUST have elixir, else it
-		// supplies nothing.
-		if (bd->needs.Value(Needs::FOOD) > 0 && (chit->GetItemComponent()->FindItem(ISC::elixir) < 0)) {
-			continue;
-		}
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit);
+		if (buildingNeeds.IsZero()) continue;
 
 		// The needs match.
-		double s=0;
-		double nv=0;
-		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
-			double n = bd->needs.Value(k);
-
-			if ( n > 0 ) {
-				double myNeed = needs.Value(k);
-
-				// Have energy reflect a healing need.
-				if ( k == ai::Needs::ENERGY ) {
-					myNeed = Min( myNeed, double( thisComp.item->HPFraction() ));
-				}
-
-				// (how much needed) * (how much available)
-				nv += 1.0 - myNeed;
-				s  += (1.0 - myNeed) * n;	
-			}
-		}
-
+		double score = DotProduct(buildingNeeds, myNeeds);
 		// Small wiggle to use different markets, sleep tubes, etc.
-		s += 0.05 * double(Random::Hash8( chit->ID() ^ thisComp.chit->ID())) / 255.0;
-
-		// A little more push to drive for weapon creation.
-		// The factory fun is set high, but only works if
-		// there is crystal.
-		if (item->IName() == ISC::factory) {
-			if (!thisComp.item->wallet.Crystal(CRYSTAL_GREEN)) {
-				s *= 0.1;
-			}
-		}
-
-		// If we have something to sell, extra interest in markets that can buy.
-		if (item->IName() == ISC::market && sell )
-		{
-			s *= 2.0;	// sell sell sell!
-		}
-
-		// Another tweak: eating when not hungry depletes elixir.
-		if (bd->needs.Value(Needs::FOOD) > 0 && needs.Value(Needs::FOOD) > 0.5) {
-			s *= 0.1;
-		}
-
+		static const double INV = 1.0 / 255.0;
+		score += 0.05 * double(Random::Hash8( building->ID() ^ thisComp.chit->ID())) * INV;
 		// Variation - is this the last building visited?
-		if ( item->IName() == taskList.LastBuildingUsed() ) {
-			s *= 0.2;
+		if ( bd->structure == taskList.LastBuildingUsed() ) {
+			score *= 0.2;
 		}
 
 		if (logNeeds) {
-			GLOUTPUT(("  %.2f %s\n", s, item->Name()));
+			GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
 		}
-		if ( s > 0 && s > score ) {
-			score = s;
-			best = i;
-			needVal = nv;
+		if ( score > 0 && score > bestScore ) {
+			bestScore = score;
+			bestIndex = i;
 			bestBD = bd;
 			bestPorch = porch;
 		}
 	}
 
-	if ( best >= 0 && needVal > 0.4 ) {
+	if (bestScore >= 0.4) {
 		GLASSERT( bestPorch.x > 0 );
 
 		taskList.Push( Task::MoveTask( bestPorch));

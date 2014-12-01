@@ -34,7 +34,8 @@ DomainAI* DomainAI::Factory(int team)
 		default:
 		break;
 	}
-	GLASSERT(0);
+	//	GLASSERT(0); lots of reasons the team can be CHAOS, or changed, or whatever.
+	// caller has to handle null return.
 	return 0;
 }
 
@@ -706,18 +707,13 @@ int TrollDomainAI::DoTick(U32 delta)
 			TransactAmt cost;
 			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed, parentChit->Team());
 			if (item) {
-				if (ReserveBank::GetWallet()->CanWithdraw(cost)) {
+				GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
+				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+				market->GetItemComponent()->AddToInventory(item);
 
-					item->wallet.Deposit(ReserveBank::GetWallet(), cost);
-					market->GetItemComponent()->AddToInventory(item);
-
-					// Mark this item as important with a destroyMsg:
-					item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
-										 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
-				}
-				else {
-					delete item;
-				}
+				// Mark this item as important with a destroyMsg:
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
+										Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
 			}
 		}
 	}

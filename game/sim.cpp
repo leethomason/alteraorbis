@@ -359,16 +359,26 @@ void Sim::SpawnDenizens()
 				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
 				GameItem * item = 0;
 
-				if (random.Bit())
-					item = context.chitBag->AddItem("pistol", chit, context.engine, team, 0);
-				else
-					item = context.chitBag->AddItem("ring", chit, context.engine, team, 0);
-
-				if (item) {
-					Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
-					NewsHistory* history = context.chitBag->GetNewsHistory();
-					item->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
+				int itemType = -1;
+				switch (random.Rand(4)) {
+					case 1: itemType = ForgeScript::GUN;	break;
+					case 2: itemType = ForgeScript::RING;	break;
+					case 3: itemType = ForgeScript::SHIELD;	break;
+					default: break;
 				}
+				if (itemType >= 0) {
+					TransactAmt cost;
+					GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, 0, 0, 0, 0, chit->ID(), team);
+					if (item) {
+						GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
+						item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+						chit->GetItemComponent()->AddToInventory(item);
+
+						// Mark this item as important with a destroyMsg:
+						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE));
+					}
+				}
+
 
 				pos.x += 0.2f * float(i);
 				chit->GetSpatialComponent()->SetPosition(pos);
@@ -523,12 +533,14 @@ void Sim::DoTick( U32 delta )
 	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
 
+#if SPAWN_MOBS > 0
 	if (minuteTick) {
 		SpawnGreater();
 	}
 	if (spawnClock.Delta(delta)) {
 		SpawnDenizens();
 	}
+#endif
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = VolcanoScript::MAX_RAD;

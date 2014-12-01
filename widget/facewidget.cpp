@@ -48,9 +48,7 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	}
 
 	upper.SetVisible( false );
-	for( int i=0; i<MAX_BARS; ++i ) {
-		barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
-	}
+	SetFlags(f);
 }
 
 	
@@ -58,10 +56,8 @@ void FaceWidget::SetFlags(int f)
 {
 	flags = f;
 	barStack.SetVisible(this->Visible());
-	if (this->Visible()) {
-		for (int i = 0; i < MAX_BARS; ++i) {
-			barStack.barArr[i]->SetVisible((flags & (1 << i)) != 0);
-		}
+	for (int i = 0; i < MAX_BARS; ++i) {
+		barStack.barArr[i]->SetVisible((flags & (1 << i))&& this->Visible());
 	}
 }
 
@@ -109,7 +105,8 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 		GetButton()->SetVisible( false );
 		upper.SetText( "" );
 	}
- 	barStack.SetVisible(GetButton()->Visible());
+ 	//barStack.SetVisible(GetButton()->Visible());
+	SetFlags(flags);	// sets visibility
 }
 
 
@@ -194,5 +191,6 @@ void FaceWidget::SetVisible( bool vis )
 { 
 	GetButton()->SetVisible( vis ); 
 	upper.SetVisible( vis );
-	barStack.SetVisible(vis);
+	//barStack.SetVisible(vis);
+	SetFlags(flags);
 }

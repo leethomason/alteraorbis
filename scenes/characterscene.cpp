@@ -42,7 +42,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0, 0 );
 	const GameItem* mainItem = data->itemComponent->GetItem(0);
 	faceWidget.SetFace( &uiRenderer, mainItem );
-	if (mainItem->keyValues.GetIString(ISC::mob) != ISC::denizen) {
+	if (mainItem->keyValues.GetIString(ISC::mob).empty()) {
 		faceWidget.SetVisible(false);
 	}
 

@@ -70,6 +70,9 @@ Beta 3b
 		x gems running too-negative. Truulga?? Something else?
 
 		x move sim spawn to its own times
+		- DomainAI::Factory can get team Chaos
+		- lots more forging needs to happen!
+		- control should show weapon ownership
 		- retest truulga item generation
 		- denizen red on red color scheme way too much
 		- build tasks aren't getting serialized correctly. wrong rotation?
@@ -86,6 +89,12 @@ Beta 3b
 		- optimize hit testing (and correct for xform)	
 		- test destination marks
 		- test squad motion in general
+		- suit colors don't seem to be correctly randomized
+		- remove greater summon rules
+		- no construction at world center - hide grid pathing bugs
+		x shock-fire too subtle. And fast rising.
+		- nerf pulse fire rate again
+		- too many QCore weapons
 
 		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
 		- [Reenen] Abandon domain

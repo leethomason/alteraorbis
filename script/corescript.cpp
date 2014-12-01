@@ -46,8 +46,6 @@ static const int SUMMON_GREATER_TIME = 10 * 60 * 1000;
 
 using namespace grinliz;
 
-#define SPAWN_MOBS
-
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
 
@@ -278,8 +276,9 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 	if (arr) {
 		for (int i = 0; i < squads[id].Size(); ++i) {
 			Chit* c = Context()->chitBag->GetChit(squads[id][i]);
-			GLASSERT(c);
-			arr->Push(c);
+			if (c) {
+				arr->Push(c);
+			}
 		}
 	}
 	return squads[id].Size();
@@ -490,6 +489,14 @@ int CoreScript::DoTick(U32 delta)
 		UpdateAI();
 	}
 
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squads[i].Empty()) {
+			waypoints[i].Clear();
+			Context()->engine->FreeModel(waypointFlags[i]);
+			waypointFlags[i] = 0;
+		}
+	}
+
 	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
 }
 
@@ -592,7 +599,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 
 	if ( nSpawnTicks && lesserPossible)
 	{
-#ifdef SPAWN_MOBS
+#if SPAWN_MOBS > 0
 		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
 			// spawn stuff.
 

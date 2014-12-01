@@ -158,7 +158,9 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		}
 		--maxIt;
 	}
-	GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	if (!item) {
+		GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	}
 	return item;
 }
 

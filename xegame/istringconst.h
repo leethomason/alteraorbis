@@ -147,6 +147,9 @@ public:
 	static grinliz::IString kiosk__m;
 	static grinliz::IString kiosk__c;
 	static grinliz::IString kiosk__s;
+	static grinliz::IString need__food;
+	static grinliz::IString need__energy;
+	static grinliz::IString need__fun;
 };
 
 typedef IStringConst ISC;

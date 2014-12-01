@@ -28,7 +28,6 @@
 #include "../script/forgescript.h"
 #include "../script/procedural.h"
 #include "../script/plantscript.h"
-#include "../script/evalbuildingscript.h"
 
 #include "../engine/particle.h"
 
@@ -392,14 +391,17 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 
 	// Okay, passed checks. Give social happiness.
 //	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
+	Vector3<double> needs = { 0, 0, 0 };
+
 	for( int i=0; i<arr.Size(); ++i ) {
 		const Personality& personality = thisComp.item->GetPersonality();
 		double social = double(arr.Size()) * 0.10;
 		if (personality.Introvert()) {
 			social *= 0.5;	// introverts get less reward from social interaction (go build stuff)
 		}
+		needs.X(Needs::FUN) += social;
 
-		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::FUN, social );
+		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( needs );
 		if ( thisComp.chit->GetRenderComponent() ) {
 			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
 		}
@@ -416,7 +418,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	Chit* controller		= coreScript->ParentChit();
 	ItemComponent* ic		= building->GetItemComponent();
 
-	// Workers:
+	// Working buildings. (Not need based.)
 	if ( buildingName == ISC::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
@@ -448,71 +450,42 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		}
 	}
 
-	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
-		BuildScript buildScript;
-		const BuildData* bd = buildScript.GetDataFromStructure( buildingName, 0 );
-		GLASSERT( bd );
-		ai::Needs supply = bd->needs;
-		int nElixir = ic->NumCarriedItems(ISC::elixir);
-
-		// Food based buildings don't work if there is no elixir.
-		if ( supply.Value(Needs::FOOD) && nElixir == 0 ) {
-			supply.SetZero();
+	if (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) {
+		// Need based.
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit);
+		if (buildingNeeds.IsZero()) {
+			// doesn't have what is needed, etc.
+			return;
 		}
 
-		if ( buildingName == ISC::market ) {
-			GoShopping( thisComp, building );
+		int nElixir = ic->NumCarriedItems(ISC::elixir);
+
+		if (buildingName == ISC::market) {
+			GoShopping(thisComp, building);
 		}
 		else if (buildingName == ISC::exchange) {
 			GoExchange(thisComp, building);
 		}
-		else if ( buildingName == ISC::factory ) {
-			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
-			if ( !used ) supply.SetZero();
+		else if (buildingName == ISC::factory) {
+			UseFactory(thisComp, building, int(coreScript->GetTech()));
 		}
-		else if ( buildingName == ISC::bed ) {
-			// Apply the needs as is.
+		else if (buildingName == ISC::bed) {
+			// Also heal.
+			thisComp.item->hp += buildingNeeds.X(Needs::ENERGY) * thisComp.item->TotalHP();
+			if (thisComp.item->hp > thisComp.item->TotalHP()) {
+				thisComp.item->hp = thisComp.item->TotalHP();
+			}
 		}
-		else if ( buildingName == ISC::bar ) {
+		else if (buildingName == ISC::bar) {
 			// Apply the needs as is...if there is Elixir.
-		}
-		else {
-			GLASSERT( 0 );
-		}
-		if ( supply.Value(Needs::FOOD) > 0 ) {
-			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
-			GLASSERT( nElixir > 0 );
-
 			const GameItem* elixir = ic->FindItem(ISC::elixir);
-			GLASSERT(elixir);
+			GLASSERT(elixir);	// if !elixir, needs should have been ZERO
 			if (elixir) {
 				GameItem* item = ic->RemoveFromInventory(elixir);
 				delete item;
 			}
 		}
-		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
-		//supply.Set(Needs::SOCIAL, 0);
-
-		double scale = 1.0;
-
-		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
-		if (evalScript) {
-			double industry = building->GetItem()->GetBuildingIndustrial();
-			double score = evalScript->EvalIndustrial(false);
-			double dot = score * industry;
-			scale = 0.55 + 0.45 * dot;
-
-			if (!evalScript->Reachable()) {
-				scale = 0;
-			}
-		}
-		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
-
-		double heal = (supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * scale;
-		heal = Clamp( heal, 0.0, 1.0 );
-
-		thisComp.item->hp += double(thisComp.item->TotalHP()) * heal;
-		thisComp.item->hp = Min( thisComp.item->hp, double(thisComp.item->TotalHP()) );
+		thisComp.ai->GetNeedsMutable()->Add(buildingNeeds);
 	}
 }
 
