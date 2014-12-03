@@ -404,30 +404,20 @@ StringPool* StringPool::Instance() {
 
 StringPool::StringPool()
 {
-	treeSize = 1+2+4+8+16;
-	treeDepth = 5;
-	tree = (Node*) Malloc( treeSize*sizeof(Node) );
-	memset( tree, 0, treeSize*sizeof(Node) );
 	root = 0;
-
-	nStrings = 0;
-	nStored = 0;
 	nBlocks = 0;
 }
 
 
 StringPool::~StringPool()
 {
-	GLOUTPUT(( "StringPool destructor. nStrings=%d nStored=%d treeDepth=%d mem=%d blocks * %d = %d\n",
-			   nStrings,
-			   nStored,
-			   treeDepth,
+	GLOUTPUT(( "StringPool destructor. nStrings=%d mem=%d blocks * %d = %d\n",
+			   nodes.Size(),
 			   nBlocks,
 			   BLOCK_SIZE,
 			   BLOCK_SIZE * nBlocks ));
 
-	if ( tree )
-		Free( tree );
+	nodes.Clear();
 	while( root ) {
 		Block* b = root->next;
 		Free( root );
@@ -435,13 +425,6 @@ StringPool::~StringPool()
 	}
 }
 
-
-/*
-		     0
-	    1          2
-	  3   4     5     6
-	 7 8 9 10 11 12 13 14
-*/
 
 IString StringPool::Get( const char* str, bool strIsStaticMem )
 {
@@ -452,51 +435,28 @@ IString StringPool::Get( const char* str, bool strIsStaticMem )
 
 	U32 hash = Random::Hash( str, U32(-1) ); 
 	
-	int depth=0; 
-	int offset=0;
-	Node* node = tree;
+	Node searchNode = { hash, 0 };
+	int search = nodes.BSearch(searchNode);
 
-	while( depth < treeDepth ) {
-		GLASSERT( node < tree + treeSize );
-		if ( node->str == 0 ) {
-			break;	// empty
-		}
-		if ( node->hash == hash && StrEqual( node->str, str ) ) {
-			return IString( node->str );
-		}
-		else if ( hash < node->hash ) {
-			++depth;
-			offset = offset*2 + 1;
-			node = tree + offset;
-		}
-		else {
-			++depth;
-			offset = offset*2+2;
-			node = tree + offset;
+	if (search >= 0) {
+		while (nodes[search].hash == hash) {
+			if (StrEqual(str, nodes[search].str)) {
+				return IString(nodes[search].str);
+			}
 		}
 	}
-	// Didn't find. Do we need to extend the tree?
-	if ( offset >= treeSize ) {
-		int oldTreeSize = treeSize;
-		treeSize += (1<<treeDepth);
-		++treeDepth;
-		tree = (Node*) Realloc( tree, treeSize*sizeof(Node) );
-		memset( tree + oldTreeSize, 0, (treeSize-oldTreeSize)*sizeof(Node) );
-	}
+	
+	// Doesn't exist yet:
+	Node node = { hash, 0 };
 
-	node = tree + offset;
-	GLASSERT( node->hash == 0 );
-	GLASSERT( node->str == 0 );
-	node->hash = hash;
-	++nStrings;
-	if ( strIsStaticMem ) {
-		node->str = str;
+	if (strIsStaticMem) {
+		node.str = str;
 	}
 	else {
-		node->str = Add( str );
-		++nStored;
+		node.str = Add(str);
 	}
-	return node->str;
+	nodes.Add(node);
+	return node.str;
 }
 
 
@@ -527,10 +487,9 @@ const char* StringPool::Add( const char* str )
 void StringPool::GetAllStrings( grinliz::CDynArray< const char* >* arr )
 {
 	arr->Clear();
-	arr->EnsureCap( nStrings );
-	for( int i=0; i<nStrings; ++i ) {
-		GLASSERT( tree[i].str );
-		arr->Push( tree[i].str );
+	arr->EnsureCap( nodes.Size() );
+	for( int i=0; i<nodes.Size(); ++i ) {
+		arr->Push( nodes[i].str );
 	}
 }
 
@@ -538,12 +497,9 @@ void StringPool::GetAllStrings( grinliz::CDynArray< const char* >* arr )
 void StringPool::GetAllStrings( grinliz::CDynArray< IString >* arr )
 {
 	arr->Clear();
-	arr->EnsureCap( nStrings );
-	for( int i=0; i<treeSize; ++i ) {
-		if ( tree[i].str ) {
-			arr->Push( IString( tree[i].str ));
-		}
+	arr->EnsureCap( nodes.Size() );
+	for( int i=0; i<nodes.Size(); ++i ) {
+		arr->Push( IString( nodes[i].str ));
 	}
-	GLASSERT( arr->Size() == nStrings );
 }
 

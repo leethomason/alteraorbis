@@ -343,22 +343,38 @@ private:
 	static StringPool* instance;
 
 	enum { BLOCK_SIZE = 4000 };
+	
 	struct Node {
 		U32 hash;
 		const char* str;
 	};
+
+	class CompValueNode {
+	public:
+		static U32 Hash(const Node& v) { return v.hash; }
+		static bool Equal(const Node& v0, const Node& v1)	{ return v0.hash == v1.hash; }
+		static bool Less(const Node& v0, const Node& v1)	{ return v0.hash < v1.hash; }
+	};
+
 	struct Block {
 		Block* next;
 		int nBytes;
 		char mem[BLOCK_SIZE];
 	};
-	int treeSize;
-	int treeDepth;
-	Node* tree;		// An array.
+	/*
+		Originally implemented as a binary tree;
+		but actual code hit the actual pathelogical
+		case where the tree was one sided, and the 
+		memory (allocated for the full tree) 
+		consumed all available memory.
+
+		Switched to sorted array.
+
+		May wish to consider left-leaning red-black.
+	*/
+	SortedDynArray<Node, ValueSem, CompValueNode> nodes;
 	Block* root;
 
-	int nStrings;
-	int nStored;
 	int nBlocks;
 };
 

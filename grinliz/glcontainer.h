@@ -324,7 +324,6 @@ public:
 	void Sort() { grinliz::Sort<T, CompValue>(mem, size); }
 
 	// Binary Search: array must be sorted!
-	// near: an optional parameter that returns something near an insertion point.
 	int BSearch( const T& t ) const {
 		int low = 0;
 		int high = Size();
@@ -336,8 +335,13 @@ public:
 			else
 				high = mid; 
 		}
-		if ((low < Size()) && KCOMPARE::Equal(mem[low], t))
+		if ((low < Size()) && KCOMPARE::Equal(mem[low], t)) {
+			// if multiple matches, return the first.
+			while (low && KCOMPARE::Equal(mem[low - 1], t)) {
+				--low;
+			}
 			return low;
+		}
 
 		return -1;
 	}
