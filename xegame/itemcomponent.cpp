@@ -130,10 +130,7 @@ void ItemComponent::NameItem(GameItem* item)
 		if ( item->IProperName().empty() ) {
 			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
-				item->SetProperName( StringPool::Intern( 
-					context->game->GenName( nameGen.c_str(), 
-											item->ID(),
-											4, 10 )));
+				item->SetProperName(context->chitBag->NameGen(nameGen.c_str(), item->ID(), 4, 10));
 			}
 
 			/*
@@ -448,16 +445,19 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 		}
 
-		// Mobs drop gold and crystal; everyone else returns it to the Bank
+		// Mobs drop gold and crystal. (Should cores as well?)
+		// Everything drops crystal.
+		while (parentChit->GetWallet()->NumCrystals()) {
+			Context()->chitBag->NewCrystalChit(pos, parentChit->GetWallet(), true);
+		}
+
 		if ( mobFilter.Accept( parentChit )) {
 			if (!parentChit->GetWallet()->IsEmpty()) {
 				Context()->chitBag->NewWalletChits(pos, parentChit->GetWallet());
 			}
 		}
-		else {
-			if (ReserveBank::Instance()) {	// null in battle mode
-				ReserveBank::Instance()->wallet.DepositAll(parentChit->GetWallet());
-			}
+		if (ReserveBank::Instance()) {	// null in battle mode
+			ReserveBank::Instance()->wallet.DepositAll(parentChit->GetWallet());
 		}
 		GLASSERT(parentChit->GetWallet()->IsEmpty());
 		parentChit->GetWallet()->SetClosed();

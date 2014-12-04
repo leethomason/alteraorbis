@@ -369,13 +369,33 @@ void ProcessMarkov(XMLElement* data)
 		}
 	}
 	builder.Process();
-
 	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
+
+#if 1
+	HashTable<U32, GLString> nameTable;
+	MarkovGenerator generator(builder.Data(), builder.NumBytes(), 1);
+	for (int i = 0; i < 4000 && nameTable.Size() < 1000; ++i) {
+		GLString str;
+		generator.Name(&str, 7);
+		if (str.size() >= 4) {
+			U32 hash = Random::Hash(str.c_str(), str.size());
+			nameTable.Add(hash, str);
+		}
+	}
+
+	gamedb::WItem* child = witem->FetchChild("names");
+
+	GLString key;
+	for (int i = 0; i < nameTable.Size(); ++i) {
+		gamedb::WItem* nameChild = child->FetchChild(i);
+		nameChild->SetString("name", nameTable.GetValue(i).c_str());
+	}
+	printf("markovName '%s' numNames=%d\n", assetName.c_str(), nameTable.Size());
+#else
 	witem->SetData("triplets", builder.Data(), builder.NumBytes(), false);	// prefer fast access to size
-
-	printf("markovName '%s' memory=%dk\n", assetName.c_str(), builder.NumBytes() / 1024);
+	printf("markovName '%s'\n", assetName.c_str());
 	totalDataMem += builder.NumBytes();
-
+#endif
 	fclose(read);
 }
 

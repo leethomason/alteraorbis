@@ -377,8 +377,10 @@ void CharacterScene::DeActivate()
 {
 	if ((data->IsExchange() || data->IsMarket() ) && ReserveBank::Instance()) {
 		// Move all the gold to the reserve
+		// BUT NOT crystal. Crystal stays in the exchange.
+		// Markets shouldn't collect crystal.
 		Wallet* w = &data->storageIC->GetItem()->wallet;
-		ReserveBank::Instance()->wallet.Deposit(w, w->Gold(), w->Crystal());
+		ReserveBank::Instance()->wallet.Deposit(w, w->Gold());
 	}
 }
 

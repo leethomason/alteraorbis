@@ -439,10 +439,11 @@ IString StringPool::Get( const char* str, bool strIsStaticMem )
 	int search = nodes.BSearch(searchNode);
 
 	if (search >= 0) {
-		while (nodes[search].hash == hash) {
+		while (search < nodes.Size() && nodes[search].hash == hash) {
 			if (StrEqual(str, nodes[search].str)) {
 				return IString(nodes[search].str);
 			}
+			++search;
 		}
 	}
 	
@@ -456,7 +457,7 @@ IString StringPool::Get( const char* str, bool strIsStaticMem )
 		node.str = Add(str);
 	}
 	nodes.Add(node);
-	return node.str;
+	return IString(node.str);
 }
 
 
@@ -489,6 +490,7 @@ void StringPool::GetAllStrings( grinliz::CDynArray< const char* >* arr )
 	arr->Clear();
 	arr->EnsureCap( nodes.Size() );
 	for( int i=0; i<nodes.Size(); ++i ) {
+		GLASSERT(nodes[i].str);
 		arr->Push( nodes[i].str );
 	}
 }
@@ -499,6 +501,7 @@ void StringPool::GetAllStrings( grinliz::CDynArray< IString >* arr )
 	arr->Clear();
 	arr->EnsureCap( nodes.Size() );
 	for( int i=0; i<nodes.Size(); ++i ) {
+		GLASSERT(nodes[i].str);
 		arr->Push( IString( nodes[i].str ));
 	}
 }

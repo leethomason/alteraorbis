@@ -174,8 +174,11 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 	if (buildingName == ISC::factory) {
 		if (visitorItem->wallet.Crystal(0) == 0)					needs.Zero();	// can't use.
 
-		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= 1.5;
-		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.5;
+		// Not sure this should be here: likes/dislikes of 
+		// crafting is accounted for in buying/selling crystal.
+		// Adjusted down to small effect because of the crystal.
+		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= 1.1;
+		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
 	}
 	else if (buildingName == ISC::bed) {
 		// Beds always work for energy. Up importance if wounded.
@@ -193,7 +196,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 			// Likes crafting, wants to BUY crystal
 			int cheapest = -1;
 			for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
-				if (ReserveBank::GetWallet()->Crystal(i)) {
+				if (building->GetWallet()->Crystal(i)) {
 					cheapest = i;
 					break;
 				}

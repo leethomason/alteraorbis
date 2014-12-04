@@ -168,7 +168,7 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 
 	IString name;
 
-	const GameItem* item = ItemDB::Instance()->Find( id );
+	const GameItem* item = ItemDB::Instance()->Active( id );
 	if ( item ) {
 		if (shortName) {
 			if (!item->IProperName().empty())
@@ -181,9 +181,9 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 		}
 	}
 	else {
-		const ItemHistory* history = ItemDB::Instance()->History( id );
-		if ( history ) {
-			name = history->titledName;
+		ItemHistory history;
+		if ( ItemDB::Instance()->Registry(id, &history)) {
+			name = history.titledName;
 		}
 	}
 	return name;
@@ -197,7 +197,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	//const GameItem* first = ItemDB::Instance()->Find(itemID);
-	const GameItem* second = ItemDB::Instance()->Find(secondItemID);
+	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
 
 	// Not the case with explosives: can kill yourself.
 	//GLASSERT( itemID != secondItemID );

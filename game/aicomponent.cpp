@@ -99,7 +99,7 @@ AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 	wanderTime = 0;
 	rethink = 0;
 	fullSectorAware = false;
-	debugFlag = false;
+	debugLog = false;
 	visitorIndex = -1;
 	rampageTarget = 0;
 	destinationBlocked = 0;
@@ -468,7 +468,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				utilityReload = 1.0f - rangedWeapon->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
-				if ( debugFlag ) {
+				if ( debugLog ) {
 					GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
 				}
 				if ( utilityRunAndGun > utilityReload ) {
@@ -479,13 +479,13 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 											leading, 
 											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
 											rangedWeapon );
-					if ( debugFlag ) {
+					if ( debugLog ) {
 						GLOUTPUT(( "->RunAndGun\n" ));
 					}
 				}
 				else {
 					rangedWeapon->Reload( parentChit );
-					if ( debugFlag ) {
+					if ( debugLog ) {
 						GLOUTPUT(( "->Reload\n" ));
 					}
 				}
@@ -683,7 +683,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 				ChitMsg heal( ChitMsg::CHIT_HEAL );
 				heal.dataF = hp * EAT_HP_HEAL_MULT;
 
-				if ( debugFlag ) {
+				if ( debugLog ) {
 					GLOUTPUT(( "ID=%d Eating plants itemHp=%.1f total=%.1f hp=%.1f\n", thisComp.chit->ID(),
 						item->hp, item->TotalHP(), hp ));
 				}
@@ -1363,7 +1363,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		 || vd->nWants  >= VisitorData::NUM_VISITS ) 
 	{
 		disconnect = true;
-		if ( debugFlag ) {
+		if ( debugLog ) {
 			GLOUTPUT(( "ID=%d Visitor travel done.\n", thisComp.chit->ID() ));
 		}
 	}
@@ -1390,7 +1390,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			if ( !kiosk ) {
 				// Done here.
 				vd->NoKiosk( sector );
-				if ( debugFlag ) {
+				if ( debugLog ) {
 					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
 				}
 			}
@@ -1406,7 +1406,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				else {
 					// Done here.
 					vd->doneWith = sector;
-					if ( debugFlag ) {
+					if ( debugLog ) {
 						GLOUTPUT(( "ID=%d Visitor: no path to kiosk.\n", thisComp.chit->ID() ));
 					}
 				}
@@ -2011,13 +2011,12 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 	
-	BuildScript buildScript;
+	BuildScript			buildScript;
 	int					bestIndex=-1;
 	double				bestScore=0;
 	const BuildData*	bestBD = 0;
 	Vector2I			bestPorch = { 0, 0 };
 
-	bool logNeeds = false;
 	Vector3<double> myNeeds = thisComp.ai->GetNeeds().GetOneMinus();
 	// Don't eat when not hungry; depletes food.
 	if (myNeeds.X(Needs::FOOD) < 0.5) {
@@ -2060,10 +2059,10 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		score += 0.05 * double(Random::Hash8( building->ID() ^ thisComp.chit->ID())) * INV;
 		// Variation - is this the last building visited?
 		if ( bd->structure == taskList.LastBuildingUsed() ) {
-			score *= 0.2;
+			score *= 0.4;
 		}
 
-		if (logNeeds) {
+		if (debugLog) {
 			GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
 		}
 		if ( score > 0 && score > bestScore ) {
@@ -2501,7 +2500,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT( 0 );
 	};
 
-	if ( debugFlag ) {
+	if ( debugLog ) {
 		static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
 		GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
 				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
@@ -2912,7 +2911,7 @@ int AIComponent::DoTick( U32 deltaTime )
 			currentAction = 0;
 			taskList.Clear();
 
-			if ( debugFlag ) {
+			if ( debugLog ) {
 				GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 			}
 
@@ -2929,7 +2928,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		else if ( aiMode == BATTLE_MODE && !targetDesc.HasTarget() && enemyList.Empty() ) {
 			aiMode = NORMAL_MODE;
 			currentAction = 0;
-			if ( debugFlag ) {
+			if ( debugLog ) {
 				GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
 			}
 		}
@@ -3054,7 +3053,7 @@ int AIComponent::DoTick( U32 deltaTime )
 			break;
 	}
 
-	if ( debugFlag && (currentAction != oldAction) ) {
+	if ( debugLog && (currentAction != oldAction) ) {
 		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
 	}
 

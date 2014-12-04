@@ -480,7 +480,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
 	}
 
-	chit->GetAIComponent()->EnableDebug( true );
+	//chit->GetAIComponent()->EnableLog( true );
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost

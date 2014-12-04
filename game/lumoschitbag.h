@@ -308,6 +308,12 @@ public:
 	grinliz::Vector2I HasSummoning(int reason);
 	void RemoveSummoning(const grinliz::Vector2I& sector);
 
+	grinliz::IString NameGen(const char* dataset, int seed, int min, int max);
+
+	// The seed is just a lookup into the name, in this form.
+	// Generally use the NameGen() method.
+	static grinliz::IString StaticNameGen(const gamedb::Reader* database, const char* dataset, int seed, int min, int max);
+
 private:
 
 	static bool HasMapSpatialInUse( Chit* );
@@ -319,6 +325,14 @@ private:
 	Sim*						sim;	// if part of a simulation. can be null.
 	int							deityID[NUM_DEITY];
 
+	struct NamePoolID {
+		grinliz::IString dataset;
+		int id;
+
+		void Serialize(XStream* xs);
+	};
+
+	grinliz::CDynArray<NamePoolID> namePool;
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
 	grinliz::CDynArray<Chit*>	findMatch;

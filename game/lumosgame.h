@@ -77,7 +77,6 @@ public:
 	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
 	static gamui::RenderAtom CalcUIIconAtom(const char* name, bool enabled = true, float* ratio = 0);
 
-	const char* GenName( const char* dataset, int seed, int minLen, int maxLen );
 	grinliz::IString SoundName(const grinliz::IString& name, int seed);
 
 	enum {

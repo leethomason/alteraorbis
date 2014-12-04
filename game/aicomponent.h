@@ -82,7 +82,7 @@ public:
 	
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
-	void EnableDebug( bool enable )			{ debugFlag = enable; }
+	void EnableLog( bool enable )			{ debugLog = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 	int  VisitorIndex() const				{ return visitorIndex; }
@@ -211,7 +211,7 @@ private:
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
-	bool				debugFlag;
+	bool				debugLog;
 	int					rampageTarget;
 	int					destinationBlocked;
 	ai::TaskList		taskList;

@@ -146,6 +146,7 @@ Beta 3b
 		- walk target for the avatar
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
+		x stringpool buggy: over-allocating? turn on code in builder.cpp
 
 	- World Gen
 		- less techy, more interesting world gen

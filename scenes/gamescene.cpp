@@ -594,11 +594,6 @@ void GameScene::TapModel( Chit* target )
 	Chit* player = GetPlayerChit();
 	if ( !player ) {
 		ClearTargetFlags();
-
-		AIComponent* ai = target->GetAIComponent();
-		if ( ai ) {
-			ai->EnableDebug( true );
-		}
 	}
 
 	AIComponent* ai = player ? player->GetAIComponent() : 0;
@@ -1128,6 +1123,12 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				if (cc && chit) {
 					chitTracking = chit->ID();
 					cc->SetTrack(chitTracking);
+				}
+				for (int i = 0; i < nCitizens; ++i) {
+					AIComponent* ai = citizens[i]->GetAIComponent();
+					if (ai) {
+						ai->EnableLog(chitTracking == citizens[i]->ID());
+					}
 				}
 			}
 		}

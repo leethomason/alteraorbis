@@ -246,14 +246,15 @@ void WorldGenScene::DoTick(U32 delta)
 					GLString name;
 					GLString postfix;
 
+					const gamedb::Reader* database = game->GetDatabase();
 					for (int j = 0; j < NUM_SECTORS; ++j) {
 						for (int i = 0; i < NUM_SECTORS; ++i) {
 							name = "sector";
 							// Keep the names a little short, so that they don't overflow UI.
-							const char* n = static_cast<LumosGame*>(game)->GenName("sector", random.Rand(), 4, 7);
-							GLASSERT(n);
-							if (n) {
-								name = n;
+							IString n = LumosChitBag::StaticNameGen(database, "sector", random.Rand(), 4, 7);
+							GLASSERT(!n.empty());
+							if (!n.empty()) {
+								name = n.safe_str();
 							}
 							GLASSERT(NUM_SECTORS == 16);	// else the printing below won't be correct.
 							postfix = "";

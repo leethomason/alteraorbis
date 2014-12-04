@@ -319,7 +319,7 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<leftCount; ++i ) {
 		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), leftLevel );
 		if ( i==0 ) {
-			c->GetAIComponent()->EnableDebug( true );
+			c->GetAIComponent()->EnableLog( true );
 			c->GetItemComponent()->EnableDebug(true);
 		}
 

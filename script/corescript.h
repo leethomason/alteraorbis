@@ -21,7 +21,7 @@
 #include "../xegame/component.h"
 #include "../xegame/chitbag.h"
 
-#define SPAWN_MOBS 0
+#define SPAWN_MOBS 1
 
 class WorldMap;
 class WorkQueue;

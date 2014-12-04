@@ -361,28 +361,36 @@ protected:
 };
 
 
+/*
+	Sorted Array
+	Does support repeated keys. (Unlike hash table.)
+*/
 template < class T, class SEM=ValueSem, class KCOMPARE=CompValue >
 class SortedDynArray : public CDynArray< T, SEM, KCOMPARE >
 {
 public:
 	void Add( const T& t ) {
-		int index = BSearch( t );
+		EnsureCap( size+1 );
 
-		if ( index >= 0 ) {
-			mem[index] = t;
+		int i = size;
+		while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
+			mem[i] = mem[i-1];
+			--i;
 		}
-		else {
-			EnsureCap( size+1 );
+		mem[i] = t;
+		++size;
+		++nAlloc;
 
-			int i = size;
-			while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
-				mem[i] = mem[i-1];
-				--i;
-			}
-			mem[i] = t;
-			++size;
-			++nAlloc;
+#ifdef DEBUG
+		// This check isn't correct: they can be 
+		// less than or equal. But the strict
+		// less that turned out to be useful to catch
+		// bugs. But at some point this should fire
+		// in error, and the logic flipped.
+		for (int i = 1; i < size; ++i) {
+			GLASSERT(KCOMPARE::Less(mem[i - 1], mem[i]));
 		}
+#endif
 	}
 };
 
@@ -611,10 +619,9 @@ public:
 	}
 
 	bool Empty() const		{ return nItems == 0; }
+	int Size() const		{ return nItems; }
 
-	int NumValues() const	{ return nItems; }
-
-	V GetValue( int i ) {
+	const V& GetValue( int i ) {
 		// Create a cache of the values, so they can be a true array.
 		if ( values.Empty() ) {
 			for( int i=0; i<nBuckets; ++i ) {
@@ -625,6 +632,13 @@ public:
 		}
 		GLASSERT( values.Size() == nItems );
 		return values[i].value;
+	}
+
+	const K& GetKey(int i) {
+		if (values.Empty()) {
+			GetValue(i);
+		}
+		return values[i].key;
 	}
 
 private:

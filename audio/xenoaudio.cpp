@@ -30,7 +30,7 @@ XenoAudio::~XenoAudio()
 	if (audioOn) {
 		Mix_CloseAudio();
 	}
-	for (int i = 0; i < chunks.NumValues(); ++i) {
+	for (int i = 0; i < chunks.Size(); ++i) {
 		Mix_FreeChunk(chunks.GetValue(i));
 	}
 	GLASSERT(instance == this);

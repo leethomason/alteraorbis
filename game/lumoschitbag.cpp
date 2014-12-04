@@ -41,6 +41,7 @@
 #include "../script/countdownscript.h"
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
+#include "../markov/markov.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -73,6 +74,7 @@ void LumosChitBag::Serialize( XStream* xs )
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeTeam );
 	XARC_SER_ARR(xs, deityID, NUM_DEITY);
+	XARC_SER_CARRAY(xs, namePool);
 	XarcClose( xs );
 }
 
@@ -292,7 +294,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
 		LumosGame* game = Context()->game;
-		const char* p = game->GenName( nameGen.c_str(), chit->random.Rand(), 0, 0 );
+		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand(), 0, 0);
 		chit->GetItem()->SetProperName( p );
 	}
 
@@ -442,12 +444,9 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		LumosGame* game = chit->Context()->game;
-		if ( game ) {
-			chit->GetItem()->SetProperName( StringPool::Intern( 
-				game->GenName(	nameGen.c_str(), 
-								chit->ID(),
-								4, 8 )));
+		LumosChitBag* chitBag = chit->Context()->chitBag;
+		if ( chitBag ) {
+			chit->GetItem()->SetProperName(chitBag->NameGen(nameGen.c_str(), chit->ID(), 4, 8));
 		}
 	}
 
@@ -1144,4 +1143,106 @@ void LumosChitBag::RemoveSummoning(const grinliz::Vector2I& sector)
 	while ((i = summoningArr.Find(sector)) >= 0) {
 		summoningArr.Remove(i);
 	}
+}
+
+
+IString LumosChitBag::NameGen(const char* dataset, int seed, int min, int max)
+{
+	const gamedb::Reader* database = Context()->game->GetDatabase();
+	const gamedb::Item* parent = database->Root()->Child("markovName");
+	GLASSERT(parent);
+	const gamedb::Item* item = parent->Child(dataset);
+	GLASSERT(item);
+	if (!item) return IString();
+	const gamedb::Item* names = item->Child("names");
+
+	if (names) {
+		IString ds = StringPool::Intern(dataset);
+		bool found = false;
+		int id = 0;
+		for (int i = 0; i < namePool.Size(); ++i) {
+			if (namePool[i].dataset == ds) {
+				namePool[i].id++;
+				id = namePool[i].id;
+				found = true;
+			}
+		}
+		if (!found) {
+			NamePoolID entry = { ds, 0 };
+			id = 0;
+			namePool.Push(entry);
+		}
+		seed = id;
+	}
+	return StaticNameGen(database, dataset, seed, min, max);
+}
+
+
+IString LumosChitBag::StaticNameGen(const gamedb::Reader* database, const char* dataset, int _seed, int min, int max)
+{
+	const gamedb::Item* parent = database->Root()->Child("markovName");
+	GLASSERT(parent);
+	const gamedb::Item* item = parent->Child(dataset);
+	GLASSERT(item);
+	if (!item) return IString();
+
+	GLString nameBuffer = "";
+
+	// Make sure the name generator is warm:
+	Random random(_seed);
+	random.Rand();
+	random.Rand();
+	int seed = random.Rand();
+
+	const gamedb::Item* word = item->Child("words0");
+	const gamedb::Item* names = item->Child("names");
+	if (word) {
+		// The 3-word form.
+		for (int i = 0; i < 3; ++i) {
+			static const char* CHILD[] = { "words0", "words1", "words2" };
+			word = item->Child(CHILD[i]);
+			if (word && word->NumAttributes()) {
+				// attribute name and value are the same.
+				const char *attr = word->AttributeName(random.Rand(word->NumAttributes()));
+				if (i) {
+					nameBuffer.AppendFormat(" %s", attr);
+				}
+				else {
+					nameBuffer = attr;
+				}
+			}
+		}
+		return StringPool::Intern(nameBuffer.c_str());
+	}
+	else if (names) {
+		int index = abs(_seed) % names->NumChildren();
+		const char* n = names->ChildAt(index)->GetString("name");
+		return StringPool::Intern(n);
+	}
+	else {
+		// The triplet (letter) form.
+		int size = 0;
+		const void* data = database->AccessData(item, "triplets", &size);
+		MarkovGenerator gen((const char*)data, size, seed);
+
+		int len = max + 1;
+		int error = 100;
+		while (error--) {
+			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {
+				return StringPool::Intern(nameBuffer.c_str());
+			}
+		}
+		gen.Name(&nameBuffer, max);
+		return StringPool::Intern(nameBuffer.c_str());
+	}
+	return IString();
+}
+
+
+void LumosChitBag::NamePoolID::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "NamePoolID");
+	XARC_SER(xs, this->dataset);
+	XARC_SER(xs, this->id);
+	XarcClose(xs);
 }

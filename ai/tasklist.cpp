@@ -514,21 +514,16 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 		}
 	}
 	else {
-		int willSpend = thisComp.item->wallet.Gold() / 5;
-		if (personality.Crafting() == Personality::LIKES) {
-			willSpend = thisComp.item->wallet.Gold() / 2;
-		}
-
-		for (int pass = 0; pass < 3; ++pass) {
+		const int nPass = (personality.Crafting() == Personality::LIKES) ? 3 : 1;
+		for (int pass = 0; pass < nPass; ++pass) {
 			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= willSpend) {
+				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= thisComp.item->wallet.Gold()) {
 					// Money to bank.
 					// Crystal from exchange.
 					int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 					crystal[type] = 1;
 					bank->wallet.Deposit(&thisComp.item->wallet, crystalValue[type]);
 					thisComp.item->wallet.Deposit(exchange->GetWallet(), 0, crystal);
-					willSpend -= crystalValue[type];
 					usedExchange = true;
 				}
 			}
