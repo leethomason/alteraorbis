@@ -520,7 +520,6 @@ class Image : public UIItem
 {
 public:
 	Image();
-	Image( Gamui*, const RenderAtom& atom, bool foreground );
 	virtual ~Image();
 	void Init( Gamui*, const RenderAtom& atom, bool foreground );
 
@@ -547,6 +546,37 @@ private:
 	float m_height;
 	bool m_slice;
 	bool m_capturesTap;
+};
+
+
+class Canvas : public UIItem
+{
+public:
+	Canvas();
+	virtual ~Canvas();
+	void Init( Gamui*, const RenderAtom& atom );
+
+	void Clear();
+	void DrawLine(float x0, float y0, float x1, float y1, float thickness);
+
+	void SetAtom(const RenderAtom& atom)								{ m_atom = atom; Modify(); }
+	virtual const RenderAtom& GetRenderAtom() const						{ return m_atom; }
+
+	virtual void SetSize(float width, float height)						{}
+
+	virtual float Width() const											{ return DEFAULT_SIZE; }
+	virtual float Height() const										{ return DEFAULT_SIZE; }
+
+	virtual bool DoLayout()												{ return true; }
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+
+private:
+	struct Cmd {
+		float x0, y0, x1, y1;
+		float thickness;
+	};
+	RenderAtom m_atom;
+	grinliz::CDynArray<Cmd> m_cmds;
 };
 
 

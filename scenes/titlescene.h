@@ -95,6 +95,7 @@ private:
 	gamui::ToggleButton		audioButton;
 	gamui::PushButton		creditsButton;
 	gamui::TextLabel		note;
+	gamui::Canvas			testCanvas;
 };
 
 #endif // TITLESCENE_INCLUDED

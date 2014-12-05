@@ -420,14 +420,6 @@ Image::Image() : UIItem( Gamui::LEVEL_BACKGROUND ),
 {
 }
 
-Image::Image( Gamui* gamui, const RenderAtom& atom, bool foreground ): UIItem( Gamui::LEVEL_BACKGROUND ),
-	  m_width( DEFAULT_SIZE ),
-	  m_height( DEFAULT_SIZE ),
-	  m_slice( false )
-{
-	Init( gamui, atom, foreground );
-}
-
 Image::~Image()
 {
 }
@@ -499,6 +491,68 @@ bool Image::DoLayout()
 {
 	return true;
 }
+
+
+Canvas::Canvas() : UIItem( Gamui::LEVEL_FOREGROUND )
+{
+}
+
+Canvas::~Canvas()
+{
+}
+
+
+void Canvas::Init( Gamui* gamui, const RenderAtom& atom )
+{
+	m_atom = atom;
+	m_gamui = gamui;
+	gamui->Add(this);
+}
+
+
+void Canvas::Clear()
+{
+	m_cmds.Clear();
+	Modify();
+}
+
+
+void Canvas::DrawLine(float x0, float y0, float x1, float y1, float thick)
+{
+	Cmd cmd = { x0, y0, x1, y1, thick };
+	m_cmds.Push(cmd);
+	Modify();
+}
+
+
+void Canvas::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+{
+	if ( m_atom.textureHandle == 0 ) {
+		return;
+	}
+
+	for (int i = 0; i < m_cmds.Size(); ++i) {
+
+		Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+		const Cmd& cmd = m_cmds[i];
+		
+		float half = cmd.thickness * 0.5f;
+		float nX = cmd.x1 - cmd.x0;
+		float nY = cmd.y1 - cmd.y0;
+		float len = sqrt(nX*nX + nY*nY);
+		nX /= len;
+		nY /= len;
+
+		float rX = nY;
+		float rY = -nX;
+
+		vertex[0].Set(X() + cmd.x0 + rX * half, Y() + cmd.y0 + rY * half, m_atom.tx0, m_atom.ty0);
+		vertex[1].Set(X() + cmd.x0 - rX * half, Y() - cmd.y0 - rY * half, m_atom.tx1, m_atom.ty0);
+		vertex[2].Set(X() + cmd.x1 - rX * half, Y() + cmd.y1 - rY * half, m_atom.tx1, m_atom.ty1);
+		vertex[3].Set(X() + cmd.x1 + rX * half, Y() + cmd.y1 + rY * half, m_atom.tx0, m_atom.ty1);
+	}
+}
+
 
 
 TiledImageBase::TiledImageBase() : UIItem( Gamui::LEVEL_BACKGROUND ),
@@ -1648,7 +1702,8 @@ float Gamui::GetFocusY()
 void Gamui::SetFocusLook( const RenderAtom& atom, float zRotation )
 {
 	if ( !m_focusImage ) {
-		m_focusImage = new Image( this, atom, true );
+		m_focusImage = new Image();
+		m_focusImage->Init(this, atom, true );
 		m_focusImage->SetLevel( LEVEL_FOCUS );
 	}
 	m_focusImage->SetAtom( atom );

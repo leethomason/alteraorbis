@@ -929,3 +929,31 @@ void Sim::UseBuilding()
 		}
 	}
 }
+
+
+void Sim::CalcWeb(CDynArray<WebLink>* web)
+{
+	CArray<CoreScript*, NUM_SECTORS * 4> cores;
+	for (int j = 0; j < SECTOR_SIZE; ++j) {
+		for (int i = 0; i < SECTOR_SIZE; ++i) {
+			Vector2I sector = { i, j };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (   cs 
+				&& cs->InUse() 
+				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY) 
+			{
+				if (cores.HasCap()) {
+					cores.Push(cs);
+				}
+			}
+		}
+	}
+	/*
+	while (cores.Size() > 1) {
+		CoreScript* cs = cores.Pop();
+		// Find 2 closest neighbors.
+		GL_C_ARRAY_SIZE
+	}
+	*/
+}
+
