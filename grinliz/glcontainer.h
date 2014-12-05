@@ -382,13 +382,10 @@ public:
 		++nAlloc;
 
 #ifdef DEBUG
-		// This check isn't correct: they can be 
-		// less than or equal. But the strict
-		// less that turned out to be useful to catch
-		// bugs. But at some point this should fire
-		// in error, and the logic flipped.
 		for (int i = 1; i < size; ++i) {
-			GLASSERT(KCOMPARE::Less(mem[i - 1], mem[i]));
+			// Use the !, swap the operators, becomes
+			// 'greater than or equal to'
+			GLASSERT(!KCOMPARE::Less(mem[i], mem[i-1]));
 		}
 #endif
 	}

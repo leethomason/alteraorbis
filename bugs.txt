@@ -52,7 +52,7 @@ Beta 3b
 			t restore alpha blending on hp display and squad text
 			x switch over domain growth to be in line with new squad rules
 			- flag art
-			t squad destination on main map
+			- squad destination on main map not correct
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
@@ -70,8 +70,8 @@ Beta 3b
 		x gems running too-negative. Truulga?? Something else?
 
 		x move sim spawn to its own times
-		- DomainAI::Factory can get team Chaos
-		- lots more forging needs to happen!
+		x DomainAI::Factory can get team Chaos
+		t lots more forging needs to happen!
 		- control should show weapon ownership
 		- retest truulga item generation
 		- denizen red on red color scheme way too much
