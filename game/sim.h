@@ -97,11 +97,7 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
-	struct WebLink {
-		grinliz::Vector2I sector0, sector1;
-		float strength;
-	};
-	void CalcWeb(grinliz::CDynArray<WebLink>* web);
+	void CalcWeb(grinliz::CDynArray<grinliz::Vector2I>* web);
 
 private:
 	void CreateCores();

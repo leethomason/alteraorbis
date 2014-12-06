@@ -6,6 +6,7 @@
 #include "../game/lumoschitbag.h"
 #include "../game/team.h"
 #include "../game/gameitem.h"
+#include "../game/sim.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -25,6 +26,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	worldMap     = data->worldMap;
 	player       = data->player;
 	this->data   = data;
+
+	lumosChitBag->GetSim()->CalcWeb(&web);
 
 	gridTravel.Init( &gamui2D, lumosGame->GetButtonLook(0) );
 	viewButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
@@ -78,6 +81,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	for (int i = 0; i < MAX_FACE; ++i) {
 		face[i].Init(&gamui2D, nullAtom, true);
 	}
+
+	webCanvas.Init(&gamui2D, LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY));
 }
 
 
@@ -329,6 +334,18 @@ void MapScene::DrawMap()
 		Vector2F world = { (float)map2Bounds.min.x, (float)map2Bounds.min.y };
 		Vector2F pos = ToUI(0, world, mapBounds, 0);
 		selectionMark.SetPos(pos.x, pos.y);
+	}
+	{
+		float mapSize = mapImage.Width();
+		float scale = mapSize / float(NUM_SECTORS);
+		
+		for (int i = 0; i < web.Size(); i += 2) {
+			Vector2I s0 = web[i];
+			Vector2I s1 = web[i + 1];
+			Vector2F p0 = { (float(s0.x)) * scale, (float(s0.y)) * scale };
+			Vector2F p1 = { (float(s1.x)) * scale, (float(s1.y)) * scale };
+			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 4);
+		}
 	}
 }
 

@@ -46,6 +46,7 @@
 #include "../xarchive/glstreamer.h"
 
 #include "../grinliz/glperformance.h"
+#include "../grinliz/glarrayutil.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -931,16 +932,22 @@ void Sim::UseBuilding()
 }
 
 
-void Sim::CalcWeb(CDynArray<WebLink>* web)
+void Sim::CalcWeb(grinliz::CDynArray<Vector2I>* outWeb)
 {
+	struct WebLink {
+		grinliz::Vector2I sector0, sector1;
+		bool operator==(const WebLink& rhs) const { return (sector0 == rhs.sector0 && sector1 == rhs.sector1) || (sector1 == rhs.sector0 && sector0 == rhs.sector1); }
+	};
+	CDynArray<WebLink> web;
+
 	CArray<CoreScript*, NUM_SECTORS * 4> cores;
-	for (int j = 0; j < SECTOR_SIZE; ++j) {
-		for (int i = 0; i < SECTOR_SIZE; ++i) {
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
 			CoreScript* cs = CoreScript::GetCore(sector);
-			if (   cs 
-				&& cs->InUse() 
-				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY) 
+			if (cs
+				&& cs->InUse()
+				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY)
 			{
 				if (cores.HasCap()) {
 					cores.Push(cs);
@@ -948,12 +955,25 @@ void Sim::CalcWeb(CDynArray<WebLink>* web)
 			}
 		}
 	}
-	/*
+
 	while (cores.Size() > 1) {
 		CoreScript* cs = cores.Pop();
+		Vector2I origin = cs->ParentChit()->GetSpatialComponent()->GetSector();
 		// Find 2 closest neighbors.
-		GL_C_ARRAY_SIZE
+		GL_ARRAY_SORT_EXPR(cores.Mem(), cores.Size(), (float((ele->ParentChit()->GetSpatialComponent()->GetSector() - origin).LengthSquared())));
+		WebLink link0 = { origin, cores[0]->ParentChit()->GetSpatialComponent()->GetSector() };
+		if (web.Find(link0) < 0)
+			web.Push(link0);
+		if (cores.Size() > 1) {
+			WebLink link1 = { origin, cores[1]->ParentChit()->GetSpatialComponent()->GetSector() };
+			if (web.Find(link1) < 0)
+				web.Push(link1);
+		}
 	}
-	*/
+	outWeb->Clear();
+	for (int i = 0; i < web.Size(); ++i) {
+		outWeb->Push(web[i].sector0);
+		outWeb->Push(web[i].sector1);
+	}
 }
 

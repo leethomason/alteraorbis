@@ -83,6 +83,8 @@ private:
 	Chit*				player;
 	MapSceneData*		data;
 
+	grinliz::CDynArray<grinliz::Vector2I> web;
+
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;
@@ -95,6 +97,7 @@ private:
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
 	gamui::TextLabel	map2Text[MAP2_SIZE2];
+	gamui::Canvas		webCanvas;
 };
 
 #endif // MAP_SCENE_INCLUDED

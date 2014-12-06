@@ -543,13 +543,13 @@ void Canvas::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > 
 		nX /= len;
 		nY /= len;
 
-		float rX = nY;
-		float rY = -nX;
+		float rX = nY * half;
+		float rY = -nX * half;
 
-		vertex[0].Set(X() + cmd.x0 + rX * half, Y() + cmd.y0 + rY * half, m_atom.tx0, m_atom.ty0);
-		vertex[1].Set(X() + cmd.x0 - rX * half, Y() - cmd.y0 - rY * half, m_atom.tx1, m_atom.ty0);
-		vertex[2].Set(X() + cmd.x1 - rX * half, Y() + cmd.y1 - rY * half, m_atom.tx1, m_atom.ty1);
-		vertex[3].Set(X() + cmd.x1 + rX * half, Y() + cmd.y1 + rY * half, m_atom.tx0, m_atom.ty1);
+		vertex[0].Set(X() + cmd.x0 + rX, Y() + cmd.y0 + rY, m_atom.tx0, m_atom.ty0);
+		vertex[1].Set(X() + cmd.x0 - rX, Y() + cmd.y0 - rY, m_atom.tx0, m_atom.ty0);
+		vertex[2].Set(X() + cmd.x1 - rX, Y() + cmd.y1 - rY, m_atom.tx1, m_atom.ty1);
+		vertex[3].Set(X() + cmd.x1 + rX, Y() + cmd.y1 + rY, m_atom.tx1, m_atom.ty1);
 	}
 }
 
