@@ -155,6 +155,7 @@ void MapScene::Resize()
 		}
 	}
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
+	webCanvas.SetPos(mapImage.X(), mapImage.Y());
 	DrawMap();
 }
 
@@ -336,14 +337,18 @@ void MapScene::DrawMap()
 		selectionMark.SetPos(pos.x, pos.y);
 	}
 	{
+		webCanvas.Clear();
 		float mapSize = mapImage.Width();
 		float scale = mapSize / float(NUM_SECTORS);
+
+		webCanvas.DrawRectangle(0, 0, scale, scale);
+		webCanvas.DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
 		
 		for (int i = 0; i < web.Size(); i += 2) {
 			Vector2I s0 = web[i];
 			Vector2I s1 = web[i + 1];
-			Vector2F p0 = { (float(s0.x)) * scale, (float(s0.y)) * scale };
-			Vector2F p1 = { (float(s1.x)) * scale, (float(s1.y)) * scale };
+			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
+			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
 			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 4);
 		}
 	}

@@ -392,6 +392,7 @@ void Sim::SpawnDenizens()
 	}
 }
 
+
 void Sim::SpawnGreater()
 {
 	int lesser = 0, greater = 0, denizen = 0;
@@ -938,7 +939,6 @@ void Sim::CalcWeb(grinliz::CDynArray<Vector2I>* outWeb)
 		grinliz::Vector2I sector0, sector1;
 		bool operator==(const WebLink& rhs) const { return (sector0 == rhs.sector0 && sector1 == rhs.sector1) || (sector1 == rhs.sector0 && sector0 == rhs.sector1); }
 	};
-	CDynArray<WebLink> web;
 
 	CArray<CoreScript*, NUM_SECTORS * 4> cores;
 	for (int j = 0; j < NUM_SECTORS; ++j) {
@@ -956,21 +956,49 @@ void Sim::CalcWeb(grinliz::CDynArray<Vector2I>* outWeb)
 		}
 	}
 
-	while (cores.Size() > 1) {
-		CoreScript* cs = cores.Pop();
+	outWeb->Clear();
+	if (cores.Size() < 2) return;
+	if (cores.Size() == 2) {
+		outWeb->Push(cores[0]->ParentChit()->GetSpatialComponent()->GetSector());
+		outWeb->Push(cores[1]->ParentChit()->GetSpatialComponent()->GetSector());
+		return;
+	}
+
+	CDynArray<WebLink> web;
+	for (int i = 0; i < cores.Size(); ++i) {
+		CoreScript* cs = cores[i];
 		Vector2I origin = cs->ParentChit()->GetSpatialComponent()->GetSector();
+		
 		// Find 2 closest neighbors.
-		GL_ARRAY_SORT_EXPR(cores.Mem(), cores.Size(), (float((ele->ParentChit()->GetSpatialComponent()->GetSector() - origin).LengthSquared())));
-		WebLink link0 = { origin, cores[0]->ParentChit()->GetSpatialComponent()->GetSector() };
-		if (web.Find(link0) < 0)
-			web.Push(link0);
-		if (cores.Size() > 1) {
-			WebLink link1 = { origin, cores[1]->ParentChit()->GetSpatialComponent()->GetSector() };
-			if (web.Find(link1) < 0)
-				web.Push(link1);
+		static const int N = 2;
+		int bestScore[N] = { 0 };
+		int bestIndex[N] = { 0 };
+
+		for (int k = 0; k < cores.Size(); ++k) {
+			if (k == i) continue;
+
+			Vector2I sector = cores[k]->ParentChit()->GetSpatialComponent()->GetSector();
+			int score = NUM_SECTORS*NUM_SECTORS*4 - (sector - origin).LengthSquared();
+			for (int a = 0; a < N; ++a) {
+				if (score > bestScore[a]) {
+					for (int b = N - 1; b>a; --b) {
+						bestScore[b] = bestScore[b - 1];
+						bestIndex[b] = bestIndex[b - 1];
+					}
+					bestScore[a] = score;
+					bestIndex[a] = k;
+					break;
+				}
+			}
+		}
+
+		for (int k=0; k<N; ++k) {
+			WebLink link = { origin, cores[bestIndex[k]]->ParentChit()->GetSpatialComponent()->GetSector() };
+			if (web.Find(link) < 0) {
+				web.Push(link);
+			}
 		}
 	}
-	outWeb->Clear();
 	for (int i = 0; i < web.Size(); ++i) {
 		outWeb->Push(web[i].sector0);
 		outWeb->Push(web[i].sector1);

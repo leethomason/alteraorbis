@@ -47,25 +47,35 @@
 // element 'ele'. EVAL must evaluate to a 
 // double.
 #define GL_ARRAY_SORT_EXPR(mem, size, EVAL) {	\
-	for (int gap = size;;) {					\
-		gap = CombSortGap(gap);					\
-		bool swapped = false;					\
-		const int end = size - gap;				\
+	for (int _gap = size;;) {					\
+		_gap = CombSortGap(_gap);					\
+		bool _swapped = false;					\
+		const int end = size - _gap;				\
 		for (int i = 0; i < end; i++) {			\
-			int j = i + gap;					\
+			int j = i + _gap;					\
 			double valI=0, valJ = 0;			\
 			{ auto& ele = mem[i]; valI = EVAL; }	\
 			{ auto& ele = mem[j]; valJ = EVAL; }	\
 			if ( valJ < valI ) {				\
 				Swap(mem+i, mem+j);				\
-				swapped = true;					\
+				_swapped = true;					\
 			}									\
 		}										\
-		if (gap == 1 && !swapped) {				\
+		if (_gap == 1 && !_swapped) {				\
 			break;								\
 		}										\
 	}											\
 }
 
+
+/*
+#define GL_FIND_LEAST(mem, size, EVAL, outPtr, outN) {	\
+	double _bestScore[outN];
+	double _bestIndex
+	for(int _i=0; _i<size; ++_i ) {
+	
+	}
+}
+*/
 
 #endif //  GRINLIZ_ARRAY_UTIL_H

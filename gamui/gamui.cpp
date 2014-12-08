@@ -519,7 +519,15 @@ void Canvas::Clear()
 
 void Canvas::DrawLine(float x0, float y0, float x1, float y1, float thick)
 {
-	Cmd cmd = { x0, y0, x1, y1, thick };
+	Cmd cmd = { LINE, x0, y0, x1, y1, thick };
+	m_cmds.Push(cmd);
+	Modify();
+}
+
+
+void Canvas::DrawRectangle(float x, float y, float w, float h)
+{
+	Cmd cmd = { RECTANGLE, x, y, w, h };
 	m_cmds.Push(cmd);
 	Modify();
 }
@@ -533,23 +541,45 @@ void Canvas::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > 
 
 	for (int i = 0; i < m_cmds.Size(); ++i) {
 
-		Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
 		const Cmd& cmd = m_cmds[i];
 		
-		float half = cmd.thickness * 0.5f;
-		float nX = cmd.x1 - cmd.x0;
-		float nY = cmd.y1 - cmd.y0;
-		float len = sqrt(nX*nX + nY*nY);
-		nX /= len;
-		nY /= len;
+		switch (cmd.type) {
+			case LINE:
+			{
+				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+				float half = cmd.thickness * 0.5f;
+				float nX = cmd.x1 - cmd.x0;
+				float nY = cmd.y1 - cmd.y0;
+				float len = sqrt(nX*nX + nY*nY);
+				nX /= len;
+				nY /= len;
 
-		float rX = nY * half;
-		float rY = -nX * half;
+				float rX = nY * half;
+				float rY = -nX * half;
 
-		vertex[0].Set(X() + cmd.x0 + rX, Y() + cmd.y0 + rY, m_atom.tx0, m_atom.ty0);
-		vertex[1].Set(X() + cmd.x0 - rX, Y() + cmd.y0 - rY, m_atom.tx0, m_atom.ty0);
-		vertex[2].Set(X() + cmd.x1 - rX, Y() + cmd.y1 - rY, m_atom.tx1, m_atom.ty1);
-		vertex[3].Set(X() + cmd.x1 + rX, Y() + cmd.y1 + rY, m_atom.tx1, m_atom.ty1);
+				vertex[0].Set(X() + cmd.x0 + rX, Y() + cmd.y0 + rY, m_atom.tx0, m_atom.ty0);
+				vertex[1].Set(X() + cmd.x0 - rX, Y() + cmd.y0 - rY, m_atom.tx0, m_atom.ty0);
+				vertex[2].Set(X() + cmd.x1 - rX, Y() + cmd.y1 - rY, m_atom.tx1, m_atom.ty1);
+				vertex[3].Set(X() + cmd.x1 + rX, Y() + cmd.y1 + rY, m_atom.tx1, m_atom.ty1);
+			}
+			break;
+
+			case RECTANGLE:
+			{
+				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+
+				float x0 = cmd.x0;
+				float x1 = cmd.x0 + cmd.w;
+				float y0 = cmd.y0;
+				float y1 = cmd.y0 + cmd.h;
+
+				vertex[0].Set(X() + x0, Y() + y0, m_atom.tx0, m_atom.ty0);
+				vertex[1].Set(X() + x0, Y() + y1, m_atom.tx0, m_atom.ty0);
+				vertex[2].Set(X() + x1, Y() + y1, m_atom.tx1, m_atom.ty1);
+				vertex[3].Set(X() + x1, Y() + y0, m_atom.tx1, m_atom.ty1);
+			}
+			break;
+		}
 	}
 }
 

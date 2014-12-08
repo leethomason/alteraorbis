@@ -38,6 +38,7 @@
 - interface annoyances
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
+- remove grid64 BS for proper optimization
 
 Beta 3b
 		x Denizen domains

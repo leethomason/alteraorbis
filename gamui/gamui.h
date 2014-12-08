@@ -558,6 +558,7 @@ public:
 
 	void Clear();
 	void DrawLine(float x0, float y0, float x1, float y1, float thickness);
+	void DrawRectangle(float x, float y, float w, float h);
 
 	void SetAtom(const RenderAtom& atom)								{ m_atom = atom; Modify(); }
 	virtual const RenderAtom& GetRenderAtom() const						{ return m_atom; }
@@ -571,8 +572,18 @@ public:
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
+	enum {
+		LINE, RECTANGLE
+	};
 	struct Cmd {
-		float x0, y0, x1, y1;
+		int type;
+		float x0, y0;
+		union {
+			float x1, w;
+		};
+		union {
+			float y1, h;
+		};
 		float thickness;
 	};
 	RenderAtom m_atom;

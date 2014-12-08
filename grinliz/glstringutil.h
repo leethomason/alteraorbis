@@ -370,7 +370,7 @@ private:
 
 		Switched to sorted array.
 
-		May wish to consider left-leaning red-black.
+		May wish to consider aa-tree.
 	*/
 	SortedDynArray<Node, ValueSem, CompValueNode> nodes;
 	Block* root;
