@@ -124,12 +124,12 @@ int Team::GetRelationship( int _t0, int _t1 )
 
 	static const int relate[NUM][NUM] = {
 		{ F, E, E, E, E, E, E, E },		// rat
-		{ 0, F, E, N, E, E, F, E },		// green
+		{ 0, F, E, N, E, E, F, N },		// green
 		{ 0, 0, F, N, E, E, E, E },		// red
-		{ 0, 0, 0, F, E, N, N, E },		// troll 
+		{ 0, 0, 0, F, E, N, N, N },		// troll 
 		{ 0, 0, 0, 0, F, N, E, F },		// house
-		{ 0, 0, 0, 0, 0, F, E, N },		// gobmen
-		{ 0, 0, 0, 0, 0, 0, F, E },		// kamakiri
+		{ 0, 0, 0, 0, 0, F, E, F },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F, N },		// kamakiri
 		{ 0, 0, 0, 0, 0, 0, 0, F },		// visitor
 	};
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);

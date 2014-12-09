@@ -82,7 +82,9 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		face[i].Init(&gamui2D, nullAtom, true);
 	}
 
-	webCanvas.Init(&gamui2D, LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY));
+	RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
+	webAtom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO;
+	webCanvas.Init(&gamui2D, webAtom);
 }
 
 
@@ -344,12 +346,12 @@ void MapScene::DrawMap()
 		webCanvas.DrawRectangle(0, 0, scale, scale);
 		webCanvas.DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
 		
-		for (int i = 0; i < web.Size(); i += 2) {
-			Vector2I s0 = web[i];
-			Vector2I s1 = web[i + 1];
+		for (int i = 0; i < web.Size(); i++) {
+			Vector2I s0 = web[i].sector0;
+			Vector2I s1 = web[i].sector1;
 			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
 			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
-			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 4);
+			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
 		}
 	}
 }

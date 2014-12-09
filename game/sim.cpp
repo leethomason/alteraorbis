@@ -60,6 +60,7 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	spawnEnabled = true;
 	Screenport* port = context.game->GetScreenportMutable();
 	const gamedb::Reader* database = context.game->GetDatabase();
+	cachedWebAge = VERY_LONG_TICK;
 
 	itemDB		= new ItemDB();
 	context.worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -512,6 +513,7 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
+	cachedWebAge += delta;
 	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
 	context.circuitSim->DoTick(delta);
@@ -584,7 +586,7 @@ void Sim::DoTick( U32 delta )
 
 		if (this->SpawnEnabled()) {
 			if (visitorData[currentVisitor].id == 0) {
-				Chit* chit = context.chitBag->NewVisitor(currentVisitor);
+				Chit* chit = context.chitBag->NewVisitor(currentVisitor, this->GetCachedWeb());
 				visitorData[currentVisitor].id = chit->ID();
 			}
 		}
@@ -933,14 +935,9 @@ void Sim::UseBuilding()
 }
 
 
-void Sim::CalcWeb(grinliz::CDynArray<Vector2I>* outWeb)
+void Sim::CalcWeb(grinliz::CDynArray<WebLink>* outWeb)
 {
-	struct WebLink {
-		grinliz::Vector2I sector0, sector1;
-		bool operator==(const WebLink& rhs) const { return (sector0 == rhs.sector0 && sector1 == rhs.sector1) || (sector1 == rhs.sector0 && sector0 == rhs.sector1); }
-	};
-
-	CArray<CoreScript*, NUM_SECTORS * 4> cores;
+	CArray<Vector2I, NUM_SECTORS * 4> cores, inSet;
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
@@ -950,58 +947,55 @@ void Sim::CalcWeb(grinliz::CDynArray<Vector2I>* outWeb)
 				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY)
 			{
 				if (cores.HasCap()) {
-					cores.Push(cs);
+					cores.Push(sector);
 				}
 			}
 		}
 	}
 
 	outWeb->Clear();
-	if (cores.Size() < 2) return;
-	if (cores.Size() == 2) {
-		outWeb->Push(cores[0]->ParentChit()->GetSpatialComponent()->GetSector());
-		outWeb->Push(cores[1]->ParentChit()->GetSpatialComponent()->GetSector());
-		return;
-	}
+	if (cores.Empty()) return;
 
-	CDynArray<WebLink> web;
-	for (int i = 0; i < cores.Size(); ++i) {
-		CoreScript* cs = cores[i];
-		Vector2I origin = cs->ParentChit()->GetSpatialComponent()->GetSector();
-		
-		// Find 2 closest neighbors.
-		static const int N = 2;
-		int bestScore[N] = { 0 };
-		int bestIndex[N] = { 0 };
+	inSet.Push(cores.Pop());
 
-		for (int k = 0; k < cores.Size(); ++k) {
-			if (k == i) continue;
+	static const int MAXSCORE = 4 * NUM_SECTORS * NUM_SECTORS;
 
-			Vector2I sector = cores[k]->ParentChit()->GetSpatialComponent()->GetSector();
-			int score = NUM_SECTORS*NUM_SECTORS*4 - (sector - origin).LengthSquared();
-			for (int a = 0; a < N; ++a) {
-				if (score > bestScore[a]) {
-					for (int b = N - 1; b>a; --b) {
-						bestScore[b] = bestScore[b - 1];
-						bestIndex[b] = bestIndex[b - 1];
-					}
-					bestScore[a] = score;
-					bestIndex[a] = k;
-					break;
+	// 'cores' is the out list, 'web' is the in list.
+	while (!cores.Empty()) {
+		Vector2I bestSrc = { 0, 0 };
+		Vector2I bestDst = { 0, 0 };
+		int bestIndex = 0;
+		int bestScore = 0;
+
+		for (int i = 0; i < cores.Size(); ++i) {
+			for (int k = 0; k < inSet.Size(); ++k) {
+				int score = MAXSCORE - (inSet[k] - cores[i]).LengthSquared();
+				if (score > bestScore) {
+					bestScore = score;
+					bestSrc = inSet[k];
+					bestDst = cores[i];
+					bestIndex = i;
 				}
 			}
 		}
+		GLASSERT(!bestSrc.IsZero());
+		GLASSERT(!bestDst.IsZero());
+		cores.SwapRemove(bestIndex);
+		inSet.Push(bestDst);
 
-		for (int k=0; k<N; ++k) {
-			WebLink link = { origin, cores[bestIndex[k]]->ParentChit()->GetSpatialComponent()->GetSector() };
-			if (web.Find(link) < 0) {
-				web.Push(link);
-			}
+		WebLink link = { bestSrc, bestDst };
+		if (outWeb->Find(link) < 0) {
+			outWeb->Push(link);
 		}
-	}
-	for (int i = 0; i < web.Size(); ++i) {
-		outWeb->Push(web[i].sector0);
-		outWeb->Push(web[i].sector1);
 	}
 }
 
+
+const CDynArray<WebLink>& Sim::GetCachedWeb()
+{
+	if (cachedWebAge > 2000) {
+		CalcWeb(&cachedWeb);
+		cachedWebAge = 0;
+	}
+	return cachedWeb;
+}

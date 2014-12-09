@@ -69,13 +69,32 @@
 
 
 /*
-#define GL_FIND_LEAST(mem, size, EVAL, outPtr, outN) {	\
-	double _bestScore[outN];
-	double _bestIndex
-	for(int _i=0; _i<size; ++_i ) {
-	
-	}
-}
+	Search an array and find the index
+	with the greatest EVAL. Works for
+	1 or more outputs. (So it can find
+	the 3 highest, for example.) If
+	no answer found -1 is returned.
 */
+#define GL_ARRAY_FIND_MAX(mem, size, EVAL, outIndexPtr, outN) {	\
+	double bestScore[outN] = { 0 };							\
+	for( int _k=0; _k < outN; ++_k) {						\
+		(outIndexPtr)[_k] = -1;								\
+	}														\
+	for (int _k = 0; _k < size; ++_k) {						\
+		auto &ele = mem[_k];								\
+		double score = EVAL;								\
+		for (int a = 0; a < outN; ++a) {					\
+			if (score > bestScore[a]) {						\
+				for (int b = outN - 1; b>a; --b) {			\
+					bestScore[b] = bestScore[b - 1];		\
+					(outIndexPtr)[b] = (outIndexPtr)[b - 1];	\
+				}											\
+				bestScore[a] = score;						\
+				(outIndexPtr)[a] = _k;						\
+				break;										\
+			}												\
+		}													\
+	}														\
+}
 
 #endif //  GRINLIZ_ARRAY_UTIL_H

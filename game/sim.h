@@ -97,7 +97,8 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
-	void CalcWeb(grinliz::CDynArray<grinliz::Vector2I>* web);
+	void CalcWeb(grinliz::CDynArray<WebLink>* web);
+	const grinliz::CDynArray<WebLink>& GetCachedWeb();
 
 private:
 	void CreateCores();
@@ -125,10 +126,12 @@ private:
 			spawnClock;
 	int currentVisitor;
 	bool spawnEnabled;
+	int cachedWebAge;
 
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
+	grinliz::CDynArray<WebLink>	cachedWeb;
 };
 
 

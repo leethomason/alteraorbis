@@ -1,3 +1,5 @@
+#include "../grinliz/glarrayutil.h"
+
 #include "lumoschitbag.h"
 #include "gameitem.h"
 #include "gamelimits.h"
@@ -489,9 +491,28 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewVisitor( int visitorIndex )
+Chit* LumosChitBag::NewVisitor( int visitorIndex, const CDynArray<WebLink>& web)
 {
 	const ChitContext* context = Context();
+	if (web.Empty()) return 0;
+
+	// Visitors start at any domain on the web.
+	// Tend to prefer the center.
+	static const int N_START = 8;
+	Vector2I start[N_START];
+	for (int i = 0; i < N_START; i+=2) {
+		int index = random.Rand(web.Size());
+		start[i + 0] = web[index].sector0;
+		start[i + 1] = web[index].sector1;
+	}
+	int startIndex = 0;
+	Vector2I origin = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
+	GL_ARRAY_FIND_MAX(start, N_START, (NUM_SECTORS*NUM_SECTORS - (ele - origin).LengthSquared()), &startIndex, 1);
+
+	CoreScript* cs = CoreScript::GetCore(start[startIndex]);
+	if (!cs) return 0;	// cores get deleted, web is cached, etc.
+	Vector3F pos = cs->ParentChit()->GetSpatialComponent()->GetPosition();
+
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
@@ -505,7 +526,6 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 	Visitors::Instance()->visitorData[visitorIndex].Connect();	// initialize.
 
 	// Visitors start at world center, with gridMove, and go from there.
-	Vector3F pos = { (float)context->worldMap->Width()*0.5f, 0.0f, (float)context->worldMap->Height()*0.5f };
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	PathMoveComponent* pmc = new PathMoveComponent();

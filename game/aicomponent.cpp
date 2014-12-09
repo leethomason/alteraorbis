@@ -708,8 +708,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		}
 	}
 	
-	if (    visitorIndex >= 0
-		      && !thisComp.move->IsMoving() )
+	if (    visitorIndex >= 0 && !thisComp.move->IsMoving() )
 	{
 		// Visitors at a kiosk.
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
@@ -762,19 +761,19 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 }
 
 
-void AIComponent::Think( const ComponentSet& thisComp )
+void AIComponent::Think(const ComponentSet& thisComp)
 {
-	switch( aiMode ) {
-	case NORMAL_MODE:
-		if ( visitorIndex >= 0 )
-			ThinkVisitor( thisComp );
-		else
-			ThinkNormal( thisComp );	
-		break;
-	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
-	case RAMPAGE_MODE:		ThinkRampage( thisComp );	break;
+	if (visitorIndex >= 0) {
+		ThinkVisitor(thisComp);
+		return;
 	}
-};
+
+	switch (aiMode) {
+		case NORMAL_MODE:		ThinkNormal(thisComp);	break;
+		case BATTLE_MODE:		ThinkBattle(thisComp);	break;
+		case RAMPAGE_MODE:		ThinkRampage(thisComp);	break;
+	}
+}
 
 
 bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)

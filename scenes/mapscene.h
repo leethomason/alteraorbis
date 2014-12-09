@@ -4,6 +4,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../game/gamelimits.h"
+#include "../game/lumosmath.h"
 
 class LumosGame;
 class LumosChitBag;
@@ -83,7 +84,7 @@ private:
 	Chit*				player;
 	MapSceneData*		data;
 
-	grinliz::CDynArray<grinliz::Vector2I> web;
+	grinliz::CDynArray<WebLink> web;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel, viewButton;
