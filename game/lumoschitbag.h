@@ -21,6 +21,7 @@
 #include "../engine/map.h"
 #include "census.h"
 #include "visitor.h"
+#include "visitorweb.h"
 
 class WorldMap;
 class Wallet;
@@ -241,7 +242,7 @@ public:
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
-	Chit* NewVisitor( int visitorIndex, const grinliz::CDynArray<WebLink>& web );
+	Chit* NewVisitor( int visitorIndex, const Web& web );
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.

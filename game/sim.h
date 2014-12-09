@@ -24,6 +24,7 @@
 
 #include "gamelimits.h"
 #include "visitor.h"
+#include "visitorweb.h"
 
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
@@ -97,8 +98,8 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
-	void CalcWeb(grinliz::CDynArray<WebLink>* web);
-	const grinliz::CDynArray<WebLink>& GetCachedWeb();
+	const Web& CalcWeb();
+	const Web& GetCachedWeb();
 
 private:
 	void CreateCores();
@@ -126,12 +127,13 @@ private:
 			spawnClock;
 	int currentVisitor;
 	bool spawnEnabled;
+
 	int cachedWebAge;
+	Web web;
 
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
-	grinliz::CDynArray<WebLink>	cachedWeb;
 };
 
 

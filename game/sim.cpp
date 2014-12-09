@@ -935,9 +935,9 @@ void Sim::UseBuilding()
 }
 
 
-void Sim::CalcWeb(grinliz::CDynArray<WebLink>* outWeb)
+const Web& Sim::CalcWeb()
 {
-	CArray<Vector2I, NUM_SECTORS * 4> cores, inSet;
+	CArray<Vector2I, NUM_SECTORS * NUM_SECTORS> cores;
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
@@ -952,50 +952,16 @@ void Sim::CalcWeb(grinliz::CDynArray<WebLink>* outWeb)
 			}
 		}
 	}
-
-	outWeb->Clear();
-	if (cores.Empty()) return;
-
-	inSet.Push(cores.Pop());
-
-	static const int MAXSCORE = 4 * NUM_SECTORS * NUM_SECTORS;
-
-	// 'cores' is the out list, 'web' is the in list.
-	while (!cores.Empty()) {
-		Vector2I bestSrc = { 0, 0 };
-		Vector2I bestDst = { 0, 0 };
-		int bestIndex = 0;
-		int bestScore = 0;
-
-		for (int i = 0; i < cores.Size(); ++i) {
-			for (int k = 0; k < inSet.Size(); ++k) {
-				int score = MAXSCORE - (inSet[k] - cores[i]).LengthSquared();
-				if (score > bestScore) {
-					bestScore = score;
-					bestSrc = inSet[k];
-					bestDst = cores[i];
-					bestIndex = i;
-				}
-			}
-		}
-		GLASSERT(!bestSrc.IsZero());
-		GLASSERT(!bestDst.IsZero());
-		cores.SwapRemove(bestIndex);
-		inSet.Push(bestDst);
-
-		WebLink link = { bestSrc, bestDst };
-		if (outWeb->Find(link) < 0) {
-			outWeb->Push(link);
-		}
-	}
+	web.Calc(cores.Mem(), cores.Size());
+	return web;
 }
 
 
-const CDynArray<WebLink>& Sim::GetCachedWeb()
+const Web& Sim::GetCachedWeb()
 {
 	if (cachedWebAge > 2000) {
-		CalcWeb(&cachedWeb);
+		CalcWeb();
 		cachedWebAge = 0;
 	}
-	return cachedWeb;
+	return web;
 }

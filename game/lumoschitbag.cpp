@@ -491,25 +491,13 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewVisitor( int visitorIndex, const CDynArray<WebLink>& web)
+Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 {
 	const ChitContext* context = Context();
 	if (web.Empty()) return 0;
 
-	// Visitors start at any domain on the web.
-	// Tend to prefer the center.
-	static const int N_START = 8;
-	Vector2I start[N_START];
-	for (int i = 0; i < N_START; i+=2) {
-		int index = random.Rand(web.Size());
-		start[i + 0] = web[index].sector0;
-		start[i + 1] = web[index].sector1;
-	}
-	int startIndex = 0;
-	Vector2I origin = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
-	GL_ARRAY_FIND_MAX(start, N_START, (NUM_SECTORS*NUM_SECTORS - (ele - origin).LengthSquared()), &startIndex, 1);
-
-	CoreScript* cs = CoreScript::GetCore(start[startIndex]);
+	Vector2I startSector = web.Origin();
+	CoreScript* cs = CoreScript::GetCore(startSector);
 	if (!cs) return 0;	// cores get deleted, web is cached, etc.
 	Vector3F pos = cs->ParentChit()->GetSpatialComponent()->GetPosition();
 

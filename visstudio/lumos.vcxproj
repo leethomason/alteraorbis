@@ -142,6 +142,7 @@
     <ClCompile Include="..\game\towcomponent.cpp" />
     <ClCompile Include="..\game\visitor.cpp" />
     <ClCompile Include="..\game\visitorstatecomponent.cpp" />
+    <ClCompile Include="..\game\visitorweb.cpp" />
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="..\game\towcomponent.h" />
     <ClInclude Include="..\game\visitor.h" />
     <ClInclude Include="..\game\visitorstatecomponent.h" />
+    <ClInclude Include="..\game\visitorweb.h" />
     <ClInclude Include="..\game\wallet.h" />
     <ClInclude Include="..\game\weather.h" />
     <ClInclude Include="..\game\workqueue.h" />

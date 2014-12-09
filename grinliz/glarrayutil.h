@@ -2,6 +2,7 @@
 #define GRINLIZ_ARRAY_UTIL_H
 
 #include "glcontainer.h"
+#include <float.h>
 
 // 'auto' in a #define. Not sure if C11 is going to give me trouble.
 // Transforms a CDynArray or CArary (in place)
@@ -79,6 +80,7 @@
 	double bestScore[outN] = { 0 };							\
 	for( int _k=0; _k < outN; ++_k) {						\
 		(outIndexPtr)[_k] = -1;								\
+		bestScore[_k] = -DBL_MAX;							\
 	}														\
 	for (int _k = 0; _k < size; ++_k) {						\
 		auto &ele = mem[_k];								\

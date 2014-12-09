@@ -7,15 +7,6 @@
 #include "../grinliz/glrandom.h"
 #include "gamelimits.h"
 
-struct WebLink {
-	grinliz::Vector2I sector0, sector1;
-
-	bool operator==(const WebLink& rhs) const { 
-		return (sector0 == rhs.sector0 && sector1 == rhs.sector1) || (sector1 == rhs.sector0 && sector0 == rhs.sector1); 
-	}
-};
-
-
 inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
 	grinliz::Vector3F v = { float(pos2i.x) + 0.5f, 0.0f, float(pos2i.y) + 0.5f };
 	return v;
