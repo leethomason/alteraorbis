@@ -244,8 +244,23 @@ void Sim::CreateCores()
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
-			CoreScript* cs = CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 
+			int team = TEAM_NEUTRAL;
+			bool indestructible = false;
+			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
+				// Mother Core. Always at the center: spawn point of the Visitors.
+				team = TEAM_DEITY;
+				indestructible = true;
+			}
+			CoreScript* cs = CoreScript::CreateCore(sector, team, &context);
+			if (indestructible) {
+				cs->ParentChit()->GetItem()->flags |= GameItem::INDESTRUCTABLE;
+				HealthComponent* hc = cs->ParentChit()->GetHealthComponent();
+				if (hc) {
+					cs->ParentChit()->Remove(hc);
+					delete hc;
+				}
+			}
 			if (cs) {
 				++ncores;
 			}

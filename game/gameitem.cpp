@@ -1003,7 +1003,7 @@ void GameItem::SetChaos()
 void GameItem::SetTeam(int newTeam)
 {
 	GLASSERT(IsDenizen());
-	GLASSERT(Team::ID(team) == 0);
+	GLASSERT((newTeam == team) || Team::ID(team) == 0);
 	GLASSERT(Team::ID(newTeam) != 0);
 	team = newTeam;
 }

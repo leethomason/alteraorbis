@@ -84,8 +84,6 @@ private:
 	Chit*				player;
 	MapSceneData*		data;
 
-	grinliz::CDynArray<WebLink> web;
-
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;

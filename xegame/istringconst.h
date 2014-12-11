@@ -140,6 +140,7 @@ public:
 	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
 
+	static grinliz::IString deity;
 	static grinliz::IString Truulga;
 
 	// double underscore -> '.'

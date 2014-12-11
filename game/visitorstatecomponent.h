@@ -42,7 +42,7 @@ public:
 
 private:
 	gamui::Image		want;	// s[VisitorData::NUM_VISITS];
-	gamui::DigitalBar	bar;	// FIXME: this is a pretty general need to have here. Probably should be head decos.
+	gamui::DigitalBar	bar;
 	bool needsInit;
 };
 

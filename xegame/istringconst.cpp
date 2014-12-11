@@ -108,6 +108,7 @@ IString IStringConst::accuracy;
 IString IStringConst::porch;
 IString IStringConst::circuit;
 IString IStringConst::nameGen;
+IString IStringConst::deity;
 IString IStringConst::Truulga;
 IString IStringConst::kiosk__n;
 IString IStringConst::kiosk__m;
@@ -225,6 +226,7 @@ void IStringConst::Init()
 	porch = StringPool::Intern( "porch", true );
 	circuit = StringPool::Intern( "circuit", true );
 	nameGen = StringPool::Intern( "nameGen", true );
+	deity = StringPool::Intern( "deity", true );
 	Truulga = StringPool::Intern( "Truulga", true );
 	kiosk__n = StringPool::Intern( "kiosk.n", true );
 	kiosk__m = StringPool::Intern( "kiosk.m", true );

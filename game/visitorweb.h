@@ -22,9 +22,24 @@ public:
 
 	const grinliz::Vector2I& Origin() const { return origin; }
 
-	bool Empty() const { return edges.Empty(); }
-	int NumLinks() const;
-	int Link(int i, grinliz::Vector2I* s0, grinliz::Vector2I* s1);
+	bool Empty() const		{ return edges.Empty(); }
+	int NumEdges() const	{ return edges.Size(); }
+	void Edge(int i, grinliz::Vector2I* s0, grinliz::Vector2I* s1) const;
+
+	struct Node {
+		Node() { sector.Zero(); }
+		Node(const Node& node) { 
+			sector = node.sector; 
+			for (int i = 0; i < adjacent.Size(); ++i) {
+				adjacent.Push(node.adjacent[i]);
+			}
+		}
+
+		grinliz::Vector2I sector;
+		grinliz::CDynArray<Node*> adjacent;
+	};
+	const Node* Root() const { return nodes.Empty() ? 0 : nodes.Mem(); }
+	const Node* FindNode(const grinliz::Vector2I& v) const;
 
 private:
 	struct WebLink {
@@ -35,8 +50,11 @@ private:
 		}
 	};
 
+	void BuildNodeRec(grinliz::Vector2I pos, Node* node, grinliz::CDynArray<bool>* edgeSet );
+
 	grinliz::Vector2I origin;
 	grinliz::CDynArray<WebLink> edges;
+	grinliz::CDynArray<Node> nodes;
 };
 
 

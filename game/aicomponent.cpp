@@ -26,6 +26,7 @@
 #include "team.h"
 #include "circuitsim.h"
 #include "reservebank.h"
+#include "sim.h"	// FIXME: where shourd the Web live??
 
 // move to tasklist file
 #include "lumoschitbag.h"
@@ -708,24 +709,23 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		}
 	}
 	
-	if (    visitorIndex >= 0 && !thisComp.move->IsMoving() )
+	if (visitorIndex >= 0 && !thisComp.move->IsMoving())
 	{
 		// Visitors at a kiosk.
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-		Vector2I sector = ToSector( pos2i );
-		Chit* chit = this->Context()->chitBag->QueryPorch( pos2i,0 );
-		CoreScript* cs = CoreScript::GetCore( sector );
-		
+		Vector2I sector = ToSector(pos2i);
+		Chit* chit = this->Context()->chitBag->QueryPorch(pos2i, 0);
+		CoreScript* cs = CoreScript::GetCore(sector);
+
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
 
-		if ( chit && chit->GetItem()->IName() == kioskName ) {
+		if (chit && chit->GetItem()->IName() == kioskName) {
 			vd->kioskTime += time;
-			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
-				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-				vd->DidVisitKiosk( sector );
+			if (vd->kioskTime > VisitorData::KIOSK_TIME) {
+				vd->visited.Push(sector);
 				cs->AddTech();
-				thisComp.render->AddDeco( "techxfer", STD_DECO );
+				thisComp.render->AddDeco("techxfer", STD_DECO);
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
 				return false;
@@ -1358,57 +1358,46 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		kiosk = 0;
 	}
 
-	if (    vd->nVisits >= VisitorData::MAX_VISITS
-		 || vd->nWants  >= VisitorData::NUM_VISITS ) 
-	{
-		disconnect = true;
-		if ( debugLog ) {
-			GLOUTPUT(( "ID=%d Visitor travel done.\n", thisComp.chit->ID() ));
-		}
-	}
-	else {
-		// Move on,
-		// Stand, or
-		// Move to a kiosk
-		if ( vd->doneWith == sector ) {
-			// Head out!
-			SectorPort sp = Visitors::Instance()->ChooseDestination( visitorIndex, context->worldMap, Context()->chitBag->ToLumos() );
-			bool okay = this->Move( sp, true );
-			if ( !okay ) disconnect = true;
-		}
-		else if ( pmc->Stopped() && kiosk ) {
-			currentAction = STAND;
+	if ( vd->visited.Find(sector) >= 0) {
+		// This sector has been added to "visited", so we are done here.
+		// Head out!
+		LumosChitBag* chitBag = Context()->chitBag;
+		const Web& web = chitBag->GetSim()->GetCachedWeb();
+		SectorPort sp = Visitors::Instance()->ChooseDestination(visitorIndex, web, chitBag, Context()->worldMap);
+
+		if (sp.IsValid()) {
+			this->Move(sp, true);
 		}
 		else {
-			// Find a kiosk.
-			Chit* kiosk = Context()->chitBag->FindBuilding(	vd->CurrentKioskWant(),
-															sector,
-															&thisComp.spatial->GetPosition2D(),
-															LumosChitBag::RANDOM_NEAR, 0, 0 );
+			disconnect = true;
+		}
+	}
+	else if ( pmc->Stopped() && kiosk ) {
+		currentAction = STAND;
+	}
+	else {
+		// Find a kiosk.
+		Chit* kiosk = Context()->chitBag->FindBuilding(	vd->CurrentKioskWant(),
+														sector,
+														&thisComp.spatial->GetPosition2D(),
+														LumosChitBag::RANDOM_NEAR, 0, 0 );
 
-			if ( !kiosk ) {
-				// Done here.
-				vd->NoKiosk( sector );
-				if ( debugLog ) {
-					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
-				}
+		if ( !kiosk ) {
+			// Done here.
+			vd->visited.Push(sector);
+		}
+		else {
+			MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
+			GLASSERT( msc );
+			Rectangle2I porch = msc->PorchPos();
+
+			// The porch is a rectangle; go to a particular point based on the ID()
+			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F(porch.min), 0, 0 ) ) {
+				this->Move(ToWorld2F(porch.min), false);
 			}
 			else {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
-				GLASSERT( msc );
-				Rectangle2I porch = msc->PorchPos();
-
-				// The porch is a rectangle; go to a particular point based on the ID()
-				if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F(porch.min), 0, 0 ) ) {
-					this->Move(ToWorld2F(porch.min), false);
-				}
-				else {
-					// Done here.
-					vd->doneWith = sector;
-					if ( debugLog ) {
-						GLOUTPUT(( "ID=%d Visitor: no path to kiosk.\n", thisComp.chit->ID() ));
-					}
-				}
+				// Can't path!
+				vd->visited.Push(sector);
 			}
 		}
 	}

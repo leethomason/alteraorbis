@@ -518,11 +518,6 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 
 	PathMoveComponent* pmc = new PathMoveComponent();
 	chit->Add(pmc);
-	GridMoveComponent* gmc = new GridMoveComponent();
-	chit->Add( gmc );
-
-	SectorPort sp = context->worldMap->RandomPort( &random );
-	gmc->SetDest( sp );
 
 	AddItem( rootItem.Name(), chit, context->engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent());

@@ -48,6 +48,10 @@ grinliz::IString Team::TeamName(int team)
 		name = StringPool::Intern(str.c_str());
 		break;
 
+		case TEAM_DEITY:
+		name = ISC::deity;
+		break;
+
 		default:
 		break;
 	}
@@ -75,6 +79,9 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	}
 	else if (itemName == ISC::kamakiri) {
 		return TEAM_KAMAKIRI;
+	}
+	else if (itemName == ISC::deity) {
+		return TEAM_DEITY;
 	}
 	else if (    itemName == ISC::cyclops
 		      || itemName == ISC::fireCyclops
@@ -116,6 +123,9 @@ int Team::GetRelationship( int _t0, int _t1 )
 	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
 		return RELATE_NEUTRAL;
 
+	GLASSERT(t0 >= 0 && t0 < NUM_TEAMS);
+	GLASSERT(t1 >= 0 && t1 < NUM_TEAMS);
+
 	static const int F = RELATE_FRIEND;
 	static const int E = RELATE_ENEMY;
 	static const int N = RELATE_NEUTRAL;
@@ -123,14 +133,15 @@ int Team::GetRelationship( int _t0, int _t1 )
 	static const int NUM = NUM_TEAMS - OFFSET;
 
 	static const int relate[NUM][NUM] = {
-		{ F, E, E, E, E, E, E, E },		// rat
-		{ 0, F, E, N, E, E, F, N },		// green
-		{ 0, 0, F, N, E, E, E, E },		// red
-		{ 0, 0, 0, F, E, N, N, N },		// troll 
-		{ 0, 0, 0, 0, F, N, E, F },		// house
-		{ 0, 0, 0, 0, 0, F, E, F },		// gobmen
-		{ 0, 0, 0, 0, 0, 0, F, N },		// kamakiri
-		{ 0, 0, 0, 0, 0, 0, 0, F },		// visitor
+		{ F, E, E, E, E, E, E, E, N },		// rat
+		{ 0, F, E, N, E, E, F, N, N },		// green
+		{ 0, 0, F, N, E, E, E, E, N },		// red
+		{ 0, 0, 0, F, E, N, N, N, N },		// troll 
+		{ 0, 0, 0, 0, F, N, E, F, N },		// house
+		{ 0, 0, 0, 0, 0, F, E, F, N },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F, N, N },		// kamakiri
+		{ 0, 0, 0, 0, 0, 0, 0, F, F },		// visitor
+		{ 0, 0, 0, 0, 0, 0, 0, 0, N },		// deity
 	};
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
 	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);

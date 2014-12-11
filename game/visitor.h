@@ -25,7 +25,9 @@
 
 class XStream;
 class WorldMap;
+class ChitBag;
 class LumosChitBag;
+class Web;
 
 // Each visitor has their own personality and memory, seperate
 // from the chit AI.
@@ -58,7 +60,7 @@ struct VisitorData
 	//int nVisits;
 	grinliz::CArray<grinliz::Vector2I, 8> visited;
 
-	struct Memory {
+/*	struct Memory {
 		Memory() { sector.Zero(); rating=0; }
 
 		grinliz::Vector2I	sector;
@@ -67,12 +69,13 @@ struct VisitorData
 		void Serialize( XStream* xs );
 	};
 	grinliz::CArray< Memory, MEMORY > memoryArr;
-
+*/
 //	void NoKiosk( const grinliz::Vector2I& sector );
 //	void DidVisitKiosk( const grinliz::Vector2I& sector );
 
+
 	grinliz::IString CurrentKioskWant();
-//	int CurrentKioskWantID()	{ GLASSERT( nWants < NUM_VISITS ); return wants[nWants]; }
+	int CurrentKioskWantID()	{ return want; }
 };
 
 
@@ -91,7 +94,7 @@ public:
 	// only returns existing; doesn't create.
 	static Visitors* Instance()	{ return instance; }
 
-	SectorPort ChooseDestination( int visitorIndex, WorldMap* map, LumosChitBag* chitBag );
+	SectorPort ChooseDestination(int index, const Web& web, ChitBag* chitBag, WorldMap* map);
 
 private:
 	static Visitors* instance;

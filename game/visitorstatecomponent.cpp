@@ -39,20 +39,15 @@ void VisitorStateComponent::OnAdd( Chit* chit, bool init )
 	const ChitContext* context = Context();
 	needsInit = true;
 
-	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		RenderAtom nullAtom;
-		wants[i].Init( &context->worldMap->overlay0, nullAtom, true );
-		wants[i].SetVisible( false );	// keep flash from world origin
-	}
+	RenderAtom nullAtom;
+	want.Init( &context->worldMap->overlay0, nullAtom, true );
 
 	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
 	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
 	bar.Init( &context->worldMap->overlay0, green, gray );
 	bar.SetVisible( false );
 
-	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		context->worldMap->overlay0.Add( &wants[i] );
-	}
+	context->worldMap->overlay0.Add( &want );
 	context->worldMap->overlay0.Add( &bar );
 }
 
@@ -60,9 +55,7 @@ void VisitorStateComponent::OnAdd( Chit* chit, bool init )
 void VisitorStateComponent::OnRemove()
 {
 	const ChitContext* context = Context();
-	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		context->worldMap->overlay0.Remove( &wants[i] );
-	}
+	context->worldMap->overlay0.Remove( &want );
 	context->worldMap->overlay0.Remove( &bar );
 	super::OnRemove();
 }
@@ -83,17 +76,12 @@ int VisitorStateComponent::DoTick( U32 delta )
 					"commerce",
 					"social"
 				};
-				for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-					int need = vd->wants[i];
-					RenderAtom atom = LumosGame::CalcIconAtom( ICON[need] );
-					wants[i].SetAtom( atom );
-				}
+				RenderAtom atom = LumosGame::CalcIconAtom( ICON[vd->want] );
+				want.SetAtom( atom );
 				needsInit = false;
 			}
 
-			for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-				wants[i].SetVisible( i >= vd->nWants );
-			}
+			//want[i].SetVisible( i >= vd->nwant );
 			if ( vd->kioskTime ) {
 				float t = (float)vd->kioskTime / (float)VisitorData::KIOSK_TIME;
 				bar.SetVisible( true );
@@ -107,10 +95,10 @@ int VisitorStateComponent::DoTick( U32 delta )
 
 	if (parentChit->GetSpatialComponent()) {
 		Vector2F pos2 = parentChit->GetSpatialComponent()->GetPosition2D() + OFFSET;
-		for (int i = 0; i < VisitorData::NUM_VISITS; ++i) {
-			wants[i].SetPos(pos2.x + (float)i*0.25f, pos2.y);
-			wants[i].SetSize(SIZE, SIZE);
-		}
+		//for (int i = 0; i < VisitorData::NUM_VISITS; ++i) {
+			want.SetPos(pos2.x + 0.50f, pos2.y);
+			want.SetSize(SIZE, SIZE);
+		//}
 		bar.SetPos(pos2.x, pos2.y + 1.0f - SIZE);
 		bar.SetSize(1.0f, SIZE);
 	}

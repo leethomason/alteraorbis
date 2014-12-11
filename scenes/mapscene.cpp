@@ -27,8 +27,6 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	player       = data->player;
 	this->data   = data;
 
-	lumosChitBag->GetSim()->CalcWeb(&web);
-
 	gridTravel.Init( &gamui2D, lumosGame->GetButtonLook(0) );
 	viewButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
 	viewButton.SetText("View");
@@ -339,6 +337,7 @@ void MapScene::DrawMap()
 		selectionMark.SetPos(pos.x, pos.y);
 	}
 	{
+		const Web& web = lumosChitBag->GetSim()->CalcWeb();
 		webCanvas.Clear();
 		float mapSize = mapImage.Width();
 		float scale = mapSize / float(NUM_SECTORS);
@@ -346,9 +345,9 @@ void MapScene::DrawMap()
 		webCanvas.DrawRectangle(0, 0, scale, scale);
 		webCanvas.DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
 		
-		for (int i = 0; i < web.Size(); i++) {
-			Vector2I s0 = web[i].sector0;
-			Vector2I s1 = web[i].sector1;
+		for (int i = 0; i < web.NumEdges(); i++) {
+			Vector2I s0, s1;
+			web.Edge(i, &s0, &s1);
 			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
 			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
 			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 2);

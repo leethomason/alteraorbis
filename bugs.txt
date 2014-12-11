@@ -62,7 +62,9 @@ Beta 3b
 			- squad adventure mode?
 			- AI take over mode?
 		- Visitor role
-			- Visitor travel
+			x Visitor travel
+			- visitors should wander around before leaving in a "useless" domain.
+
 			- Visitor trails on map
 			- Limit squad control to "power radius"
 			- Switch to tech tree model for visitors? Do they bring gems??
@@ -148,6 +150,7 @@ Beta 3b
 		- rotation of grid and voxel elements (experiment)
 		- tune EmitterGenerator - meander length
 		x stringpool buggy: over-allocating? turn on code in builder.cpp
+		- human: unify male/female into one object (Gender() method? Differnt resource.)
 
 	- World Gen
 		- less techy, more interesting world gen

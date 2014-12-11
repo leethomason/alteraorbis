@@ -526,32 +526,9 @@ int CoreScript::MaxCitizens()
 
 void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
-	// FIXME shouldn't need special tech rules.
-	int team = Team::Group(parentChit->Team());
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
-			int maxTech = MaxTech();
-			tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
-		}
-		break;
-
-		case TEAM_GOB:
-		case TEAM_KAMAKIRI:
-		{
-			tech = MaxTech();
-		}
-		break;
-
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		tech = 0;
-		break;
-
-		default:
-		GLASSERT(0);
-	}
+	tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
+	int maxTech = MaxTech();
+	tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
@@ -798,7 +775,8 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 
 	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {
-		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::ID(team));
+		// Assert that the 'team' is correctly formed.
+		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || team == TEAM_DEITY || Team::ID(team));
 		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
