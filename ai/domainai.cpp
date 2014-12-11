@@ -605,6 +605,11 @@ void DomainAI::DoBuild()
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::GUARDPOST] < 1 && BuildBuilding(BuildScript::GUARDPOST)) break;
 			if (eff < 2 && BuildFarm()) break;
+			
+			if (arr[BuildScript::KIOSK_C] < 1 && BuildBuilding(BuildScript::KIOSK_C)) break;
+			if (arr[BuildScript::KIOSK_M] < 1 && BuildBuilding(BuildScript::KIOSK_M)) break;
+			if (arr[BuildScript::KIOSK_N] < 1 && BuildBuilding(BuildScript::KIOSK_N)) break;
+			if (arr[BuildScript::KIOSK_S] < 1 && BuildBuilding(BuildScript::KIOSK_S)) break;
 		}
 		if (eff >= 2) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;

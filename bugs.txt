@@ -64,10 +64,11 @@ Beta 3b
 		- Visitor role
 			x Visitor travel
 			- visitors should wander around before leaving in a "useless" domain.
+			- AI should build kiosks
 
-			- Visitor trails on map
-			- Limit squad control to "power radius"
-			- Switch to tech tree model for visitors? Do they bring gems??
+		- Visitor trails on map
+		- Limit squad control to "power radius"
+		- Switch to tech tree model for visitors? Do they bring gems??
 
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?
