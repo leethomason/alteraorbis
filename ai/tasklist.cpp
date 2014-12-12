@@ -668,16 +668,12 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		else 
 			partsMask &= (~WeaponGen::RING_BLADE);
 	}
-	if (itemType == ForgeScript::GUN && team == TEAM_KAMAKIRI) {
-		subItem = ForgeScript::BEAMGUN;
-		altRes = "kamabeamgun";
-	}
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
 	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed, thisComp.chit->Team());
 	if (item) {
-		if (altRes && *altRes) {
-			item->SetResource(altRes);
+		if (team == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
+			item->SetResource("kamabeamgun");
 		}
 
 		item->wallet.Deposit(&thisComp.item->wallet, cost);

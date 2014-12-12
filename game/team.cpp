@@ -52,7 +52,12 @@ grinliz::IString Team::TeamName(int team)
 		name = ISC::deity;
 		break;
 
+		case TEAM_CHAOS:
+		case TEAM_NEUTRAL:
+		break;
+
 		default:
+		GLASSERT(0);
 		break;
 	}
 
@@ -106,6 +111,7 @@ bool Team::IsDefault(const IString& str, int team)
 	return GetTeam(str) == Group(team);
 }
 
+
 int Team::GetRelationship( int _t0, int _t1 )
 {
 	int t0 = 0, t1 = 0;
@@ -123,8 +129,8 @@ int Team::GetRelationship( int _t0, int _t1 )
 	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
 		return RELATE_NEUTRAL;
 
-	GLASSERT(t0 >= 0 && t0 < NUM_TEAMS);
-	GLASSERT(t1 >= 0 && t1 < NUM_TEAMS);
+	GLASSERT(t0 >= TEAM_RAT && t0 < NUM_TEAMS);
+	GLASSERT(t1 >= TEAM_RAT && t1 < NUM_TEAMS);
 
 	static const int F = RELATE_FRIEND;
 	static const int E = RELATE_ENEMY;

@@ -58,21 +58,22 @@ Beta 3b
 			- enemies, neutral, friends
 			- switch to war mode
 			- AI attacks
-			- AI adventures
-			- squad adventure mode?
-			- AI take over mode?
 		- Visitor role
 			x Visitor travel
-			- visitors should wander around before leaving in a "useless" domain.
-			- AI should build kiosks
+			x AI should build kiosks
+		- "siren call of tech"
+		- something wrong with targeting / awareness / enemy status.
 
+		- rebalance denizen spawning
+		- visitors should wander around before leaving in a "useless" domain.
 		- Visitor trails on map
 		- Limit squad control to "power radius"
 		- Switch to tech tree model for visitors? Do they bring gems??
-
+		- AI adventures
+		- squad adventure mode?
+		- AI take over mode?
 		x clean up UI layout
 		x gems running too-negative. Truulga?? Something else?
-
 		x move sim spawn to its own times
 		x DomainAI::Factory can get team Chaos
 		t lots more forging needs to happen!

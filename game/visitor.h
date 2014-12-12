@@ -41,11 +41,10 @@ struct VisitorData
 		visited.Clear();
 	}
 
-	enum {	//NUM_VISITS = 4, 			// how many domains would like to be visited before disconnect
+	enum {	
 			KIOSK_TIME = 5000,
 			MEMORY = 8,
 			NUM_KIOSK_TYPES = 4,
-			//MAX_VISITS = 8,
 			KIOSK_N = 0,				// News, red
 			KIOSK_M,					// Media, blue
 			KIOSK_C,					// Commerce, green
@@ -56,23 +55,7 @@ struct VisitorData
 	int id;								// chit id, and whether in-world or not.
 	U32 kioskTime;						// time spent standing at current kiosk
 	int want;
-	//int nWants;							// number of wants achieved
-	//int nVisits;
-	grinliz::CArray<grinliz::Vector2I, 8> visited;
-
-/*	struct Memory {
-		Memory() { sector.Zero(); rating=0; }
-
-		grinliz::Vector2I	sector;
-		//int					kioskType;
-		int					rating;		
-		void Serialize( XStream* xs );
-	};
-	grinliz::CArray< Memory, MEMORY > memoryArr;
-*/
-//	void NoKiosk( const grinliz::Vector2I& sector );
-//	void DidVisitKiosk( const grinliz::Vector2I& sector );
-
+	grinliz::CDynArray<grinliz::Vector2I> visited;
 
 	grinliz::IString CurrentKioskWant();
 	int CurrentKioskWantID()	{ return want; }
