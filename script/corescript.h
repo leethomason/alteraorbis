@@ -30,6 +30,8 @@ class CoreScript;
 class Model;
 struct ChitContext;
 
+#define CCoreArray grinliz::CArray<CoreScript*, 32 >
+
 struct CoreInfo
 {
 	CoreScript* coreScript;	
@@ -85,6 +87,9 @@ public:
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
+
+	float CoreStrength() const;		// approximation of the military strength of the core
+	int CoreWealth() const;			// amount of money in the core's treasury
 
 	/*	Controls flags are simple "denizen attractors"
 		in the same domain. When a denizen arrives
@@ -148,6 +153,7 @@ private:
 	void DoTickNeutral(int delta, int nSpawnTicks);
 	void DoTickInUse(int delta, int nSpawnTicks);
 	void AssignToSquads();
+	void DoStrategicTick();
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
@@ -155,6 +161,7 @@ private:
 
 	CTicker		aiTicker;		// use to update the core info, every couple of seconds.
 	CTicker		scoreTicker;
+	CTicker		strategicTicker;
 	CoreAchievement	achievement;
 	
 	// serialized

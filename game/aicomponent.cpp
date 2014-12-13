@@ -2185,22 +2185,6 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		int r = parentChit->random.Rand(4);
 
-		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::greater) {
-			// If there is a summoning, try to go there. Don't actually pop until
-			// the Grid travel kicks in.
-			Vector2I techSector = Context()->chitBag->HasSummoning(LumosChitBag::SUMMON_TECH);
-			if (!techSector.IsZero()) {
-				SectorPort dest;
-				dest.sector = techSector;
-				const SectorData& destSD = context->worldMap->GetSectorData(dest.sector);
-				dest.port = destSD.NearestPort(pos2);
-
-				// The announcement of an incoming greater is made later.
-				DoSectorHerd(thisComp, false, dest);
-				return;
-			}
-		}
-
 		// FIXME: the greater logic doesn't even seem to get used.
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
@@ -3060,24 +3044,24 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
+void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	/* Remember this is a *synchronous* function.
 	   Not safe to reach back and change other components.
-	*/
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
-		                               Chit::SPATIAL_BIT |
-									   ComponentSet::IS_ALIVE |
-									   ComponentSet::NOT_IN_IMPACT );
+	   */
+	ComponentSet thisComp(parentChit, Chit::RENDER_BIT |
+						  Chit::SPATIAL_BIT |
+						  ComponentSet::IS_ALIVE |
+						  ComponentSet::NOT_IN_IMPACT);
 
-	if ( !thisComp.okay )
+	if (!thisComp.okay)
 		return;
 
 	Vector2I mapPos = thisComp.spatial->GetPosition2DI();
-	Vector2I sector = ToSector( mapPos );
+	Vector2I sector = ToSector(mapPos);
 
 	switch (msg.ID()) {
-	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
+		case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
 		if (currentAction != WANDER) {
@@ -3087,7 +3071,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		break;
 
-	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
+		case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
 		destinationBlocked++;
 		focus = 0;
 		currentAction = NO_ACTION;
@@ -3108,41 +3092,43 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		break;
 
-	case ChitMsg::PATHMOVE_TO_GRIDMOVE:
-	{
-		LumosChitBag* chitBag = Context()->chitBag;
-		const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
-		Vector2I sector = sectorPort->sector;
-
-		if (   parentChit->GetItem()
-			&& parentChit->GetItem()->keyValues.GetIString( ISC::mob) == ISC::greater 
-			&& chitBag->HasSummoning(LumosChitBag::SUMMON_TECH) == sector)
+		case ChitMsg::PATHMOVE_TO_GRIDMOVE:
 		{
-			Vector2I target = { sector.x*SECTOR_SIZE + SECTOR_SIZE / 2, sector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
-			Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
-			chitBag->RemoveSummoning(sector);
+			LumosChitBag* chitBag = Context()->chitBag;
+			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
+			Vector2I sector = sectorPort->sector;
+			CoreScript* cs = CoreScript::GetCore(sector);
+
+			// Pulled out the old "summoning" system, but left in 
+			// the cool message for Greaters attracted to tech.
+			if (parentChit->GetItem()
+				&& parentChit->GetItem()->keyValues.GetIString(ISC::mob) == ISC::greater
+				&& cs && (cs->GetTech() >= TECH_ATTRACTS_GREATER))
+			{
+				Vector2I target = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+			}
 		}
-	}
 		break;
 
 
-	case ChitMsg::CHIT_SECTOR_HERD:
+		case ChitMsg::CHIT_SECTOR_HERD:
 		if (parentChit->GetItem() && (parentChit->GetItem()->flags & (GameItem::AI_SECTOR_HERD | GameItem::AI_SECTOR_WANDER))) {
 			// Read our destination port information:
-			const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
-			this->Move( *sectorPort, msg.Data() ? true : false );
+			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
+			this->Move(*sectorPort, msg.Data() ? true : false);
 		}
 		break;
 
-	case ChitMsg::WORKQUEUE_UPDATE:
-		if ( aiMode == NORMAL_MODE && currentAction == WANDER ) {
+		case ChitMsg::WORKQUEUE_UPDATE:
+		if (aiMode == NORMAL_MODE && currentAction == WANDER) {
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
 		break;
 
-	default:
-		super::OnChitMsg( chit, msg );
+		default:
+		super::OnChitMsg(chit, msg);
 		break;
 	}
 }

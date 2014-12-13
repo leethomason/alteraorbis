@@ -48,7 +48,9 @@ static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.
 static const int TECH_REPELS_LESSER = 1;	// repels *some* but not all lesser
 static const int TECH_REPELS_GREATER = 2;
 static const int TECH_ATTRACTS_LESSER = 3;
-static const int TECH_ATTRACTS_GREATER = 4;
+
+// In terms of current tech:
+static const float TECH_ATTRACTS_GREATER = 3.2f;
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;

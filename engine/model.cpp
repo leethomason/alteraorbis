@@ -898,7 +898,8 @@ const grinliz::Matrix4& Model::InvXForm() const
 // cache the xform: 8.4
 // goal: 30. Better but ouchie.
 
-int Model::IntersectRay(	const Vector3F& _origin, 
+int Model::IntersectRay(	bool testTris,
+							const Vector3F& _origin, 
 							const Vector3F& _dir,
 							Vector3F* intersect ) const
 {
@@ -912,23 +913,32 @@ int Model::IntersectRay(	const Vector3F& _origin,
 
 	if ( initTest == grinliz::INTERSECT || initTest == grinliz::INSIDE )
 	{
-		const Matrix4& inv = InvXForm();
+		if (testTris) {
+			const Matrix4& inv = InvXForm();
 
-		Vector4F objOrigin4 = inv * origin;
-		Vector4F objDir4    = inv * dir;
+			Vector4F objOrigin4 = inv * origin;
+			Vector4F objDir4 = inv * dir;
 
-		Vector3F objOrigin = { objOrigin4.x, objOrigin4.y, objOrigin4.z };
-		Vector3F objDir    = { objDir4.x, objDir4.y, objDir4.z };
-		Vector3F objIntersect;
+			Vector3F objOrigin = { objOrigin4.x, objOrigin4.y, objOrigin4.z };
+			Vector3F objDir = { objDir4.x, objDir4.y, objDir4.z };
+			Vector3F objIntersect;
 
-		result = resource->Intersect( objOrigin, objDir, &objIntersect );
-		if ( result == grinliz::INTERSECT ) {
-			// Back to this coordinate system. What a pain.
-			const Matrix4& xform = XForm();
+			result = resource->Intersect(objOrigin, objDir, &objIntersect);
+			if (result == grinliz::INTERSECT) {
+				// Back to this coordinate system. What a pain.
+				const Matrix4& xform = XForm();
 
-			Vector4F objIntersect4 = { objIntersect.x, objIntersect.y, objIntersect.z, 1.0f };
-			Vector4F intersect4 = xform*objIntersect4;
-			intersect->Set( intersect4.x, intersect4.y, intersect4.z );
+				Vector4F objIntersect4 = { objIntersect.x, objIntersect.y, objIntersect.z, 1.0f };
+				Vector4F intersect4 = xform*objIntersect4;
+				intersect->Set(intersect4.x, intersect4.y, intersect4.z);
+			}
+		}
+		else {
+			result = grinliz::INTERSECT;
+			if (initTest == grinliz::INSIDE)
+				*intersect = _origin;
+			else
+				*intersect = dv;
 		}
 	}
 	return result;

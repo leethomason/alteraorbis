@@ -512,24 +512,14 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 			continue;
 
 		//GLOUTPUT(( "Consider: %s\n", root->GetResource()->header.name ));
-		int result = grinliz::REJECT;
+		t = FLT_MAX;
+		int result = root->IntersectRay((testType == TEST_TRI), p0, dir, &testInt);
 
-		if ( testType == TEST_HIT_AABB ) {
-			Rectangle3F modelAABB;
-
-			root->CalcHitAABB( &modelAABB );
-			result = IntersectRayAABB( p0, dir, modelAABB, &testInt, &t );
-		}
-		else if ( testType == TEST_TRI ) {
-			t = FLT_MAX;
-			result = root->IntersectRay( p0, dir, &testInt );
-
-			if ( result == grinliz::INTERSECT ) {
-				Vector3F delta = p0 - testInt;
-				t = delta.Length();
-				//GLOUTPUT(( "Hit: %s t=%.2f\n", root->GetResource()->header.name, t ));
-			}	
-		}
+		if ( result == grinliz::INTERSECT ) {
+			Vector3F delta = p0 - testInt;
+			t = delta.Length();
+			//GLOUTPUT(( "Hit: %s t=%.2f\n", root->GetResource()->header.name, t ));
+		}	
 
 		if ( result == grinliz::INTERSECT ) {
 			// Ugly little bug: check for t>=0, else could collide with objects

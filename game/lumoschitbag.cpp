@@ -949,10 +949,17 @@ bool BuildingFilter::Accept( Chit* chit )
 	return msc != 0;
 }
 
+bool BuildingWithPorchFilter::Accept(Chit* chit)
+{
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	if (msc && msc->HasPorch()) {
+		return true;
+	}
+	return false;
+}
 
 bool BuildingRepairFilter::Accept(Chit* chit)
 {
-	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 	if (msc ) { //&& msc->Building()) {
 		GameItem* item = chit->GetItem();
@@ -1121,31 +1128,6 @@ bool LumosChitBag::PopScene( int* id, SceneData** data )
 		return true;
 	}
 	return false;
-}
-
-
-void LumosChitBag::AddSummoning(const grinliz::Vector2I& sector, int reason)
-{
-	summoningArr.Push(sector);
-}
-
-
-grinliz::Vector2I LumosChitBag::HasSummoning(int reason)
-{
-	Vector2I v = { 0, 0 };
-	if (summoningArr.Size()) {
-		v = summoningArr[0];
-	}
-	return v;
-}
-
-
-void LumosChitBag::RemoveSummoning(const grinliz::Vector2I& sector)
-{
-	int i = 0;
-	while ((i = summoningArr.Find(sector)) >= 0) {
-		summoningArr.Remove(i);
-	}
 }
 
 

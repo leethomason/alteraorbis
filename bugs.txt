@@ -52,18 +52,18 @@ Beta 3b
 			t squaddies abandon mission
 			t restore alpha blending on hp display and squad text
 			x switch over domain growth to be in line with new squad rules
-			- flag art
 			- squad destination on main map not correct
 		- "Diplomacy"
 			- enemies, neutral, friends
 			- switch to war mode
 			- AI attacks
-		- Visitor role
+		x Visitor role
 			x Visitor travel
 			x AI should build kiosks
-		- "siren call of tech"
-		- something wrong with targeting / awareness / enemy status.
+		x "siren call of tech"
+		t something wrong with targeting / awareness / enemy status.
 
+		- control flag art
 		- rebalance denizen spawning
 		- visitors should wander around before leaving in a "useless" domain.
 		- Visitor trails on map

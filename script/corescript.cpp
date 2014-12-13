@@ -89,6 +89,7 @@ CoreScript::CoreScript()
 	  workQueue( 0 ),
 	  aiTicker(2000),
 	  scoreTicker(10*1000),
+	  strategicTicker(10*1000),
 	  summonGreater(0),
 	  autoRebuild(false)
 {
@@ -497,6 +498,12 @@ int CoreScript::DoTick(U32 delta)
 		}
 	}
 
+	if (strategicTicker.Delta(delta)) {
+		if (this->InUse() && Context()->chitBag->GetHomeCore() != this) {
+			DoStrategicTick();
+		}
+	}
+
 	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
 }
 
@@ -545,18 +552,6 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 			if (!RecruitNeutral()) {
 				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
 				this->AddCitizen( chit );
-			}
-		}
-
-		if ( (Team::Group(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
-			summonGreater += spawnTick.Period();
-			if (summonGreater > SUMMON_GREATER_TIME) {
-				// Find a greater and bring 'em in!
-				// This feels a little artificial, and 
-				// may need to get revisited as the game
-				// grows.
-				Context()->chitBag->AddSummoning(sector, LumosChitBag::SUMMON_TECH);
-				summonGreater = 0;
 			}
 		}
 	}
@@ -934,4 +929,105 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 		waypointFlags[squadID] = Context()->engine->AllocModel("flag");
 	}
 	waypointFlags[squadID]->SetPos(ToWorld3F(waypoints[squadID].Last()));
+}
+
+
+void CoreScript::DoStrategicTick()
+{
+	// Look around for someone to attack. They should be:
+	//	- an enemy FIXME: or neutral
+	//	- weaker
+	//	- compete for visitors OR have crystal
+	//
+	// We should:
+	//	- have squads ready to go
+
+	// 1. Check for squads available & ready
+	// 2. Run through diplomacy list, look for enemies
+	// 3. Score on: strength & wealth/visitors
+	// 4. Attack
+
+	bool squadReady[MAX_SQUADS] = { false };
+	CChitArray squaddies;
+	
+	// Check for ready squads.
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		this->Squaddies(i, &squaddies);
+		if (squaddies.Size() < SQUAD_SIZE) 
+			continue;
+
+		bool okay = true;
+		for (int k = 0; okay && k < squaddies.Size(); ++k) {
+			Chit* chit = squaddies[k];
+			if (this->IsSquaddieOnMission(chit->ID())) {
+				okay = false;
+				break;
+			}
+			else if (chit->GetItem()->HPFraction() < 0.8f) {
+				okay = false;
+				break;
+			}
+		}
+		squadReady[i] = okay;
+	}
+
+	int nReady = 0;
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squadReady[i])
+			++nReady;
+	}
+	if (nReady == 0) return;
+
+	Sim* sim = Context()->chitBag->GetSim();
+	GLASSERT(sim);
+	if (!sim) return;
+
+	Vector2I sector = ParentChit()->GetSpatialComponent()->GetSector();
+	CCoreArray stateArr;
+	sim->CalcPossibleStrategicTargets(sector, &stateArr);
+
+	float myStrength = this->CoreStrength();
+	int myWealth	 = this->CoreWealth();
+
+	CoreScript* target = 0;
+	for (int i = 0; i < stateArr.Size(); ++i) {
+		CoreScript* cs = stateArr[i];
+		float strength = cs->CoreStrength();
+		int wealth   = cs->CoreWealth();
+
+		if (strength < myStrength * 0.5f
+			&& wealth > myWealth)
+		{
+			// Assuming this is actually so rare that it doesn't matter to select the best.
+			target = cs;
+			break;
+		}
+	}
+
+	if (!target) return;
+
+	// Attack!!!
+	bool first = true;
+	Vector2F targetCorePos2 = target->ParentChit()->GetSpatialComponent()->GetPosition2D();
+	Vector2I targetCorePos = target->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+	Vector2I targetSector = ToSector(targetCorePos);
+
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (!squadReady[i]) continue;
+
+		Vector2I pos = { 0, 0 };
+		pos = targetCorePos;
+		if (first) {
+			first = false;
+		}
+		else {
+			BuildingWithPorchFilter filter;
+			Chit* building = Context()->chitBag->FindBuilding(IString(), targetSector, &targetCorePos2, LumosChitBag::RANDOM_NEAR, 0, &filter);
+			if (building) {
+				pos = building->GetSpatialComponent()->GetPosition2DI();
+			}
+		}
+		GLASSERT(!pos.IsZero());
+		this->SetWaypoints(i, pos);
+	}
 }

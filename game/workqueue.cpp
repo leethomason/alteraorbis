@@ -226,6 +226,15 @@ bool WorkQueue::HasAssignedJob() const
 	return false;
 }
 
+bool WorkQueue::HasJobAt(const Vector2I& v) {
+	for (int i = 0; i < queue.Size(); ++i) {
+		if (queue[i].pos == v) {
+			return true;
+		}
+	}
+	return false;
+}
+
 
 const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {

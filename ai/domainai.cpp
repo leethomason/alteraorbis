@@ -482,8 +482,10 @@ bool DomainAI::ClearRoadsAndPorches()
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
 				if (wg.IsLand()) {
 					if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
-						workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
-						issued = true;
+						if (!workQueue->HasJobAt(pos)) {
+							workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
+							issued = true;
+						}
 					}
 				}
 			}

@@ -101,6 +101,21 @@ public:
 	const Web& CalcWeb();
 	const Web& GetCachedWeb();
 
+	/*
+	struct DiplomaticState {
+		int team0, team1;	// team0 < team1 for sorting
+
+		float feeling;		// -1 (bad) to 1 (good), 0 neutral
+		bool  atWar;
+		enum {
+			FRIEND_TEAM = (1<<0),
+			ENEMY_TEAM = (1<<1),
+			COMPETE_VISITORS = (1<<2),
+		};
+		int	factors;
+	};*/
+	void CalcPossibleStrategicTargets(const grinliz::Vector2I& sector, grinliz::CArray<CoreScript*, 32> *stateArr);
+
 private:
 	void CreateCores();
 	void CreateRockInOutland();
@@ -134,6 +149,7 @@ private:
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
+//	grinliz::CDynArray< DiplomaticState > diplomacyArr;
 };
 
 

@@ -46,6 +46,13 @@ public:
 	virtual int  Type() { return MAP; }
 };
 
+class BuildingWithPorchFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MAP; }
+};
+
 // This one is abstract - has no Type()
 class RelationshipFilter : public IChitAccept
 {
@@ -301,14 +308,6 @@ public:
 	bool PopScene( int* id, SceneData** data );
 	bool IsScenePushed() const { return sceneID >= 0; }
 
-	// FIXME: sketchy partial implementation. 'reason' not used.
-	enum {
-		SUMMON_TECH
-	};
-	void AddSummoning(const grinliz::Vector2I& sector, int reason);
-	grinliz::Vector2I HasSummoning(int reason);
-	void RemoveSummoning(const grinliz::Vector2I& sector);
-
 	grinliz::IString NameGen(const char* dataset, int seed, int min, int max);
 
 	// The seed is just a lookup into the name, in this form.
@@ -339,7 +338,6 @@ private:
 	grinliz::CDynArray<Chit*>	findMatch;
 	grinliz::CDynArray<float>	findWeight;
 	grinliz::CDynArray<Chit*>	chitArr;				// local, temporary
-	grinliz::CDynArray<grinliz::Vector2I> summoningArr;	// not serialized (maybe should be?)
 
 	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
 };

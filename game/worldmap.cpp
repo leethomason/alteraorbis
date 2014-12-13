@@ -1327,7 +1327,7 @@ int WorldMap::IntersectPlantAtVoxel(const grinliz::Vector3I& voxel,
 	PushTree(0, voxel.x, voxel.z, wg.Plant() - 1, wg.PlantStage(), 1.0f);
 	Model* m = treePool[0];
 
-	int result = m->IntersectRay(origin, dir, at);
+	int result = m->IntersectRay(true, origin, dir, at);
 	if (result == INTERSECT) {
 		float lenToImpact = (*at - origin).Length();
 		if (lenToImpact <= length) return INTERSECT;
