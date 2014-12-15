@@ -268,7 +268,7 @@ public:
 					bool trail );
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, Wallet* srcWallet );
-	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0 );
+	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0, const char* altName=0 );
 	GameItem* AddItem( GameItem* item, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler

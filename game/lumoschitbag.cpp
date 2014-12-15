@@ -439,7 +439,12 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
 
-	AddItem( root.Name(), chit, context->engine, team, 0 );
+	const char* altName = 0;
+	if (Team::Group(team) == TEAM_HOUSE) {
+		altName = "human";
+	}
+	AddItem(root.Name(), chit, context->engine, team, 0, 0, altName);
+
 	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
@@ -780,7 +785,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes)
+GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes, const char* altName)
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
@@ -788,6 +793,9 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 	GLASSERT(itemDefArr.Size() > 0);
 
 	GameItem* item = itemDefArr[0]->Clone();
+	if (altName) {
+		item->SetName(altName);
+	}
 	if (altRes) {
 		item->SetResource(altRes);
 	}

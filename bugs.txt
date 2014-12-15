@@ -61,9 +61,9 @@ Beta 3b
 			x AI should build kiosks
 		x "siren call of tech"
 		t something wrong with targeting / awareness / enemy status.
+		x unify human male/female
+		x seed plants
 		- clean up worldgen output
-		- unify human male/female
-		- seed plants
 
 		- switch to war mode
 		- control flag art

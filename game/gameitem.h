@@ -320,6 +320,11 @@ public:
 	void SetProperName( const grinliz::IString& n );
 	void SetResource(const char* n)				{ GLASSERT(n && *n);  resource = grinliz::StringPool::Intern(n); }
 
+	bool IsFemale() const {
+		// HACK! But only here.
+		return !resource.empty() && strstr(resource.c_str(), "emale");
+	}
+
 	// Sets this item to be tracked. Also records the team that created it, 
 	// for generating colors when applicable.
 	void SetSignificant(NewsHistory* history, const grinliz::Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator);

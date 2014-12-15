@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:e29e2039044a1e066a37866c0d1096a9$ -->
+<!-- $TexturePacker:SmartUpdate:8a74e59b0b9115dca991bf5602dc0084$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -37,8 +37,8 @@ r => 'y' only set if sprite is rotated
     <sprite n="fireCyclops" x="884" y="806" w="128" h="128"/>
     <sprite n="gobman" x="608" y="920" w="128" h="128"/>
     <sprite n="greeninfo" x="748" y="798" w="128" h="128"/>
-    <sprite n="human" x="136" y="936" w="64" h="64"/>
-    <sprite n="humanFace" x="518" y="528" w="154" h="207"/>
+    <sprite n="human.bak" x="136" y="936" w="64" h="64"/>
+    <sprite n="human" x="518" y="528" w="154" h="207"/>
     <sprite n="humanFemale" x="528" y="0" w="256" h="256"/>
     <sprite n="humanMale" x="264" y="0" w="256" h="256"/>
     <sprite n="kamakiri" x="472" y="879" w="128" h="128"/>

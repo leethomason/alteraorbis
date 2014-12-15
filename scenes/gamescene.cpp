@@ -605,6 +605,7 @@ void GameScene::TapModel( Chit* target )
 	}
 	else if ( ai && Team::GetRelationship( target, player ) == RELATE_FRIEND ) {
 		const GameItem* item = target->GetItem();
+		// FIXME: should use key
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
 			chitTracking = target->ID();

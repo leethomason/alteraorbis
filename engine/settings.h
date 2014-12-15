@@ -40,7 +40,6 @@ public:
 	bool DebugFPS() const				{ return debugFPS; }
 	float SpawnDate() const				{ return spawnDate; }
 	float WorldGenDone() const			{ return worldGenDone; }
-	bool SeedPlants() const				{ return seedPlants; }
 
 protected:
 	SettingsManager( const char* path );
@@ -60,7 +59,6 @@ private:
 	bool debugFPS;
 	float spawnDate;	// would like to be 0.20, but in interest of performance, 0.90 is used. On a debug 0.98 may be correct.
 	float worldGenDone;
-	bool seedPlants;
 	grinliz::GLString path;
 };
 

@@ -334,9 +334,7 @@ void WorldGenScene::DoTick(U32 delta)
 			sim->Load(datPath, 0);
 
 			sim->EnableSpawn(false);
-			if (SettingsManager::Instance()->SeedPlants()) {
-				sim->SeedPlants();
-			}
+			sim->SeedPlants();
 			genState.mode = GenState::SIM_TICK;
 			newsConsole.AttachChitBag(sim->GetChitBag());
 		}
