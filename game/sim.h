@@ -115,6 +115,7 @@ public:
 		int	factors;
 	};*/
 	void CalcPossibleStrategicTargets(const grinliz::Vector2I& sector, grinliz::CArray<CoreScript*, 32> *stateArr);
+	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
 
 private:
 	void CreateCores();

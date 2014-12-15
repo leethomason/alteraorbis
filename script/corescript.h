@@ -88,8 +88,8 @@ public:
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
 
-	float CoreStrength() const;		// approximation of the military strength of the core
-	int CoreWealth() const;			// amount of money in the core's treasury
+	int CorePower();	// approximation of the military strength of the core
+	int CoreWealth();	// amount of money in the core's treasury
 
 	/*	Controls flags are simple "denizen attractors"
 		in the same domain. When a denizen arrives

@@ -152,12 +152,24 @@ void ItemComponent::NameItem(GameItem* item)
 }
 
 
-float ItemComponent::PowerRating() const
+int ItemComponent::PowerRating(bool current) const
 {
-	GameItem* mainItem = itemArr[0];
-	int level = mainItem->Traits().Level();
+	// damage we can deal * damage we can take
+	int power = current ? int(itemArr[0]->hp) : itemArr[0]->TotalHP();
+	const MeleeWeapon* melee = this->QuerySelectMelee();
+	const RangedWeapon* ranged = this->QuerySelectRanged();
+	if (melee)
+		power *= melee->GetValue();
+	if (ranged)
+		power *= ranged->GetValue() * 2;
 
-	return float(1+level) * float(mainItem->mass);
+	// nominal: 50 * 10 * 20 * 2 = 10,000
+	// reduce nominal to 100:
+	power /= 100;
+
+	if (power < 1)
+		power = 1;
+	return power;
 }
 
 

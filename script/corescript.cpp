@@ -18,12 +18,14 @@
 #include "../game/gameitem.h"
 #include "../game/sim.h"
 #include "../game/worldinfo.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/cameracomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
@@ -932,6 +934,34 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 }
 
 
+int CoreScript::CorePower()
+{
+	int power = 0;
+	for (int i = 0; i < citizens.Size(); ++i) {
+		Chit* chit = Context()->chitBag->GetChit(citizens[i]);
+		if (chit && chit->GetItemComponent()) {
+			power += chit->GetItemComponent()->PowerRating(true);
+		}
+	}
+	return power;
+}
+
+
+int CoreScript::CoreWealth()
+{
+	int gold = 0;
+	const int* value = ReserveBank::Instance()->CrystalValue();
+	const Wallet* wallet = ParentChit()->GetWallet();
+	if (wallet) {
+		gold += wallet->Gold();
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			gold += value[i] * wallet->Crystal(i);
+		}
+	}
+	return gold;
+}
+
+
 void CoreScript::DoStrategicTick()
 {
 	// Look around for someone to attack. They should be:
@@ -986,17 +1016,16 @@ void CoreScript::DoStrategicTick()
 	CCoreArray stateArr;
 	sim->CalcPossibleStrategicTargets(sector, &stateArr);
 
-	float myStrength = this->CoreStrength();
-	int myWealth	 = this->CoreWealth();
+	int myPower = this->CorePower();
+	int myWealth = this->CoreWealth();
 
 	CoreScript* target = 0;
 	for (int i = 0; i < stateArr.Size(); ++i) {
 		CoreScript* cs = stateArr[i];
-		float strength = cs->CoreStrength();
+		int power = cs->CorePower();
 		int wealth   = cs->CoreWealth();
 
-		if (strength < myStrength * 0.5f
-			&& wealth > myWealth)
+		if ((power < myPower / 2) && wealth > myWealth)
 		{
 			// Assuming this is actually so rare that it doesn't matter to select the best.
 			target = cs;
@@ -1007,6 +1036,7 @@ void CoreScript::DoStrategicTick()
 	if (!target) return;
 
 	// Attack!!!
+	sim->DeclareWar(target, this);
 	bool first = true;
 	Vector2F targetCorePos2 = target->ParentChit()->GetSpatialComponent()->GetPosition2D();
 	Vector2I targetCorePos = target->ParentChit()->GetSpatialComponent()->GetPosition2DI();

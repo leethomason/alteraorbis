@@ -980,3 +980,10 @@ const Web& Sim::GetCachedWeb()
 	}
 	return web;
 }
+
+
+void Sim::CalcPossibleStrategicTargets(const grinliz::Vector2I& sector, grinliz::CArray<CoreScript*, 32> *stateArr)
+{
+	stateArr->Clear();
+}
+

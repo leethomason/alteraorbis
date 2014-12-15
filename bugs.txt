@@ -55,14 +55,17 @@ Beta 3b
 			- squad destination on main map not correct
 		- "Diplomacy"
 			- enemies, neutral, friends
-			- switch to war mode
 			- AI attacks
 		x Visitor role
 			x Visitor travel
 			x AI should build kiosks
 		x "siren call of tech"
 		t something wrong with targeting / awareness / enemy status.
+		- clean up worldgen output
+		- unify human male/female
+		- seed plants
 
+		- switch to war mode
 		- control flag art
 		- rebalance denizen spawning
 		- visitors should wander around before leaving in a "useless" domain.
