@@ -346,8 +346,7 @@ void GameScene::Resize()
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
-	float consoleHeight = okay.Y() - newsConsole.consoleWidget.Y();
-	newsConsole.consoleWidget.SetBounds(0, consoleHeight);
+	newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );

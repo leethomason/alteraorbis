@@ -63,7 +63,8 @@ Beta 3b
 		t something wrong with targeting / awareness / enemy status.
 		x unify human male/female
 		x seed plants
-		- clean up worldgen output
+		x clean up worldgen output
+		- new art from shroom
 
 		- switch to war mode
 		- control flag art

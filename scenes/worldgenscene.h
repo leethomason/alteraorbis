@@ -80,8 +80,8 @@ private:
 	grinliz::GLString	simStr;
 	gamui::PushButton	okay, cancel;
 	gamui::Image		worldImage;
-	gamui::TextLabel	headerText;				// Top label 
-	gamui::TextLabel	footerText;				// bottom label
+	gamui::TextLabel	headerText;			// Top label 
+	gamui::TextLabel	footerText;			// bottom label
 	gamui::TextLabel	statText;			// (at this time) mostly debug.
 	NewsConsole			newsConsole;
 };

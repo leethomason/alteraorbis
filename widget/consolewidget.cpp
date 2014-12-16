@@ -28,10 +28,17 @@ void ConsoleWidget::Init( gamui::Gamui* g )
 		lines[i].button.Init(g, nullAtom, nullAtom, nullAtom, nullAtom, nullAtom, nullAtom);
 		lines[i].pos.Zero();
 	}
+	background.Init(g, nullAtom, true);
 }
 
 
-void ConsoleWidget::SetBounds( float w, float h )
+void ConsoleWidget::SetBackground(RenderAtom atom)
+{
+	background.SetAtom(atom);
+}
+
+
+void ConsoleWidget::SetSize( float w, float h )
 {
 	nLines = LRint(h / gamui->GetTextHeight());
 	nLines = Clamp(nLines, 1, (int)NUM_LINES);
@@ -39,6 +46,7 @@ void ConsoleWidget::SetBounds( float w, float h )
 		lines[i].text.SetVisible(i < nLines);
 		lines[i].button.SetVisible(i < nLines);
 	}
+	background.SetSize(w, h);
 }
 
 
@@ -98,6 +106,7 @@ void ConsoleWidget::SetPos(float x, float y)
 		lines[i].button.SetSize(h, h);
 		lines[i].text.SetPos(x + h, y + (float)i*h);
 	}
+	background.SetPos(x, y);
 }
 
 
@@ -108,6 +117,7 @@ void ConsoleWidget::SetVisible(bool vis)
 		lines[i].text.SetVisible(visible);
 		lines[i].button.SetVisible(visible);
 	}
+	background.SetVisible(vis);
 }
 
 

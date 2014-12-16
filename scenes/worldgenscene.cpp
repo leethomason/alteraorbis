@@ -12,6 +12,7 @@
 #include "../game/sim.h"
 
 #include "../script/rockgen.h"
+#include "../script/procedural.h"
 #include "../audio/xenoaudio.h"
 #include <time.h>
 
@@ -49,7 +50,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	footerText.SetBounds(400, 0);
 
 	newsConsole.Init(&gamui2D, 0);
-	newsConsole.consoleWidget.SetBounds(400, 0);
+	newsConsole.consoleWidget.SetSize(400, 100);
 	newsConsole.consoleWidget.SetTime(VERY_LONG_TICK);
 
 	genState.Clear();
@@ -79,17 +80,25 @@ void WorldGenScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 
 	const float DY = 16.0f;
-	const float CONSOLE_HEIGHT = DY * 8.0f;
+	const float CONSOLE_HEIGHT = DY * 16.0f;
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), headerText.Y() + DY*3.0f);
-	newsConsole.consoleWidget.SetBounds(400, CONSOLE_HEIGHT);
-	statText.SetPos(worldImage.X() + layout.GutterX(), headerText.Y() + 2.0f*DY + CONSOLE_HEIGHT);
+	//newsConsole.consoleWidget.SetPos(0, 0);
+	newsConsole.consoleWidget.SetSize(400, CONSOLE_HEIGHT);
+
+//	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
+//	newsConsole.consoleWidget.SetBackground(gray);
+
+	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(), 
+					worldImage.Y());
 	footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
 
 	headerText.SetTab(worldImage.Width() / 5.0f);
 	statText.SetTab(worldImage.Width() / 5.0f);
 	footerText.SetTab(worldImage.Width() / 5.0f);
+
+	statText.SetVisible(SettingsManager::Instance()->DebugFPS());
 }
 
 

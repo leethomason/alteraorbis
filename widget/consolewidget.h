@@ -11,6 +11,7 @@ class ConsoleWidget : public gamui::IWidget
 public:
 	ConsoleWidget();
 	void Init( gamui::Gamui* );
+	void SetBackground(gamui::RenderAtom atom);
 
 	virtual float X() const							{ return lines[0].text.X(); }
 	virtual float Y() const							{ return lines[0].text.Y(); }
@@ -18,8 +19,8 @@ public:
 	virtual float Height() const;
 	virtual void SetPos(float x, float y);
 
-	virtual void SetSize( float w, float h )		{}
-	void SetBounds( float w, float h );
+	virtual void SetSize(float w, float h);
+//	void SetBounds( float w, float h );
 	virtual bool Visible() const					{ return lines[0].text.Visible(); }
 	virtual void SetVisible(bool vis);
 
@@ -47,6 +48,7 @@ private:
 		AGE_TIME  = 40*1000,	// msec
 	};
 	gamui::Gamui*		gamui;
+	gamui::Image		background;
 	int					ageTime;
 	int					nLines;
 	Line				lines[NUM_LINES];
