@@ -54,8 +54,8 @@ Beta 3b
 			x switch over domain growth to be in line with new squad rules
 			- squad destination on main map not correct
 		- "Diplomacy"
-			- enemies, neutral, friends
-			- AI attacks
+			x enemies, neutral, friends
+			t AI attacks
 		x Visitor role
 			x Visitor travel
 			x AI should build kiosks
@@ -64,7 +64,7 @@ Beta 3b
 		x unify human male/female
 		x seed plants
 		x clean up worldgen output
-		- new art from shroom
+		- new art from Shroom
 
 		- switch to war mode
 		- control flag art

@@ -101,20 +101,7 @@ public:
 	const Web& CalcWeb();
 	const Web& GetCachedWeb();
 
-	/*
-	struct DiplomaticState {
-		int team0, team1;	// team0 < team1 for sorting
-
-		float feeling;		// -1 (bad) to 1 (good), 0 neutral
-		bool  atWar;
-		enum {
-			FRIEND_TEAM = (1<<0),
-			ENEMY_TEAM = (1<<1),
-			COMPETE_VISITORS = (1<<2),
-		};
-		int	factors;
-	};*/
-	void CalcPossibleStrategicTargets(const grinliz::Vector2I& sector, grinliz::CArray<CoreScript*, 32> *stateArr);
+	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, int relate, grinliz::CArray<CoreScript*, 32> *stateArr);
 	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
 
 private:

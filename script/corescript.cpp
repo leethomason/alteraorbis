@@ -1014,7 +1014,7 @@ void CoreScript::DoStrategicTick()
 
 	Vector2I sector = ParentChit()->GetSpatialComponent()->GetSector();
 	CCoreArray stateArr;
-	sim->CalcPossibleStrategicTargets(sector, &stateArr);
+	sim->CalcStrategicRelationships(sector, 3, RELATE_ENEMY, &stateArr);
 
 	int myPower = this->CorePower();
 	int myWealth = this->CoreWealth();

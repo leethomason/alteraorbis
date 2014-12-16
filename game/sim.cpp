@@ -978,8 +978,28 @@ const Web& Sim::GetCachedWeb()
 }
 
 
-void Sim::CalcPossibleStrategicTargets(const grinliz::Vector2I& sector, grinliz::CArray<CoreScript*, 32> *stateArr)
+void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, int relate, grinliz::CArray<CoreScript*, 32> *stateArr)
 {
 	stateArr->Clear();
+
+	Rectangle2I mapBounds, bounds;
+	mapBounds.Set(1, 1, NUM_SECTORS - 2, NUM_SECTORS - 2);
+	bounds.min = bounds.max = sector;
+	bounds.Outset(rad);
+	bounds.DoIntersection(mapBounds);
+
+	CoreScript* originCore = CoreScript::GetCore(sector);
+	if (!originCore) return;
+
+	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
+		CoreScript* cs = CoreScript::GetCore(it.Pos());
+		if (cs
+			&& cs != originCore
+			&& cs->InUse()
+			&& Team::GetRelationship(cs->ParentChit(), originCore->ParentChit()) == relate)
+		{
+			stateArr->Push(cs);
+		}
+	}
 }
 

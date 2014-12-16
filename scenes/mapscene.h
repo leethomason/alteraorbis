@@ -96,7 +96,8 @@ private:
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
 	gamui::TextLabel	map2Text[MAP2_SIZE2];
-	gamui::Canvas		webCanvas;
+	enum {WHITE_CANVAS, RED_CANVAS, YELLOW_CANVAS, GREEN_CANVAS, NUM_CANVAS};
+	gamui::Canvas		webCanvas[NUM_CANVAS];
 };
 
 #endif // MAP_SCENE_INCLUDED

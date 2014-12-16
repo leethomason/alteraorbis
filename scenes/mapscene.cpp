@@ -80,9 +80,12 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		face[i].Init(&gamui2D, nullAtom, true);
 	}
 
-	RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
-	webAtom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO;
-	webCanvas.Init(&gamui2D, webAtom);
+	for (int i = 0; i < NUM_CANVAS; ++i) {
+		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
+		RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
+		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+		webCanvas[i].Init(&gamui2D, webAtom);
+	}
 }
 
 
@@ -155,7 +158,10 @@ void MapScene::Resize()
 		}
 	}
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
-	webCanvas.SetPos(mapImage.X(), mapImage.Y());
+
+	for (int i = 0; i < NUM_CANVAS; ++i) {
+		webCanvas[i].SetPos(mapImage.X(), mapImage.Y());
+	}
 	DrawMap();
 }
 
@@ -336,21 +342,39 @@ void MapScene::DrawMap()
 		Vector2F pos = ToUI(0, world, mapBounds, 0);
 		selectionMark.SetPos(pos.x, pos.y);
 	}
+
+	float mapSize = mapImage.Width();
+	float scale = mapSize / float(NUM_SECTORS);
 	{
 		const Web& web = lumosChitBag->GetSim()->CalcWeb();
-		webCanvas.Clear();
-		float mapSize = mapImage.Width();
-		float scale = mapSize / float(NUM_SECTORS);
+		webCanvas[WHITE_CANVAS].Clear();
 
-		webCanvas.DrawRectangle(0, 0, scale, scale);
-		webCanvas.DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
+//		webCanvas[WHITE_CANVAS].DrawRectangle(0, 0, scale, scale);
+//		webCanvas[WHITE_CANVAS].DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
 		
 		for (int i = 0; i < web.NumEdges(); i++) {
 			Vector2I s0, s1;
 			web.Edge(i, &s0, &s1);
 			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
 			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
-			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+			webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+		}
+	}
+	for (int i = 0; i < 3; ++i) {
+		static const int RELATE[3] = { RELATE_FRIEND, RELATE_NEUTRAL, RELATE_ENEMY };
+		static const int CANVAS[3] = { GREEN_CANVAS, YELLOW_CANVAS, RED_CANVAS };
+
+		int canvas = CANVAS[i];
+		int relate = RELATE[i];
+		webCanvas[canvas].Clear();
+
+		CCoreArray arr;
+		Sim* sim = lumosChitBag->GetSim();
+		sim->CalcStrategicRelationships(data->destSector.IsZero() ? homeSector : data->destSector, NUM_SECTORS, relate, &arr);
+
+		for (int k = 0; k < arr.Size(); ++k) {
+			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();
+			webCanvas[canvas].DrawRectangle(scale*float(s.x), scale*float(s.y), scale, scale);
 		}
 	}
 }
