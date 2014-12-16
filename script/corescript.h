@@ -87,6 +87,7 @@ public:
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
+	int NumTemples();
 
 	int CorePower();	// approximation of the military strength of the core
 	int CoreWealth();	// amount of money in the core's treasury

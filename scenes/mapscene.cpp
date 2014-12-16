@@ -65,8 +65,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 
 	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
 	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
-	travelMark[0].Init( &gamui2D, travelAtom, true );
-	travelMark[1].Init( &gamui2D, travelAtom, true );
+	travelMark.Init( &gamui2D, travelAtom, true );
 
 	RenderAtom selectionAtom = lumosGame->CalcUIIconAtom("mapSelection", true);
 	selectionMark.Init(&gamui2D, selectionAtom, true);
@@ -83,7 +82,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	for (int i = 0; i < NUM_CANVAS; ++i) {
 		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
 		RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
-		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
 		webCanvas[i].Init(&gamui2D, webAtom);
 	}
 }
@@ -151,12 +150,13 @@ void MapScene::Resize()
 		const float MARK_SIZE = 5;
 		const float SQUAD_MARK_SIZE = 20;
 		playerMark[i].SetSize(MARK_SIZE, MARK_SIZE);
-		homeMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
-		travelMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 		for (int k = 0; k < MAX_SQUADS; ++k) {
 			squadMark[i][k].SetSize(SQUAD_MARK_SIZE, SQUAD_MARK_SIZE);
 		}
 	}
+	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+	homeMark[0].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+	homeMark[1].SetSize(dx / float(MAP2_SIZE), dy / float(MAP2_SIZE));
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 
 	for (int i = 0; i < NUM_CANVAS; ++i) {
@@ -303,7 +303,8 @@ void MapScene::DrawMap()
 	// --- MAIN ---
 	Rectangle2I mapBounds = data->worldMap->Bounds();
 	Rectangle2I map2Bounds;
-	map2Bounds.Set(subBounds.min.x*SECTOR_SIZE, subBounds.min.y*SECTOR_SIZE, subBounds.max.x*SECTOR_SIZE, subBounds.max.y*SECTOR_SIZE);
+	map2Bounds.Set(subBounds.min.x*SECTOR_SIZE, subBounds.min.y*SECTOR_SIZE, 
+				   subBounds.max.x*SECTOR_SIZE + SECTOR_SIZE-1, subBounds.max.y*SECTOR_SIZE + SECTOR_SIZE-1);
 
 	Vector2F playerPos = { 0, 0 };
 	Chit* player = data->player;
@@ -328,9 +329,10 @@ void MapScene::DrawMap()
 
 		pos.Set(float(data->destSector.x * SECTOR_SIZE), float(data->destSector.y * SECTOR_SIZE));
 		v = ToUI(i,pos, b, &inBounds);
-		travelMark[i].SetPos(v.x, v.y);
-		travelMark[i].SetVisible(inBounds && !data->destSector.IsZero());
-
+		if (i == 0) {
+			travelMark.SetPos(v.x, v.y);
+			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
+		}
 		for (int k = 0; k < MAX_SQUADS; ++k) {
 			v = ToUI(i, ToWorld2F(data->squadDest[k]), b, &inBounds);
 			squadMark[i][k].SetCenterPos(v.x, v.y);
@@ -343,8 +345,7 @@ void MapScene::DrawMap()
 		selectionMark.SetPos(pos.x, pos.y);
 	}
 
-	float mapSize = mapImage.Width();
-	float scale = mapSize / float(NUM_SECTORS);
+	float scale = float(mapImage.Width()) / float(NUM_SECTORS);
 	{
 		const Web& web = lumosChitBag->GetSim()->CalcWeb();
 		webCanvas[WHITE_CANVAS].Clear();

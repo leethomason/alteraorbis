@@ -92,7 +92,7 @@ private:
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
-	gamui::Image		travelMark[2];
+	gamui::Image		travelMark;
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
 	gamui::TextLabel	map2Text[MAP2_SIZE2];

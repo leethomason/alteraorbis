@@ -516,6 +516,15 @@ int CoreScript::MaxCitizens(int nTemples)
 }
 
 
+int CoreScript::NumTemples()
+{
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
+	int nTemples = chitArr.Size();
+	return nTemples;
+}
+
+
 int CoreScript::MaxCitizens()
 {
 	int team = parentChit->Team();
@@ -523,9 +532,7 @@ int CoreScript::MaxCitizens()
 	CChitArray chitArr;
 	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
 	int nBeds = chitArr.Size();
-	chitArr.Clear();
-	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
-	int nTemples = chitArr.Size();
+	int nTemples = NumTemples();
 
 	int n = CoreScript::MaxCitizens(nTemples);
 	return Min(n, nBeds);
@@ -1022,6 +1029,9 @@ void CoreScript::DoStrategicTick()
 	CoreScript* target = 0;
 	for (int i = 0; i < stateArr.Size(); ++i) {
 		CoreScript* cs = stateArr[i];
+		if (cs->NumTemples() == 0)		// Ignore starting out domains so it isn't a complete wasteland out there.
+			continue;
+
 		int power = cs->CorePower();
 		int wealth   = cs->CoreWealth();
 
