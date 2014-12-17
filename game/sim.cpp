@@ -54,7 +54,7 @@ using namespace tinyxml2;
 Weather* StackedSingleton<Weather>::instance	= 0;
 Sim* StackedSingleton<Sim>::instance			= 0;
 
-Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(20*1000)
+Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10*1000)
 {
 	context.game = g;
 	spawnEnabled = true;
@@ -351,17 +351,15 @@ void Sim::SpawnDenizens()
 			static const int NSPAWN = 4;
 			static const int NUM = 3;
 			IString denizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
-			float odds[NUM] = { 1.0f, 0.8f, 0.8f };
+			float odds[NUM] = { 100.f, 80.f, 80.f };
 
 			const Census& census = context.chitBag->census;
-			const grinliz::CDynArray<Census::MOBItem>& coreItems = census.CoreItems();
-			for (int i = 0; i < coreItems.Size(); ++i) {
-				const IString& name = coreItems[i].name;
-				float value = 1.0f + coreItems[i].count;
-				for (int k = 0; k < NUM; ++k) {
-					if (denizen[k] == name) {
-						odds[k] /= value;
-					}
+			const grinliz::CDynArray<Census::MOBItem>& items = census.MOBItems();
+			for (int i = 0; i < NUM; ++i) {
+				Census::MOBItem item(denizen[i]);
+				int index = items.Find(item);
+				if (index >= 0) {
+					odds[i] /= float(items[index].count);
 				}
 			}
 

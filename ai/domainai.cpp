@@ -601,19 +601,18 @@ void DomainAI::DoBuild()
 		// Check efficiency to curtail over-building.
 		int wantedCitizens = CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]);
 
-		if (eff >= 1) {
-			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
-
+		if (eff >= 1 && nElixir) {
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::GUARDPOST] < 1 && BuildBuilding(BuildScript::GUARDPOST)) break;
 			if (eff < 2 && BuildFarm()) break;
 			
+			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::KIOSK_C] < 1 && BuildBuilding(BuildScript::KIOSK_C)) break;
 			if (arr[BuildScript::KIOSK_M] < 1 && BuildBuilding(BuildScript::KIOSK_M)) break;
 			if (arr[BuildScript::KIOSK_N] < 1 && BuildBuilding(BuildScript::KIOSK_N)) break;
 			if (arr[BuildScript::KIOSK_S] < 1 && BuildBuilding(BuildScript::KIOSK_S)) break;
 		}
-		if (eff >= 2) {
+		if (eff >= 2 && nElixir > 4 && arr[BuildScript::TEMPLE] ) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
 			if (arr[BuildScript::TEMPLE] < templeCap && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;

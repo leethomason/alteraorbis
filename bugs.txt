@@ -42,7 +42,7 @@
 
 Beta 3b
 		x Denizen domains
-		- Squads
+		x Squads
 			x squad motion
 			x basic sorting into squads
 			x place squad flags
@@ -53,7 +53,7 @@ Beta 3b
 			t restore alpha blending on hp display and squad text
 			x switch over domain growth to be in line with new squad rules
 			- squad destination on main map not correct
-		- "Diplomacy"
+		x "Diplomacy"
 			x enemies, neutral, friends
 			t AI attacks
 		x Visitor role
@@ -64,7 +64,13 @@ Beta 3b
 		x unify human male/female
 		x seed plants
 		x clean up worldgen output
-		- new art from Shroom
+		x new art from Shroom
+		- task serialization
+
+		- any building attack should cause awareness in domainAI
+		- getting hit should cause awareness
+		- guardposts away from kiosks
+		- overloading of kiosks near core. One kind of kiosk??
 
 		- switch to war mode
 		- control flag art
