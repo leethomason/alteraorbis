@@ -1917,7 +1917,7 @@ void GameScene::SetSquadDisplay(bool squadVisible)
 				count[c] += 1;
 				GLASSERT(index >= 0 && index < MAX_CITIZENS);
 				ItemComponent* itemComponent = citizens[i]->GetItemComponent();
-				squadBar[index].Set(item, itemComponent ? itemComponent->GetShield() : 0, 0);
+				squadBar[index].Set(itemComponent);
 				squadBar[index].SetVisible(true);
 				inUse[index] = true;
 			}

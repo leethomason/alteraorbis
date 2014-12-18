@@ -1980,28 +1980,28 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 }
 
 
-bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
+bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 {
-	if (    !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
-		 || !(thisComp.item->flags & GameItem::HAS_NEEDS )
-		 || parentChit->PlayerControlled() )
+	if (!(thisComp.item->flags & GameItem::AI_USES_BUILDINGS)
+		|| !(thisComp.item->flags & GameItem::HAS_NEEDS)
+		|| parentChit->PlayerControlled())
 	{
 		return false;
 	}
 
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2I sector = ToSector( pos2i );
+	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 
-	if ( !coreScript ) return false;
-	if ( Team::GetRelationship( parentChit, coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
+	if (!coreScript) return false;
+	if (Team::GetRelationship(parentChit, coreScript->ParentChit()) == RELATE_ENEMY) return false;
 
 	BuildingFilter filter;
-	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
-	
+	Context()->chitBag->FindBuilding(IString(), sector, 0, 0, &chitArr, &filter);
+
 	BuildScript			buildScript;
-	int					bestIndex=-1;
-	double				bestScore=0;
+	int					bestIndex = -1;
+	double				bestScore = 0;
 	const BuildData*	bestBD = 0;
 	Vector2I			bestPorch = { 0, 0 };
 
@@ -2014,18 +2014,18 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	/*
 	bool logNeeds = thisComp.item->IProperName() == "Tria";
 	if (logNeeds) {
-		GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
+	GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
 	}
 	*/
 
-	for( int i=0; i<chitArr.Size(); ++i ) {
+	for (int i = 0; i < chitArr.Size(); ++i) {
 		Chit* building = chitArr[i];
-		GLASSERT( building->GetItem() );
-		const BuildData* bd = buildScript.GetDataFromStructure( building->GetItem()->IName(), 0 );
+		GLASSERT(building->GetItem());
+		const BuildData* bd = buildScript.GetDataFromStructure(building->GetItem()->IName(), 0);
 		if (!bd || bd->needs.IsZero()) continue;
 
-		MapSpatialComponent* msc = GET_SUB_COMPONENT( building, SpatialComponent, MapSpatialComponent );
-		GLASSERT( msc );
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+		GLASSERT(msc);
 
 		Vector2I porch = { 0, 0 };
 		Rectangle2I porchRect = msc->PorchPos();
@@ -2044,16 +2044,16 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		double score = DotProduct(buildingNeeds, myNeeds);
 		// Small wiggle to use different markets, sleep tubes, etc.
 		static const double INV = 1.0 / 255.0;
-		score += 0.05 * double(Random::Hash8( building->ID() ^ thisComp.chit->ID())) * INV;
+		score += 0.05 * double(Random::Hash8(building->ID() ^ thisComp.chit->ID())) * INV;
 		// Variation - is this the last building visited?
-		if ( bd->structure == taskList.LastBuildingUsed() ) {
+		if (bd->structure == taskList.LastBuildingUsed()) {
 			score *= 0.4;
 		}
 
 		if (debugLog) {
 			GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
 		}
-		if ( score > 0 && score > bestScore ) {
+		if (score > 0 && score > bestScore) {
 			bestScore = score;
 			bestIndex = i;
 			bestBD = bd;
@@ -2062,11 +2062,14 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	}
 
 	if (bestScore >= 0.4) {
-		GLASSERT( bestPorch.x > 0 );
+		GLASSERT(bestPorch.x > 0);
+		if (debugLog) {
+			GLOUTPUT(("  --> %s\n", bestBD->structure.c_str()));
+		}
 
-		taskList.Push( Task::MoveTask( bestPorch));
-		taskList.Push( Task::StandTask( bestBD->standTime ));
-		taskList.Push( Task::UseBuildingTask());
+		taskList.Push(Task::MoveTask(bestPorch));
+		taskList.Push(Task::StandTask(bestBD->standTime));
+		taskList.Push(Task::UseBuildingTask());
 		return true;
 	}
 	return false;

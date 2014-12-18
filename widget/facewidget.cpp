@@ -125,7 +125,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 
 		if ( flags & LEVEL_BAR ) {
 			HPBar* hpbar = static_cast<HPBar*>(barStack.barArr[0]);
-			hpbar->Set(item, ic->GetShield(), "HP");
+			hpbar->Set(item, ic->GetShield(), "HP", false, false);
 
 			int lev = item->Traits().Level();
 			int xp  = item->Traits().Experience();

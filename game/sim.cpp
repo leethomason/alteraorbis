@@ -54,7 +54,7 @@ using namespace tinyxml2;
 Weather* StackedSingleton<Weather>::instance	= 0;
 Sim* StackedSingleton<Sim>::instance			= 0;
 
-Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10*1000)
+Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10 * 1000), visitorClock(4*1000)
 {
 	context.game = g;
 	spawnEnabled = true;
@@ -179,6 +179,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			secondClock.Serialize( &reader, "secondClock" );
 			volcTimer.Serialize( &reader, "volcTimer" );
 			spawnClock.Serialize(&reader, "spawnClock");
+			visitorClock.Serialize(&reader, "visitorClock");
 			Team::Serialize(&reader);
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
@@ -222,6 +223,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
 			spawnClock.Serialize(&writer, "spawnClock");
+			visitorClock.Serialize(&writer, "visitorClock");
 			Team::Serialize(&writer);
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
@@ -587,7 +589,7 @@ void Sim::DoTick( U32 delta )
 		}
 	}
 
-	if ( secondTick ) {
+	if ( visitorClock.Delta(delta) ) {
 		VisitorData* visitorData = Visitors::Instance()->visitorData;
 
 		// Check if the visitor is still in the world.

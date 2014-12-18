@@ -177,7 +177,8 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 		// Not sure this should be here: likes/dislikes of 
 		// crafting is accounted for in buying/selling crystal.
 		// Adjusted down to small effect because of the crystal.
-		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= 1.1;
+		// On the other hand, hard to get out of the sleep - bar loop.
+		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= 2.0;
 		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
 	}
 	else if (buildingName == ISC::bed) {
@@ -214,6 +215,10 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 			if (visitorItem->wallet.NumCrystals() == 0) {
 				needs.Zero();
 			}
+		}
+
+		if (likesCrafting) {
+			needs = needs * 2.0f;
 		}
 	}
 	else if (buildingName == ISC::bar) {

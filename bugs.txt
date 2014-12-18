@@ -65,11 +65,12 @@ Beta 3b
 		x seed plants
 		x clean up worldgen output
 		x new art from Shroom
-		- task serialization
+		x guardposts away from kiosks
 
+		- deity -> MotherCore
+		- task serialization
 		- any building attack should cause awareness in domainAI
 		- getting hit should cause awareness
-		- guardposts away from kiosks
 		- overloading of kiosks near core. One kind of kiosk??
 
 		- switch to war mode

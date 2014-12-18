@@ -279,8 +279,10 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			// A little teeny tiny effort to group natural and industrial buildings.
+			// Also, keep kiosks away from guardposts. Too many MOBs hanging around.
 			if (bd.zone) {
 				IString avoid = (bd.zone == BuildData::ZONE_INDUSTRIAL) ? ISC::natural : ISC::industrial;
+
 				Rectangle2I conflictBounds = zone.fullBounds;
 				conflictBounds.Outset(3);
 				CChitArray conflict;
@@ -289,7 +291,16 @@ bool DomainAI::BuildBuilding(int id)
 
 				for (int i = 0; i < conflict.Size(); ++i) {
 					const GameItem* item = conflict[i]->GetItem();
-					if (item && item->keyValues.GetIString(ISC::zone) == avoid) {
+					if (!item) continue;
+					if (item->keyValues.GetIString(ISC::zone) == avoid) {
+						hasConflict = true;
+						break;
+					}
+					if (item->IName() == ISC::guardpost && strstr(bd.structure.safe_str(), "kiosk") == 0) {
+						hasConflict = true;
+						break;
+					}
+					if (bd.structure == ISC::guardpost && strstr(item->Name(), "kiosk") == 0) {
 						hasConflict = true;
 						break;
 					}

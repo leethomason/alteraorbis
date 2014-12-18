@@ -369,7 +369,7 @@
         nameGen="barNames"
         
         need.time="5.0"
-        need.fun="0.5"
+        need.fun="0.4"
         need.food="1.0"
         />
 
