@@ -103,7 +103,7 @@ void TaskList::Clear()
 void TaskList::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "TaskList" );
-	XARC_SER( xs, lastBuildingUsed );
+	XARC_SER_ARR( xs, buildingsUsed, NUM_BUILDING_USED);
 	XARC_SER_CARRAY( xs, taskList );
 	socialTicker.Serialize( xs, "socialTicker" );
 	XarcClose( xs );
@@ -325,7 +325,10 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				}
 				else {
 					UseBuilding(thisComp, building, buildingName);
-					lastBuildingUsed = buildingName;
+					for (int i = 1; i < NUM_BUILDING_USED; ++i) {
+						buildingsUsed[i] = buildingsUsed[i - 1];
+					}
+					buildingsUsed[0] = buildingName;
 				}
 			}
 			Remove();

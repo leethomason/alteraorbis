@@ -141,7 +141,9 @@ public:
 
 	void DoTasks( Chit* chit, U32 delta );
 
-	grinliz::IString LastBuildingUsed() const { return lastBuildingUsed; }
+	enum {NUM_BUILDING_USED = 2};
+	// 0 is the most recent.
+	const grinliz::IString* BuildingsUsed() const { return buildingsUsed; }
 
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
@@ -158,7 +160,7 @@ private:
 	void Remove();
 
 	const ChitContext* context;
-	grinliz::IString	lastBuildingUsed;	// should probably be serialized, if TaskList was serialized.
+	grinliz::IString	buildingsUsed[NUM_BUILDING_USED];
 	CTicker				socialTicker;
 	grinliz::CDynArray<Task> taskList;
 };

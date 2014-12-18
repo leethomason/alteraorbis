@@ -2017,11 +2017,14 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 	GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
 	}
 	*/
+	
+	bool debugBuildingOutput[BuildScript::NUM_TOTAL_OPTIONS] = { false };
 
 	for (int i = 0; i < chitArr.Size(); ++i) {
 		Chit* building = chitArr[i];
 		GLASSERT(building->GetItem());
-		const BuildData* bd = buildScript.GetDataFromStructure(building->GetItem()->IName(), 0);
+		int buildDataID = 0;
+		const BuildData* bd = buildScript.GetDataFromStructure(building->GetItem()->IName(), &buildDataID);
 		if (!bd || bd->needs.IsZero()) continue;
 
 		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
@@ -2046,12 +2049,20 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 		static const double INV = 1.0 / 255.0;
 		score += 0.05 * double(Random::Hash8(building->ID() ^ thisComp.chit->ID())) * INV;
 		// Variation - is this the last building visited?
-		if (bd->structure == taskList.LastBuildingUsed()) {
-			score *= 0.4;
+		// This is here to break up the bar-sleep loop.
+		for (int k = 0; k < TaskList::NUM_BUILDING_USED; ++k) {
+			if (bd->structure == taskList.BuildingsUsed()[k]) {
+				// Tricky number to get right; note the bestScore >= SOMETHING filter below.
+				score *= 0.6 + 0.1 * double(k);
+			}
 		}
 
 		if (debugLog) {
-			GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
+			if (!debugBuildingOutput[buildDataID]) {
+				GLASSERT(buildDataID >= 0 && buildDataID < GL_C_ARRAY_SIZE(debugBuildingOutput));
+				debugBuildingOutput[buildDataID] = true;
+				GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
+			}
 		}
 		if (score > 0 && score > bestScore) {
 			bestScore = score;

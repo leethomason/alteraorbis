@@ -141,6 +141,7 @@ void Needs::Serialize(XStream* xs)
 grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor)
 {
 	static const Vector3<double> ZERO = { 0, 0, 0 };
+	static const double LIKE_BOOST = 1.5;
 
 	GLASSERT(Needs::NUM_NEEDS == 3);		// use a Vector3
 	const GameItem* buildingItem = building->GetItem();
@@ -178,7 +179,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 		// crafting is accounted for in buying/selling crystal.
 		// Adjusted down to small effect because of the crystal.
 		// On the other hand, hard to get out of the sleep - bar loop.
-		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= 2.0;
+		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= LIKE_BOOST;
 		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
 	}
 	else if (buildingName == ISC::bed) {
@@ -218,7 +219,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 		}
 
 		if (likesCrafting) {
-			needs = needs * 2.0f;
+			needs = needs * LIKE_BOOST;
 		}
 	}
 	else if (buildingName == ISC::bar) {

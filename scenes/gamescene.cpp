@@ -1223,7 +1223,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 #endif
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
-		if ( item == &pickupButton[i] ) {
+		if ( i < pickupData.Size() && item == &pickupButton[i] ) {
 			Chit* playerChit = GetPlayerChit();
 			Chit* item = sim->GetChitBag()->GetChit( pickupData[i].chitID );
 			if ( item && playerChit ) {
