@@ -85,6 +85,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
 		webCanvas[i].Init(&gamui2D, webAtom);
 	}
+	webCanvas[WHITE_CANVAS].SetLevel(Gamui::LEVEL_ICON);
 }
 
 
@@ -371,7 +372,8 @@ void MapScene::DrawMap()
 
 		CCoreArray arr;
 		Sim* sim = lumosChitBag->GetSim();
-		sim->CalcStrategicRelationships(data->destSector.IsZero() ? homeSector : data->destSector, NUM_SECTORS, relate, &arr);
+//		sim->CalcStrategicRelationships(data->destSector.IsZero() ? homeSector : data->destSector, NUM_SECTORS, relate, &arr);
+		sim->CalcStrategicRelationships(homeSector, NUM_SECTORS, relate, &arr);
 
 		for (int k = 0; k < arr.Size(); ++k) {
 			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();

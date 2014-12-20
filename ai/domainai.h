@@ -81,6 +81,27 @@ private:
 };
 
 
+class DeityDomainAI : public DomainAI
+{
+	typedef DomainAI super;
+
+public:
+	DeityDomainAI()		{}
+	~DeityDomainAI()	{}
+
+	virtual const char* Name() const { return "DeityDomainAI"; }
+	virtual void Serialize(XStream* xs);
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
+	virtual int DoTick(U32 delta);
+
+	virtual void DoBuild();
+
+private:
+};
+
+
 class TrollDomainAI : public DomainAI
 {
 	typedef DomainAI super;

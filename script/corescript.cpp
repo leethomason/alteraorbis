@@ -279,7 +279,7 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 	if (arr) {
 		for (int i = 0; i < squads[id].Size(); ++i) {
 			Chit* c = Context()->chitBag->GetChit(squads[id][i]);
-			if (c) {
+			if (c && !c->Destroyed()) {
 				arr->Push(c);
 			}
 		}
@@ -341,7 +341,7 @@ int CoreScript::Citizens(CChitArray* arr)
 	while (i < citizens.Size()) {
 		int id = citizens[i];
 		Chit* chit = Context()->chitBag->GetChit(id);
-		if (chit) {
+		if (chit && !chit->Destroyed()) {
 			if (arr) arr->Push(chit);
 			++i;
 		}
@@ -1035,8 +1035,7 @@ void CoreScript::DoStrategicTick()
 		int power = cs->CorePower();
 		int wealth   = cs->CoreWealth();
 
-		if ((power < myPower / 2) && wealth > myWealth)
-		{
+		if ((power < myPower / 2) && (wealth > myWealth || wealth > 400)) {
 			// Assuming this is actually so rare that it doesn't matter to select the best.
 			target = cs;
 			break;

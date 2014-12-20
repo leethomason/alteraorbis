@@ -522,18 +522,20 @@ int DomainAI::DoTick(U32 delta)
 
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
-		int gold = parentChit->GetItem()->wallet.Gold();
-		CChitArray citizens;
-		cs->Citizens(&citizens);
+		if (!parentChit->Destroyed()) {
+			int gold = parentChit->GetItem()->wallet.Gold();
+			CChitArray citizens;
+			cs->Citizens(&citizens);
 
-		for (int i = 0; i < citizens.Size(); ++i) {
-			Chit* c = citizens[i];
-			if (c->GetItem()) {
-				int citizenGold = c->GetItem()->wallet.Gold();
-				if (citizenGold > gold / 4) {
-					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
-					if (tax > 0) {
-						parentChit->GetWallet()->Deposit( &c->GetItem()->wallet, tax);
+			for (int i = 0; i < citizens.Size(); ++i) {
+				Chit* c = citizens[i];
+				if (c->GetItem()) {
+					int citizenGold = c->GetItem()->wallet.Gold();
+					if (citizenGold > gold / 4) {
+						int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
+						if (tax > 0) {
+							parentChit->GetWallet()->Deposit(&c->GetItem()->wallet, tax);
+						}
 					}
 				}
 			}
@@ -631,6 +633,65 @@ void DomainAI::DoBuild()
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 			if (BuildRoad()) break;	// will return true until all roads are built.
 		}
+	} while (false);
+}
+
+
+void DeityDomainAI::Serialize(XStream* xs)
+{
+	this->BeginSerialize(xs, Name());
+	super::Serialize(xs);
+	this->EndSerialize(xs);
+}
+
+
+void DeityDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
+
+	Vector2I c = sectorData.core;
+	Rectangle2I plaza0;
+	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
+	roads->AddPlaza(plaza0);
+}
+
+
+void DeityDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+
+int DeityDomainAI::DoTick(U32 delta)
+{
+	// Skim off the reserve bank:
+	GameItem* item = parentChit->GetItem();
+	if (!parentChit->Destroyed() && item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
+		item->wallet.Deposit(ReserveBank::GetWallet(), 100);
+	}
+
+	return super::DoTick(delta);
+}
+
+
+void DeityDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	do {
+		if (BuyWorkers()) break;
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
+		if (BuildPlaza()) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
 

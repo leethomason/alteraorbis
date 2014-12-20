@@ -407,7 +407,7 @@ void WorldGenScene::DoTick(U32 delta)
 			statText.SetText(simStr.c_str());
 
 			CStr<32> str;
-			str.Format("Stage 3/3 Simulation: %d%%", int(100.0f * age / 1.0f));
+			str.Format("Stage 3/3 Simulation: %1.f%%", 100.0f * age);
 			footerText.SetText(str.c_str());
 
 			if (age > SettingsManager::Instance()->SpawnDate()) {

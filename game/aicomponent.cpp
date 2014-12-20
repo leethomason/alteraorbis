@@ -2006,6 +2006,8 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 	Vector2I			bestPorch = { 0, 0 };
 
 	Vector3<double> myNeeds = thisComp.ai->GetNeeds().GetOneMinus();
+	double myMorale = thisComp.ai->GetNeeds().Morale();
+
 	// Don't eat when not hungry; depletes food.
 	if (myNeeds.X(Needs::FOOD) < 0.5) {
 		myNeeds.X(Needs::FOOD) = 0;
@@ -2049,11 +2051,13 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 		static const double INV = 1.0 / 255.0;
 		score += 0.05 * double(Random::Hash8(building->ID() ^ thisComp.chit->ID())) * INV;
 		// Variation - is this the last building visited?
-		// This is here to break up the bar-sleep loop.
-		for (int k = 0; k < TaskList::NUM_BUILDING_USED; ++k) {
-			if (bd->structure == taskList.BuildingsUsed()[k]) {
-				// Tricky number to get right; note the bestScore >= SOMETHING filter below.
-				score *= 0.6 + 0.1 * double(k);
+		// This is here to break up the bar-sleep loop. But only if we have full morale.
+		if (myMorale > 0.99) {
+			for (int k = 0; k < TaskList::NUM_BUILDING_USED; ++k) {
+				if (bd->structure == taskList.BuildingsUsed()[k]) {
+					// Tricky number to get right; note the bestScore >= SOMETHING filter below.
+					score *= 0.6 + 0.1 * double(k);
+				}
 			}
 		}
 

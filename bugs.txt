@@ -67,7 +67,7 @@ Beta 3b
 		x new art from Shroom
 		x guardposts away from kiosks
 		x break the sleep/bar loop: ratchet back the 'like' boost. add a 2nd memory.
-		- building history: only when morale==1
+		x building history: only when morale==1
 		- don't add to squads with waypoints
 
 		- deity -> MotherCore

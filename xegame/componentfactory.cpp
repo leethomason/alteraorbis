@@ -115,6 +115,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if (name == "BatteryComponent") {
 		return new BatteryComponent();
 	}
+	else if (name == "DeityDomainAI") {
+		return new DeityDomainAI();
+	}
 	else if (name == "TrollDomainAI") {
 		return new TrollDomainAI();
 	}

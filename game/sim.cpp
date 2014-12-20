@@ -248,20 +248,19 @@ void Sim::CreateCores()
 			Vector2I sector = { i, j };
 
 			int team = TEAM_NEUTRAL;
-			bool indestructible = false;
 			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
 				// Mother Core. Always at the center: spawn point of the Visitors.
 				team = TEAM_DEITY;
-				indestructible = true;
 			}
 			CoreScript* cs = CoreScript::CreateCore(sector, team, &context);
-			if (indestructible) {
+			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
 				cs->ParentChit()->GetItem()->flags |= GameItem::INDESTRUCTABLE;
 				HealthComponent* hc = cs->ParentChit()->GetHealthComponent();
 				if (hc) {
 					cs->ParentChit()->Remove(hc);
 					delete hc;
 				}
+				cs->ParentChit()->Add(new DeityDomainAI());
 			}
 			if (cs) {
 				++ncores;
@@ -996,7 +995,8 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, i
 		if (cs
 			&& cs != originCore
 			&& cs->InUse()
-			&& Team::GetRelationship(cs->ParentChit(), originCore->ParentChit()) == relate)
+			&& Team::GetRelationship(cs->ParentChit(), originCore->ParentChit()) == relate
+			&& stateArr->HasCap())
 		{
 			stateArr->Push(cs);
 		}
