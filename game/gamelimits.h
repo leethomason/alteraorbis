@@ -45,9 +45,8 @@ static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.
 // Part of implenmentation in AIComponent.cpp
-static const int TECH_REPELS_LESSER = 1;	// repels *some* but not all lesser
-static const int TECH_REPELS_GREATER = 2;
-static const int TECH_ATTRACTS_LESSER = 3;
+static const int TEMPLES_REPELS_LESSER = 0;	// repels *some* but not all lesser
+static const int TEMPLES_REPELS_GREATER = 1;
 
 // In terms of current tech:
 static const float TECH_ATTRACTS_GREATER = 3.2f;

@@ -510,7 +510,8 @@ int DomainAI::DoTick(U32 delta)
 {
 	PROFILE_FUNC();
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial || !parentChit->GetItem()) return ticker.Next();
+	if (!spatial || !parentChit->GetItem() || parentChit->Destroyed() ) 
+		return ticker.Next();
 
 	if (ticker.Delta(delta)) {
 		Vector2I sector = { 0, 0 };
@@ -522,20 +523,18 @@ int DomainAI::DoTick(U32 delta)
 
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
-		if (!parentChit->Destroyed()) {
-			int gold = parentChit->GetItem()->wallet.Gold();
-			CChitArray citizens;
-			cs->Citizens(&citizens);
+		int gold = parentChit->GetItem()->wallet.Gold();
+		CChitArray citizens;
+		cs->Citizens(&citizens);
 
-			for (int i = 0; i < citizens.Size(); ++i) {
-				Chit* c = citizens[i];
-				if (c->GetItem()) {
-					int citizenGold = c->GetItem()->wallet.Gold();
-					if (citizenGold > gold / 4) {
-						int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
-						if (tax > 0) {
-							parentChit->GetWallet()->Deposit(&c->GetItem()->wallet, tax);
-						}
+		for (int i = 0; i < citizens.Size(); ++i) {
+			Chit* c = citizens[i];
+			if (c->GetItem()) {
+				int citizenGold = c->GetItem()->wallet.Gold();
+				if (citizenGold > gold / 4) {
+					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
+					if (tax > 0) {
+						parentChit->GetWallet()->Deposit(&c->GetItem()->wallet, tax);
 					}
 				}
 			}

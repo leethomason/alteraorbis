@@ -75,6 +75,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 			if (!buyer->CanAddToInventory()) {
 				const GameItem* sell = buyer->ItemToSell();
 				GLASSERT(sell);
+				if (!sell) return 0;
 				GameItem* sold = buyer->RemoveFromInventory(sell);
 
 				// Make room in the inventory. Give the crystal to the exchange
@@ -110,7 +111,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				pos = seller->ParentChit()->GetSpatialComponent()->GetPosition2D();
 				sector = ToSector(seller->ParentChit()->GetSpatialComponent()->GetPosition2DI());
 			}
-			GLOUTPUT(("'%s' sold to '%s' the item '%s' for %d Au at sector=%x,%x\n",
+			GLOUTPUT(("'%s' sold to '%s' the item '%s' for %d Au at sector=%x%x\n",
 				seller->ParentChit()->GetItem()->BestName(),
 				buyer->ParentChit()->GetItem()->BestName(),
 				gi->BestName(),

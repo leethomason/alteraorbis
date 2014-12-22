@@ -260,7 +260,9 @@ void CoreScript::AssignToSquads()
 
 	while (nSquaddies < nExpected) {
 		for (int i = 0; i < MAX_SQUADS; ++i) {
-			if (squads[i].Size() < SQUAD_SIZE) {
+			if (squads[i].Size() < SQUAD_SIZE
+				&& GetWaypoint(i).IsZero())			// don't add to a squad while it's in use!
+			{
 				Chit* chit = recruits.Pop();
 				squads[i].Push(chit->ID());
 				++nSquaddies;

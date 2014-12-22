@@ -52,7 +52,7 @@ Beta 3b
 			t squaddies abandon mission
 			t restore alpha blending on hp display and squad text
 			x switch over domain growth to be in line with new squad rules
-			- squad destination on main map not correct
+			x squad destination on main map not correct
 		x "Diplomacy"
 			x enemies, neutral, friends
 			t AI attacks
@@ -68,8 +68,9 @@ Beta 3b
 		x guardposts away from kiosks
 		x break the sleep/bar loop: ratchet back the 'like' boost. add a 2nd memory.
 		x building history: only when morale==1
-		- don't add to squads with waypoints
+		x don't add to squads with waypoints
 
+		- use only one type of kiosk
 		- deity -> MotherCore
 		- task serialization
 		- any building attack should cause awareness in domainAI

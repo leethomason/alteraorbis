@@ -1185,9 +1185,15 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
 		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
 	};
-	CArray<Vector2I, NDELTA> delta, rinit;
+	IString mob = thisComp.item->keyValues.GetIString("mob");
+	CArray<Vector2I, NDELTA * 2> delta, rinit;
 	for (int i = 0; i < NDELTA; ++i) {
 		rinit.Push(initDelta[i]);
+	}
+	if (mob == ISC::greater) {
+		for (int i = 0; i < NDELTA; ++i) {
+			rinit.Push(initDelta[i]*2);	// greaters have a larger move range
+		}
 	}
 	parentChit->random.ShuffleArray(rinit.Mem(), rinit.Size());
 
@@ -1201,7 +1207,6 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 		return false;
 	}
 
-	IString mob = thisComp.item->keyValues.GetIString("mob");
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	if (thisComp.item->IName() == ISC::troll) {
@@ -1228,36 +1233,41 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 
 	// First pass: filter on attract / repel choices.
 	// This is game difficulty logic!
+	Rectangle2I sectorBounds;
+	sectorBounds.Set(0, 0, NUM_SECTORS - 1, NUM_SECTORS - 1);
+
 	for (int i = 0; i < rinit.Size(); ++i) {
 		Vector2I destSector = start.sector + rinit[i];
 
-		if (InRange(destSector.x, 0, NUM_SECTORS - 1) && InRange(destSector.y, 0, NUM_SECTORS - 1)) {
+		if (sectorBounds.Contains(destSector)) {
 			CoreScript* cs = CoreScript::GetCore(destSector);
 
 			// Check repelled / attracted.
 			if (cs && cs->ParentChit()->Team()) {
 				int relate = Team::GetRelationship(cs->ParentChit(), thisComp.chit);
-				int tech = cs->MaxTech();
+				int nTemples = cs->NumTemples();
+				float tech = cs->GetTech();
 
 				// For enemies, apply rules to make the gameplay smoother.
 				if (relate == RELATE_ENEMY) {
 					if (mob == ISC::lesser) {
-						if (tech <= TECH_REPELS_LESSER) {
+						if (nTemples <= TEMPLES_REPELS_LESSER) {
 							if (parentChit->random.Rand(2) == 0) {
 								delta.Push(rinit[i]);
 							}
 						}
-						else if (tech >= TECH_ATTRACTS_LESSER) 
-							delta.Insert(0, rinit[i]);
-						else 
+						else {
 							delta.Push(rinit[i]);
+						}
 					}
 					else if (mob == ISC::greater) {
 						if (tech >= TECH_ATTRACTS_GREATER) 
 							delta.Insert(0, rinit[i]);
-						else if (tech > TECH_REPELS_GREATER) 
+						else if (nTemples > TEMPLES_REPELS_GREATER)
 							delta.Push(rinit[i]);
-						// else push nothing
+						else {
+							// else push nothing
+						}
 					}
 					else {
 						delta.Push(rinit[i]);
@@ -1269,7 +1279,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 			}
 			else if (cs) {
 				// FIXME: is the cs check needed?
-				// But we don't want the MOBs herding to the outlan
+				// But we don't want the MOBs herding to the outland
 				delta.Push(rinit[i]);
 			}
 		}
@@ -1465,72 +1475,6 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
 				this->Move( ToWorld2F( sd.core ), false );
 				return true;
-			}
-		}
-	}
-	return false;
-}
-
-
-bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
-{
-	Vector2F pos = thisComp.spatial->GetPosition2D();
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2I sector = ToSector( pos2i );
-
-	// Are we un-armed?
-	// If we don't have one of the big 3: gun, ring, shield check for
-	// a market to buy it, and the means to buy.
-	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
-		 && AtFriendlyOrNeutralCore()
-		 && thisComp.item->wallet.Gold() )
-	{
-		const MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
-		const RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-		const Shield* shield = thisComp.itemComponent->GetShield();
-
-		// Don't want the AIs running to the market all the time if nothing
-		// is there. (And planning to have random market visits anyway.)
-		// This is "critical call ahead" needs.
-		if ( !melee || !ranged || !shield ) {
-			LumosChitBag* chitBag = this->Context()->chitBag;
-			Chit* market = chitBag->FindBuilding( ISC::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0 );
-
-			if ( market ) {
-				bool goMarket = false;
-				MarketAI marketAI( market );
-				BuildScript buildScript;
-				const BuildData* bd = buildScript.GetDataFromStructure( ISC::market, 0 );
-				GLASSERT( bd );
-
-				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.Gold() )) {
-					goMarket = true;
-				}
-				if ( !shield && marketAI.HasShield( thisComp.item->wallet.Gold() )) {
-					goMarket = true;
-				}
-				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.Gold() )) {
-					goMarket = true;
-				}
-
-				if ( goMarket ) {
-					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
-					if (msc) {
-						Rectangle2I porch = msc->PorchPos();
-						CoreScript* cs = CoreScript::GetCore(ToSector(porch.min));
-
-						if (cs) {
-							for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
-								if (!cs->HasTask(it.Pos())) {
-									taskList.Push(Task::MoveTask(it.Pos()));
-									taskList.Push(Task::StandTask(bd->standTime));
-									taskList.Push(Task::UseBuildingTask());
-									return true;
-								}
-							}
-						}
-					}
-				}
 			}
 		}
 	}
@@ -2173,8 +2117,10 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		return;
 	if (ThinkLoot(thisComp))
 		return;
+	/*
 	if (ThinkCriticalShopping(thisComp))
 		return;
+	*/
 	if (ThinkHungry(thisComp))
 		return;
 

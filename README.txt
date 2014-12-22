@@ -25,30 +25,17 @@ thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
 
-Changes in Beta3
+Changes in Beta3b
 ----------------
-
-Key:
-- AI controlled domains. Logic, roads, build plan, management, taxation.
-  - AI domain for Truulga, the Troll deity. Truulga is essentially
-    an arms supplier for Trolls.
-  - Gobmen domains. Neutral denizens.
-  - Kamakiri domains. Aggressive denizens.
-
-Changes:
-- 'social' need has been removed, and integrated with 'fun'
-- significant map screen improvements
-- better random colors for domains and weapons
-- neutral units can now be recruited to a domain
-- improvements to census and census scene
-- new spawn strategy for Kamakiri and Gobmen
-
-Bug fixes:
-- significant refactoring of internal Game Items to make the
-  system more reliable
-- re-write of internal gold/crystal and banking system
-  to (try to) guarentee money isn't created or destroyed
-- many, many small bug fixes and crashes addressed.
+- Other human denizens can now create domains.
+- Squads! You can have and control up to 4 squards, each with 4 units.
+- UI improvements
+- Enemy / Neutral / Friend display on map
+- AIs now build kiosks for visitors
+- 3+ temples no longer summon cyclops. (Although cyclops are still attracted if they are close.)
+- Human gender is now properly accounted for.
+- More plants seeded in world generation.
+- Improvements on the "which building should I use" AI.
 
 FAQ
 ---
