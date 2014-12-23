@@ -1,3 +1,4 @@
+- gobman statues
 - GT: ui to show idle and busy workers
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
