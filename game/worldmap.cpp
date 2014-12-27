@@ -53,6 +53,8 @@ using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
 
+static const float PLANT_SATURATION = 1.0f;
+static const float GRID_SATURATION = 1.0f;
 
 // Startup for test world
 // Baseline:				15,000
@@ -1945,7 +1947,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 	GPUStreamData data;
 	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
-	Vector4F control	= { 1, Saturation(), 1, 1 };
+	Vector4F control	= { 1, Saturation() * GRID_SATURATION, 1, 1 };
 	data.controlParam	= &control;
 
 	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
@@ -1995,7 +1997,7 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
 	float rot = IndexToRotation360(INDEX(x, y));
 	m->SetPosAndYRotation(pos, rot);
-	m->SetSaturation(hpFraction);
+	m->SetSaturation(hpFraction * PLANT_SATURATION);
 
 	// Don't get a root if we are being used for hit testing.
 	if (root) {
@@ -2340,7 +2342,7 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 		device->MultMatrix( GPUDevice::MODELVIEW_MATRIX, *xform );
 	}
 
-	Vector4F control = { 1, Saturation(), 1, 1 };
+	Vector4F control = { 1, Saturation() * GRID_SATURATION, 1, 1 };
 
 	GPUStreamData data;
 	data.vertexBuffer	= voxelVertexVBO->ID();
