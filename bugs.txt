@@ -5,7 +5,7 @@
 - maps: what direction is player pointed?
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
-- colors of buildings (not enough)
+x colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - general extension of the effect of tech on buildings, and morale on MOBs
@@ -42,7 +42,7 @@
 - interface annoyances
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
-- remove grid64 BS for proper optimization
+x remove grid64 BS for proper optimization
 - use only one type of kiosk
 - deity -> MotherCore
 - task serialization
@@ -96,7 +96,8 @@
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
 - way too much CivTech score for just the Avatar hanging around
 - cyclops should eat rock to heal
-- namegen: re-use too common. switch to loop
+x namegen: re-use too common. switch to loop
+- randomize 1st name
 - balance spawn based on # in world 
 - check human spawn: correctly handling male/female
 - increase drive to make weapons
@@ -104,7 +105,7 @@
 - buildings, on destruction, should drop items (market, vault, etc.)
 - clean up world gen layout
 - background for console (full, none, dynamic)
-- DomainAI: don't clear existing pave? (Depends on AI?)
+x DomainAI: don't clear existing pave? (Depends on AI?)
 - build to an efficiency level with distilleries (1 or 2)
 - in census, cores/domains should show team
 - how many trolls visit Truulga??
@@ -127,6 +128,8 @@
 - walk target for the avatar
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
+- deal with fruit overflow
+- *still* not enough forging
 
 - World Gen
 	- less techy, more interesting world gen

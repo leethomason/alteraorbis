@@ -62,6 +62,9 @@ using namespace tinyxml2;
 // Bug fix: incorrect recusion   4	yes, 4
 // 
 
+static const float MAP_SATURATION = 0.5f;
+static const float PLANT_SATURATION = 1.0f;
+
 static const Vector2I DIR_I4[4] = {
 	{ 1, 0 },
 	{ 0, 1 },
@@ -623,14 +626,9 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 	Rectangle2I b = Bounds();
 	b.Outset(-1);
 
-	const U64* grid64 = (const U64*)grid;
-	GLASSERT(sizeof(*grid64) == sizeof(WorldGrid));
-
 	while (nGrid--) {
 		processIndex++;
 		if (processIndex >= MAP2) processIndex = 0;
-		if (grid64[processIndex] == 0) continue;
-
 		const int index = processIndex;
 
 		// This can be out of bounds - everything is water outside of Bounds()
@@ -1945,7 +1943,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 	GPUStreamData data;
 	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
-	Vector4F control	= { 1, Saturation(), 1, 1 };
+	Vector4F control	= { 1, Saturation()*MAP_SATURATION, 1, 1 };
 	data.controlParam	= &control;
 
 	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
@@ -1995,7 +1993,7 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
 	float rot = IndexToRotation360(INDEX(x, y));
 	m->SetPosAndYRotation(pos, rot);
-	m->SetSaturation(hpFraction);
+	m->SetSaturation(hpFraction * PLANT_SATURATION);
 
 	// Don't get a root if we are being used for hit testing.
 	if (root) {
