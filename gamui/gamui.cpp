@@ -285,6 +285,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	if ( !m_gamui )
 		return;
 	IGamuiText* iText = m_gamui->GetTextInterface();
+	const int vStart = vertexBuf ? vertexBuf->Size() : 0;
 
 	const char* p = m_str;
 	float x = X();
@@ -355,19 +356,15 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 		
-				float x0 = Transform(x+metrics.x);
-				float x1 = Transform(x+metrics.x+metrics.w);
-				float y0 = Transform(y+metrics.y);
-				float y1 = Transform(y+metrics.y+metrics.h);
+				float x0 = x+metrics.x;
+				float x1 = x+metrics.x+metrics.w;
+				float y0 = y+metrics.y;
+				float y1 = y+metrics.y+metrics.h;
 
-				vertex[0].Set( x0, y0,				
-							   metrics.tx0, metrics.ty0 );
-				vertex[1].Set( x0, y1, 
-							   metrics.tx0, metrics.ty1 );
-				vertex[2].Set( x1, y1, 
-							   metrics.tx1, metrics.ty1 );
-				vertex[3].Set( x1, y0,
-							   metrics.tx1, metrics.ty0 );
+				vertex[0].Set( x0, y0, metrics.tx0, metrics.ty0 );
+				vertex[1].Set( x0, y1, metrics.tx0, metrics.ty1 );
+				vertex[2].Set( x1, y1, metrics.tx1, metrics.ty1 );
+				vertex[3].Set( x1, y0, metrics.tx1, metrics.ty0 );
 			}
 			int done = isspace( *p );
 
@@ -383,6 +380,10 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 
 	m_width = xmax - X();
 	m_height = y + height - Y();
+
+	if (vertexBuf) {
+		m_gamui->Transform(vertexBuf->Mem() + vStart, vertexBuf->Size() - vStart);
+	}
 }
 
 
@@ -694,10 +695,10 @@ void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 			if (*mem >= 0 && *mem < MAX_ATOMS && m_atom[*mem].textureHandle ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 
-				vertex[0].Set( Transform(x),	Transform(y),		m_atom[*mem].tx0, m_atom[*mem].ty1 );
-				vertex[1].Set( Transform(x),	Transform(y+dy),	m_atom[*mem].tx0, m_atom[*mem].ty0 );
-				vertex[2].Set( Transform(x+dx), Transform(y+dy),	m_atom[*mem].tx1, m_atom[*mem].ty0 );
-				vertex[3].Set( Transform(x+dx), Transform(y),		m_atom[*mem].tx1, m_atom[*mem].ty1 );
+				vertex[0].Set( x,	y,		m_atom[*mem].tx0, m_atom[*mem].ty1 );
+				vertex[1].Set( x,	y+dy,	m_atom[*mem].tx0, m_atom[*mem].ty0 );
+				vertex[2].Set( x+dx, y+dy,	m_atom[*mem].tx1, m_atom[*mem].ty0 );
+				vertex[3].Set( x+dx, y,		m_atom[*mem].tx1, m_atom[*mem].ty1 );
 
 				++count;
 			}
@@ -708,6 +709,7 @@ void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		y += dy;
 	}
 	ApplyRotation( count*4, vertexBuf->Mem() + startVertex );
+	m_gamui->Transform(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -722,6 +724,7 @@ void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *ve
 	if ( m_atom.textureHandle == 0 ) {
 		return;
 	}
+	const int startVertex = vertexBuf->Size();
 
 	// Dislike magic numbers, but also dislike having to track atom sizes.
 	//float sliceSize = 0.75f * Min( m_width, m_height );
@@ -733,10 +736,10 @@ void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *ve
 	{
 		Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 
-		float x0 = Transform(X());
-		float y0 = Transform(Y());
-		float x1 = Transform(X() + m_width);
-		float y1 = Transform(Y() + m_height);
+		float x0 = X();
+		float y0 = Y();
+		float x1 = X() + m_width;
+		float y1 = Y() + m_height;
 
 		vertex[0].Set( x0, y0, m_atom.tx0, m_atom.ty1 );
 		vertex[1].Set( x0, y1, m_atom.tx0, m_atom.ty0 );
@@ -782,6 +785,7 @@ void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *ve
 			}
 		}
 	}
+	m_gamui->Transform(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -1719,6 +1723,18 @@ float Gamui::GetFocusY()
 		return item->CenterY();
 	}
 	return -1;
+}
+
+
+void Gamui::Transform(Vertex* v, int n) const 
+{ 
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	while (n) {
+		v->x *= M;
+		v->y *= M;
+		--n;
+		++v;
+	}
 }
 
 

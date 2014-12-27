@@ -374,7 +374,7 @@ public:
 	float			GetFocusX();
 	float			GetFocusY();
 
-	float			Transform(float x) const { return x * float(m_physicalHeight) / float(m_virtualHeight); }
+	void			Transform(Vertex* v, int n) const;
 	static const RenderAtom& NullAtom() { return m_nullAtom; }
 
 private:
@@ -555,7 +555,6 @@ public:
 	virtual void Clear()	{ m_gamui = 0; }
 
 	// internal
-	float Transform(float x) const { return m_gamui->Transform(x); }
 	void SetSuperItem( ToggleButton* tb ) { m_superItem = tb; }
 	ToggleButton* SuperItem() const		  { return m_superItem; }
 	void DoPreLayout();
