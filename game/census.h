@@ -27,13 +27,16 @@ public:
 	Census() {
 	}
 
-	void Add(const grinliz::IString& name);
-	void Remove(const grinliz::IString& name);
+	void AddMOB(const grinliz::IString& name);
+	void RemoveMOB(const grinliz::IString& name);
+	void AddCore(const grinliz::IString& team);
+	void RemoveCore(const grinliz::IString& team);
 
 	void NumByType(int *lesser, int *greater, int *denizen);
 
 	struct MOBItem {
 		MOBItem() : count(0) {}
+		MOBItem(const grinliz::IString& n) : name(n), count(1) {}
 		bool operator<(const MOBItem& rhs) const { return name < rhs.name; }
 		bool operator==(const MOBItem& rhs) const { return name == rhs.name; }
 
@@ -42,9 +45,11 @@ public:
 	};
 
 	const grinliz::CDynArray<MOBItem>& MOBItems() const { return mobItems; }
+	const grinliz::CDynArray<MOBItem>& CoreItems() const { return coreItems; }
 
 private:
 	grinliz::CDynArray<MOBItem> mobItems;
+	grinliz::CDynArray<MOBItem> coreItems;
 };
 
 #endif 

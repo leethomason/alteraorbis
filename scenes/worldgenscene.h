@@ -22,6 +22,7 @@
 
 #include "../script/worldgen.h"
 #include "../script/rockgen.h"
+#include "../game/newsconsole.h"
 
 class LumosGame;
 class WorldMap;
@@ -79,8 +80,10 @@ private:
 	grinliz::GLString	simStr;
 	gamui::PushButton	okay, cancel;
 	gamui::Image		worldImage;
-	gamui::TextLabel	label;
-	gamui::TextLabel	worldText;
+	gamui::TextLabel	headerText;			// Top label 
+	gamui::TextLabel	footerText;			// bottom label
+	gamui::TextLabel	statText;			// (at this time) mostly debug.
+	NewsConsole			newsConsole;
 };
 
 #endif // WORLDGEN_SCENE_INCLUDED

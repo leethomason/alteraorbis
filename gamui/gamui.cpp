@@ -32,6 +32,8 @@ using namespace std;
 
 static const float PI = 3.1415926535897932384626433832795f;
 
+RenderAtom Gamui::m_nullAtom;
+
 void Matrix::SetXRotation( float theta )
 {
 	float cosTheta = cosf( theta*PI/180.0f );
@@ -190,11 +192,9 @@ void TextLabel::ClearText()
 }
 
 
-const RenderAtom* TextLabel::GetRenderAtom() const
+const RenderAtom& TextLabel::GetRenderAtom() const
 {
 	GAMUIASSERT( m_gamui );
-	GAMUIASSERT( m_gamui->GetTextAtom() );
-
 	return Enabled() ? m_gamui->GetTextAtom() : m_gamui->GetDisabledTextAtom();
 }
 
@@ -418,14 +418,6 @@ Image::Image() : UIItem( Gamui::LEVEL_BACKGROUND ),
 {
 }
 
-Image::Image( Gamui* gamui, const RenderAtom& atom, bool foreground ): UIItem( Gamui::LEVEL_BACKGROUND ),
-	  m_width( DEFAULT_SIZE ),
-	  m_height( DEFAULT_SIZE ),
-	  m_slice( false )
-{
-	Init( gamui, atom, foreground );
-}
-
 Image::~Image()
 {
 }
@@ -497,6 +489,98 @@ bool Image::DoLayout()
 {
 	return true;
 }
+
+
+Canvas::Canvas() : UIItem( Gamui::LEVEL_FOREGROUND )
+{
+}
+
+Canvas::~Canvas()
+{
+}
+
+
+void Canvas::Init( Gamui* gamui, const RenderAtom& atom )
+{
+	m_atom = atom;
+	m_gamui = gamui;
+	gamui->Add(this);
+}
+
+
+void Canvas::Clear()
+{
+	m_cmds.Clear();
+	Modify();
+}
+
+
+void Canvas::DrawLine(float x0, float y0, float x1, float y1, float thick)
+{
+	Cmd cmd = { LINE, x0, y0, x1, y1, thick };
+	m_cmds.Push(cmd);
+	Modify();
+}
+
+
+void Canvas::DrawRectangle(float x, float y, float w, float h)
+{
+	Cmd cmd = { RECTANGLE, x, y, w, h };
+	m_cmds.Push(cmd);
+	Modify();
+}
+
+
+void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
+{
+	if ( m_atom.textureHandle == 0 ) {
+		return;
+	}
+
+	for (int i = 0; i < m_cmds.Size(); ++i) {
+
+		const Cmd& cmd = m_cmds[i];
+		
+		switch (cmd.type) {
+			case LINE:
+			{
+				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+				float half = cmd.thickness * 0.5f;
+				float nX = cmd.x1 - cmd.x0;
+				float nY = cmd.y1 - cmd.y0;
+				float len = sqrt(nX*nX + nY*nY);
+				nX /= len;
+				nY /= len;
+
+				float rX = nY * half;
+				float rY = -nX * half;
+
+				vertex[0].Set(X() + cmd.x0 + rX, Y() + cmd.y0 + rY, m_atom.tx0, m_atom.ty0);
+				vertex[1].Set(X() + cmd.x0 - rX, Y() + cmd.y0 - rY, m_atom.tx0, m_atom.ty0);
+				vertex[2].Set(X() + cmd.x1 - rX, Y() + cmd.y1 - rY, m_atom.tx1, m_atom.ty1);
+				vertex[3].Set(X() + cmd.x1 + rX, Y() + cmd.y1 + rY, m_atom.tx1, m_atom.ty1);
+			}
+			break;
+
+			case RECTANGLE:
+			{
+				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+
+				float x0 = cmd.x0;
+				float x1 = cmd.x0 + cmd.w;
+				float y0 = cmd.y0;
+				float y1 = cmd.y0 + cmd.h;
+
+				vertex[0].Set(X() + x0, Y() + y0, m_atom.tx0, m_atom.ty0);
+				vertex[1].Set(X() + x0, Y() + y1, m_atom.tx0, m_atom.ty0);
+				vertex[2].Set(X() + x1, Y() + y1, m_atom.tx1, m_atom.ty1);
+				vertex[3].Set(X() + x1, Y() + y0, m_atom.tx1, m_atom.ty1);
+			}
+			break;
+		}
+	}
+}
+
 
 
 TiledImageBase::TiledImageBase() : UIItem( Gamui::LEVEL_BACKGROUND ),
@@ -573,9 +657,9 @@ void TiledImageBase::SetForeground( bool foreground )
 }
 
 
-const RenderAtom* TiledImageBase::GetRenderAtom() const
+const RenderAtom& TiledImageBase::GetRenderAtom() const
 {
-	return &m_atom[1];
+	return m_atom[1];
 }
 
 
@@ -627,9 +711,9 @@ void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 }
 
 
-const RenderAtom* Image::GetRenderAtom() const
+const RenderAtom& Image::GetRenderAtom() const
 {
-	return &m_atom;
+	return m_atom;
 }
 
 
@@ -901,9 +985,9 @@ void Button::SetEnabled( bool enabled )
 }
 
 
-const RenderAtom* Button::GetRenderAtom() const
+const RenderAtom& Button::GetRenderAtom() const
 {
-	return 0;
+	return Gamui::NullAtom();
 }
 
 
@@ -1086,7 +1170,7 @@ bool ToggleButton::HandleTap( TapAction action, float x, float y )
 
 
 DigitalBar::DigitalBar() : UIItem( Gamui::LEVEL_FOREGROUND ),
-	m_nTicks( 0 ),
+	m_double( false ),
 	m_width( DEFAULT_SIZE ),
 	m_height( DEFAULT_SIZE )
 {
@@ -1094,7 +1178,6 @@ DigitalBar::DigitalBar() : UIItem( Gamui::LEVEL_FOREGROUND ),
 
 
 void DigitalBar::Init(	Gamui* gamui,
-						int nTicks,
 						const RenderAtom& atom0,
 						const RenderAtom& atom1 )
 {
@@ -1102,16 +1185,13 @@ void DigitalBar::Init(	Gamui* gamui,
 	SetDialogID(gamui->CurrentDialogID());
 	m_gamui->Add(this);
 
-	GAMUIASSERT( nTicks <= MAX_TICKS );
-	m_nTicks = nTicks;
-	m_t = 0;
+	m_t[0] = m_t[1] = 0;
 
-	m_atomLower = atom0;
-	m_atomHigher = atom1;
+	m_image[0].Init( gamui, atom0, true );
+	m_image[1].Init( gamui, atom1, true );
+	m_image[2].Init( gamui, atom0, true );
+	m_image[3].Init( gamui, atom1, true );
 
-	for( int i=0; i<nTicks; ++i ) {
-		m_image[i].Init( gamui, m_atomHigher, true );
-	}
 	m_textLabel.Init( gamui );
 	SetRange( 0 );
 }
@@ -1125,50 +1205,23 @@ void DigitalBar::SetSize( float w, float h )
 }
 
 
-void DigitalBar::SetLowerAtom( const RenderAtom& atom )
+void DigitalBar::SetAtom( int which, const RenderAtom& atom, int n )
 {
-	if ( !atom.Equal( m_atomLower )) {
-		m_atomLower = atom;
+	GAMUIASSERT(n == 0 || n == 1);
+	if ( !atom.Equal( m_image[n*2+which].GetRenderAtom() )) {
+		m_image[n * 2 + which].SetAtom(atom);
 		Modify();
-
-		int index = (int)( m_t * (float)m_nTicks + 0.5f );
-		for( int i=0; i<index; ++i ) {
-			m_image[i].SetAtom( m_atomLower );
-		}
 	}
 }
 
 
-void DigitalBar::SetHigherAtom( const RenderAtom& atom )
-{
-	if ( !atom.Equal( m_atomHigher )) {
-		m_atomHigher = atom;
-		Modify();
-
-		int index = (int)( m_t * (float)m_nTicks + 0.5f );
-		for( int i=index; i<m_nTicks; ++i ) {
-			m_image[i].SetAtom( m_atomHigher );
-		}
-	}
-}
-
-
-void DigitalBar::SetRange( float t0 )
+void DigitalBar::SetRange( float t0, int n )
 {
 	if ( t0 < 0 ) t0 = 0;
 	if ( t0 > 1 ) t0 = 1;
-
-	if ( t0 != m_t ) {
-		m_t = t0;
-
-		int index = (int)( m_t * (float)m_nTicks + 0.5f );
-
-		for( int i=0; i<index; ++i ) {
-			m_image[i].SetAtom( m_atomLower );
-		}
-		for( int i=index; i<m_nTicks; ++i ) {
-			m_image[i].SetAtom( m_atomHigher );
-		}
+	GAMUIASSERT(n == 0 || n == 1);
+	if ( t0 != m_t[n] ) {
+		m_t[n] = t0;
 		Modify();
 	}
 }
@@ -1189,44 +1242,45 @@ float DigitalBar::Height() const
 void DigitalBar::SetVisible( bool visible )
 {
 	UIItem::SetVisible( visible );
-	for( int i=0; i<m_nTicks; ++i ) {
-		m_image[i].SetVisible( visible );
-	}
+	m_image[0].SetVisible( visible );
+	m_image[1].SetVisible( visible );
+	m_image[2].SetVisible( visible && m_double);
+	m_image[3].SetVisible( visible && m_double);
 	m_textLabel.SetVisible( visible );
 }
 
 
-const RenderAtom* DigitalBar::GetRenderAtom() const
+const RenderAtom& DigitalBar::GetRenderAtom() const
 {
-	return 0;
+	return Gamui::NullAtom();
 }
 
 
 bool DigitalBar::DoLayout()
 {
-	if ( m_nTicks > 2 ) {
-		//
-		// a space b space c
-		//
-		float totalSpace = m_width * 0.10f;
-		float space = totalSpace / (float)(m_nTicks-1);
-		float perItemWidth = 0.90f * m_width / (float)m_nTicks;
+	float mult = m_double ? 0.5f : 1.0f;
+	m_image[0].SetSize(m_width * m_t[0], m_height*mult);
+	m_image[1].SetSize(m_width * (1.0f - m_t[0]), m_height*mult);
 
-		for( int i=0; i<m_nTicks; ++i ) {
-			m_image[i].SetSize( perItemWidth, m_height );
-			m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
-							   Y() );
-		}
+	m_image[0].SetPos(X(), Y());
+	m_image[1].SetPos(X() + m_width*m_t[0], Y());
+
+	if (m_double) {
+		m_image[2].SetSize(m_width * m_t[1], m_height*mult);
+		m_image[3].SetSize(m_width * (1.0f - m_t[1]), m_height*mult);
+
+		m_image[2].SetPos(X(), Y() + m_height*mult);
+		m_image[3].SetPos(X() + m_width*m_t[1], Y() + m_height*mult);
+
+		m_image[2].SetVisible(this->Visible());
+		m_image[3].SetVisible(this->Visible());
 	}
 	else {
-		m_image[0].SetAtom( m_atomLower );
-		m_image[1].SetAtom( m_atomHigher );
-		m_image[0].SetSize( m_width * m_t, m_height );
-		m_image[1].SetSize( m_width * (1.0f-m_t), m_height );
-		m_image[0].SetPos( X(), Y() );
-		m_image[1].SetPos( X() + m_width*m_t, Y() );
+		m_image[2].SetVisible(false);
+		m_image[3].SetVisible(false);
 	}
-	m_textLabel.SetCenterPos( X() + Width()*0.5f, Y() + Height()*0.5f );
+
+	m_textLabel.SetCenterPos(X() + Width()*0.5f, Y() + Height()*0.5f);
 	return false;
 }
 
@@ -1413,11 +1467,11 @@ int Gamui::SortItems( const void* _a, const void* _b )
 	else if ( a->Level() > b->Level() )
 		return 1;
 
-	const RenderAtom* atomA = a->GetRenderAtom();
-	const RenderAtom* atomB = b->GetRenderAtom();
+	const RenderAtom& atomA = a->GetRenderAtom();
+	const RenderAtom& atomB = b->GetRenderAtom();
 
-	const void* rStateA = (atomA) ? atomA->renderState : 0;
-	const void* rStateB = (atomB) ? atomB->renderState : 0;
+	const void* rStateA = atomA.renderState;
+	const void* rStateB = atomB.renderState;
 
 	// If level is the same, look at the RenderAtom;
 	// to get to the state:
@@ -1426,8 +1480,8 @@ int Gamui::SortItems( const void* _a, const void* _b )
 	else if ( rStateA > rStateB )
 		return 1;
 
-	const void* texA = (atomA) ? atomA->textureHandle : 0;
-	const void* texB = (atomB) ? atomB->textureHandle : 0;
+	const void* texA = atomA.textureHandle;
+	const void* texB = atomB.textureHandle;
 
 	// finally the texture.
 	if ( texA < texB )
@@ -1474,12 +1528,12 @@ void Gamui::Render()
 
 		for( int i=0; i<m_itemArr.Size(); ++i ) {
 			UIItem* item = m_itemArr[i];
-			const RenderAtom* atom = item->GetRenderAtom();
+			const RenderAtom& atom = item->GetRenderAtom();
 
 			// Requires() does layout / sets child visibility. Can't skip this step:
 			bool needsToRender = item->DoLayout();
 
-			if ( !needsToRender || !item->Visible() || !atom || !atom->textureHandle )
+			if ( !needsToRender || !item->Visible() || !atom.textureHandle )
 				continue;
 
 			// Dialog boxes must be pushed to show up:
@@ -1491,14 +1545,14 @@ void Gamui::Render()
 
 			// Do we need a new state?
 			if (    !state
-				 || atom->renderState   != state->renderState
-				 || atom->textureHandle != state->textureHandle ) 
+				 || atom.renderState   != state->renderState
+				 || atom.textureHandle != state->textureHandle ) 
 			{
 				state = m_stateBuffer.PushArr( 1 );
 				state->vertexStart = m_vertexBuffer.Size();
 				state->indexStart = m_indexBuffer.Size();
-				state->renderState = atom->renderState;
-				state->textureHandle = atom->textureHandle;
+				state->renderState = atom.renderState;
+				state->textureHandle = atom.textureHandle;
 			}
 			item->Queue( &m_indexBuffer, &m_vertexBuffer );
 
@@ -1671,7 +1725,8 @@ float Gamui::GetFocusY()
 void Gamui::SetFocusLook( const RenderAtom& atom, float zRotation )
 {
 	if ( !m_focusImage ) {
-		m_focusImage = new Image( this, atom, true );
+		m_focusImage = new Image();
+		m_focusImage->Init(this, atom, true );
 		m_focusImage->SetLevel( LEVEL_FOCUS );
 	}
 	m_focusImage->SetAtom( atom );

@@ -56,7 +56,8 @@ public:
 								int effectsMask,
 								int tech,
 								int level,
-								int seed);
+								int seed,
+								int team);
 
 
 	GameItem* Build(	int itemType,		// GUN
@@ -65,7 +66,8 @@ public:
 				int effectsFlags,	// GameItem effect flags, not enumeration above. GameItem::EFFECT_FIRE, etc.
 				TransactAmt* required,
 				int* techRequired,
-				bool randomTraits );			
+				bool randomTraits,
+				int team);			
 
 private:
 	int seed;

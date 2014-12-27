@@ -105,8 +105,6 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
 	engine->camera.Orbit( 180.0f );
 
-	//FaceGen faceGen( currentType == HUMAN_FEMALE_FACE );
-
 	Random random( mainRow );
 	random.Rand();
 

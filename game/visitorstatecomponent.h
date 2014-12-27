@@ -41,8 +41,8 @@ public:
 	void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 private:
-	gamui::Image		wants[VisitorData::NUM_VISITS];
-	gamui::DigitalBar	bar;	// FIXME: this is a pretty general need to have here. Probably should be head decos.
+	gamui::Image		want;	// s[VisitorData::NUM_VISITS];
+	gamui::DigitalBar	bar;
 	bool needsInit;
 };
 

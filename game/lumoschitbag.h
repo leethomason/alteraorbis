@@ -21,6 +21,7 @@
 #include "../engine/map.h"
 #include "census.h"
 #include "visitor.h"
+#include "visitorweb.h"
 
 class WorldMap;
 class Wallet;
@@ -39,6 +40,13 @@ public:
 
 
 class BuildingRepairFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MAP; }
+};
+
+class BuildingWithPorchFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
@@ -241,7 +249,7 @@ public:
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
-	Chit* NewVisitor( int visitorIndex );
+	Chit* NewVisitor( int visitorIndex, const Web& web );
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
@@ -260,7 +268,7 @@ public:
 					bool trail );
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, Wallet* srcWallet );
-	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0 );
+	GameItem* AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altResource=0, const char* altName=0 );
 	GameItem* AddItem( GameItem* item, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
@@ -300,13 +308,11 @@ public:
 	bool PopScene( int* id, SceneData** data );
 	bool IsScenePushed() const { return sceneID >= 0; }
 
-	// FIXME: sketchy partial implementation. 'reason' not used.
-	enum {
-		SUMMON_TECH
-	};
-	void AddSummoning(const grinliz::Vector2I& sector, int reason);
-	grinliz::Vector2I HasSummoning(int reason);
-	void RemoveSummoning(const grinliz::Vector2I& sector);
+	grinliz::IString NameGen(const char* dataset, int seed, int min, int max);
+
+	// The seed is just a lookup into the name, in this form.
+	// Generally use the NameGen() method.
+	static grinliz::IString StaticNameGen(const gamedb::Reader* database, const char* dataset, int seed, int min, int max);
 
 private:
 
@@ -319,12 +325,19 @@ private:
 	Sim*						sim;	// if part of a simulation. can be null.
 	int							deityID[NUM_DEITY];
 
+	struct NamePoolID {
+		grinliz::IString dataset;
+		int id;
+
+		void Serialize(XStream* xs);
+	};
+
+	grinliz::CDynArray<NamePoolID> namePool;
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
 	grinliz::CDynArray<Chit*>	findMatch;
 	grinliz::CDynArray<float>	findWeight;
 	grinliz::CDynArray<Chit*>	chitArr;				// local, temporary
-	grinliz::CDynArray<grinliz::Vector2I> summoningArr;	// not serialized (maybe should be?)
 
 	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
 };

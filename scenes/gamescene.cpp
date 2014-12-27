@@ -57,7 +57,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	selectionModel = 0;
 	buildActive = 0;
 	chitTracking = 0;
-	currentNews = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
 	domainWarningTimer = 0;
@@ -85,9 +84,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	saveButton.Init( &gamui2D, game->GetButtonLook(0) );
 	saveButton.SetText( "Save" );
-
-	loadButton.Init(&gamui2D, game->GetButtonLook(0));
-	loadButton.SetText("Load");
 
 	useBuildingButton.Init(&gamui2D, game->GetButtonLook(0));
 	useBuildingButton.SetText( "Use" );
@@ -143,10 +139,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
-	autoRebuild.Init(&gamui2D, game->GetButtonLook(0));
-	autoRebuild.SetText("Auto\nRebuild");
-	autoRebuild.SetVisible(false);
-
 	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
 	abandonButton.SetText("Abandon");
 	abandonButton.SetVisible(false);
@@ -179,11 +171,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetFaceWidget.Init(&gamui2D, game->GetButtonLook(0), FaceWidget::BATTLE_BARS | FaceWidget::SHOW_NAME, 1);
 	targetFaceWidget.SetSize(100, 100);
 
-	summaryBars.Init(&gamui2D, ai::Needs::NUM_NEEDS + 1);
+	summaryBars.Init(&gamui2D, 0, ai::Needs::NUM_NEEDS + 1);
 	for (int i = 0; i < ai::Needs::NUM_NEEDS; ++i) {
-		summaryBars.SetBarText(i+1, ai::Needs::Name(i));
+		summaryBars.barArr[i+1]->SetText(ai::Needs::Name(i));
 	}
-	summaryBars.SetBarText(0, "morale");
+	summaryBars.barArr[0]->SetText("morale");
 
 	chitTracking = GetPlayerChitID();
 
@@ -198,7 +190,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	dateLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
-	consoleWidget.Init( &gamui2D );
+	newsConsole.Init( &gamui2D, sim->GetChitBag() );
+
+	RenderAtom darkPurple = LumosGame::CalcPaletteAtom( 10, 5 );
+	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
+	uiBackground.Init(&gamui2D, darkPurple, false);
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -233,6 +229,16 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
 
 	adviser->Attach(&helpText, &helpImage);
+
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		static const char* NAMES[NUM_SQUAD_BUTTONS] = { "Local", "Alpha", "Beta", "Delta", "Omega" };
+		squadButton[i].Init(&gamui2D, game->GetButtonLook(0));
+		squadButton[i].SetText(NAMES[i]);
+		squadButton[0].AddToToggleGroup(&squadButton[i]);
+	}
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		squadBar[i].Init(&gamui2D);
+	}
 }
 
 
@@ -256,7 +262,6 @@ void GameScene::Resize()
 	layout.PosAbs(&helpImage, 1, -1);
 	layout.PosAbs(&helpText, 2, -1);
 	layout.PosAbs(&saveButton, 1, -1);
-	layout.PosAbs(&loadButton, 2, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
 
@@ -266,6 +271,10 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		layout.PosAbs(&squadButton[i], i, 1);
+	}
 
 	static float SIZE_BOOST = 1.3f;
 	helpImage.SetPos(helpImage.X() + layout.Width() * 0.3f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
@@ -297,7 +306,6 @@ void GameScene::Resize()
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
 	layout.PosAbs(&createWorkerButton, 0, 3);
-	layout.PosAbs(&autoRebuild, 1, 3);
 	layout.PosAbs(&abandonButton, 2, 3);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
@@ -337,9 +345,8 @@ void GameScene::Resize()
 	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
-	layout.PosAbs(&consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
-	float consoleHeight = okay.Y() - consoleWidget.Y();
-	consoleWidget.SetBounds( 0, consoleHeight );
+	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
+	newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
@@ -360,8 +367,24 @@ void GameScene::Resize()
 
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
-	loadButton.SetVisible(visible);
 	okay.SetVisible(visible);
+
+	// ------- SQUAD LAYOUT ------ //
+	layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	layout.SetSize(layout.Width(), layout.Height()*0.5f);
+	for (int j = 0; j < CITIZEN_BASE; ++j) {
+		layout.PosAbs(&squadBar[j], 0, 2*2 + j);
+	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		for (int j = 0; j < SQUAD_SIZE; ++j) {
+			layout.PosAbs(&squadBar[CITIZEN_BASE + SQUAD_SIZE*i + j], i+1, 2*2 + j);
+		}
+	}
+
+	// --- calculated ----
+	uiBackground.SetPos(squadBar[0].X(), squadBar[0].Y());
+	uiBackground.SetSize(squadBar[MAX_CITIZENS - 1].X() + squadBar[MAX_CITIZENS - 1].Width() - squadBar[0].X(),
+						 squadBar[CITIZEN_BASE - 1].Y() + squadBar[CITIZEN_BASE - 1].Height() - squadBar[0].Y());
 }
 
 
@@ -570,11 +593,6 @@ void GameScene::TapModel( Chit* target )
 	Chit* player = GetPlayerChit();
 	if ( !player ) {
 		ClearTargetFlags();
-
-		AIComponent* ai = target->GetAIComponent();
-		if ( ai ) {
-			ai->EnableDebug( true );
-		}
 	}
 
 	AIComponent* ai = player ? player->GetAIComponent() : 0;
@@ -586,6 +604,7 @@ void GameScene::TapModel( Chit* target )
 	}
 	else if ( ai && Team::GetRelationship( target, player ) == RELATE_FRIEND ) {
 		const GameItem* item = target->GetItem();
+		// FIXME: should use key
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
 			chitTracking = target->ID();
@@ -641,7 +660,21 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	BuildAction(plane2i);
 
 	if (coreScript && uiMode[UI_CONTROL].Down()) {
-		coreScript->ToggleFlag(plane2i);
+		for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+			if (squadButton[i].Down()) {
+				ControlTap(i-1, plane2i);
+			}
+		}
+#if 0
+		CArray<int, 32> citizens;
+		for (int i = 0; i < coreScript->NumCitizens(); ++i) {
+			Chit* c = coreScript->CitizenAtIndex(i);
+			GLASSERT(c);
+			citizens.Push(c->ID());
+		}
+		coreScript->SetWaypoints(citizens.Mem(), citizens.Size(), plane2i);
+#endif
+
 		return;
 	}
 
@@ -760,6 +793,33 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 				variation = coreScript->GetPave();
 			}
 			wq->AddAction(pos2i, buildActive, 0, variation);
+		}
+	}
+}
+
+
+void GameScene::ControlTap(int slot, const Vector2I& pos2i)
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	if (!cs) return;
+
+	if (slot == -1) {
+		// Local control.
+		Vector2I sector = ToSector(pos2i);
+		Vector2I coreSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+		if (sector == coreSector) {
+			cs->ToggleFlag(pos2i);
+		}
+	}
+	else {
+		GLASSERT(slot >= 0 && slot < MAX_SQUADS);
+		Vector2I waypoint = cs->GetWaypoint(slot);
+		static const Vector2I ZERO = { 0, 0 };
+		if (waypoint == pos2i) {
+			cs->SetWaypoints(slot, ZERO);
+		}
+		else {
+			cs->SetWaypoints(slot, pos2i);
 		}
 	}
 }
@@ -968,15 +1028,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		at.z = Clamp(at.z, 0.0f, sim->GetWorldMap()->Height() - 1.0f);
 
 		data->destSector = ToSector(ToWorld2I(at));
+		CoreScript* cc = sim->GetChitBag()->GetHomeCore();
+		for (int i = 0; cc && i < MAX_SQUADS; ++i) {
+			data->squadDest[i] = cc->GetLastWaypoint(i);
+		}
 		game->PushScene( LumosGame::SCENE_MAP, data );
 	}
 	else if ( item == &saveButton ) {
 		Save();
-	}
-	else if ( item == &loadButton ) {
-		delete sim;
-		sim = new Sim( lumosGame );
-		Load();
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
@@ -990,23 +1049,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			Chit* coreChit = cs->ParentChit();
 			if (coreChit->GetItem()->wallet.Gold() >= WORKER_BOT_COST) {
 				ReserveBank::GetWallet()->Deposit(coreChit->GetWallet(), WORKER_BOT_COST);
-				int team = coreChit->GetItem()->team;
+				int team = coreChit->GetItem()->Team();
 				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
-			}
-		}
-	}
-	else if (item == &autoRebuild) {
-		CoreScript* cs = GetHomeCore();
-		if (cs) {
-			Chit* coreChit = cs->ParentChit();
-			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
-
-			if (autoRebuild.Down() && !rebuild) {
-				coreChit->Add(new RebuildAIComponent());
-			}
-			else if (!autoRebuild.Down() && rebuild) {
-				coreChit->Remove(rebuild);
-				delete rebuild;
 			}
 		}
 	}
@@ -1057,27 +1101,35 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if (item == &prevUnit) bias = -1;
 		if (item == &nextUnit) bias = 1;
 
-		if (coreScript && coreScript->NumCitizens()) {
-			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-			int index = 0;
-			if (chit) {
-				index = coreScript->FindCitizenIndex(chit);
-			}
+		if (coreScript ) {
+			CChitArray citizens;
+			int nCitizens = coreScript->Citizens(&citizens);
+			if (nCitizens) {
 
-			if (index < 0)
-				index = 0;
-			else
-				index = index + bias;
+				Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+				int index = citizens.Find(chit);
 
-			if (index < 0) index += coreScript->NumCitizens();
-			if (index >= coreScript->NumCitizens()) index = 0;
+				if (index < 0)
+					index = 0;
+				else
+					index = index + bias;
 
-			chit = coreScript->CitizenAtIndex(index);
+				if (index < 0) index += nCitizens;
+				if (index >= nCitizens) index = 0;
 
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-			if (cc && chit) {
-				chitTracking = chit->ID();
-				cc->SetTrack(chitTracking);
+				chit = citizens[index];
+
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				if (cc && chit) {
+					chitTracking = chit->ID();
+					cc->SetTrack(chitTracking);
+				}
+				for (int i = 0; i < nCitizens; ++i) {
+					AIComponent* ai = citizens[i]->GetAIComponent();
+					if (ai) {
+						ai->EnableLog(chitTracking == citizens[i]->ID());
+					}
+				}
 			}
 		}
 	}
@@ -1095,7 +1147,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 
 	Vector2F pos2 = { 0, 0 };
-	if (consoleWidget.IsItem(item, &pos2)) {
+	if (newsConsole.consoleWidget.IsItem(item, &pos2)) {
 		if (!pos2.IsZero()) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 			if (cc) {
@@ -1171,7 +1223,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 #endif
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
-		if ( item == &pickupButton[i] ) {
+		if ( i < pickupData.Size() && item == &pickupButton[i] ) {
 			Chit* playerChit = GetPlayerChit();
 			Chit* item = sim->GetChitBag()->GetChit( pickupData[i].chitID );
 			if ( item && playerChit ) {
@@ -1206,7 +1258,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 			{
 				// Find the nearest port. (Somewhat arbitrary.)
 				sectorPort.sector = destSector;
-				sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
+				sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
 			}
 			if ( sectorPort.IsValid() ) {
 				ai->Move( sectorPort, true );
@@ -1255,7 +1307,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Create Kamakira domain.
+#if 0	// Create Kamakira domain.
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
@@ -1267,6 +1319,23 @@ void GameScene::HandleHotKey( int mask )
 
 				for (int i = 0; i<5; ++i) {
 					sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_KAMAKIRI);
+					at.x += 0.5f;
+				}
+			}
+		}
+#endif
+#if 1	// Create Human domain.
+		{
+			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
+			if (cs) {
+				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				int team = Team::GenTeam(TEAM_HOUSE);
+				cs = CoreScript::CreateCore(sector, team, sim->Context());
+				cs->ParentChit()->Add(new HumanDomainAI());
+				cs->ParentChit()->GetWallet()->Deposit(ReserveBank::GetWallet(), 1000);
+
+				for (int i = 0; i<5; ++i) {
+					sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_HOUSE);
 					at.x += 0.5f;
 				}
 			}
@@ -1354,7 +1423,12 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if ( mask == GAME_HK_MAP ) {
 		Chit* playerChit = GetPlayerChit();
-		game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
+		MapSceneData* data = new MapSceneData(sim->GetChitBag(), sim->GetWorldMap(), playerChit);
+		CoreScript* cc = sim->GetChitBag()->GetHomeCore();
+		for (int i = 0; cc && i < MAX_SQUADS; ++i) {
+			data->squadDest[i] = cc->GetLastWaypoint(i);
+		}
+		game->PushScene( LumosGame::SCENE_MAP, data);
 	}
 	else if ( mask == GAME_HK_CHEAT_GOLD ) {
 		CoreScript* cs = GetHomeCore();
@@ -1501,7 +1575,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	// Enforce the sleep tube limit.
 	CStr<32> str;
 	int techLevel = Min(nTemples, 3);
-	int maxTubes = CoreScript::MaxCitizens(TEAM_HOUSE, nTemples);
+	int maxTubes = CoreScript::MaxCitizens(nTemples);
 
 	BuildScript buildScript;
 	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(ISC::bed, 0);
@@ -1584,91 +1658,8 @@ void GameScene::SetPickupButtons()
 }
 
 
-void GameScene::ProcessNewsToConsole()
-{
-	NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-	currentNews = Max( currentNews, history->NumNews() - 40 );
-	GLString str;
-	LumosChitBag* chitBag = sim->GetChitBag();
-	CoreScript* coreScript = GetHomeCore();
-
-	Chit* playerChit = GetPlayerChit();
-	Vector2I homeSector = GetHomeSector();
-
-	// Check if news sector is 1)current avatar sector, or 2)domain sector
-
-	RenderAtom atom;
-	Vector2F pos2 = { 0, 0 };
-
-	for ( ;currentNews < history->NumNews(); ++currentNews ) {
-		const NewsEvent& ne = history->News( currentNews );
-		Vector2I sector = ne.Sector();
-		Chit* chit = chitBag->GetChit(ne.FirstChitID());
-		SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
-
-		str = "";
-
-		switch( ne.What() ) {
-		case NewsEvent::DENIZEN_CREATED:
-		case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
-			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
-				ne.Console( &str, chitBag, 0 );
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("greeninfo");
-			}
-			break;
-
-		case NewsEvent::DENIZEN_KILLED:
-		case NewsEvent::STARVATION:
-		case NewsEvent::BLOOD_RAGE:
-		case NewsEvent::VISION_QUEST:
-			if ( coreScript && coreScript->IsCitizen( ne.FirstChitID() )) {
-				ne.Console( &str, chitBag, 0 );
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("warning");
-			}
-			break;
-
-		case NewsEvent::FORGED:
-		case NewsEvent::UN_FORGED:
-		case NewsEvent::PURCHASED:
-			if ((coreScript && coreScript->IsCitizen(ne.FirstChitID() ))
-				|| sector == homeSector)
-			{
-				ne.Console(&str, chitBag, 0);
-				if (sc) pos2 = sc->GetPosition2D();
-				atom = LumosGame::CalcUIIconAtom("greeninfo");
-			}
-			break;
-
-		case NewsEvent::GREATER_MOB_CREATED:
-		case NewsEvent::GREATER_MOB_KILLED:
-			ne.Console( &str, chitBag, 0 );
-			if (sc) pos2 = sc->GetPosition2D();
-			atom = LumosGame::CalcUIIconAtom("greeninfo");
-			break;
-
-		case NewsEvent::DOMAIN_CREATED:
-		case NewsEvent::DOMAIN_DESTROYED:
-		case NewsEvent::GREATER_SUMMON_TECH:
-		case NewsEvent::DOMAIN_CONQUER:
-			ne.Console( &str, chitBag, 0 );
-			break;
-
-		default:
-			break;
-		}
-		if ( !str.empty() ) {
-			consoleWidget.Push(str, atom, pos2);
-		}
-	}
-}
-
-
 void GameScene::DoTick( U32 delta )
 {
-	clock_t startTime = clock();
-
 	sim->DoTick( delta );
 
 	SetPickupButtons();
@@ -1689,8 +1680,6 @@ void GameScene::DoTick( U32 delta )
 			newsButton[i].SetEnabled( false );
 		}
 	}
-
-	clock_t endTime = clock();
 
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
@@ -1731,10 +1720,13 @@ void GameScene::DoTick( U32 delta )
 		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
 		Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+
+		CChitArray citizens;
+		coreScript->Citizens(&citizens);
 	
-		if (coreScript->NumCitizens()) {
-			for (int i = 0; i < coreScript->NumCitizens(); i++) {
-				Chit* chit = coreScript->CitizenAtIndex(i);
+		if (citizens.Size()) {
+			for (int i = 0; i < citizens.Size(); i++) {
+				Chit* chit = citizens[i];
 				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
 					++nActive;
 					const ai::Needs& needs = chit->GetAIComponent()->GetNeeds();
@@ -1759,11 +1751,11 @@ void GameScene::DoTick( U32 delta )
 		}
 		RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 		RenderAtom red   = LumosGame::CalcPaletteAtom( 0, 1 );	
-		summaryBars.SetBarColor(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
-		summaryBars.SetBarRatio(0, float(sum[ai::Needs::NUM_NEEDS]));
+		summaryBars.barArr[0]->SetAtom(0, critical[ai::Needs::NUM_NEEDS] ? red : blue);
+		summaryBars.barArr[0]->SetRange( float(sum[ai::Needs::NUM_NEEDS]));
 		for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
-			summaryBars.SetBarColor(k+1, critical[k] ? red : blue);
-			summaryBars.SetBarRatio(k+1, float(sum[k]));
+			summaryBars.barArr[k+1]->SetAtom(0, critical[k] ? red : blue);
+			summaryBars.barArr[k+1]->SetRange(float(sum[k]));
 		}
 
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
@@ -1772,7 +1764,7 @@ void GameScene::DoTick( U32 delta )
 		str.Format("Date %.2f\n%s\nPop %d/%d", 
 				   sim->AgeF(), 
 				   sd.name.safe_str(), 
-				   coreScript->NumCitizens(), CoreScript::MaxCitizens(TEAM_HOUSE, arr[BuildScript::TEMPLE]));
+				   citizens.Size(), CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
 
@@ -1804,7 +1796,6 @@ void GameScene::DoTick( U32 delta )
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
 	bool visible = game->GetDebugUI();
-	autoRebuild.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
 	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
 
 	str.Clear();
@@ -1845,19 +1836,8 @@ void GameScene::DoTick( U32 delta )
 		adviser->DoTick(delta, coreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
-	autoRebuild.SetEnabled(coreScript != 0);
 	abandonButton.SetEnabled(coreScript != 0);
-	if (coreScript) {
-		// auto rebuild
-		Component* rebuild = coreScript->ParentChit()->GetComponent("RebuildAIComponent");
-		if (rebuild)
-			autoRebuild.SetDown();
-		else
-			autoRebuild.SetUp();
-	}
-
-	consoleWidget.DoTick( delta );
-	ProcessNewsToConsole();
+	newsConsole.DoTick( delta, sim->GetChitBag()->GetHomeCore() );
 
 	bool useBuildingVisible = false;
 	if ( AvatarSelected() ) {
@@ -1899,8 +1879,88 @@ void GameScene::DoTick( U32 delta )
 
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
+
+	SetSquadDisplay(uiMode[UI_CONTROL].Down());
 }
 
+
+void GameScene::SetSquadDisplay(bool squadVisible)
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+
+	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
+		squadButton[i].SetVisible(squadVisible);
+		squadBar[i].SetVisible(squadVisible);
+	}
+	bool inUse[MAX_CITIZENS] = { false };
+	uiBackground.SetVisible(squadVisible);
+	if (squadVisible && cs) {
+		int count[NUM_SQUAD_BUTTONS] = { 0 };
+		GLString str;
+		CChitArray citizens;
+		cs->Citizens(&citizens);
+
+		for (int i = 0; i < citizens.Size(); ++i) {
+			int c = cs->SquadID(citizens[i]->ID()) + 1;
+			GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
+			if (count[c] < ((c == 0) ? CITIZEN_BASE : SQUAD_SIZE)) {
+				const GameItem* item = citizens[i]->GetItem();
+				int index = 0;
+				if (c == 0) {
+					index = count[0];
+					GLASSERT(index >= 0 && index < CITIZEN_BASE);
+				}
+				else {
+					index = CITIZEN_BASE + (c - 1)*SQUAD_SIZE + count[c];
+					GLASSERT(index >= CITIZEN_BASE && index < MAX_CITIZENS);
+				}
+				count[c] += 1;
+				GLASSERT(index >= 0 && index < MAX_CITIZENS);
+				ItemComponent* itemComponent = citizens[i]->GetItemComponent();
+				squadBar[index].Set(itemComponent);
+				squadBar[index].SetVisible(true);
+				inUse[index] = true;
+			}
+		}
+	}
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		if (!inUse[i]) {
+			squadBar[i].SetVisible(false);
+		}
+	}
+
+	if (squadVisible) {
+		for (int i = 0; i < MAX_SQUADS; ++i) {
+			static const char* NAME[MAX_SQUADS] = { "Alpha", "Beta", "Delta", "Omega" };
+			// Ready, Resting, On Route
+			Vector2I waypoint = { 0, 0 };
+			CChitArray squaddies;
+			if (cs) {
+				waypoint = cs->GetWaypoint(i);
+				cs->Squaddies(i, &squaddies);
+			}
+			double totalMorale = 0;
+			for (int k = 0; k < squaddies.Size(); ++k) {
+				if (squaddies[k]->GetAIComponent()) {
+					totalMorale += squaddies[k]->GetAIComponent()->GetNeeds().Morale();
+				}
+			}
+			double moraleAve = squaddies.Size() ? (totalMorale / double(squaddies.Size())) : 0;
+
+			CStr<32> str = NAME[i];
+			if (squaddies.Size() && !waypoint.IsZero()) {
+				str.Format("%s\nRoute %x%x", NAME[i], waypoint.x/SECTOR_SIZE, waypoint.y/SECTOR_SIZE);
+			}
+			else if (squaddies.Size() && moraleAve > 0.95) {
+				str.Format("%s\nReady", NAME[i]);
+			}
+			else if (squaddies.Size()) {
+				str.Format("%s\nRest %d%%", NAME[i], int(moraleAve*100.0f));
+			}
+			squadButton[i + 1].SetText(str.safe_str());
+		}
+	}
+}
 
 
 void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
@@ -1911,7 +1971,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
-				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
+				const SectorData& sd = sim->GetWorldMap()->GetSectorData(sector);
 				endGameWidget.SetData(	chit->Context()->chitBag->GetNewsHistory(),
 										this, 
 										sd.name, chit->GetItem()->ID(), 
@@ -1975,7 +2035,7 @@ void GameScene::CheckGameStage(U32 delta)
 
 		CArray<SectorInfo, NUM_SECTORS * NUM_SECTORS> arr;
 		for (Rectangle2IIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
-			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
+			const SectorData* sd = &sim->GetWorldMap()->GetSectorData(it.Pos());
 			if (sd->HasCore() && arr.HasCap()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
 				CoreScript* cs = CoreScript::GetCore(sector);

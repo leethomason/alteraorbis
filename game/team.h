@@ -34,13 +34,14 @@ enum {
 	TEAM_GOB,
 	TEAM_KAMAKIRI,
 	TEAM_VISITOR,
+	TEAM_DEITY,
 	
 	NUM_TEAMS
 };
 
 enum {
-	TEAM_ID_LEFT  = 0xfffff1,
-	TEAM_ID_RIGHT = 0xfffff2,
+	TEAM_ID_LEFT  = 0x1fffff,
+	TEAM_ID_RIGHT = 0x2fffff,
 };
 
 
@@ -86,6 +87,10 @@ public:
 
 	static int Group(int team) {
 		return team & 0xff;
+	}
+
+	static int ID(int team) {
+		return ((team & 0xffffff00) >> 8);
 	}
 
 	static bool IsRogue(int team) {

@@ -46,6 +46,7 @@
 #include "../xarchive/glstreamer.h"
 
 #include "../grinliz/glperformance.h"
+#include "../grinliz/glarrayutil.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -53,12 +54,13 @@ using namespace tinyxml2;
 Weather* StackedSingleton<Weather>::instance	= 0;
 Sim* StackedSingleton<Sim>::instance			= 0;
 
-Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
+Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10 * 1000), visitorClock(4*1000)
 {
 	context.game = g;
 	spawnEnabled = true;
 	Screenport* port = context.game->GetScreenportMutable();
 	const gamedb::Reader* database = context.game->GetDatabase();
+	cachedWebAge = VERY_LONG_TICK;
 
 	itemDB		= new ItemDB();
 	context.worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -176,6 +178,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &reader, "minuteClock" );
 			secondClock.Serialize( &reader, "secondClock" );
 			volcTimer.Serialize( &reader, "volcTimer" );
+			spawnClock.Serialize(&reader, "spawnClock");
+			visitorClock.Serialize(&reader, "visitorClock");
 			Team::Serialize(&reader);
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
@@ -218,6 +222,8 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &writer, "minuteClock" );
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
+			spawnClock.Serialize(&writer, "spawnClock");
+			visitorClock.Serialize(&writer, "visitorClock");
 			Team::Serialize(&writer);
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
@@ -240,8 +246,22 @@ void Sim::CreateCores()
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
-			CoreScript* cs = CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
 
+			int team = TEAM_NEUTRAL;
+			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
+				// Mother Core. Always at the center: spawn point of the Visitors.
+				team = TEAM_DEITY;
+			}
+			CoreScript* cs = CoreScript::CreateCore(sector, team, &context);
+			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
+				cs->ParentChit()->GetItem()->flags |= GameItem::INDESTRUCTABLE;
+				HealthComponent* hc = cs->ParentChit()->GetHealthComponent();
+				if (hc) {
+					cs->ParentChit()->Remove(hc);
+					delete hc;
+				}
+				cs->ParentChit()->Add(new DeityDomainAI());
+			}
 			if (cs) {
 				++ncores;
 			}
@@ -305,13 +325,6 @@ void Sim::AbandonDomain()
 }
 
 
-void Sim::DoSpawn()
-{
-	SpawnGreater();
-	SpawnDenizens();
-}
-
-
 void Sim::SpawnDenizens()
 {
 	// FIXME: should track the relative numbers. Spawn more Kamakiri
@@ -321,59 +334,79 @@ void Sim::SpawnDenizens()
 	int greater = 0, lesser = 0, denizen = 0;
 	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
 
-	for (int pass = 0; pass < 2; ++pass) {
-		if (denizen < TYPICAL_DENIZENS) {
-			SectorPort sp;
-			for (int i = 0; i < 4; ++i) {
-				sp.Zero();
-				Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
-				CoreScript* cs = CoreScript::GetCore(sector);
-				if (cs && !cs->InUse()) {
-					const SectorData& sd = context.worldMap->GetSector(sector);
-					GLASSERT(sd.ports);
-					sp.sector = sector;
-					sp.port = sd.RandomPort(&random);
-					break;
+	if (denizen < TYPICAL_DENIZENS) {
+		SectorPort sp;
+		for (int i = 0; i < 4; ++i) {
+			sp.Zero();
+			Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && !cs->InUse()) {
+				const SectorData& sd = context.worldMap->GetSectorData(sector);
+				GLASSERT(sd.ports);
+				sp.sector = sector;
+				sp.port = sd.RandomPort(&random);
+				break;
+			}
+		}
+		if (sp.IsValid()) {
+			static const int NSPAWN = 4;
+			static const int NUM = 3;
+			IString denizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
+			float odds[NUM] = { 100.f, 80.f, 80.f };
+
+			const Census& census = context.chitBag->census;
+			const grinliz::CDynArray<Census::MOBItem>& items = census.MOBItems();
+			for (int i = 0; i < NUM; ++i) {
+				Census::MOBItem item(denizen[i]);
+				int index = items.Find(item);
+				if (index >= 0) {
+					odds[i] /= float(items[index].count);
 				}
 			}
-			if (sp.IsValid()) {
-				static const int NSPAWN = 4;
-				static const int NUM = 2;
-				static const char* denizen[NUM] = { "gobman", "kamakiri" };
-				static const float odds[NUM] = { 0.60f, 0.40f };
-				int index = random.Select(odds, NUM);
 
-				for (int i = 0; i < NSPAWN; ++i) {
-					IString ispawn = StringPool::Intern(denizen[index], true);
-					int team = Team::GetTeam(ispawn);
-					GLASSERT(team != TEAM_NEUTRAL);
+			int index = random.Select(odds, NUM);
 
-					Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
-					Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
-					GameItem * item = 0;
+			for (int i = 0; i < NSPAWN; ++i) {
+				IString ispawn = denizen[index];
+				int team = Team::GetTeam(ispawn);
+				GLASSERT(team != TEAM_NEUTRAL);
 
-					if (random.Bit())
-						item = context.chitBag->AddItem("pistol", chit, context.engine, team, 0);
-					else
-						item = context.chitBag->AddItem("ring", chit, context.engine, team, 0);
+				Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
+				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
+				GameItem * item = 0;
 
-					if (item) {
-						Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
-						NewsHistory* history = context.chitBag->GetNewsHistory();
-						item->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
-					}
-
-					pos.x += 0.2f * float(i);
-					chit->GetSpatialComponent()->SetPosition(pos);
-
-					GridMoveComponent* gmc = new GridMoveComponent();
-					chit->Add(gmc);
-					gmc->SetDest(sp);
+				int itemType = -1;
+				switch (random.Rand(4)) {
+					case 1: itemType = ForgeScript::GUN;	break;
+					case 2: itemType = ForgeScript::RING;	break;
+					case 3: itemType = ForgeScript::SHIELD;	break;
+					default: break;
 				}
+				if (itemType >= 0) {
+					TransactAmt cost;
+					GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, 0, 0, 0, 0, chit->ID(), team);
+					if (item) {
+						GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
+						item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+						chit->GetItemComponent()->AddToInventory(item);
+
+						// Mark this item as important with a destroyMsg:
+						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE));
+					}
+				}
+
+
+				pos.x += 0.2f * float(i);
+				chit->GetSpatialComponent()->SetPosition(pos);
+
+				GridMoveComponent* gmc = new GridMoveComponent();
+				chit->Add(gmc);
+				gmc->SetDest(sp);
 			}
 		}
 	}
 }
+
 
 void Sim::SpawnGreater()
 {
@@ -386,7 +419,7 @@ void Sim::SpawnGreater()
 			Vector2I sector = RandomInOutland(&random);
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && !cs->InUse()) {
-				const SectorData& sd = context.worldMap->GetSector(sector);
+				const SectorData& sd = context.worldMap->GetSectorData(sector);
 				GLASSERT(sd.ports);
 				sp.sector = sector;
 				sp.port = sd.RandomPort(&random);
@@ -446,7 +479,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
 	GLASSERT(context.chitBag->GetHomeTeam());
 	GLASSERT(context.chitBag->GetHomeCore());
-	Chit* chit = context.chitBag->NewDenizen(pos, context.chitBag->GetHomeTeam());
+	Chit* chit = context.chitBag->NewDenizen(pos, TEAM_HOUSE);	// real team assigned with AddCitizen
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
 	CoreScript::GetCore( ToSector(pos) )->AddCitizen( chit );
@@ -464,7 +497,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
 	}
 
-	chit->GetAIComponent()->EnableDebug( true );
+	//chit->GetAIComponent()->EnableLog( true );
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost
@@ -494,6 +527,7 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
+	cachedWebAge += delta;
 	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
 	context.circuitSim->DoTick(delta);
@@ -517,9 +551,14 @@ void Sim::DoTick( U32 delta )
 	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
 
+#if SPAWN_MOBS > 0
 	if (minuteTick) {
-		DoSpawn();
+		SpawnGreater();
 	}
+	if (spawnClock.Delta(delta)) {
+		SpawnDenizens();
+	}
+#endif
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = VolcanoScript::MAX_RAD;
@@ -541,7 +580,7 @@ void Sim::DoTick( U32 delta )
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
 				CoreScript* cs = CoreScript::GetCore( sector );
-				if ( cs && ( !cs->InUse() || age == 0 )) {
+				if ( !cs || !cs->InUse()) {
 					CreateVolcano( x, y );
 				}
 				break;
@@ -549,7 +588,7 @@ void Sim::DoTick( U32 delta )
 		}
 	}
 
-	if ( secondTick ) {
+	if ( visitorClock.Delta(delta) ) {
 		VisitorData* visitorData = Visitors::Instance()->visitorData;
 
 		// Check if the visitor is still in the world.
@@ -561,7 +600,7 @@ void Sim::DoTick( U32 delta )
 
 		if (this->SpawnEnabled()) {
 			if (visitorData[currentVisitor].id == 0) {
-				Chit* chit = context.chitBag->NewVisitor(currentVisitor);
+				Chit* chit = context.chitBag->NewVisitor(currentVisitor, this->GetCachedWeb());
 				visitorData[currentVisitor].id = chit->ID();
 			}
 		}
@@ -712,15 +751,17 @@ void Sim::Draw3D( U32 deltaTime )
 
 void Sim::CreateRockInOutland()
 {
-	const SectorData* sectorDataArr = context.worldMap->GetSectorData();
-	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
-		const SectorData& sd = sectorDataArr[i];
-		if ( !sd.HasCore() ) {
-			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
-				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
-					if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
-						context.worldMap->SetPlant(i, j, 0, 0);
-						context.worldMap->SetRock(i, j, -1, false, 0);
+	for (int sj = 0; sj < NUM_SECTORS; ++sj) {
+		for (int si = 0; si < NUM_SECTORS; ++si) {
+			Vector2I sector = { si, sj };
+			const SectorData& sd = context.worldMap->GetSectorData(sector);
+			if (!sd.HasCore()) {
+				for (int j = sd.y; j < sd.y + SECTOR_SIZE; ++j) {
+					for (int i = sd.x; i < sd.x + SECTOR_SIZE; ++i) {
+						if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
+							context.worldMap->SetPlant(i, j, 0, 0);
+							context.worldMap->SetRock(i, j, -1, false, 0);
+						}
 					}
 				}
 			}
@@ -741,7 +782,7 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y )
 {
-	const SectorData& sd = context.worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSectorData( x, y );
 	if ( sd.ports == 0 ) {
 		// no point to volcanoes in the outland
 		return;
@@ -763,21 +804,17 @@ void Sim::SeedPlants()
 {
 	Rectangle2I bounds = context.worldMap->Bounds();
 	bounds.Outset(-SECTOR_SIZE);
+	const int STEP = bounds.Area() / TYPICAL_PLANTS;
 
-	int type = 0;
-	int stage = 0;
 	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
-		int x = it.Pos().x;
-		int y = it.Pos().y;
+		if (random.Rand(STEP) == 0) {
+			int x = it.Pos().x;
+			int y = it.Pos().y;
 
-		if (((x + y) %4) == 0) {
+			int type = random.Rand(NUM_PLANT_TYPES);
+			int stage = random.Rand(MAX_PLANT_STAGES);
+
 			CreatePlant(x, y, type, stage);
-			type++;
-			stage++;
-			if (type == NUM_PLANT_TYPES)
-				type = 0;
-			if (stage == 4)
-				stage = 0;
 		}
 	}
 }
@@ -792,7 +829,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 	if ( !bounds.Contains( x, y ) ) {
 		return false;
 	}
-	const SectorData& sd = context.worldMap->GetSector( x, y );
+	const SectorData& sd = context.worldMap->GetSectorData( x, y );
 	if (sd.HasCore() && sd.core.x == x && sd.core.y == y ) {
 		// no plants on cores.
 		return false;
@@ -906,3 +943,63 @@ void Sim::UseBuilding()
 		}
 	}
 }
+
+
+const Web& Sim::CalcWeb()
+{
+	CArray<Vector2I, NUM_SECTORS * NUM_SECTORS> cores;
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			Vector2I sector = { i, j };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs
+				&& cs->InUse()
+				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY)
+			{
+				if (cores.HasCap()) {
+					cores.Push(sector);
+				}
+			}
+		}
+	}
+	web.Calc(cores.Mem(), cores.Size());
+	return web;
+}
+
+
+const Web& Sim::GetCachedWeb()
+{
+	if (cachedWebAge > 2000) {
+		CalcWeb();
+		cachedWebAge = 0;
+	}
+	return web;
+}
+
+
+void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, int relate, grinliz::CArray<CoreScript*, 32> *stateArr)
+{
+	stateArr->Clear();
+
+	Rectangle2I mapBounds, bounds;
+	mapBounds.Set(1, 1, NUM_SECTORS - 2, NUM_SECTORS - 2);
+	bounds.min = bounds.max = sector;
+	bounds.Outset(rad);
+	bounds.DoIntersection(mapBounds);
+
+	CoreScript* originCore = CoreScript::GetCore(sector);
+	if (!originCore) return;
+
+	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
+		CoreScript* cs = CoreScript::GetCore(it.Pos());
+		if (cs
+			&& cs != originCore
+			&& cs->InUse()
+			&& Team::GetRelationship(cs->ParentChit(), originCore->ParentChit()) == relate
+			&& stateArr->HasCap())
+		{
+			stateArr->Push(cs);
+		}
+	}
+}
+

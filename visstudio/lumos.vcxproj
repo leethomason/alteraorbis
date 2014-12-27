@@ -132,6 +132,7 @@
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\news.cpp" />
+    <ClCompile Include="..\game\newsconsole.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\personality.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="..\game\towcomponent.cpp" />
     <ClCompile Include="..\game\visitor.cpp" />
     <ClCompile Include="..\game\visitorstatecomponent.cpp" />
+    <ClCompile Include="..\game\visitorweb.cpp" />
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
@@ -187,6 +189,7 @@
     <ClCompile Include="..\widget\consolewidget.cpp" />
     <ClCompile Include="..\widget\endwidget.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
+    <ClCompile Include="..\widget\hpbar.cpp" />
     <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
     <ClCompile Include="..\widget\startwidget.cpp" />
@@ -262,6 +265,7 @@
     <ClInclude Include="..\game\lumosmath.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\news.h" />
+    <ClInclude Include="..\game\newsconsole.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\personality.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
@@ -272,6 +276,7 @@
     <ClInclude Include="..\game\towcomponent.h" />
     <ClInclude Include="..\game\visitor.h" />
     <ClInclude Include="..\game\visitorstatecomponent.h" />
+    <ClInclude Include="..\game\visitorweb.h" />
     <ClInclude Include="..\game\wallet.h" />
     <ClInclude Include="..\game\weather.h" />
     <ClInclude Include="..\game\workqueue.h" />
@@ -323,6 +328,7 @@
     <ClInclude Include="..\widget\consolewidget.h" />
     <ClInclude Include="..\widget\endwidget.h" />
     <ClInclude Include="..\widget\facewidget.h" />
+    <ClInclude Include="..\widget\hpbar.h" />
     <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
     <ClInclude Include="..\widget\startwidget.h" />

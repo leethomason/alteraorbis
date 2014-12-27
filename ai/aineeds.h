@@ -4,9 +4,11 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glvector.h"
 
 class XStream;
 class Personality;
+class Chit;
 
 namespace ai {
 
@@ -60,9 +62,22 @@ public:
 	void AddMorale( double v ) { morale += v; morale = grinliz::Clamp( morale, 0.0, 1.0 ); }
 	double Morale() const { return morale; }
 
+	grinliz::Vector3<double> Get() const {
+		GLASSERT(NUM_NEEDS == 3);
+		grinliz::Vector3<double> v = { need[0], need[1], need[2] };
+		return v;
+	}
+
+	grinliz::Vector3<double> GetOneMinus() const {
+		GLASSERT(NUM_NEEDS == 3);
+		grinliz::Vector3<double> v = { 1.0 - need[0], 1.0 - need[1], 1.0 - need[2] };
+		return v;
+	}
+
+
 	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; ClampNeeds(); }
-	void Add( const Needs& needs, double scale );
-	void Add( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] += v; ClampNeeds(); }
+	void Add( const Needs& needs );
+	void Add(const grinliz::Vector3<double>&);
 
 	void SetZero() { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 0; }
 	void SetFull() { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
@@ -83,6 +98,8 @@ public:
 	void Serialize( XStream* xs );
 
 	static double DecayTime();
+
+	static grinliz::Vector3<double> CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor);
 
 private:
 	void ClampNeeds();

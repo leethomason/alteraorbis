@@ -58,6 +58,7 @@ public:
 	static grinliz::IString useBuilding;
 	static grinliz::IString repair;
 
+	static grinliz::IString human;
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
 	static grinliz::IString worker;
@@ -139,6 +140,7 @@ public:
 	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
 
+	static grinliz::IString deity;
 	static grinliz::IString Truulga;
 
 	// double underscore -> '.'
@@ -146,6 +148,9 @@ public:
 	static grinliz::IString kiosk__m;
 	static grinliz::IString kiosk__c;
 	static grinliz::IString kiosk__s;
+	static grinliz::IString need__food;
+	static grinliz::IString need__energy;
+	static grinliz::IString need__fun;
 };
 
 typedef IStringConst ISC;

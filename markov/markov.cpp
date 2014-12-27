@@ -42,7 +42,7 @@ void MarkovBuilder::Process()
 		}
 	}
 
-	for( int i=0; i<table.NumValues(); ++i ) {
+	for( int i=0; i<table.Size(); ++i ) {
 		sortedArr.Push( table.GetValue(i) );
 	}
 	Sort< Triplet, DoubletSort >( &sortedArr[0], sortedArr.Size() );

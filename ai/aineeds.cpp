@@ -4,6 +4,13 @@
 #include "../grinliz/glutil.h"
 #include "../xarchive/glstreamer.h"
 
+#include "../game/aicomponent.h"
+#include "../game/gameitem.h"
+#include "../game/reservebank.h"
+#include "../xegame/chit.h"
+#include "../xegame/itemcomponent.h"
+#include "../script/evalbuildingscript.h"
+
 using namespace ai;
 using namespace grinliz;
 
@@ -94,16 +101,25 @@ void Needs::ClampNeeds()
 }
 
 
-void Needs::Add( const Needs& other, double scale )
+void Needs::Add( const Needs& other )
 {
 	for( int i=0; i<NUM_NEEDS; ++i ) {
-		need[i] += other.need[i] * scale;
+		need[i] += other.need[i];
 	}
 	ClampNeeds();
 }
 
 
-void Needs::Serialize( XStream* xs )
+void Needs::Add(const Vector3<double>& other)
+{
+	for (int i = 0; i<NUM_NEEDS; ++i) {
+		need[i] += other.X(i);
+	}
+	ClampNeeds();
+}
+
+
+void Needs::Serialize(XStream* xs)
 {
 	bool allOne = (morale == 1);
 	for (int i = 0; i < NUM_NEEDS; ++i) {
@@ -119,4 +135,102 @@ void Needs::Serialize( XStream* xs )
 		XARC_SER_ARR(xs, need, NUM_NEEDS);
 	}
 	XarcClose( xs );
+}
+
+
+grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor)
+{
+	static const Vector3<double> ZERO = { 0, 0, 0 };
+	static const double LIKE_BOOST = 1.5;
+
+	GLASSERT(Needs::NUM_NEEDS == 3);		// use a Vector3
+	const GameItem* buildingItem = building->GetItem();
+	GLASSERT(buildingItem);
+	const GameItem* visitorItem = visitor->GetItem();
+	GLASSERT(visitorItem);
+	if (!visitorItem || !buildingItem) return ZERO;
+
+	GLASSERT(Needs::FOOD == 0 && Needs::ENERGY == 1 && Needs::FUN == 2);
+	Vector3F needsF = { 0, 0, 0 };
+	buildingItem->keyValues.Get(ISC::need__food, &needsF.x);
+	buildingItem->keyValues.Get(ISC::need__energy, &needsF.y);
+	buildingItem->keyValues.Get(ISC::need__fun, &needsF.z);
+	Vector3<double> needs = { needsF.x, needsF.y, needsF.z };
+
+	int likesCrafting = visitorItem->GetPersonality().Crafting();
+	const IString& buildingName = buildingItem->IName();
+	const GameItem* sell = visitor->GetItemComponent()->ItemToSell();
+
+	EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
+	if (evalScript) {
+		if (!evalScript->Reachable()) return ZERO;
+
+		double industry = building->GetItem()->GetBuildingIndustrial();
+		double score = evalScript->EvalIndustrial(false);
+		double dot = score * industry;	// -1 to 1
+		double scale = 0.55 + 0.45 * dot;
+		needs = needs * scale;
+	}
+
+	if (buildingName == ISC::factory) {
+		if (visitorItem->wallet.Crystal(0) == 0)					needs.Zero();	// can't use.
+
+		// Not sure this should be here: likes/dislikes of 
+		// crafting is accounted for in buying/selling crystal.
+		// Adjusted down to small effect because of the crystal.
+		// On the other hand, hard to get out of the sleep - bar loop.
+		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= LIKE_BOOST;
+		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
+	}
+	else if (buildingName == ISC::bed) {
+		// Beds always work for energy. Up importance if wounded.
+		needs.X(Needs::ENERGY) = Max(needs.X(Needs::ENERGY), 1.0 - visitorItem->HPFraction());
+	}
+	else if (buildingName == ISC::market) {
+		// Can always sell; if we have something to sell a market is interesting.
+		if (!sell) {
+			if (visitorItem->wallet.Gold() == 0)						needs.Zero();	// broke
+			if (building->GetItemComponent()->NumCarriedItems() == 0)	needs.Zero();	// market empty
+		}
+	}
+	else if (buildingName == ISC::exchange) {
+		if (likesCrafting != Personality::DISLIKES) {
+			// Likes crafting, wants to BUY crystal
+			int cheapest = -1;
+			for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+				if (building->GetWallet()->Crystal(i)) {
+					cheapest = i;
+					break;
+				}
+			}
+			int cost = INT_MAX;
+			if (cheapest >= 0) {
+				cost = *(ReserveBank::Instance()->CrystalValue() + cheapest);
+			}
+			if (visitorItem->wallet.Gold() < cost) {
+				needs.Zero();
+			}
+		}
+		else {
+			// DISLIKES. only uses to sell.
+			if (visitorItem->wallet.NumCrystals() == 0) {
+				needs.Zero();
+			}
+		}
+
+		if (likesCrafting) {
+			needs = needs * LIKE_BOOST;
+		}
+	}
+	else if (buildingName == ISC::bar) {
+		if (building->GetItemComponent()->FindItem(ISC::elixir) == 0) needs.Zero();
+	}
+	else if (buildingName == ISC::kiosk__c || buildingName == ISC::kiosk__m || buildingName == ISC::kiosk__n || buildingName == ISC::kiosk__s) {
+		// randomly on porch?
+		needs.Zero();
+	}
+	else{
+		GLASSERT(0);	// missing some usable item.
+	}
+	return needs;
 }

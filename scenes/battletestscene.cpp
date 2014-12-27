@@ -61,6 +61,8 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ FIRE_CYCLOPS,	"F-Cyclops",	LEFT_MOB },
 	{ SHOCK_CYCLOPS,	"S-Cyclops",LEFT_MOB },
 	{ TROLL,	"Troll",	LEFT_MOB },
+	{ GOBMAN,	"Gobman",	LEFT_MOB },
+	{ KAMAKIRI,	"Kamakiri",	LEFT_MOB },
 	{ NO_WEAPON,"None",		LEFT_WEAPON },
 	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
 	{ PISTOL, "Pistol", LEFT_WEAPON },
@@ -86,6 +88,8 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ FIRE_CYCLOPS,	"F-Cyclops",	RIGHT_MOB },
 	{ SHOCK_CYCLOPS,	"S-Cyclops",RIGHT_MOB },
 	{ TROLL,	"Troll",	RIGHT_MOB },
+	{ GOBMAN,	"Gobman",	RIGHT_MOB },
+	{ KAMAKIRI,	"Kamakiri",	RIGHT_MOB },
 	{ NO_WEAPON,"None",		RIGHT_WEAPON },
 	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
 	{ PISTOL, "Pistol", RIGHT_WEAPON },
@@ -139,11 +143,6 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	optionButton[DUMMY].SetVisible( false );
 	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
 
-	label[0].Init( &gamui2D );
-	label[0].SetText( "" );
-	label[1].Init( &gamui2D );
-	label[1].SetText( "Team Tangerine" );
-
 	context.engine = 0;
 	context.worldMap = 0;
 
@@ -192,12 +191,10 @@ void BattleTestScene::Resize()
 			col = 0;
 			++row;
 		}
-		layout.PosAbs( &optionButton[i], x+col, row+1 );
+		layout.PosAbs( &optionButton[i], x+col, row );
 		++col;
 	
 	}
-	layout.PosAbs( &label[0], 0, 0 );
-	layout.PosAbs( &label[1], -4, 0 );
 }
 
 
@@ -267,10 +264,10 @@ void BattleTestScene::LoadMap()
 
 	Vector2I unit = { 2, 16 };
 	Vector2I dummy = { 16, 16 };
-	CreateChit( unit, HUMAN, PISTOL, LEFT, 0 );
-	CreateChit( dummy, DUMMY, NO_WEAPON, MID, 0 );
+	CreateChit( unit, HUMAN, PISTOL, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), 0 );
+	CreateChit( dummy, DUMMY, NO_WEAPON, Team::CombineID(TEAM_HOUSE, TEAM_ID_RIGHT), 0 );
 	dummy.Set( 16, 17 );
-	CreateChit( dummy, DUMMY, NO_WEAPON, MID, 0 );
+	CreateChit( dummy, DUMMY, NO_WEAPON, Team::CombineID(TEAM_HOUSE, TEAM_ID_RIGHT), 0 );
 
 	context.engine->CameraLookAt( (float)context.worldMap->Width()/2, (float)context.worldMap->Height()/2, 
 		                  22.f,		// height
@@ -322,7 +319,7 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<leftCount; ++i ) {
 		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), leftLevel );
 		if ( i==0 ) {
-			c->GetAIComponent()->EnableDebug( true );
+			c->GetAIComponent()->EnableLog( true );
 			c->GetItemComponent()->EnableDebug(true);
 		}
 
@@ -349,6 +346,8 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	case FIRE_CYCLOPS:	itemName = "fireCyclops";		break;
 	case SHOCK_CYCLOPS:	itemName = "shockCyclops";		break;
 	case TROLL:			itemName = "troll";				break;
+	case GOBMAN:		itemName = "gobman";			break;
+	case KAMAKIRI:		itemName = "kamakiri";			break;
 	default: GLASSERT( 0 ); break;
 	}
 
@@ -364,9 +363,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	RenderComponent* rc = new RenderComponent( resourceName );
 	chit->Add( rc );
 
-	context.chitBag->AddItem( itemName, chit, context.engine, team, level );
+	GameItem* mobItem = context.chitBag->AddItem( itemName, chit, context.engine, team, level );
 
-	if ( type == HUMAN ) {
+	if ( mobItem->IsDenizen() || type == TROLL) {
 		context.chitBag->AddItem( "shield",		chit, context.engine, 0, level );
 		if ( loadout == MELEE_WEAPON || loadout == BLASTER_AND_GUN )
 			context.chitBag->AddItem( "ring",	chit, context.engine, 0, level );
@@ -378,14 +377,6 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 			context.chitBag->AddItem("pulse", chit, context.engine, 0, level);
 		else if (loadout == BEAMGUN)
 			context.chitBag->AddItem("beamgun", chit, context.engine, 0, level);
-	}
-	if ( type == TROLL ) {
-		if ( random.Bit() )
-			context.chitBag->AddItem( "shield",  chit, context.engine, 0, level );
-		if ( random.Bit() )
-			context.chitBag->AddItem( "ring",    chit, context.engine, 0, level );
-		if ( random.Bit() )
-			context.chitBag->AddItem( "blaster", chit, context.engine, 0, level );
 	}
 
 	if ( type != DUMMY ) {

@@ -106,10 +106,11 @@
   </particle>
 
   <particle name="shock"
-            time="continuous" size="0.3" count="20" config="ray"
-            posFuzz="0.1" velocity="1.5" velocityFuzz="0.2" colorFuzz="0.4" >
-    <color palx="8" paly="6" alpha="1.5" />
-    <colorVelocity red="0.2" green="0.2" blue="0.2" alpha="-0.8" />
+            time="continuous" size="0.3" count="13" config="ray"
+            posFuzz="0.1" velocity="1.2" velocityFuzz="0.2" colorFuzz="0.4" >
+    <color palx="8" paly="6" alpha="0.1" />
+    <colorVelocity red="0" green="0" blue="0" alpha="1.5" />
+    <colorVelocity red="0.2" green="0.4" blue="0.2" alpha="-0.6" />
     <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
   </particle>
 

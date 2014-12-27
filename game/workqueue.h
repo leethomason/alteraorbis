@@ -66,12 +66,12 @@ public:
 
 	bool HasJob() const				{ return !queue.Empty(); }
 	bool HasAssignedJob() const;
+	bool HasJobAt(const grinliz::Vector2I& v);
 	
 	// Manages which chits are doing a job:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
 	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
 	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
-	const QueueItem*	GetJobByPosition(const grinliz::Vector2I& pos);
 
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	

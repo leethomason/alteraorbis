@@ -84,7 +84,7 @@ void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
 	int group = 0, id = 0;
-	Team::SplitID(item->team, &group, &id);
+	Team::SplitID(item->Team(), &group, &id);
 	str->AppendFormat( "[Item] %s hp=%.1f/%d tm=%d,%d ", 
 		item->Name(), item->hp, item->TotalHP(),
 		group, id );
@@ -130,10 +130,7 @@ void ItemComponent::NameItem(GameItem* item)
 		if ( item->IProperName().empty() ) {
 			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
-				item->SetProperName( StringPool::Intern( 
-					context->game->GenName( nameGen.c_str(), 
-											item->ID(),
-											4, 10 )));
+				item->SetProperName(context->chitBag->NameGen(nameGen.c_str(), item->ID(), 4, 10));
 			}
 
 			/*
@@ -155,12 +152,24 @@ void ItemComponent::NameItem(GameItem* item)
 }
 
 
-float ItemComponent::PowerRating() const
+int ItemComponent::PowerRating(bool current) const
 {
-	GameItem* mainItem = itemArr[0];
-	int level = mainItem->Traits().Level();
+	// damage we can deal * damage we can take
+	int power = current ? int(itemArr[0]->hp) : itemArr[0]->TotalHP();
+	const MeleeWeapon* melee = this->QuerySelectMelee();
+	const RangedWeapon* ranged = this->QuerySelectRanged();
+	if (melee)
+		power *= melee->GetValue();
+	if (ranged)
+		power *= ranged->GetValue() * 2;
 
-	return float(1+level) * float(mainItem->mass);
+	// nominal: 50 * 10 * 20 * 2 = 10,000
+	// reduce nominal to 100:
+	power /= 100;
+
+	if (power < 1)
+		power = 1;
+	return power;
 }
 
 
@@ -448,16 +457,19 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 		}
 
-		// Mobs drop gold and crystal; everyone else returns it to the Bank
+		// Mobs drop gold and crystal. (Should cores as well?)
+		// Everything drops crystal.
+		while (parentChit->GetWallet()->NumCrystals()) {
+			Context()->chitBag->NewCrystalChit(pos, parentChit->GetWallet(), true);
+		}
+
 		if ( mobFilter.Accept( parentChit )) {
 			if (!parentChit->GetWallet()->IsEmpty()) {
 				Context()->chitBag->NewWalletChits(pos, parentChit->GetWallet());
 			}
 		}
-		else {
-			if (ReserveBank::Instance()) {	// null in battle mode
-				ReserveBank::Instance()->wallet.DepositAll(parentChit->GetWallet());
-			}
+		if (ReserveBank::Instance()) {	// null in battle mode
+			ReserveBank::Instance()->wallet.DepositAll(parentChit->GetWallet());
 		}
 		GLASSERT(parentChit->GetWallet()->IsEmpty());
 		parentChit->GetWallet()->SetClosed();
@@ -710,19 +722,40 @@ int ItemComponent::DoTick( U32 delta )
 }
 
 
+void ItemComponent::InformCensus(bool add)
+{
+	GameItem* mainItem = itemArr[0];
+	if (Context()->chitBag) {
+		IString mob = mainItem->keyValues.GetIString("mob");
+		IString core = mainItem->IName();
+
+		if (!mob.empty()) {
+			if (add)
+				Context()->chitBag->census.AddMOB(mainItem->IName());
+			else
+				Context()->chitBag->census.RemoveMOB(mainItem->IName());
+		}
+		else if (core == "core") {
+			int team = parentChit->Team();
+			if (team) {
+				IString team = Team::TeamName(Team::Group(parentChit->Team()));
+				if (add)
+					Context()->chitBag->census.AddCore(team);
+				else
+					Context()->chitBag->census.RemoveCore(team);
+			}
+		}
+	}
+}
+
 void ItemComponent::OnAdd( Chit* chit, bool init )
 {
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit, init );
 	hardpointsModified = true;
+	InformCensus(true);
 
-	if ( Context()->chitBag ) {
-		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if (!mob.empty()) {
-			Context()->chitBag->census.Add(mainItem->IName());
-		}
-	}
 	slowTick.SetPeriod( 500 + (chit->ID() & 128));
 	UseBestItems();
 }
@@ -731,12 +764,7 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 void ItemComponent::OnRemove() 
 {
 	GameItem* mainItem = itemArr[0];
-	if ( Context()->chitBag ) {
-		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if (!mob.empty()) {
-			Context()->chitBag->census.Remove(mainItem->IName());
-		}
-	}
+	InformCensus(false);
 	super::OnRemove();
 }
 

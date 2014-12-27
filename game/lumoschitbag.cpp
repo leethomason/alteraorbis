@@ -1,3 +1,5 @@
+#include "../grinliz/glarrayutil.h"
+
 #include "lumoschitbag.h"
 #include "gameitem.h"
 #include "gamelimits.h"
@@ -41,6 +43,7 @@
 #include "../script/countdownscript.h"
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
+#include "../markov/markov.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -73,6 +76,7 @@ void LumosChitBag::Serialize( XStream* xs )
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeTeam );
 	XARC_SER_ARR(xs, deityID, NUM_DEITY);
+	XARC_SER_CARRAY(xs, namePool);
 	XarcClose( xs );
 }
 
@@ -292,7 +296,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
 		LumosGame* game = Context()->game;
-		const char* p = game->GenName( nameGen.c_str(), chit->random.Rand(), 0, 0 );
+		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand(), 0, 0);
 		chit->GetItem()->SetProperName( p );
 	}
 
@@ -371,7 +375,6 @@ Chit* LumosChitBag::GetDeity(int id)
 		chit->GetItem()->SetProperName(NAME[id]);
 	}
 
-	if (id == DEITY_TRUULGA) chit->GetItem()->team = TEAM_TROLL;
 	if (!chit->GetSpatialComponent()) {
 		// Have a spatial component but not a render component.
 		// Used to set the "focus" of the deity, and mark
@@ -436,19 +439,21 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
 
-	AddItem( root.Name(), chit, context->engine, team, 0 );
+	const char* altName = 0;
+	if (Team::Group(team) == TEAM_HOUSE) {
+		altName = "human";
+	}
+	AddItem(root.Name(), chit, context->engine, team, 0, 0, altName);
+
 	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		LumosGame* game = chit->Context()->game;
-		if ( game ) {
-			chit->GetItem()->SetProperName( StringPool::Intern( 
-				game->GenName(	nameGen.c_str(), 
-								chit->ID(),
-								4, 8 )));
+		LumosChitBag* chitBag = chit->Context()->chitBag;
+		if ( chitBag ) {
+			chit->GetItem()->SetProperName(chitBag->NameGen(nameGen.c_str(), chit->ID(), 4, 8));
 		}
 	}
 
@@ -491,9 +496,16 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewVisitor( int visitorIndex )
+Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 {
 	const ChitContext* context = Context();
+	if (web.Empty()) return 0;
+
+	Vector2I startSector = web.Origin();
+	CoreScript* cs = CoreScript::GetCore(startSector);
+	if (!cs) return 0;	// cores get deleted, web is cached, etc.
+	Vector3F pos = cs->ParentChit()->GetSpatialComponent()->GetPosition();
+
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
@@ -507,16 +519,10 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 	Visitors::Instance()->visitorData[visitorIndex].Connect();	// initialize.
 
 	// Visitors start at world center, with gridMove, and go from there.
-	Vector3F pos = { (float)context->worldMap->Width()*0.5f, 0.0f, (float)context->worldMap->Height()*0.5f };
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	PathMoveComponent* pmc = new PathMoveComponent();
 	chit->Add(pmc);
-	GridMoveComponent* gmc = new GridMoveComponent();
-	chit->Add( gmc );
-
-	SectorPort sp = context->worldMap->RandomPort( &random );
-	gmc->SetDest( sp );
 
 	AddItem( rootItem.Name(), chit, context->engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent());
@@ -726,7 +732,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
 	int shooterTeam = -1;
 	if ( chitShooter && chitShooter->GetItemComponent() ) {
-		shooterTeam = chitShooter->GetItemComponent()->GetItem()->team;
+		shooterTeam = chitShooter->GetItemComponent()->GetItem()->Team();
 	}
 	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
@@ -738,7 +744,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 			if ( chitHit ) {
 				GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 				if ( chitHit->GetItemComponent() &&
-					 chitHit->GetItemComponent()->GetItem()->team == shooterTeam ) 
+					 chitHit->GetItemComponent()->GetItem()->Team() == shooterTeam ) 
 				{
 					// do nothing. don't shoot own team.
 				}
@@ -779,7 +785,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes)
+GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes, const char* altName)
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
@@ -787,12 +793,14 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 	GLASSERT(itemDefArr.Size() > 0);
 
 	GameItem* item = itemDefArr[0]->Clone();
+	if (altName) {
+		item->SetName(altName);
+	}
 	if (altRes) {
 		item->SetResource(altRes);
 	}
-	item->team = team;
+	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
-	item->Roll(item->Traits().Get());
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
@@ -812,9 +820,8 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 
 GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int team, int level)
 {
-	item->team = team;
+	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
-	item->Roll(item->Traits().Get());
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
@@ -950,10 +957,17 @@ bool BuildingFilter::Accept( Chit* chit )
 	return msc != 0;
 }
 
+bool BuildingWithPorchFilter::Accept(Chit* chit)
+{
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	if (msc && msc->HasPorch()) {
+		return true;
+	}
+	return false;
+}
 
 bool BuildingRepairFilter::Accept(Chit* chit)
 {
-	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 	if (msc ) { //&& msc->Building()) {
 		GameItem* item = chit->GetItem();
@@ -1125,26 +1139,103 @@ bool LumosChitBag::PopScene( int* id, SceneData** data )
 }
 
 
-void LumosChitBag::AddSummoning(const grinliz::Vector2I& sector, int reason)
+IString LumosChitBag::NameGen(const char* dataset, int seed, int min, int max)
 {
-	summoningArr.Push(sector);
+	const gamedb::Reader* database = Context()->game->GetDatabase();
+	const gamedb::Item* parent = database->Root()->Child("markovName");
+	GLASSERT(parent);
+	const gamedb::Item* item = parent->Child(dataset);
+	GLASSERT(item);
+	if (!item) return IString();
+	const gamedb::Item* names = item->Child("names");
+
+	if (names) {
+		IString ds = StringPool::Intern(dataset);
+		bool found = false;
+		int id = 0;
+		for (int i = 0; i < namePool.Size(); ++i) {
+			if (namePool[i].dataset == ds) {
+				namePool[i].id++;
+				id = namePool[i].id;
+				found = true;
+			}
+		}
+		if (!found) {
+			NamePoolID entry = { ds, 0 };
+			id = 0;
+			namePool.Push(entry);
+		}
+		seed = id;
+	}
+	return StaticNameGen(database, dataset, seed, min, max);
 }
 
 
-grinliz::Vector2I LumosChitBag::HasSummoning(int reason)
+IString LumosChitBag::StaticNameGen(const gamedb::Reader* database, const char* dataset, int _seed, int min, int max)
 {
-	Vector2I v = { 0, 0 };
-	if (summoningArr.Size()) {
-		v = summoningArr[0];
+	const gamedb::Item* parent = database->Root()->Child("markovName");
+	GLASSERT(parent);
+	const gamedb::Item* item = parent->Child(dataset);
+	GLASSERT(item);
+	if (!item) return IString();
+
+	GLString nameBuffer = "";
+
+	// Make sure the name generator is warm:
+	Random random(_seed);
+	random.Rand();
+	random.Rand();
+	int seed = random.Rand();
+
+	const gamedb::Item* word = item->Child("words0");
+	const gamedb::Item* names = item->Child("names");
+	if (word) {
+		// The 3-word form.
+		for (int i = 0; i < 3; ++i) {
+			static const char* CHILD[] = { "words0", "words1", "words2" };
+			word = item->Child(CHILD[i]);
+			if (word && word->NumAttributes()) {
+				// attribute name and value are the same.
+				const char *attr = word->AttributeName(random.Rand(word->NumAttributes()));
+				if (i) {
+					nameBuffer.AppendFormat(" %s", attr);
+				}
+				else {
+					nameBuffer = attr;
+				}
+			}
+		}
+		return StringPool::Intern(nameBuffer.c_str());
 	}
-	return v;
+	else if (names) {
+		int index = abs(_seed) % names->NumChildren();
+		const char* n = names->ChildAt(index)->GetString("name");
+		return StringPool::Intern(n);
+	}
+	else {
+		// The triplet (letter) form.
+		int size = 0;
+		const void* data = database->AccessData(item, "triplets", &size);
+		MarkovGenerator gen((const char*)data, size, seed);
+
+		int len = max + 1;
+		int error = 100;
+		while (error--) {
+			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {
+				return StringPool::Intern(nameBuffer.c_str());
+			}
+		}
+		gen.Name(&nameBuffer, max);
+		return StringPool::Intern(nameBuffer.c_str());
+	}
+	return IString();
 }
 
 
-void LumosChitBag::RemoveSummoning(const grinliz::Vector2I& sector)
+void LumosChitBag::NamePoolID::Serialize(XStream* xs)
 {
-	int i = 0;
-	while ((i = summoningArr.Find(sector)) >= 0) {
-		summoningArr.Remove(i);
-	}
+	XarcOpen(xs, "NamePoolID");
+	XARC_SER(xs, this->dataset);
+	XARC_SER(xs, this->id);
+	XarcClose(xs);
 }

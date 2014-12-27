@@ -18,7 +18,7 @@ public:
 	void AddRoad(const grinliz::Vector2I* v, int n);
 	void AddPlaza(const grinliz::Rectangle2I& rect);
 
-	enum {MAX_ROADS = 4};
+	enum {MAX_ROADS = 8};
 	const grinliz::Vector2I* GetRoad(int i, int *len);
 	enum {MAX_PLAZA = 4};
 	const grinliz::Rectangle2I* GetPlaza(int i);;

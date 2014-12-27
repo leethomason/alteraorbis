@@ -1,3 +1,4 @@
+- gobman statues
 - GT: ui to show idle and busy workers
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
@@ -15,7 +16,10 @@
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
 - fabricator. trinkets. (see notes)
-	- medkit
+	- medkit: from extra fruit?
+		- auto-medkit (human?)
+		- regen kit (kamakiri)
+		- shield booster (gobmen)
 	- boost items
 	- sellable items
 - should be able to browse units in character screen
@@ -38,124 +42,156 @@
 - interface annoyances
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
+- remove grid64 BS for proper optimization
+- use only one type of kiosk
+- deity -> MotherCore
+- task serialization
+- any building attack should cause awareness in domainAI
+- getting hit should cause awareness
+- overloading of kiosks near core. One kind of kiosk??
+- switch to war mode
+- control flag art
+- rebalance denizen spawning
+- visitors should wander around before leaving in a "useless" domain.
+- Visitor trails on map
+- Limit squad control to "power radius"
+- Switch to tech tree model for visitors? Do they bring gems??
+- AI adventures
+- squad adventure mode?
+- AI take over mode?
+- lots more forging needs to happen!
+- control should show weapon ownership
+- retest truulga item generation
+- denizen red on red color scheme way too much
+- build tasks aren't getting serialized correctly. wrong rotation?
+- news multi-prints. start avatar, close window, start avatar.
+- advisor still comes up in weird states.
+- special gobman item, building
+- re-test battle scenes. balance.
+- Long play test
+	- Troll distribution
+	- Troll gun distribution
+- fix world get layout / text / debugging display	
+- remove sleep tube cap?
+- remove disabled building choices?
+- optimize hit testing (and correct for xform)	
+- test destination marks
+- test squad motion in general
+- suit colors don't seem to be correctly randomized
+- remove greater summon rules
+- no construction at world center - hide grid pathing bugs
+- nerf pulse fire rate again
+- too many QCore weapons
+- [Reenen] Abandon domain
+- [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
+- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
+- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
+- [Reenen] Circuits are way complex... (see post)
+- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
+- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+- [Reenen] Cyclops heal at rocks.
+- Mini map flash of battles.
+- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
+- console: Foo is taken over by Foo for House-1(core)
+- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+- way too much CivTech score for just the Avatar hanging around
+- cyclops should eat rock to heal
+- namegen: re-use too common. switch to loop
+- balance spawn based on # in world 
+- check human spawn: correctly handling male/female
+- increase drive to make weapons
+- weapons, on destruction, should drop crystal
+- buildings, on destruction, should drop items (market, vault, etc.)
+- clean up world gen layout
+- background for console (full, none, dynamic)
+- DomainAI: don't clear existing pave? (Depends on AI?)
+- build to an efficiency level with distilleries (1 or 2)
+- in census, cores/domains should show team
+- how many trolls visit Truulga??
+- persisting fluids bugs. switch to simpler model of pressure / not pressure
+- pause
+	- basic
+	- tactical
+- replace build with click/drag?
+- zoom out to full domain
+- map travel: lanes?
+- worldgen: only run fluids past a certain time?
+- Linux
+- Android
+- some kind of shock source - lighting? electric water??
+- slow down awareness. only notify friends we can see.
+- denizen spawn rate. hmm..
+- face icon generation; icon into build (mantis?)
+- out of gold shouldn't cancel build orders
+- plants look repetetive
+- walk target for the avatar
+- rotation of grid and voxel elements (experiment)
+- tune EmitterGenerator - meander length
 
-Beta 3b
-		- retest truulga item generation
-		- Denizen domains
-		- Visitor role
-			- Visitor travel
-			- Visitor trails on map
-		- Squads
-			- squad control:
-				- defend
-				- attack
-				- adventure
-				- follow avatar
-
-		x clean up UI layout
-		x gems running too-negative. Truulga?? Something else?
-		- denizen red on red color scheme way too much
-		- build tasks aren't getting serialized correctly. wrong rotation?
-		- news multi-prints. start avatar, close window, start avatar.
-		- advisor still comes up in weird states.
-		- special gobman item, building
-		- re-test battle scenes. balance.
-		- Long play test
-			- Troll distribution
-			- Troll gun distribution
-
-		x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
-		- build to an efficiency level with distilleries (1 or 2)
-		- in census, cores/domains should show team
-		- how many trolls visit Truulga??
-		- persisting fluids bugs. switch to simpler model of pressure / not pressure
-		- pause
-			- basic
-			- tactical
-		- replace build with click/drag?
-		- zoom out to full domain
-		- map travel: lanes?
-		- worldgen: only run fluids past a certain time?
-		- Linux
-		- Android
-		x Download tracking
-		d more aggressively seed plants? (Fire takes out a lot.)
-		d some kind of shock source - lighting? electric water??
-		- slow down awareness. only notify friends we can see.
-		- denizen spawn rate. hmm..
-    	- face icon generation; icon into build (mantis?)
-		x Circuit Fab does nothing
-		x name of Bar
-		- out of gold shouldn't cancel build orders
-	    - plants look repetetive
-		- walk target for the avatar
-		- rotation of grid and voxel elements (experiment)
-		- tune EmitterGenerator - meander length
-
-	- World Gen
-		- less techy, more interesting world gen
-		- use some of the time and space to introduce and explain the game
-		- text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
-		- text report on major battles
-		- text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
-		- enhance the text reports with screen shots of the events (which replace the map as it is now)
+- World Gen
+	- less techy, more interesting world gen
+	- use some of the time and space to introduce and explain the game
+	- text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
+	- text report on major battles
+	- text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
+	- enhance the text reports with screen shots of the events (which replace the map as it is now)
 	
-	- Census
-    	- re-do visitor likes to account for the grids they pass through
-		- name / level / health display
-		x money checks optional
-		x needs to feel interactive
-		x browsing of items/people
-		x redo UI layout
+- Census
+    - re-do visitor likes to account for the grids they pass through
+	- name / level / health display
+	x money checks optional
+	x needs to feel interactive
+	x browsing of items/people
+	x redo UI layout
 
-	- Market
-		- world effects morale/needs: water, tombstones, temples, etc.
-		x proper game start: location, selection of team color, icons
-		x turret
-		x team colors
-		- battle flags
-    	- time scale culling
-		x vault:
-			x item limit
-		x what to do with full vaults?
-		- marking build zones
-			- dragging, rows
-			- top view?
-			x auto-clear vegetation
+- Market
+	- world effects morale/needs: water, tombstones, temples, etc.
+	x proper game start: location, selection of team color, icons
+	x turret
+	x team colors
+	- battle flags
+    - time scale culling
+	x vault:
+		x item limit
+	x what to do with full vaults?
+	- marking build zones
+		- dragging, rows
+		- top view?
+		x auto-clear vegetation
 
-	- Adventure
-		- control
-			- space bar to pause
-			- tab to toggle weapons
-			- pause button
-		- balance battles
-		- real health bars & check visibility
-	    - exploring
-	      - xp for exploring!!
-	      - "domain theme" when you arrive
+- Adventure
+	- control
+		- space bar to pause
+		- tab to toggle weapons
+		- pause button
+	- balance battles
+	- real health bars & check visibility
+	- exploring
+	    - xp for exploring!!
+	    - "domain theme" when you arrive
 
-    - TBD
-		- monster ecology
-		- land variation:
-			- cold dry (rocky)
-			- hot dry (sandy)
-			- cold wet (icy)
-			- hot wet (greener)
-			- randomization pattern
-		- rock wear / stone aging
-		- external constant file
-		- consider moving ground to voxel gen system, so that ground can vary?
-	    - batching troubles - still lots of small batches going in. consider dropping back to ES2
-		- redo AI utility to be based on a set of curves
-		- show rock damage
-		- GT: lightning
-		- can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
-		- fix porch image (alpha of the tiles, if not general improvement)
-		- squisher, in streaming mode, to save files
-		- target “Focus” shouldn’t switch so easily.
-		- remove normalization in shader
-		- mountain peaks news
-		- openMP - particle system, elsewhere
+- TBD
+	- monster ecology
+	- land variation:
+		- cold dry (rocky)
+		- hot dry (sandy)
+		- cold wet (icy)
+		- hot wet (greener)
+		- randomization pattern
+	- rock wear / stone aging
+	- external constant file
+	- consider moving ground to voxel gen system, so that ground can vary?
+	- batching troubles - still lots of small batches going in. consider dropping back to ES2
+	- redo AI utility to be based on a set of curves
+	- show rock damage
+	- GT: lightning
+	- can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
+	- fix porch image (alpha of the tiles, if not general improvement)
+	- squisher, in streaming mode, to save files
+	- target “Focus” shouldn’t switch so easily.
+	- remove normalization in shader
+	- mountain peaks news
+	- openMP - particle system, elsewhere
 
 - combat test scene	
 	x connect item to procedural rendering of melee weapon
@@ -243,6 +279,47 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x shock-fire too subtle. And fast rising.
+x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
+x clean up UI layout
+x gems running too-negative. Truulga?? Something else?
+x move sim spawn to its own times
+x DomainAI::Factory can get team Chaos
+x Download tracking
+x more aggressively seed plants? (Fire takes out a lot.)
+x Circuit Fab does nothing
+x name of Bar
+x stringpool buggy: over-allocating? turn on code in builder.cpp
+x human: unify male/female into one object (Gender() method? Differnt resource.)
+x Beta 3b
+	x Denizen domains
+	x Squads
+		x squad motion
+		x basic sorting into squads
+		x place squad flags
+		x clear squad flags
+		x hp + shield display, add to control view
+		x serialization
+		x squaddies abandon mission
+		x restore alpha blending on hp display and squad text
+		x switch over domain growth to be in line with new squad rules
+		x squad destination on main map not correct
+	x "Diplomacy"
+		x enemies, neutral, friends
+		t AI attacks
+	x Visitor role
+		x Visitor travel
+		x AI should build kiosks
+	x "siren call of tech"
+	x something wrong with targeting / awareness / enemy status.
+	x unify human male/female
+	x seed plants
+	x clean up worldgen output
+	x new art from Shroom
+	x guardposts away from kiosks
+	x break the sleep/bar loop: ratchet back the 'like' boost. add a 2nd memory.
+	x building history: only when morale==1
+	x don't add to squads with waypoints
 x Beta 3
 	x remove social
 	x domain AI

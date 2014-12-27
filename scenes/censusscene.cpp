@@ -125,7 +125,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 			int itemID = (int)link[i].userData;
 			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
-				const GameItem* gi = ItemDB::Instance()->Find(itemID);
+				const GameItem* gi = ItemDB::Instance()->Active(itemID);
 
 				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, gi);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
@@ -231,10 +231,10 @@ void CensusScene::Scan()
 	GLOUTPUT(("Scan nChits=%d\n", nChits));
 
 	ItemDB* itemDB = ItemDB::Instance();
-	for (int i = 0; i<itemDB->NumHistory(); ++i) {
-		const ItemHistory& h = itemDB->HistoryByIndex(i);
+	for (int i = 0; i<itemDB->NumRegistry(); ++i) {
+		const ItemHistory& h = itemDB->RegistryByIndex(i);
 
-		const GameItem* hItem = itemDB->Find(h.itemID);
+		const GameItem* hItem = itemDB->Active(h.itemID);
 		if (hItem && hItem->hp > 0) {
 			// still alive.
 			continue;
@@ -262,7 +262,7 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 			Vector2I sector = ToSector(sc->GetPosition2DI());
 
 			WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
-			const SectorData& sd = map->GetSector(sector);
+			const SectorData& sd = map->GetSectorData(sector);
 			str.AppendFormat("at %s", sd.name.safe_str());
 		}
 	}

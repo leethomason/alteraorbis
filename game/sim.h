@@ -24,6 +24,7 @@
 
 #include "gamelimits.h"
 #include "visitor.h"
+#include "visitorweb.h"
 
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
@@ -97,13 +98,18 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
+	const Web& CalcWeb();
+	const Web& GetCachedWeb();
+
+	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, int relate, grinliz::CArray<CoreScript*, 32> *stateArr);
+	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
+
 private:
 	void CreateCores();
 	void CreateRockInOutland();
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
 
-	void DoSpawn();
 	void SpawnGreater();
 	void SpawnDenizens();
 	void CreateTruulgaCore();
@@ -120,13 +126,19 @@ private:
 	int avatarTimer;
 	CTicker minuteClock, 
 			secondClock, 
-			volcTimer;
+			volcTimer,
+			spawnClock,
+			visitorClock;
 	int currentVisitor;
 	bool spawnEnabled;
+
+	int cachedWebAge;
+	Web web;
 
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
+//	grinliz::CDynArray< DiplomaticState > diplomacyArr;
 };
 
 

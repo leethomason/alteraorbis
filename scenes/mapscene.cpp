@@ -6,6 +6,7 @@
 #include "../game/lumoschitbag.h"
 #include "../game/team.h"
 #include "../game/gameitem.h"
+#include "../game/sim.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -55,10 +56,16 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	homeMark[0].Init( &gamui2D, atom, true );
 	homeMark[1].Init( &gamui2D, atom, true );
 
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		static const char* NAME[MAX_SQUADS] = { "alphaMark", "betaMark", "deltaMark", "omegaMark" };
+		RenderAtom atom = lumosGame->CalcUIIconAtom(NAME[i], true);
+		squadMark[0][i].Init(&gamui2D, atom, true);
+		squadMark[1][i].Init(&gamui2D, atom, true);
+	}
+
 	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
 	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
-	travelMark[0].Init( &gamui2D, travelAtom, true );
-	travelMark[1].Init( &gamui2D, travelAtom, true );
+	travelMark.Init( &gamui2D, travelAtom, true );
 
 	RenderAtom selectionAtom = lumosGame->CalcUIIconAtom("mapSelection", true);
 	selectionMark.Init(&gamui2D, selectionAtom, true);
@@ -71,6 +78,14 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	for (int i = 0; i < MAX_FACE; ++i) {
 		face[i].Init(&gamui2D, nullAtom, true);
 	}
+
+	for (int i = 0; i < NUM_CANVAS; ++i) {
+		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
+		RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
+		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+		webCanvas[i].Init(&gamui2D, webAtom);
+	}
+	webCanvas[WHITE_CANVAS].SetLevel(Gamui::LEVEL_ICON);
 }
 
 
@@ -95,8 +110,8 @@ Rectangle2F MapScene::GridBounds2(int x, int y, bool useGutter)
 
 Vector2F MapScene::ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds)
 {
-	float dx = pos.x / (float(bounds.max.x) - float(bounds.min.x));
-	float dy = pos.y / (float(bounds.max.y) - float(bounds.min.y));
+	float dx = (pos.x - float(bounds.min.x)) / (float(bounds.max.x) - float(bounds.min.x));
+	float dy = (pos.y - float(bounds.min.y)) / (float(bounds.max.y) - float(bounds.min.y));
 
 	Vector2F v = { 0, 0 };
 	const gamui::Image& image = (select == 0) ? mapImage : mapImage2;
@@ -119,7 +134,6 @@ void MapScene::Resize()
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
 	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
-	//gridTravel.SetSize( gridTravel.Width()*2.f, gridTravel.Height() );	// double the button size
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -135,11 +149,20 @@ void MapScene::Resize()
 
 	for (int i = 0; i < 2; ++i) {
 		const float MARK_SIZE = 5;
+		const float SQUAD_MARK_SIZE = 20;
 		playerMark[i].SetSize(MARK_SIZE, MARK_SIZE);
-		homeMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
-		travelMark[i].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+		for (int k = 0; k < MAX_SQUADS; ++k) {
+			squadMark[i][k].SetSize(SQUAD_MARK_SIZE, SQUAD_MARK_SIZE);
+		}
 	}
+	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+	homeMark[0].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+	homeMark[1].SetSize(dx / float(MAP2_SIZE), dy / float(MAP2_SIZE));
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
+
+	for (int i = 0; i < NUM_CANVAS; ++i) {
+		webCanvas[i].SetPos(mapImage.X(), mapImage.Y());
+	}
 	DrawMap();
 }
 
@@ -175,7 +198,7 @@ void MapScene::DrawMap()
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
 	float map2Y = float(subBounds.min.x) / float(NUM_SECTORS);
-	RenderAtom subAtom = *mapImage.GetRenderAtom();
+	RenderAtom subAtom = mapImage.GetRenderAtom();
 	subAtom.tx0 = map2X;
 	subAtom.ty0 = map2Y;
 	subAtom.tx1 = map2X + float(MAP2_SIZE) / float(NUM_SECTORS);
@@ -184,7 +207,7 @@ void MapScene::DrawMap()
 
 	for (Rectangle2IIterator it(subBounds); !it.Done(); it.Next()) {
 		Vector2I sector = it.Pos();
-		const SectorData& sd = worldMap->GetSector( sector );
+		const SectorData& sd = worldMap->GetSectorData( sector );
 
 		int i = (sector.x - subBounds.min.x);
 		int j = (sector.y - subBounds.min.y);
@@ -267,7 +290,7 @@ void MapScene::DrawMap()
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
 	if ( !data->destSector.IsZero() && data->destSector != homeSector ) {
-		const SectorData& sd = worldMap->GetSector( data->destSector );
+		const SectorData& sd = worldMap->GetSectorData( data->destSector );
 		CStr<64> str;
 		str.Format( "Grid Travel\n%s", sd.name.c_str() );
 		gridTravel.SetText(  str.c_str() );
@@ -281,7 +304,8 @@ void MapScene::DrawMap()
 	// --- MAIN ---
 	Rectangle2I mapBounds = data->worldMap->Bounds();
 	Rectangle2I map2Bounds;
-	map2Bounds.Set(subBounds.min.x*SECTOR_SIZE, subBounds.min.y*SECTOR_SIZE, subBounds.max.x*SECTOR_SIZE, subBounds.max.y*SECTOR_SIZE);
+	map2Bounds.Set(subBounds.min.x*SECTOR_SIZE, subBounds.min.y*SECTOR_SIZE, 
+				   subBounds.max.x*SECTOR_SIZE + SECTOR_SIZE-1, subBounds.max.y*SECTOR_SIZE + SECTOR_SIZE-1);
 
 	Vector2F playerPos = { 0, 0 };
 	Chit* player = data->player;
@@ -306,13 +330,55 @@ void MapScene::DrawMap()
 
 		pos.Set(float(data->destSector.x * SECTOR_SIZE), float(data->destSector.y * SECTOR_SIZE));
 		v = ToUI(i,pos, b, &inBounds);
-		travelMark[i].SetPos(v.x, v.y);
-		travelMark[i].SetVisible(inBounds && !data->destSector.IsZero());
+		if (i == 0) {
+			travelMark.SetPos(v.x, v.y);
+			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
+		}
+		for (int k = 0; k < MAX_SQUADS; ++k) {
+			v = ToUI(i, ToWorld2F(data->squadDest[k]), b, &inBounds);
+			squadMark[i][k].SetCenterPos(v.x, v.y);
+			squadMark[i][k].SetVisible(!data->squadDest[k].IsZero() && inBounds);
+		}
 	}
 	{
 		Vector2F world = { (float)map2Bounds.min.x, (float)map2Bounds.min.y };
 		Vector2F pos = ToUI(0, world, mapBounds, 0);
 		selectionMark.SetPos(pos.x, pos.y);
+	}
+
+	float scale = float(mapImage.Width()) / float(NUM_SECTORS);
+	{
+		const Web& web = lumosChitBag->GetSim()->CalcWeb();
+		webCanvas[WHITE_CANVAS].Clear();
+
+//		webCanvas[WHITE_CANVAS].DrawRectangle(0, 0, scale, scale);
+//		webCanvas[WHITE_CANVAS].DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
+		
+		for (int i = 0; i < web.NumEdges(); i++) {
+			Vector2I s0, s1;
+			web.Edge(i, &s0, &s1);
+			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
+			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
+			webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+		}
+	}
+	for (int i = 0; i < 3; ++i) {
+		static const int RELATE[3] = { RELATE_FRIEND, RELATE_NEUTRAL, RELATE_ENEMY };
+		static const int CANVAS[3] = { GREEN_CANVAS, YELLOW_CANVAS, RED_CANVAS };
+
+		int canvas = CANVAS[i];
+		int relate = RELATE[i];
+		webCanvas[canvas].Clear();
+
+		CCoreArray arr;
+		Sim* sim = lumosChitBag->GetSim();
+//		sim->CalcStrategicRelationships(data->destSector.IsZero() ? homeSector : data->destSector, NUM_SECTORS, relate, &arr);
+		sim->CalcStrategicRelationships(homeSector, NUM_SECTORS, relate, &arr);
+
+		for (int k = 0; k < arr.Size(); ++k) {
+			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();
+			webCanvas[canvas].DrawRectangle(scale*float(s.x), scale*float(s.y), scale, scale);
+		}
 	}
 }
 

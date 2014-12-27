@@ -96,17 +96,17 @@ public:
 	void Remove( const GameItem* );		// stop tracking
 
 	// Find an item by id; if null, can use History
-	const GameItem*		Find( int id );
-	const ItemHistory*	History( int id );
+	const GameItem*	Active( int id );
+	bool Registry(int id, ItemHistory* h);
 
 	void Serialize( XStream* xs );
 
-	int NumHistory() const { return itemHistory.Size(); }
-	const ItemHistory& HistoryByIndex( int i ) { return itemHistory[i]; }
+	int NumRegistry() const { return itemRegistry.Size(); }
+	const ItemHistory& RegistryByIndex(int i) { return itemRegistry.GetValue(i); }
 
 private:
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
-	grinliz::SortedDynArray< ItemHistory > itemHistory; // all the significant items ever created
+	grinliz::HashTable<int, ItemHistory> itemRegistry; // all the significant items ever created
 };
 
 

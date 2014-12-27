@@ -1,6 +1,7 @@
 #include "corescript.h"
 
 #include "../grinliz/glvector.h"
+#include "../grinliz/glarrayutil.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -17,12 +18,14 @@
 #include "../game/gameitem.h"
 #include "../game/sim.h"
 #include "../game/worldinfo.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/cameracomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
@@ -45,9 +48,19 @@ static const int SUMMON_GREATER_TIME = 10 * 60 * 1000;
 
 using namespace grinliz;
 
-#define SPAWN_MOBS
-
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
+
+void CoreScript::Init()
+{
+	teamToCoreInfo = new HashTable<int, int>();
+}
+
+void CoreScript::Free()
+{
+	delete teamToCoreInfo;
+}
+
 
 const char* CoreAchievement::CivTechDescription(int score)
 {
@@ -78,6 +91,7 @@ CoreScript::CoreScript()
 	  workQueue( 0 ),
 	  aiTicker(2000),
 	  scoreTicker(10*1000),
+	  strategicTicker(10*1000),
 	  summonGreater(0),
 	  autoRebuild(false)
 {
@@ -86,6 +100,9 @@ CoreScript::CoreScript()
 	workQueue = 0;
 	pave = 0;
 	sector.Zero();
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		waypointFlags[i] = 0;
+	}
 }
 
 
@@ -112,18 +129,19 @@ void CoreScript::Serialize(XStream* xs)
 	XARC_SER(xs, pave);
 
 	XARC_SER(xs, defaultSpawn);
+	XARC_SER_VAL_CARRAY(xs, citizens);
+	
+	GLASSERT(MAX_SQUADS == 4);
+	XARC_SER_VAL_CARRAY(xs, squads[0]);
+	XARC_SER_VAL_CARRAY(xs, squads[1]);
+	XARC_SER_VAL_CARRAY(xs, squads[2]);
+	XARC_SER_VAL_CARRAY(xs, squads[3]);
 
-	if (xs->Loading()) {
-		int size = 0;
-		XarcGet(xs, "citizens.size", size);
-		citizens.PushArr(size);
-		if (size)
-			int debug = 1;
-	}
-	else {
-		XarcSet(xs, "citizens.size", citizens.Size());
-	}
-	XARC_SER_ARR(xs, citizens.Mem(), citizens.Size());
+	XARC_SER_VAL_CARRAY(xs, waypoints[0]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[1]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[2]);
+	XARC_SER_VAL_CARRAY(xs, waypoints[3]);
+
 	XARC_SER_CARRAY(xs, flags);
 
 	spawnTick.Serialize(xs, "spawn");
@@ -162,6 +180,13 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 		m->SetPos(ToWorld3F(flags[i].pos));
 		flags[i].model = m;
 	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		waypointFlags[i] = 0;
+		if (!waypoints[i].Empty()) {
+			waypointFlags[i] = Context()->engine->AllocModel("flag");
+			waypointFlags[i]->SetPos(ToWorld3F(waypoints[i].Last()));
+		}
+	}
 }
 
 
@@ -178,6 +203,10 @@ void CoreScript::OnRemove()
 		Context()->engine->FreeModel(flags[i].model);
 		flags[i].model = 0;
 	}
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		Context()->engine->FreeModel(waypointFlags[i]);
+		waypointFlags[i] = 0;
+	}
 
 	super::OnRemove();
 }
@@ -192,10 +221,83 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			Chit* citizen = Context()->chitBag->GetChit(citizenID);
 			if (citizen && citizen->GetItem()) {
 				// Set to rogue team.
-				citizen->GetItem()->team = Team::Group(citizen->GetItem()->team);
+				citizen->GetItem()->SetRogue();
 			}
 		}
 	}
+}
+
+
+void CoreScript::AssignToSquads()
+{
+	// First, how many do we actually have?
+	// Filter out everyone that has gone away.
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		GL_ARRAY_FILTER(squads[i], (this->IsCitizen(ele)));
+		if (squads[i].Empty()) {
+			// Flush out dead squads so they don't have 
+			// control flags laying around.
+			waypoints[i].Clear();
+			Context()->engine->FreeModel(waypointFlags[i]);
+		}
+	}
+	int nSquaddies = 0;
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		nSquaddies += squads[i].Size();
+	}
+
+	CChitArray recruits;
+	int nCitizens = Citizens(&recruits);
+	int nExpected = nCitizens - CITIZEN_BASE;
+	if (nSquaddies >= nExpected) return;
+
+	// Filter to: not in squad AND not player controlled
+	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && !ele->PlayerControlled() ));
+	// Sort the best recruits to the end.
+	// FIXME: better if there was a (working) power approximation
+	GL_ARRAY_SORT_EXPR(recruits.Mem(), recruits.Size(), 
+		(-1 * ele->GetItem()->Traits().Level() * (ele->GetItem()->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1)));
+
+	while (nSquaddies < nExpected) {
+		for (int i = 0; i < MAX_SQUADS; ++i) {
+			if (squads[i].Size() < SQUAD_SIZE
+				&& GetWaypoint(i).IsZero())			// don't add to a squad while it's in use!
+			{
+				Chit* chit = recruits.Pop();
+				squads[i].Push(chit->ID());
+				++nSquaddies;
+				break;
+			}
+		}
+	}
+}
+
+
+int CoreScript::Squaddies(int id, CChitArray* arr)
+{
+	GLASSERT(id >= 0 && id < MAX_SQUADS);
+	if (arr) arr->Clear();
+	GL_ARRAY_FILTER(squads[id], (this->IsCitizen(ele)));
+	if (arr) {
+		for (int i = 0; i < squads[id].Size(); ++i) {
+			Chit* c = Context()->chitBag->GetChit(squads[id][i]);
+			if (c && !c->Destroyed()) {
+				arr->Push(c);
+			}
+		}
+	}
+	return squads[id].Size();
+}
+
+
+bool CoreScript::IsSquaddieOnMission(int chitID)
+{
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squads[i].Find(chitID) >= 0) {
+			return !waypoints[i].Empty();
+		}
+	}
+	return false;
 }
 
 
@@ -206,8 +308,9 @@ void CoreScript::AddCitizen( Chit* chit )
 	GLASSERT( citizens.Find( chit->ID()) < 0 );
 	GLASSERT(Team::IsRogue(chit->Team()) || (chit->Team() == ParentChit()->Team()));
 
-	chit->GetItem()->team = ParentChit()->Team();
+	chit->GetItem()->SetTeam(ParentChit()->Team());
 	citizens.Push( chit->ID() );
+	AssignToSquads();
 }
 
 
@@ -223,56 +326,52 @@ bool CoreScript::IsCitizen( int id )
 }
 
 
-Chit* CoreScript::CitizenAtIndex( int index )
+int CoreScript::SquadID(int id)
 {
-	int id = citizens[index];
-	return Context()->chitBag->GetChit( id );
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squads[i].Find(id) >= 0) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 
-int CoreScript::FindCitizenIndex( Chit* chit )
-{
-	GLASSERT( chit );
-	int id = chit->ID();
-	return citizens.Find( id );
-}
-
-
-int CoreScript::NumCitizens()
+int CoreScript::Citizens(CChitArray* arr)
 {
 	int i=0;
-	int count=0;
-	while ( i < citizens.Size() ) {
+	while (i < citizens.Size()) {
 		int id = citizens[i];
-		if ( Context()->chitBag->GetChit( id ) ) {
-			++count;
+		Chit* chit = Context()->chitBag->GetChit(id);
+		if (chit && !chit->Destroyed()) {
+			if (arr) arr->Push(chit);
 			++i;
 		}
 		else {
 			// Dead and gone.
-			citizens.SwapRemove( i );
+			citizens.SwapRemove(i);
 			// Reset the timer so that there is a little time
 			// between a dead citizen and re-spawn
 			spawnTick.Reset();
-#if 0
-			// This is annoying: seeing if cranking down the spawn rate and not
-			// destroying the sleep tube achieves success.
-			// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
-			SpatialComponent* sc = parentChit->GetSpatialComponent();
-			GLASSERT( sc );
-			if ( sc ) {
-				Vector2F pos2 = sc->GetPosition2D();
-				Vector2I sector = ToSector( ToWorld2I( pos2 ));
-				Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
-				if ( bed && bed->GetItem() ) {
-					bed->GetItem()->hp = 0;
-					bed->SetTickNeeded();
-				}
-			}
-#endif
 		}
 	}
-	return count;
+#if 0
+	// This is annoying: seeing if cranking down the spawn rate and not
+	// destroying the sleep tube achieves success.
+	// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	GLASSERT( sc );
+	if ( sc ) {
+		Vector2F pos2 = sc->GetPosition2D();
+		Vector2I sector = ToSector( ToWorld2I( pos2 ));
+		Chit* bed = scriptContext->chitBag->FindBuilding( ISC::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
+		if ( bed && bed->GetItem() ) {
+			bed->GetItem()->hp = 0;
+			bed->SetTickNeeded();
+		}
+	}
+#endif
+	return citizens.Size();
 }
 
 
@@ -395,38 +494,36 @@ int CoreScript::DoTick(U32 delta)
 		UpdateAI();
 	}
 
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squads[i].Empty()) {
+			waypoints[i].Clear();
+			Context()->engine->FreeModel(waypointFlags[i]);
+			waypointFlags[i] = 0;
+		}
+	}
+
+	if (strategicTicker.Delta(delta)) {
+		if (this->InUse() && Context()->chitBag->GetHomeCore() != this) {
+			DoStrategicTick();
+		}
+	}
+
 	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
 }
 
 
-int CoreScript::MaxCitizens(int team, int nTemples)
+int CoreScript::MaxCitizens(int nTemples)
 {
-	team = Team::Group(team);
-	int citizens = 0;
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			static const int N = 4;
-			static const int limit[N] = { 4, 8, 16, 20 };
-			int n = Clamp(nTemples, 0, N - 1);
-			citizens = limit[n];
-		}
-		break;
+	return CITIZEN_BASE + Min(nTemples, MAX_SQUADS)*SQUAD_SIZE;
+}
 
-		case TEAM_GOB:
-		case TEAM_KAMAKIRI:
-		citizens = 16;
-		break;
 
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		break;
-
-		default:
-		GLASSERT(0);
-		break;
-	}
-	return citizens;
+int CoreScript::NumTemples()
+{
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
+	int nTemples = chitArr.Size();
+	return nTemples;
 }
 
 
@@ -437,11 +534,9 @@ int CoreScript::MaxCitizens()
 	CChitArray chitArr;
 	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
 	int nBeds = chitArr.Size();
-	chitArr.Clear();
-	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
-	int nTemples = chitArr.Size();
+	int nTemples = NumTemples();
 
-	int n = CoreScript::MaxCitizens(team, nTemples);
+	int n = CoreScript::MaxCitizens(nTemples);
 	return Min(n, nBeds);
 }
 
@@ -449,31 +544,9 @@ int CoreScript::MaxCitizens()
 
 void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 {
-	int team = Team::Group(parentChit->Team());
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
-			int maxTech = MaxTech();
-			tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
-		}
-		break;
-
-		case TEAM_GOB:
-		case TEAM_KAMAKIRI:
-		{
-			tech = MaxTech();
-		}
-		break;
-
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		tech = 0;
-		break;
-
-		default:
-		GLASSERT(0);
-	}
+	tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
+	int maxTech = MaxTech();
+	tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
@@ -483,25 +556,13 @@ void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
 	if ( nSpawnTicks ) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
-		int nCitizens = this->NumCitizens();
+		int nCitizens = this->Citizens(0);
 		int maxCitizens = this->MaxCitizens();
 
 		if ( nCitizens < maxCitizens ) {
 			if (!RecruitNeutral()) {
 				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
 				this->AddCitizen( chit );
-			}
-		}
-
-		if ( (Team::Group(parentChit->Team()) == TEAM_HOUSE) && (MaxTech() >= TECH_ATTRACTS_GREATER)) {
-			summonGreater += spawnTick.Period();
-			if (summonGreater > SUMMON_GREATER_TIME) {
-				// Find a greater and bring 'em in!
-				// This feels a little artificial, and 
-				// may need to get revisited as the game
-				// grows.
-				Context()->chitBag->AddSummoning(sector, LumosChitBag::SUMMON_TECH);
-				summonGreater = 0;
 			}
 		}
 	}
@@ -521,7 +582,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 
 	if ( nSpawnTicks && lesserPossible)
 	{
-#ifdef SPAWN_MOBS
+#if SPAWN_MOBS > 0
 		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
 			// spawn stuff.
 
@@ -589,9 +650,11 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 #endif
 	}
 	// Clear the work queue - chit is gone that controls this.
-	delete workQueue;
-	workQueue = new WorkQueue();
-	workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
+	if (!workQueue || workQueue->HasJob()) {
+		delete workQueue;
+		workQueue = new WorkQueue();
+		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
+	}
 }
 
 
@@ -620,29 +683,10 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	int team = Team::Group(parentChit->Team());
-	switch (team) {
-		case TEAM_HOUSE:
-		{
-			Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
-			CChitArray chitArr;
-			Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
-			return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
-		}
-		break;
-
-		case TEAM_KAMAKIRI:
-		case TEAM_GOB:
-		return 1;
-
-		case TEAM_NEUTRAL:
-		case TEAM_TROLL:
-		return 0;
-
-		default:
-		GLASSERT(0);
-		break;
-	}
+	Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
+	CChitArray chitArr;
+	Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
+	return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
 }
 
 
@@ -680,14 +724,25 @@ bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 
 CoreScript* CoreScript::GetCoreFromTeam(int team)
 {
-	static int last = 0;
-	if (coreInfoArr[last].coreScript && coreInfoArr[last].coreScript->ParentChit()->Team() == team) {
-		return coreInfoArr[last].coreScript;
+	int group = 0, id = 0;
+	Team::SplitID(team, &group, &id);
+	if (id == 0) 
+		return 0;
+
+	int index = 0;
+	if (teamToCoreInfo->Query(team, &index)) {
+		// Make sure it is current:
+		GLASSERT(index >= 0 && index < NUM_SECTORS*NUM_SECTORS);
+		CoreScript* cs = coreInfoArr[index].coreScript;
+		GLASSERT(cs);
+		if (cs && cs->ParentChit()->Team() == team) {
+			return cs;
+		}
 	}
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
 		if (coreInfoArr[i].coreScript && coreInfoArr[i].coreScript->ParentChit()->Team() == team) {
-			last = i;
+			teamToCoreInfo->Add(team, i);
 			return coreInfoArr[i].coreScript;
 		}
 	}
@@ -724,10 +779,11 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	const GameItem& coreItem = itemDefDB->Get("core");
 
-	const SectorData* sectorDataArr = context->worldMap->GetSectorData();
-	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
+	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {
-		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", 0);
+		// Assert that the 'team' is correctly formed.
+		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || team == TEAM_DEITY || Team::ID(team));
+		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
@@ -739,7 +795,6 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			cs->ParentChit()->GetItem()->team = team;
 			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
 			context->chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.
@@ -759,9 +814,10 @@ int CoreScript::GetPave()
 		return pave;
 	}
 
-	// Pavement is used as a flag for "this is a road" by the AI.
+	// OLD: Pavement is used as a flag for "this is a road" by the AI.
 	// It's important to use the least common pave in a domain
 	// so that building isn't interfered with.
+	// NOW: Just use least common pave to spread things out.
 	CArray<int, WorldGrid::NUM_PAVE> nPave;
 	for (int i = 0; i < WorldGrid::NUM_PAVE; ++i) nPave.Push(0);
 
@@ -785,4 +841,234 @@ int CoreScript::GetPave()
 		pave = 1;
 	}
 	return pave;
+}
+
+
+Vector2I CoreScript::GetWaypoint(int squadID)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	static const Vector2I zero = { 0, 0 };
+	if (!waypoints[squadID].Empty()) {
+		return waypoints[squadID][0];
+	}
+	return zero;
+}
+
+
+Vector2I CoreScript::GetLastWaypoint(int squadID)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	static const Vector2I zero = { 0, 0 };
+	if (!waypoints[squadID].Empty()) {
+		return waypoints[squadID].Last();
+	}
+	return zero;
+}
+
+
+void CoreScript::PopWaypoint(int squadID)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	GLASSERT(waypoints[squadID].Size());
+	GLOUTPUT(("Waypoint popped. %d:%d,%d %d remain.\n", squadID, waypoints[squadID][0].x, waypoints[squadID][0].y, waypoints[squadID].Size()-1));
+	waypoints[squadID].Remove(0);
+	if (waypoints[squadID].Empty()) {
+		Context()->engine->FreeModel(waypointFlags[squadID]);
+		waypointFlags[squadID] = 0;
+	}
+}
+
+
+void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	if (dest.IsZero()) {
+		waypoints[squadID].Clear();
+		Context()->engine->FreeModel(waypointFlags[squadID]);
+		waypointFlags[squadID] = 0;
+		return;
+	}
+
+	// Use the first chit to choose the starting location:
+	bool startInSameSector = true;
+	Vector2I startSector = { 0, 0 };
+	CChitArray chitArr;
+	Squaddies(squadID, &chitArr);
+	if (chitArr.Empty()) return;
+
+	for (int i = 0; i<chitArr.Size(); ++i) {
+		Chit* chit = chitArr[i];
+		if (startSector.IsZero())
+			startSector = chit->GetSpatialComponent()->GetSector();
+		else
+			if (startSector != chit->GetSpatialComponent()->GetSector())
+				startInSameSector = false;
+	}
+
+	Vector2I destSector = ToSector(dest);
+	waypoints[squadID].Clear();
+
+	// - Current port
+	// - grid travel (implies both sector and target port)
+	// - dest port (regroup)
+	// - destination
+
+	GLOUTPUT(("SetWaypoints: #chits=%d squadID=%d:", chitArr.Size(), squadID));
+
+	if (startSector != destSector) {
+		Chit* chit = chitArr[0];
+		const SectorData& currentSD = Context()->worldMap->GetSectorData(chit->GetSpatialComponent()->GetSector());
+		int currentPort = currentSD.NearestPort(chit->GetSpatialComponent()->GetPosition2D());
+
+		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
+		int destPort = destSD.NearestPort(ToWorld2F(dest));
+		Vector2I p0 = { 0, 0 };
+
+		if (startInSameSector) {
+			p0 = currentSD.GetPortLoc(currentPort).Center();	// meet at the STARTING port
+		}
+		else {
+			p0 = destSD.GetPortLoc(destPort).Center();			// meet at the DESTINATION port
+		}
+		waypoints[squadID].Push(p0);
+		GLOUTPUT(("%d,%d [s%x%x]  ", p0.x, p0.y, p0.x / SECTOR_SIZE, p0.y / SECTOR_SIZE));
+	}
+	GLOUTPUT(("%d,%d [s%x%x]\n", dest.x, dest.y, dest.x/SECTOR_SIZE, dest.y/SECTOR_SIZE));
+	waypoints[squadID].Push(dest);
+
+	if (!waypointFlags[squadID]) {
+		waypointFlags[squadID] = Context()->engine->AllocModel("flag");
+	}
+	waypointFlags[squadID]->SetPos(ToWorld3F(waypoints[squadID].Last()));
+}
+
+
+int CoreScript::CorePower()
+{
+	int power = 0;
+	for (int i = 0; i < citizens.Size(); ++i) {
+		Chit* chit = Context()->chitBag->GetChit(citizens[i]);
+		if (chit && chit->GetItemComponent()) {
+			power += chit->GetItemComponent()->PowerRating(true);
+		}
+	}
+	return power;
+}
+
+
+int CoreScript::CoreWealth()
+{
+	int gold = 0;
+	const int* value = ReserveBank::Instance()->CrystalValue();
+	const Wallet* wallet = ParentChit()->GetWallet();
+	if (wallet) {
+		gold += wallet->Gold();
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			gold += value[i] * wallet->Crystal(i);
+		}
+	}
+	return gold;
+}
+
+
+void CoreScript::DoStrategicTick()
+{
+	// Look around for someone to attack. They should be:
+	//	- an enemy FIXME: or neutral
+	//	- weaker
+	//	- compete for visitors OR have crystal
+	//
+	// We should:
+	//	- have squads ready to go
+
+	// 1. Check for squads available & ready
+	// 2. Run through diplomacy list, look for enemies
+	// 3. Score on: strength & wealth/visitors
+	// 4. Attack
+
+	bool squadReady[MAX_SQUADS] = { false };
+	CChitArray squaddies;
+	
+	// Check for ready squads.
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		this->Squaddies(i, &squaddies);
+		if (squaddies.Size() < SQUAD_SIZE) 
+			continue;
+
+		bool okay = true;
+		for (int k = 0; okay && k < squaddies.Size(); ++k) {
+			Chit* chit = squaddies[k];
+			if (this->IsSquaddieOnMission(chit->ID())) {
+				okay = false;
+				break;
+			}
+			else if (chit->GetItem()->HPFraction() < 0.8f) {
+				okay = false;
+				break;
+			}
+		}
+		squadReady[i] = okay;
+	}
+
+	int nReady = 0;
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (squadReady[i])
+			++nReady;
+	}
+	if (nReady == 0) return;
+
+	Sim* sim = Context()->chitBag->GetSim();
+	GLASSERT(sim);
+	if (!sim) return;
+
+	Vector2I sector = ParentChit()->GetSpatialComponent()->GetSector();
+	CCoreArray stateArr;
+	sim->CalcStrategicRelationships(sector, 3, RELATE_ENEMY, &stateArr);
+
+	int myPower = this->CorePower();
+	int myWealth = this->CoreWealth();
+
+	CoreScript* target = 0;
+	for (int i = 0; i < stateArr.Size(); ++i) {
+		CoreScript* cs = stateArr[i];
+		if (cs->NumTemples() == 0)		// Ignore starting out domains so it isn't a complete wasteland out there.
+			continue;
+
+		int power = cs->CorePower();
+		int wealth   = cs->CoreWealth();
+
+		if ((power < myPower / 2) && (wealth > myWealth || wealth > 400)) {
+			// Assuming this is actually so rare that it doesn't matter to select the best.
+			target = cs;
+			break;
+		}
+	}
+
+	if (!target) return;
+
+	// Attack!!!
+	sim->DeclareWar(target, this);
+	bool first = true;
+	Vector2F targetCorePos2 = target->ParentChit()->GetSpatialComponent()->GetPosition2D();
+	Vector2I targetCorePos = target->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+	Vector2I targetSector = ToSector(targetCorePos);
+
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (!squadReady[i]) continue;
+
+		Vector2I pos = { 0, 0 };
+		pos = targetCorePos;
+		if (first) {
+			first = false;
+		}
+		else {
+			BuildingWithPorchFilter filter;
+			Chit* building = Context()->chitBag->FindBuilding(IString(), targetSector, &targetCorePos2, LumosChitBag::RANDOM_NEAR, 0, &filter);
+			if (building) {
+				pos = building->GetSpatialComponent()->GetPosition2DI();
+			}
+		}
+		GLASSERT(!pos.IsZero());
+		this->SetWaypoints(i, pos);
+	}
 }

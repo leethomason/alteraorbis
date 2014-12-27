@@ -12,6 +12,7 @@
 #include "../game/sim.h"
 
 #include "../script/rockgen.h"
+#include "../script/procedural.h"
 #include "../audio/xenoaudio.h"
 #include <time.h>
 
@@ -41,10 +42,17 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	worldImage.Init( &gamui2D, atom, false );
 	worldImage.SetSize( 400, 400 );
 
-	worldText.Init(&gamui2D);
-	worldText.SetBounds(400, 400);
+	headerText.Init( &gamui2D );
+	headerText.SetBounds(400, 0);
+	statText.Init(&gamui2D);
+	statText.SetBounds(400, 0);
+	footerText.Init(&gamui2D);
+	footerText.SetBounds(400, 0);
 
-	label.Init( &gamui2D );
+	newsConsole.Init(&gamui2D, 0);
+	newsConsole.consoleWidget.SetSize(400, 100);
+	newsConsole.consoleWidget.SetTime(VERY_LONG_TICK);
+
 	genState.Clear();
 }
 
@@ -70,12 +78,27 @@ void WorldGenScene::Resize()
 	worldImage.SetPos( port.UIWidth()*0.5f - size*0.5f, 10.0f );
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
-	label.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f);
 
-	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
-	float boundWidth = size - layout.GutterX()*2.0f;
-	worldText.SetBounds(boundWidth, size - layout.GutterY()*2.0f);
-	worldText.SetTab(boundWidth / 5.0f);
+	const float DY = 16.0f;
+	const float CONSOLE_HEIGHT = DY * 16.0f;
+
+	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
+	newsConsole.consoleWidget.SetPos(worldImage.X(), headerText.Y() + DY*3.0f);
+	//newsConsole.consoleWidget.SetPos(0, 0);
+	newsConsole.consoleWidget.SetSize(400, CONSOLE_HEIGHT);
+
+//	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
+//	newsConsole.consoleWidget.SetBackground(gray);
+
+	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(), 
+					worldImage.Y());
+	footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
+
+	headerText.SetTab(worldImage.Width() / 5.0f);
+	statText.SetTab(worldImage.Width() / 5.0f);
+	footerText.SetTab(worldImage.Width() / 5.0f);
+
+	statText.SetVisible(SettingsManager::Instance()->DebugFPS());
 }
 
 
@@ -186,7 +209,7 @@ void WorldGenScene::DoTick(U32 delta)
 			okay.SetEnabled(true);
 			cancel.SetEnabled(true);
 
-			worldText.SetText("Welcome to world generation!\n\n"
+			headerText.SetText("Welcome to world generation!\n\n"
 							  "This process will take a few minutes (grab some water "
 							  "or coffee) while the world is generated. This will delete any game in progress. Once generated, "
 							  "the world persists and you can play a game, with time passing and domains rising and falling, for "
@@ -203,7 +226,9 @@ void WorldGenScene::DoTick(U32 delta)
 		{
 			// Don't want to hear crazy sound during world-gen:
 			XenoAudio::Instance()->SetAudio(false);	// turned back on/off on scene de-activate. 
-			worldText.SetText("");
+			statText.SetText("");
+			headerText.SetText("");
+
 			clock_t start = clock();
 			while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
 				for (int i = 0; i < 16; ++i) {
@@ -212,7 +237,7 @@ void WorldGenScene::DoTick(U32 delta)
 			}
 			CStr<32> str;
 			str.Format("Stage 1/3 Land: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
-			label.SetText(str.c_str());
+			footerText.SetText(str.c_str());
 			GLString name;
 
 			if (genState.y == WorldGen::SIZE) {
@@ -230,14 +255,15 @@ void WorldGenScene::DoTick(U32 delta)
 					GLString name;
 					GLString postfix;
 
+					const gamedb::Reader* database = game->GetDatabase();
 					for (int j = 0; j < NUM_SECTORS; ++j) {
 						for (int i = 0; i < NUM_SECTORS; ++i) {
 							name = "sector";
 							// Keep the names a little short, so that they don't overflow UI.
-							const char* n = static_cast<LumosGame*>(game)->GenName("sector", random.Rand(), 4, 7);
-							GLASSERT(n);
-							if (n) {
-								name = n;
+							IString n = LumosChitBag::StaticNameGen(database, "sector", random.Rand(), 4, 7);
+							GLASSERT(!n.empty());
+							if (!n.empty()) {
+								name = n.safe_str();
 							}
 							GLASSERT(NUM_SECTORS == 16);	// else the printing below won't be correct.
 							postfix = "";
@@ -279,7 +305,7 @@ void WorldGenScene::DoTick(U32 delta)
 			}
 			CStr<32> str;
 			str.Format("Stage 2/3 Rock: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
-			label.SetText(str.c_str());
+			footerText.SetText(str.c_str());
 
 			if (genState.y == WorldGen::SIZE) {
 				rockGen->EndCalc();
@@ -317,10 +343,9 @@ void WorldGenScene::DoTick(U32 delta)
 			sim->Load(datPath, 0);
 
 			sim->EnableSpawn(false);
-			if (SettingsManager::Instance()->SeedPlants()) {
-				sim->SeedPlants();
-			}
+			sim->SeedPlants();
 			genState.mode = GenState::SIM_TICK;
+			newsConsole.AttachChitBag(sim->GetChitBag());
 		}
 		break;
 
@@ -330,6 +355,7 @@ void WorldGenScene::DoTick(U32 delta)
 			while (clock() - start < 100) {
 				for (int i = 0; i < 10; ++i) {
 					sim->DoTick(100);
+					newsConsole.DoTick(100, 0);
 				}
 			}
 			float age = sim->AgeF();
@@ -344,9 +370,10 @@ void WorldGenScene::DoTick(U32 delta)
 			int pools = 0, waterfalls = 0;
 			swm->FluidStats(&pools, &waterfalls);
 
-			simStr.Format("SIM:\nAge=%.2f\n\n"
-						  "Plants=%d\n"
-						  "Pools=%d Waterfalls=%d\n\n"
+			simStr.Format("Age=%.2f\n", age);
+			headerText.SetText(simStr.safe_str());
+
+			simStr.Format("Plants=%d Pools=%d Waterfalls=%d\n\n"
 						  "Orbstalk=%d\t\t[%d, %d, %d, %d]\n"
 						  "Tree=%d\t\t[%d, %d, %d, %d]\n"
 						  "Fern=%d\t\t[%d, %d, %d, %d]\n"
@@ -355,7 +382,6 @@ void WorldGenScene::DoTick(U32 delta)
 						  "Shroom=%d\t\t[%d, %d, %d, %d]\n"
 						  "SunBloom=%d\t\t[%d, %d]\n"
 						  "MoonBloom=%d\t\t[%d, %d]\n\n",
-						  age,
 						  swm->CountPlants(),
 						  pools, waterfalls,
 						  typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
@@ -370,14 +396,19 @@ void WorldGenScene::DoTick(U32 delta)
 			const Census& census = sim->GetChitBag()->census;
 			for (int i = 0; i < census.MOBItems().Size(); ++i) {
 				const Census::MOBItem& mobItem = census.MOBItems()[i];
-				simStr.AppendFormat("%s=%d\n", mobItem.name.safe_str(), mobItem.count);
+				simStr.AppendFormat("%s\t%d\n", mobItem.name.safe_str(), mobItem.count);
+			}
+			simStr.AppendFormat("\n\n");
+			for (int i = 0; i < census.CoreItems().Size(); ++i) {
+				const Census::MOBItem& coreItem = census.CoreItems()[i];
+				simStr.AppendFormat("%s\t%d\n", coreItem.name.safe_str(), coreItem.count);
 			}
 
-			worldText.SetText(simStr.c_str());
+			statText.SetText(simStr.c_str());
 
 			CStr<32> str;
-			str.Format("Stage 3/3 Simulation: %d%%", int(100.0f * age / 1.0f));
-			label.SetText(str.c_str());
+			str.Format("Stage 3/3 Simulation: %1.f%%", 100.0f * age);
+			footerText.SetText(str.c_str());
 
 			if (age > SettingsManager::Instance()->SpawnDate()) {
 				sim->EnableSpawn(true);
@@ -400,8 +431,8 @@ void WorldGenScene::DoTick(U32 delta)
 
 			genState.mode = GenState::DONE;
 			simStr.AppendFormat("\n\nDONE!");
-			label.SetText("DONE");
-			worldText.SetText(simStr.c_str());
+			footerText.SetText("DONE");
+			statText.SetText(simStr.c_str());
 		}
 		break;
 

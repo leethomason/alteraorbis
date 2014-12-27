@@ -72,7 +72,8 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 							   int effectsMask,
 							   int tech,
 							   int level,
-							   int seed)
+							   int seed,
+							   int team)
 {
 	// Guarentee we can build something:
 	if (avail.Crystal(0) == 0) {
@@ -128,7 +129,7 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 
 		cost->Clear();
 		int techRequired = 0;
-		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true);
+		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true, team);
 
 		if (avail.CanWithdraw(*cost) && techRequired <= tech) {
 			break;
@@ -157,7 +158,9 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		}
 		--maxIt;
 	}
-	GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	if (!item) {
+		GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	}
 	return item;
 }
 
@@ -168,7 +171,8 @@ GameItem* ForgeScript::Build(	int type,			// GUN
 								int effectFlags,
 								TransactAmt* required,
 								int *techRequired,
-								bool doRandom )
+								bool doRandom,
+								int team)
 {
 	*techRequired = 0;
 	required->Clear();
@@ -255,7 +259,7 @@ GameItem* ForgeScript::Build(	int type,			// GUN
 	
 	const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
 	GameItem* item = itemDef.Clone();
-	item->Roll(roll);
+	item->Roll(team, roll);
 
 	if ( effectFlags & GameItem::EFFECT_FIRE ) {
 		required->AddCrystal(CRYSTAL_RED, 1);

@@ -19,6 +19,9 @@
 #include "../xegame/cticker.h"
 #include "../game/gamelimits.h"
 #include "../xegame/component.h"
+#include "../xegame/chitbag.h"
+
+#define SPAWN_MOBS 1
 
 class WorldMap;
 class WorkQueue;
@@ -26,6 +29,8 @@ class LumosChitBag;
 class CoreScript;
 class Model;
 struct ChitContext;
+
+#define CCoreArray grinliz::CArray<CoreScript*, 32 >
 
 struct CoreInfo
 {
@@ -73,17 +78,39 @@ public:
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
 	bool IsCitizen( int id );
-	Chit*  CitizenAtIndex( int id );
-	int    FindCitizenIndex( Chit* chit ); 
-	int NumCitizens();
+	int  Citizens(CChitArray* arr);
 
-	static int MaxCitizens(int team, int nTemples);
+	// 0-3, -1 if not in squad
+	int SquadID(int id);
+	int Squaddies(int squadID, CChitArray* arr);
+	bool IsSquaddieOnMission(int chitID);
+
+	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
+	int NumTemples();
 
+	int CorePower();	// approximation of the military strength of the core
+	int CoreWealth();	// amount of money in the core's treasury
+
+	/*	Controls flags are simple "denizen attractors"
+		in the same domain. When a denizen arrives
+		the flag is cleared. They are assigned to the
+		first available denizen.
+	*/
 	void AddFlag(const grinliz::Vector2I& pos);
 	void RemoveFlag(const grinliz::Vector2I& pos);
 	void ToggleFlag(const grinliz::Vector2I& pos);
 	grinliz::Vector2I GetFlag();
+
+	/*	Waypoints are destinations that may involve
+		grid travel. Waypoints are assigned to 
+		a particular squad, and movement 
+		can be coordinated.
+	*/
+	void SetWaypoints(int squadID, const grinliz::Vector2I& dest);
+	grinliz::Vector2I GetWaypoint(int squadID);	// gets the next waypoint
+	grinliz::Vector2I GetLastWaypoint(int squadID);
+	void PopWaypoint(int squadID);
 
 	bool InUse() const;
 
@@ -113,11 +140,12 @@ public:
 		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
 	}
 
-	static CoreScript* GetCore(const grinliz::Vector2I& sector) {
-		return GetCoreInfo(sector).coreScript;
-	}
+	static CoreScript* GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
 	static CoreScript* GetCoreFromTeam(int team);
 	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
+
+	static void Init();
+	static void Free();
 
 private:
 	void UpdateAI();
@@ -125,6 +153,8 @@ private:
 	bool RecruitNeutral();
 	void DoTickNeutral(int delta, int nSpawnTicks);
 	void DoTickInUse(int delta, int nSpawnTicks);
+	void AssignToSquads();
+	void DoStrategicTick();
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
@@ -132,6 +162,7 @@ private:
 
 	CTicker		aiTicker;		// use to update the core info, every couple of seconds.
 	CTicker		scoreTicker;
+	CTicker		strategicTicker;
 	CoreAchievement	achievement;
 	
 	// serialized
@@ -143,6 +174,7 @@ private:
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
+	grinliz::CArray<int, SQUAD_SIZE> squads[MAX_SQUADS];
 	grinliz::CDynArray< grinliz::Vector2I > tasks;
 	
 	struct Flag {
@@ -154,7 +186,11 @@ private:
 	};
 	grinliz::CDynArray< Flag > flags;
 
+	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_SQUADS];
+	Model* waypointFlags[MAX_SQUADS];
+
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+	static grinliz::HashTable<int, int>* teamToCoreInfo;
 };
 
 #endif // CORESCRIPT_INCLUDED

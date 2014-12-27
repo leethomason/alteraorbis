@@ -77,7 +77,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		}
 
 		// Check if we can go from the core to the porch.
-		const SectorData& sd = worldMap->GetSector(ToSector(porch.min));
+		const SectorData& sd = worldMap->GetSectorData(ToSector(porch.min));
 		reachable = worldMap->CalcPath(ToWorld2F(sd.core), ToWorld2F(porch.min), 0, 0, false);
 
 		CChitArray arr;

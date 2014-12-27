@@ -376,7 +376,7 @@ int Chit::Team() const
 {
 	const GameItem* item = GetItem();
 	if ( item ) 
-		return item->team;
+		return item->Team();
 	return 0;
 }
 

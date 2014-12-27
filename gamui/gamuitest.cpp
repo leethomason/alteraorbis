@@ -260,7 +260,8 @@ int main( int argc, char **argv )
 	textLabel[1].SetText( "Very long text to test the string allocator." );
 	textLabel[1].SetPos( 10, 20 );
 
-	Image image0( &gamui, imageAtom, true );
+	Image image0;
+	image0.Init(&gamui, imageAtom, true);
 	image0.SetPos( 50, 50 );
 	image0.SetSize( 100, 100 );
 
@@ -270,27 +271,33 @@ int main( int argc, char **argv )
 	block.SetSize( 100, 100 );
 	block.SetText( "This is paragraph one.\n\nAnd number 2." );
 
-	Image image1( &gamui, imageAtom, true );
+	Image image1;
+	image1.Init(&gamui, imageAtom, true);
 	image1.SetPos( 50, 200 );
 	image1.SetSize( 125, 125 );
 
-	Image image2( &gamui, imageAtom, true );
+	Image image2;
+	image2.Init(&gamui, imageAtom, true);
 	image2.SetPos( 200, 50 );
 	image2.SetSize( 50, 50 );
 
-	Image image2b( &gamui, imageAtom, true );
+	Image image2b;
+	image2b.Init(&gamui, imageAtom, true);
 	image2b.SetPos( 270, 50 );
 	image2b.SetSize( 50, 50 );
 
-	Image image2c( &gamui, imageAtom, true );
+	Image image2c;
+	image2c.Init(&gamui, imageAtom, true);
 	image2c.SetPos( 200, 120 );
 	image2c.SetSize( 50, 50 );
 
-	Image image2d( &gamui, imageAtom, true );
+	Image image2d;
+	image2d.Init(&gamui, imageAtom, true);
 	image2d.SetPos( 270, 120 );
 	image2d.SetSize( 50, 50 );
 
-	Image image3( &gamui, imageAtom, true );
+	Image image3;
+	image3.Init(&gamui, imageAtom, true);
 	image3.SetPos( 200, 200 );
 	image3.SetSize( 125, 125 );
 	image3.SetSlice( true );
@@ -345,8 +352,8 @@ int main( int argc, char **argv )
 	tick2.SetCoord( 190.f/256.f, 180.f/256.f, 205.f/256.f, 210.f/256.f );
 	tick1.SetCoord( 230.f/256.f, 225.f/256.f, 245.f/256.f, 1 );
 
-	DigitalBar bar( &gamui, 10, tick0, tick1 );
-//	bar.SetRange( 0.33f, 0.66f );
+	DigitalBar bar;
+	bar.Init(&gamui, tick0, tick1);
 	bar.SetPos( 20, 350 );
 	bar.SetSize( 100, 20 );
 
@@ -369,6 +376,7 @@ int main( int argc, char **argv )
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 					screenX = event.window.data1;
 					screenY = event.window.data2;
+					glViewport( 0, 0, screenX, screenY );
 					gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 				}
 				break;

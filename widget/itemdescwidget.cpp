@@ -142,13 +142,16 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		if (history && chitBag) {
 			GLString s;
 
+			static const int DISPLAY_MAX = 10;	// can't read everything, and actually causing overflow. FIXME: show most important events.
 			int num = 0;
 			const NewsEvent** events = history->Find(item->ID(), true, &num, 0);
 			for (int i = 0; i < num; ++i) {
-				events[i]->Console(&s, chitBag, item->ID());
-				if (!s.empty()) {
-					textBuffer += s.c_str();
-					textBuffer += '\n';
+				if (i == 0 || (i > num - DISPLAY_MAX)) {
+					events[i]->Console(&s, chitBag, item->ID());
+					if (!s.empty()) {
+						textBuffer += s.c_str();
+						textBuffer += '\n';
+					}
 				}
 			}
 		}

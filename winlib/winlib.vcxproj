@@ -128,6 +128,7 @@
     <ClCompile Include="..\zlib\zutil.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\grinliz\glarrayutil.h" />
     <ClInclude Include="..\grinliz\glbitarray.h" />
     <ClInclude Include="..\grinliz\glcolor.h" />
     <ClInclude Include="..\grinliz\glcontainer.h" />

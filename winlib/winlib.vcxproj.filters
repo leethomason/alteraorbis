@@ -303,5 +303,8 @@
     <ClInclude Include="..\grinliz\glperformance.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
+    <ClInclude Include="..\grinliz\glarrayutil.h">
+      <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

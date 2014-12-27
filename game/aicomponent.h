@@ -69,6 +69,7 @@ public:
 	void Pickup( Chit* item );
 	void Stand();
 	void Rampage( int dest );
+	bool Rampaging() const { return aiMode == RAMPAGE_MODE;  }
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
@@ -76,10 +77,12 @@ public:
 
 	Chit* GetTarget();
 	void MakeAware( const int* enemyIDs, int n );
+
+	bool AtWaypoint();
 	
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
-	void EnableDebug( bool enable )			{ debugFlag = enable; }
+	void EnableLog( bool enable )			{ debugLog = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 	int  VisitorIndex() const				{ return visitorIndex; }
@@ -126,7 +129,7 @@ private:
 	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
-	void ThinkWander( const ComponentSet& thisComp );
+	void ThinkNormal( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
@@ -135,6 +138,7 @@ private:
 	bool ThinkDelivery( const ComponentSet& thisComp );
 	bool ThinkRepair(const ComponentSet& thisComp);
 	bool ThinkFlag(const ComponentSet& thisComp);
+	bool ThinkWaypoints(const ComponentSet& thisComp);
 
 	bool RampageDone(const ComponentSet& thisComp);
 	void DoMoraleZero(const ComponentSet& thisComp);
@@ -207,7 +211,7 @@ private:
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
-	bool				debugFlag;
+	bool				debugLog;
 	int					rampageTarget;
 	int					destinationBlocked;
 	ai::TaskList		taskList;

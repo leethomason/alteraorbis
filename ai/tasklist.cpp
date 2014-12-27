@@ -28,7 +28,6 @@
 #include "../script/forgescript.h"
 #include "../script/procedural.h"
 #include "../script/plantscript.h"
-#include "../script/evalbuildingscript.h"
 
 #include "../engine/particle.h"
 
@@ -104,7 +103,7 @@ void TaskList::Clear()
 void TaskList::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "TaskList" );
-	XARC_SER( xs, lastBuildingUsed );
+	XARC_SER_ARR( xs, buildingsUsed, NUM_BUILDING_USED);
 	XARC_SER_CARRAY( xs, taskList );
 	socialTicker.Serialize( xs, "socialTicker" );
 	XarcClose( xs );
@@ -326,7 +325,10 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				}
 				else {
 					UseBuilding(thisComp, building, buildingName);
-					lastBuildingUsed = buildingName;
+					for (int i = 1; i < NUM_BUILDING_USED; ++i) {
+						buildingsUsed[i] = buildingsUsed[i - 1];
+					}
+					buildingsUsed[0] = buildingName;
 				}
 			}
 			Remove();
@@ -392,14 +394,17 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 
 	// Okay, passed checks. Give social happiness.
 //	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
+	Vector3<double> needs = { 0, 0, 0 };
+
 	for( int i=0; i<arr.Size(); ++i ) {
 		const Personality& personality = thisComp.item->GetPersonality();
 		double social = double(arr.Size()) * 0.10;
 		if (personality.Introvert()) {
 			social *= 0.5;	// introverts get less reward from social interaction (go build stuff)
 		}
+		needs.X(Needs::FUN) += social;
 
-		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::FUN, social );
+		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( needs );
 		if ( thisComp.chit->GetRenderComponent() ) {
 			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
 		}
@@ -416,7 +421,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	Chit* controller		= coreScript->ParentChit();
 	ItemComponent* ic		= building->GetItemComponent();
 
-	// Workers:
+	// Working buildings. (Not need based.)
 	if ( buildingName == ISC::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
@@ -448,71 +453,42 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		}
 	}
 
-	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
-		BuildScript buildScript;
-		const BuildData* bd = buildScript.GetDataFromStructure( buildingName, 0 );
-		GLASSERT( bd );
-		ai::Needs supply = bd->needs;
-		int nElixir = ic->NumCarriedItems(ISC::elixir);
-
-		// Food based buildings don't work if there is no elixir.
-		if ( supply.Value(Needs::FOOD) && nElixir == 0 ) {
-			supply.SetZero();
+	if (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) {
+		// Need based.
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit);
+		if (buildingNeeds.IsZero()) {
+			// doesn't have what is needed, etc.
+			return;
 		}
 
-		if ( buildingName == ISC::market ) {
-			GoShopping( thisComp, building );
+		int nElixir = ic->NumCarriedItems(ISC::elixir);
+
+		if (buildingName == ISC::market) {
+			GoShopping(thisComp, building);
 		}
 		else if (buildingName == ISC::exchange) {
 			GoExchange(thisComp, building);
 		}
-		else if ( buildingName == ISC::factory ) {
-			bool used = UseFactory( thisComp, building, int(coreScript->GetTech()) );
-			if ( !used ) supply.SetZero();
+		else if (buildingName == ISC::factory) {
+			UseFactory(thisComp, building, int(coreScript->GetTech()));
 		}
-		else if ( buildingName == ISC::bed ) {
-			// Apply the needs as is.
+		else if (buildingName == ISC::bed) {
+			// Also heal.
+			thisComp.item->hp += buildingNeeds.X(Needs::ENERGY) * thisComp.item->TotalHP();
+			if (thisComp.item->hp > thisComp.item->TotalHP()) {
+				thisComp.item->hp = thisComp.item->TotalHP();
+			}
 		}
-		else if ( buildingName == ISC::bar ) {
+		else if (buildingName == ISC::bar) {
 			// Apply the needs as is...if there is Elixir.
-		}
-		else {
-			GLASSERT( 0 );
-		}
-		if ( supply.Value(Needs::FOOD) > 0 ) {
-			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
-			GLASSERT( nElixir > 0 );
-
 			const GameItem* elixir = ic->FindItem(ISC::elixir);
-			GLASSERT(elixir);
+			GLASSERT(elixir);	// if !elixir, needs should have been ZERO
 			if (elixir) {
 				GameItem* item = ic->RemoveFromInventory(elixir);
 				delete item;
 			}
 		}
-		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
-		//supply.Set(Needs::SOCIAL, 0);
-
-		double scale = 1.0;
-
-		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
-		if (evalScript) {
-			double industry = building->GetItem()->GetBuildingIndustrial();
-			double score = evalScript->EvalIndustrial(true);
-			double dot = score * industry;
-			scale = 0.55 + 0.45 * dot;
-
-			if (!evalScript->Reachable()) {
-				scale = 0;
-			}
-		}
-		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
-
-		double heal = (supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * scale;
-		heal = Clamp( heal, 0.0, 1.0 );
-
-		thisComp.item->hp += double(thisComp.item->TotalHP()) * heal;
-		thisComp.item->hp = Min( thisComp.item->hp, double(thisComp.item->TotalHP()) );
+		thisComp.ai->GetNeedsMutable()->Add(buildingNeeds);
 	}
 }
 
@@ -541,21 +517,16 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 		}
 	}
 	else {
-		int willSpend = thisComp.item->wallet.Gold() / 5;
-		if (personality.Crafting() == Personality::LIKES) {
-			willSpend = thisComp.item->wallet.Gold() / 2;
-		}
-
-		for (int pass = 0; pass < 3; ++pass) {
+		const int nPass = (personality.Crafting() == Personality::LIKES) ? 3 : 1;
+		for (int pass = 0; pass < nPass; ++pass) {
 			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= willSpend) {
+				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= thisComp.item->wallet.Gold()) {
 					// Money to bank.
 					// Crystal from exchange.
 					int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 					crystal[type] = 1;
 					bank->wallet.Deposit(&thisComp.item->wallet, crystalValue[type]);
 					thisComp.item->wallet.Deposit(exchange->GetWallet(), 0, crystal);
-					willSpend -= crystalValue[type];
 					usedExchange = true;
 				}
 			}
@@ -700,16 +671,12 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		else 
 			partsMask &= (~WeaponGen::RING_BLADE);
 	}
-	if (itemType == ForgeScript::GUN && team == TEAM_KAMAKIRI) {
-		subItem = ForgeScript::BEAMGUN;
-		altRes = "kamabeamgun";
-	}
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
-	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed);
+	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed, thisComp.chit->Team());
 	if (item) {
-		if (altRes && *altRes) {
-			item->SetResource(altRes);
+		if (team == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
+			item->SetResource("kamabeamgun");
 		}
 
 		item->wallet.Deposit(&thisComp.item->wallet, cost);

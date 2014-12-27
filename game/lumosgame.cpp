@@ -46,6 +46,7 @@ LumosGame::LumosGame(  int width, int height, int rotation )
 	: Game( width, height, rotation, 600 )
 {
 	InitButtonLooks();
+	CoreScript::Init();
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
@@ -54,6 +55,7 @@ LumosGame::LumosGame(  int width, int height, int rotation )
 
 LumosGame::~LumosGame()
 {
+	CoreScript::Free();
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 }
 
@@ -291,61 +293,6 @@ void LumosGame::CopyFile( const char* src, const char* target )
 		}
 		fclose( fp );
 	}
-}
-
-
-
-const char* LumosGame::GenName( const char* dataset, int _seed, int min, int max )
-{
-	const gamedb::Item* parent = this->GetDatabase()->Root()->Child( "markovName" );
-	GLASSERT( parent );
-	const gamedb::Item* item = parent->Child( dataset );
-	GLASSERT( item );
-	if ( !item ) return 0;
-
-	nameBuffer = "";
-
-	// Make sure the name generator is warm:
-	Random random(_seed);
-	random.Rand();
-	random.Rand();
-	int seed = random.Rand();
-
-
-	const gamedb::Item* word = item->Child("words0");
-	if (word) {
-		// The 3-word form.
-		for (int i = 0; i < 3; ++i) {
-			static const char* CHILD[] = { "words0", "words1", "words2" };
-			word = item->Child(CHILD[i]);
-			if (word && word->NumAttributes()) {
-				// attribute name and value are the same.
-				const char *attr = word->AttributeName(random.Rand(word->NumAttributes()));
-				if (i) {
-					nameBuffer.AppendFormat(" %s", attr);
-				}
-				else {
-					nameBuffer = attr;
-				}
-			}
-		}
-		return nameBuffer.c_str();
-	}
-	else {
-		// The triplet (letter) form.
-		int size = 0;
-		const void* data = this->GetDatabase()->AccessData(item, "triplets", &size);
-		MarkovGenerator gen((const char*)data, size, seed);
-
-		int len = max + 1;
-		int error = 100;
-		while (error--) {
-			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {
-				return nameBuffer.c_str();
-			}
-		}
-	}
-	return 0;
 }
 
 

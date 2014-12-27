@@ -83,6 +83,11 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 	SetAudioButton();
 
+	RenderAtom gray = LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
+	testCanvas.Init(&gamui2D, gray);
+	testCanvas.DrawLine(0, 0, 100, 100, 5);
+	testCanvas.SetVisible(false);
+
 	creditsButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
 	creditsButton.SetText("Credits");
 
@@ -239,6 +244,8 @@ void TitleScene::Resize()
 
 	layout.PosAbs(&audioButton, -1, 0);
 	layout.PosAbs(&creditsButton, -2, 0);
+
+	layout.PosAbs(&testCanvas, 2, 2);
 }
 
 

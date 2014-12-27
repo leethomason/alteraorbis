@@ -30,10 +30,12 @@ DomainAI* DomainAI::Factory(int team)
 		case TEAM_TROLL:	return new TrollDomainAI();
 		case TEAM_GOB:		return new GobDomainAI();
 		case TEAM_KAMAKIRI:	return new KamakiriDomainAI();
+		case TEAM_HOUSE:	return new HumanDomainAI();
 		default:
 		break;
 	}
-	GLASSERT(0);
+	//	GLASSERT(0); lots of reasons the team can be CHAOS, or changed, or whatever.
+	// caller has to handle null return.
 	return 0;
 }
 
@@ -44,6 +46,7 @@ DomainAI::DomainAI()
 	for (int i = 0; i < MAX_ROADS; ++i) {
 		buildDistance[i] = 0;
 	}
+	templeCap = MAX_TEMPLES;
 }
 
 DomainAI::~DomainAI()
@@ -57,7 +60,7 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 
 	// Computer the roads so that we have them later.
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 	roads = new RoadAI(sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE);
 	CDynArray<Vector2I> road;
 
@@ -211,7 +214,7 @@ bool DomainAI::BuildPlaza()
 
 	// Check a random road.
 	bool issuedOrders = false;
-	const SectorData& sd = Context()->worldMap->GetSector(sector);
+	const SectorData& sd = Context()->worldMap->GetSectorData(sector);
 
 	for (int i = 0; i < RoadAI::MAX_PLAZA; ++i) {
 		const Rectangle2I* r = roads->GetPlaza(i);
@@ -276,8 +279,10 @@ bool DomainAI::BuildBuilding(int id)
 			}
 
 			// A little teeny tiny effort to group natural and industrial buildings.
+			// Also, keep kiosks away from guardposts. Too many MOBs hanging around.
 			if (bd.zone) {
 				IString avoid = (bd.zone == BuildData::ZONE_INDUSTRIAL) ? ISC::natural : ISC::industrial;
+
 				Rectangle2I conflictBounds = zone.fullBounds;
 				conflictBounds.Outset(3);
 				CChitArray conflict;
@@ -286,7 +291,16 @@ bool DomainAI::BuildBuilding(int id)
 
 				for (int i = 0; i < conflict.Size(); ++i) {
 					const GameItem* item = conflict[i]->GetItem();
-					if (item && item->keyValues.GetIString(ISC::zone) == avoid) {
+					if (!item) continue;
+					if (item->keyValues.GetIString(ISC::zone) == avoid) {
+						hasConflict = true;
+						break;
+					}
+					if (item->IName() == ISC::guardpost && strstr(bd.structure.safe_str(), "kiosk") == 0) {
+						hasConflict = true;
+						break;
+					}
+					if (bd.structure == ISC::guardpost && strstr(item->Name(), "kiosk") == 0) {
 						hasConflict = true;
 						break;
 					}
@@ -411,7 +425,8 @@ bool DomainAI::ClearDisconnected()
 	Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
 	Context()->chitBag->QueryBuilding(IString(), inner, &arr);
 
-	GL_FOR_EACH_BEGIN(Chit*, chit, arr) {
+	for (int i = 0; i < arr.Size(); ++i) {
+		Chit* chit = arr[i];
 		MapSpatialComponent* msc = chit->GetSpatialComponent()->ToMapSpatialComponent();
 		if (msc && chit->GetItem()) {
 			if (!roads->IsOnRoad(msc, chit->GetItem()->IName() == ISC::farm)) {
@@ -419,7 +434,7 @@ bool DomainAI::ClearDisconnected()
 				return true;
 			}
 		}
-	} GL_FOR_EACH_END
+	}
 	return false;
 }
 
@@ -478,8 +493,10 @@ bool DomainAI::ClearRoadsAndPorches()
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
 				if (wg.IsLand()) {
 					if (!wg.Pave() || wg.Plant() || wg.RockHeight()) {
-						workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
-						issued = true;
+						if (!workQueue->HasJobAt(pos)) {
+							workQueue->AddAction(pos, BuildScript::PAVE, 0, pave);
+							issued = true;
+						}
 					}
 				}
 			}
@@ -493,7 +510,8 @@ int DomainAI::DoTick(U32 delta)
 {
 	PROFILE_FUNC();
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial || !parentChit->GetItem()) return ticker.Next();
+	if (!spatial || !parentChit->GetItem() || parentChit->Destroyed() ) 
+		return ticker.Next();
 
 	if (ticker.Delta(delta)) {
 		Vector2I sector = { 0, 0 };
@@ -506,14 +524,17 @@ int DomainAI::DoTick(U32 delta)
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
 		int gold = parentChit->GetItem()->wallet.Gold();
-		for (int i = 0; i < cs->NumCitizens(); ++i) {
-			Chit* citizen = cs->CitizenAtIndex(i);
-			if (citizen->GetItem()) {
-				int citizenGold = citizen->GetItem()->wallet.Gold();
+		CChitArray citizens;
+		cs->Citizens(&citizens);
+
+		for (int i = 0; i < citizens.Size(); ++i) {
+			Chit* c = citizens[i];
+			if (c->GetItem()) {
+				int citizenGold = c->GetItem()->wallet.Gold();
 				if (citizenGold > gold / 4) {
 					int tax = (citizenGold - gold / 4) / 4;	// brutal taxation every 10s. But keep core funded,	or we all go down together.
 					if (tax > 0) {
-						parentChit->GetWallet()->Deposit( &citizen->GetItem()->wallet, tax);
+						parentChit->GetWallet()->Deposit(&c->GetItem()->wallet, tax);
 					}
 				}
 			}
@@ -546,6 +567,133 @@ float DomainAI::CalcFarmEfficiency(const grinliz::Vector2I& sector)
 }
 
 
+void DomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	Rectangle2I sectorBounds = SectorBounds(sector);
+
+	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+	float eff = CalcFarmEfficiency(sector);
+
+	CChitArray bars;
+	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
+	int nElixir = 0;
+	for (int i = 0; i < bars.Size(); ++i) {
+		ItemComponent* ic = bars[i]->GetItemComponent();
+		if (ic) {
+			nElixir += ic->NumCarriedItems(ISC::elixir);
+		}
+	}
+
+	do {
+		if (BuyWorkers()) break;		
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
+		if (BuildPlaza()) break;
+
+		if (DoSpecialBuild(AFTER_ROADS)) break;
+		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
+		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
+		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
+		if (DoSpecialBuild(AFTER_BAR)) break;
+
+		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
+		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
+
+		if (eff < 1 && BuildFarm()) break;
+
+		// Check efficiency to curtail over-building.
+		int wantedCitizens = CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]);
+
+		if (eff >= 1 && nElixir) {
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::GUARDPOST] < 1 && BuildBuilding(BuildScript::GUARDPOST)) break;
+			if (eff < 2 && BuildFarm()) break;
+			
+			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
+			if (arr[BuildScript::KIOSK_C] < 1 && BuildBuilding(BuildScript::KIOSK_C)) break;
+			if (arr[BuildScript::KIOSK_M] < 1 && BuildBuilding(BuildScript::KIOSK_M)) break;
+			if (arr[BuildScript::KIOSK_N] < 1 && BuildBuilding(BuildScript::KIOSK_N)) break;
+			if (arr[BuildScript::KIOSK_S] < 1 && BuildBuilding(BuildScript::KIOSK_S)) break;
+		}
+		if (eff >= 2 && nElixir > 4 && arr[BuildScript::TEMPLE] ) {
+			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
+			if (arr[BuildScript::TEMPLE] < templeCap && BuildBuilding(BuildScript::TEMPLE)) break;
+			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
+			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
+			if (BuildRoad()) break;	// will return true until all roads are built.
+		}
+	} while (false);
+}
+
+
+void DeityDomainAI::Serialize(XStream* xs)
+{
+	this->BeginSerialize(xs, Name());
+	super::Serialize(xs);
+	this->EndSerialize(xs);
+}
+
+
+void DeityDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
+
+	Vector2I c = sectorData.core;
+	Rectangle2I plaza0;
+	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
+	roads->AddPlaza(plaza0);
+}
+
+
+void DeityDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}
+
+
+int DeityDomainAI::DoTick(U32 delta)
+{
+	// Skim off the reserve bank:
+	GameItem* item = parentChit->GetItem();
+	if (!parentChit->Destroyed() && item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
+		item->wallet.Deposit(ReserveBank::GetWallet(), 100);
+	}
+
+	return super::DoTick(delta);
+}
+
+
+void DeityDomainAI::DoBuild()
+{
+	Vector2I sector = { 0, 0 };
+	CoreScript* cs = 0;
+	WorkQueue* workQueue = 0;
+	int pave = 0;
+	if (!Preamble(&sector, &cs, &workQueue, &pave))
+		return;
+
+	do {
+		if (BuyWorkers()) break;
+		if (ClearDisconnected()) break;
+		if (ClearRoadsAndPorches()) break;
+		if (BuildPlaza()) break;
+		if (BuildRoad()) break;	// will return true until all roads are built.
+	} while (false);
+}
+
 
 TrollDomainAI::TrollDomainAI()
 {
@@ -573,7 +721,7 @@ void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
 	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0;
@@ -634,20 +782,15 @@ int TrollDomainAI::DoTick(U32 delta)
 			}
 
 			TransactAmt cost;
-			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed);
+			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed, parentChit->Team());
 			if (item) {
-				if (ReserveBank::GetWallet()->CanWithdraw(cost)) {
+				GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
+				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
+				market->GetItemComponent()->AddToInventory(item);
 
-					item->wallet.Deposit(ReserveBank::GetWallet(), cost);
-					market->GetItemComponent()->AddToInventory(item);
-
-					// Mark this item as important with a destroyMsg:
-					item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
-										 Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
-				}
-				else {
-					delete item;
-				}
+				// Mark this item as important with a destroyMsg:
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
+										Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
 			}
 		}
 	}
@@ -705,56 +848,19 @@ void GobDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0;
 	plaza0.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
 	roads->AddPlaza(plaza0);
+	templeCap = MAX_GOBMEN_TEMPLES;
 }
 
 
 void GobDomainAI::OnRemove()
 {
 	return super::OnRemove();
-}
-
-void GobDomainAI::DoBuild()
-{
-	Vector2I sector = { 0, 0 };
-	CoreScript* cs = 0;
-	WorkQueue* workQueue = 0;
-	int pave = 0;
-	if (!Preamble(&sector, &cs, &workQueue, &pave))
-		return;
-
-	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
-	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-
-	float eff = CalcFarmEfficiency(sector);
-
-	do {
-		if (BuyWorkers()) break;
-		if (ClearDisconnected()) break;
-		if (ClearRoadsAndPorches()) break;
-		if (BuildPlaza()) break;
-		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
-		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
-		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
-		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
-		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
-		if (eff < 2.0f && BuildFarm()) break;
-		if (eff > 1.5f) {
-			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		}
-		if (eff >= 2) {
-			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
-			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
-			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-		}
-	} while (false);
 }
 
 
@@ -782,7 +888,7 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 
 	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
-	const SectorData& sectorData = Context()->worldMap->GetSector(sector);
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0, plaza1;
@@ -791,6 +897,7 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 
 	roads->AddPlaza(plaza0);
 	roads->AddPlaza(plaza1);
+	templeCap = MAX_KAMAKIRI_TEMPLES;
 }
 
 
@@ -799,58 +906,96 @@ void KamakiriDomainAI::OnRemove()
 	return super::OnRemove();
 }
 
-void KamakiriDomainAI::DoBuild()
+
+bool KamakiriDomainAI::DoSpecialBuild(int stage)
 {
-	Vector2I sector = { 0, 0 };
-	CoreScript* cs = 0;
-	WorkQueue* workQueue = 0;
-	int pave = 0;
-	if (!Preamble(&sector, &cs, &workQueue, &pave))
-		return;
+	if (stage == AFTER_BAR) {
+		Vector2I sector = { 0, 0 };
+		CoreScript* cs = 0;
+		WorkQueue* workQueue = 0;
+		int pave = 0;
+		if (!Preamble(&sector, &cs, &workQueue, &pave))
+			return false;
 
-	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
-	Rectangle2I sectorBounds = SectorBounds(sector);
+		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+		Rectangle2I sectorBounds = SectorBounds(sector);
+		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 
-	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	float eff = CalcFarmEfficiency(sector);
+		if (arr[BuildScript::KAMAKIRI_STATUE] < 4) {
+			return BuildBuilding(BuildScript::KAMAKIRI_STATUE);
+		}
+	}
+	return false;
+}
 
-	CChitArray bars;
-	Context()->chitBag->QueryBuilding(ISC::bar, sectorBounds, &bars);
-	int nElixir = 0;
-	for (int i = 0; i < bars.Size(); ++i) {
-		ItemComponent* ic = bars[i]->GetItemComponent();
-		if (ic) {
-			nElixir += ic->NumCarriedItems(ISC::elixir);
+
+HumanDomainAI::HumanDomainAI()
+{
+
+}
+
+
+HumanDomainAI::~HumanDomainAI()
+{
+
+}
+
+void HumanDomainAI::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	this->EndSerialize( xs );
+}
+
+
+void HumanDomainAI::OnAdd(Chit* chit, bool initialize)
+{
+	super::OnAdd(chit, initialize);
+
+	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
+	Vector2I c = sectorData.core;
+	Rectangle2I innerBounds = InnerSectorBounds(sector);
+
+	// Humans use up to 8 roads - the diagonals as well
+	// as the cardinals. Reach out and see which are valid.
+	static const int D = SECTOR_SIZE / 2 - 4;
+	Vector2I altRoad[4] = {
+		{ c.x + D, c.y + D }, { c.x - D, c.y + D }, { c.x + D, c.y - D }, { c.x - D, c.y - D }
+	};
+
+	CDynArray<Vector2I> road;
+	for (int i = 0; i < 4; ++i) {
+		const WorldGrid& endWG = Context()->worldMap->GetWorldGrid(altRoad[i]);
+		if (innerBounds.Contains(altRoad[i]) && endWG.IsLand()) {
+			Vector2I it = altRoad[i];
+			road.Clear();
+			bool valid = true;
+			while (it != sectorData.core) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it);
+				if (wg.IsPort()) {
+					valid = false;
+				}
+				road.Push(it);
+				it = it + wg.Path(0);
+			}
+			if (valid) {
+				// Road goes from corner to core.
+				// Hitting a port on the way invalidates it.
+				road.Reverse();
+				roads->AddRoad(road.Mem(), road.Size());
+			}
 		}
 	}
 
-	do {
-		if (BuyWorkers()) break;		
-		if (ClearDisconnected()) break;
-		if (ClearRoadsAndPorches()) break;
-		if (BuildPlaza()) break;
-		if (arr[BuildScript::SLEEPTUBE] < 4 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-		if (arr[BuildScript::FARM] == 0 && BuildFarm()) break;
-		if (arr[BuildScript::DISTILLERY] < 1 && BuildBuilding(BuildScript::DISTILLERY)) break;
-		if (arr[BuildScript::BAR] < 1 && BuildBuilding(BuildScript::BAR)) break;
-		if (arr[BuildScript::KAMAKIRI_STATUE] < 4 && BuildBuilding(BuildScript::KAMAKIRI_STATUE)) break;
-		if (arr[BuildScript::MARKET] < 1 && BuildBuilding(BuildScript::MARKET)) break;
-		if (arr[BuildScript::FORGE] < 1 && BuildBuilding(BuildScript::FORGE)) break;
-		if (eff < 2.0f && BuildFarm()) break;
+	Rectangle2I plaza;
+	plaza.FromPair(c.x - 2, c.y - 2, c.x + 2, c.y + 2);
 
-		// Check efficiency to curtail over-building.
-		if (eff > 1 && nElixir > 4) {
-			if (arr[BuildScript::SLEEPTUBE] < 6 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-			if (arr[BuildScript::GUARDPOST] < 2 && BuildBuilding(BuildScript::GUARDPOST)) break;
-		}
-		if (eff >= 2 && nElixir > 4) {
-			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
-			if (arr[BuildScript::SLEEPTUBE] < 8 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
-			if (arr[BuildScript::SLEEPTUBE] < 12 && BuildBuilding(BuildScript::SLEEPTUBE)) break;
-			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-			if (BuildRoad()) break;	// will return true until all roads are built.
-		}
-	} while (false);
+	roads->AddPlaza(plaza);
 }
 
+
+void HumanDomainAI::OnRemove()
+{
+	return super::OnRemove();
+}

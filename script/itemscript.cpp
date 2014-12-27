@@ -302,8 +302,25 @@ ItemDB* StackedSingleton< ItemDB >::instance = 0;
 void ItemDB::Serialize( XStream* xs ) 
 {
 	XarcOpen( xs, "ItemDB" );
-	// Don't serialize map! It is created/destroyed with GameItems
-	XARC_SER_CARRAY( xs, itemHistory );
+	// Don't serialize 'itemMap'. It is for active
+	// game items and is created on demand.
+	if (xs->Saving()) {
+		int size = itemRegistry.Size();
+		XARC_SER_KEY(xs, "itemRegistry.size", size);
+		for (int i = 0; i < itemRegistry.Size(); ++i) {
+			ItemHistory h = itemRegistry.GetValue(i);
+			h.Serialize(xs);
+		}
+	}
+	else {
+		int size = 0;
+		XARC_SER_KEY(xs, "itemRegistry.size", size);
+		for (int i = 0; i < size; ++i) {
+			ItemHistory h;
+			h.Serialize(xs);
+			itemRegistry.Add(h.itemID, h);
+		}
+	}
 	XarcClose( xs );
 }
 
@@ -316,7 +333,7 @@ void ItemDB::Add( const GameItem* gi )
 	if ( gi->Significant() ) {
 		ItemHistory h;
 		h.Set( gi );
-		itemHistory.Add( h );
+		itemRegistry.Add(h.itemID, h);
 	}
 
 	// Current
@@ -333,7 +350,7 @@ void ItemDB::Remove( const GameItem* gi )
 	if ( gi->Significant() ) {
 		ItemHistory h;
 		h.Set( gi );
-		itemHistory.Add( h );
+		itemRegistry.Add(h.itemID, h);
 	}
 
 	// Current:
@@ -349,26 +366,20 @@ void ItemDB::Update( const GameItem* gi )
 	if ( gi->Significant() ) {
 		ItemHistory h;
 		h.Set( gi );
-		itemHistory.Add( h );
+		itemRegistry.Add(h.itemID, h);
 	}
 }
 
 
-const GameItem*	ItemDB::Find( int id )
+const GameItem*	ItemDB::Active( int id )
 {
 	const GameItem* gi = 0;
 	itemMap.Query( id, &gi );
 	return gi;
 }
 
-
-const ItemHistory* ItemDB::History( int id )
+bool ItemDB::Registry( int id, ItemHistory* h )
 {
-	ItemHistory key;
-	key.itemID = id;
-
-	const ItemHistory* h = 0;
-	int index = itemHistory.BSearch( key );
-	return index >= 0 ? &itemHistory[index] : 0;
+	return itemRegistry.Query(id, h);
 }
 

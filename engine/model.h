@@ -398,7 +398,8 @@ public:
 	void CalcTargetSize( float* width, float* height ) const;
 
 	// Returns grinliz::INTERSECT or grinliz::REJECT
-	int IntersectRay(	const grinliz::Vector3F& origin, 
+	int IntersectRay(	bool testTriangles,					// true: test each triangle, false: bounding box only
+						const grinliz::Vector3F& origin, 
 						const grinliz::Vector3F& dir,
 						grinliz::Vector3F* intersect ) const;
 

@@ -104,7 +104,9 @@ namespace gamedb
 		ATTRIBUTE_FLOAT,
 		ATTRIBUTE_FLOAT_ARRAY,	// saves as DATA
 		ATTRIBUTE_STRING,
-		ATTRIBUTE_BOOL
+		ATTRIBUTE_BOOL,
+
+		ATTRIBUTE_COUNT
 	};
 	struct HeaderStruct	
 	{
@@ -127,10 +129,16 @@ namespace gamedb
 	struct AttribStruct
 	{
 		void SetKeyType( int key, int type ) {
-			keyType = (key&0x00ffffff) | (type<<24);
+			GLASSERT(type >= ATTRIBUTE_INVALID && type < ATTRIBUTE_COUNT);
+			GLASSERT(key >= 0 && key < 0x01000000);
+			keyType = (key & 0x00ffffff) | (type<<24);
 		}
+		U32 Type() const { return keyType >> 24; }
+		U32 Key() const { return keyType & 0x00ffffff; }
 
+	private:
 		U32	keyType;		// lower 24 bits in name of the key, high 8 bits is type
+	public:
 		union {
 			U32 dataID;
 			int intVal;

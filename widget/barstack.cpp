@@ -4,26 +4,36 @@
 
 using namespace gamui;
 
-static const float HEIGHT_FRACTION = 0.75f;
-static const float BAR_ALPHA = 0.80f;
-
 BarStackWidget::BarStackWidget()
 {
 	height = deltaY = 0;
-	nBars = 0;
 }
 
 
-void BarStackWidget::Init(gamui::Gamui* g, int _nBars)
+BarStackWidget::~BarStackWidget()
+{
+	Deinit();
+}
+
+
+void BarStackWidget::Deinit()
+{
+	while (!barArr.Empty()) {
+		delete barArr.Pop();
+	}
+	visibleArr.Clear();
+}
+
+void BarStackWidget::Init(gamui::Gamui* g, int nHPBars, int nBars)
 {
 	GLASSERT(height == 0);
 	GLASSERT(deltaY == 0);
-	GLASSERT(_nBars <= MAX_BARS);
-	nBars = _nBars;
 
-	float rowHeight = LAYOUT_SIZE_Y * 0.5f;
-	deltaY = rowHeight;
-	height = deltaY * HEIGHT_FRACTION;
+	for (int i = 0; i < nHPBars; ++i) {
+		HPBar* hpBar = new HPBar();
+		hpBar->Init(g);
+		barArr.Push(hpBar);
+	}
 
 	RenderAtom gray  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
@@ -32,59 +42,40 @@ void BarStackWidget::Init(gamui::Gamui* g, int _nBars)
 	blue.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
 
 	for (int i = 0; i < nBars; ++i) {
-		barArr[i].Init(g, 2, blue, gray);
-		visibleArr[i] = true;
-		barArr[i].SetSize(height*10.0f, height);
+		DigitalBar* bar = new DigitalBar();
+		bar->Init(g, blue, gray);
+		barArr.Push(bar);
+	}
+
+	float rowHeight = LAYOUT_SIZE_Y * 0.5f;
+	deltaY = rowHeight;
+	height = deltaY * LAYOUT_BAR_HEIGHT_FRACTION;
+
+	for (int i = 0; i < barArr.Size(); ++i) {
+		visibleArr.Push(true);
+		barArr[i]->SetSize(height*10.0f, height);
 	}
 }
 
 
 void BarStackWidget::SetSize(float w, float /*h*/ )
 {
-	for (int i = 0; i < nBars; ++i) {
-		barArr[i].SetSize(w, height);
+	for (int i = 0; i < barArr.Size(); ++i) {
+		barArr[i]->SetSize(w, height);
 	}	
 }
 
 void BarStackWidget::SetPos(float x, float y)
 {
-	for (int i = 0; i < nBars; ++i) {
-		barArr[i].SetPos(x, y + float(i) * deltaY);
+	for (int i = 0; i < barArr.Size(); ++i) {
+		barArr[i]->SetPos(x, y + float(i) * deltaY);
 	}
 }
 
 
 void BarStackWidget::SetVisible(bool vis)
 {
-	for (int i = 0; i < nBars; ++i) {
-		barArr[i].SetVisible(vis && visibleArr[i]);
+	for (int i = 0; i < barArr.Size(); ++i) {
+		barArr[i]->SetVisible(vis && visibleArr[i]);
 	}
 }
-
-
-void BarStackWidget::SetBarVisible(int i, bool vis)
-{
-	visibleArr[i] = vis;
-	barArr[i].SetVisible(vis && visibleArr[i]);
-}
-
-
-void BarStackWidget::SetBarRatio(int i, float ratio)
-{
-	barArr[i].SetRange(ratio);
-}
-
-
-void BarStackWidget::SetBarColor(int i, const gamui::RenderAtom& atom)
-{
-	RenderAtom a = atom;
-	a.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
-	barArr[i].SetLowerAtom(a);
-}
-
-
-void BarStackWidget::SetBarText(int i, const char* str)
-{
-	barArr[i].SetText(str);
-}
-

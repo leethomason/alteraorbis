@@ -93,10 +93,11 @@ public:
 	void Serialize( XStream* xs );
 
 	bool CanWithdraw(const Wallet& amt) const {
-		if (amt.Gold() > Gold()) return false;
+		if (amt.Gold() && amt.Gold() > Gold()) 
+			return false;
 
 		for (int i = 0; i < NUM_CRYSTAL_TYPES; i++) {
-			if (amt.Crystal(i) > Crystal(i)) {
+			if (amt.Crystal(i) && amt.Crystal(i) > Crystal(i)) {
 				return false;
 			}
 		}

@@ -51,7 +51,7 @@ public:
 	void Buy(Wallet* src, const int* crystals);
 
 	static ReserveBank* Instance() { return instance; }
-	static Wallet* GetWallet() { return &Instance()->wallet; }
+	static Wallet* GetWallet() { return instance ? &Instance()->wallet : 0; }
 
 private:
 	void Withdraw(Wallet* dst, int gold, const int* crystal);

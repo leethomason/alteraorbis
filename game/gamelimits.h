@@ -45,10 +45,11 @@ static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.
 // Part of implenmentation in AIComponent.cpp
-static const int TECH_REPELS_LESSER = 1;	// repels *some* but not all lesser
-static const int TECH_REPELS_GREATER = 2;
-static const int TECH_ATTRACTS_LESSER = 3;
-static const int TECH_ATTRACTS_GREATER = 4;
+static const int TEMPLES_REPELS_LESSER = 0;	// repels *some* but not all lesser
+static const int TEMPLES_REPELS_GREATER = 1;
+
+// In terms of current tech:
+static const float TECH_ATTRACTS_GREATER = 3.2f;
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;
@@ -93,12 +94,21 @@ static const int MAX_BUILDING_SIZE	= 2;
 static const U32 MINUTES_IN_AGE		= 100;
 static const U32 AGE_IN_MSEC		= MINUTES_IN_AGE * 60 * 1000;
 
-static const float MIN_EFFECTIVE_RANGE = 2.0f;
-static const float MAX_EFFECTIVE_RANGE = 25.0f;	
+static const float MIN_EFFECTIVE_RANGE	= 2.0f;
+static const float MAX_EFFECTIVE_RANGE	= 25.0f;	
 
-static const int MODEL_USER		= (1<<16);				// from model.h
+static const int MODEL_USER				= (1<<16);				// from model.h
 static const int MODEL_CLICK_THROUGH	= (MODEL_USER<<1);
 static const int INVERTORY_SLOTS		= 15;
+
+static const int MAX_SQUADS				= 4;
+static const int CITIZEN_BASE			= 8;		// Base # of citizens before squads form
+static const int SQUAD_SIZE				= 4;
+static const int MAX_TEMPLES			= 4;		// # that do something; each temple is a squad
+// WARNING: needs to equal or less than size of the CChitArray
+static const int MAX_CITIZENS			= CITIZEN_BASE + SQUAD_SIZE * MAX_SQUADS;	
+static const int MAX_GOBMEN_TEMPLES		= 3;
+static const int MAX_KAMAKIRI_TEMPLES	= 2;
 
 // Debugging values:
 static const float ROTATION_LIMIT	= 45.0f;

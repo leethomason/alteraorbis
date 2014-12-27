@@ -42,7 +42,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0, 0 );
 	const GameItem* mainItem = data->itemComponent->GetItem(0);
 	faceWidget.SetFace( &uiRenderer, mainItem );
-	if (mainItem->keyValues.GetIString(ISC::mob) != ISC::denizen) {
+	if (mainItem->keyValues.GetIString(ISC::mob).empty()) {
 		faceWidget.SetVisible(false);
 	}
 
@@ -377,8 +377,10 @@ void CharacterScene::DeActivate()
 {
 	if ((data->IsExchange() || data->IsMarket() ) && ReserveBank::Instance()) {
 		// Move all the gold to the reserve
+		// BUT NOT crystal. Crystal stays in the exchange.
+		// Markets shouldn't collect crystal.
 		Wallet* w = &data->storageIC->GetItem()->wallet;
-		ReserveBank::Instance()->wallet.Deposit(w, w->Gold(), w->Crystal());
+		ReserveBank::Instance()->wallet.Deposit(w, w->Gold());
 	}
 }
 

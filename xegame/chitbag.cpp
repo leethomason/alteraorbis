@@ -79,7 +79,7 @@ void ChitBag::Serialize(XStream* xs)
 
 	if (xs->Saving()) {
 		XarcOpen(xs, "Chits");
-		for (int i = 0; i < chitID.NumValues(); ++i) {
+		for (int i = 0; i < chitID.Size(); ++i) {
 			Chit* chit = chitID.GetValue(i);
 			XarcOpen(xs, "id");
 			xs->Saving()->Set("id", chit->ID());

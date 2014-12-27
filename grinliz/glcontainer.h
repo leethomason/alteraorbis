@@ -184,6 +184,25 @@ public:
 
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
+	bool operator==(const CDynArray<T, SEM, KCOMPARE>& rhs) const {
+		bool match = false;
+		if (this->Size() == rhs.Size()) {
+			match = true;
+			for (int i = 0; i < Size(); ++i) {
+				if ((*this)[i] == rhs[i]) {
+					// all good
+				}
+				else {
+					match = false;
+					break;
+				}
+			}
+		}
+		return match;
+	}
+
+	const T& First() const { GLASSERT(size); return mem[0]; }
+	const T& Last() const { GLASSERT(size); return mem[size - 1]; }
 
 	void Push( const T& t ) {
 		EnsureCap( size+1 );
@@ -305,7 +324,6 @@ public:
 	void Sort() { grinliz::Sort<T, CompValue>(mem, size); }
 
 	// Binary Search: array must be sorted!
-	// near: an optional parameter that returns something near an insertion point.
 	int BSearch( const T& t ) const {
 		int low = 0;
 		int high = Size();
@@ -317,8 +335,13 @@ public:
 			else
 				high = mid; 
 		}
-		if ((low < Size()) && KCOMPARE::Equal(mem[low], t))
+		if ((low < Size()) && KCOMPARE::Equal(mem[low], t)) {
+			// if multiple matches, return the first.
+			while (low && KCOMPARE::Equal(mem[low - 1], t)) {
+				--low;
+			}
 			return low;
+		}
 
 		return -1;
 	}
@@ -338,28 +361,33 @@ protected:
 };
 
 
+/*
+	Sorted Array
+	Does support repeated keys. (Unlike hash table.)
+*/
 template < class T, class SEM=ValueSem, class KCOMPARE=CompValue >
 class SortedDynArray : public CDynArray< T, SEM, KCOMPARE >
 {
 public:
 	void Add( const T& t ) {
-		int index = BSearch( t );
+		EnsureCap( size+1 );
 
-		if ( index >= 0 ) {
-			mem[index] = t;
+		int i = size;
+		while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
+			mem[i] = mem[i-1];
+			--i;
 		}
-		else {
-			EnsureCap( size+1 );
+		mem[i] = t;
+		++size;
+		++nAlloc;
 
-			int i = size;
-			while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
-				mem[i] = mem[i-1];
-				--i;
-			}
-			mem[i] = t;
-			++size;
-			++nAlloc;
+#ifdef DEBUG
+		for (int i = 1; i < size; ++i) {
+			// Use the !, swap the operators, becomes
+			// 'greater than or equal to'
+			GLASSERT(!KCOMPARE::Less(mem[i], mem[i-1]));
 		}
+#endif
 	}
 };
 
@@ -479,50 +507,6 @@ private:
 	int size;
 };
 
- // 'auto' in a #define. could be a lamba? or clean up? not sure if C11 is going to give me trouble.
-#define GL_ARRAY_FILTER( arr, f ) {		\
-	int _k_ = 0;						\
-	while (_k_ < arr.Size()) {			\
-		auto& ele = arr[_k_];			\
-		if (f) {						\
-			++_k_;						\
-		}								\
-		else {							\
-			arr.SwapRemove(_k_);		\
-		}								\
-	}									\
-}
-
-
-#define GL_ARRAY_FILTER_ORDERED( arr, f ) {		\
-	int _k_ = 0;						\
-	while (_k_ < arr.Size()) {			\
-		auto& ele = arr[_k_];			\
-		if (f) {						\
-			++_k_;						\
-		}								\
-		else {							\
-			arr.Remove(_k_);			\
-		}								\
-	}									\
-}
-
-/*	Tom Forsyth's foreach is amazing, and I learned something about programming from studying it.
-	Since all the variables declared in the 'for' have to be "pointer variants" of the same type,
-	it's tricky to get right. Also the functional assert, while cool, is a little inconvenient.
-
-	I don't claim this is better, but some pros:
-	- Much less fidly about const, type, and references
-	- The type T can be const if the list isn't.
-	- There's only one variant: make T a pointer, reference, or value as appropriate
-	- still debug checks!
-
-	Con:
-	- nastier syntax
-*/
-
-#define GL_FOR_EACH_BEGIN(T, ref, list ) { const T const * first = list.Mem(); const T const* last = list.End(); for(int i=0; i<list.Size(); ++i) { GLASSERT(first == list.Mem()); GLASSERT(last == list.End()); T ref = list[i];
-#define GL_FOR_EACH_END }}
 
 class CompCharPtr {
 public:
@@ -632,10 +616,9 @@ public:
 	}
 
 	bool Empty() const		{ return nItems == 0; }
+	int Size() const		{ return nItems; }
 
-	int NumValues() const	{ return nItems; }
-
-	V GetValue( int i ) {
+	const V& GetValue( int i ) {
 		// Create a cache of the values, so they can be a true array.
 		if ( values.Empty() ) {
 			for( int i=0; i<nBuckets; ++i ) {
@@ -646,6 +629,13 @@ public:
 		}
 		GLASSERT( values.Size() == nItems );
 		return values[i].value;
+	}
+
+	const K& GetKey(int i) {
+		if (values.Empty()) {
+			GetValue(i);
+		}
+		return values[i].key;
 	}
 
 private:

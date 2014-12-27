@@ -6,20 +6,17 @@
 #include "../script/corescript.h"
 #include "../grinliz/glrandom.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/spatialcomponent.h"
 
 using namespace grinliz;
 
-void VisitorData::Serialize( XStream* xs )
+void VisitorData::Serialize(XStream* xs)
 {
-	XarcOpen( xs, "VisitorData" );
-	XARC_SER( xs, id );
-	XARC_SER( xs, kioskTime );
-	XARC_SER_ARR( xs, wants, NUM_VISITS );
-	XARC_SER( xs, nWants );
-	XARC_SER( xs, nVisits );
-	XARC_SER( xs, doneWith );
-	XARC_SER_CARRAY( xs, memoryArr );
-	XarcClose( xs );
+	XarcOpen(xs, "VisitorData");
+	XARC_SER(xs, id);
+	XARC_SER(xs, kioskTime);
+	XARC_SER(xs, want);
+	XarcClose(xs);
 }
 
 
@@ -27,10 +24,10 @@ VisitorData::VisitorData()
 {
 	id = 0;
 	kioskTime = 0;
-	for( int i=0; i<NUM_VISITS; ++i ) wants[i] = 0;
 }
 
 
+/*
 void VisitorData::Memory::Serialize( XStream* xs ) 
 {
 	XarcOpen( xs, "Memory" );
@@ -39,7 +36,7 @@ void VisitorData::Memory::Serialize( XStream* xs )
 	XARC_SER( xs, rating );
 	XarcClose( xs );
 }
-
+*/
 
 
 Visitors* Visitors::instance = 0;
@@ -48,11 +45,8 @@ Visitors::Visitors()
 {
 	GLASSERT( instance == 0 );
 	instance = this;
-	Random random;
 	for( int i=0; i<NUM_VISITORS; ++i ) {
-		for( int k=0; k<VisitorData::NUM_VISITS; ++k ) {
-			visitorData[i].wants[k] = random.Rand(VisitorData::NUM_KIOSK_TYPES);
-		}
+		visitorData[i].want = i % VisitorData::NUM_KIOSK_TYPES;
 	}
 }
 
@@ -82,67 +76,25 @@ VisitorData* Visitors::Get( int index )
 }
 
 
-SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* chitBag )
+SectorPort Visitors::ChooseDestination(int index, const Web& web, ChitBag* chitBag, WorldMap* map )
 {
 	GLASSERT( instance );
 	GLASSERT( index >=0 && index <NUM_VISITORS );
-	Vector2I sector = { 0, 0 };
-	int kioskType = visitorData[index].CurrentKioskWantID();
-	
-	if ( random.Rand(3)) {
-		Random notRandom( index );
+	VisitorData* visitor = &visitorData[index];
+	Chit* visitorChit = chitBag->GetChit(visitor->id);
 
-		grinliz::CArray< VisitorData::Memory, VisitorData::MEMORY*3 > ideas;
-		float score[VisitorData::MEMORY*3];
+	SectorPort sectorPort;
+	if (!visitorChit) return sectorPort;
 
-		int idx[3] = { index, notRandom.Rand( NUM_VISITORS ), notRandom.Rand( NUM_VISITORS ) };
+	Vector2I thisSector = visitorChit->GetSpatialComponent()->GetSector();
+	const Web::Node* node = web.FindNode(thisSector);
+	if (!node || node->adjacent.Empty()) return sectorPort;
 
-		// Push the memory of this object and 2 friends, then
-		// choose one at random based on rating.
-		for( int k=0; k<3; ++k ) {
-			VisitorData* vd = Visitors::Get( idx[k] );
-			for( int i=0; i<vd->memoryArr.Size(); ++i ) {
-				if (    vd->memoryArr[i].kioskType == kioskType
-					 && vd->memoryArr[i].rating > 0 ) 
-				{
-					score[ideas.Size()] = (float)vd->memoryArr[i].rating;
-					ideas.Push( vd->memoryArr[i] );
-				}
-			}
-		}
-		if ( !ideas.Empty() ) {
-			int select = random.Select( score, ideas.Size() );
-			sector = ideas[select].sector;
-		}
-	}
+	int which = random.Rand(node->adjacent.Size());
+	Vector2I sector = node->adjacent[which]->sector;
 
-
-	// Go to a random sector with a core.
-	// I'm not quite sure what the correct # of attempts is.
-	static const int ATTEMPTS = 6;
-	for( int i=0; i<ATTEMPTS; ++i ) {
-		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
-		const SectorData& sd = map->GetSector( sector );
-		CoreScript* cs = CoreScript::GetCore( sector );
-		if ( sd.ports && cs && cs->InUse() ) {
-			break;
-		}
-		sector.Zero();
-	}
-
-	// Go to any random sector.
-	while( sector.IsZero() ) {
-		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
-		const SectorData& sd = map->GetSector( sector );
-		if ( sd.ports ) 
-			break;
-		sector.Zero();
-	}
-
-	GLASSERT( !sector.IsZero() );
-
-	const SectorData& sd = map->GetSector( sector );
-	GLASSERT( sd.ports );
+	const SectorData& sd = map->GetSectorData( sector );
+	if (!sd.ports) return sectorPort;
 
 	int ports[4] = { 1, 2, 4, 8 };
 	int port = 0;
@@ -154,14 +106,13 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 			break;
 		}
 	}
-
-	SectorPort sectorPort;
 	sectorPort.sector = sector;
 	sectorPort.port   = port;
 	return sectorPort;
 }
 
 
+/*
 void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 {
 	bool added = false;
@@ -186,8 +137,9 @@ void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 	++nVisits;
 	doneWith = sector;
 }
+*/
 
-
+/*
 void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
 {
 	++nVisits;
@@ -200,14 +152,11 @@ void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
 		}
 	}
 }
-
+*/
 
 grinliz::IString VisitorData::CurrentKioskWant()
 {
-	if ( nWants >= NUM_VISITS )
-		return IString();
-
-	switch ( wants[nWants] ) {
+	switch ( want ) {
 	case KIOSK_N:	return ISC::kiosk__n;
 	case KIOSK_M:	return ISC::kiosk__m;
 	case KIOSK_C:	return ISC::kiosk__c;

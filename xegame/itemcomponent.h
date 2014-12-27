@@ -69,8 +69,8 @@ public:
 	enum { SELECT_MELEE, SELECT_RANGED};
 	const GameItem* SelectWeapon(int type);
 	const GameItem* QuerySelectWeapon(int type) const;	// queries what will be swapped to, but doesn't swap
-	const RangedWeapon* QuerySelectRanged() const;
-	const MeleeWeapon* QuerySelectMelee() const;
+	const RangedWeapon* QuerySelectRanged() const;		// queries ranged, but doesn't swap
+	const MeleeWeapon* QuerySelectMelee() const;		// queries melee, but doesn't swap
 
 	bool Swap( int i, int j );	// swap 2 slots 
 
@@ -109,7 +109,8 @@ public:
 	void AddCraftXP( int nCrystals );
 
 	// Very crude assessment of the power of this MOB.
-	float PowerRating() const;
+	// If current=true, uses the current HP vs. Total
+	int PowerRating(bool current) const;
 
 	void EnableDebug(bool d) { debugEnabled = d;  }
 
@@ -128,6 +129,7 @@ private:
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
 	int ProcessEffect( int delta);	// look around for environment that effects this itemComp, and apply those effects
+	void InformCensus(bool add);
 
 	// Not serialized:
 	bool		hardpointsModified;

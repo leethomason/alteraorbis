@@ -79,6 +79,8 @@ private:
 		FIRE_CYCLOPS,
 		SHOCK_CYCLOPS,
 		TROLL,
+		GOBMAN,
+		KAMAKIRI,
 		
 		NO_WEAPON,
 		MELEE_WEAPON,
@@ -110,7 +112,6 @@ private:
 		RIGHT_LEVEL,
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
-	gamui::TextLabel label[2];
 	static const ButtonDef buttonDef[NUM_BUTTONS];
 
 	ChitContext context;

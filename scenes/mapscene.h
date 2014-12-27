@@ -3,6 +3,8 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../game/gamelimits.h"
+#include "../game/lumosmath.h"
 
 class LumosGame;
 class LumosChitBag;
@@ -21,11 +23,14 @@ public:
 		view(false)
 	{
 		destSector.Zero();
+		for (int i = 0; i < MAX_SQUADS; ++i) squadDest[i].Zero();
 	}
 
 	LumosChitBag*	lumosChitBag;
 	WorldMap*		worldMap;
 	Chit*			player;
+
+	grinliz::Vector2I	squadDest[MAX_SQUADS];
 
 	// Read/Write	
 	grinliz::Vector2I	destSector;	// fast travel. request going in, destination coming out.
@@ -87,9 +92,12 @@ private:
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
-	gamui::Image		travelMark[2];
+	gamui::Image		travelMark;
+	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
 	gamui::TextLabel	map2Text[MAP2_SIZE2];
+	enum {WHITE_CANVAS, RED_CANVAS, YELLOW_CANVAS, GREEN_CANVAS, NUM_CANVAS};
+	gamui::Canvas		webCanvas[NUM_CANVAS];
 };
 
 #endif // MAP_SCENE_INCLUDED

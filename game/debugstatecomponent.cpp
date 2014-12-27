@@ -54,16 +54,16 @@ void DebugStateComponent::OnAdd( Chit* chit, bool init )
 
 	RenderAtom a1 = LumosGame::CalcPaletteAtom(1, 3);
 	RenderAtom a2 = LumosGame::CalcPaletteAtom(1, 1);
-	healthBar.Init(&map->overlay0, 10, a1, a2);
+	healthBar.Init(&map->overlay0, a1, a2);
 	healthBar.SetVisible(false);
 
 	RenderAtom blue = LumosGame::CalcPaletteAtom(8, 0);
-	ammoBar.Init(&map->overlay0, 10, blue, blue);
+	ammoBar.Init(&map->overlay0, blue, blue);
 	ammoBar.SetVisible(false);
 
 	RenderAtom purple = LumosGame::CalcPaletteAtom(10, 0);
 	RenderAtom grey = LumosGame::CalcPaletteAtom(0, 6);
-	shieldBar.Init(&map->overlay0, 10, purple, grey);
+	shieldBar.Init(&map->overlay0, purple, grey);
 	shieldBar.SetVisible(false);
 
 	map->overlay0.Add( &healthBar );
@@ -115,13 +115,13 @@ int DebugStateComponent::DoTick( U32 delta )
 		float r = 1;
 		if ( weapon->Reloading() ) {
 			r = weapon->ReloadFraction();
-			ammoBar.SetLowerAtom( orange );
-			ammoBar.SetHigherAtom( grey );
+			ammoBar.SetAtom( 0, orange );
+			ammoBar.SetAtom( 1, grey );
 		}
 		else {
 			r = weapon->RoundsFraction();
-			ammoBar.SetLowerAtom( blue );
-			ammoBar.SetHigherAtom( grey );
+			ammoBar.SetAtom( 0, blue );
+			ammoBar.SetAtom( 1, grey );
 		}
 		ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
 	}

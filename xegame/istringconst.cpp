@@ -35,6 +35,7 @@ IString IStringConst::teleport;
 IString IStringConst::construction;
 IString IStringConst::useBuilding;
 IString IStringConst::repair;
+IString IStringConst::human;
 IString IStringConst::humanFemale;
 IString IStringConst::humanMale;
 IString IStringConst::worker;
@@ -107,11 +108,15 @@ IString IStringConst::accuracy;
 IString IStringConst::porch;
 IString IStringConst::circuit;
 IString IStringConst::nameGen;
+IString IStringConst::deity;
 IString IStringConst::Truulga;
 IString IStringConst::kiosk__n;
 IString IStringConst::kiosk__m;
 IString IStringConst::kiosk__c;
 IString IStringConst::kiosk__s;
+IString IStringConst::need__food;
+IString IStringConst::need__energy;
+IString IStringConst::need__fun;
 
 void IStringConst::Init()
 {
@@ -148,6 +153,7 @@ void IStringConst::Init()
 	construction = StringPool::Intern( "construction", true );
 	useBuilding = StringPool::Intern( "useBuilding", true );
 	repair = StringPool::Intern( "repair", true );
+	human = StringPool::Intern( "human", true );
 	humanFemale = StringPool::Intern( "humanFemale", true );
 	humanMale = StringPool::Intern( "humanMale", true );
 	worker = StringPool::Intern( "worker", true );
@@ -220,9 +226,13 @@ void IStringConst::Init()
 	porch = StringPool::Intern( "porch", true );
 	circuit = StringPool::Intern( "circuit", true );
 	nameGen = StringPool::Intern( "nameGen", true );
+	deity = StringPool::Intern( "deity", true );
 	Truulga = StringPool::Intern( "Truulga", true );
 	kiosk__n = StringPool::Intern( "kiosk.n", true );
 	kiosk__m = StringPool::Intern( "kiosk.m", true );
 	kiosk__c = StringPool::Intern( "kiosk.c", true );
 	kiosk__s = StringPool::Intern( "kiosk.s", true );
+	need__food = StringPool::Intern( "need.food", true );
+	need__energy = StringPool::Intern( "need.energy", true );
+	need__fun = StringPool::Intern( "need.fun", true );
 }

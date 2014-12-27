@@ -71,7 +71,7 @@ struct CompAttribute
 	CompAttribute( int k ) : key( k )	{}
 
 	int operator()( const AttribStruct& attrib ) const {
-		return (attrib.keyType&0x0fff) - key;
+		return int(attrib.Key()) - key;
 	}
 };
 
@@ -476,6 +476,7 @@ const Item* Item::ChildAt( int i ) const
 const Item* Item::Child( int i ) const
 {
 	char buffer[32];
+	GLASSERT(i >= 0 && i < 10000);
 	grinliz::SNPrintf( buffer, 32, "%04d", i );
 	return Child( buffer );
 }
@@ -521,7 +522,7 @@ const char* Item::AttributeName( int i ) const
 {
 	const AttribStruct* attrib = AttributePtr( i );
 	// note only uses lower 24 bits
-	U32 key = (attrib->keyType) & 0x0fff;
+	U32 key = attrib->Key();
 
 	const Reader* context = Reader::GetContext( this );
 	return context->GetString( key );
@@ -531,7 +532,7 @@ const char* Item::AttributeName( int i ) const
 int Item::AttributeType( int i ) const
 {
 	const AttribStruct* attrib = AttributePtr( i );
-	U32 type = (attrib->keyType) >> 24;
+	U32 type = attrib->Type();
 	return (int)type;
 }
 

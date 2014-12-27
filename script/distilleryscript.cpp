@@ -68,7 +68,6 @@ int DistilleryScript::DoTick( U32 delta )
 		Vector2I sector = msc->GetSector();
 		Rectangle2I porch = msc->PorchPos();
 		CoreScript* cs = CoreScript::GetCore( sector );
-		GLASSERT(cs);
 		if (!cs) return VERY_LONG_TICK;
 
 		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");

@@ -220,6 +220,7 @@ WItem* WItem::CreateChild( const char* name )
 WItem* WItem::FetchChild( int id )
 {
 	char buffer[32];
+	GLASSERT(id >= 0 && id < 10000);
 	grinliz::SNPrintf( buffer, 32, "%04d", id );
 	return FetchChild( buffer );
 }
@@ -338,6 +339,7 @@ int WItem::FindString( const IString& str, const CDynArray< IString >& stringPoo
 	int index = stringPool.BSearch( str );
 	GLASSERT( index >= 0 );	// should always succeed!
 	GLASSERT( index < stringPool.Size() );
+	GLASSERT(StrEqual(stringPool[index].c_str(), str.c_str()));
 	return index;
 }
 

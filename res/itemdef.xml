@@ -248,7 +248,7 @@
         zone="industrial"
         
 		    need.time="2.0"
-        need.fun="0.8"
+        need.fun="1.0"
         />
 
   <GameItem name="temple"
@@ -335,8 +335,7 @@
         zone="natural"
         
 	      need.time="1.5"
-        need.fun="0.4"
-        need.social="0.2"
+        need.fun="1.0"
         />
 
   <GameItem name="exchange"
@@ -351,7 +350,7 @@
         zone="industrial"
 
         need.time="1.5"
-        need.fun="0.4"
+        need.fun="1.0"
         />
 
   <!-- comlpex needs: gives social if others there, 
@@ -370,8 +369,7 @@
         nameGen="barNames"
         
         need.time="5.0"
-        need.fun="0.2"
-        need.social="0.4"
+        need.fun="0.4"
         need.food="1.0"
         />
 
