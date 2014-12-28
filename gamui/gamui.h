@@ -375,6 +375,9 @@ public:
 	float			GetFocusY();
 
 	void			Transform(Vertex* v, int n) const;
+	float			Transform(float x) const;
+	float			InvTransform(float x) const;
+
 	static const RenderAtom& NullAtom() { return m_nullAtom; }
 
 private:

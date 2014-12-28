@@ -284,17 +284,25 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 {
 	if ( !m_gamui )
 		return;
+
+	/* This routine gets done in physical pixels, not virtual. */
+
 	IGamuiText* iText = m_gamui->GetTextInterface();
-	const int vStart = vertexBuf ? vertexBuf->Size() : 0;
+//	const int vStart = vertexBuf ? vertexBuf->Size() : 0;
 
 	const char* p = m_str;
-	float x = X();
-	float y = Y();
+	const float X0 = floorf(m_gamui->Transform(X()));
+	const float Y0 = floorf(m_gamui->Transform(Y()));
+	float x = X0;
+	float y = Y0;
+	const float tabWidth = m_gamui->Transform(m_tabWidth);
+	const float boundsWidth = m_gamui->Transform(m_boundsWidth);
+	const float boundsHeight = m_gamui->Transform(m_boundsHeight);
 
 	float xmax = x;
 
 	IGamuiText::GlyphMetrics metrics;
-	float height = m_gamui->GetTextHeight();
+	const float height = m_gamui->GetTextHeight();
 	int tab = 0;
 
 	while ( p && *p ) {
@@ -305,7 +313,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		while ( *p == '\n' ) {
 			y += height;
 			tab = 0;
-			x = X();
+			x = X0;
 			++p;
 		}
 		if ( !*p ) break;
@@ -315,14 +323,14 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 			++p;
 			if ( !*p ) break;
 
-			if ( m_tabWidth > 0 ) {
+			if ( tabWidth > 0 ) {
 				++tab;
-				x = X() + float(tab)*m_tabWidth;
+				x = X0 + float(tab)*tabWidth;
 			}
 		}
 
 		// Throw away space after a line break.
-		if ( m_boundsWidth && ( x == X() && y > Y() )) {
+		if ( boundsWidth && ( x == X0 && y > Y0 )) {
 			while ( *p && *p == ' ' ) {
 				++p;
 			}
@@ -332,34 +340,36 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		}
 
 		// If we aren't the first word, do we need to break?
-		if ( m_boundsWidth && (x > X()) && (*p != ' ') ) {
+		if ( boundsWidth && (x > X0) && (*p != ' ') ) {
 			float w = WordWidth( p, iText );
-			if ( x + w > X() + m_boundsWidth ) { 
+			if ( x + w > X0 + boundsWidth ) { 
 				y += height;
-				x = X();
+				x = X0;
 				tab = 0;
 				continue;
 			}
 		}
 
 		// And finally, have we exceeded the y bound?
-		if ( m_boundsHeight && ( y + height >= Y() + m_boundsHeight) ) {
+		if ( boundsHeight && ( y + height >= Y0 + boundsHeight) ) {
 			break;
 		}
 
 		// Everything above is about a word; now we are
 		// committed and can run in a tight loop.
-		//y = round(y); doesn't help - why?
+		y = floorf(y);
 		while( p && *p && *p != '\n' && *p != '\t' ) {
+			x = floorf(x);
+
 			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
 
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 		
-				float x0 = x+metrics.x;
-				float x1 = x+metrics.x+metrics.w;
-				float y0 = y+metrics.y;
-				float y1 = y+metrics.y+metrics.h;
+				float x0 = x + (metrics.x);
+				float x1 = x + (metrics.x + metrics.w);
+				float y0 = y + (metrics.y);
+				float y1 = y + (metrics.y + metrics.h);
 
 				vertex[0].Set( x0, y0, metrics.tx0, metrics.ty0 );
 				vertex[1].Set( x0, y1, metrics.tx0, metrics.ty1 );
@@ -378,12 +388,12 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		}
 	}
 
-	m_width = xmax - X();
-	m_height = y + height - Y();
+	m_width  = m_gamui->InvTransform(xmax - X0);
+	m_height = m_gamui->InvTransform(y + height - Y0);
 
-	if (vertexBuf) {
-		m_gamui->Transform(vertexBuf->Mem() + vStart, vertexBuf->Size() - vStart);
-	}
+//	if (vertexBuf) {
+//		m_gamui->Transform(vertexBuf->Mem() + vStart, vertexBuf->Size() - vStart);
+//	}
 }
 
 
@@ -1726,7 +1736,21 @@ float Gamui::GetFocusY()
 }
 
 
-void Gamui::Transform(Vertex* v, int n) const 
+float Gamui::Transform(float x) const
+{
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	return x * M;
+}
+
+
+float Gamui::InvTransform(float x) const
+{
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	return x / M;
+}
+
+
+void Gamui::Transform(Vertex* v, int n) const
 { 
 	const float M = float(m_physicalHeight) / float(m_virtualHeight);
 	while (n) {

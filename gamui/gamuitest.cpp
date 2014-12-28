@@ -138,7 +138,7 @@ public:
 class TextMetrics : public IGamuiText
 {
 public:
-	virtual void GamuiGlyph( int c, int c1, float height, GlyphMetrics* metric )
+	virtual void GamuiGlyph( int c, int c1, float /*height*/, GlyphMetrics* metric )
 	{
 		if ( c <= 32 || c >= 32+96 ) {
 			c = 32;
@@ -149,13 +149,12 @@ public:
 
 		float tx0 = (float)x / 16.0f;
 		float ty0 = (float)y / 8.0f;
-		float scale = height / 16.f;	// 16 is the intended size.
 
-		metric->advance = 10.f*scale;
-		metric->x = -3.f*scale;
-		metric->w = 16.f*scale;
+		metric->advance = 10.f;
+		metric->x = -3.f;
+		metric->w = 16.f;
 		metric->y = 0;
-		metric->h = 16.f*scale;
+		metric->h = 16.f;
 
 		metric->tx0 = tx0;
 		metric->tx1 = tx0 + (1.f/16.f);
@@ -189,6 +188,7 @@ int main( int argc, char **argv )
 											screenX, screenY,
 											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	SDL_GL_CreateContext( screen );
+	glViewport(0, 0, screenX, screenY);
 
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
@@ -198,9 +198,9 @@ int main( int argc, char **argv )
 	glGenTextures( 1, &textTextureID );
 	glBindTexture( GL_TEXTURE_2D, textTextureID );
 
-	glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
+	//glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_ALPHA, textSurface->w, textSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, textSurface->pixels );
 	SDL_FreeSurface( textSurface );
 	TESTGLERR();

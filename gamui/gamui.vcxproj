@@ -52,6 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\src\alteraorbis\freetype\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,9 +81,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="gamui.h" />
+    <ClInclude Include="gamuifreetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gamui.cpp" />
+    <ClCompile Include="gamuifreetype.cpp" />
     <ClCompile Include="gamuitest.cpp" />
     <ClCompile Include="glew.c" />
   </ItemGroup>
