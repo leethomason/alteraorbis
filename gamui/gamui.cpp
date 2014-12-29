@@ -285,7 +285,9 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	if ( !m_gamui )
 		return;
 
-	/* This routine gets done in physical pixels, not virtual. */
+	/*	This routine gets done in physical pixels, not virtual.
+		Hence all the Transform() calls to convert from virtual to physical.
+	*/
 
 	IGamuiText* iText = m_gamui->GetTextInterface();
 	if (!iText) return;
@@ -390,10 +392,6 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 
 	m_width  = m_gamui->InvTransform(xmax - X0);
 	m_height = m_gamui->InvTransform(y + height - Y0);
-
-//	if (vertexBuf) {
-//		m_gamui->Transform(vertexBuf->Mem() + vStart, vertexBuf->Size() - vStart);
-//	}
 }
 
 

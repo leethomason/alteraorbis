@@ -459,10 +459,18 @@ public:
 		float tx0, ty0, tx1, ty1;	// texture coordinates of the glyph
 	};
 
+	struct FontMetrics {
+		int ascent;
+		int descent;
+		int linespace;				// distance between lines.
+	};
+
 	virtual ~IGamuiText()	{}
-	virtual void GamuiGlyph( int c0, int cPrev,	// character, prev character
+	virtual void GamuiGlyph( int c0, int cPrev,		// character, prev character
 							 float height,
 							 gamui::IGamuiText::GlyphMetrics* metric ) = 0;
+
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric) = 0;
 };
 
 
