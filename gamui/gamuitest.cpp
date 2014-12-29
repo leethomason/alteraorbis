@@ -28,6 +28,8 @@
 #include "gamuifreetype.h"
 #include <stdio.h>
 
+#define BRIDGE 1
+
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
 							printf( "GL ERR=0x%x\n", err );		\
@@ -249,7 +251,10 @@ int main( int argc, char **argv )
 
 	TESTGLERR();
 	Gamui gamui;
-	gamui.Init(&renderer, textAtom, textAtomD, &textMetrics);
+	gamui.Init(&renderer);
+#if BRIDGE == 0
+	gamui.SetText(textAtom, textAtomD, &textMetrics);
+#endif
 	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
 	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
@@ -260,7 +265,22 @@ int main( int argc, char **argv )
 	bridge->Generate(16, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
 	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
 	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
-	SDL_FreeSurface(fontSurface);
+
+#if BRIDGE == 1
+	TESTGLERR();
+	GLuint textTextureID2;
+	glGenTextures(1, &textTextureID2);
+	glBindTexture(GL_TEXTURE_2D, textTextureID2);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
+	TESTGLERR();
+
+	textAtom.textureHandle = (const void*)textTextureID2;
+	textAtomD.textureHandle = textAtom.textureHandle;
+	gamui.SetText(textAtom, textAtomD, bridge);
+#endif
 
 	TextLabel textLabel[2];
 	textLabel[0].Init( &gamui );
@@ -436,6 +456,9 @@ int main( int argc, char **argv )
 		SDL_GL_SwapWindow( screen );
 	}
 	SDL_FreeSurface(textSurface);
+	SDL_FreeSurface(fontSurface);
+
+	gamui.SetText(textAtom, textAtomD, 0);
 	delete bridge; bridge = 0;
 	SDL_Quit();
 	return 0;

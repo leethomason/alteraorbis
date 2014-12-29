@@ -19,7 +19,7 @@ public:
 
 	virtual void GamuiGlyph(int c0, int cPrev,	// character, prev character
 		float height,
-		gamui::IGamuiText::GlyphMetrics* metric)	{}
+		gamui::IGamuiText::GlyphMetrics* metric);
 
 	enum {
 		FIRST_CHAR_CODE = 33,	// space (32) is special
@@ -31,10 +31,18 @@ private:
 	void Blit(uint8_t* target, int scanbytes, const FT_Bitmap& bitmap);
 
 	struct Glyph {
+		// location in texture:
 		int tx, ty;
 		int tw, th;
+
+		// glyph info:
+		int advance;		// in pixels
+		int bitmapLeft;
+		int bitmapTop;
 	};
 
+	int			fontHeight;
+	int			textureWidth, textureHeight;
 	FT_Library  library;
 	FT_Face		face;
 

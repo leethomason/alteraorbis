@@ -1,5 +1,7 @@
 #include "gamuifreetype.h"
 
+#include <math.h>
+
 using namespace gamui;
 
 // FreeType:
@@ -42,6 +44,10 @@ void GamuiFreetypeBridge::Blit(uint8_t* target, int scanbytes, const FT_Bitmap& 
 
 bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 {
+	fontHeight = height;
+	textureWidth = w;
+	textureHeight = h;
+
 	FT_Set_Pixel_Sizes(face, 0, height);
 
 	int x = 0;
@@ -84,7 +90,39 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 		glyphs[idx].tw = bitmap.width;
 		glyphs[idx].th = bitmap.rows;
 
+		glyphs[idx].advance = slot->advance.x >> 6;
+		glyphs[idx].bitmapLeft = slot->bitmap_left;
+		glyphs[idx].bitmapTop = slot->bitmap_top;
+
 		x += bitmap.width + PAD;
 	}
 	return 0;
+}
+
+
+void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev character
+	float height,
+	gamui::IGamuiText::GlyphMetrics* metric)
+{
+	int idx = c0 - FIRST_CHAR_CODE;
+	if (idx < 0 || idx >= NUM_CODES) {
+		// Space.
+		GlyphMetrics space;
+		*metric = space;
+		metric->advance = fontHeight / 2;
+		return;
+	}
+
+	const Glyph& glyph = glyphs[idx];
+
+	metric->advance = glyph.advance;
+	metric->x = float(glyph.bitmapLeft);
+	metric->y = float(-glyph.bitmapTop);
+	metric->w = float(glyph.tw);
+	metric->h = float(glyph.th);
+
+	metric->tx0 = float(glyph.tx) / float(textureWidth);
+	metric->ty0 = float(glyph.ty) / float(textureHeight);
+	metric->tx1 = float(glyph.tx + glyph.tw) / float(textureWidth);
+	metric->ty1 = float(glyph.ty + glyph.th) / float(textureHeight);
 }

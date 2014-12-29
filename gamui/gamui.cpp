@@ -288,7 +288,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	/* This routine gets done in physical pixels, not virtual. */
 
 	IGamuiText* iText = m_gamui->GetTextInterface();
-//	const int vStart = vertexBuf ? vertexBuf->Size() : 0;
+	if (!iText) return;
 
 	const char* p = m_str;
 	const float X0 = floorf(m_gamui->Transform(X()));
@@ -1335,12 +1335,17 @@ Gamui::~Gamui()
 }
 
 
-void Gamui::Init(	IGamuiRenderer* renderer,
-					const RenderAtom& textEnabled, 
-					const RenderAtom& textDisabled,
-					IGamuiText* iText )
+void Gamui::Init(	IGamuiRenderer* renderer )
 {
 	m_iRenderer = renderer;
+	m_iText = 0;
+}
+
+
+void Gamui::SetText(	const RenderAtom& textEnabled,
+						const RenderAtom& textDisabled,
+						IGamuiText* iText)
+{
 	m_textAtomEnabled = textEnabled;
 	m_textAtomDisabled = textDisabled;
 	m_iText = iText;

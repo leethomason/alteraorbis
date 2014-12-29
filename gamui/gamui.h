@@ -310,10 +310,8 @@ public:
 	~Gamui();
 
 	/// Required if the default constructor used.
-	void Init(	IGamuiRenderer* renderer,
-				const RenderAtom& textEnabled, 
-				const RenderAtom& textDisabled,
-				IGamuiText* iText );
+	void Init(IGamuiRenderer* renderer);
+	void SetText(const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
 
 	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
 
@@ -453,8 +451,11 @@ class IGamuiText
 {
 public:
 	struct GlyphMetrics {
-		float advance;
-		float x, y, w, h;			// position, based at 0,0
+		GlyphMetrics() : advance(0), x(0), y(0), w(0), h(0), tx0(0), ty0(0), tx1(0), ty1(0) {}
+
+		int advance;
+		float x, y;					// position. Offset by x, y.
+		float w, h;					// w & h. should be a ration of (tx1-tx0) and (ty1-ty0)
 		float tx0, ty0, tx1, ty1;	// texture coordinates of the glyph
 	};
 
