@@ -25,6 +25,7 @@
 #include "../libs/SDL2/include/SDL.h"
 
 #include "gamui.h"
+#include "gamuifreetype.h"
 #include <stdio.h>
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
@@ -202,7 +203,6 @@ int main( int argc, char **argv )
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_ALPHA, textSurface->w, textSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, textSurface->pixels );
-	SDL_FreeSurface( textSurface );
 	TESTGLERR();
 
 	// Load a bitmap
@@ -251,6 +251,16 @@ int main( int argc, char **argv )
 	Gamui gamui;
 	gamui.Init(&renderer, textAtom, textAtomD, &textMetrics);
 	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
+
+	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
+	bridge->Init("./gamui/DidactGothic.ttf");
+	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
+	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
+	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
+	bridge->Generate(16, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
+	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
+	SDL_FreeSurface(fontSurface);
 
 	TextLabel textLabel[2];
 	textLabel[0].Init( &gamui );
@@ -425,6 +435,8 @@ int main( int argc, char **argv )
 
 		SDL_GL_SwapWindow( screen );
 	}
+	SDL_FreeSurface(textSurface);
+	delete bridge; bridge = 0;
 	SDL_Quit();
 	return 0;
 }

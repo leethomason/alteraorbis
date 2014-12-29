@@ -89,6 +89,11 @@
     <ClCompile Include="gamuitest.cpp" />
     <ClCompile Include="glew.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\freetype\builds\windows\vc2010\freetype.vcxproj">
+      <Project>{78b079bd-9fc7-4b9e-b4a6-96da0f00248b}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
