@@ -44,8 +44,10 @@ private:
 		int bitmapTop;
 	};
 
+	int			scale;
 	int			fontHeight;
 	int			textureWidth, textureHeight;
+	int			ascent, descent;
 	FT_Library  library;
 	FT_Face		face;
 

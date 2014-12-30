@@ -32,9 +32,10 @@
 #define BRIDGE 1
 
 // TODO:
-// - scaling
+// x scaling
 // - kerning
 // - linespace
+// x texture memory overflow
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
@@ -271,11 +272,11 @@ int main( int argc, char **argv )
 	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
 	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
-	bridge->Init("./gamui/DidactGothic.ttf");
+	bridge->Init("./gamui/OpenSans-Regular.ttf");
 	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
 	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
 	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
-	bridge->Generate(16, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+	bridge->Generate(gamui.TextHeightInPixels(), (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
 	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
 	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
 
@@ -416,7 +417,19 @@ int main( int argc, char **argv )
 					screenX = event.window.data1;
 					screenY = event.window.data2;
 					glViewport( 0, 0, screenX, screenY );
+
 					gamui.SetScale(screenX, screenY, VIRTUAL_Y);
+#if BRIDGE == 0
+					gamui.SetText(16, textAtom, textAtomD, &textMetrics);
+#else	
+					bridge->Generate(gamui.TextHeightInPixels(), (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+					SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
+					TESTGLERR();
+					glBindTexture(GL_TEXTURE_2D, textTextureID2);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
+					TESTGLERR();
+					gamui.SetText(16, textAtom, textAtomD, bridge);
+#endif
 				}
 				break;
 

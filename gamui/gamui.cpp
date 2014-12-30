@@ -284,6 +284,7 @@ void TextLabel::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex >
 	ConstQueue( indexBuf, vertexBuf );
 }
 
+
 void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf ) const
 {
 	if ( !m_gamui )
@@ -308,7 +309,6 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	const float boundsHeight = m_gamui->Transform(m_boundsHeight);
 
 	float xmax = x;
-
 	IGamuiText::GlyphMetrics metrics;
 	const float height = float(font.linespace);
 	int tab = 0;
@@ -397,7 +397,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	}
 
 	m_width  = m_gamui->InvTransform(xmax - X0);
-	m_height = m_gamui->InvTransform(y + height - Y0);
+	m_height = m_gamui->InvTransform(y + height - (Y0 + float(font.ascent)));
 }
 
 
@@ -929,7 +929,7 @@ void Button::PositionChildren()
 		y0 += m_textDY;
 		y1 += m_textDY;
 
-		m_label.SetPos(x, y0 + float(font.ascent)*0.5f);
+		m_label.SetPos(x, y0);
 	}
 	m_label.SetVisible( Visible() );
 	m_deco.SetVisible( Visible() );
