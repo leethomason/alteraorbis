@@ -309,10 +309,17 @@ public:
 	Gamui();
 	~Gamui();
 
-	/// Required if the default constructor used.
+	/// Initialize with a renderer. Called once.
 	void Init(IGamuiRenderer* renderer);
-	void SetText(const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
+	/** Initialize the text system. Can be called multiple times. Generally called in conjunction with SetScale()
+		'size' is the size in virtual pixels (usually 12 or 16 point)
+		'textEnabled' the render atom to use, usually the text texture and render state
+		'textDisabled' with a lighter render effect
+		'iText' the pointer to the metrics interface
+	*/
+	void SetText(float size, const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
 
+	/// Sets the physical vs. virtual coordinate system. Generally called in conjunction with SetText()
 	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
 
 	void StartDialog(const char* name);
@@ -337,8 +344,11 @@ public:
 	const RenderAtom& GetDisabledTextAtom()		{ return m_textAtomDisabled; }
 
 	IGamuiText* GetTextInterface() const	{ return m_iText; }
-	void SetTextHeight( float h )			{ m_textHeight = h; }
-	float GetTextHeight() const				{ return m_textHeight; }
+
+	/// Query the text height in physical pixels.
+	int   TextHeightInPixels() const				{ return int(Transform(m_textHeight)); }
+	/// Query the text height in virtual pixels.
+	float TextHeightVirtual() const					{ return m_textHeight; }
 
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
@@ -467,10 +477,10 @@ public:
 
 	virtual ~IGamuiText()	{}
 	virtual void GamuiGlyph( int c0, int cPrev,		// character, prev character
-							 float height,
+							 int heightInPhysicalPixels,
 							 gamui::IGamuiText::GlyphMetrics* metric ) = 0;
 
-	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric) = 0;
+	virtual void GamuiFont(int heightInPhysicalPixels, gamui::IGamuiText::FontMetrics* metric) = 0;
 };
 
 

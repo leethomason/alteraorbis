@@ -262,11 +262,15 @@ float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 {
 	float w = 0;
 	IGamuiText::GlyphMetrics metrics;
-	float height = m_gamui->GetTextHeight();
+	IGamuiText::FontMetrics font;
+
+	int textHeight = m_gamui->TextHeightInPixels();
+	iText->GamuiFont(textHeight, &font);
+
 	char prev = ' ';
 
 	while( *p && !isspace( *p )) {
-		iText->GamuiGlyph( *p, prev, height, &metrics );
+		iText->GamuiGlyph( *p, prev, textHeight, &metrics );
 		w += metrics.advance;
 		prev = *p;
 		++p;
@@ -291,12 +295,14 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 
 	IGamuiText* iText = m_gamui->GetTextInterface();
 	if (!iText) return;
+	IGamuiText::FontMetrics font;
+	iText->GamuiFont(m_gamui->TextHeightInPixels(), &font);
 
 	const char* p = m_str;
 	const float X0 = floorf(m_gamui->Transform(X()));
 	const float Y0 = floorf(m_gamui->Transform(Y()));
 	float x = X0;
-	float y = Y0;
+	float y = Y0 + float(font.ascent);	// move to the baseline
 	const float tabWidth = m_gamui->Transform(m_tabWidth);
 	const float boundsWidth = m_gamui->Transform(m_boundsWidth);
 	const float boundsHeight = m_gamui->Transform(m_boundsHeight);
@@ -304,7 +310,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	float xmax = x;
 
 	IGamuiText::GlyphMetrics metrics;
-	const float height = m_gamui->GetTextHeight();
+	const float height = float(font.linespace);
 	int tab = 0;
 
 	while ( p && *p ) {
@@ -353,7 +359,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		}
 
 		// And finally, have we exceeded the y bound?
-		if ( boundsHeight && ( y + height >= Y0 + boundsHeight) ) {
+		if ( boundsHeight && ( y + font.descent >= Y0 + boundsHeight) ) {
 			break;
 		}
 
@@ -363,7 +369,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		while( p && *p && *p != '\n' && *p != '\t' ) {
 			x = floorf(x);
 
-			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
+			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, font.linespace, &metrics );
 
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
@@ -902,25 +908,29 @@ void Button::PositionChildren()
 	m_icon.SetPos( m_face.X() + m_face.Width() - iconSize, m_face.Y() + m_face.Height() - iconSize );
 
 	// --- text --- //
+	IGamuiText* itext = m_gamui->GetTextInterface();
+	if (itext) {
+		IGamuiText::FontMetrics font;
+		itext->GamuiFont(m_gamui->TextHeightInPixels(), &font);
 
-	float w = m_label.Width();
-	
-	if ( m_textLayout == LEFT ) {
-		x = X();
+		float w = m_label.Width();
+
+		if (m_textLayout == LEFT) {
+			x = X();
+		}
+		else if (m_textLayout == RIGHT) {
+			x = X() + m_face.Width() - w;
+		}
+		else {
+			x = X() + (m_face.Width() - w)*0.5f;
+		}
+
+		x += m_textDX;
+		y0 += m_textDY;
+		y1 += m_textDY;
+
+		m_label.SetPos(x, y0 + float(font.ascent)*0.5f);
 	}
-	else if ( m_textLayout == RIGHT ) {
-		x = X() + m_face.Width() - w;
-	}
-	else {
-		x = X() + (m_face.Width()-w)*0.5f;
-	}
-
-	x += m_textDX;
-	y0 += m_textDY;
-	y1 += m_textDY;
-
-	m_label.SetPos( x, y0 );
-
 	m_label.SetVisible( Visible() );
 	m_deco.SetVisible( Visible() );
 	m_face.SetVisible( Visible() );
@@ -1340,10 +1350,12 @@ void Gamui::Init(	IGamuiRenderer* renderer )
 }
 
 
-void Gamui::SetText(	const RenderAtom& textEnabled,
+void Gamui::SetText(	float size,
+						const RenderAtom& textEnabled,
 						const RenderAtom& textDisabled,
 						IGamuiText* iText)
 {
+	m_textHeight = size;
 	m_textAtomEnabled = textEnabled;
 	m_textAtomDisabled = textDisabled;
 	m_iText = iText;
@@ -1352,7 +1364,6 @@ void Gamui::SetText(	const RenderAtom& textEnabled,
 
 void Gamui::SetScale(int pixelWidth, int pixelHeight, int virtualHeight)
 {
-	// FIXME: flush the glyph cache
 	m_physicalWidth  = pixelWidth;
 	m_physicalHeight = pixelHeight;
 	m_virtualHeight  = virtualHeight;
@@ -1523,7 +1534,7 @@ void Gamui::Render()
 		const UIItem* focused = GetFocus();
 		if ( focused ) {
 			m_focusImage->SetVisible( true );
-			m_focusImage->SetSize( GetTextHeight()*2.5f, GetTextHeight()*2.5f );
+			m_focusImage->SetSize(TextHeightVirtual()*2.5f, TextHeightVirtual()*2.5f);
 			m_focusImage->SetCenterPos( focused->X() + focused->Width()*0.5f, focused->Y() + focused->Height()*0.5f );
 		}
 		else {

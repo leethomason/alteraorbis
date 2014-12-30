@@ -101,7 +101,7 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 
 
 void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev character
-	float height,
+	int height,
 	gamui::IGamuiText::GlyphMetrics* metric)
 {
 	int idx = c0 - FIRST_CHAR_CODE;
@@ -125,4 +125,13 @@ void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev chara
 	metric->ty0 = float(glyph.ty) / float(textureHeight);
 	metric->tx1 = float(glyph.tx + glyph.tw) / float(textureWidth);
 	metric->ty1 = float(glyph.ty + glyph.th) / float(textureHeight);
+}
+
+
+void GamuiFreetypeBridge::GamuiFont(int height, gamui::IGamuiText::FontMetrics* metric)
+{
+	// http://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html
+	metric->ascent = face->ascender >> 6;
+	metric->descent = -(face->descender >> 6);
+	metric->linespace = face->height >> 6;
 }

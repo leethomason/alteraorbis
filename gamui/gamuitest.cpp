@@ -27,8 +27,14 @@
 #include "gamui.h"
 #include "gamuifreetype.h"
 #include <stdio.h>
+#include <math.h>
 
 #define BRIDGE 1
+
+// TODO:
+// - scaling
+// - kerning
+// - linespace
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
@@ -141,7 +147,7 @@ public:
 class TextMetrics : public IGamuiText
 {
 public:
-	virtual void GamuiGlyph( int c, int c1, float /*height*/, GlyphMetrics* metric )
+	virtual void GamuiGlyph( int c, int c1, int height, GlyphMetrics* metric )
 	{
 		if ( c <= 32 || c >= 32+96 ) {
 			c = 32;
@@ -153,10 +159,10 @@ public:
 		float tx0 = (float)x / 16.0f;
 		float ty0 = (float)y / 8.0f;
 
-		metric->advance = 10.f;
+		metric->advance = 10;
 		metric->x = -3.f;
 		metric->w = 16.f;
-		metric->y = 0;
+		metric->y = -floorf(float(height) * 0.75f);	// baseline position. assume baseline 75% of glyph
 		metric->h = 16.f;
 
 		metric->tx0 = tx0;
@@ -164,6 +170,13 @@ public:
 
 		metric->ty0 = ty0;
 		metric->ty1 = ty0 + (1.f/8.f);
+	}
+
+	virtual void GamuiFont(int height, gamui::IGamuiText::FontMetrics* metric)
+	{
+		metric->ascent = int(height * 0.75f);
+		metric->descent = int(height * 0.25f);
+		metric->linespace = int(height);
 	}
 };
 
@@ -253,7 +266,7 @@ int main( int argc, char **argv )
 	Gamui gamui;
 	gamui.Init(&renderer);
 #if BRIDGE == 0
-	gamui.SetText(textAtom, textAtomD, &textMetrics);
+	gamui.SetText(16, textAtom, textAtomD, &textMetrics);
 #endif
 	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
@@ -279,27 +292,23 @@ int main( int argc, char **argv )
 
 	textAtom.textureHandle = (const void*)textTextureID2;
 	textAtomD.textureHandle = textAtom.textureHandle;
-	gamui.SetText(textAtom, textAtomD, bridge);
+	gamui.SetText(16, textAtom, textAtomD, bridge);
 #endif
 
 	TextLabel textLabel[2];
 	textLabel[0].Init( &gamui );
 	textLabel[1].Init( &gamui );
 
-	textLabel[0].SetText( "Hello Gamui" );
+	textLabel[0].SetText( "Hello Gamui. This is text\n"
+						  "with line breaks, that is\n"
+						  "positioned at the origin.");
 	textLabel[1].SetText( "Very long text to test the string allocator." );
-	textLabel[1].SetPos( 10, 20 );
+	textLabel[1].SetPos( 10, 200 );
 
 	Image image0;
 	image0.Init(&gamui, imageAtom, true);
 	image0.SetPos( 50, 50 );
 	image0.SetSize( 100, 100 );
-
-	TextLabel block;
-	block.Init( &gamui );
-	block.SetPos( 50, 50 );
-	block.SetSize( 100, 100 );
-	block.SetText( "This is paragraph one.\n\nAnd number 2." );
 
 	Image image1;
 	image1.Init(&gamui, imageAtom, true);
@@ -458,7 +467,7 @@ int main( int argc, char **argv )
 	SDL_FreeSurface(textSurface);
 	SDL_FreeSurface(fontSurface);
 
-	gamui.SetText(textAtom, textAtomD, 0);
+	gamui.SetText(16, textAtom, textAtomD, 0);
 	delete bridge; bridge = 0;
 	SDL_Quit();
 	return 0;
