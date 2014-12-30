@@ -31,12 +31,6 @@
 
 #define BRIDGE 1
 
-// TODO:
-// x scaling
-// - kerning
-// - linespace
-// x texture memory overflow
-
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
 							printf( "GL ERR=0x%x\n", err );		\
@@ -273,6 +267,7 @@ int main( int argc, char **argv )
 
 	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
 	bridge->Init("./gamui/OpenSans-Regular.ttf");
+	//bridge->Init("./gamui/DidactGothic.ttf");
 	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
 	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
 	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
@@ -303,7 +298,7 @@ int main( int argc, char **argv )
 	textLabel[0].SetText( "Hello Gamui. This is text\n"
 						  "with line breaks, that is\n"
 						  "positioned at the origin.");
-	textLabel[1].SetText( "Very long text to test the string allocator." );
+	textLabel[1].SetText( "Very long text to test the string allocator.\nAnd some classic kerns: VA AV." );
 	textLabel[1].SetPos( 10, 200 );
 
 	Image image0;

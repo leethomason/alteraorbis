@@ -104,6 +104,10 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 		}
 	} while (!done);
 
+	// The ascent and the descent for the font are often
+	// wrong. They are set to the max/min of a particular
+	// glyph, not the representative value. Sampling letters
+	// seems to give better results.
 	{
 		FT_UInt glyphIndex = FT_Get_Char_Index(face, 'A');
 		FT_Load_Glyph(face, glyphIndex, 0);
@@ -133,9 +137,14 @@ void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev chara
 		return;
 	}
 
+	FT_UInt leftIndex = FT_Get_Char_Index(face, cPrev);
+	FT_UInt rightIndex = FT_Get_Char_Index(face, c0);
+	FT_Vector kerning = { 0, 0 };
+	FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &kerning);
+
 	const Glyph& glyph = glyphs[idx];
 
-	metric->advance = glyph.advance * scale;
+	metric->advance = (glyph.advance - (kerning.x >> 6)) * scale;
 	metric->x = float(glyph.bitmapLeft * scale);
 	metric->y = float(-glyph.bitmapTop * scale);
 	metric->w = float(glyph.tw * scale);
