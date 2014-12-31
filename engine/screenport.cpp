@@ -61,6 +61,14 @@ void Screenport::Resize( int w, int h )
 	screenWidth = screenHeight * physicalWidth / physicalHeight;
 
 	//GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
+
+	FontSingleton* bridge = FontSingleton::Instance();
+	{
+		uint8_t* mem = new uint8_t[FontSingleton::TEX_H * FontSingleton::TEX_W];
+		bridge->Generate(LAYOUT_TEXT_HEIGHT, mem, FontSingleton::TEX_W, FontSingleton::TEX_H);
+		bridge->FontTexture()->Upload(mem, FontSingleton::TEX_W*FontSingleton::TEX_H);
+		delete[] mem;
+	}
 }
 
 

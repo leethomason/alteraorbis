@@ -31,10 +31,10 @@ Scene::Scene( Game* _game )
 	: game( _game ),
 	  uiRenderer( GPUDevice::HUD )
 {
-	gamui2D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-//	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-	gamui2D.SetTextHeight( TEXT_HEIGHT );
-//	gamui3D.SetTextHeight( TEXT_HEIGHT );
+	gamui2D.Init(&uiRenderer);
+	gamui2D.SetText(	LAYOUT_TEXT_HEIGHT, 
+						game->GetRenderAtom(Game::ATOM_TEXT), game->GetRenderAtom(Game::ATOM_TEXT_D), 
+						FontSingleton::Instance() );
 	
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );

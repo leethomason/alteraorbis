@@ -56,6 +56,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>C:\src\alteraorbis\freetype\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +149,7 @@
     <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\game\fluidsim.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
+    <ClCompile Include="..\gamui\gamuifreetype.cpp" />
     <ClCompile Include="..\markov\markov.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\animationscene.cpp" />
@@ -285,6 +287,7 @@
     <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\game\fluidsim.h" />
     <ClInclude Include="..\gamui\gamui.h" />
+    <ClInclude Include="..\gamui\gamuifreetype.h" />
     <ClInclude Include="..\markov\markov.h" />
     <ClInclude Include="..\micropather\micropather.h" />
     <ClInclude Include="..\scenes\animationscene.h" />

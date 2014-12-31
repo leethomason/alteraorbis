@@ -36,6 +36,6 @@ static const float LAYOUT_GUTTER =  8.0f;
 // Digital bars are all kinds of layout execeptions:
 static const float LAYOUT_BAR_HEIGHT_FRACTION = 0.75f;
 static const float LAYOUT_BAR_ALPHA = 0.80f;
-
+static const int LAYOUT_TEXT_HEIGHT = 16;
 
 #endif // LAYOUT_ALTERA_INCLUDED

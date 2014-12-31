@@ -43,6 +43,7 @@
 
 #include <time.h>
 #include <direct.h>	// for _mkdir
+#include "../game/layout.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -106,7 +107,9 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "font" );
 	GLASSERT( textTexture );
-	UFOText::Create( database0, textTexture );
+	FontSingleton* bridge = FontSingleton::Instance();
+	bridge->Init("./res/font.ttf");
+	UFOText::Create( textTexture );
 
 	_mkdir( "save" );
 
@@ -132,6 +135,7 @@ Game::~Game()
 
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
+	delete FontSingleton::Instance();
 	SettingsManager::Destroy();
 	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
@@ -441,7 +445,6 @@ void Game::PrintPerf()
 	UFOText* ufoText = UFOText::Instance();
 	int perfY = 0;
 
-	ufoText->SetFixed( true );
 	while( p < end ) {
 		char* q = buf;
 		while( p < end && *p != '\n' ) {
@@ -452,7 +455,6 @@ void Game::PrintPerf()
 		perfY += 16;
 		++p;
 	}
-	ufoText->SetFixed( false );
 }
 
 

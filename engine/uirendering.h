@@ -16,13 +16,34 @@
 #ifndef UIRENDERING_INCLUDED
 #define UIRENDERING_INCLUDED
 
-#include "../gamui/gamui.h"
+#include "../gamui/gamuifreetype.h"
 #include "gpustatemanager.h"
 
 class Screenport;
 
+class FontSingleton : public gamui::GamuiFreetypeBridge
+{
+public:
+	~FontSingleton();
 
-class UIRenderer : public gamui::IGamuiRenderer, public gamui::IGamuiText
+	static FontSingleton* Instance() {
+		if (!instance)
+			instance = new FontSingleton();
+		return instance;
+	}
+
+	enum { TEX_W = 512, TEX_H = 256 };
+	Texture* FontTexture() { return fontTexture; }
+
+private:
+	FontSingleton();
+
+	static FontSingleton* instance;
+	Texture* fontTexture;
+};
+
+
+class UIRenderer : public gamui::IGamuiRenderer
 {
 public:
 	enum {
@@ -56,7 +77,7 @@ public:
 
 	static void SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, gamui::RenderAtom* );
 	static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );
-	virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
+	//virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
 	
 	// Rendering parameters:
 	grinliz::Vector4F uv[NUM_DATA];

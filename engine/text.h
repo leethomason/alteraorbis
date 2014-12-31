@@ -22,8 +22,6 @@
 #include "screenport.h"
 #include "texture.h"
 #include "vertex.h"
-#include "../gamui/gamui.h"
-#include "../shared/gamedbreader.h"
 #include "shadermanager.h"
 
 class GPUState;
@@ -37,45 +35,21 @@ public:
 	// Queues drawing, actually. Need to call CommitDraw() to send to screen.
 	void Draw( int x, int y, const char* format, ... );
 	void FinalDraw();
-
-	void Metrics(	int c, int c1,
-					float lineHeight,
-					gamui::IGamuiText::GlyphMetrics* metric );
-	void SetFixed( bool fix ) { fixedWidth = fix; }
-
 	virtual void DeviceLoss();
 
-	static void Create( const gamedb::Reader*, Texture* texture );
+	static void Create(Texture* texture);
 	static void Destroy();
 
 private:
-	UFOText( const gamedb::Reader*, Texture* texture );
+	UFOText(Texture* texture);
 	~UFOText();
-
-	struct Metric
-	{
-		S16 isSet;
-		S16 advance;
-		S16 x, y, width, height;
-		S16 xoffset, yoffset;
-	};
-
-	void CacheMetric( int c );
-	void CacheKern( int c, int cPrev );
 
 	void TextOut( const char* str, int x, int y, int h, int *w );
 
 	static UFOText* instance;
 	
-	const gamedb::Reader* database;
 	Texture* texture;
 	GPUVertexBuffer* vbo;
-
-	float fontSize;
-	float texWidthInv;
-	float texHeight;
-	float texHeightInv;
-	bool fixedWidth;
 
 	enum {
 		VBO_MEM		= 128*1024,
@@ -84,12 +58,7 @@ private:
 		END_CHAR = CHAR_OFFSET + CHAR_RANGE
 	};
 
-	int MetricIndex( int c )          { return c - CHAR_OFFSET; }
-	int KernIndex( int c, int cPrev ) { return (c-CHAR_OFFSET)*CHAR_RANGE + (cPrev-CHAR_OFFSET); }
-
 	grinliz::CDynArray< PTVertex2 > quadBuf;
-	Metric		metricCache[ CHAR_RANGE ];
-	S8			kerningCache[ CHAR_RANGE*CHAR_RANGE ];
 };
 
 #endif // UFOATTACK_TEXT_INCLUDED

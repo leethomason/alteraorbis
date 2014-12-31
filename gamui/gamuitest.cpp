@@ -266,8 +266,8 @@ int main( int argc, char **argv )
 	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
 	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
-	bridge->Init("./gamui/OpenSans-Regular.ttf");
-	//bridge->Init("./gamui/DidactGothic.ttf");
+	//bridge->Init("./gamui/OpenSans-Regular.ttf");
+	bridge->Init("./gamui/DidactGothic.ttf");
 	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
 	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
 	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);

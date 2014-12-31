@@ -12,7 +12,7 @@ class GamuiFreetypeBridge : public IGamuiText
 {
 public:
 	GamuiFreetypeBridge();
-	~GamuiFreetypeBridge();
+	virtual ~GamuiFreetypeBridge();
 
 	bool Init(const char* facePath);
 	bool Generate(int height, uint8_t* pixels, int w, int h);

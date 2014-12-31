@@ -12,7 +12,7 @@ MoneyWidget::MoneyWidget()
 
 void MoneyWidget::Init( gamui::Gamui* gamui )
 {
-	float size = gamui->GetTextHeight() * 2.0f;
+	float size = gamui->TextHeightVirtual() * 2.0f;
 
 	for( int i=0; i<COUNT; ++i ) {
 		textLabel[i].Init( gamui );
