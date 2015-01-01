@@ -18,10 +18,9 @@ public:
 	bool Generate(int height, uint8_t* pixels, int w, int h);
 
 	virtual void GamuiGlyph(int c0, int cPrev,	// character, prev character
-		int height,
 		gamui::IGamuiText::GlyphMetrics* metric);
 
-	virtual void GamuiFont(int height, gamui::IGamuiText::FontMetrics* metric);
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric);
 
 
 	enum {

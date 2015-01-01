@@ -21,12 +21,7 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glmatrix.h"
 
-//#include "uirendering.h"
-//#include "../game/layout.h"
-//#include "texture.h"
-
 using namespace grinliz;
-//using namespace gamui;
 
 Screenport::Screenport( int w, int h, int virtualHeight )
 {

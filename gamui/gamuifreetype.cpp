@@ -125,7 +125,6 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 
 
 void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev character
-	int height,
 	gamui::IGamuiText::GlyphMetrics* metric)
 {
 	int idx = c0 - FIRST_CHAR_CODE;
@@ -157,7 +156,7 @@ void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev chara
 }
 
 
-void GamuiFreetypeBridge::GamuiFont(int height, gamui::IGamuiText::FontMetrics* metric)
+void GamuiFreetypeBridge::GamuiFont(gamui::IGamuiText::FontMetrics* metric)
 {
 	// http://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html
 	/* This seems correct, but gives very un-latin values.

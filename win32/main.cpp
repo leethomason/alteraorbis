@@ -49,15 +49,20 @@ static const float KEY_ZOOM_SPEED		= 0.04f;
 static const float KEY_ROTATE_SPEED		= 4.0f;
 static const float KEY_MOVE_SPEED		= 0.4f;
 
-#if 1
+/*
 // 4:3 test
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
-#else
+*/
+
+// 4:3, virtual == physical
+static const int SCREEN_WIDTH  = 640;
+static const int SCREEN_HEIGHT = 480;
+
+/*
 static const int SCREEN_WIDTH  = 952;
 static const int SCREEN_HEIGHT = 600;
-#endif
-
+*/
 
 const int multisample = 2;
 bool fullscreen = false;

@@ -311,13 +311,14 @@ public:
 
 	/// Initialize with a renderer. Called once.
 	void Init(IGamuiRenderer* renderer);
-	/** Initialize the text system. Can be called multiple times. Generally called in conjunction with SetScale()
-		'size' is the size in virtual pixels (usually 12 or 16 point)
+	/** Initialize the text system. Can be called multiple times. Generally called in conjunction with SetScale().
+		The size of the text is from the iText interface. It isn't tracked by gamui directly.
+
 		'textEnabled' the render atom to use, usually the text texture and render state
 		'textDisabled' with a lighter render effect
 		'iText' the pointer to the metrics interface
 	*/
-	void SetText(float size, const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
+	void SetText(const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
 
 	/// Sets the physical vs. virtual coordinate system. Generally called in conjunction with SetText()
 	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
@@ -349,12 +350,12 @@ public:
 	const RenderAtom& GetTextAtom() 			{ return m_textAtomEnabled; }
 	const RenderAtom& GetDisabledTextAtom()		{ return m_textAtomDisabled; }
 
-	IGamuiText* GetTextInterface() const	{ return m_iText; }
+	IGamuiText* GetTextInterface() const			{ return m_iText; }
 
 	/// Query the text height in physical pixels.
-	int   TextHeightInPixels() const				{ return int(Transform(m_textHeight)); }
+	int   TextHeightInPixels() const;
 	/// Query the text height in virtual pixels.
-	float TextHeightVirtual() const					{ return m_textHeight; }
+	float TextHeightVirtual() const;
 
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
@@ -421,7 +422,7 @@ private:
 	PODArray<UIItem*> m_itemArr;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
-	float			m_textHeight;
+	//float			m_textHeight;
 	float			m_relativeX;
 	float			m_relativeY;
 	int				m_focus;
@@ -483,10 +484,9 @@ public:
 
 	virtual ~IGamuiText()	{}
 	virtual void GamuiGlyph( int c0, int cPrev,		// character, prev character
-							 int heightInPhysicalPixels,
 							 gamui::IGamuiText::GlyphMetrics* metric ) = 0;
 
-	virtual void GamuiFont(int heightInPhysicalPixels, gamui::IGamuiText::FontMetrics* metric) = 0;
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric) = 0;
 };
 
 

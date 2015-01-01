@@ -67,6 +67,7 @@ void FontSingleton::CreateTexture(Texture* t)
 			}
 		}
 		t->Upload(d16, sizeof(U16)*w*h);
+		GLOUTPUT(("FontSingleton::CreateTexture %d pixels\n", fontHeight));
 
 		delete[] d8;
 		delete[] d16;

@@ -34,6 +34,8 @@
 #include "engineshaders.h"
 #include "bolt.h"
 
+#include "../game/layout.h"
+
 /*
 	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
 	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
@@ -74,15 +76,9 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
 
-	TextureManager* tm = TextureManager::Instance();
-	gamui::RenderAtom text, textD;
-	text.Init(  (const void*)UIRenderer::RENDERSTATE_UI_TEXT, 
-		        (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-	textD.Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
-		        (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-
 	overlay.Init(&uiRenderer);
-	overlay.SetText(16, text, textD, FontSingleton::Instance());
+	FontSingleton* bridge = FontSingleton::Instance();
+	overlay.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
 	PushInstance( this );
 }
 

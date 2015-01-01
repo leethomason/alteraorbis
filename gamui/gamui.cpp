@@ -264,13 +264,12 @@ float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 	IGamuiText::GlyphMetrics metrics;
 	IGamuiText::FontMetrics font;
 
-	int textHeight = m_gamui->TextHeightInPixels();
-	iText->GamuiFont(textHeight, &font);
+	iText->GamuiFont(&font);
 
 	char prev = ' ';
 
 	while( *p && !isspace( *p )) {
-		iText->GamuiGlyph( *p, prev, textHeight, &metrics );
+		iText->GamuiGlyph( *p, prev, &metrics );
 		w += metrics.advance;
 		prev = *p;
 		++p;
@@ -297,7 +296,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	IGamuiText* iText = m_gamui->GetTextInterface();
 	if (!iText) return;
 	IGamuiText::FontMetrics font;
-	iText->GamuiFont(m_gamui->TextHeightInPixels(), &font);
+	iText->GamuiFont(&font);
 
 	const char* p = m_str;
 	const float X0 = floorf(m_gamui->Transform(X()));
@@ -369,7 +368,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		while( p && *p && *p != '\n' && *p != '\t' ) {
 			x = floorf(x);
 
-			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, font.linespace, &metrics );
+			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, &metrics );
 
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
@@ -911,7 +910,7 @@ void Button::PositionChildren()
 	IGamuiText* itext = m_gamui->GetTextInterface();
 	if (itext) {
 		IGamuiText::FontMetrics font;
-		itext->GamuiFont(m_gamui->TextHeightInPixels(), &font);
+		itext->GamuiFont(&font);
 
 		float w = m_label.Width();
 
@@ -1324,7 +1323,7 @@ Gamui::Gamui()
 		m_modified( true ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
-		m_textHeight( 16 ),
+		//m_textHeight( 16 ),
 		m_relativeX( 0 ),
 		m_relativeY( 0 ),
 		m_focus( -1 ),
@@ -1350,12 +1349,11 @@ void Gamui::Init(	IGamuiRenderer* renderer )
 }
 
 
-void Gamui::SetText(	float size,
-						const RenderAtom& textEnabled,
+void Gamui::SetText(	const RenderAtom& textEnabled,
 						const RenderAtom& textDisabled,
 						IGamuiText* iText)
 {
-	m_textHeight = size;
+	//m_textHeight = size;
 	m_textAtomEnabled = textEnabled;
 	m_textAtomDisabled = textDisabled;
 	m_iText = iText;
@@ -1750,6 +1748,23 @@ float Gamui::GetFocusY()
 		return item->CenterY();
 	}
 	return -1;
+}
+
+
+int Gamui::TextHeightInPixels() const
+{
+	IGamuiText* iText = GetTextInterface();
+	GAMUIASSERT(iText);
+	if (!iText) return 0;
+	IGamuiText::FontMetrics font;
+	iText->GamuiFont(&font);
+	return font.linespace;
+}
+
+
+float Gamui::TextHeightVirtual() const
+{
+	return InvTransform(float(TextHeightInPixels()));
 }
 
 

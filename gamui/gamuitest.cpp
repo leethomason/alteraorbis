@@ -142,7 +142,8 @@ public:
 class TextMetrics : public IGamuiText
 {
 public:
-	virtual void GamuiGlyph( int c, int c1, int height, GlyphMetrics* metric )
+	enum { height = 16};
+	virtual void GamuiGlyph( int c, int c1, GlyphMetrics* metric )
 	{
 		if ( c <= 32 || c >= 32+96 ) {
 			c = 32;
@@ -167,7 +168,7 @@ public:
 		metric->ty1 = ty0 + (1.f/8.f);
 	}
 
-	virtual void GamuiFont(int height, gamui::IGamuiText::FontMetrics* metric)
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric)
 	{
 		metric->ascent = int(height * 0.75f);
 		metric->descent = int(height * 0.25f);
@@ -288,7 +289,7 @@ int main( int argc, char **argv )
 
 	textAtom.textureHandle = (const void*)textTextureID2;
 	textAtomD.textureHandle = textAtom.textureHandle;
-	gamui.SetText(16, textAtom, textAtomD, bridge);
+	gamui.SetText(textAtom, textAtomD, bridge);
 #endif
 
 	TextLabel textLabel[2];
@@ -423,7 +424,7 @@ int main( int argc, char **argv )
 					glBindTexture(GL_TEXTURE_2D, textTextureID2);
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
 					TESTGLERR();
-					gamui.SetText(16, textAtom, textAtomD, bridge);
+					gamui.SetText(textAtom, textAtomD, bridge);
 #endif
 				}
 				break;
@@ -475,7 +476,7 @@ int main( int argc, char **argv )
 	SDL_FreeSurface(textSurface);
 	SDL_FreeSurface(fontSurface);
 
-	gamui.SetText(16, textAtom, textAtomD, 0);
+	gamui.SetText(textAtom, textAtomD, 0);
 	delete bridge; bridge = 0;
 	SDL_Quit();
 	return 0;
