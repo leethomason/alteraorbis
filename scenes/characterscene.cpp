@@ -34,7 +34,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
 	dropButton.SetVisible( data->IsAvatar() );
@@ -122,9 +122,8 @@ void CharacterScene::Resize()
 	const Screenport& port = game->GetScreenport();
 	engine->GetScreenportMutable()->Resize( port.PhysicalWidth(), port.PhysicalHeight() );
 
-	lumosGame->PositionStd( &okay, 0 );
-
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	PositionStd( &okay, 0 );
+	LayoutCalculator layout = DefaultLayout();
 
 	layout.PosAbs( &faceWidget, 0, 1 );
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
@@ -151,7 +150,7 @@ void CharacterScene::Resize()
 	layout.PosAbs(&helpText, 1, -3);
 	if (data->IsAvatar()) {
 		// Need space for the history text
-		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
+		helpText.SetBounds(gamui2D.Width()*0.5f - (okay.X() + okay.Width()), 0);
 	}
 
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {

@@ -57,7 +57,7 @@ public:
 	void SetNearFar( float n, float f ) { near = n; far = f; GLASSERT( far > near ); }
 
 	void Resize( int w, int h );
-	float UIAspectRatio() const		{ return UIHeight() / UIWidth(); }
+//	float UIAspectRatio() const		{ return UIHeight() / UIWidth(); }
 
 	void UIToView( const grinliz::Vector2F& in, grinliz::Vector2F* view ) const;
 	void ViewToUI( const grinliz::Vector2F& in, grinliz::Vector2F* ui ) const;
@@ -106,13 +106,13 @@ public:
 
 	const Frustum&	GetFrustum()		{ GLASSERT( uiMode == false ); return frustum; }
 
-	float UIWidth() const									{ return screenWidth; }
-	float UIHeight() const									{ return screenHeight; }
+	//float UIWidth() const									{ return screenWidth; }
+	//float UIHeight() const									{ return screenHeight; }
 	int PhysicalWidth() const								{ return (int)physicalWidth; }
 	int PhysicalHeight() const								{ return (int)physicalHeight; }
 
-	const grinliz::Rectangle2F UIBoundsClipped3D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
-	const grinliz::Rectangle2F UIBoundsClipped2D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
+//	const grinliz::Rectangle2F UIBoundsClipped3D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
+//	const grinliz::Rectangle2F UIBoundsClipped2D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
 
 	bool UIMode() const										{ return uiMode; }
 
@@ -120,9 +120,9 @@ private:
 	void UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const;
 	void CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean );
 
-	float screenWidth; 
-	float screenHeight;		// if rotation==0, 320
-	float virtualHeight;	// used to be 320. Used for UI layout.
+	//float screenWidth; 
+	//float screenHeight;		// if rotation==0, 320
+	//float virtualHeight;	// used to be 320. Used for UI layout.
 	float near;
 	float far;
 

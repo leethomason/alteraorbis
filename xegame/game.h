@@ -107,12 +107,12 @@ public:
 	const Screenport& GetScreenport() const { return screenport; }
 	Screenport* GetScreenportMutable() { return &screenport; }
 
-	enum {
-		ATOM_TEXT, ATOM_TEXT_D,
-		ATOM_COUNT
-	};
-	const gamui::RenderAtom& GetRenderAtom( int id );
-	gamui::RenderAtom CreateRenderAtom( int uiRendering, const char* assetName, float x0=0, float y0=0, float x1=1, float y1=1 );
+	//enum {
+	//	ATOM_TEXT, ATOM_TEXT_D,
+	//	ATOM_COUNT
+	//};
+	//const gamui::RenderAtom& GetRenderAtom( int id );
+	//gamui::RenderAtom CreateRenderAtom( int uiRendering, const char* assetName, float x0=0, float y0=0, float x1=1, float y1=1 );
 	
 	// For creating some required textures:
 	virtual void CreateTexture( Texture* t );
@@ -173,7 +173,7 @@ protected:
 	void LoadTextures();
 	void LoadModels();
 	void LoadModel( const char* name );
-	void LoadAtoms();
+	//void LoadAtoms();
 	void LoadPalettes();
 
 	int tapMod;
@@ -213,7 +213,7 @@ protected:
 	int rotTestStart;
 	int rotTestCount;
 
-	gamui::RenderAtom renderAtoms[ATOM_COUNT];
+//	gamui::RenderAtom renderAtoms[ATOM_COUNT];
 };
 
 

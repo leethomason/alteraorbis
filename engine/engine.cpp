@@ -81,7 +81,8 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	textD.Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
 		        (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
 
-	overlay.Init( &uiRenderer, text, textD, &uiRenderer );
+	overlay.Init(&uiRenderer);
+	overlay.SetText(16, text, textD, FontSingleton::Instance());
 	PushInstance( this );
 }
 
@@ -118,7 +119,7 @@ void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height
 	else {
 		float h = 0;
 		float theta = ToRadian( EL_FOV/2.0f );
-		float ratio = screenport->UIAspectRatio();
+		float ratio = 0.5f;	// FIXME screenport->UIAspectRatio();
 
 		if ( sizeToWidth ) {
 			h = (width) / tanf(theta);		
@@ -495,8 +496,8 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	#ifdef EL_USE_MRT_BLUR
 		for( int i=0; i<BLUR_COUNT; ++i ) {
 			shader.SetColor( lighting.glow.x, lighting.glow.y, lighting.glow.z, 0 );
-			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
-			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+			Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
+			Vector3F p1 = { (float)screenport->PhysicalWidth(), 0, 0 };
 
 			device->DrawQuad( shader, renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );
 		}
@@ -558,8 +559,8 @@ void Engine::Blur()
 		//int shift = i+1;
 
 		FlatShader shader;
-		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
-		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
+		Vector3F p1 = { (float)screenport->PhysicalWidth(), 0, 0 };
 		device->DrawQuad( shader, renderTarget[i+RT_BLUR_0-1]->GetTexture(), p0, p1 );
 
 		renderTarget[i+RT_BLUR_0]->SetActive( false, this );

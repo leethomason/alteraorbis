@@ -1364,9 +1364,12 @@ void Gamui::SetText(	float size,
 
 void Gamui::SetScale(int pixelWidth, int pixelHeight, int virtualHeight)
 {
-	m_physicalWidth  = pixelWidth;
-	m_physicalHeight = pixelHeight;
-	m_virtualHeight  = virtualHeight;
+	if (pixelWidth != m_physicalWidth || pixelHeight != m_physicalHeight || virtualHeight != m_virtualHeight) {
+		m_physicalWidth = pixelWidth;
+		m_physicalHeight = pixelHeight;
+		m_virtualHeight = virtualHeight;
+		Modify();
+	}
 }
 
 

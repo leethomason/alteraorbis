@@ -16,6 +16,8 @@
 #ifndef LAYOUT_ALTERA_INCLUDED
 #define LAYOUT_ALTERA_INCLUDED
 
+static const int LAYOUT_VIRTUAL_HEIGHT = 480;
+
 #if 0
 // TABLET sizes. Need tuning.
 static const float LAYOUT_SQUARE = 50.0f;
@@ -36,6 +38,6 @@ static const float LAYOUT_GUTTER =  8.0f;
 // Digital bars are all kinds of layout execeptions:
 static const float LAYOUT_BAR_HEIGHT_FRACTION = 0.75f;
 static const float LAYOUT_BAR_ALPHA = 0.80f;
-static const int LAYOUT_TEXT_HEIGHT = 16;
+static const int   LAYOUT_TEXT_HEIGHT = 16;			// Text height in virtual pixels.
 
 #endif // LAYOUT_ALTERA_INCLUDED

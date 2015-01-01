@@ -19,7 +19,7 @@ using namespace grinliz;
 
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)
 {
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	memset( mobActive, 0, sizeof(*mobActive)*MOB_COUNT );
 	memset( itemActive, 0, sizeof(*itemActive)*ITEM_COUNT );
@@ -95,9 +95,9 @@ CensusScene::~CensusScene()
 
 void CensusScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	const Screenport& port = lumosGame->GetScreenport();
 
 	for (int i = 0; i < MAX_ROWS; ++i) {

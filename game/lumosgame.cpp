@@ -218,50 +218,7 @@ RenderAtom LumosGame::CalcIconAtom( const char* asset )
 }
 
 
-/*
-	640x480 mininum screen.
-	6 buttons
-	80 pixels / per
-*/
-gamui::LayoutCalculator LumosGame::DefaultLayout()
-{
-	const Screenport& port = GetScreenport();
-	LayoutCalculator layout(port.UIWidth(), port.UIHeight());
-	layout.SetGutter(LAYOUT_GUTTER, LAYOUT_GUTTER);
-	layout.SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
-	layout.SetSpacing(LAYOUT_SPACING);
-	return layout;
-}
 
-
-void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel )
-{
-	const ButtonLook& stdBL = GetButtonLook( LumosGame::BUTTON_LOOK_STD );
-	gamui::LayoutCalculator layout = DefaultLayout();
-
-	if ( okay ) {
-		okay->Init( g, stdBL );
-		okay->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-		okay->SetDeco( CalcUIIconAtom( "okay", true ), CalcUIIconAtom( "okay", false ) );
-	}
-	if ( cancel ) {
-		cancel->Init( g, stdBL );
-		cancel->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-		cancel->SetDeco( CalcUIIconAtom( "cancel", true ), CalcUIIconAtom( "cancel", false ) );
-	}
-}
-
-
-void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel )
-{
-	gamui::LayoutCalculator layout = DefaultLayout();
-
-	if ( okay )
-		layout.PosAbs( okay, LumosGame::OKAY_X, -1 );
-	
-	if ( cancel )
-		layout.PosAbs( cancel, LumosGame::CANCEL_X, -1 );
-}
 
 
 void LumosGame::CopyFile( const char* src, const char* target )

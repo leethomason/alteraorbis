@@ -5,7 +5,7 @@ using namespace gamui;
 
 CreditsScene::CreditsScene(LumosGame* game) : Scene(game)
 {
-	game->InitStd(&gamui2D, &okay, 0);
+	InitStd(&gamui2D, &okay, 0);
 	text.Init(&gamui2D);
 
 	text.SetText(
@@ -49,12 +49,12 @@ CreditsScene::~CreditsScene()
 void CreditsScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
-	game->ToLumosGame()->PositionStd(&okay, 0);
-	LayoutCalculator layout = game->ToLumosGame()->DefaultLayout();
+	PositionStd(&okay, 0);
+	LayoutCalculator layout = DefaultLayout();
 
 	float offset = layout.GutterX() + layout.Width();
 	text.SetPos(offset, layout.GutterY() + layout.Height());
-	text.SetBounds(port.UIWidth() - offset*2.0f, 0);
+	text.SetBounds(gamui2D.Width() - offset*2.0f, 0);
 
 	text.SetTab(layout.Width()*1.0f);
 }

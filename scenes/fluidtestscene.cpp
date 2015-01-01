@@ -21,7 +21,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.engine->LoadConfigFiles("./res/particles.xml", "./res/lighting.xml");
 
 	context.worldMap->InitCircle();
-	context.game->InitStd(&gamui2D, &okay, 0);
+	InitStd(&gamui2D, &okay, 0);
 
 	context.chitBag = new LumosChitBag( context, 0 );
 	context.worldMap->AttachEngine(context.engine, context.chitBag);
@@ -61,8 +61,8 @@ FluidTestScene::~FluidTestScene()
 
 void FluidTestScene::Resize()
 {
-	context.game->PositionStd(&okay, 0);
-	LayoutCalculator layout = context.game->DefaultLayout();
+	PositionStd(&okay, 0);
+	LayoutCalculator layout = DefaultLayout();
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		if (i < NUM_BUILD_BUTTONS)
 			layout.PosAbs(&buildButton[i], i, -3);

@@ -98,7 +98,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	LoadTextures();
 	modelLoader = new ModelLoader();
 	LoadModels();
-	LoadAtoms();
+	//LoadAtoms();
 	LoadPalettes();
 	AnimationResourceManager::Instance()->Load( database0 );
 
@@ -107,9 +107,12 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "font" );
 	GLASSERT( textTexture );
+
 	FontSingleton* bridge = FontSingleton::Instance();
 	bridge->Init("./res/font.ttf");
-	UFOText::Create( textTexture );
+	
+
+	UFOText::Create(textTexture);
 
 	_mkdir( "save" );
 
@@ -343,6 +346,7 @@ void Game::CreateSceneLower( const SceneNode& in, SceneNode* node )
 }
 
 
+/*
 void Game::LoadAtoms()
 {
 	TextureManager* tm = TextureManager::Instance();
@@ -351,7 +355,8 @@ void Game::LoadAtoms()
 		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
 	renderAtoms[ATOM_TEXT_D].Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
 		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-}	
+}
+*/
 
 
 void Game::LoadPalettes()
@@ -379,14 +384,16 @@ void Game::LoadPalettes()
 }
 
 
+/*
 const gamui::RenderAtom& Game::GetRenderAtom( int id )
 {
 	GLASSERT( id >= 0 && id < ATOM_COUNT );
 	GLASSERT( renderAtoms[id].textureHandle );
 	return renderAtoms[id];
 }
+*/
 
-
+/*
 RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float x0, float y0, float x1, float y1 )
 {
 	GLASSERT( uiRendering >= 0 && uiRendering < UIRenderer::RENDERSTATE_COUNT );
@@ -395,6 +402,7 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 						tm->GetTexture( assetName ),
 						x0, y0, x1, y1 );
 }
+*/
 
 
 const char* Game::GamePath( const char* type, int slot, const char* extension ) const
@@ -697,6 +705,7 @@ void Game::DeviceLoss()
 void Game::Resize( int width, int height, int rotation ) 
 {
 	screenport.Resize( width, height );
+	sceneStack.Top()->scene->ResizeGamui(width, height);
 	sceneStack.Top()->scene->Resize();
 }
 

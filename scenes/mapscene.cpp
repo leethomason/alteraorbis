@@ -20,7 +20,7 @@ using namespace grinliz;
 
 MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumosGame(game)
 {
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	lumosChitBag = data->lumosChitBag;
 	worldMap     = data->worldMap;
@@ -97,7 +97,7 @@ MapScene::~MapScene()
 Rectangle2F MapScene::GridBounds2(int x, int y, bool useGutter)
 {
 	float gridSize = mapImage2.Width() / float(MAP2_SIZE);
-	float gutter = useGutter ? gamui2D.GetTextHeight() * 0.25f : 0;
+	float gutter = useGutter ? gamui2D.TextHeightVirtual() * 0.25f : 0;
 
 	Rectangle2F r;
 	r.Set(mapImage2.X() + float(x)*gridSize + gutter,
@@ -127,10 +127,10 @@ Vector2F MapScene::ToUI(int select, const grinliz::Vector2F& pos, const grinliz:
 
 void MapScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
 	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
@@ -138,14 +138,14 @@ void MapScene::Resize()
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
 	float x = layout.GutterX();
-	float dx = port.UIWidth()*0.5f - 1.5f*layout.GutterX();
+	float dx = gamui2D.Width()*0.5f - 1.5f*layout.GutterX();
 	dx = dy = Min( dx, dy );
 
 	mapImage.SetSize( dx, dy );
 	mapImage2.SetSize( dx, dy );
 
 	mapImage.SetPos( x, y );
-	mapImage2.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
+	mapImage2.SetPos( gamui2D.Width()*0.5f + 0.5f*layout.GutterX(), y );
 
 	for (int i = 0; i < 2; ++i) {
 		const float MARK_SIZE = 5;

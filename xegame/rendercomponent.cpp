@@ -441,6 +441,7 @@ void RenderComponent::PositionIcons(bool inUse)
 
 	if (inUse) {
 		const Screenport& port = context->engine->GetScreenport();
+		const gamui::Gamui& g = context->engine->overlay;
 
 		Vector2F ui = { 0, 0 };
 		const Rectangle3F aabb = model[0]->AABB();
@@ -449,8 +450,8 @@ void RenderComponent::PositionIcons(bool inUse)
 
 		port.WorldToUI(topCenter, &ui);
 		Rectangle2F uiBounds;
-		uiBounds.Set(0, 0, port.UIWidth(), port.UIHeight());
-		uiBounds.Outset(port.UIHeight() * 0.25f);
+		uiBounds.Set(0, 0, g.Width(), g.Height());
+		uiBounds.Outset(g.Height() * 0.25f);
 
 		if (uiBounds.Contains(ui)) {
 			if (!hud->textLabel) {

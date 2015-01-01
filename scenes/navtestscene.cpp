@@ -49,9 +49,9 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	debugRay.direction.Zero();
 	debugRay.origin.Zero();
 
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
-	LayoutCalculator layout = game->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	block.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	block.SetText( "block" );
 
@@ -112,8 +112,8 @@ NavTestScene::~NavTestScene()
 void NavTestScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	lumosGame->PositionStd( &okay, 0 );
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	PositionStd( &okay, 0 );
+	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &block, 1, -1 );
 	layout.PosAbs( &block20, 2, -1 );
 

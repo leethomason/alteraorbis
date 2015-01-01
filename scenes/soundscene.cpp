@@ -8,7 +8,7 @@ using namespace grinliz;
 SoundScene::SoundScene(LumosGame* game) : Scene(game)
 {
 	lumosGame = game;
-	game->InitStd(&gamui2D, &okay, 0);
+	InitStd(&gamui2D, &okay, 0);
 
 	for (int i = 0; i < NUM_TESTS; ++i) {
 		test[i].Init(&gamui2D, lumosGame->GetButtonLook(0));
@@ -26,8 +26,8 @@ SoundScene::~SoundScene()
 
 void SoundScene::Resize()
 {
-	lumosGame->PositionStd(&okay, 0);
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	PositionStd(&okay, 0);
+	LayoutCalculator layout = DefaultLayout();
 	for (int i = 0; i < NUM_TESTS; ++i) {
 		layout.PosAbs(&test[i], i, 0);
 	}

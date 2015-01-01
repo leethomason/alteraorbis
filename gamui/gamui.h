@@ -322,6 +322,12 @@ public:
 	/// Sets the physical vs. virtual coordinate system. Generally called in conjunction with SetText()
 	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
 
+	int PixelWidth() const { return m_physicalWidth; }
+	int PixelHeight() const { return m_physicalHeight; }
+	float Height() const { return float(m_virtualHeight); }
+	float Width() const { return Transform(float(m_physicalWidth)); }
+	float AspectRatio() const { return float(m_physicalHeight) / float(m_physicalWidth); }
+
 	void StartDialog(const char* name);
 	void EndDialog();
 	unsigned CurrentDialogID() const { return m_currentDialog; }

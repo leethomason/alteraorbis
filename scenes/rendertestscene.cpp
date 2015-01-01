@@ -45,9 +45,9 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	
 	SetupTest();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	refreshButton.SetText( "refresh" );
@@ -80,9 +80,9 @@ RenderTestScene::~RenderTestScene()
 
 void RenderTestScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 	
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &refreshButton, 2, -1 );
 
 	for( int i=0; i<NUM_CONTROL; ++i ) {
@@ -226,7 +226,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 		RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 			(const void*)engine->GetRenderTargetTexture(glowLayer), 0, 0, 1, 1 );
 		rtImage.SetAtom( atom );
-		rtImage.SetSize( port.UIWidth(), port.UIHeight() );
+		rtImage.SetSize(gamui2D.Width(), gamui2D.Height());
 		rtImage.SetPos( 0, 0 );
 	}
 	else {

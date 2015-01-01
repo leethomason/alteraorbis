@@ -365,6 +365,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\freetype\builds\windows\vc2010\freetype.vcxproj">
+      <Project>{78b079bd-9fc7-4b9e-b4a6-96da0f00248b}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\winlib\winlib.vcxproj">
       <Project>{28433181-007b-4bf5-aecc-cc52f97e69a1}</Project>
     </ProjectReference>

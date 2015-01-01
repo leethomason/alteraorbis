@@ -58,7 +58,7 @@ void EndGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCalcu
 	okay.Init(gamui, look);
 	okay.SetDeco(LumosGame::CalcUIIconAtom("okay", true), LumosGame::CalcUIIconAtom("okay", false));
 
-	textHeight = gamui->GetTextHeight();
+	textHeight = gamui->TextHeightVirtual();
 	gamui->EndDialog();
 }
 

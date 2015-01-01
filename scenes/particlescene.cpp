@@ -34,7 +34,7 @@ static const int SIZE = 64;
 
 ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 {
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	testMap = new TestMap( SIZE, SIZE );
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), testMap );
@@ -66,9 +66,9 @@ void ParticleScene::Clear()
 void ParticleScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	layout.SetSize( LAYOUT_SIZE_X*0.75f, LAYOUT_SIZE_Y*0.5f );
 	int x=0;
 	int y=1;
@@ -87,7 +87,7 @@ void ParticleScene::Load()
 	Clear(); 
 
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	const ButtonLook& look = lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 
 	particleDefArr.Clear();

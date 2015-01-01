@@ -42,9 +42,10 @@ using namespace grinliz;
 
 TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenport(game->GetScreenport()), ticker(200)
 {
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
-	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL, "title" );
+	RenderAtom batom;
+	batom.Init((const void*)UIRenderer::RENDERSTATE_UI_NORMAL, (const void*)TextureManager::Instance()->GetTexture("title"), 0, 0, 1, 1);
 	background.Init( &gamui2D, batom, false );
 
 	static const char* testSceneName[NUM_TESTS] = { "Dialog", 
@@ -198,17 +199,17 @@ void TitleScene::Resize()
 	}
 	background.SetPos( 0, 0 );
 
-	float aspect = port.UIAspectRatio();
+	float aspect = gamui2D.AspectRatio();
 	if ( aspect >= 0.5f ) {
-		background.SetSize( port.UIWidth(), port.UIWidth()*0.5f );
+		background.SetSize(gamui2D.Width(), gamui2D.Width()*0.5f);
 	}
 	else {
-		background.SetSize( port.UIHeight()*2.0f, port.UIHeight() );
+		background.SetSize( gamui2D.Height()*2.0f, gamui2D.Height() );
 	}
-	background.SetCenterPos( port.UIWidth()*0.5f, port.UIHeight()*0.5f );
+	background.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f);
 
 	bool visible = game->GetDebugUI();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	int c = 0;
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].SetVisible( visible );
@@ -240,7 +241,7 @@ void TitleScene::Resize()
 
 	layout.PosAbs( &note, 0, -2 );
 	note.SetVisible(!visible);
-	note.SetBounds( port.UIWidth() / 2, 0 );
+	note.SetBounds( gamui2D.Width() / 2.0f, 0 );
 
 	layout.PosAbs(&audioButton, -1, 0);
 	layout.PosAbs(&creditsButton, -2, 0);

@@ -22,6 +22,7 @@
 #include "../engine/particle.h"
 #include "../audio/xenoaudio.h"
 #include "../xegame/istringconst.h"
+#include "../game/lumosgame.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -31,10 +32,10 @@ Scene::Scene( Game* _game )
 	: game( _game ),
 	  uiRenderer( GPUDevice::HUD )
 {
+
 	gamui2D.Init(&uiRenderer);
-	gamui2D.SetText(	LAYOUT_TEXT_HEIGHT, 
-						game->GetRenderAtom(Game::ATOM_TEXT), game->GetRenderAtom(Game::ATOM_TEXT_D), 
-						FontSingleton::Instance() );
+	const Screenport& screenport = _game->GetScreenport();
+	ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
 	
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
@@ -230,3 +231,65 @@ void Scene::HandleHotKey( int value )
 	}
 }
 
+
+/*
+640x480 mininum screen.
+6 buttons
+80 pixels / per
+*/
+gamui::LayoutCalculator Scene::DefaultLayout()
+{
+	LayoutCalculator layout(gamui2D.Width(), gamui2D.Height());
+	layout.SetGutter(LAYOUT_GUTTER, LAYOUT_GUTTER);
+	layout.SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+	layout.SetSpacing(LAYOUT_SPACING);
+	return layout;
+}
+
+
+
+void Scene::InitStd(gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel)
+{
+	const ButtonLook& stdBL = static_cast<LumosGame*>(game)->GetButtonLook(LumosGame::BUTTON_LOOK_STD);
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if (okay) {
+		okay->Init(g, stdBL);
+		okay->SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+		okay->SetDeco(LumosGame::CalcUIIconAtom("okay", true), LumosGame::CalcUIIconAtom("okay", false));
+	}
+	if (cancel) {
+		cancel->Init(g, stdBL);
+		cancel->SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+		cancel->SetDeco(LumosGame::CalcUIIconAtom("cancel", true), LumosGame::CalcUIIconAtom("cancel", false));
+	}
+}
+
+
+void Scene::PositionStd(gamui::PushButton* okay, gamui::PushButton* cancel)
+{
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if (okay)
+		layout.PosAbs(okay, OKAY_X, -1);
+
+	if (cancel)
+		layout.PosAbs(cancel, CANCEL_X, -1);
+}
+
+
+void Scene::ResizeGamui(int w, int h)
+{
+	gamui2D.SetScale(w, h, LAYOUT_VIRTUAL_HEIGHT);
+
+	FontSingleton* bridge = FontSingleton::Instance();
+
+	// Generate / reset the text.
+	int heightInPixels = gamui2D.TextHeightInPixels();
+	FontSingleton::Instance()->SetPhysicalPixel(heightInPixels);
+
+	// Set the atoms to the gamui system:
+	gamui2D.SetText(float(LAYOUT_TEXT_HEIGHT),
+		bridge->TextAtom(false), bridge->TextAtom(true),
+		FontSingleton::Instance());
+}

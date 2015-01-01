@@ -46,9 +46,8 @@ ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( gam
 	engine->lighting.direction.Normalize();
 	
 	SetupTest();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
-
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	LayoutCalculator layout = DefaultLayout();
+	InitStd( &gamui2D, &okay, 0 );
 
 	Texture* palette = TextureManager::Instance()->GetTexture("palette");
 	RenderAtom atom((const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)palette, 0, 0, 1, 1);
@@ -82,9 +81,9 @@ ColorTestScene::~ColorTestScene()
 
 void ColorTestScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	for (int i = 0; i < NUM_PAL_SEL; ++i) {
 		layout.PosAbs(&paletteSelector[i], i*2, 0, 2, 2);
 		paletteSelector[i].SetCapturesTap(true);

@@ -85,14 +85,6 @@ public:
 	};
 	const gamui::ButtonLook& GetButtonLook( int i ) { GLASSERT( i>=0 && i<BUTTON_LOOK_COUNT ); return buttonLookArr[i]; }
 	
-	enum {
-		CANCEL_X = -1,
-		OKAY_X = 0
-	};
-	gamui::LayoutCalculator DefaultLayout();
-	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
-	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
-
 	// Put the item text and symbols on a button.
 	// If for sale, pass in the costMult: <1 for the amount it can be sold for, >1 for the buying price
 	void ItemToButton( const GameItem* item, gamui::Button* button );

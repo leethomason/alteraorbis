@@ -65,7 +65,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	voxelInfoID.Zero();
 	lumosGame = game;
 	adviser = new Adviser();
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
 
 	Load();
@@ -196,7 +196,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
 	uiBackground.Init(&gamui2D, darkPurple, false);
 
-	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 	endGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 
@@ -256,7 +256,7 @@ void GameScene::Resize()
 {
 	const Screenport& port = lumosGame->GetScreenport();
 	
-	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
 	layout.PosAbs(&censusButton, 0, -1);
 	layout.PosAbs(&helpImage, 1, -1);
@@ -370,7 +370,7 @@ void GameScene::Resize()
 	okay.SetVisible(visible);
 
 	// ------- SQUAD LAYOUT ------ //
-	layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	layout = DefaultLayout();
 	layout.SetSize(layout.Width(), layout.Height()*0.5f);
 	for (int j = 0; j < CITIZEN_BASE; ++j) {
 		layout.PosAbs(&squadBar[j], 0, 2*2 + j);
