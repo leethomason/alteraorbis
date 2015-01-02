@@ -21,6 +21,8 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glmatrix.h"
 
+#include "../gamui/gamui.h"
+
 using namespace grinliz;
 
 Screenport::Screenport( int w, int h, int virtualHeight )
@@ -118,19 +120,13 @@ void Screenport::SetPerspective()
 }
 
 
-void Screenport::ViewToUI( const grinliz::Vector2F& view, grinliz::Vector2F* ui ) const
+grinliz::Vector2F Screenport::WorldToUI(const grinliz::Vector3F& world, const gamui::Gamui& g) const
 {
-	GLASSERT(0);	// not correct
-	ui->x = view.x;
-	ui->y = physicalHeight-view.y;
-}
-
-
-void Screenport::UIToView( const grinliz::Vector2F& ui, grinliz::Vector2F* view ) const
-{
-	GLASSERT(0);	// not correct
-	view->x = ui.x;
-	view->y = physicalHeight-ui.y;
+	Vector2F view = WorldToView(world);
+	Vector2F ui = { 0, 0 };
+	ui.x = g.TransformPhysicalToVirtual(view.x);
+	ui.y = g.TransformPhysicalToVirtual(view.y);
+	return ui;
 }
 
 
@@ -182,12 +178,11 @@ void Screenport::WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F*
 	p.Set( world, 1 );
 	r = mvp * p;
 
-	Vector2F v0, v1;
 	Rectangle2F clipInView;
-	Vector2F min = { 0, 0 };
-	Vector2F max = { physicalWidth, physicalHeight };
-	UIToView( min, &v0 );
-	UIToView( max, &v1 );
+	Vector2F v0 = { 0, 0 };
+	Vector2F v1 = { physicalWidth, physicalHeight };
+//	UIToView( min, &v0 );
+//	UIToView( max, &v1 );
 
 	clipInView.FromPair( v0.x, v0.y, v1.x, v1.y );
 	
@@ -200,6 +195,7 @@ void Screenport::WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F*
 }
 
 
+/*
 void Screenport::ViewToWindow( const Vector2F& view, Vector2F* window ) const
 {
 	GLASSERT(0);	// not correct
@@ -214,8 +210,10 @@ void Screenport::WindowToView( const Vector2F& window, Vector2F* view ) const
 	view->x = window.x;	// *screenWidth / physicalWidth;
 	view->y = window.y; // *screenHeight / physicalHeight;
 }
+*/
 
 
+/*
 void Screenport::UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const
 {	
 	Vector2F v;
@@ -229,7 +227,7 @@ void Screenport::UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2
 	ViewToWindow( v, &w );
 	clip->DoUnion( w );
 }
-
+*/
 
 void Screenport::CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean )
 {

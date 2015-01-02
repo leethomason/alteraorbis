@@ -391,6 +391,7 @@ public:
 
 	void			TransformVirtualToPhysical(Vertex* v, int n) const;
 	float			TransformVirtualToPhysical(float x) const;
+
 	float			TransformPhysicalToVirtual(float x) const;
 
 	static const RenderAtom& NullAtom() { return m_nullAtom; }

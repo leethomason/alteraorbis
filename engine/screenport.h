@@ -22,6 +22,7 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glgeometry.h"
 
+namespace gamui { class Gamui; };
 
 struct Frustum
 {
@@ -29,24 +30,9 @@ struct Frustum
 };
 
 /*
-	** PHYSICAL/WINDOW coordinates:
-	THe actual dimensions, in pixels, of the screen.
-
-	** VIEW coordinates:
-	View coordinates are the OpenGL based coordinates. OpenGL moves the origin
-	to the lower left. This is a scaled pixel coordinate system. (Eek.)
-
-	y
-	|
-	|
-	0----x
-	Independent of rotation.
-
-	** UI coordinates:
-	Put the origin in the upper left accounting for rotation. So the upper left
-	from the point of view of the person holding the device. The h=320 
-	always, regardless of actual screen, so these are scaled coordinates.
-	Used to define UI positions in a rational way.
+	Window:	pixel coordinates, origin upper left.
+	View: pixel coordinate, origin lower left
+	ViewNormalized: (-1,-1) - (1,1) normalized pixels, origin lower left (not generally exposed)
 */
 class Screenport
 {
@@ -57,23 +43,25 @@ public:
 	void SetNearFar( float n, float f ) { near = n; far = f; GLASSERT( far > near ); }
 
 	void Resize( int w, int h );
-//	float UIAspectRatio() const		{ return UIHeight() / UIWidth(); }
-
-	void UIToView( const grinliz::Vector2F& in, grinliz::Vector2F* view ) const;
-	void ViewToUI( const grinliz::Vector2F& in, grinliz::Vector2F* ui ) const;
 
 	bool ViewToWorld( const grinliz::Vector2F& view, const grinliz::Matrix4* mvpi, grinliz::Ray* world ) const;
 	void WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F* view ) const;
-
-	void WorldToUI( const grinliz::Vector3F& world, grinliz::Vector2F* ui ) const {
-		grinliz::Vector2F view;
-		WorldToView( world, &view );
-		ViewToUI( view, ui );
+	grinliz::Vector2F WorldToView(const grinliz::Vector3F& world) const {
+		grinliz::Vector2F view = { 0, 0 };
+		WorldToView(world, &view);
+		return view;
 	}
 
-	// Primarily used in scissor. Returs in physical window coordinates.
-	void ViewToWindow( const grinliz::Vector2F& view, grinliz::Vector2F* window ) const;
-	void WindowToView( const grinliz::Vector2F& window, grinliz::Vector2F* view ) const;
+	grinliz::Vector2F WorldToUI(const grinliz::Vector3F& world, const gamui::Gamui& g) const;
+
+	void ViewToWindow(const grinliz::Vector2F& view, grinliz::Vector2F* window) const {
+		window->x = view.x;
+		window->y = float(physicalHeight) - view.y;
+	}
+	void WindowToView(const grinliz::Vector2F& window, grinliz::Vector2F* view) const {
+		view->x = window.x;
+		view->y = float(physicalHeight) - window.y;
+	}
 
 	// UI: origin in lower left, oriented with device.
 	// Sets both the MODELVIEW and the PROJECTION for UI coordinates. (The view is not set.)
@@ -117,7 +105,7 @@ public:
 	bool UIMode() const										{ return uiMode; }
 
 private:
-	void UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const;
+	//void UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const;
 	void CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean );
 
 	//float screenWidth; 

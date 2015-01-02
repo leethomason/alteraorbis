@@ -443,12 +443,12 @@ void RenderComponent::PositionIcons(bool inUse)
 		const Screenport& port = context->engine->GetScreenport();
 		const gamui::Gamui& g = context->engine->overlay;
 
-		Vector2F ui = { 0, 0 };
 		const Rectangle3F aabb = model[0]->AABB();
 		const Vector3F pos = model[0]->Pos();
 		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
 
-		port.WorldToUI(topCenter, &ui);
+		Vector2F ui = port.WorldToUI(topCenter, g);
+
 		Rectangle2F uiBounds;
 		uiBounds.Set(0, 0, g.Width(), g.Height());
 		uiBounds.Outset(g.Height() * 0.25f);

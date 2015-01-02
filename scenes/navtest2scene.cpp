@@ -227,12 +227,6 @@ void NavTest2Scene::Pan(int action, const grinliz::Vector2F& view, const grinliz
 void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
-
-	if ( action == GAME_TAP_UP && !uiHasTap ) {
-		// Check mini-map
-		grinliz::Vector2F ui;
-		game->GetScreenport().ViewToUI( view, &ui );
-	}
 }
 
 
