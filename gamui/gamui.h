@@ -362,11 +362,11 @@ public:
 		* TapDown return the item tapped on. This does not activate anything except capture.
 		* TapUp returns if the item was activated (that is, the up and down item are the same.)
 	*/
-	void			TapDown( float x, float y );		
-	const UIItem*	TapUp( float x, float y );						///< Used as a pair with TapDown
+	void			TapDown( float xPhysical, float yPhysical );		
+	const UIItem*	TapUp( float xPhysical, float yPhysical );		///< Used as a pair with TapDown
 	void			TapCancel();									///< Cancel a tap (generally in response to the OS)
 	const UIItem*	TapCaptured() const { return m_itemTapped; }	///< The item that received the TapDown, while in move.
-	const UIItem*	Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
+	const UIItem*	Tap( float xPhysical, float yPhysical );		///< Used to send events on systems that have a simple tap without up/down symantics.
 	void			GetRelativeTap( float* x, float* y );			///< Get the tap location, in item coordinates, of the last tap down. [0,1]
 
 	/** The return of a Tap...() or TapCaptured() is a valid UI Item.
@@ -385,7 +385,7 @@ public:
 	void			AddToFocusGroup( const UIItem* item, int id );
 	void			SetFocus( const UIItem* item );
 	const UIItem*	GetFocus() const;
-	void			MoveFocus( float x, float y );
+	void			MoveFocus( float x, float y );	// FIXME: in virtual coordinates?
 	float			GetFocusX();
 	float			GetFocusY();
 

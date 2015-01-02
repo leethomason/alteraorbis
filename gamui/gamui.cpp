@@ -1404,15 +1404,18 @@ void Gamui::GetRelativeTap( float* x, float* y )
 }
 
 
-const UIItem* Gamui::Tap( float x, float y )
+const UIItem* Gamui::Tap(float xPhysical, float yPhysical)
 {
-	TapDown( x, y );
-	return TapUp( x, y );
+	TapDown(xPhysical, yPhysical);
+	return TapUp(xPhysical, yPhysical);
 }
 
 
-void Gamui::TapDown( float x, float y )
+void Gamui::TapDown( float xPhysical, float yPhysical )
 {
+	float x = TransformPhysicalToVirtual(xPhysical);
+	float y = TransformPhysicalToVirtual(yPhysical);
+
 	GAMUIASSERT( m_itemTapped == 0 );
 	m_itemTapped = 0;
 	m_disabledItemTapped = 0;
@@ -1442,8 +1445,11 @@ void Gamui::TapDown( float x, float y )
 }
 
 
-const UIItem* Gamui::TapUp( float x, float y )
+const UIItem* Gamui::TapUp( float xPhysical, float yPhysical )
 {
+	float x = TransformPhysicalToVirtual(xPhysical);
+	float y = TransformPhysicalToVirtual(yPhysical);
+
 	m_dragStart = m_itemTapped;
 
 	const UIItem* result = 0;
