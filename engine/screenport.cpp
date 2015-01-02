@@ -36,8 +36,8 @@ Screenport::Screenport( int w, int h, int virtualHeight )
 
 void Screenport::Resize( int w, int h )
 {
-	if ( w > 0 && h > 0 ) {
-		physicalWidth  = (float)w;
+	if (w > 0 && h > 0) {
+		physicalWidth = (float)w;
 		physicalHeight = (float)h;
 	}
 	else {
@@ -45,21 +45,7 @@ void Screenport::Resize( int w, int h )
 		h = (int)physicalHeight;
 	}
 
-	GPUDevice::Instance()->SetViewport( w, h );
-
-	// Sad but true: the game assets are set up for 480x320 resolution.
-	// How to scale?
-	//   1. Scale the smallest axis to be within 320x480. But then buttons get
-	//      bigger and all layout has to be programmatic.
-	//   2. Clip to a window. Seems a waste to lose that space.
-	//   3. Fix UI Height at 320. Stretch backgrounds. That looks weird...but
-	//		the background images can be patched up.
-	// Try #3.
-
-//	screenHeight = virtualHeight;
-//	screenWidth = screenHeight * physicalWidth / physicalHeight;
-
-	//GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
+	GPUDevice::Instance()->SetViewport(w, h);
 }
 
 

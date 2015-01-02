@@ -36,7 +36,7 @@ Scene::Scene( Game* _game )
 	gamui2D.Init(&uiRenderer);
 	FontSingleton* bridge = FontSingleton::Instance();
 
-	int heightInPixels = (int)gamui2D.Transform(float(LAYOUT_TEXT_HEIGHT));
+	int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
 	bridge->SetPhysicalPixel(heightInPixels);
 	gamui2D.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
 
@@ -291,7 +291,7 @@ void Scene::ResizeGamui(int w, int h)
 	FontSingleton* bridge = FontSingleton::Instance();
 
 	// Generate / reset the text.
-	int heightInPixels = (int)gamui2D.Transform(float(LAYOUT_TEXT_HEIGHT));
+	int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
 	bridge->SetPhysicalPixel(heightInPixels);
 
 	// Set the atoms to the gamui system:

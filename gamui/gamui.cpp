@@ -299,13 +299,13 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	iText->GamuiFont(&font);
 
 	const char* p = m_str;
-	const float X0 = floorf(m_gamui->Transform(X()));
-	const float Y0 = floorf(m_gamui->Transform(Y()));
+	const float X0 = floorf(m_gamui->TransformVirtualToPhysical(X()));
+	const float Y0 = floorf(m_gamui->TransformVirtualToPhysical(Y()));
 	float x = X0;
 	float y = Y0 + float(font.ascent);	// move to the baseline
-	const float tabWidth = m_gamui->Transform(m_tabWidth);
-	const float boundsWidth = m_gamui->Transform(m_boundsWidth);
-	const float boundsHeight = m_gamui->Transform(m_boundsHeight);
+	const float tabWidth = m_gamui->TransformVirtualToPhysical(m_tabWidth);
+	const float boundsWidth = m_gamui->TransformVirtualToPhysical(m_boundsWidth);
+	const float boundsHeight = m_gamui->TransformVirtualToPhysical(m_boundsHeight);
 
 	float xmax = x;
 	IGamuiText::GlyphMetrics metrics;
@@ -395,8 +395,8 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		}
 	}
 
-	m_width  = m_gamui->InvTransform(xmax - X0);
-	m_height = m_gamui->InvTransform(y + height - (Y0 + float(font.ascent)));
+	m_width  = m_gamui->TransformPhysicalToVirtual(xmax - X0);
+	m_height = m_gamui->TransformPhysicalToVirtual(y + height - (Y0 + float(font.ascent)));
 }
 
 
@@ -551,6 +551,7 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 		return;
 	}
 
+	const int startVertex = vertexBuf->Size();
 	for (int i = 0; i < m_cmds.Size(); ++i) {
 
 		const Cmd& cmd = m_cmds[i];
@@ -593,6 +594,7 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 			break;
 		}
 	}
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -722,7 +724,7 @@ void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 		y += dy;
 	}
 	ApplyRotation( count*4, vertexBuf->Mem() + startVertex );
-	m_gamui->Transform(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -798,7 +800,7 @@ void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *ve
 			}
 		}
 	}
-	m_gamui->Transform(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -1764,25 +1766,25 @@ int Gamui::TextHeightInPixels() const
 
 float Gamui::TextHeightVirtual() const
 {
-	return InvTransform(float(TextHeightInPixels()));
+	return TransformPhysicalToVirtual(float(TextHeightInPixels()));
 }
 
 
-float Gamui::Transform(float x) const
+float Gamui::TransformVirtualToPhysical(float x) const
 {
 	const float M = float(m_physicalHeight) / float(m_virtualHeight);
 	return x * M;
 }
 
 
-float Gamui::InvTransform(float x) const
+float Gamui::TransformPhysicalToVirtual(float x) const
 {
 	const float M = float(m_physicalHeight) / float(m_virtualHeight);
 	return x / M;
 }
 
 
-void Gamui::Transform(Vertex* v, int n) const
+void Gamui::TransformVirtualToPhysical(Vertex* v, int n) const
 { 
 	const float M = float(m_physicalHeight) / float(m_virtualHeight);
 	while (n) {

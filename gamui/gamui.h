@@ -326,7 +326,7 @@ public:
 	int PixelWidth() const { return m_physicalWidth; }
 	int PixelHeight() const { return m_physicalHeight; }
 	float Height() const { return float(m_virtualHeight); }
-	float Width() const { return Transform(float(m_physicalWidth)); }
+	float Width() const { return TransformPhysicalToVirtual(float(m_physicalWidth)); }
 	float AspectRatio() const { return float(m_physicalHeight) / float(m_physicalWidth); }
 
 	void StartDialog(const char* name);
@@ -389,9 +389,9 @@ public:
 	float			GetFocusX();
 	float			GetFocusY();
 
-	void			Transform(Vertex* v, int n) const;
-	float			Transform(float x) const;
-	float			InvTransform(float x) const;
+	void			TransformVirtualToPhysical(Vertex* v, int n) const;
+	float			TransformVirtualToPhysical(float x) const;
+	float			TransformPhysicalToVirtual(float x) const;
 
 	static const RenderAtom& NullAtom() { return m_nullAtom; }
 

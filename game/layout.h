@@ -16,7 +16,7 @@
 #ifndef LAYOUT_ALTERA_INCLUDED
 #define LAYOUT_ALTERA_INCLUDED
 
-static const int LAYOUT_VIRTUAL_HEIGHT = 480;
+static const int LAYOUT_VIRTUAL_HEIGHT = 600;
 
 #if 0
 // TABLET sizes. Need tuning.

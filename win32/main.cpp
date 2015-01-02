@@ -54,10 +54,10 @@ static const float KEY_MOVE_SPEED		= 0.4f;
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
 */
+// Virtual size test.
+static const int SCREEN_WIDTH  = 800;	// 750 virtual
+static const int SCREEN_HEIGHT = 640;	// 600 virtual
 
-// 4:3, virtual == physical
-static const int SCREEN_WIDTH  = 640;
-static const int SCREEN_HEIGHT = 480;
 
 /*
 static const int SCREEN_WIDTH  = 952;

@@ -272,7 +272,9 @@ int main( int argc, char **argv )
 	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
 	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
 	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
-	bridge->Generate(gamui.TextHeightInPixels(), (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+
+	int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
+	bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
 	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
 	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
 
@@ -418,7 +420,8 @@ int main( int argc, char **argv )
 #if BRIDGE == 0
 					gamui.SetText(16, textAtom, textAtomD, &textMetrics);
 #else	
-					bridge->Generate(gamui.TextHeightInPixels(), (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+					int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
+					bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
 					SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
 					TESTGLERR();
 					glBindTexture(GL_TEXTURE_2D, textTextureID2);
