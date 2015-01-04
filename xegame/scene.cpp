@@ -36,8 +36,9 @@ Scene::Scene( Game* _game )
 	gamui2D.Init(&uiRenderer);
 	FontSingleton* bridge = FontSingleton::Instance();
 
-	int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
-	bridge->SetPhysicalPixel(heightInPixels);
+	// Don't set text height on scene constructor. Do in Resize()
+	//int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
+	//bridge->SetPhysicalPixel(heightInPixels);
 	gamui2D.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
 
 	const Screenport& screenport = _game->GetScreenport();
@@ -74,7 +75,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& view, const grinliz
 				dragImage.SetAtom( atom );
 			}
 		}
-		dragImage.SetCenterPos( window.x, window.y );
+		dragImage.SetCenterPos(gamui2D.TransformPhysicalToVirtual(window.x), gamui2D.TransformPhysicalToVirtual(window.y));
 	}
 	else if ( action == GAME_TAP_CANCEL ) {
 		gamui2D.TapCancel();

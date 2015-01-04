@@ -423,7 +423,6 @@ private:
 	PODArray<UIItem*> m_itemArr;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
-	//float			m_textHeight;
 	float			m_relativeX;
 	float			m_relativeY;
 	int				m_focus;

@@ -109,7 +109,7 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 	// glyph, not the representative value. Sampling letters
 	// seems to give better results.
 	{
-		FT_UInt glyphIndex = FT_Get_Char_Index(face, 'A');
+		FT_UInt glyphIndex = FT_Get_Char_Index(face, 'h');
 		FT_Load_Glyph(face, glyphIndex, 0);
 		const FT_GlyphSlot& slot = face->glyph;
 		ascent = slot->metrics.horiBearingY >> 6;

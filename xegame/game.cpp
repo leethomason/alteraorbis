@@ -296,9 +296,13 @@ void Game::PushPopScene()
 		sceneStack.Pop();
 
 		if ( !sceneStack.Empty() ) {
-			sceneStack.Top()->scene->Activate();
-			sceneStack.Top()->scene->Resize();
-			sceneStack.Top()->scene->SceneResult( id, result, data );
+			Scene* scene = sceneStack.Top()->scene;
+			GLASSERT(scene);
+
+			scene->Activate();
+			scene->ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
+			scene->Resize();
+			scene->SceneResult( id, result, data );
 		}
 		delete data;
 	}
@@ -328,6 +332,7 @@ void Game::PushPopScene()
 		sceneQueued.Free();
 
 		node->scene->Activate();
+		node->scene->ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
 		node->scene->Resize();
 
 		if ( oldTop ) 

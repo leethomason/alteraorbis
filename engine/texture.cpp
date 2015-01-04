@@ -193,7 +193,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, TextureT
 
 void TextureManager::ContextShift()
 {
-	DeviceLoss();
+//	DeviceLoss();
 }
 
 

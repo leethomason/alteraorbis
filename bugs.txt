@@ -128,6 +128,12 @@
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
 
+- Beta3c
+	- resize
+	- test world->ui
+	- why is the font texture getting re-created all the time?
+	- overlays
+
 - World Gen
 	- less techy, more interesting world gen
 	- use some of the time and space to introduce and explain the game
