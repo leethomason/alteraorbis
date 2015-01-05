@@ -105,13 +105,12 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	delete modelLoader;
 	modelLoader = 0;
 
-	Texture* textTexture = TextureManager::Instance()->GetTexture( "font" );
-	GLASSERT( textTexture );
 
 	FontSingleton* bridge = FontSingleton::Instance();
 	bridge->Init("./res/font.ttf");
 	
-
+	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
+	GLASSERT( textTexture );
 	UFOText::Create(textTexture);
 
 	_mkdir( "save" );

@@ -55,6 +55,7 @@
   <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" depth="32"/>
   <texture filename="flags.png" />
   <texture filename="calibration.png" />
+  <texture filename="fixedfont.png" noMip="true"/>
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
@@ -386,7 +387,7 @@
   <data assetName="explosionWAV2"   filename="sound/Explo_2_22k.wav" />
   <data assetName="explosionWAV3"   filename="sound/Explo_3_22k.wav" />
 
-
+<!-- Deprecated by truetype rendering.
   <font assetName="font" filename="font_0.png" noMip="true" alphaTexture="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>
     <common lineHeight="28" base="23" scaleW="256" scaleH="128" pages="1" packed="0" alphaChnl="0" redChnl="3" greenChnl="3" blueChnl="3"/>
@@ -649,5 +650,5 @@
       <kerning first="123" second="106" amount="1" />
     </kernings>
   </font>
-
+-->
 </resource>

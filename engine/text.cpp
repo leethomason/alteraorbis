@@ -68,7 +68,7 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 	float y = (float)_y;
 	float h = (float)_h;
 
-	float advance = (float)h * 0.5f;
+	float advance = (float)h * 0.75f;
 	if ( w ) {
 		*w = int(float(strlen(str)) * advance);
 		return;
@@ -82,7 +82,7 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 		int index = *str - 32;
 		int r = index / 16;
 		int c = index - r * 16;
-		if (r >= 8) {
+		if (r <0 || r >= 8) {
 			r = c = 0;
 		}
 		GLASSERT(c >= 0 && c < 16);
@@ -90,8 +90,8 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 
 		float tx0 = float(c) / COLS;
 		float tx1 = tx0 + 1.0f / COLS;
-		float ty0 = 1.0f - float(1 + r) / ROWS;
-		float ty1 = ty0 + 1.0f / ROWS;
+		float ty0 = 1.0f - float(r) / ROWS;
+		float ty1 = ty0 - 1.0f / ROWS;
 
 		PTVertex2* vBuf = quadBuf.PushArr(4);
 		vBuf[0].tex.Set( tx0, ty0 );
