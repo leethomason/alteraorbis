@@ -54,15 +54,21 @@ static const float KEY_MOVE_SPEED		= 0.4f;
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
 */
+
 /*
 // Virtual size test.
 static const int SCREEN_WIDTH  = 800;	// 750 virtual
 static const int SCREEN_HEIGHT = 640;	// 600 virtual
 */
 
+// Laptop
+static const int SCREEN_WIDTH  = 700;
+static const int SCREEN_HEIGHT = 520;
+
+/*
 static const int SCREEN_WIDTH  = 952;
 static const int SCREEN_HEIGHT = 600;
-
+*/
 
 const int multisample = 2;
 bool fullscreen = false;
