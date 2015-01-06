@@ -78,10 +78,7 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 		BuildScript::TEMPLE,
 		BuildScript::GUARDPOST,
 		BuildScript::EXCHANGE,
-		BuildScript::KIOSK_N,
-		BuildScript::KIOSK_M,
-		BuildScript::KIOSK_C,
-		BuildScript::KIOSK_S,
+		BuildScript::KIOSK,
 		BuildScript::VAULT,
 		BuildScript::CIRCUITFAB
 	};
@@ -117,8 +114,8 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 					const BuildData& data = buildScript.GetData(id);
 
 					if (wallet.Gold() >= data.cost) {
-						if (id >= BuildScript::KIOSK_N && id <= BuildScript::KIOSK_S) {
-							str.Format("Build a %s kiosk to attract Visitors.", data.cName);
+						if (id == BuildScript::KIOSK) {
+							str.Format("Build a kiosk to attract Visitors.");
 						}
 						else if (id == BuildScript::TEMPLE) {
 							str.Format("Building a Temple increases our\npotential, and attracts monsters.");

@@ -29,10 +29,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "Exchange", "exchange",		3, "Allows Denizens and Avatar convert between Au and Crystal.", "Requires a Market" },
 	{ "Vault", "vault",				3, "Stores items for the Core and Avatar.", "Requires a Market" },
 	// Visitor
-	{ "News", "kiosk.n",			4, "Attracts Visitors searching for news.", "Requires a Temple" },
-	{ "Media", "kiosk.m",			4, "Attracts Visitors searching for media.", "Requires a Temple" },
-	{ "Commerce", "kiosk.c",		4, "Attracts Visitors searching for commerce.", "Requires a Temple" },
-	{ "Social", "kiosk.s",			4, "Attracts Visitors searching for social.", "Requires a Temple" },
+	{ "Kiosk", "kiosk",				4, "Attracts Visitors.", "Requires a Temple" },
 	// Circuits
 	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
 	{ "Battery", "power",			5, "Creates a charge when triggered.", "Requires a Circuit Fab" },

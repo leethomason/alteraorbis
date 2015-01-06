@@ -1592,10 +1592,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	buildButton[BuildScript::FORGE].SetEnabled(nMarkets > 0);
 	buildButton[BuildScript::EXCHANGE].SetEnabled(nMarkets > 0);
 	buildButton[BuildScript::VAULT].SetEnabled(nMarkets > 0);
-	buildButton[BuildScript::KIOSK_N].SetEnabled(nTemples > 0);
-	buildButton[BuildScript::KIOSK_C].SetEnabled(nTemples > 0);
-	buildButton[BuildScript::KIOSK_S].SetEnabled(nTemples > 0);
-	buildButton[BuildScript::KIOSK_M].SetEnabled(nTemples > 0);
+	buildButton[BuildScript::KIOSK].SetEnabled(nTemples > 0);
 
 	buildButton[BuildScript::BATTERY].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::TURRET].SetEnabled(nCircuitFab > 0);

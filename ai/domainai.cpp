@@ -619,16 +619,14 @@ void DomainAI::DoBuild()
 			if (eff < 2 && BuildFarm()) break;
 			
 			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
-			if (arr[BuildScript::KIOSK_C] < 1 && BuildBuilding(BuildScript::KIOSK_C)) break;
-			if (arr[BuildScript::KIOSK_M] < 1 && BuildBuilding(BuildScript::KIOSK_M)) break;
-			if (arr[BuildScript::KIOSK_N] < 1 && BuildBuilding(BuildScript::KIOSK_N)) break;
-			if (arr[BuildScript::KIOSK_S] < 1 && BuildBuilding(BuildScript::KIOSK_S)) break;
+			if (arr[BuildScript::KIOSK] < 2 && BuildBuilding(BuildScript::KIOSK)) break;
 		}
 		if (eff >= 2 && nElixir > 4 && arr[BuildScript::TEMPLE] ) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
 			if (arr[BuildScript::TEMPLE] < templeCap && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
+			if (arr[BuildScript::KIOSK] < 4 && BuildBuilding(BuildScript::KIOSK)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 			if (BuildRoad()) break;	// will return true until all roads are built.
 		}

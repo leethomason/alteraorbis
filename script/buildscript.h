@@ -55,10 +55,7 @@ public:
 		EXCHANGE,
 		VAULT,
 
-		KIOSK_N,
-		KIOSK_M,
-		KIOSK_C,
-		KIOSK_S,
+		KIOSK,
 
 		// Trickiness:
 		// CIRCUIT_NONE isn't used for building, so CIRCUIT_START maps to CIRCUIT_SWITCH

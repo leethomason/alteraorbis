@@ -252,6 +252,14 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 		str.Format("pyramid%d", random.Rand(3));
 		item->SetResource(str.c_str());
 	}
+	if (item->IResourceName() == ISC::kiosk) {
+		switch (random.Rand(4)) {
+			case 0: item->SetResource("kiosk.n");	break;
+			case 1: item->SetResource("kiosk.m");	break;
+			case 2: item->SetResource("kiosk.s");	break;
+			default:item->SetResource("kiosk.c");	break;
+		}
+	}
 
 	int cx = 1;
 	rootItem.keyValues.Get(ISC::size, &cx);

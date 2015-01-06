@@ -1,7 +1,9 @@
 x portrait and suit colors not matching
 x suit colors are the same
-- check gobman that is House denizen healing
 x remove kiosk types
+x use only one type of kiosk
+x overloading of kiosks near core. One kind of kiosk??
+- check gobman that is House denizen healing
 - should buy weapons more aggressively
 - warnings of “core attack” not in place
 - remove itemID in census
@@ -18,12 +20,10 @@ x remove kiosk types
 - *still* not enough forging
 - lots more forging needs to happen!
 - market use not correct
-x use only one type of kiosk
 - deity -> MotherCore
 - task serialization
 - any building attack should cause awareness in domainAI
 - getting hit should cause awareness
-x overloading of kiosks near core. One kind of kiosk??
 - build tasks aren't getting serialized correctly. wrong rotation?
 - [Reenen] Abandon domain
 - [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
