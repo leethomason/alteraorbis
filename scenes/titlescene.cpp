@@ -246,8 +246,8 @@ void TitleScene::Resize()
 	layout.PosAbs(&audioButton, -1, 0);
 	layout.PosAbs(&creditsButton, -2, 0);
 
-	//layout.PosAbs(&testCanvas, 2, 2);
 	testCanvas.SetPos(gamui2D.Width() - 100, gamui2D.Height() - 100);
+	testCanvas.SetVisible(false);
 }
 
 

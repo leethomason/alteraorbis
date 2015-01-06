@@ -1,15 +1,47 @@
+- visitors don't visit
+- cyclops should eat rock to heal
+- increase drive to make weapons
+- weapons, on destruction, should drop crystal
+- buildings, on destruction, should drop items (market, vault, etc.)
+- walk target for the avatar
+- deal with fruit overflow
+- *still* not enough forging
+- lots more forging needs to happen!
+- market use not correct
+- use only one type of kiosk
+- deity -> MotherCore
+- task serialization
+- any building attack should cause awareness in domainAI
+- getting hit should cause awareness
+- overloading of kiosks near core. One kind of kiosk??
+- build tasks aren't getting serialized correctly. wrong rotation?
+- [Reenen] Abandon domain
+- [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
+- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
+- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
+- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+- [Reenen] Cyclops heal at rocks.
+- Mini map flash of battles.
+- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
+- console: Foo is taken over by Foo for House-1(core)
+- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+
+- switch to war mode
+- mouse wheel support
+- see monsters when you click on them
+- bar-market-forge need to look more distinct
+- should be able to browse units in character screen
+
 - gobman statues
 - GT: ui to show idle and busy workers
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - maps: what direction is player pointed?
-- see monsters when you click on them
 - Click through of disabled buttons is surprising
 x colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - general extension of the effect of tech on buildings, and morale on MOBs
-- bar-market-forge need to look more distinct
 - console: add icons to match screen
 - console: links
 - buttons for weapons changing
@@ -22,8 +54,7 @@ x colors of buildings (not enough)
 		- shield booster (gobmen)
 	- boost items
 	- sellable items
-- should be able to browse units in character screen
-- add target portrait
+x add target portrait
 - review all atlases for texture mem usage
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
@@ -36,20 +67,12 @@ x colors of buildings (not enough)
 - uitracking in battle scene
 - destroy date of avatar doesn't seem to be getting entered in the Census/History
 - shock -> plasma??
-- mouse wheel support
 - cage trap
 - taskBeside needs to account for 2x2 buildings.
 - interface annoyances
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 x remove grid64 BS for proper optimization
-- use only one type of kiosk
-- deity -> MotherCore
-- task serialization
-- any building attack should cause awareness in domainAI
-- getting hit should cause awareness
-- overloading of kiosks near core. One kind of kiosk??
-- switch to war mode
 - control flag art
 - rebalance denizen spawning
 - visitors should wander around before leaving in a "useless" domain.
@@ -59,11 +82,9 @@ x remove grid64 BS for proper optimization
 - AI adventures
 - squad adventure mode?
 - AI take over mode?
-- lots more forging needs to happen!
 - control should show weapon ownership
 - retest truulga item generation
 - denizen red on red color scheme way too much
-- build tasks aren't getting serialized correctly. wrong rotation?
 - news multi-prints. start avatar, close window, start avatar.
 - advisor still comes up in weird states.
 - special gobman item, building
@@ -82,28 +103,14 @@ x remove grid64 BS for proper optimization
 - no construction at world center - hide grid pathing bugs
 - nerf pulse fire rate again
 - too many QCore weapons
-- [Reenen] Abandon domain
-- [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
-- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
-- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - [Reenen] Circuits are way complex... (see post)
 - [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
-- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
-- [Reenen] Cyclops heal at rocks.
-- Mini map flash of battles.
-- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
-- console: Foo is taken over by Foo for House-1(core)
-- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
 - way too much CivTech score for just the Avatar hanging around
-- cyclops should eat rock to heal
 x namegen: re-use too common. switch to loop
 - randomize 1st name
 - balance spawn based on # in world 
-- check human spawn: correctly handling male/female
-- increase drive to make weapons
-- weapons, on destruction, should drop crystal
-- buildings, on destruction, should drop items (market, vault, etc.)
-- clean up world gen layout
+x check human spawn: correctly handling male/female
+x clean up world gen layout
 - background for console (full, none, dynamic)
 x DomainAI: don't clear existing pave? (Depends on AI?)
 - build to an efficiency level with distilleries (1 or 2)
@@ -125,17 +132,16 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - face icon generation; icon into build (mantis?)
 - out of gold shouldn't cancel build orders
 - plants look repetetive
-- walk target for the avatar
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
-- deal with fruit overflow
-- *still* not enough forging
 
 - Beta3c
-	- resize
-	- test world->ui
-	- why is the font texture getting re-created all the time?
-	- overlays
+	x resize
+	x test world->ui
+	x why is the font texture getting re-created all the time?
+	x overlays
+	- top bugs
+	- strategic game improvementns
 
 - World Gen
 	- less techy, more interesting world gen
