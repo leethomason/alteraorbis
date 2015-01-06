@@ -131,6 +131,7 @@ void Map::BeginRenderState( const void* renderState )
 			gamuiShader.SetBlendMode( BLEND_NORMAL );
 			break;
 
+		case UIRenderer::RENDERSTATE_UI_DECO:
 		case RENDERSTATE_MAP_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA );
 			gamuiShader.SetBlendMode( BLEND_NORMAL );

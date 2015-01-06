@@ -123,9 +123,10 @@ void Screenport::SetPerspective()
 grinliz::Vector2F Screenport::WorldToUI(const grinliz::Vector3F& world, const gamui::Gamui& g) const
 {
 	Vector2F view = WorldToView(world);
+	Vector2F window = ViewToWindow(view);
 	Vector2F ui = { 0, 0 };
-	ui.x = g.TransformPhysicalToVirtual(view.x);
-	ui.y = g.TransformPhysicalToVirtual(view.y);
+	ui.x = g.TransformPhysicalToVirtual(window.x);
+	ui.y = g.TransformPhysicalToVirtual(window.y);
 	return ui;
 }
 
@@ -178,19 +179,11 @@ void Screenport::WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F*
 	p.Set( world, 1 );
 	r = mvp * p;
 
-	Rectangle2F clipInView;
-	Vector2F v0 = { 0, 0 };
-	Vector2F v1 = { physicalWidth, physicalHeight };
-//	UIToView( min, &v0 );
-//	UIToView( max, &v1 );
-
-	clipInView.FromPair( v0.x, v0.y, v1.x, v1.y );
-	
-	v->x = Interpolate( -1.0f, (float)clipInView.min.x,
-						1.0f,  (float)clipInView.max.x,
+	v->x = Interpolate( -1.0f, 0.0f,
+						1.0f,  (float)physicalWidth,
 						r.x/r.w );
-	v->y = Interpolate( -1.0f, (float)clipInView.min.y,
-						1.0f,  (float)clipInView.max.y,
+	v->y = Interpolate( -1.0f, 0.0f,
+						1.0f,  (float)physicalHeight,
 						r.y/r.w );
 }
 

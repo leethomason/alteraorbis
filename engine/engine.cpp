@@ -77,6 +77,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	boltRenderer = new BoltRenderer();
 
 	overlay.Init(&uiRenderer);
+	overlay.SetScale(port->PhysicalWidth(), port->PhysicalHeight(), LAYOUT_VIRTUAL_HEIGHT);
 	FontSingleton* bridge = FontSingleton::Instance();
 	overlay.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
 	PushInstance( this );
@@ -256,6 +257,11 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	++frame;
 	for (int i = 0; i < NUM_MODEL_DRAW_CALLS; ++i)
 		modelDrawCalls[i] = 0;
+
+	// Engine should probably have a re-size.
+	if (overlay.PixelWidth() != screenport->PhysicalWidth() || overlay.PixelHeight() != screenport->PhysicalHeight()) {
+		overlay.SetScale(screenport->PhysicalWidth(), screenport->PhysicalHeight(), LAYOUT_VIRTUAL_HEIGHT);
+	}
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView(camera.ViewMatrix());	// Draw the camera

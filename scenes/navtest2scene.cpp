@@ -132,7 +132,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	const char* asset = "humanFemale";
 	if ( random.Rand( 4 ) == 0 ) {
-		asset = "hornet";
+		asset = "visitor";
 	}
 
 	chit->Add( new RenderComponent( asset ));

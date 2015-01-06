@@ -43,8 +43,6 @@
   <texture filename="palette_50.png" emissive="true" depth="32" />
   <texture filename="palette_100.png" emissive="true" depth="32" />
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" depth="32" />
-  <texture filename="charSwatch.png" width="128" height="8" /> 
-  <texture filename="characters.png" />
   <texture filename="bluestone.png" />
   <texture filename="shield.png" emissive="true" colorMap="true" />
   <texture filename="debugging.png" noMip="true" />
@@ -279,11 +277,6 @@
     <particle name="spark" meta="trigger" />
   </model>
   
-  <model filename="chess_characters.ac" modelName="hornet" origin="2 0 0" shading="flat" polyRemoval="pre">
-    <meta name="trigger" pos="1.8 0.56 0" />
-    <meta name="target"  pos="2 0.54 0" />
-  </model>
-
   <!-- orb plant -->
   <model filename="plant0.ac" modelName="plant0.0"    origin="-6 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="plant0.ac" modelName="plant0.1"    origin="-4 0 0"  shading="flat" polyRemoval="pre" />

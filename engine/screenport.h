@@ -58,6 +58,12 @@ public:
 		window->x = view.x;
 		window->y = float(physicalHeight) - view.y;
 	}
+	grinliz::Vector2F ViewToWindow(const grinliz::Vector2F& view) const {
+		grinliz::Vector2F window = { 0, 0 };
+		ViewToWindow(view, &window);
+		return window;
+	}
+
 	void WindowToView(const grinliz::Vector2F& window, grinliz::Vector2F* view) const {
 		view->x = window.x;
 		view->y = float(physicalHeight) - window.y;
