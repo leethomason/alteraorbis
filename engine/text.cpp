@@ -68,9 +68,10 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 	float y = (float)_y;
 	float h = (float)_h;
 
-	float advance = (float)h * 0.75f;
+	float width = (float)h * 0.75f;
+	float advance = (float)h * 0.50f;
 	if ( w ) {
-		*w = int(float(strlen(str)) * advance);
+		*w = int(float(strlen(str)) * width);
 		return;
 	}
 
@@ -101,8 +102,8 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 
 		vBuf[0].pos.Set(x, y);
 		vBuf[1].pos.Set(x, y + h);
-		vBuf[2].pos.Set(x + advance, y + h);
-		vBuf[3].pos.Set(x + advance, y);
+		vBuf[2].pos.Set(x + width, y + h);
+		vBuf[3].pos.Set(x + width, y);
 
 		x += advance;
 		++str;
