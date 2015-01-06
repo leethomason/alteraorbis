@@ -28,7 +28,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	LayoutCalculator layout = game->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	const ButtonLook& look = game->GetButtonLook(0);
 
 	for( int i=0; i<ROWS; ++i ) {
@@ -53,7 +53,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 
 	currentType = HUMAN_MALE_FACE;
 	GenerateAndCreate();
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 }
 
 
@@ -70,9 +70,9 @@ LivePreviewScene::~LivePreviewScene()
 void LivePreviewScene::Resize()
 {
 	//const Screenport& port = game->GetScreenport();
-	static_cast<LumosGame*>(game)->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	for( int i=0; i<ROWS; ++i ) {
 		layout.PosAbs( &rowButton[i], 0, i );
 	}

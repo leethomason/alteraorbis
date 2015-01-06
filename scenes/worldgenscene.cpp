@@ -23,7 +23,7 @@ using namespace gamui;
 
 WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 {
-	game->InitStd( &gamui2D, &okay, &cancel );
+	InitStd( &gamui2D, &okay, &cancel );
 	sim = 0;
 
 	worldMap = new WorldMap( WorldGen::SIZE, WorldGen::SIZE );
@@ -71,13 +71,13 @@ WorldGenScene::~WorldGenScene()
 void WorldGenScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
-	static_cast<LumosGame*>(game)->PositionStd( &okay, &cancel );
+	PositionStd( &okay, &cancel );
 	
-	float size = port.UIHeight() * 0.75f;
+	float size = gamui2D.Height() * 0.75f;
 	worldImage.SetSize( size, size );
-	worldImage.SetPos( port.UIWidth()*0.5f - size*0.5f, 10.0f );
+	worldImage.SetPos(gamui2D.Width()*0.5f - size*0.5f, 10.0f);
 
-	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
 	const float DY = 16.0f;
 	const float CONSOLE_HEIGHT = DY * 16.0f;

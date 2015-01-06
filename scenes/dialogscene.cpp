@@ -29,7 +29,7 @@ using namespace gamui;
 
 DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game ) 
 {
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	const ButtonLook& stdBL = lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 	for ( int i=0; i<NUM_ITEMS; ++i ) {
@@ -118,9 +118,9 @@ DialogScene::~DialogScene()
 void DialogScene::Resize()
 {
 	//const Screenport& port = game->GetScreenport();
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
 	for ( int i=0; i<NUM_ITEMS; ++i ) {
 		layout.PosAbs( &itemArr[i], i, 0 );

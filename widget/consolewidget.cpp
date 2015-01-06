@@ -40,7 +40,7 @@ void ConsoleWidget::SetBackground(RenderAtom atom)
 
 void ConsoleWidget::SetSize( float w, float h )
 {
-	nLines = LRint(h / gamui->GetTextHeight());
+	nLines = LRint(h / gamui->TextHeightVirtual());
 	nLines = Clamp(nLines, 1, (int)NUM_LINES);
 	for (int i = 0; i < NUM_LINES; ++i) {
 		lines[i].text.SetVisible(i < nLines);
@@ -94,13 +94,13 @@ void ConsoleWidget::DoTick( U32 delta )
 
 float ConsoleWidget::Height() const
 {
-	return nLines * gamui->GetTextHeight();
+	return nLines * gamui->TextHeightVirtual();
 }
 
 
 void ConsoleWidget::SetPos(float x, float y)
 {
-	float h = gamui->GetTextHeight();
+	float h = gamui->TextHeightVirtual();
 	for (int i = 0; i < NUM_LINES; ++i) {
 		lines[i].button.SetPos(x, y + (float)i*h);
 		lines[i].button.SetSize(h, h);

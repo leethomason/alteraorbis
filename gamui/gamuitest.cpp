@@ -22,10 +22,14 @@
 */
 
 #include "glew.h"
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 
 #include "gamui.h"
+#include "gamuifreetype.h"
 #include <stdio.h>
+#include <math.h>
+
+#define BRIDGE 1
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
@@ -43,23 +47,28 @@ enum {
 	RENDERSTATE_DISABLED
 };
 
-const int SCREEN_X = 600;
-const int SCREEN_Y = 400;
+const int VIRTUAL_X = 600;
+const int VIRTUAL_Y = 400;
 
-typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
-PFN_IMG_LOAD libIMG_Load;
-
+int screenX = VIRTUAL_X;
+int screenY = VIRTUAL_Y;
 
 class Renderer : public IGamuiRenderer
 {
+	const uint16_t* m_index;
+	const Gamui::Vertex* m_vertex;
+
 public:
-	virtual void BeginRender()
+	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
 	{
 		TESTGLERR();
-		
+
+		m_index = index;
+		m_vertex = vertex;
+
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho( 0, SCREEN_X, SCREEN_Y, 0, 1, -1 );
+		glOrtho( 0, screenX, screenY, 0, 1, -1 );
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();				// model
@@ -119,12 +128,12 @@ public:
 	}
 
 
-	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
+	virtual void Render( const void* renderState, const void* textureHandle, int start, int count )
 	{
 		TESTGLERR();
-		glVertexPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &vertex->x );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &vertex->tx );
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, index );
+		glVertexPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->x );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->tx );
+		glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_SHORT, m_index + start );
 		TESTGLERR();
 	}
 };
@@ -133,7 +142,8 @@ public:
 class TextMetrics : public IGamuiText
 {
 public:
-	virtual void GamuiGlyph( int c, int c1, float height, GlyphMetrics* metric )
+	enum { height = 16};
+	virtual void GamuiGlyph( int c, int c1, GlyphMetrics* metric )
 	{
 		if ( c <= 32 || c >= 32+96 ) {
 			c = 32;
@@ -144,19 +154,25 @@ public:
 
 		float tx0 = (float)x / 16.0f;
 		float ty0 = (float)y / 8.0f;
-		float scale = height / 16.f;	// 16 is the intended size.
 
-		metric->advance = 10.f*scale;
-		metric->x = -3.f*scale;
-		metric->w = 16.f*scale;
-		metric->y = 0;
-		metric->h = 16.f*scale;
+		metric->advance = 10;
+		metric->x = -3.f;
+		metric->w = 16.f;
+		metric->y = -floorf(float(height) * 0.75f);	// baseline position. assume baseline 75% of glyph
+		metric->h = 16.f;
 
 		metric->tx0 = tx0;
 		metric->tx1 = tx0 + (1.f/16.f);
 
 		metric->ty0 = ty0;
 		metric->ty1 = ty0 + (1.f/8.f);
+	}
+
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric)
+	{
+		metric->ascent = int(height * 0.75f);
+		metric->descent = int(height * 0.25f);
+		metric->linespace = int(height);
 	}
 };
 
@@ -172,42 +188,45 @@ int main( int argc, char **argv )
 	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
-	SDL_EnableKeyRepeat( 0, 0 );
-	SDL_EnableUNICODE( 1 );
-
-	const SDL_version* sversion = SDL_Linked_Version();
-
-	void* handle = SDL_LoadObject( "SDL_image" );
-	libIMG_Load = (PFN_IMG_LOAD)SDL_LoadFunction( handle, "IMG_Load" );
-
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
-
-	int	videoFlags  = SDL_OPENGL;      /* Enable OpenGL in SDL */
-	videoFlags |= SDL_GL_DOUBLEBUFFER; /* Enable double buffering */
-
-	surface = SDL_SetVideoMode( SCREEN_X, SCREEN_Y, 32, videoFlags );
+	SDL_Window *screen = SDL_CreateWindow(	"Gamui",
+											50, 50,
+											screenX, screenY,
+											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
+	SDL_GL_CreateContext( screen );
+	glViewport(0, 0, screenX, screenY);
 
 	// Load text texture
-	SDL_Surface* textSurface = SDL_LoadBMP( "stdfont2.bmp" );
+	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
 
+	TESTGLERR();
 	GLuint textTextureID;
 	glGenTextures( 1, &textTextureID );
 	glBindTexture( GL_TEXTURE_2D, textTextureID );
 
-	glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
+	//glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_ALPHA, textSurface->w, textSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, textSurface->pixels );
-	SDL_FreeSurface( textSurface );
-
+	TESTGLERR();
 
 	// Load a bitmap
-	SDL_Surface* imageSurface = libIMG_Load( "buttons.png" );
+	SDL_Surface* imageSurface = SDL_LoadBMP( "./gamui/buttons.bmp" );
+	for (int j = 0; j < imageSurface->h; ++j) {
+		for (int i = 0; i < imageSurface->w; ++i) {
+			uint8_t* p0 = (uint8_t*)imageSurface->pixels + j * imageSurface->pitch + i * 3;
+			uint8_t* p1 = p0 + 2;
+			uint8_t t = *p0;
+			*p0 = *p1;
+			*p1 = t;
+		}
+	}
 
 	GLuint imageTextureID;
 	glGenTextures( 1, &imageTextureID );
@@ -216,8 +235,11 @@ int main( int argc, char **argv )
 	glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageSurface->pixels );
+	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSurface->pixels );
+	TESTGLERR();
 	SDL_FreeSurface( imageSurface );
+
+	RenderAtom nullAtom;
 
 	// 256, 128
 	RenderAtom textAtom( (const void*)RENDERSTATE_TEXT, (const void*)textTextureID, 0, 0, 0, 0 );
@@ -228,55 +250,92 @@ int main( int argc, char **argv )
 	RenderAtom imageAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.5f, 0.5f, 228.f/256.f, 28.f/256.f );
 
 	// 50x50
-	RenderAtom decoAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.25f, 0.25f, 0.f );
+	//RenderAtom decoAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.25f, 0.25f, 0.f );
+	RenderAtom decoAtom = nullAtom; 
 	RenderAtom decoAtomD = decoAtom;
 	decoAtomD.renderState = (const void*) RENDERSTATE_DISABLED;
 
 	TextMetrics textMetrics;
 	Renderer renderer;
 
+	TESTGLERR();
+	Gamui gamui;
+	gamui.Init(&renderer);
+#if BRIDGE == 0
+	gamui.SetText(16, textAtom, textAtomD, &textMetrics);
+#endif
+	gamui.SetScale(screenX, screenY, VIRTUAL_Y);
 
-	Gamui gamui( &renderer, textAtom, textAtomD, &textMetrics );
+	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
+	//bridge->Init("./gamui/OpenSans-Regular.ttf");
+	bridge->Init("./gamui/DidactGothic.ttf");
+	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
+	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
+	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
+
+	int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
+	bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
+	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
+
+#if BRIDGE == 1
+	TESTGLERR();
+	GLuint textTextureID2;
+	glGenTextures(1, &textTextureID2);
+	glBindTexture(GL_TEXTURE_2D, textTextureID2);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
+	TESTGLERR();
+
+	textAtom.textureHandle = (const void*)textTextureID2;
+	textAtomD.textureHandle = textAtom.textureHandle;
+	gamui.SetText(textAtom, textAtomD, bridge);
+#endif
 
 	TextLabel textLabel[2];
 	textLabel[0].Init( &gamui );
 	textLabel[1].Init( &gamui );
 
-	textLabel[0].SetText( "Hello Gamui" );
-	textLabel[1].SetText( "Very long text to test the string allocator." );
-	textLabel[1].SetPos( 10, 20 );
+	textLabel[0].SetText( "Hello Gamui. This is text\n"
+						  "with line breaks, that is\n"
+						  "positioned at the origin.");
+	textLabel[1].SetText( "Very long text to test the string allocator.\nAnd some classic kerns: VA AV." );
+	textLabel[1].SetPos( 10, 200 );
 
-	Image image0( &gamui, imageAtom, true );
+	Image image0;
+	image0.Init(&gamui, imageAtom, true);
 	image0.SetPos( 50, 50 );
 	image0.SetSize( 100, 100 );
 
-	TextBox block;
-	block.Init( &gamui );
-	block.SetPos( 50, 50 );
-	block.SetSize( 100, 100 );
-	block.SetText( "This is paragraph one.\n\nAnd number 2." );
-
-	Image image1( &gamui, imageAtom, true );
+	Image image1;
+	image1.Init(&gamui, imageAtom, true);
 	image1.SetPos( 50, 200 );
 	image1.SetSize( 125, 125 );
 
-	Image image2( &gamui, imageAtom, true );
+	Image image2;
+	image2.Init(&gamui, imageAtom, true);
 	image2.SetPos( 200, 50 );
 	image2.SetSize( 50, 50 );
 
-	Image image2b( &gamui, imageAtom, true );
+	Image image2b;
+	image2b.Init(&gamui, imageAtom, true);
 	image2b.SetPos( 270, 50 );
 	image2b.SetSize( 50, 50 );
 
-	Image image2c( &gamui, imageAtom, true );
+	Image image2c;
+	image2c.Init(&gamui, imageAtom, true);
 	image2c.SetPos( 200, 120 );
 	image2c.SetSize( 50, 50 );
 
-	Image image2d( &gamui, imageAtom, true );
+	Image image2d;
+	image2d.Init(&gamui, imageAtom, true);
 	image2d.SetPos( 270, 120 );
 	image2d.SetSize( 50, 50 );
 
-	Image image3( &gamui, imageAtom, true );
+	Image image3;
+	image3.Init(&gamui, imageAtom, true);
 	image3.SetPos( 200, 200 );
 	image3.SetSize( 125, 125 );
 	image3.SetSlice( true );
@@ -304,8 +363,7 @@ int main( int argc, char **argv )
 	ToggleButton toggle( &gamui, up, upD, down, downD, decoAtom, decoAtomD );
 	toggle.SetPos( 350, 250 );
 	toggle.SetSize( 150, 50 );
-	toggle.SetText( "Toggle" );
-	toggle.SetText2( "Line 2" );
+	toggle.SetText( "Toggle\nLine 2" );
 
 	ToggleButton toggle0( &gamui, up, upD, down, downD, decoAtom, decoAtomD );
 	toggle0.SetPos( 350, 325 );
@@ -332,12 +390,10 @@ int main( int argc, char **argv )
 	tick2.SetCoord( 190.f/256.f, 180.f/256.f, 205.f/256.f, 210.f/256.f );
 	tick1.SetCoord( 230.f/256.f, 225.f/256.f, 245.f/256.f, 1 );
 
-	DigitalBar bar( &gamui, 10, tick0, tick1, tick2 );
-	bar.SetRange( 0.33f, 0.66f );
+	DigitalBar bar;
+	bar.Init(&gamui, tick0, tick1);
 	bar.SetPos( 20, 350 );
 	bar.SetSize( 100, 20 );
-
-	RenderAtom nullAtom;
 
 	TiledImage<2, 2> tiled( &gamui );
 	tiled.SetPos( 520, 20 );
@@ -353,6 +409,28 @@ int main( int argc, char **argv )
 		SDL_Event event;
 		if ( SDL_PollEvent( &event ) ) {
 			switch( event.type ) {
+	
+				case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					screenX = event.window.data1;
+					screenY = event.window.data2;
+					glViewport( 0, 0, screenX, screenY );
+
+					gamui.SetScale(screenX, screenY, VIRTUAL_Y);
+#if BRIDGE == 0
+					gamui.SetText(16, textAtom, textAtomD, &textMetrics);
+#else	
+					int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
+					bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h);
+					SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
+					TESTGLERR();
+					glBindTexture(GL_TEXTURE_2D, textTextureID2);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
+					TESTGLERR();
+					gamui.SetText(textAtom, textAtomD, bridge);
+#endif
+				}
+				break;
 
 				case SDL_KEYDOWN:
 				{
@@ -366,17 +444,17 @@ int main( int argc, char **argv )
 				break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					gamui.TapDown( event.button.x, event.button.y );
+					gamui.TapDown( (float)event.button.x, (float)event.button.y );
 					break;
 
 				case SDL_MOUSEBUTTONUP:
 					{
-						const UIItem* item = gamui.TapUp( event.button.x, event.button.y );
+						const UIItem* item = gamui.TapUp( (float)event.button.x, (float)event.button.y );
 						if ( item ) {
 							range += 0.1f;
 							if ( range > 1.0f )
 								range = 0.0f;
-							bar.SetRange( 0, range );
+//							bar.SetRange( 0, range );
 						}
 					}
 					break;
@@ -396,11 +474,13 @@ int main( int argc, char **argv )
 		image2d.SetRotationZ( rotation );
 		gamui.Render();
 
-		SDL_GL_SwapBuffers();
+		SDL_GL_SwapWindow( screen );
 	}
+	SDL_FreeSurface(textSurface);
+	SDL_FreeSurface(fontSurface);
 
-
-
+	gamui.SetText(textAtom, textAtomD, 0);
+	delete bridge; bridge = 0;
 	SDL_Quit();
 	return 0;
 }

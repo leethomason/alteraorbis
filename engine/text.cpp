@@ -27,9 +27,9 @@ using namespace grinliz;
 
 
 UFOText* UFOText::instance = 0;
-void UFOText::Create( const gamedb::Reader* db, Texture* texture )
+void UFOText::Create(Texture* texture)
 {
-	instance = new UFOText( db, texture );
+	instance = new UFOText(texture);
 }
 
 
@@ -40,27 +40,9 @@ void UFOText::Destroy()
 }
 
 
-UFOText::UFOText( const gamedb::Reader* database, Texture* texture )
+UFOText::UFOText(Texture* texture )
 {
-	this->database = database;
 	this->texture = texture;
-	this->fixedWidth = false;
-
-	memset( metricCache, 0, sizeof(Metric)*CHAR_RANGE );
-	memset( kerningCache, 100, CHAR_RANGE*CHAR_RANGE );
-
-	const gamedb::Item* fontItem = database->Root()->Child( "data" )
-												   ->Child( "fonts" )
-												   ->Child( "font" );
-	fontItem = database->ChainItem( fontItem );
-	const gamedb::Item* infoItem = fontItem->Child( "info" );
-	const gamedb::Item* commonItem = fontItem->Child( "common" );
-
-	fontSize = (float)infoItem->GetInt( "size" );
-	texWidthInv = 1.0f / (float)commonItem->GetInt( "scaleW" );
-	texHeight = (float)commonItem->GetInt( "scaleH" );
-	texHeightInv = 1.0f / texHeight;
-
 	vbo = new GPUVertexBuffer( 0, VBO_MEM );
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 }
@@ -79,128 +61,6 @@ void UFOText::DeviceLoss()
 	vbo = new GPUVertexBuffer( 0, VBO_MEM );
 }
 
-
-void UFOText::CacheMetric( int c )
-{
-
-	char buffer[] = "char0";
-	buffer[4] = (char)c;
-
-	const gamedb::Item* fontItem = database->Root()->Child( "data" )
-												   ->Child( "fonts" )
-												   ->Child( "font" );
-	fontItem = database->ChainItem( fontItem );
-	const gamedb::Item* charItem = fontItem->Child( "chars" )->Child( buffer );
-
-	int index = MetricIndex( c );
-	GLASSERT( index >= 0 && index < CHAR_RANGE );
-	Metric* mc = &metricCache[ index ];
-	mc->isSet = 1;
-
-	if ( charItem ) {
-		mc->advance = charItem->GetInt( "xadvance" );
-
-		mc->x =		 charItem->GetInt( "x" );
-		mc->y =		 charItem->GetInt( "y" );
-		mc->width =  charItem->GetInt( "width" );
-		mc->height = charItem->GetInt( "height" );
-
-		mc->xoffset = charItem->GetInt( "xoffset" );
-		mc->yoffset = charItem->GetInt( "yoffset" );
-	}
-}
-
-
-void UFOText::CacheKern( int c, int cPrev )
-{
-	char kernbuf[] = "kerning00";
-	kernbuf[7] = (char)cPrev;
-	kernbuf[8] = (char)c;
-
-	const gamedb::Item* fontItem = database->Root()->Child( "data" )
-												   ->Child( "fonts" )
-												   ->Child( "font" );
-
-	const gamedb::Item* kernsItem = fontItem->Child( "kernings" );
-	const gamedb::Item* kernItem = 0;
-	
-	int index = KernIndex( c, cPrev );
-	GLASSERT( index >= 0 && index < CHAR_RANGE*CHAR_RANGE );
-	kerningCache[index] = 0;
-	
-	if ( kernsItem ) {
-		kernItem = kernsItem->Child( kernbuf );
-		if ( kernItem ) {
-			kerningCache[index] = kernItem->GetInt( "amount" );
-		}
-	}
-}
-
-
-
-void UFOText::Metrics(	int c, int cPrev,
-						float lineHeight,
-						gamui::IGamuiText::GlyphMetrics* metric )
-{
-	if ( c < 0 )  c += 256;
-	if ( cPrev < 0 ) cPrev += 256;
-
-	float s2 = 1.f;
-	if ( c > 128 ) {
-		s2 = 0.75f;
-		c -= 128;
-	}
-
-	if ( c < CHAR_OFFSET || c >= END_CHAR ) {
-		c = ' ';
-		cPrev = 0;
-	}
-	const Metric& mc = metricCache[ MetricIndex( c ) ];
-	if ( !mc.isSet ) CacheMetric( c );
-
-	float kern = 0;
-	if (    c >= CHAR_OFFSET && c < END_CHAR
-		 && cPrev >= CHAR_OFFSET && cPrev < END_CHAR ) 
-	{
-		int kernI = kerningCache[ KernIndex( c, cPrev ) ];
-		if ( kernI == 100 ) {
-			CacheKern( c, cPrev );
-			kernI = kerningCache[ KernIndex( c, cPrev ) ];
-		}
-
-		if ( kernI && s2 == 1.0f ) {
-			kern = (float)kernI;
-		}
-	}
-
-	float scale = (float)lineHeight / fontSize;
-	if ( mc.width ) {
-		metric->advance = ((float)mc.advance+kern) * scale * s2;
-
-		float x = (float)mc.x;
-		float y = (float)mc.y;
-		float width = (float)mc.width;
-		float height = (float)mc.height;
-
-		metric->x = ((float)mc.xoffset+kern) * scale;
-		metric->w = width * scale * s2;
-		metric->y = (float)mc.yoffset * scale;
-		metric->h = height * scale * s2;
-
-		metric->tx0 = x * texWidthInv;
-		metric->tx1 = (x + width) * texWidthInv;
-		metric->ty0 = (texHeight - 1.f - y) * texHeightInv;
-		metric->ty1 = (texHeight - 1.f - y - height) * texHeightInv;
-	}
-	else {
-		metric->advance = lineHeight * 0.4f;
-
-		metric->x = metric->y = metric->w = metric->h = 0;
-		metric->tx0 = metric->tx1 = metric->ty0 = metric->ty1 = 0;
-	}
-}
-
-
 void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 {
 	bool rendering = true;
@@ -208,46 +68,45 @@ void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 	float y = (float)_y;
 	float h = (float)_h;
 
+	float width = (float)h * 0.75f;
+	float advance = (float)h * 0.50f;
 	if ( w ) {
-		*w = 0;
-		rendering = false;
+		*w = int(float(strlen(str)) * width);
+		return;
 	}
+
+	static const float ROWS = 8.0f;
+	static const float COLS = 16.0f;
 
 	while( *str )
 	{
-		gamui::IGamuiText::GlyphMetrics metric;
-		Metrics( *str, 0, (float)h, &metric );
-
-		if ( fixedWidth ) {
-			float cw = (float)h * 0.5f;
-			metric.advance = cw;
-
-			if ( metric.w > cw ) {
-				metric.x = 0;
-				metric.w = cw;
-			}
-			else {
-				metric.x = (cw - metric.w) * 0.5f;
-			}
+		int index = *str - 32;
+		int r = index / 16;
+		int c = index - r * 16;
+		if (r <0 || r >= 8) {
+			r = c = 0;
 		}
+		GLASSERT(c >= 0 && c < 16);
+		GLASSERT(r >= 0 && r < 8);
 
-		if ( rendering ) {
-			PTVertex2* vBuf = quadBuf.PushArr(4);
-			vBuf[0].tex.Set( metric.tx0, metric.ty0 );
-			vBuf[1].tex.Set( metric.tx0, metric.ty1 );
-			vBuf[2].tex.Set( metric.tx1, metric.ty1 );
-			vBuf[3].tex.Set( metric.tx1, metric.ty0 );
+		float tx0 = float(c) / COLS;
+		float tx1 = tx0 + 1.0f / COLS;
+		float ty0 = 1.0f - float(r) / ROWS;
+		float ty1 = ty0 - 1.0f / ROWS;
 
-			vBuf[0].pos.Set( (float)x+metric.x,				(float)y+metric.y );	
-			vBuf[1].pos.Set( (float)x+metric.x,				(float)y+metric.y+metric.h );				
-			vBuf[2].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y+metric.h );	
-			vBuf[3].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y );	
-		}
-		x += metric.advance;
+		PTVertex2* vBuf = quadBuf.PushArr(4);
+		vBuf[0].tex.Set( tx0, ty0 );
+		vBuf[1].tex.Set( tx0, ty1 );
+		vBuf[2].tex.Set( tx1, ty1 );
+		vBuf[3].tex.Set( tx1, ty0 );
+
+		vBuf[0].pos.Set(x, y);
+		vBuf[1].pos.Set(x, y + h);
+		vBuf[2].pos.Set(x + width, y + h);
+		vBuf[3].pos.Set(x + width, y);
+
+		x += advance;
 		++str;
-	}
-	if ( w ) {
-		*w = int(x+0.5f) - _x;
 	}
 }
 

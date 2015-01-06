@@ -45,9 +45,9 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	
 	SetupTest();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	refreshButton.SetText( "refresh" );
@@ -65,6 +65,15 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	rtImage.SetSize( 400.f, 200.f );
 
 	LoadLighting();
+
+	RenderAtom adviser = LumosGame::CalcUIIconAtom("adviser");
+	mapImage.Init(&testMap->overlay0, adviser, false);
+	mapImage.SetPos(1, 1);
+	mapImage.SetSize(1, 1);
+
+	RenderAtom headAtom = LumosGame::CalcUIIconAtom("crystalGreen");
+	headImage.Init(&engine->overlay, headAtom, false);
+	model[0]->SetFlag(Model::MODEL_UI_TRACK);
 }
 
 
@@ -80,9 +89,9 @@ RenderTestScene::~RenderTestScene()
 
 void RenderTestScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 	
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &refreshButton, 2, -1 );
 
 	for( int i=0; i<NUM_CONTROL; ++i ) {
@@ -217,7 +226,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 			model[i]->DeltaAnimation( deltaTime, 0, 0 );
 		}
 	}
-	engine->Draw( deltaTime );
+	engine->Draw( deltaTime, 0, 0, this );
 	
 	if ( glowLayer >= 0 ) {
 		rtImage.SetVisible( true );
@@ -226,7 +235,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 		RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 			(const void*)engine->GetRenderTargetTexture(glowLayer), 0, 0, 1, 1 );
 		rtImage.SetAtom( atom );
-		rtImage.SetSize( port.UIWidth(), port.UIHeight() );
+		rtImage.SetSize(gamui2D.Width(), gamui2D.Height());
 		rtImage.SetPos( 0, 0 );
 	}
 	else {
@@ -240,3 +249,21 @@ void RenderTestScene::DrawDebugText()
 	DrawDebugTextDrawCalls( 0, 16, engine );
 }
 
+
+void RenderTestScene::UpdateUIElements(const Model* models[], int n)
+{
+	for (int i = 0; i < n; ++i) {
+		const Model* m = models[i];
+		if (m != model[0]) continue;
+
+		const Screenport& port = engine->GetScreenport();
+		const gamui::Gamui& g = engine->overlay;
+
+		const Rectangle3F aabb = m->AABB();
+		const Vector3F pos = m->Pos();
+		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
+
+		Vector2F ui = port.WorldToUI(topCenter, g);
+		headImage.SetCenterPos(ui.x, ui.y);
+	}
+}

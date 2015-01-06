@@ -53,7 +53,7 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 	debugRay.origin.Zero();
 
 	creationTick = 0;
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 	data = _data;
 
 	context.worldMap = new WorldMap( 64, 64 );
@@ -65,7 +65,7 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	LoadMap();
 
-	LayoutCalculator layout = game->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	regionButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	regionButton.SetText( "region" );
 }
@@ -83,10 +83,10 @@ NavTest2Scene::~NavTest2Scene()
 void NavTest2Scene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &regionButton, 1, -1 );
 }
 
@@ -132,7 +132,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	const char* asset = "humanFemale";
 	if ( random.Rand( 4 ) == 0 ) {
-		asset = "hornet";
+		asset = "visitor";
 	}
 
 	chit->Add( new RenderComponent( asset ));
@@ -227,12 +227,6 @@ void NavTest2Scene::Pan(int action, const grinliz::Vector2F& view, const grinliz
 void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
-
-	if ( action == GAME_TAP_UP && !uiHasTap ) {
-		// Check mini-map
-		grinliz::Vector2F ui;
-		game->GetScreenport().ViewToUI( view, &ui );
-	}
 }
 
 

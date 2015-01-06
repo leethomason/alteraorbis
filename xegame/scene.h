@@ -114,9 +114,17 @@ public:
 
 	//// ------- public interface  below this line needs eval ---- //
 	void RenderGamui2D()	{ gamui2D.Render(); }
+	void ResizeGamui(int w, int h);
 
 	// 2D overlay rendering.
 	virtual void DrawDebugText()								{}
+	gamui::LayoutCalculator DefaultLayout();
+	enum {
+		CANCEL_X = -1,
+		OKAY_X = 0
+	};
+	void InitStd(gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel);
+	void PositionStd(gamui::PushButton* okay, gamui::PushButton* cancel);
 
 protected:
 

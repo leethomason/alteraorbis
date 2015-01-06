@@ -43,6 +43,7 @@
 
 #include <time.h>
 #include <direct.h>	// for _mkdir
+#include "../game/layout.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -97,16 +98,20 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	LoadTextures();
 	modelLoader = new ModelLoader();
 	LoadModels();
-	LoadAtoms();
+	//LoadAtoms();
 	LoadPalettes();
 	AnimationResourceManager::Instance()->Load( database0 );
 
 	delete modelLoader;
 	modelLoader = 0;
 
-	Texture* textTexture = TextureManager::Instance()->GetTexture( "font" );
+
+	FontSingleton* bridge = FontSingleton::Instance();
+	bridge->Init("./res/font.ttf");
+	
+	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
 	GLASSERT( textTexture );
-	UFOText::Create( database0, textTexture );
+	UFOText::Create(textTexture);
 
 	_mkdir( "save" );
 
@@ -132,6 +137,7 @@ Game::~Game()
 
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
+	delete FontSingleton::Instance();
 	SettingsManager::Destroy();
 	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
@@ -289,9 +295,13 @@ void Game::PushPopScene()
 		sceneStack.Pop();
 
 		if ( !sceneStack.Empty() ) {
-			sceneStack.Top()->scene->Activate();
-			sceneStack.Top()->scene->Resize();
-			sceneStack.Top()->scene->SceneResult( id, result, data );
+			Scene* scene = sceneStack.Top()->scene;
+			GLASSERT(scene);
+
+			scene->Activate();
+			scene->ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
+			scene->Resize();
+			scene->SceneResult( id, result, data );
 		}
 		delete data;
 	}
@@ -321,6 +331,7 @@ void Game::PushPopScene()
 		sceneQueued.Free();
 
 		node->scene->Activate();
+		node->scene->ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
 		node->scene->Resize();
 
 		if ( oldTop ) 
@@ -339,6 +350,7 @@ void Game::CreateSceneLower( const SceneNode& in, SceneNode* node )
 }
 
 
+/*
 void Game::LoadAtoms()
 {
 	TextureManager* tm = TextureManager::Instance();
@@ -347,7 +359,8 @@ void Game::LoadAtoms()
 		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
 	renderAtoms[ATOM_TEXT_D].Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
 		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-}	
+}
+*/
 
 
 void Game::LoadPalettes()
@@ -375,14 +388,16 @@ void Game::LoadPalettes()
 }
 
 
+/*
 const gamui::RenderAtom& Game::GetRenderAtom( int id )
 {
 	GLASSERT( id >= 0 && id < ATOM_COUNT );
 	GLASSERT( renderAtoms[id].textureHandle );
 	return renderAtoms[id];
 }
+*/
 
-
+/*
 RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float x0, float y0, float x1, float y1 )
 {
 	GLASSERT( uiRendering >= 0 && uiRendering < UIRenderer::RENDERSTATE_COUNT );
@@ -391,6 +406,7 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 						tm->GetTexture( assetName ),
 						x0, y0, x1, y1 );
 }
+*/
 
 
 const char* Game::GamePath( const char* type, int slot, const char* extension ) const
@@ -441,7 +457,6 @@ void Game::PrintPerf()
 	UFOText* ufoText = UFOText::Instance();
 	int perfY = 0;
 
-	ufoText->SetFixed( true );
 	while( p < end ) {
 		char* q = buf;
 		while( p < end && *p != '\n' ) {
@@ -452,7 +467,6 @@ void Game::PrintPerf()
 		perfY += 16;
 		++p;
 	}
-	ufoText->SetFixed( false );
 }
 
 
@@ -695,6 +709,7 @@ void Game::DeviceLoss()
 void Game::Resize( int width, int height, int rotation ) 
 {
 	screenport.Resize( width, height );
+	sceneStack.Top()->scene->ResizeGamui(width, height);
 	sceneStack.Top()->scene->Resize();
 }
 

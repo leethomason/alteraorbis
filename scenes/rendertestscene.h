@@ -18,6 +18,7 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../engine/engine.h"
 
 class LumosGame;
 class Engine;
@@ -32,7 +33,7 @@ public:
 };
 
 
-class RenderTestScene : public Scene
+class RenderTestScene : public Scene, public IUITracker
 {
 	typedef Scene super;
 public:
@@ -50,6 +51,8 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
 
+	void UpdateUIElements(const Model* models[], int n);
+
 private:
 	enum { NUM_ITEMS = 4,
 		   NUM_MODELS = 16,
@@ -64,6 +67,7 @@ private:
 	gamui::PushButton refreshButton;
 	gamui::ToggleButton control[ NUM_CONTROL ];
 	gamui::Image rtImage;
+	gamui::Image mapImage, headImage;
 
 	Engine* engine;
 	Model*  model[NUM_MODELS];

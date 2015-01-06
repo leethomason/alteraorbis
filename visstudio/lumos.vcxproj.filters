@@ -421,6 +421,9 @@
     <ClCompile Include="..\game\visitorweb.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\gamui\gamuifreetype.cpp">
+      <Filter>Source Files\gamui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -842,6 +845,9 @@
     </ClInclude>
     <ClInclude Include="..\game\visitorweb.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gamui\gamuifreetype.h">
+      <Filter>Source Files\gamui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

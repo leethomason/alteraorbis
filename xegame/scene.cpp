@@ -22,6 +22,7 @@
 #include "../engine/particle.h"
 #include "../audio/xenoaudio.h"
 #include "../xegame/istringconst.h"
+#include "../game/lumosgame.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -31,10 +32,17 @@ Scene::Scene( Game* _game )
 	: game( _game ),
 	  uiRenderer( GPUDevice::HUD )
 {
-	gamui2D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-//	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-	gamui2D.SetTextHeight( TEXT_HEIGHT );
-//	gamui3D.SetTextHeight( TEXT_HEIGHT );
+
+	gamui2D.Init(&uiRenderer);
+	FontSingleton* bridge = FontSingleton::Instance();
+
+	// Don't set text height on scene constructor. Do in Resize()
+	//int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
+	//bridge->SetPhysicalPixel(heightInPixels);
+	gamui2D.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
+
+	const Screenport& screenport = _game->GetScreenport();
+	ResizeGamui(screenport.PhysicalWidth(), screenport.PhysicalHeight());
 	
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
@@ -42,10 +50,10 @@ Scene::Scene( Game* _game )
 }
 
 
-bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )
+bool Scene::ProcessTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
-	grinliz::Vector2F ui;
-	game->GetScreenport().ViewToUI( screen, &ui );
+	grinliz::Vector2F window;
+	game->GetScreenport().ViewToWindow( view, &window );
 	bool tapCaptured = (gamui2D.TapCaptured() != 0);
 
 	// Callbacks:
@@ -55,7 +63,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 
 	const UIItem* uiItem = 0;
 	if ( action == GAME_TAP_DOWN ) {
-		gamui2D.TapDown( ui.x, ui.y );
+		gamui2D.TapDown( window.x, window.y );
 		dragStarted = false;
 		return gamui2D.TapCaptured() != 0;
 	}
@@ -67,7 +75,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 				dragImage.SetAtom( atom );
 			}
 		}
-		dragImage.SetCenterPos( ui.x, ui.y );
+		dragImage.SetCenterPos(gamui2D.TransformPhysicalToVirtual(window.x), gamui2D.TransformPhysicalToVirtual(window.y));
 	}
 	else if ( action == GAME_TAP_CANCEL ) {
 		gamui2D.TapCancel();
@@ -77,7 +85,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	}
 	else if ( action == GAME_TAP_UP ) {
 		const UIItem* dragStart = gamui2D.TapCaptured();
-		uiItem = gamui2D.TapUp( ui.x, ui.y );
+		uiItem = gamui2D.TapUp( window.x, window.y );
 		
 		if ( dragStarted ) {
 			dragStarted = false;
@@ -230,3 +238,63 @@ void Scene::HandleHotKey( int value )
 	}
 }
 
+
+/*
+640x480 mininum screen.
+6 buttons
+80 pixels / per
+*/
+gamui::LayoutCalculator Scene::DefaultLayout()
+{
+	LayoutCalculator layout(gamui2D.Width(), gamui2D.Height());
+	layout.SetGutter(LAYOUT_GUTTER, LAYOUT_GUTTER);
+	layout.SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+	layout.SetSpacing(LAYOUT_SPACING);
+	return layout;
+}
+
+
+
+void Scene::InitStd(gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel)
+{
+	const ButtonLook& stdBL = static_cast<LumosGame*>(game)->GetButtonLook(LumosGame::BUTTON_LOOK_STD);
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if (okay) {
+		okay->Init(g, stdBL);
+		okay->SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+		okay->SetDeco(LumosGame::CalcUIIconAtom("okay", true), LumosGame::CalcUIIconAtom("okay", false));
+	}
+	if (cancel) {
+		cancel->Init(g, stdBL);
+		cancel->SetSize(LAYOUT_SIZE_X, LAYOUT_SIZE_Y);
+		cancel->SetDeco(LumosGame::CalcUIIconAtom("cancel", true), LumosGame::CalcUIIconAtom("cancel", false));
+	}
+}
+
+
+void Scene::PositionStd(gamui::PushButton* okay, gamui::PushButton* cancel)
+{
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if (okay)
+		layout.PosAbs(okay, OKAY_X, -1);
+
+	if (cancel)
+		layout.PosAbs(cancel, CANCEL_X, -1);
+}
+
+
+void Scene::ResizeGamui(int w, int h)
+{
+	gamui2D.SetScale(w, h, LAYOUT_VIRTUAL_HEIGHT);
+
+	FontSingleton* bridge = FontSingleton::Instance();
+
+	// Generate / reset the text.
+	int heightInPixels = (int)gamui2D.TransformVirtualToPhysical(float(LAYOUT_TEXT_HEIGHT));
+	bridge->SetPhysicalPixel(heightInPixels);
+
+	// Set the atoms to the gamui system:
+	gamui2D.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
+}

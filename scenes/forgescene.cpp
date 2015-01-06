@@ -47,7 +47,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	engine->camera.SetPosWC( D, 0, 0 );
 	engine->CameraLookAt( engine->camera.PosWC(), V3F_ZERO );
 
-	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 
 	availableLabel.Init( &gamui2D );
 	requiredLabel.Init( &gamui2D );
@@ -107,8 +107,8 @@ ForgeScene::~ForgeScene()
 
 void ForgeScene::Resize()
 {
-	lumosGame->PositionStd( &okay, 0 );
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	PositionStd( &okay, 0 );
+	LayoutCalculator layout = DefaultLayout();
 
 	for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
 		layout.PosAbs( &itemType[i], 0, i );		

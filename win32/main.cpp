@@ -49,15 +49,26 @@ static const float KEY_ZOOM_SPEED		= 0.04f;
 static const float KEY_ROTATE_SPEED		= 4.0f;
 static const float KEY_MOVE_SPEED		= 0.4f;
 
-#if 1
+/*
 // 4:3 test
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
-#else
+*/
+
+/*
+// Virtual size test.
+static const int SCREEN_WIDTH  = 800;	// 750 virtual
+static const int SCREEN_HEIGHT = 640;	// 600 virtual
+*/
+
+// Laptop
+static const int SCREEN_WIDTH  = 700;
+static const int SCREEN_HEIGHT = 520;
+
+/*
 static const int SCREEN_WIDTH  = 952;
 static const int SCREEN_HEIGHT = 600;
-#endif
-
+*/
 
 const int multisample = 2;
 bool fullscreen = false;
@@ -70,45 +81,20 @@ bool cameraIso = true;
 int nModDB = 0;
 grinliz::GLString* databases[GAME_MAX_MOD_DATABASES];	
 
-#ifdef TEST_ROTATION
-const int rotation = 1;
-#else
-const int rotation = 0;
-#endif
-
 void ScreenCapture();
 void PostCurrentGame();
 
-void TransformXY( int x0, int y0, int* x1, int* y1 )
+int main(int argc, char **argv)
 {
-	// As a way to do scaling outside of the core, translate all
-	// the mouse coordinates so that they are reported in opengl
-	// window coordinates.
-	if ( rotation == 0 ) {
-		*x1 = x0;
-		*y1 = screenHeight-1-y0;
-	}
-	else if ( rotation == 1 ) {
-		*x1 = x0;
-		*y1 = screenHeight-1-y0;
-	}
-	else {
-		GLASSERT( 0 );
-	}
-}
-
-
-int main( int argc, char **argv )
-{    
 	MemStartCheck();
-	{ char* test = new char[16]; delete [] test; }
+	{ char* test = new char[16]; delete[] test; }
 
 	{
 		grinliz::GLString releasePath;
 		GetSystemPath(GAME_SAVE_DIR, "release_log.txt", &releasePath);
 		SetReleaseLog(fopen(releasePath.c_str(), "w"));
 	}
-	GLOUTPUT_REL(( "Altera startup. version'%s'\n", VERSION ));
+	GLOUTPUT_REL(("Altera startup. version'%s'\n", VERSION));
 
 	SDL_version compiled;
 	SDL_version linked;
@@ -121,25 +107,25 @@ int main( int argc, char **argv )
 	GLASSERT((linked.major == compiled.major && linked.minor == compiled.minor));
 
 	// SDL initialization steps.
-    if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0)
 	{
-	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
-		exit( 1 );
+		fprintf(stderr, "SDL initialization failed: %s\n", SDL_GetError());
+		exit(1);
 	}
 
 	//  OpenGL 4.3 provides full compatibility with OpenGL ES 3.0.
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 #if 0	// I was hoping to get to Angle on intel - may still be able to. But
-		// as is this gets HW mode, which crashes in a function that should
-		// be supported. The Intel drivers are so terrible. As of this writing,
-		// you can't specify the DX version of ES:
-		//		http://forums.libsdl.org/viewtopic.php?t=9770&highlight=angle+opengl
+	// as is this gets HW mode, which crashes in a function that should
+	// be supported. The Intel drivers are so terrible. As of this writing,
+	// you can't specify the DX version of ES:
+	//		http://forums.libsdl.org/viewtopic.php?t=9770&highlight=angle+opengl
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);	// driver supports 2 and 3. Both crash.
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -160,27 +146,27 @@ int main( int argc, char **argv )
 #endif
 
 	if (multisample) {
-		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisample);
 	}
 
-	if ( argc == 3 ) {
-		screenWidth = atoi( argv[1] );
-		screenHeight = atoi( argv[2] );
-		if ( screenWidth <= 0 ) screenWidth   = SCREEN_WIDTH;
-		if ( screenHeight <= 0 ) screenHeight = SCREEN_HEIGHT;
+	if (argc == 3) {
+		screenWidth = atoi(argv[1]);
+		screenHeight = atoi(argv[2]);
+		if (screenWidth <= 0) screenWidth = SCREEN_WIDTH;
+		if (screenHeight <= 0) screenHeight = SCREEN_HEIGHT;
 	}
 
 	SDL_DisplayMode displayMode;
 	SDL_GetCurrentDisplayMode(0, &displayMode);
 
 	// Note that our output surface is rotated from the iPod.
-	SDL_Window *screen = SDL_CreateWindow(	"Altera",
-											50, 50,
-											screenWidth, screenHeight,
-											/*SDL_WINDOW_FULLSCREEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
-	GLASSERT( screen );
-	SDL_GL_CreateContext( screen );
+	SDL_Window *screen = SDL_CreateWindow("Altera",
+		50, 50,
+		screenWidth, screenHeight,
+		/*SDL_WINDOW_FULLSCREEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	GLASSERT(screen);
+	SDL_GL_CreateContext(screen);
 
 	int stencil = 0;
 	int depth = 0;
@@ -191,32 +177,32 @@ int main( int argc, char **argv )
 	glGetError();	// 2 queries, 2 errors.
 	CHECK_GL_ERROR;
 	GLOUTPUT_REL(("SDL screen created. stencil=%d depthBits=%d\n", stencil, depth));
-	
-    /* Verify there is a surface */
-    if ( !screen ) {
-	    fprintf( stderr,  "Video mode set failed: %s\n", SDL_GetError( ) );
-	    exit( 1 );
+
+	/* Verify there is a surface */
+	if (!screen) {
+		fprintf(stderr, "Video mode set failed: %s\n", SDL_GetError());
+		exit(1);
 	}
 
 	CHECK_GL_ERROR;
 	int r = glewInit();
-	GLASSERT( r == GL_NO_ERROR );
+	GLASSERT(r == GL_NO_ERROR);
 
 	while (glGetError() != GL_NO_ERROR) {
 		// around again
 	}
 	CHECK_GL_ERROR;
 
-	const unsigned char* vendor   = glGetString( GL_VENDOR );
-	const unsigned char* renderer = glGetString( GL_RENDERER );
-	const unsigned char* version  = glGetString( GL_VERSION );
+	const unsigned char* vendor = glGetString(GL_VENDOR);
+	const unsigned char* renderer = glGetString(GL_RENDERER);
+	const unsigned char* version = glGetString(GL_VERSION);
 
-	GLOUTPUT_REL(( "OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version ));
+	GLOUTPUT_REL(("OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version));
 	CHECK_GL_ERROR;
 
 	bool done = false;
 	bool zooming = false;
-    SDL_Event event;
+	SDL_Event event;
 
 	float yRotation = 45.0f;
 	grinliz::Vector2I mouseDown = { 0, 0 };
@@ -227,51 +213,51 @@ int main( int argc, char **argv )
 	int zoomX = 0;
 	int zoomY = 0;
 
-	void* game = NewGame( screenWidth, screenHeight, rotation );
-	
+	void* game = NewGame(screenWidth, screenHeight, 0);
+
 	int modKeys = SDL_GetModState();
 	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
 
 	// ---- Main Loop --- //
-	while ( !done ) {
+	while (!done) {
 		while (SDL_PollEvent(&event)) {
 
 			switch (event.type)
 			{
-			case SDL_WINDOWEVENT:
+				case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 					screenWidth = event.window.data1;
 					screenHeight = event.window.data2;
 					GameDeviceLoss(game);
-					GameResize(game, screenWidth, screenHeight, rotation);
+					GameResize(game, screenWidth, screenHeight, 0);
 				}
 				break;
 
-			case SDL_KEYUP:
+				case SDL_KEYUP:
 				switch (event.key.keysym.scancode)
 				{
-				case SDL_SCANCODE_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
-				case SDL_SCANCODE_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
-				case SDL_SCANCODE_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
-				case SDL_SCANCODE_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
-				default:
+					case SDL_SCANCODE_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
+					case SDL_SCANCODE_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
+					case SDL_SCANCODE_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
+					case SDL_SCANCODE_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
+					default:
 					break;
 				}
 				break;
 
-			case SDL_KEYDOWN:
+				case SDL_KEYDOWN:
 				{
 					// sym or scancode? I used a dvorak keyboard, so appreciate
 					// every day the difference. However, AWSD support is the 
 					// primary thing so scancode is hopefully the better choice.
 					switch (event.key.keysym.scancode)
 					{
-					case SDL_SCANCODE_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
-					case SDL_SCANCODE_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
-					case SDL_SCANCODE_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
-					case SDL_SCANCODE_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
+						case SDL_SCANCODE_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
+						case SDL_SCANCODE_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
+						case SDL_SCANCODE_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
+						case SDL_SCANCODE_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
 
-					case SDL_SCANCODE_F4:
+						case SDL_SCANCODE_F4:
 						{
 							int sdlMod = SDL_GetModState();
 							if (sdlMod & (KMOD_RALT | KMOD_LALT))
@@ -279,69 +265,69 @@ int main( int argc, char **argv )
 						}
 						break;
 
-					case SDL_SCANCODE_ESCAPE:	GameHotKey(game, GAME_HK_ESCAPE);			break;
-					case SDL_SCANCODE_SPACE:	GameHotKey(game, GAME_HK_SPACE);			break;
-					case SDL_SCANCODE_F1:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
-					case SDL_SCANCODE_F2:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
-					// F3: screenshot
-					case SDL_SCANCODE_TAB:	GameHotKey(game, GAME_HK_CAMERA_TOGGLE);		break;
-					case SDL_SCANCODE_HOME:	GameHotKey(game, GAME_HK_CAMERA_CORE);			break;
-					case SDL_SCANCODE_END:	GameHotKey(game, GAME_HK_CAMERA_AVATAR);		break;
+						case SDL_SCANCODE_ESCAPE:	GameHotKey(game, GAME_HK_ESCAPE);			break;
+						case SDL_SCANCODE_SPACE:	GameHotKey(game, GAME_HK_SPACE);			break;
+						case SDL_SCANCODE_F1:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
+						case SDL_SCANCODE_F2:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
+							// F3: screenshot
+						case SDL_SCANCODE_TAB:	GameHotKey(game, GAME_HK_CAMERA_TOGGLE);		break;
+						case SDL_SCANCODE_HOME:	GameHotKey(game, GAME_HK_CAMERA_CORE);			break;
+						case SDL_SCANCODE_END:	GameHotKey(game, GAME_HK_CAMERA_AVATAR);		break;
 
-					//case SDLK_a: reserved
-					case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
-					case SDL_SCANCODE_C:	GameHotKey(game, GAME_HK_ATTACH_CORE);	break;
-					//case SDLK_d: reserved
-					case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
-					case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
-					case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
-					case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);			break;
-					case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
-					case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
-					//case SDLK_s: reserved
-					case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
-					case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
-					//case SDLK_w: reserved
+							//case SDLK_a: reserved
+						case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
+						case SDL_SCANCODE_C:	GameHotKey(game, GAME_HK_ATTACH_CORE);	break;
+							//case SDLK_d: reserved
+						case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
+						case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
+						case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
+						case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);			break;
+						case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
+						case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
+							//case SDLK_s: reserved
+						case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
+						case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
+							//case SDLK_w: reserved
 
-					case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
-					case SDL_SCANCODE_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
-					case SDL_SCANCODE_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
-					case SDL_SCANCODE_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
-					case SDL_SCANCODE_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
+						case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
+						case SDL_SCANCODE_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
+						case SDL_SCANCODE_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
+						case SDL_SCANCODE_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
+						case SDL_SCANCODE_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
 
-					case SDL_SCANCODE_F3:
+						case SDL_SCANCODE_F3:
 						GameDoTick(game, SDL_GetTicks());
 						SDL_GL_SwapWindow(screen);
 						ScreenCapture();
 						break;
 
-					case SDL_SCANCODE_F11:
-					{
-						if (fullscreen) {
-							// SDL_RestoreWindow doesn't seem to work as I expect.
-							SDL_SetWindowFullscreen(screen, 0);
-							SDL_SetWindowSize(screen, restoreWidth, restoreHeight);
-							fullscreen = false;
+						case SDL_SCANCODE_F11:
+						{
+							if (fullscreen) {
+								// SDL_RestoreWindow doesn't seem to work as I expect.
+								SDL_SetWindowFullscreen(screen, 0);
+								SDL_SetWindowSize(screen, restoreWidth, restoreHeight);
+								fullscreen = false;
+							}
+							else {
+								restoreWidth = screenWidth;
+								restoreHeight = screenHeight;
+								SDL_SetWindowFullscreen(screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+								fullscreen = true;
+							}
 						}
-						else {
-							restoreWidth = screenWidth;
-							restoreHeight = screenHeight;
-							SDL_SetWindowFullscreen(screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
-							fullscreen = true;
-						}
-					}
-					break;
+						break;
 
-					default:
+						default:
 						break;
 					}
 				}
 				break;
 
-			case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONDOWN:
 				{
-					int x, y;
-					TransformXY(event.button.x, event.button.y, &x, &y);
+					int x = event.button.x;
+					int y = event.button.y;
 					GLOUTPUT(("Mouse down %d %d\n", x, y));
 
 					int mod = 0;
@@ -368,10 +354,10 @@ int main( int argc, char **argv )
 				}
 				break;
 
-			case SDL_MOUSEBUTTONUP:
+				case SDL_MOUSEBUTTONUP:
 				{
-					int x, y;
-					TransformXY(event.button.x, event.button.y, &x, &y);
+					int x = event.button.x;
+					int y = event.button.y;
 
 					if (event.button.button == 3) {
 						zooming = false;
@@ -389,12 +375,12 @@ int main( int argc, char **argv )
 				}
 				break;
 
-			case SDL_MOUSEMOTION:
+				case SDL_MOUSEMOTION:
 				{
 					SDL_GetRelativeMouseState(&zoomX, &zoomY);
 					int state = SDL_GetMouseState(NULL, NULL);
-					int x, y;
-					TransformXY(event.button.x, event.button.y, &x, &y);
+					int x = event.button.x;
+					int y = event.button.y;
 
 					int mod = 0;
 					if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
@@ -417,34 +403,34 @@ int main( int argc, char **argv )
 				}
 				break;
 
-			case SDL_QUIT:
+				case SDL_QUIT:
 				{
 					done = true;
 				}
 				break;
 
-			default:
+				default:
 				break;
 			}
 		}
 		U32 delta = SDL_GetTicks() - tickTimer;
-		if ( delta < TIME_BETWEEN_FRAMES ) {
+		if (delta < TIME_BETWEEN_FRAMES) {
 			SDL_Delay(1);
 			continue;
 		}
 		tickTimer = SDL_GetTicks();
-		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LEQUAL );
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 
 		const U8* keys = SDL_GetKeyboardState(0);
 		U32 tickDelta = thisTick - lastTick;
 		if (tickDelta > 100) tickDelta = 100;
 
-		float keyMoveSpeed  = KEY_MOVE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
-		float keyZoomSpeed  = KEY_ZOOM_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+		float keyMoveSpeed = KEY_MOVE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+		float keyZoomSpeed = KEY_ZOOM_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
 		float keyRotatepeed = KEY_ROTATE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
 
-		if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] ) {
+		if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]) {
 			if (modKeys & KMOD_CTRL)
 				GameZoom(game, GAME_ZOOM_DISTANCE, keyZoomSpeed);
 			else
@@ -472,19 +458,19 @@ int main( int argc, char **argv )
 		{
 			lastTick = thisTick;
 			thisTick = SDL_GetTicks();
-			PROFILE_BLOCK( GameDoTick );
-			GameDoTick( game, thisTick );
+			PROFILE_BLOCK(GameDoTick);
+			GameDoTick(game, thisTick);
 		}
 		{
-			PROFILE_BLOCK( Swap );
-			SDL_GL_SwapWindow( screen );
+			PROFILE_BLOCK(Swap);
+			SDL_GL_SwapWindow(screen);
 		}
 	}
 
-	GameSave( game );
-	DeleteGame( game );
+	GameSave(game);
+	DeleteGame(game);
 
-	for( int i=0; i<nModDB; ++i ) {
+	for (int i = 0; i < nModDB; ++i) {
 		delete databases[i];
 	}
 

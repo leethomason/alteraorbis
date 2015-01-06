@@ -16,13 +16,42 @@
 #ifndef UIRENDERING_INCLUDED
 #define UIRENDERING_INCLUDED
 
-#include "../gamui/gamui.h"
+#include "../gamui/gamuifreetype.h"
 #include "gpustatemanager.h"
+#include "texture.h"
 
 class Screenport;
 
+class FontSingleton : public gamui::GamuiFreetypeBridge, 
+					  public ITextureCreator
 
-class UIRenderer : public gamui::IGamuiRenderer, public gamui::IGamuiText
+{
+public:
+	~FontSingleton();
+
+	static FontSingleton* Instance() {
+		if (!instance)
+			instance = new FontSingleton();
+		return instance;
+	}
+
+	// Sets the physical pixels. Generate a new texture if needed.
+	void SetPhysicalPixel(int h);
+
+	virtual void CreateTexture(Texture* t);
+	gamui::RenderAtom TextAtom(bool disabled);
+
+private:
+	enum { TEX_W = 512, TEX_H = 256 };
+	FontSingleton();
+
+	static FontSingleton* instance;
+	int fontHeight;
+	Texture* fontTexture;
+};
+
+
+class UIRenderer : public gamui::IGamuiRenderer
 {
 public:
 	enum {
@@ -55,8 +84,8 @@ public:
 	virtual void Render( const void* renderState, const void* textureHandle, int start, int count ) ;
 
 	static void SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, gamui::RenderAtom* );
-	static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );
-	virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
+	//static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );
+	//virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
 	
 	// Rendering parameters:
 	grinliz::Vector4F uv[NUM_DATA];

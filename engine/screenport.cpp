@@ -21,12 +21,13 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glmatrix.h"
 
-using namespace grinliz;
+#include "../gamui/gamui.h"
 
+using namespace grinliz;
 
 Screenport::Screenport( int w, int h, int virtualHeight )
 {
-	this->virtualHeight = (float)virtualHeight;
+//	this->virtualHeight = (float)virtualHeight;
 	this->near = EL_NEAR;
 	this->far  = EL_FAR;
 	Resize( w, h );
@@ -37,8 +38,8 @@ Screenport::Screenport( int w, int h, int virtualHeight )
 
 void Screenport::Resize( int w, int h )
 {
-	if ( w > 0 && h > 0 ) {
-		physicalWidth  = (float)w;
+	if (w > 0 && h > 0) {
+		physicalWidth = (float)w;
 		physicalHeight = (float)h;
 	}
 	else {
@@ -46,29 +47,15 @@ void Screenport::Resize( int w, int h )
 		h = (int)physicalHeight;
 	}
 
-	GPUDevice::Instance()->SetViewport( w, h );
-
-	// Sad but true: the game assets are set up for 480x320 resolution.
-	// How to scale?
-	//   1. Scale the smallest axis to be within 320x480. But then buttons get
-	//      bigger and all layout has to be programmatic.
-	//   2. Clip to a window. Seems a waste to lose that space.
-	//   3. Fix UI Height at 320. Stretch backgrounds. That looks weird...but
-	//		the background images can be patched up.
-	// Try #3.
-
-	screenHeight = virtualHeight;
-	screenWidth = screenHeight * physicalWidth / physicalHeight;
-
-	//GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
+	GPUDevice::Instance()->SetViewport(w, h);
 }
 
 
 void Screenport::SetUI()	
 {
 	projection2D.SetIdentity();
-	projection2D.SetOrtho( 0, screenWidth, screenHeight, 0, -1, 1 );
-	GPUDevice::Instance()->SetOrthoTransform( (int)screenWidth, (int)screenHeight );
+	projection2D.SetOrtho(0, physicalWidth, physicalHeight, 0, -1, 1);
+	GPUDevice::Instance()->SetOrthoTransform((int)physicalWidth, (int)physicalHeight);
 	uiMode = true;
 }
 
@@ -133,17 +120,14 @@ void Screenport::SetPerspective()
 }
 
 
-void Screenport::ViewToUI( const grinliz::Vector2F& view, grinliz::Vector2F* ui ) const
+grinliz::Vector2F Screenport::WorldToUI(const grinliz::Vector3F& world, const gamui::Gamui& g) const
 {
-	ui->x = view.x;
-	ui->y = screenHeight-view.y;
-}
-
-
-void Screenport::UIToView( const grinliz::Vector2F& ui, grinliz::Vector2F* view ) const
-{
-	view->x = ui.x;
-	view->y = screenHeight-ui.y;
+	Vector2F view = WorldToView(world);
+	Vector2F window = ViewToWindow(view);
+	Vector2F ui = { 0, 0 };
+	ui.x = g.TransformPhysicalToVirtual(window.x);
+	ui.y = g.TransformPhysicalToVirtual(window.y);
+	return ui;
 }
 
 
@@ -160,8 +144,8 @@ bool Screenport::ViewToWorld( const grinliz::Vector2F& v, const grinliz::Matrix4
 	}
 
 	// View normalized:
-	Vector4F in = { 2.0f * v.x / screenWidth - 1.0f,
-					2.0f * v.y / screenHeight - 1.0f,
+	Vector4F in = { 2.0f * v.x / physicalWidth - 1.0f,
+					2.0f * v.y / physicalHeight - 1.0f,
 					0.f, //v.z*2.0f-1.f,
 					1.0f };
 
@@ -195,38 +179,34 @@ void Screenport::WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F*
 	p.Set( world, 1 );
 	r = mvp * p;
 
-	Vector2F v0, v1;
-	Rectangle2F clipInView;
-	Vector2F min = { 0, 0 };
-	Vector2F max = { UIWidth(), UIHeight() };
-	UIToView( min, &v0 );
-	UIToView( max, &v1 );
-
-	clipInView.FromPair( v0.x, v0.y, v1.x, v1.y );
-	
-	v->x = Interpolate( -1.0f, (float)clipInView.min.x,
-						1.0f,  (float)clipInView.max.x,
+	v->x = Interpolate( -1.0f, 0.0f,
+						1.0f,  (float)physicalWidth,
 						r.x/r.w );
-	v->y = Interpolate( -1.0f, (float)clipInView.min.y,
-						1.0f,  (float)clipInView.max.y,
+	v->y = Interpolate( -1.0f, 0.0f,
+						1.0f,  (float)physicalHeight,
 						r.y/r.w );
 }
 
 
+/*
 void Screenport::ViewToWindow( const Vector2F& view, Vector2F* window ) const
 {
-	window->x = view.x * physicalWidth  / screenWidth;
-	window->y = view.y * physicalHeight / screenHeight;
+	GLASSERT(0);	// not correct
+	window->x = view.x * physicalWidth;	// / screenWidth;
+	window->y = view.y * physicalHeight;	// / screenHeight;
 }
 
 
 void Screenport::WindowToView( const Vector2F& window, Vector2F* view ) const
 {
-	view->x = window.x * screenWidth / physicalWidth;
-	view->y = window.y * screenHeight / physicalHeight;
+	GLASSERT(0);	// not correct
+	view->x = window.x;	// *screenWidth / physicalWidth;
+	view->y = window.y; // *screenHeight / physicalHeight;
 }
+*/
 
 
+/*
 void Screenport::UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const
 {	
 	Vector2F v;
@@ -240,7 +220,7 @@ void Screenport::UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2
 	ViewToWindow( v, &w );
 	clip->DoUnion( w );
 }
-
+*/
 
 void Screenport::CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean )
 {

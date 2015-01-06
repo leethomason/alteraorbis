@@ -29,7 +29,6 @@
 
 using namespace gamui;
 using namespace std;
-using namespace grinliz;
 
 static const float PI = 3.1415926535897932384626433832795f;
 
@@ -118,7 +117,7 @@ UIItem::~UIItem()
 }
 
 
-Gamui::Vertex* UIItem::PushQuad( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+Gamui::Vertex* UIItem::PushQuad( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	int base = vertexBuf->Size();
 	uint16_t *index = indexBuf->PushArr( 6 );
@@ -263,11 +262,14 @@ float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 {
 	float w = 0;
 	IGamuiText::GlyphMetrics metrics;
-	float height = m_gamui->GetTextHeight();
+	IGamuiText::FontMetrics font;
+
+	iText->GamuiFont(&font);
+
 	char prev = ' ';
 
 	while( *p && !isspace( *p )) {
-		iText->GamuiGlyph( *p, prev, height, &metrics );
+		iText->GamuiGlyph( *p, prev, &metrics );
 		w += metrics.advance;
 		prev = *p;
 		++p;
@@ -276,25 +278,38 @@ float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 }
 
 
-void TextLabel::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) 
+void TextLabel::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf ) 
 {
 	ConstQueue( indexBuf, vertexBuf );
 }
 
-void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) const
+
+void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf ) const
 {
 	if ( !m_gamui )
 		return;
+
+	/*	This routine gets done in physical pixels, not virtual.
+		Hence all the Transform() calls to convert from virtual to physical.
+	*/
+
 	IGamuiText* iText = m_gamui->GetTextInterface();
+	if (!iText) return;
+	IGamuiText::FontMetrics font;
+	iText->GamuiFont(&font);
 
 	const char* p = m_str;
-	float x = X();
-	float y = Y(); //floorf( Y()+0.5f );	// snapping seems to hurt quality. Text is so tricky.
+	const float X0 = floorf(m_gamui->TransformVirtualToPhysical(X()));
+	const float Y0 = floorf(m_gamui->TransformVirtualToPhysical(Y()));
+	float x = X0;
+	float y = Y0 + float(font.ascent);	// move to the baseline
+	const float tabWidth = m_gamui->TransformVirtualToPhysical(m_tabWidth);
+	const float boundsWidth = m_gamui->TransformVirtualToPhysical(m_boundsWidth);
+	const float boundsHeight = m_gamui->TransformVirtualToPhysical(m_boundsHeight);
 
 	float xmax = x;
-
 	IGamuiText::GlyphMetrics metrics;
-	float height = m_gamui->GetTextHeight();
+	const float height = float(font.linespace);
 	int tab = 0;
 
 	while ( p && *p ) {
@@ -305,7 +320,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		while ( *p == '\n' ) {
 			y += height;
 			tab = 0;
-			x = X();
+			x = X0;
 			++p;
 		}
 		if ( !*p ) break;
@@ -315,14 +330,14 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 			++p;
 			if ( !*p ) break;
 
-			if ( m_tabWidth > 0 ) {
+			if ( tabWidth > 0 ) {
 				++tab;
-				x = X() + float(tab)*m_tabWidth;
+				x = X0 + float(tab)*tabWidth;
 			}
 		}
 
 		// Throw away space after a line break.
-		if ( m_boundsWidth && ( x == X() && y > Y() )) {
+		if ( boundsWidth && ( x == X0 && y > Y0 )) {
 			while ( *p && *p == ' ' ) {
 				++p;
 			}
@@ -332,44 +347,41 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		}
 
 		// If we aren't the first word, do we need to break?
-		if ( m_boundsWidth && (x > X()) && (*p != ' ') ) {
+		if ( boundsWidth && (x > X0) && (*p != ' ') ) {
 			float w = WordWidth( p, iText );
-			if ( x + w > X() + m_boundsWidth ) { 
+			if ( x + w > X0 + boundsWidth ) { 
 				y += height;
-				x = X();
+				x = X0;
 				tab = 0;
 				continue;
 			}
 		}
 
 		// And finally, have we exceeded the y bound?
-		if ( m_boundsHeight && ( y + height >= Y() + m_boundsHeight) ) {
+		if ( boundsHeight && ( y + font.descent >= Y0 + boundsHeight) ) {
 			break;
 		}
 
 		// Everything above is about a word; now we are
 		// committed and can run in a tight loop.
-		//y = round(y); doesn't help - why?
+		y = floorf(y);
 		while( p && *p && *p != '\n' && *p != '\t' ) {
-			//x = floorf(x + 0.5f); causes text wiggle.
-			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
+			x = floorf(x);
 
-			float x0 = x+metrics.x;
-			float x1 = x+metrics.x+metrics.w;
-			float y0 = y+metrics.y;
-			float y1 = y+metrics.y+metrics.h;
+			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, &metrics );
 
 			if ( vertexBuf ) {
 				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 		
-				vertex[0].Set( x0, y0,				
-							   metrics.tx0, metrics.ty0 );
-				vertex[1].Set( x0, y1, 
-							   metrics.tx0, metrics.ty1 );
-				vertex[2].Set( x1, y1, 
-							   metrics.tx1, metrics.ty1 );
-				vertex[3].Set( x1, y0,
-							   metrics.tx1, metrics.ty0 );
+				float x0 = x + (metrics.x);
+				float x1 = x + (metrics.x + metrics.w);
+				float y0 = y + (metrics.y);
+				float y1 = y + (metrics.y + metrics.h);
+
+				vertex[0].Set( x0, y0, metrics.tx0, metrics.ty0 );
+				vertex[1].Set( x0, y1, metrics.tx0, metrics.ty1 );
+				vertex[2].Set( x1, y1, metrics.tx1, metrics.ty1 );
+				vertex[3].Set( x1, y0, metrics.tx1, metrics.ty0 );
 			}
 			int done = isspace( *p );
 
@@ -383,8 +395,8 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		}
 	}
 
-	m_width = xmax - X();
-	m_height = y + height - Y();
+	m_width  = m_gamui->TransformPhysicalToVirtual(xmax - X0);
+	m_height = m_gamui->TransformPhysicalToVirtual(y + height - (Y0 + float(font.ascent)));
 }
 
 
@@ -533,12 +545,13 @@ void Canvas::DrawRectangle(float x, float y, float w, float h)
 }
 
 
-void Canvas::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	if ( m_atom.textureHandle == 0 ) {
 		return;
 	}
 
+	const int startVertex = vertexBuf->Size();
 	for (int i = 0; i < m_cmds.Size(); ++i) {
 
 		const Cmd& cmd = m_cmds[i];
@@ -581,6 +594,7 @@ void Canvas::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > 
 			break;
 		}
 	}
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -678,7 +692,7 @@ bool TiledImageBase::DoLayout()
 }
 
 
-void TiledImageBase::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void TiledImageBase::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	int startVertex = vertexBuf->Size();
 
@@ -710,6 +724,7 @@ void TiledImageBase::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		y += dy;
 	}
 	ApplyRotation( count*4, vertexBuf->Mem() + startVertex );
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -719,11 +734,12 @@ const RenderAtom& Image::GetRenderAtom() const
 }
 
 
-void Image::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void Image::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	if ( m_atom.textureHandle == 0 ) {
 		return;
 	}
+	const int startVertex = vertexBuf->Size();
 
 	// Dislike magic numbers, but also dislike having to track atom sizes.
 	//float sliceSize = 0.75f * Min( m_width, m_height );
@@ -784,6 +800,7 @@ void Image::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *
 			}
 		}
 	}
+	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
 
@@ -892,25 +909,29 @@ void Button::PositionChildren()
 	m_icon.SetPos( m_face.X() + m_face.Width() - iconSize, m_face.Y() + m_face.Height() - iconSize );
 
 	// --- text --- //
+	IGamuiText* itext = m_gamui->GetTextInterface();
+	if (itext) {
+		IGamuiText::FontMetrics font;
+		itext->GamuiFont(&font);
 
-	float w = m_label.Width();
-	
-	if ( m_textLayout == LEFT ) {
-		x = X();
+		float w = m_label.Width();
+
+		if (m_textLayout == LEFT) {
+			x = X();
+		}
+		else if (m_textLayout == RIGHT) {
+			x = X() + m_face.Width() - w;
+		}
+		else {
+			x = X() + (m_face.Width() - w)*0.5f;
+		}
+
+		x += m_textDX;
+		y0 += m_textDY;
+		y1 += m_textDY;
+
+		m_label.SetPos(x, y0);
 	}
-	else if ( m_textLayout == RIGHT ) {
-		x = X() + m_face.Width() - w;
-	}
-	else {
-		x = X() + (m_face.Width()-w)*0.5f;
-	}
-
-	x += m_textDX;
-	y0 += m_textDY;
-	y1 += m_textDY;
-
-	m_label.SetPos( x, y0 );
-
 	m_label.SetVisible( Visible() );
 	m_deco.SetVisible( Visible() );
 	m_face.SetVisible( Visible() );
@@ -1000,7 +1021,7 @@ bool Button::DoLayout()
 }
 
 
-void Button::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void Button::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	// does nothing - children draw
 }
@@ -1133,7 +1154,7 @@ void ToggleButton::AddSubItem( UIItem* item )
 	GAMUIASSERT( item->SuperItem() == 0 );
 
 	if ( !m_subItemArr ) {
-		m_subItemArr = new CDynArray< UIItem* >();
+		m_subItemArr = new PODArray< UIItem* >();
 	}
 	m_subItemArr->Push( item );
 	item->SetSuperItem( this );
@@ -1144,7 +1165,7 @@ void ToggleButton::RemoveSubItem( UIItem* item )
 {
 	GAMUIASSERT( m_subItemArr );
 	int index = m_subItemArr->Find( item );
-	GLASSERT( index >= 0 );
+	GAMUIASSERT( index >= 0 );
 	item->SetSuperItem( 0 );
 	m_subItemArr->Remove( index );
 }
@@ -1287,7 +1308,7 @@ bool DigitalBar::DoLayout()
 }
 
 
-void DigitalBar::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void DigitalBar::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	// does nothing - children draw
 }
@@ -1298,34 +1319,19 @@ Gamui::Gamui()
 		m_disabledItemTapped(0),
 		m_iText( 0 ),
 		m_orderChanged( true ),
+		m_physicalWidth(800),
+		m_physicalHeight(600),
+		m_virtualHeight(600),
 		m_modified( true ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
-		m_textHeight( 16 ),
+		//m_textHeight( 16 ),
 		m_relativeX( 0 ),
 		m_relativeY( 0 ),
 		m_focus( -1 ),
 		m_focusImage( 0 ),
 		m_currentDialog(0)
 {
-}
-
-
-Gamui::Gamui(	IGamuiRenderer* renderer,
-				const RenderAtom& textEnabled, 
-				const RenderAtom& textDisabled,
-				IGamuiText* iText ) 
-	:	m_itemTapped( 0 ),
-		m_disabledItemTapped(0),
-		m_iText( 0 ),
-		m_orderChanged( true ),
-		m_modified( true ),
-		m_textHeight( 16 ),
-		m_focus( -1 ),
-		m_focusImage( 0 ),
-		m_currentDialog(0)
-{
-	Init( renderer, textEnabled, textDisabled, iText );
 }
 
 
@@ -1338,15 +1344,32 @@ Gamui::~Gamui()
 }
 
 
-void Gamui::Init(	IGamuiRenderer* renderer,
-					const RenderAtom& textEnabled, 
-					const RenderAtom& textDisabled,
-					IGamuiText* iText )
+void Gamui::Init(	IGamuiRenderer* renderer )
 {
 	m_iRenderer = renderer;
+	m_iText = 0;
+}
+
+
+void Gamui::SetText(	const RenderAtom& textEnabled,
+						const RenderAtom& textDisabled,
+						IGamuiText* iText)
+{
+	//m_textHeight = size;
 	m_textAtomEnabled = textEnabled;
 	m_textAtomDisabled = textDisabled;
 	m_iText = iText;
+}
+
+
+void Gamui::SetScale(int pixelWidth, int pixelHeight, int virtualHeight)
+{
+	if (pixelWidth != m_physicalWidth || pixelHeight != m_physicalHeight || virtualHeight != m_virtualHeight) {
+		m_physicalWidth = pixelWidth;
+		m_physicalHeight = pixelHeight;
+		m_virtualHeight = virtualHeight;
+		Modify();
+	}
 }
 
 
@@ -1381,15 +1404,18 @@ void Gamui::GetRelativeTap( float* x, float* y )
 }
 
 
-const UIItem* Gamui::Tap( float x, float y )
+const UIItem* Gamui::Tap(float xPhysical, float yPhysical)
 {
-	TapDown( x, y );
-	return TapUp( x, y );
+	TapDown(xPhysical, yPhysical);
+	return TapUp(xPhysical, yPhysical);
 }
 
 
-void Gamui::TapDown( float x, float y )
+void Gamui::TapDown( float xPhysical, float yPhysical )
 {
+	float x = TransformPhysicalToVirtual(xPhysical);
+	float y = TransformPhysicalToVirtual(yPhysical);
+
 	GAMUIASSERT( m_itemTapped == 0 );
 	m_itemTapped = 0;
 	m_disabledItemTapped = 0;
@@ -1419,8 +1445,11 @@ void Gamui::TapDown( float x, float y )
 }
 
 
-const UIItem* Gamui::TapUp( float x, float y )
+const UIItem* Gamui::TapUp( float xPhysical, float yPhysical )
 {
+	float x = TransformPhysicalToVirtual(xPhysical);
+	float y = TransformPhysicalToVirtual(yPhysical);
+
 	m_dragStart = m_itemTapped;
 
 	const UIItem* result = 0;
@@ -1458,6 +1487,7 @@ void Gamui::TapCancel()
 	m_itemTapped = 0;
 	m_disabledItemTapped = 0;
 }
+
 
 int Gamui::SortItems( const void* _a, const void* _b )
 { 
@@ -1513,7 +1543,7 @@ void Gamui::Render()
 		const UIItem* focused = GetFocus();
 		if ( focused ) {
 			m_focusImage->SetVisible( true );
-			m_focusImage->SetSize( GetTextHeight()*2.5f, GetTextHeight()*2.5f );
+			m_focusImage->SetSize(TextHeightVirtual()*2.5f, TextHeightVirtual()*2.5f);
 			m_focusImage->SetCenterPos( focused->X() + focused->Width()*0.5f, focused->Y() + focused->Height()*0.5f );
 		}
 		else {
@@ -1726,6 +1756,49 @@ float Gamui::GetFocusY()
 		return item->CenterY();
 	}
 	return -1;
+}
+
+
+int Gamui::TextHeightInPixels() const
+{
+	IGamuiText* iText = GetTextInterface();
+	GAMUIASSERT(iText);
+	if (!iText) return 0;
+	IGamuiText::FontMetrics font;
+	iText->GamuiFont(&font);
+	return font.linespace;
+}
+
+
+float Gamui::TextHeightVirtual() const
+{
+	return TransformPhysicalToVirtual(float(TextHeightInPixels()));
+}
+
+
+float Gamui::TransformVirtualToPhysical(float x) const
+{
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	return x * M;
+}
+
+
+float Gamui::TransformPhysicalToVirtual(float x) const
+{
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	return x / M;
+}
+
+
+void Gamui::TransformVirtualToPhysical(Vertex* v, int n) const
+{ 
+	const float M = float(m_physicalHeight) / float(m_virtualHeight);
+	while (n) {
+		v->x *= M;
+		v->y *= M;
+		--n;
+		++v;
+	}
 }
 
 

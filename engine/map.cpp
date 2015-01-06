@@ -39,23 +39,23 @@ const float DIAGONAL_COST = 1.414f;
 
 
 
-Map::Map( int w, int h )
+Map::Map(int w, int h)
 {
 	usingSectors = false;
 	width = w;
 	height = h;
 	texture = 0;
-	GLASSERT( w <= EL_MAP_SIZE );
-	GLASSERT( h <= EL_MAP_SIZE );
-	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
+	GLASSERT(w <= EL_MAP_SIZE);
+	GLASSERT(h <= EL_MAP_SIZE);
+	GLOUTPUT(("Map created. %dK\n", sizeof(*this) / 1024));
 	saturation = 1.0f;
 
 	gamui::RenderAtom nullAtom;
-	overlay0.Init( this, nullAtom, nullAtom, 0 );
-	overlay1.Init( this, nullAtom, nullAtom, 0 );
+	overlay0.Init(this);
+	overlay1.Init(this);
 
 	TextureManager* texman = TextureManager::Instance();
-	texman->CreateTexture( "miniMap", 512, 512, TEX_RGB16, Texture::PARAM_NONE, this );
+	texman->CreateTexture("miniMap", 512, 512, TEX_RGB16, Texture::PARAM_NONE, this);
 }
 
 
@@ -131,6 +131,7 @@ void Map::BeginRenderState( const void* renderState )
 			gamuiShader.SetBlendMode( BLEND_NORMAL );
 			break;
 
+		case UIRenderer::RENDERSTATE_UI_DECO:
 		case RENDERSTATE_MAP_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA );
 			gamuiShader.SetBlendMode( BLEND_NORMAL );

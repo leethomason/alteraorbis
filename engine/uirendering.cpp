@@ -19,10 +19,84 @@
 #include "texture.h"
 #include "text.h"
 #include "shadermanager.h"
+#include "surface.h"
 
 
 using namespace grinliz;
 using namespace gamui;
+
+
+FontSingleton* FontSingleton::instance = 0;
+
+FontSingleton::FontSingleton()
+{
+	GLASSERT(instance == 0);
+	instance = this;
+	fontHeight = 0;
+	fontTexture = TextureManager::Instance()->CreateTexture("fontTexture", 512, 256, TEX_RGBA16, Texture::PARAM_NEAREST, this);
+}
+
+
+FontSingleton::~FontSingleton()
+{
+	GLASSERT(instance == this);
+	instance = 0;
+}
+
+
+void FontSingleton::CreateTexture(Texture* t)
+{
+	if (StrEqual(t->Name(), "fontTexture")) {
+		GLASSERT(fontHeight);
+		if (!fontHeight) return;
+
+		const int w = t->Width();
+		const int h = t->Height();
+
+		uint8_t* d8 = new uint8_t[w*h];
+		uint16_t* d16 = new uint16_t[w*h];
+
+		Generate(fontHeight, d8, w, h);
+		for (int j = 0; j < h; ++j) {
+			for (int i = 0; i < w; ++i) {
+				uint8_t c8 = d8[j*w + i];
+				Color4U8 color4u8 = { 255, 255, 255, c8 };
+				uint16_t c16 = Surface::CalcRGBA16(color4u8);
+				//d16[(h - 1 - j)*w + i] = c16;
+				d16[j*w + i] = c16;
+			}
+		}
+		t->Upload(d16, sizeof(U16)*w*h);
+		GLOUTPUT(("FontSingleton::CreateTexture %d pixels\n", fontHeight));
+
+		delete[] d8;
+		delete[] d16;
+	}
+	else {
+		GLASSERT(0);
+	}
+}
+
+
+gamui::RenderAtom FontSingleton::TextAtom(bool disabled)
+{
+	RenderAtom atom;
+	if (!disabled)
+		atom.Init((const void*)UIRenderer::RENDERSTATE_UI_TEXT, (const void*)fontTexture, 0, 0, 1, 1);
+	else
+		atom.Init((const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, (const void*)fontTexture, 0, 0, 1, 1);
+	return atom;
+}
+
+
+void FontSingleton::SetPhysicalPixel(int h)
+{
+	if (h != fontHeight) {
+		fontHeight = h;
+		CreateTexture(fontTexture);
+	}
+}
+
 
 
 void UIRenderer::BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
@@ -143,13 +217,13 @@ void UIRenderer::SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, i
 
 
 
-void UIRenderer::GamuiGlyph( int c, int c1, float height, IGamuiText::GlyphMetrics* metric )
-{
-	UFOText::Instance()->Metrics( c, c1, height, metric );
-}
+//void UIRenderer::GamuiGlyph( int c, int c1, float height, IGamuiText::GlyphMetrics* metric )
+//{
+//	UFOText::Instance()->Metrics( c, c1, height, metric );
+//}
 
 
-/*static*/ void UIRenderer::LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float _x, float _y, float vSpace, const Screenport& port )
+/*void UIRenderer::LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float _x, float _y, float vSpace, const Screenport& port )
 {
 	float w = items->Width();
 	float h = items->Height()*(float)nItems + vSpace*(float)(nItems-1);
@@ -173,7 +247,7 @@ void UIRenderer::GamuiGlyph( int c, int c1, float height, IGamuiText::GlyphMetri
 		item->SetPos( x, y + items->Height()*(float)i + vSpace*(float)i );
 	}
 }
-
+*/
 
 void DecoEffect::Play( int startPauseTime, bool invisibleWhenDone )	
 {

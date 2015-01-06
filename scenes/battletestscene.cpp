@@ -112,8 +112,8 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	fireTestGun = false;
 
 	context.game = game;
-	context.game->InitStd( &gamui2D, &okay, 0 );
-	LayoutCalculator layout = context.game->DefaultLayout();
+	InitStd( &gamui2D, &okay, 0 );
+	LayoutCalculator layout = DefaultLayout();
 
 	const ButtonLook& look = context.game->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 
@@ -164,7 +164,7 @@ void BattleTestScene::Resize()
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 
 	const Screenport& port = context.game->GetScreenport();
-	LayoutCalculator layout = context.game->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
 	layout.PosAbs( &okay, 0, -1 );
 	layout.PosAbs( &goButton, 0, -2 );

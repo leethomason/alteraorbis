@@ -27,7 +27,6 @@
 #include <stdint.h>
 #include <memory.h>
 #include <string.h>
-#include "../grinliz/glcontainer.h"
 
 #if defined( _DEBUG ) || defined( DEBUG )
 #	if defined( _MSC_VER )
@@ -43,7 +42,6 @@
 
 namespace gamui
 {
-
 class Gamui;
 class IGamuiRenderer;
 class IGamuiText;
@@ -53,6 +51,136 @@ class TextLabel;
 class PushButton;
 class ToggleButton;
 class Image;
+
+
+template < class T >
+class PODArray
+{
+	enum { CACHE = 4 };
+public:
+	typedef T ElementType;
+
+	PODArray() : size( 0 ), capacity( CACHE ), nAlloc(0) {
+		mem = reinterpret_cast<T*>(cache);
+		GAMUIASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
+	}
+
+	~PODArray() {
+		Clear();
+		if ( mem != reinterpret_cast<T*>(cache) ) {
+			free( mem );
+		}
+		GAMUIASSERT( nAlloc == 0 );
+	}
+
+	T& operator[]( int i )				{ GAMUIASSERT( i>=0 && i<(int)size ); return mem[i]; }
+	const T& operator[]( int i ) const	{ GAMUIASSERT( i>=0 && i<(int)size ); return mem[i]; }
+
+	void Push( const T& t ) {
+		EnsureCap( size+1 );
+		mem[size] = t;
+		++size;
+		++nAlloc;
+	}
+
+
+	void PushFront( const T& t ) {
+		EnsureCap( size+1 );
+		for( int i=size; i>0; --i ) {
+			mem[i] = mem[i-1];
+		}
+		mem[0] = t;
+		++size;
+		++nAlloc;
+	}
+
+	T* PushArr( int count ) {
+		EnsureCap( size+count );
+		T* result = &mem[size];
+		size += count;
+		nAlloc += count;
+		return result;
+	}
+
+	T Pop() {
+		GAMUIASSERT( size > 0 );
+		--size;
+		--nAlloc;
+		return mem[size];
+	}
+
+	void Remove( int i ) {
+		GAMUIASSERT( i < (int)size );
+		// Copy down.
+		for( int j=i; j<size-1; ++j ) {
+			mem[j] = mem[j+1];
+		}
+		// Get rid of the end:
+		Pop();
+	}
+
+	void SwapRemove( int i ) {
+		if (i < 0) {
+			GAMUIASSERT(i == -1);
+			return;
+		}
+		GAMUIASSERT( i<(int)size );
+		GAMUIASSERT( size > 0 );
+		
+		mem[i] = mem[size-1];
+		Pop();
+	}
+
+	int Find( const T& t ) const {
+		for( int i=0; i<size; ++i ) {
+			if ( mem[i] == t )
+				return i;
+		}
+		return -1;
+	}
+
+	int Size() const		{ return size; }
+	
+	void Clear()			{ 
+		while( !Empty() ) 
+			Pop();
+		GAMUIASSERT( nAlloc == 0 );
+		GAMUIASSERT( size == 0 );
+	}
+	bool Empty() const		{ return size==0; }
+	const T* Mem() const	{ return mem; }
+	T* Mem()				{ return mem; }
+	const T* End() const	{ return mem + size; }	// mem never 0, because of cache
+
+	void Reserve(int n) { EnsureCap(n); }
+
+	void EnsureCap( int count ) {
+		if ( count > capacity ) {
+			if (count < 16) capacity = 16;
+			while (capacity < count) capacity *= 2;
+			if ( mem == reinterpret_cast<T*>(cache) ) {
+				mem = (T*)malloc( capacity*sizeof(T) );
+				memcpy( mem, cache, size*sizeof(T) );
+			}
+			else {
+				mem = (T*)realloc( mem, capacity*sizeof(T) );
+			}
+		}
+	}
+
+protected:
+	PODArray( const PODArray<T>& );	// not allowed. Add a missing '&' in the code.
+	void operator=( const PODArray< T >& rhs );	// hard to implement with ownership semantics
+
+	T* mem;
+	int size;
+	int capacity;
+	int nAlloc;
+	enum { 
+		CACHE_SIZE = (CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)
+	};
+	int cache[CACHE_SIZE];
+};
 
 
 /**
@@ -179,18 +307,27 @@ public:
 
 	/// Construct and Init later.
 	Gamui();
-	/// Constructor
-	Gamui(	IGamuiRenderer* renderer,
-			const RenderAtom& textEnabled, 
-			const RenderAtom& textDisabled,
-			IGamuiText* iText );
 	~Gamui();
 
-	/// Required if the default constructor used.
-	void Init(	IGamuiRenderer* renderer,
-				const RenderAtom& textEnabled, 
-				const RenderAtom& textDisabled,
-				IGamuiText* iText );
+	/// Initialize with a renderer. Called once.
+	void Init(IGamuiRenderer* renderer);
+	/** Initialize the text system. Can be called multiple times. Generally called in conjunction with SetScale().
+		The size of the text is from the iText interface. It isn't tracked by gamui directly.
+
+		'textEnabled' the render atom to use, usually the text texture and render state
+		'textDisabled' with a lighter render effect
+		'iText' the pointer to the metrics interface
+	*/
+	void SetText(const RenderAtom& textEnabled, const RenderAtom& textDisabled, IGamuiText* iText);
+
+	/// Sets the physical vs. virtual coordinate system. Generally called in conjunction with SetText()
+	void SetScale(int pixelWidth, int pixelHeight, int virtualHeight);
+
+	int PixelWidth() const { return m_physicalWidth; }
+	int PixelHeight() const { return m_physicalHeight; }
+	float Height() const { return float(m_virtualHeight); }
+	float Width() const { return TransformPhysicalToVirtual(float(m_physicalWidth)); }
+	float AspectRatio() const { return float(m_physicalHeight) / float(m_physicalWidth); }
 
 	void StartDialog(const char* name);
 	void EndDialog();
@@ -213,20 +350,23 @@ public:
 	const RenderAtom& GetTextAtom() 			{ return m_textAtomEnabled; }
 	const RenderAtom& GetDisabledTextAtom()		{ return m_textAtomDisabled; }
 
-	IGamuiText* GetTextInterface() const	{ return m_iText; }
-	void SetTextHeight( float h )			{ m_textHeight = h; }
-	float GetTextHeight() const				{ return m_textHeight; }
+	IGamuiText* GetTextInterface() const			{ return m_iText; }
+
+	/// Query the text height in physical pixels.
+	int   TextHeightInPixels() const;
+	/// Query the text height in virtual pixels.
+	float TextHeightVirtual() const;
 
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
 		* TapDown return the item tapped on. This does not activate anything except capture.
 		* TapUp returns if the item was activated (that is, the up and down item are the same.)
 	*/
-	void			TapDown( float x, float y );		
-	const UIItem*	TapUp( float x, float y );						///< Used as a pair with TapDown
+	void			TapDown( float xPhysical, float yPhysical );		
+	const UIItem*	TapUp( float xPhysical, float yPhysical );		///< Used as a pair with TapDown
 	void			TapCancel();									///< Cancel a tap (generally in response to the OS)
 	const UIItem*	TapCaptured() const { return m_itemTapped; }	///< The item that received the TapDown, while in move.
-	const UIItem*	Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
+	const UIItem*	Tap( float xPhysical, float yPhysical );		///< Used to send events on systems that have a simple tap without up/down symantics.
 	void			GetRelativeTap( float* x, float* y );			///< Get the tap location, in item coordinates, of the last tap down. [0,1]
 
 	/** The return of a Tap...() or TapCaptured() is a valid UI Item.
@@ -245,9 +385,14 @@ public:
 	void			AddToFocusGroup( const UIItem* item, int id );
 	void			SetFocus( const UIItem* item );
 	const UIItem*	GetFocus() const;
-	void			MoveFocus( float x, float y );
+	void			MoveFocus( float x, float y );	// FIXME: in virtual coordinates?
 	float			GetFocusX();
 	float			GetFocusY();
+
+	void			TransformVirtualToPhysical(Vertex* v, int n) const;
+	float			TransformVirtualToPhysical(float x) const;
+
+	float			TransformPhysicalToVirtual(float x) const;
 
 	static const RenderAtom& NullAtom() { return m_nullAtom; }
 
@@ -272,12 +417,12 @@ private:
 	IGamuiRenderer*					m_iRenderer;
 	IGamuiText*						m_iText;
 
+	int				m_physicalWidth, m_physicalHeight, m_virtualHeight;
 	bool			m_orderChanged;
 	bool			m_modified;
-	grinliz::CDynArray<UIItem*> m_itemArr;
+	PODArray<UIItem*> m_itemArr;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
-	float			m_textHeight;
 	float			m_relativeX;
 	float			m_relativeY;
 	int				m_focus;
@@ -298,11 +443,11 @@ private:
 		int				group;
 	};
 
-	grinliz::CDynArray< unsigned >			m_dialogStack;
-	grinliz::CDynArray< FocusItem >			m_focusItems;
-	grinliz::CDynArray< State >				m_stateBuffer;
-	grinliz::CDynArray< uint16_t >			m_indexBuffer;
-	grinliz::CDynArray< Vertex >			m_vertexBuffer;
+	PODArray< unsigned >			m_dialogStack;
+	PODArray< FocusItem >			m_focusItems;
+	PODArray< State >				m_stateBuffer;
+	PODArray< uint16_t >			m_indexBuffer;
+	PODArray< Vertex >				m_vertexBuffer;
 };
 
 
@@ -323,15 +468,25 @@ class IGamuiText
 {
 public:
 	struct GlyphMetrics {
-		float advance;
-		float x, y, w, h;			// position, based at 0,0
+		GlyphMetrics() : advance(0), x(0), y(0), w(0), h(0), tx0(0), ty0(0), tx1(0), ty1(0) {}
+
+		int advance;
+		float x, y;					// position. Offset by x, y.
+		float w, h;					// w & h. should be a ration of (tx1-tx0) and (ty1-ty0)
 		float tx0, ty0, tx1, ty1;	// texture coordinates of the glyph
 	};
 
+	struct FontMetrics {
+		int ascent;
+		int descent;
+		int linespace;				// distance between lines.
+	};
+
 	virtual ~IGamuiText()	{}
-	virtual void GamuiGlyph( int c0, int cPrev,	// character, prev character
-							 float height,
+	virtual void GamuiGlyph( int c0, int cPrev,		// character, prev character
 							 gamui::IGamuiText::GlyphMetrics* metric ) = 0;
+
+	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric) = 0;
 };
 
 
@@ -423,7 +578,7 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const = 0;
 	virtual bool DoLayout() = 0;
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) = 0;
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex ) = 0;
 
 	virtual void Clear()	{ m_gamui = 0; }
 
@@ -450,7 +605,7 @@ protected:
 	template <class T> T Min( T a, T b ) const		{ return a<b ? a : b; }
 	template <class T> T Max( T a, T b ) const		{ return a>b ? a : b; }
 	float Mean( float a, float b ) const			{ return (a+b)*0.5f; }
-	static Gamui::Vertex* PushQuad( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	static Gamui::Vertex* PushQuad( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 	void Modify()		{ if ( m_gamui ) m_gamui->Modify(); }
 	void OrderChanged()	{ if ( m_gamui ) m_gamui->OrderChanged(); }
 
@@ -496,12 +651,12 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
 	float WordWidth( const char* p, IGamuiText* iText ) const;
 	// Always sets the width and height (which are mutable for that reason.)
-	void ConstQueue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) const;
+	void ConstQueue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex ) const;
 
 	enum { ALLOCATED = 16 };
 	char  m_buf[ALLOCATED];
@@ -537,7 +692,7 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 	virtual bool HandleTap( TapAction action, float x, float y );
 
 private:
@@ -569,7 +724,7 @@ public:
 	virtual float Height() const										{ return DEFAULT_SIZE; }
 
 	virtual bool DoLayout()												{ return true; }
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
 	enum {
@@ -587,7 +742,7 @@ private:
 		float thickness;
 	};
 	RenderAtom m_atom;
-	grinliz::CDynArray<Cmd> m_cmds;
+	PODArray<Cmd> m_cmds;
 };
 
 
@@ -609,7 +764,7 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 	virtual int CX() const = 0;
 	virtual int CY() const = 0;
@@ -705,7 +860,7 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 	virtual PushButton* ToPushButton() { return 0; }
 	virtual ToggleButton* ToToggleButton() { return 0; }
@@ -880,7 +1035,7 @@ private:
 	ToggleButton* m_next;
 	ToggleButton* m_prev;
 	bool m_wasUp;
-	grinliz::CDynArray< UIItem* >* m_subItemArr;
+	PODArray< UIItem* >* m_subItemArr;
 };
 
 
@@ -912,7 +1067,7 @@ public:
 
 	virtual const RenderAtom& GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
 	float		m_t[2];

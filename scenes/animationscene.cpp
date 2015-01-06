@@ -41,10 +41,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	currentBone = -1;
 	currentAnim = 0;
 
-	game->InitStd( &gamui2D, &okay, 0 );
+	InitStd( &gamui2D, &okay, 0 );
 	Screenport* port = game->GetScreenportMutable();
 	
-	LayoutCalculator layout = game->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 
 	boneLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	boneLeft.SetText( "<" );
@@ -155,9 +155,9 @@ AnimationScene::~AnimationScene()
 void AnimationScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	lumosGame->PositionStd( &okay, 0 );
+	PositionStd( &okay, 0 );
 
-	LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &boneLeft,		0, -2 );
 	layout.PosAbs( &boneName,		1, -2 );
 	layout.PosAbs( &boneRight,		3, -2 );

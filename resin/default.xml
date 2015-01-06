@@ -43,8 +43,6 @@
   <texture filename="palette_50.png" emissive="true" depth="32" />
   <texture filename="palette_100.png" emissive="true" depth="32" />
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" depth="32" />
-  <texture filename="charSwatch.png" width="128" height="8" /> 
-  <texture filename="characters.png" />
   <texture filename="bluestone.png" />
   <texture filename="shield.png" emissive="true" colorMap="true" />
   <texture filename="debugging.png" noMip="true" />
@@ -55,6 +53,7 @@
   <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" depth="32"/>
   <texture filename="flags.png" />
   <texture filename="calibration.png" />
+  <texture filename="fixedfont.png" noMip="true"/>
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
@@ -278,11 +277,6 @@
     <particle name="spark" meta="trigger" />
   </model>
   
-  <model filename="chess_characters.ac" modelName="hornet" origin="2 0 0" shading="flat" polyRemoval="pre">
-    <meta name="trigger" pos="1.8 0.56 0" />
-    <meta name="target"  pos="2 0.54 0" />
-  </model>
-
   <!-- orb plant -->
   <model filename="plant0.ac" modelName="plant0.0"    origin="-6 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="plant0.ac" modelName="plant0.1"    origin="-4 0 0"  shading="flat" polyRemoval="pre" />
@@ -386,7 +380,7 @@
   <data assetName="explosionWAV2"   filename="sound/Explo_2_22k.wav" />
   <data assetName="explosionWAV3"   filename="sound/Explo_3_22k.wav" />
 
-
+<!-- Deprecated by truetype rendering.
   <font assetName="font" filename="font_0.png" noMip="true" alphaTexture="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>
     <common lineHeight="28" base="23" scaleW="256" scaleH="128" pages="1" packed="0" alphaChnl="0" redChnl="3" greenChnl="3" blueChnl="3"/>
@@ -649,5 +643,5 @@
       <kerning first="123" second="106" amount="1" />
     </kernings>
   </font>
-
+-->
 </resource>
