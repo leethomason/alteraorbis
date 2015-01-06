@@ -1,3 +1,13 @@
+x portrait and suit colors not matching
+x suit colors are the same
+- check gobman that is House denizen healing
+x remove kiosk types
+- should buy weapons more aggressively
+- warnings of “core attack” not in place
+- remove itemID in census
+- “data” the default screen of census
+- console messages...unreliable. some not getting through.
+- should show information about anyone you click
 - visitors don't visit
 - cyclops should eat rock to heal
 - increase drive to make weapons
@@ -8,12 +18,12 @@
 - *still* not enough forging
 - lots more forging needs to happen!
 - market use not correct
-- use only one type of kiosk
+x use only one type of kiosk
 - deity -> MotherCore
 - task serialization
 - any building attack should cause awareness in domainAI
 - getting hit should cause awareness
-- overloading of kiosks near core. One kind of kiosk??
+x overloading of kiosks near core. One kind of kiosk??
 - build tasks aren't getting serialized correctly. wrong rotation?
 - [Reenen] Abandon domain
 - [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
@@ -25,6 +35,10 @@
 - console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 - console: Foo is taken over by Foo for House-1(core)
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+- improve hinting of text?
+- new art from GT
+- de-saturate colors correctly
+- AIComponent::DoShoot assert fires after loading
 
 - switch to war mode
 - mouse wheel support

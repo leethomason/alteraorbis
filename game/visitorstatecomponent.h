@@ -22,6 +22,7 @@
 
 class WorldMap;
 
+/*
 class VisitorStateComponent : public Component
 {
 private:
@@ -45,7 +46,7 @@ private:
 	gamui::DigitalBar	bar;
 	bool needsInit;
 };
-
+*/
 
 #endif // VISITOR_STATE_COMPONENT_INCLUDED
 

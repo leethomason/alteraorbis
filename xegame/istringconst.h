@@ -139,15 +139,12 @@ public:
 	static grinliz::IString porch;
 	static grinliz::IString circuit;
 	static grinliz::IString nameGen;
+	static grinliz::IString kiosk;
 
 	static grinliz::IString deity;
 	static grinliz::IString Truulga;
 
 	// double underscore -> '.'
-	static grinliz::IString kiosk__n;
-	static grinliz::IString kiosk__m;
-	static grinliz::IString kiosk__c;
-	static grinliz::IString kiosk__s;
 	static grinliz::IString need__food;
 	static grinliz::IString need__energy;
 	static grinliz::IString need__fun;

@@ -15,7 +15,6 @@ void VisitorData::Serialize(XStream* xs)
 	XarcOpen(xs, "VisitorData");
 	XARC_SER(xs, id);
 	XARC_SER(xs, kioskTime);
-	XARC_SER(xs, want);
 	XarcClose(xs);
 }
 
@@ -45,9 +44,6 @@ Visitors::Visitors()
 {
 	GLASSERT( instance == 0 );
 	instance = this;
-	for( int i=0; i<NUM_VISITORS; ++i ) {
-		visitorData[i].want = i % VisitorData::NUM_KIOSK_TYPES;
-	}
 }
 
 
@@ -110,60 +106,3 @@ SectorPort Visitors::ChooseDestination(int index, const Web& web, ChitBag* chitB
 	sectorPort.port   = port;
 	return sectorPort;
 }
-
-
-/*
-void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
-{
-	bool added = false;
-	int kioskType = CurrentKioskWantID();
-
-	for( int i=0; i<memoryArr.Size(); ++i ) {
-		if ( memoryArr[i].sector == sector ) {
-			memoryArr[i].rating = 1;
-			memoryArr[i].kioskType = kioskType;
-			added = true;
-			break;
-		}
-	}
-	if ( !added && memoryArr.HasCap() ) {
-		Memory m;
-		m.rating = 1;
-		m.kioskType = kioskType;
-		m.sector = sector;
-		memoryArr.Push( m );
-	}
-	++nWants;
-	++nVisits;
-	doneWith = sector;
-}
-*/
-
-/*
-void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
-{
-	++nVisits;
-	doneWith = sector;
-
-	for( int i=0; i<memoryArr.Size(); ++i ) {
-		if ( memoryArr[i].sector == sector ) {
-			memoryArr.SwapRemove( i );
-			break;
-		}
-	}
-}
-*/
-
-grinliz::IString VisitorData::CurrentKioskWant()
-{
-	switch ( want ) {
-	case KIOSK_N:	return ISC::kiosk__n;
-	case KIOSK_M:	return ISC::kiosk__m;
-	case KIOSK_C:	return ISC::kiosk__c;
-	case KIOSK_S:	return ISC::kiosk__s;
-	}
-	GLASSERT( 0 );	// Bad values?
-	return IString();
-}
-
-

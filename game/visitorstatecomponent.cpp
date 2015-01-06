@@ -11,6 +11,7 @@
 using namespace grinliz;
 using namespace gamui;
 
+/*
 static const float SIZE = 0.2f;
 static const Vector2F OFFSET = { -0.5f, -0.5f };
 
@@ -111,5 +112,4 @@ void VisitorStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	super::OnChitMsg( chit, msg );
 }
 
-
-
+*/

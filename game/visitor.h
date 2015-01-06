@@ -43,22 +43,11 @@ struct VisitorData
 
 	enum {	
 			KIOSK_TIME = 5000,
-			MEMORY = 8,
-			NUM_KIOSK_TYPES = 4,
-			KIOSK_N = 0,				// News, red
-			KIOSK_M,					// Media, blue
-			KIOSK_C,					// Commerce, green
-			KIOSK_S						// Social, violet
-
 	};
 
 	int id;								// chit id, and whether in-world or not.
 	U32 kioskTime;						// time spent standing at current kiosk
-	int want;
 	grinliz::CDynArray<grinliz::Vector2I> visited;
-
-	grinliz::IString CurrentKioskWant();
-	int CurrentKioskWantID()	{ return want; }
 };
 
 

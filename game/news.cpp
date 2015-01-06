@@ -235,7 +235,9 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		break;
 
 		case DOMAIN_CREATED:
-		str->Format("%.2f: %s " MOB_created ".", age, domain.c_str());
+		// "taken over" is interesting; a domain getting created is not.
+		*str = "";
+		//str->Format("%.2f: %s " MOB_created ".", age, domain.c_str());
 		break;
 
 		case ROQUE_DENIZEN_JOINS_TEAM:
@@ -248,7 +250,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 
 		case DOMAIN_DESTROYED:
 		if (team) {
-			str->Format("%.2f: %s domain %s " MOB_destroyed ".", age, teamName.safe_str(), domain.safe_str());
+			str->Format("%.2f: %s domain %s " MOB_destroyed " by %s.", age, teamName.safe_str(), domain.safe_str(), secondName.safe_str());
 		}
 		else {
 			str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
@@ -284,7 +286,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		break;
 
 		case DOMAIN_CONQUER:
-		str->Format("%.2f: %s is taken over by %s for team %s.", age, domain.safe_str(), itemName.safe_str(), teamName.safe_str() );
+		str->Format("%.2f: %s is occupied by team %s.", age, domain.safe_str(), teamName.safe_str() );
 		break;
 
 		default:

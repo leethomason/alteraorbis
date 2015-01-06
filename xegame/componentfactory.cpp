@@ -76,9 +76,6 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if (name == "GameMoveComponent") {
 		return new GameMoveComponent();
 	}
-	else if ( name == "VisitorStateComponent" ) {
-		return new VisitorStateComponent();
-	}
 	else if ( name == "TrackingMoveComponent" ) {
 		return new TrackingMoveComponent();
 	}

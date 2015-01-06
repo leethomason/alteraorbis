@@ -140,35 +140,8 @@
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="10" />
 
-  <GameItem name="kiosk.m"
-        resource="kiosk.m"
-        flags="DAMAGE_UNDER_WATER"
-        porch="1"
-        procedural="team"
-        mass="50"
-        baseHP="150"
-        cost="40" />
-
-  <GameItem name="kiosk.n"
-        resource="kiosk.n"
-        flags="DAMAGE_UNDER_WATER"
-        porch="1"
-        procedural="team"
-        mass="50"
-        baseHP="150"
-        cost="40" />
-
-  <GameItem name="kiosk.c"
-        resource="kiosk.c"
-        flags="DAMAGE_UNDER_WATER"
-        porch="1"
-        procedural="team"
-        mass="50"
-        baseHP="150"
-        cost="40" />
-
-  <GameItem name="kiosk.s"
-        resource="kiosk.s"
+  <GameItem name="kiosk"
+        resource="kiosk"
         flags="DAMAGE_UNDER_WATER"
         porch="1"
         procedural="team"

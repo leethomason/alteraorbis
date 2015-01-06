@@ -102,20 +102,15 @@ void HumanGen::GetSuitColor( grinliz::Vector4F* c )
 	Vector2I cvec[3];
 	TeamGen::TeamBuildColors(team, cvec + 0, cvec + 1, cvec + 2);
 
-	CArray<Vector2I, 6> arr;
-	Vector2I v;
-	for (int i = 0; i < 2; ++i) {
-		v.Set(PAL_GRAY * 2, cvec[0].y);
-		arr.Push(v);
-		v.Set(cvec[0].x, PAL_GRAY);
-		arr.Push(v);
-		v.Set(cvec[0].x + 1, PAL_GRAY);
-		arr.Push(v);
-	}
+	static const int N = 3;
+	Vector2I arr[N];
+	arr[0].Set(PAL_GRAY * 2, cvec[0].y);
+	arr[1].Set(cvec[0].x, PAL_GRAY);
+	arr[2].Set(cvec[0].x + 1, PAL_GRAY);
 
 	int teamID, teamGroup;
 	Team::SplitID(team, &teamGroup, &teamID);
-	int index = abs(teamID) % arr.Size();
+	int index = abs(teamID + int(seed)) % N;
 
 	const Game::Palette* palette = Game::GetMainPalette();
 	*c = palette->Get4F(arr[index]);
@@ -580,7 +575,7 @@ void AssignProcedural(const GameItem* item, ProcRenderInfo* info)
 	IString proc = item->keyValues.GetIString("procedural");
 	if (proc.empty()) return;
 
-	bool female = (item->IName() == ISC::humanFemale);
+	bool female = item->IsFemale();
 	U32 seed = item->ID();
 	int team = item->Team();
 	bool electric = false;	// not using; FIXME revisit 'electric'

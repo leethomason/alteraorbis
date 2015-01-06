@@ -718,9 +718,9 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		CoreScript* cs = CoreScript::GetCore(sector);
 
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
-		IString kioskName = vd->CurrentKioskWant();
+//		IString kioskName = vd->CurrentKioskWant();
 
-		if (chit && chit->GetItem()->IName() == kioskName) {
+		if (chit && chit->GetItem()->IName() == ISC::kiosk) {
 			vd->kioskTime += time;
 			if (vd->kioskTime > VisitorData::KIOSK_TIME) {
 				vd->visited.Push(sector);
@@ -1360,8 +1360,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i, 0 );
-	IString kioskName = vd->CurrentKioskWant();
-	if ( kiosk && kiosk->GetItem()->IName() == kioskName ) {
+	if ( kiosk && kiosk->GetItem()->IName() == ISC::kiosk ) {
 		// all good
 	}
 	else {
@@ -1387,7 +1386,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	}
 	else {
 		// Find a kiosk.
-		Chit* kiosk = Context()->chitBag->FindBuilding(	vd->CurrentKioskWant(),
+		Chit* kiosk = Context()->chitBag->FindBuilding(	ISC::kiosk,
 														sector,
 														&thisComp.spatial->GetPosition2D(),
 														LumosChitBag::RANDOM_NEAR, 0, 0 );

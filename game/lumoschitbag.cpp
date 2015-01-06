@@ -526,7 +526,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 
 	AddItem( rootItem.Name(), chit, context->engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent());
-	chit->Add( new VisitorStateComponent());
+	//chit->Add( new VisitorStateComponent());
 	return chit;
 }
 
