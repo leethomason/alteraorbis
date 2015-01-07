@@ -258,23 +258,22 @@ Component* Chit::GetComponent( int id )
 
 void Chit::DoTick()
 {
-	timeToTick = VERY_LONG_TICK;
-	GLASSERT( timeSince >= 0 );
+	timeToTick = MAX_FRAME_TIME;	// fixes "long frame time" bugs that plague the components, for very little (any?) perf impact.
+	GLASSERT(timeSince >= 0);
 	bool hasMove = moveComponent != 0;
 
-	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] ) { 
+	for (int i = 0; i < NUM_SLOTS; ++i) {
+		if (slot[i]) {
 			// Look for an inactive move component:
 			if (hasMove && i >= GENERAL_SLOT && i < GENERAL_SLOT + NUM_GENERAL) {
 				if (slot[i]->ToMoveComponent())
 					continue;
 			}
 
-			int t = slot[i]->DoTick( timeSince );
-			timeToTick = Min( timeToTick, t );
+			int t = slot[i]->DoTick(timeSince);
+			timeToTick = Min(timeToTick, t);
 		}
 	}
-
 	timeSince = 0;
 }
 

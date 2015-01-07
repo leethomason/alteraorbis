@@ -308,19 +308,20 @@ inline void MultMatrix4( const Matrix4& a, const Matrix4& b, Matrix4* c )
 {
 	// This does not support the target being one of the sources.
 	GLASSERT( c != &a && c != &b && &a != &b );
+	float* dst = c->x;
 
 	// The counters are rows and columns of 'c'
-	for( int i=0; i<4; ++i ) 
+	for( int j=0; j<4; ++j ) 
 	{
-		for( int j=0; j<4; ++j ) 
+		for( int i=0; i<4; ++i ) 
 		{
 			// for c:
 			//	j increments the row
 			//	i increments the column
-			*( c->x + i +4*j )	=   a.x[i+0]  * b.x[j*4+0] 
-								  + a.x[i+4]  * b.x[j*4+1] 
-								  + a.x[i+8]  * b.x[j*4+2] 
-								  + a.x[i+12] * b.x[j*4+3];
+			*dst++	=   a.x[i+0]  * b.x[j*4+0] 
+					  + a.x[i+4]  * b.x[j*4+1] 
+					  + a.x[i+8]  * b.x[j*4+2] 
+					  + a.x[i+12] * b.x[j*4+3];
 		}
 	}
 }

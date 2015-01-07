@@ -93,6 +93,7 @@ private:
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
 	void ControlTap(int slot, const grinliz::Vector2I& pos);
 	void SetSquadDisplay(bool squadVisible);
+	void OpenEndGame();
 
 	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
@@ -186,7 +187,6 @@ private:
 	gamui::PushButton	coreWarningIcon;
 	gamui::PushButton	domainWarningIcon;
 	gamui::PushButton	atlasButton;
-	gamui::PushButton	abandonButton;
 	gamui::TextLabel	buildDescription;
 	gamui::PushButton	swapWeapons;
 	gamui::Image		helpImage;
@@ -194,6 +194,7 @@ private:
 	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
 	HPBar				squadBar[MAX_CITIZENS];
 	gamui::Image		uiBackground;
+	gamui::PushButton	abandonButton, abandonConfirmButton;
 
 	BarStackWidget		summaryBars;
 

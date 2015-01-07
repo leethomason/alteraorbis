@@ -3,14 +3,19 @@ x suit colors are the same
 x remove kiosk types
 x use only one type of kiosk
 x overloading of kiosks near core. One kind of kiosk??
+x remove itemID in census (in release mode?)
+x rings change design when selecting options
+x [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
+x fix "long frame time" bug
+- [Reenen] Abandon domain
+- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
+- pause
 - check gobman that is House denizen healing
 - should buy weapons more aggressively
 - warnings of “core attack” not in place
-- remove itemID in census
-- “data” the default screen of census
 - console messages...unreliable. some not getting through.
 - should show information about anyone you click
-- visitors don't visit
+- visitors don't visit (until they do...)
 - cyclops should eat rock to heal
 - increase drive to make weapons
 - weapons, on destruction, should drop crystal
@@ -25,9 +30,7 @@ x overloading of kiosks near core. One kind of kiosk??
 - any building attack should cause awareness in domainAI
 - getting hit should cause awareness
 - build tasks aren't getting serialized correctly. wrong rotation?
-- [Reenen] Abandon domain
 - [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
-- [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
 - [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
 - [Reenen] Cyclops heal at rocks.
@@ -40,6 +43,7 @@ x overloading of kiosks near core. One kind of kiosk??
 - de-saturate colors correctly
 - AIComponent::DoShoot assert fires after loading
 
+- “data” the default screen of census
 - switch to war mode
 - mouse wheel support
 - see monsters when you click on them

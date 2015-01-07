@@ -256,10 +256,14 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* s
 	}
 	else {
 		GLASSERT( !titledName.empty() );
+		CStr<16> idStr = "";
+#if 0
+		idStr.Format("[%d]", itemID);
+#endif
 		if (score)
-			str->AppendFormat("%s %s [%d] ", CoreAchievement::CivTechDescription(score), titledName.c_str(), itemID);
+			str->AppendFormat("%s %s %s ", CoreAchievement::CivTechDescription(score), titledName.c_str(), idStr.c_str());
 		else
-			str->AppendFormat( "%s [%d] ", titledName.c_str(), itemID );
+			str->AppendFormat( "%s %s ", titledName.c_str(), idStr.c_str() );
 		
 		if (separator)
 			str->append(separator);

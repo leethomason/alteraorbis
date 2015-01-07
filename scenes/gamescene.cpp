@@ -139,10 +139,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
-	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
-	abandonButton.SetText("Abandon");
-	abandonButton.SetVisible(false);
-
 	buildDescription.Init(&gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
@@ -164,6 +160,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	}
 	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
 	swapWeapons.SetText("Swap\nWeapons");
+
+	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
+	abandonButton.SetText("Abandon\nDomain");
+	abandonConfirmButton.Init(&gamui2D, game->GetButtonLook(0));
+	abandonConfirmButton.SetText("Abandon\nConfirm");
 
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL, 2 );
 	faceWidget.SetSize( 100, 100 );
@@ -306,7 +307,6 @@ void GameScene::Resize()
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
 	layout.PosAbs(&createWorkerButton, 0, 3);
-	layout.PosAbs(&abandonButton, 2, 3);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
@@ -354,6 +354,9 @@ void GameScene::Resize()
 
 	layout.PosAbs(&startGameWidget, 2, 2, 5, 5);
 	layout.PosAbs(&endGameWidget, 2, 2, 5, 5);
+
+	layout.PosAbs(&abandonButton, -1, -4);
+	layout.PosAbs(&abandonConfirmButton, -1, -3);
 
 	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceWidget.Width(), 20.0f );
@@ -1055,16 +1058,13 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if (item == &abandonButton) {
-		// Add a rebuild, if not present, and then abandon.
-		CoreScript* cs = GetHomeCore();
-		if (cs) {
-			Chit* coreChit = cs->ParentChit();
-			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
-			if (!rebuild) {
-				coreChit->Add(new RebuildAIComponent());
-			}
-		}
+		abandonConfirmButton.SetVisible(true);
+	}
+	else if (item == &abandonConfirmButton) {
+		OpenEndGame();
 		sim->AbandonDomain();
+		sim->GetChitBag()->SetHomeTeam(TEAM_HOUSE);
+		endTimer = 1;	// open immediate
 	}
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
@@ -1683,15 +1683,15 @@ void GameScene::DoTick( U32 delta )
 	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
-	CoreScript* coreScript = GetHomeCore();
+	CoreScript* homeCoreScript = GetHomeCore();
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
 	Chit* playerChit = GetPlayerChit();
-	if ( !playerChit && !coreScript ) {
+	if ( !playerChit && !homeCoreScript ) {
 		uiMode[UI_VIEW].SetDown();
 	}
-	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
+	uiMode[UI_BUILD].SetEnabled(homeCoreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
 	if (!track && GetPlayerChit()) {
@@ -1712,14 +1712,14 @@ void GameScene::DoTick( U32 delta )
 	SetBars(track, track == playerChit);
 	CStr<64> str;
 
-	if (coreScript) {
+	if (homeCoreScript) {
 		double sum[ai::Needs::NUM_NEEDS+1] = { 0 };
 		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
-		Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+		Vector2I sector = homeCoreScript->ParentChit()->GetSpatialComponent()->GetSector();
 
 		CChitArray citizens;
-		coreScript->Citizens(&citizens);
+		homeCoreScript->Citizens(&citizens);
 	
 		if (citizens.Size()) {
 			for (int i = 0; i < citizens.Size(); i++) {
@@ -1792,14 +1792,18 @@ void GameScene::DoTick( U32 delta )
 	static const int CIRCUIT_MODE = NUM_BUILD_MODES - 1;
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
-	bool visible = game->GetDebugUI();
-	abandonButton.SetVisible(uiMode[UI_BUILD].Down() && visible && !modeButton[CIRCUIT_MODE].Down());
+	bool debugUiVisible = game->GetDebugUI();
+	bool abandonVisible = uiMode[UI_BUILD].Down() && homeCoreScript;
+	abandonButton.SetVisible(abandonVisible);
+	if (!abandonVisible) {
+		abandonConfirmButton.SetVisible(false);
+	}
 
 	str.Clear();
 
-	if (coreScript) {
-		float tech = coreScript->GetTech();
-		int maxTech = coreScript->MaxTech();
+	if (homeCoreScript) {
+		float tech = homeCoreScript->GetTech();
+		int maxTech = homeCoreScript->MaxTech();
 		str.Format("Tech %.2f / %d", tech, maxTech);
 		techLabel.SetText(str.c_str());
 	}
@@ -1830,10 +1834,9 @@ void GameScene::DoTick( U32 delta )
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
 		SetBuildButtons(arr);
-		adviser->DoTick(delta, coreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
+		adviser->DoTick(delta, homeCoreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
-	abandonButton.SetEnabled(coreScript != 0);
 	newsConsole.DoTick( delta, sim->GetChitBag()->GetHomeCore() );
 
 	bool useBuildingVisible = false;
@@ -1960,20 +1963,27 @@ void GameScene::SetSquadDisplay(bool squadVisible)
 }
 
 
+void GameScene::OpenEndGame()
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	GLASSERT(cs);
+	if (!cs) return;
+
+	Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetSector());
+	const SectorData& sd = sim->GetWorldMap()->GetSectorData(sector);
+	endGameWidget.SetData(sim->GetChitBag()->GetNewsHistory(),
+						  this,
+						  sd.name, cs->ParentChit()->GetItem()->ID(),
+						  cs->GetAchievement());
+	endTimer = 8 * 1000;
+}
+
 void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		if (chit->GetComponent("CoreScript")) {
 			if (sim->GetChitBag()->GetHomeTeam() && (chit->Team() == sim->GetChitBag()->GetHomeTeam())) {
-				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
-				GLASSERT(cs);
-				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
-				const SectorData& sd = sim->GetWorldMap()->GetSectorData(sector);
-				endGameWidget.SetData(	chit->Context()->chitBag->GetNewsHistory(),
-										this, 
-										sd.name, chit->GetItem()->ID(), 
-										cs->GetAchievement());
-				endTimer = 8*1000;
+				OpenEndGame();
 			}
 		}
 	}
