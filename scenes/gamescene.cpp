@@ -2123,7 +2123,7 @@ void GameScene::DialogResult(const char* name, void* data)
 
 void GameScene::Draw3D( U32 deltaTime )
 {
-	sim->Draw3D( deltaTime );
+	sim->Draw3D(paused ? 0 : deltaTime);
 
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 					 (const void*)sim->GetMiniMapTexture(), 
