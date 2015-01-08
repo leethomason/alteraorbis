@@ -252,7 +252,8 @@ void CoreScript::AssignToSquads()
 	if (nSquaddies >= nExpected) return;
 
 	// Filter to: not in squad AND not player controlled
-	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && !ele->PlayerControlled() ));
+	Chit* avatar = Context()->chitBag->GetAvatar();
+	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && (ele != avatar) ));
 	// Sort the best recruits to the end.
 	// FIXME: better if there was a (working) power approximation
 	GL_ARRAY_SORT_EXPR(recruits.Mem(), recruits.Size(), 
@@ -334,6 +335,21 @@ int CoreScript::SquadID(int id)
 		}
 	}
 	return -1;
+}
+
+
+Chit* CoreScript::PrimeCitizen()
+{
+	for (int i = 0; i < citizens.Size(); ++i) {
+		int id = citizens[i];
+		Chit* chit = Context()->chitBag->GetChit(id);
+		if (chit && chit->GetItem()) {
+			if (chit->GetItem()->keyValues.Has("prime")) {
+				return chit;
+			}
+		}
+	}
+	return 0;
 }
 
 

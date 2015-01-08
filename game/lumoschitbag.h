@@ -280,8 +280,10 @@ public:
 	// Don't set to NEUTRAL: it's important to know that we're in the
 	// state where the home team is gone and hasn't been re-created.
 	void SetHomeTeam(int t)	{ GLASSERT(t);  homeTeam = t; }
+
 	CoreScript* GetHomeCore() const;
 	grinliz::Vector2I GetHomeSector() const;
+	Chit* GetAvatar() const;
 
 	Census census;
 

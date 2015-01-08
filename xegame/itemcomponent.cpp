@@ -332,9 +332,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 
 //		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
-		if (parentChit->PlayerControlled()) {
-			int debug = 1;
-		}
+//		if (parentChit->PlayerControlled()) {
+//			int debug = 1;
+//		}
 
 		DamageDesc dd = ddorig;
 		Shield* shield = this->GetShield();
@@ -1097,7 +1097,7 @@ void ItemComponent::UseBestItems()
 {
 	ComputeHardpoints();
 
-	bool player = !parentChit || parentChit->PlayerControlled();
+	bool player = !parentChit || (parentChit == Context()->chitBag->GetAvatar());
 	bool usesWeapons = (GetItem()->flags & GameItem::AI_USES_BUILDINGS) != 0;
 
 	if (!player) {

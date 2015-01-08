@@ -331,6 +331,12 @@ Wallet* Chit::GetWallet()
 }
 
 
+bool Chit::PlayerControlled() const
+{
+	return Context()->chitBag->GetAvatar() == this;
+}
+
+
 void Chit::QueueDelete()
 {
 	if (GetItem() && GameItem::trackWallet) {

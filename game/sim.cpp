@@ -76,7 +76,6 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 
 	context.worldMap->AttachEngine( context.engine, context.chitBag );
 	context.worldMap->AttachHistory(context.chitBag->GetNewsHistory());
-	playerID = 0;
 	avatarTimer = 0;
 	currentVisitor = 0;
 
@@ -171,7 +170,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			StreamReader reader( fp );
 			XarcOpen( &reader, "Sim" );
 
-			XARC_SER( &reader, playerID );
 			XARC_SER(&reader, avatarTimer);
 			XARC_SER(&reader, GameItem::idPool);
 
@@ -193,12 +191,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			fclose( fp );
 		}
 	}
-	if ( context.chitBag->GetChit( playerID )) {
-		Chit* player = context.chitBag->GetChit( playerID );
-		// Mark as player controlled so it reacts as expected to player input.
-		// This is the primary avatar, and has some special rules.
-		player->SetPlayerControlled( true );
-	}
 }
 
 
@@ -215,7 +207,6 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 		if ( fp ) {
 			StreamWriter writer(fp, CURRENT_FILE_VERSION);
 			XarcOpen( &writer, "Sim" );
-			XARC_SER( &writer, playerID );
 			XARC_SER(&writer, avatarTimer);
 			XARC_SER(&writer, GameItem::idPool);
 
@@ -302,26 +293,11 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 					*/
 				}
 			}
-			if (context.chitBag->GetHomeTeam() && (chit->Team() == context.chitBag->GetHomeTeam())) {
-				AbandonDomain();
-			}
+//			if (context.chitBag->GetHomeTeam() && (chit->Team() == context.chitBag->GetHomeTeam())) {
+//				AbandonDomain();
+//			}
 		}
 	}
-}
-
-
-void Sim::AbandonDomain()
-{
-	static const Vector2I ZERO = { 0, 0 };
-	// Don't do this:
-	// context.chitBag->SetHomeTeam(0);
-	// Becasue other parts of the code need to
-	// shut down / change UI based on the home team.
-	if (playerID) {
-		Chit* player = GetPlayerChit();
-		if (player) player->SetPlayerControlled(false);
-	}
-	playerID = 0;	// FIXME: flag in 2 places...
 }
 
 
@@ -477,15 +453,14 @@ void Sim::CreateTruulgaCore()
 
 void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
-	GLASSERT(context.chitBag->GetHomeTeam());
-	GLASSERT(context.chitBag->GetHomeCore());
+	CoreScript* homeCore = context.chitBag->GetHomeCore();
+	GLASSERT(homeCore);
+	GLASSERT(!homeCore->PrimeCitizen());
+
 	Chit* chit = context.chitBag->NewDenizen(pos, TEAM_HOUSE);	// real team assigned with AddCitizen
-	chit->SetPlayerControlled( true );
-	playerID = chit->ID();
-	CoreScript::GetCore( ToSector(pos) )->AddCitizen( chit );
+	homeCore->AddCitizen( chit );
 
-	context.chitBag->GetCamera( context.engine )->SetTrack( playerID );
-
+	// Help out a newly created Avatar.
 	GameItem* items[3] = { 0, 0, 0 };
 	items[0] = context.chitBag->AddItem( "shield", chit, context.engine, 0, 0 );
 	items[1] = context.chitBag->AddItem( "blaster", chit, context.engine, 0, 0 );
@@ -497,25 +472,21 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
 	}
 
-	//chit->GetAIComponent()->EnableLog( true );
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+	context.chitBag->GetCamera( context.engine )->SetTrack( chit->ID() );
 
 	// Player speed boost
 	float boost = 1.5f / 1.2f;
 	chit->GetItem()->keyValues.Set( "speed", DEFAULT_MOVE_SPEED*boost );
 	chit->GetRenderComponent()->SetAnimationRate(boost);
 	chit->GetItem()->hpRegen = 1.0f;
+	chit->GetItem()->keyValues.Set("prime", 1);
 
 	// For an avatar, we don't get money, since all the Au goes to the core anyway.
 	if (ReserveBank::Instance()) {
 		ReserveBank::GetWallet()->Deposit(chit->GetWallet(), *(chit->GetWallet()));
 	}
-}
-
-
-Chit* Sim::GetPlayerChit()
-{
-	return context.chitBag->GetChit( playerID );
+	GLASSERT(chit == homeCore->PrimeCitizen());
 }
 
 
@@ -625,7 +596,7 @@ void Sim::DoTick( U32 delta )
 
 	// Special rule for player controlled chit: give money to the core.
 	CoreScript* cs = context.chitBag->GetHomeCore();
-	Chit* player   = this->GetPlayerChit();
+	Chit* player = context.chitBag->GetAvatar();
 	if ( cs && player ) {
 		GameItem* item = player->GetItem();
 		// Don't clear the avatar's wallet if a scene is pushed - the avatar
@@ -900,7 +871,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 
 void Sim::UseBuilding()
 {
-	Chit* player = GetPlayerChit();
+	Chit* player = context.chitBag->GetAvatar();
 	if ( !player ) return;
 
 	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();

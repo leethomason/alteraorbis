@@ -879,6 +879,18 @@ CoreScript* LumosChitBag::GetHomeCore()	const
 }
 
 
+Chit* LumosChitBag::GetAvatar() const
+{
+	CoreScript* cs = GetHomeCore();
+	if (cs) {
+		Chit* prime = cs->PrimeCitizen();
+		return prime;	// The prime citizen of the home domain is the Avatar.
+	}
+	return 0;
+}
+
+
+
 Vector2I LumosChitBag::GetHomeSector()	const
 { 
 	grinliz::Vector2I v = { 0, 0 };

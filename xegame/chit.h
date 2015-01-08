@@ -163,10 +163,12 @@ public:
 	bool StackedMoveComponent() const;
 
 	const ChitContext* Context() const;
+
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
 	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
 	Wallet* GetWallet();
+	bool PlayerControlled() const;	// more correctly: IsAvatar()
 
 	void QueueDelete();
 	void DeRez();	// deletes, but goes through de-rez sequence, checks for indestructible, etc.
@@ -178,8 +180,6 @@ public:
 
 	void DebugStr( grinliz::GLString* str );
 
-	void SetPlayerControlled( bool player ) { playerControlled = player; }
-	bool PlayerControlled() const			{ return playerControlled; }
 	int Team() const;
 
 	// "private"

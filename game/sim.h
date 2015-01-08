@@ -62,7 +62,6 @@ public:
 	void Save( const char* mapDAT, const char* gameDAT );
 
 	Texture*		GetMiniMapTexture();
-	Chit*			GetPlayerChit();
 
 	// use with caution: not a clear separation between sim and game
 	const ChitContext* Context()	{ return &context; }
@@ -89,7 +88,7 @@ public:
 	//CoreScript* CreateCore(const grinliz::Vector2I& sector, int team);
 	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
-	void AbandonDomain();
+	//void AbandonDomain();
 
 	// IChitListener.
 	// Listens for cores to be destroyed and re-creates.
@@ -122,7 +121,6 @@ private:
 	PlantScript*	plantScript;
 
 	grinliz::Random	random;
-	int playerID;
 	int avatarTimer;
 	CTicker minuteClock, 
 			secondClock, 
@@ -138,7 +136,6 @@ private:
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
-//	grinliz::CDynArray< DiplomaticState > diplomacyArr;
 };
 
 

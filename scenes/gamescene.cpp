@@ -1062,7 +1062,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if (item == &abandonConfirmButton) {
 		OpenEndGame();
-		sim->AbandonDomain();
+//		sim->AbandonDomain();
 		sim->GetChitBag()->SetHomeTeam(TEAM_HOUSE);
 		endTimer = 1;	// open immediate
 	}
@@ -2248,7 +2248,7 @@ void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 Chit* GameScene::GetPlayerChit()
 {
 	if (attached.IsZero()) {
-		return sim->GetPlayerChit();
+		return sim->GetChitBag()->GetAvatar();
 	}
 	return 0;	// don't have avatars when attached.
 }
