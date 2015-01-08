@@ -11,7 +11,7 @@ x [Reenen] Abandon domain
 x avatar ids are weird: track through the core, so that if we lose the core, Avatar is gone?
 x console: Foo is taken over by Foo for House-1(core)
 x pause
-- engine time independent of pause
+x engine time independent of pause
 - simplify fluid
 - check gobman that is House denizen healing
 - should buy weapons more aggressively
@@ -42,6 +42,7 @@ x pause
 - new art from GT
 - de-saturate colors correctly
 - AIComponent::DoShoot assert fires after loading
+- factor gamescene ui code
 - fruit & food
 	- deal with fruit overflow
 	- cyclops should eat rock to heal. (Or everyone to fruit?)

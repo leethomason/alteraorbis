@@ -79,22 +79,6 @@ void FluidSim::Reset(int x, int y)
 }
 
 
-/*
-U32 FluidSim::Hash()
-{
-	unsigned int h = 2166136261U;
-	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
-		const WorldGrid& wg = worldMap->grid[worldMap->INDEX(it.Pos())];
-		if (wg.FluidHeight()) {
-			int value = wg.fluidHeight + 32 * wg.fluidEmitter + 256 * wg.fluidType + (it.Pos().x << 16) + (it.Pos().y << 24);
-			h ^= value;
-			h *= 16777619;
-		}
-	}
-	return h;
-}
-*/
-
 bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG, int* type)
 {
 	if (   (altWG.IsFluid() && wg.IsFluid() && altWG.fluidHeight >= wg.fluidHeight + WATERFALL_HEIGHT)
@@ -146,8 +130,7 @@ bool FluidSim::DoStep()
 {
 	if (settled) return true;
 
-	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
-	memset(pressure, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
+	memset(pressure, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(pressure[0]));
 
 	emitters.Clear();
 	pools.Clear();
@@ -258,6 +241,20 @@ bool FluidSim::DoStep()
 
 void FluidSim::PressureStep()
 {
+	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
+		int i = it.Pos().x - outerBounds.min.x;
+		int j = it.Pos().y - outerBounds.min.y;
+		
+		if (!pressure[j*SECTOR_SIZE + i]) {
+			WorldGrid* eWG = &worldMap->grid[worldMap->INDEX(it.Pos())];
+			if (eWG->fluidHeight) {
+				--eWG->fluidHeight;
+				settled = false;
+			}
+		}
+	}
+
+#if 0
 	memset(water, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(water[0]));
 	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
 		int i = it.Pos().x - outerBounds.min.x;
@@ -312,6 +309,7 @@ void FluidSim::PressureStep()
 			}
 		}
 	}
+#endif
 }
 
 
