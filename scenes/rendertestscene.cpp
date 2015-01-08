@@ -207,7 +207,7 @@ void RenderTestScene::HandleHotKey( int mask )
 		}
 		break;
 
-	case GAME_HK_SPACE:
+	case GAME_HK_DEBUG_ACTION:
 		glowLayer++;
 		if ( glowLayer == Engine::RT_COUNT ) {
 			glowLayer = -1;

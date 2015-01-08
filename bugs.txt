@@ -7,21 +7,22 @@ x remove itemID in census (in release mode?)
 x rings change design when selecting options
 x [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
 x fix "long frame time" bug
-- [Reenen] Abandon domain
-- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
-- pause
+x [Reenen] Abandon domain
+x avatar ids are weird: track through the core, so that if we lose the core, Avatar is gone?
+x console: Foo is taken over by Foo for House-1(core)
+x pause
+- engine time independent of pause
+- simplify fluid
 - check gobman that is House denizen healing
 - should buy weapons more aggressively
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
 - should show information about anyone you click
 - visitors don't visit (until they do...)
-- cyclops should eat rock to heal
 - increase drive to make weapons
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
 - walk target for the avatar
-- deal with fruit overflow
 - *still* not enough forging
 - lots more forging needs to happen!
 - market use not correct
@@ -36,12 +37,15 @@ x fix "long frame time" bug
 - [Reenen] Cyclops heal at rocks.
 - Mini map flash of battles.
 - console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
-- console: Foo is taken over by Foo for House-1(core)
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
 - improve hinting of text?
 - new art from GT
 - de-saturate colors correctly
 - AIComponent::DoShoot assert fires after loading
+- fruit & food
+	- deal with fruit overflow
+	- cyclops should eat rock to heal. (Or everyone to fruit?)
+	- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
 
 - “data” the default screen of census
 - switch to war mode

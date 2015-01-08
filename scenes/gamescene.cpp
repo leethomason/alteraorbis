@@ -61,6 +61,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	coreWarningTimer = 0;
 	domainWarningTimer = 0;
 	poolView = 0;
+	paused = false;
 	attached.Zero();
 	voxelInfoID.Zero();
 	lumosGame = game;
@@ -84,6 +85,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	saveButton.Init( &gamui2D, game->GetButtonLook(0) );
 	saveButton.SetText( "Save" );
+
+	pausedLabel.Init(&gamui2D);
+	pausedLabel.SetText("-- Paused --");
 
 	useBuildingButton.Init(&gamui2D, game->GetButtonLook(0));
 	useBuildingButton.SetText( "Use" );
@@ -272,6 +276,8 @@ void GameScene::Resize()
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&avatarUnit, 2, 1);
 	layout.PosAbs(&nextUnit, 3, 1);
+
+	pausedLabel.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f);
 
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		layout.PosAbs(&squadButton[i], i, 1);
@@ -1283,7 +1289,10 @@ void GameScene::HandleHotKey( int mask )
 	else if (mask == GAME_HK_CAMERA_CORE) {
 		DoCameraHome();
 	}
-	else if (mask == GAME_HK_SPACE) {
+	else if (mask == GAME_HK_TOGGLE_PAUSE) {
+		paused = !paused;
+	}
+	else if (mask == GAME_HK_DEBUG_ACTION) {
 		Chit* playerChit = GetPlayerChit();
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
@@ -1657,8 +1666,9 @@ void GameScene::SetPickupButtons()
 
 void GameScene::DoTick( U32 delta )
 {
-	sim->DoTick( delta );
-
+	if (!paused) {
+		sim->DoTick(delta);
+	}
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -1769,7 +1779,8 @@ void GameScene::DoTick( U32 delta )
 	// at will, so it's more frustrating than useful.
 	//swapWeapons.SetVisible(track && track == playerChit);
 	swapWeapons.SetVisible(false);
-	
+
+	pausedLabel.SetVisible(paused);
 	str.Clear();
 
 	Wallet wallet;

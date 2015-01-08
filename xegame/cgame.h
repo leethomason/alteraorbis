@@ -57,7 +57,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_TOGGLE_DEBUG_TEXT		2
 #define GAME_HK_TOGGLE_DEBUG_UI			3
 #define GAME_HK_TOGGLE_PERF				4
-#define GAME_HK_SPACE					5	// general action
+#define GAME_HK_DEBUG_ACTION			5	// general action
 #define GAME_HK_ATTACH_CORE				6
 #define GAME_HK_TOGGLE_PATHING			7
 #define GAME_HK_MAP					    9
@@ -70,6 +70,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_CAMERA_TOGGLE		   16	// 'tab' on windows
 #define GAME_HK_CAMERA_CORE			   17	// camera to core
 #define GAME_HK_CAMERA_AVATAR		   18	// camera to avatar, then avatar to core
+#define GAME_HK_TOGGLE_PAUSE		   19
 
 #define GAME_HK_TOGGLE_GLOW			   20
 #define GAME_HK_TOGGLE_PARTICLE		   21

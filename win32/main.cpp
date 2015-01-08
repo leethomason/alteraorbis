@@ -266,7 +266,8 @@ int main(int argc, char **argv)
 						break;
 
 						case SDL_SCANCODE_ESCAPE:	GameHotKey(game, GAME_HK_ESCAPE);			break;
-						case SDL_SCANCODE_SPACE:	GameHotKey(game, GAME_HK_SPACE);			break;
+						case SDL_SCANCODE_SPACE:	GameHotKey(game, GAME_HK_TOGGLE_PAUSE);		break;
+						case SDL_SCANCODE_RETURN:	GameHotKey(game, GAME_HK_DEBUG_ACTION);		break;
 						case SDL_SCANCODE_F1:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
 						case SDL_SCANCODE_F2:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
 							// F3: screenshot

@@ -278,7 +278,7 @@ void BattleTestScene::LoadMap()
 
 void BattleTestScene::HandleHotKey( int mask )
 {
-	if ( mask == GAME_HK_SPACE ) {
+	if ( mask == GAME_HK_DEBUG_ACTION ) {
 		fireTestGun = !fireTestGun;
 	}
 	else {

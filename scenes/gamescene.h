@@ -143,10 +143,10 @@ private:
 	// returns the name from the build button
 	grinliz::IString StructureInfo( int buildButtonIndex, int* size );
 
-	LumosGame*	lumosGame;
-	Sim*		sim;
-	int			endTimer;
-
+	LumosGame*			lumosGame;
+	Sim*				sim;
+	int					endTimer;
+	bool				paused;
 	grinliz::Vector2I	attached;
 	int					targetChit;
 	int					possibleChit;
@@ -195,6 +195,7 @@ private:
 	HPBar				squadBar[MAX_CITIZENS];
 	gamui::Image		uiBackground;
 	gamui::PushButton	abandonButton, abandonConfirmButton;
+	gamui::TextLabel	pausedLabel;
 
 	BarStackWidget		summaryBars;
 

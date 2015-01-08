@@ -307,7 +307,7 @@ void ColorTestScene::Rotate( float degrees )
 
 void ColorTestScene::HandleHotKey( int mask )
 {
-	if (mask == GAME_HK_SPACE) {
+	if (mask == GAME_HK_DEBUG_ACTION) {
 		cameraHigh = !cameraHigh;
 		SetCamera();
 	}

@@ -322,7 +322,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 
 void TitleScene::HandleHotKey(int key)
 {
-	if (key == GAME_HK_SPACE) {
+	if (key == GAME_HK_DEBUG_ACTION) {
 		seed++;
 #if 0
 		GLOUTPUT(("Seed=%d\n", seed));
