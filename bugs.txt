@@ -12,7 +12,12 @@ x avatar ids are weird: track through the core, so that if we lose the core, Ava
 x console: Foo is taken over by Foo for House-1(core)
 x pause
 x engine time independent of pause
-- simplify fluid
+x simplify fluid
+- refactor GameScene
+	x restore worker count
+	x canTeleport
+	x return build id
+	x workerbot -> utility
 - check gobman that is House denizen healing
 - should buy weapons more aggressively
 - warnings of “core attack” not in place
@@ -47,15 +52,16 @@ x engine time independent of pause
 	- deal with fruit overflow
 	- cyclops should eat rock to heal. (Or everyone to fruit?)
 	- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
+- gobman statues
+- mouse wheel support
+- see monsters when you click on them
+- unify rotation model
 
 - “data” the default screen of census
 - switch to war mode
-- mouse wheel support
-- see monsters when you click on them
 - bar-market-forge need to look more distinct
 - should be able to browse units in character screen
 
-- gobman statues
 - GT: ui to show idle and busy workers
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation

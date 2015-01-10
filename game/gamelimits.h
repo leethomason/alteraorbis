@@ -42,6 +42,7 @@ static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
 static const int FARM_GROW_RAD	= 2;	// grid squares affected by farm. total region 5x5
 static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
 
+
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.
 // Part of implenmentation in AIComponent.cpp
@@ -132,6 +133,7 @@ static const float CHANCE_FIRE_SPREAD	= 0.40f;	// once it starts spreading, self
 
 static const float SALES_TAX = 0.15f;
 static const int   WORKER_BOT_COST = 20;
+static const int   MAX_WORKER_BOTS = 4;
 
 // Game fiction consistency.
 #define MOB_Created		"Initialized"	// Denizen Initialized

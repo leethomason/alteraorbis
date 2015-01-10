@@ -163,6 +163,7 @@
     <ClCompile Include="..\scenes\fluidtestscene.cpp" />
     <ClCompile Include="..\scenes\forgescene.cpp" />
     <ClCompile Include="..\scenes\gamescene.cpp" />
+    <ClCompile Include="..\scenes\gamescenemenu.cpp" />
     <ClCompile Include="..\scenes\livepreviewscene.cpp" />
     <ClCompile Include="..\scenes\mapscene.cpp" />
     <ClCompile Include="..\scenes\navtest2scene.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="..\scenes\fluidtestscene.h" />
     <ClInclude Include="..\scenes\forgescene.h" />
     <ClInclude Include="..\scenes\gamescene.h" />
+    <ClInclude Include="..\scenes\gamescenemenu.h" />
     <ClInclude Include="..\scenes\livepreviewscene.h" />
     <ClInclude Include="..\scenes\mapscene.h" />
     <ClInclude Include="..\scenes\navtest2scene.h" />

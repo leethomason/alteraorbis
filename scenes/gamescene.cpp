@@ -3,6 +3,7 @@
 
 #include "gamescene.h"
 #include "characterscene.h"
+#include "gamescenemenu.h"
 
 #include "../version.h"
 
@@ -55,7 +56,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	possibleChit = 0;
 	infoID = 0;
 	selectionModel = 0;
-	buildActive = 0;
 	chitTracking = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
@@ -67,7 +67,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	lumosGame = game;
 	adviser = new Adviser();
 	InitStd( &gamui2D, &okay, 0 );
+
 	sim = new Sim( lumosGame );
+	menu = new GameSceneMenu(&gamui2D, game);
 
 	Load();
 	
@@ -89,68 +91,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	pausedLabel.Init(&gamui2D);
 	pausedLabel.SetText("-- Paused --");
 
-	useBuildingButton.Init(&gamui2D, game->GetButtonLook(0));
-	useBuildingButton.SetText( "Use" );
-	useBuildingButton.SetVisible( false );
-
-	cameraHomeButton.Init( &gamui2D, game->GetButtonLook(0) );
-	cameraHomeButton.SetText( "Home" );
-	cameraHomeButton.SetVisible( false );
-
-	nextUnit.Init( &gamui2D, game->GetButtonLook( 0 ));
-	nextUnit.SetText( ">" );
-	nextUnit.SetVisible( false );
-
-	prevUnit.Init( &gamui2D, game->GetButtonLook( 0 ));
-	prevUnit.SetText( "<" );
-	prevUnit.SetVisible( false );
-
-	avatarUnit.Init(&gamui2D, game->GetButtonLook(0));
-	avatarUnit.SetText("Avatar");
-	avatarUnit.SetVisible(false);
-
 	const RenderAtom nullAtom;
 	helpText.Init(&gamui2D);
 	helpImage.Init(&gamui2D, nullAtom, true);
-
-	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
-	};
-	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		modeButton[i].SetText( modeButtonText[i] );
-		modeButton[0].AddToToggleGroup( &modeButton[i] );
-	}
-	for( int i=0; i<BuildScript::NUM_PLAYER_OPTIONS; ++i ) {
-		const BuildData& bd = buildScript.GetData( i );
-
-		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		buildButton[i].SetText( bd.label.safe_str() );
-
-		if (bd.zone == BuildData::ZONE_INDUSTRIAL)
-			buildButton[i].SetDeco(game->CalcUIIconAtom("anvil", true), game->CalcUIIconAtom("anvil", false));
-		else if (bd.zone == BuildData::ZONE_NATURAL)
-			buildButton[i].SetDeco(game->CalcUIIconAtom("leaf", true), game->CalcUIIconAtom("leaf", false));
-
-		buildButton[0].AddToToggleGroup( &buildButton[i] );
-		modeButton[bd.group].AddSubItem( &buildButton[i] );
-	}
-	buildButton[0].SetText("UNUSED");
-
-	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
-	tabBar1.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
-
-	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
-	createWorkerButton.SetText( "WorkerBot" );
-
-	buildDescription.Init(&gamui2D);
-
-	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "View", "Build", "Control" };
-		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
-		uiMode[i].SetText( TEXT[i] );
-		uiMode[0].AddToToggleGroup( &uiMode[i] );
-	}
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
@@ -162,8 +105,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
-	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
-	swapWeapons.SetText("Swap\nWeapons");
+//	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
+//	swapWeapons.SetText("Swap\nWeapons");
 
 	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
 	abandonButton.SetText("Abandon\nDomain");
@@ -197,9 +140,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	moneyWidget.Init( &gamui2D );
 	newsConsole.Init( &gamui2D, sim->GetChitBag() );
 
-	RenderAtom darkPurple = LumosGame::CalcPaletteAtom( 10, 5 );
-	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
-	uiBackground.Init(&gamui2D, darkPurple, false);
 
 	LayoutCalculator layout = DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -207,7 +147,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	Vector3F delta = { 14.0f, 14.0f, 14.0f };
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
-	uiMode[UI_VIEW].SetDown();
 	if (GetPlayerChit()) {
 		target = GetPlayerChit()->GetSpatialComponent()->GetPosition();
 	}
@@ -235,20 +174,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	adviser->Attach(&helpText, &helpImage);
 
-	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
-		static const char* NAMES[NUM_SQUAD_BUTTONS] = { "Local", "Alpha", "Beta", "Delta", "Omega" };
-		squadButton[i].Init(&gamui2D, game->GetButtonLook(0));
-		squadButton[i].SetText(NAMES[i]);
-		squadButton[0].AddToToggleGroup(&squadButton[i]);
-	}
-	for (int i = 0; i < MAX_CITIZENS; ++i) {
-		squadBar[i].Init(&gamui2D);
-	}
 }
 
 
 GameScene::~GameScene()
 {
+	delete menu;
 	if ( selectionModel ) {
 		sim->GetEngine()->FreeModel( selectionModel );
 	}
@@ -260,8 +191,9 @@ GameScene::~GameScene()
 void GameScene::Resize()
 {
 	const Screenport& port = lumosGame->GetScreenport();
-	
 	LayoutCalculator layout = DefaultLayout();
+
+	menu->Resize(port, layout);
 
 	layout.PosAbs(&censusButton, 0, -1);
 	layout.PosAbs(&helpImage, 1, -1);
@@ -270,55 +202,11 @@ void GameScene::Resize()
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
 
-	layout.PosAbs(&useBuildingButton, 0, 2);
-
-	layout.PosAbs(&cameraHomeButton, 0, 1);
-	layout.PosAbs(&prevUnit, 1, 1);
-	layout.PosAbs(&avatarUnit, 2, 1);
-	layout.PosAbs(&nextUnit, 3, 1);
-
 	pausedLabel.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f);
-
-	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
-		layout.PosAbs(&squadButton[i], i, 1);
-	}
 
 	static float SIZE_BOOST = 1.3f;
 	helpImage.SetPos(helpImage.X() + layout.Width() * 0.3f, helpImage.Y() - helpImage.Height()*(SIZE_BOOST-1.0f)*0.5f);
 	helpImage.SetSize(helpImage.Height()*SIZE_BOOST, helpImage.Height()*SIZE_BOOST);
-
-	int level = BuildScript::GROUP_UTILITY;
-	int start = 0;
-
-	for( int i=1; i<BuildScript::NUM_PLAYER_OPTIONS; ++i ) {
-		const BuildData& bd = buildScript.GetData( i );
-		if ( bd.group != level ) {
-			level = bd.group;
-			start = i;
-		}
-		if (bd.group == 0) {
-			layout.PosAbs(&buildButton[i], i - start - 1, 2);
-		}
-		else {
-			int ld = i - start;
-			int lx = ld % 6;
-			int ly = ld / 6;
-			layout.PosAbs(&buildButton[i], lx, ly + 2);
-		}
-	}
-//	buildButton[0].SetVisible(false);	// the "none" button. Not working - perhaps bug in sub-selection.
-	buildButton[0].SetPos(-100, -100);
-
-	for (int i = 0; i<NUM_BUILD_MODES; ++i) {
-		layout.PosAbs( &modeButton[i], i, 1 );
-	}
-	layout.PosAbs(&createWorkerButton, 0, 3);
-
-	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		layout.PosAbs( &uiMode[i], i, 0 );
-	}
-
-	layout.PosAbs(&buildDescription, 0, 4);
 
 	layout.PosAbs(&coreWarningIcon, 1, 6);
 	layout.PosAbs(&domainWarningIcon, 1, 7);
@@ -326,13 +214,7 @@ void GameScene::Resize()
 	coreWarningIcon.SetVisible(false);
 	domainWarningIcon.SetVisible(false);
 
-	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
-	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
-	tabBar1.SetPos(  modeButton[0].X(), modeButton[0].Y() );
-	tabBar1.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
-
 	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
-
 	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs(&summaryBars, -1, -2, 1, 1);
 
@@ -348,7 +230,7 @@ void GameScene::Resize()
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
-	layout.PosAbs(&swapWeapons, -1, 5);
+//	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
@@ -377,23 +259,6 @@ void GameScene::Resize()
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
 	okay.SetVisible(visible);
-
-	// ------- SQUAD LAYOUT ------ //
-	layout = DefaultLayout();
-	layout.SetSize(layout.Width(), layout.Height()*0.5f);
-	for (int j = 0; j < CITIZEN_BASE; ++j) {
-		layout.PosAbs(&squadBar[j], 0, 2*2 + j);
-	}
-	for (int i = 0; i < MAX_SQUADS; ++i) {
-		for (int j = 0; j < SQUAD_SIZE; ++j) {
-			layout.PosAbs(&squadBar[CITIZEN_BASE + SQUAD_SIZE*i + j], i+1, 2*2 + j);
-		}
-	}
-
-	// --- calculated ----
-	uiBackground.SetPos(squadBar[0].X(), squadBar[0].Y());
-	uiBackground.SetSize(squadBar[MAX_CITIZENS - 1].X() + squadBar[MAX_CITIZENS - 1].Width() - squadBar[0].X(),
-						 squadBar[CITIZEN_BASE - 1].Y() + squadBar[CITIZEN_BASE - 1].Height() - squadBar[0].Y());
 }
 
 
@@ -493,6 +358,8 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	float size = 1.0f;
 	int height = 1;
 	const char* name = "";
+
+	int buildActive = menu->BuildActive();
 	if ( buildActive ) {
 		if (    buildActive == BuildScript::CLEAR 
 			 || buildActive == BuildScript::CANCEL ) 
@@ -665,12 +532,13 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
 	if (!map->Bounds().Contains(plane2i)) return;
 
-	const BuildData& buildData = buildScript.GetData(buildActive);
+	//const BuildData& buildData = buildScript.GetData(buildActive);
 	BuildAction(plane2i);
+	int uiMode = menu->UIMode();
 
-	if (coreScript && uiMode[UI_CONTROL].Down()) {
-		for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
-			if (squadButton[i].Down()) {
+	if (coreScript && (uiMode == GameSceneMenu::UI_CONTROL)) {
+		for (int i = 0; i < GameSceneMenu::NUM_SQUAD_BUTTONS; ++i) {
+			if (menu->squadButton[i].Down()) {
 				ControlTap(i-1, plane2i);
 			}
 		}
@@ -703,7 +571,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	}
 
 	Chit* playerChit = GetPlayerChit();
-	if (playerChit && !buildActive) {
+	if (playerChit && !menu->BuildActive()) {
 		if (mv.model) {
 			TapModel(mv.model->userData);
 		}
@@ -716,6 +584,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 
 bool GameScene::DragAtom(gamui::RenderAtom* atom)
 {
+	int buildActive = menu->BuildActive();
 	if (buildActive && buildActive <= BuildScript::ICE && buildActive != BuildScript::ROTATE) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 			*atom = lumosGame->CalcIconAtom("delete");
@@ -730,7 +599,8 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
 {
 	Chit* building = 0;
-	if (uiMode[UI_BUILD].Down() && !buildActive) {
+	int uiMode = menu->UIMode();
+	if ((uiMode == GameSceneMenu::UI_BUILD) && !menu->BuildActive()) {
 		building = sim->GetChitBag()->QueryBuilding(IString(),pos2i,0);
 	}
 	return building != 0;
@@ -766,6 +636,7 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
 	CoreScript* coreScript = GetHomeCore();
+	int buildActive = menu->BuildActive();
 	if (coreScript && buildActive) {
 		WorkQueue* wq = coreScript->GetWorkQueue();
 		GLASSERT(wq);
@@ -911,15 +782,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		}
 		mapDragStart.Zero();
 	}
-	if (!uiHasTap && action == GAME_TAP_DOWN && gamui2D.DisabledTapCaptured()) {
-		for (int i = 1; i < BuildScript::NUM_PLAYER_OPTIONS; ++i) {
-			if (&buildButton[i] == gamui2D.DisabledTapCaptured()) {
-				BuildScript buildScript;
-				const BuildData& data = buildScript.GetData(i);
-				buildDescription.SetText(data.requirementDesc ? data.requirementDesc : "");
-			}
-		}
-	}
 }
 
 
@@ -936,7 +798,7 @@ bool GameScene::CameraTrackingAvatar()
 
 bool GameScene::AvatarSelected()
 {
-	bool button = uiMode[UI_VIEW].Down();
+	bool button = menu->UIMode() == GameSceneMenu::UI_VIEW;
 	Chit* playerChit = GetPlayerChit();
 	if (button && playerChit && playerChit->ID() == chitTracking) {
 		return true;
@@ -960,23 +822,6 @@ void GameScene::DoCameraHome()
 }
 
 
-bool GameScene::DoEscape()
-{
-	if (buildActive > 0) {
-		// back out of build
-		buildActive = 0;
-		buildButton[0].SetDown();
-		SetSelectionModel(tapView);
-	}
-	else if (uiMode[UI_BUILD].Down() || uiMode[UI_CONTROL].Down()) {
-		// return to view
-		uiMode[UI_VIEW].SetDown();
-	}
-	buildDescription.SetText("");
-	return uiMode[UI_VIEW].Down();
-}
-
-
 void GameScene::DoAvatarButton()
 {
 	CoreScript* coreScript = GetHomeCore();
@@ -997,16 +842,16 @@ void GameScene::DoAvatarButton()
 			cc->SetTrack(chitTracking);
 		}
 	}
-	bool escape = false;
-	while (!escape) {
-		escape = DoEscape();
-	}
+	menu->DoEscape(true);
 }
 
 
 void GameScene::ItemTapped( const gamui::UIItem* item )
 {
 	Vector2F dest = { 0, 0 };
+
+	// Doesn't do any logic; does change the state.
+	menu->ItemTapped(item);
 
 	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
 		startGameWidget.ItemTapped(item);
@@ -1052,7 +897,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &censusButton ) {
 		game->PushScene( LumosGame::SCENE_CENSUS, new CensusSceneData( sim->GetChitBag()) );
 	}
-	else if ( item == &createWorkerButton ) {
+	else if ( item == &menu->createWorkerButton ) {
 		CoreScript* cs = GetHomeCore();
 		if (cs) {
 			Chit* coreChit = cs->ParentChit();
@@ -1084,28 +929,28 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 							 0, 0 ));
 		}
 	}
-	else if (item == &swapWeapons) {
-		GLASSERT(0);
+//	else if (item == &swapWeapons) {
+//		GLASSERT(0);
 //		Chit* player = GetPlayerChit();
 //		if (player && player->GetItemComponent()) {
 //			player->GetItemComponent()->SwapWeapons();
 //		}
-	}
-	else if ( item == &useBuildingButton ) {
+//	}
+	else if ( item == &menu->useBuildingButton ) {
 		sim->UseBuilding();
 	}
-	else if ( item == &cameraHomeButton ) {
+	else if ( item == &menu->cameraHomeButton ) {
 		DoCameraHome();
 	}
-	else if ( item == &avatarUnit ) {
+	else if ( item == &menu->avatarUnit ) {
 		DoAvatarButton();
 	}
-	else if ( item == &prevUnit || item == &nextUnit ) {
+	else if ( item == &menu->prevUnit || item == &menu->nextUnit ) {
 		CoreScript* coreScript = GetHomeCore();
 
 		int bias = 0;
-		if (item == &prevUnit) bias = -1;
-		if (item == &nextUnit) bias = 1;
+		if (item == &menu->prevUnit) bias = -1;
+		if (item == &menu->nextUnit) bias = 1;
 
 		if (coreScript ) {
 			CChitArray citizens;
@@ -1165,38 +1010,16 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	// Only hitting the bottom row (actual action) buttons triggers
 	// the build. Up until that time, the selection icon doesn't 
 	// turn on.
-	buildActive = 0;
-	buildDescription.SetText("");
-	if (uiMode[UI_BUILD].Down()) {
+	if (menu->UIMode() == GameSceneMenu::UI_BUILD) {
 		for (int i = 1; i < BuildScript::NUM_PLAYER_OPTIONS; ++i) {
-			if (&buildButton[i] == item) {
-				buildActive = i;
+			if (&menu->buildButton[i] == item) {
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 				cc->SetTrack(0);
-
-				BuildScript buildScript;
-				const BuildData& bd = buildScript.GetData(i);
-				buildDescription.SetText(bd.desc ? bd.desc : "");
-
 				break;
 			}
 		}
 	}
 	SetSelectionModel(tapView);
-
-	// If a mode switches, set the buttons up so there isn't a down
-	// button with nothing being built.
-	bool setBuildUp = false;
-	for (int i = 0; i < NUM_BUILD_MODES; ++i) {
-		if (item == &modeButton[i]) 
-			setBuildUp = true;
-	}
-	if (item == &uiMode[UI_BUILD]) {
-		setBuildUp = true;
-	}
-	if (setBuildUp) {
-		buildButton[0].SetDown();
-	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
@@ -1281,7 +1104,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 void GameScene::HandleHotKey( int mask )
 {
 	if (mask == GAME_HK_ESCAPE) {
-		DoEscape();
+		menu->DoEscape(false);
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();
@@ -1567,6 +1390,7 @@ void GameScene::SetHelpText(const int* arr, int nWorkers)
 }
 */
 
+#if 0
 void GameScene::SetBuildButtons(const int* arr)
 {
 	// Went back and forth a bit on whether this should be
@@ -1614,6 +1438,7 @@ void GameScene::SetBuildButtons(const int* arr)
 	buildButton[BuildScript::BUILD_CIRCUIT_DETECT_ENEMY].SetEnabled(nCircuitFab > 0);
 	buildButton[BuildScript::BUILD_CIRCUIT_TRANSISTOR].SetEnabled(nCircuitFab > 0);
 }
+#endif
 
 void GameScene::SetPickupButtons()
 {
@@ -1669,6 +1494,7 @@ void GameScene::DoTick( U32 delta )
 	if (!paused) {
 		sim->DoTick(delta);
 	}
+	menu->DoTick(GetHomeCore());
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -1698,10 +1524,11 @@ void GameScene::DoTick( U32 delta )
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
 	Chit* playerChit = GetPlayerChit();
-	if ( !playerChit && !homeCoreScript ) {
-		uiMode[UI_VIEW].SetDown();
-	}
-	uiMode[UI_BUILD].SetEnabled(homeCoreScript != 0);
+//	if ( !playerChit && !homeCoreScript ) {
+//		menu->SetUIMode(GameSceneMenu::UI_VIEW);
+//	}
+//	uiMode[UI_BUILD].SetEnabled(homeCoreScript != 0);
+	menu->EnableBuildAndControl(homeCoreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
 	if (!track && GetPlayerChit()) {
@@ -1778,7 +1605,7 @@ void GameScene::DoTick( U32 delta )
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
 	//swapWeapons.SetVisible(track && track == playerChit);
-	swapWeapons.SetVisible(false);
+//	swapWeapons.SetVisible(false);
 
 	pausedLabel.SetVisible(paused);
 	str.Clear();
@@ -1796,15 +1623,15 @@ void GameScene::DoTick( U32 delta )
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
 
-	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
-	}
-	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
-	static const int CIRCUIT_MODE = NUM_BUILD_MODES - 1;
-	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
+//	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+//		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
+//	}
+//	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
+//	static const int CIRCUIT_MODE = NUM_BUILD_MODES - 1;
+//	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
 	bool debugUiVisible = game->GetDebugUI();
-	bool abandonVisible = uiMode[UI_BUILD].Down() && homeCoreScript;
+	bool abandonVisible = (menu->UIMode() == GameSceneMenu::UI_BUILD) && homeCoreScript;
 	abandonButton.SetVisible(abandonVisible);
 	if (!abandonVisible) {
 		abandonConfirmButton.SetVisible(false);
@@ -1826,17 +1653,13 @@ void GameScene::DoTick( U32 delta )
 	{
 		// Enforce the worker limit.
 		CStr<32> str2;
-		static const int MAX_BOTS = 4;
 
 		Rectangle2F b = ToWorld( InnerSectorBounds(homeSector));
 		CChitArray arr;
 		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
 		nWorkers = arr.Size();
-
-		str2.Format("WorkerBot\n%d %d/%d", WORKER_BOT_COST, nWorkers, MAX_BOTS);		// FIXME: pull price from data
-		createWorkerButton.SetText( str2.c_str() );
-		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
+		menu->SetNumWorkers(nWorkers);
 	}
 
 	{
@@ -1844,7 +1667,7 @@ void GameScene::DoTick( U32 delta )
 		Vector2I sector = GetHomeSector();
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
-		SetBuildButtons(arr);
+//		SetBuildButtons(arr);
 		adviser->DoTick(delta, homeCoreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
@@ -1860,18 +1683,19 @@ void GameScene::DoTick( U32 delta )
 			}
 		}
 	}
-	useBuildingButton.SetVisible( useBuildingVisible );
-	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
-	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
-	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
-	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
+	menu->SetUseBuilding(useBuildingVisible);
+//	useBuildingButton.SetVisible( useBuildingVisible );
+//	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
+//	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
+//	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
+//	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
 
-	if (AvatarSelected() && CameraTrackingAvatar()) {
-		avatarUnit.SetText("Teleport\nAvatar");
-	}
-	else {
-		avatarUnit.SetText("Avatar");
-	}
+	menu->SetCanTeleport(AvatarSelected() && CameraTrackingAvatar());
+//		avatarUnit.SetText("Teleport\nAvatar");
+//	}
+//	else {
+//		avatarUnit.SetText("Avatar");
+//	}
 
 	sim->GetEngine()->RestrictCamera( 0 );
 
@@ -1891,87 +1715,10 @@ void GameScene::DoTick( U32 delta )
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
 
-	SetSquadDisplay(uiMode[UI_CONTROL].Down());
+//	SetSquadDisplay(uiMode[UI_CONTROL].Down());
 }
 
 
-void GameScene::SetSquadDisplay(bool squadVisible)
-{
-	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-
-	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
-		squadButton[i].SetVisible(squadVisible);
-		squadBar[i].SetVisible(squadVisible);
-	}
-	bool inUse[MAX_CITIZENS] = { false };
-	uiBackground.SetVisible(squadVisible);
-	if (squadVisible && cs) {
-		int count[NUM_SQUAD_BUTTONS] = { 0 };
-		GLString str;
-		CChitArray citizens;
-		cs->Citizens(&citizens);
-
-		for (int i = 0; i < citizens.Size(); ++i) {
-			int c = cs->SquadID(citizens[i]->ID()) + 1;
-			GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
-			if (count[c] < ((c == 0) ? CITIZEN_BASE : SQUAD_SIZE)) {
-				const GameItem* item = citizens[i]->GetItem();
-				int index = 0;
-				if (c == 0) {
-					index = count[0];
-					GLASSERT(index >= 0 && index < CITIZEN_BASE);
-				}
-				else {
-					index = CITIZEN_BASE + (c - 1)*SQUAD_SIZE + count[c];
-					GLASSERT(index >= CITIZEN_BASE && index < MAX_CITIZENS);
-				}
-				count[c] += 1;
-				GLASSERT(index >= 0 && index < MAX_CITIZENS);
-				ItemComponent* itemComponent = citizens[i]->GetItemComponent();
-				squadBar[index].Set(itemComponent);
-				squadBar[index].SetVisible(true);
-				inUse[index] = true;
-			}
-		}
-	}
-	for (int i = 0; i < MAX_CITIZENS; ++i) {
-		if (!inUse[i]) {
-			squadBar[i].SetVisible(false);
-		}
-	}
-
-	if (squadVisible) {
-		for (int i = 0; i < MAX_SQUADS; ++i) {
-			static const char* NAME[MAX_SQUADS] = { "Alpha", "Beta", "Delta", "Omega" };
-			// Ready, Resting, On Route
-			Vector2I waypoint = { 0, 0 };
-			CChitArray squaddies;
-			if (cs) {
-				waypoint = cs->GetWaypoint(i);
-				cs->Squaddies(i, &squaddies);
-			}
-			double totalMorale = 0;
-			for (int k = 0; k < squaddies.Size(); ++k) {
-				if (squaddies[k]->GetAIComponent()) {
-					totalMorale += squaddies[k]->GetAIComponent()->GetNeeds().Morale();
-				}
-			}
-			double moraleAve = squaddies.Size() ? (totalMorale / double(squaddies.Size())) : 0;
-
-			CStr<32> str = NAME[i];
-			if (squaddies.Size() && !waypoint.IsZero()) {
-				str.Format("%s\nRoute %x%x", NAME[i], waypoint.x/SECTOR_SIZE, waypoint.y/SECTOR_SIZE);
-			}
-			else if (squaddies.Size() && moraleAve > 0.95) {
-				str.Format("%s\nReady", NAME[i]);
-			}
-			else if (squaddies.Size()) {
-				str.Format("%s\nRest %d%%", NAME[i], int(moraleAve*100.0f));
-			}
-			squadButton[i + 1].SetText(str.safe_str());
-		}
-	}
-}
 
 
 void GameScene::OpenEndGame()

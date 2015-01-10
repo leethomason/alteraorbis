@@ -1889,11 +1889,7 @@ LayoutCalculator::LayoutCalculator( float w, float h )
 	  textOffsetY( 0 ),
 	  offsetX( 0 ),
 	  offsetY( 0 ),
-	  useTextOffset( false ),
-	  innerX0( 0 ),
-	  innerY0( 0 ),
-	  innerX1( w ),
-	  innerY1( h )
+	  useTextOffset( false )
 {
 }
 
@@ -1903,7 +1899,7 @@ LayoutCalculator::~LayoutCalculator()
 }
 
 
-void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, int _cx, int _cy, bool setSize )
+void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, int _cx, int _cy, bool setSize ) const
 {
 	float pos[2] = { 0, 0 };
 	int xArr[2] = { _x, _y };
@@ -1957,26 +1953,27 @@ void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, int _cx, int _cy, 
 			y1 = item->Y() - gutter[1];
 		}
 	
-		innerX0 = Max( innerX0, gutter[0] );
-		innerY0 = Max( innerY0, gutter[1] );
-		innerX1 = Min( innerX1, screenWidth  - gutter[0] );
-		innerY1 = Min( innerY1, screenHeight - gutter[1] );
+//		innerX0 = Max( innerX0, gutter[0] );
+//		innerY0 = Max( innerY0, gutter[1] );
+//		innerX1 = Min( innerX1, screenWidth  - gutter[0] );
+//		innerY1 = Min( innerY1, screenHeight - gutter[1] );
 
 		// Can trim to y or x. Which one?
-		float areaX = ( Min( innerX1, x1 ) - Max( innerX0, x0 ) ) * ( innerY1 - innerY0 );
-		float areaY = ( innerX1 - innerX0 ) * ( Min( innerY1, y1 ) - Max( innerY0, y0 ));
-		if ( areaX > areaY ) {
-			innerX0 = Max( innerX0, x0 );
-			innerX1 = Min( innerX1, x1 );
-		}
-		else {
-			innerY0 = Max( innerY0, y0 );
-			innerY1 = Min( innerY1, y1 );
-		}
+//		float areaX = ( Min( innerX1, x1 ) - Max( innerX0, x0 ) ) * ( innerY1 - innerY0 );
+//		float areaY = ( innerX1 - innerX0 ) * ( Min( innerY1, y1 ) - Max( innerY0, y0 ));
+//		if ( areaX > areaY ) {
+//			innerX0 = Max( innerX0, x0 );
+//			innerX1 = Min( innerX1, x1 );
+//		}
+//		else {
+//			innerY0 = Max( innerY0, y0 );
+//			innerY1 = Min( innerY1, y1 );
+//		}
 	}
 }
 
 
+/*
 void LayoutCalculator::PosInner( IWidget* item, float wDivH )
 {
 	innerX0 = Max( innerX0, gutterX );
@@ -2004,4 +2001,4 @@ void LayoutCalculator::PosInner( IWidget* item, float wDivH )
 		}
 	}
 }
-
+*/

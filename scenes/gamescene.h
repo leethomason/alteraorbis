@@ -38,6 +38,7 @@ class NewsEvent;
 class Chit;
 class GameItem;
 class Adviser;
+class GameSceneMenu;
 
 class GameScene : public Scene,
 				  public IChitListener
@@ -81,7 +82,7 @@ private:
 	void SetBars(Chit* chit, bool isAvatar);
 
 	void SetPickupButtons();	// if the avatar can pick things up
-	void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
+	//void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
@@ -95,7 +96,6 @@ private:
 	void SetSquadDisplay(bool squadVisible);
 	void OpenEndGame();
 
-	bool DoEscape();		// return true if at "top" mode
 	void DoCameraHome();
 	void DoAvatarButton();
 
@@ -110,18 +110,7 @@ private:
 		NUM_NEWS_BUTTONS = 12,
 		NEWS_BUTTON_WIDTH  = 60,
 		NEWS_BUTTON_HEIGHT = 25,
-		NUM_BUILD_MARKS = 100,
-		NUM_SQUAD_BUTTONS = MAX_SQUADS+1,	// "local" control, plus the squads
-	};
-	enum {
-		NUM_BUILD_MODES = 6
-	};
-
-	enum {
-		UI_VIEW,
-		UI_BUILD,
-		UI_CONTROL,
-		NUM_UI_MODES
+		NUM_BUILD_MARKS = 100
 	};
 
 	struct SectorInfo
@@ -152,7 +141,6 @@ private:
 	int					possibleChit;
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
-	int					buildActive;	// which build button is active. 0 if none.
 	int					chitTracking;
 	int					coreWarningTimer, domainWarningTimer;
 	grinliz::Vector2F	coreWarningPos, domainWarningPos;
@@ -166,18 +154,10 @@ private:
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
-	BuildScript			buildScript;
+	GameSceneMenu*		menu;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	saveButton;
-	gamui::ToggleButton	buildButton[BuildScript::NUM_PLAYER_OPTIONS];
-	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
-	gamui::PushButton	useBuildingButton;
-	gamui::PushButton	cameraHomeButton;
-	gamui::PushButton	nextUnit, avatarUnit, prevUnit;
-	gamui::Image		tabBar0, tabBar1;
-	gamui::PushButton	createWorkerButton;
-	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	censusButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
@@ -187,13 +167,8 @@ private:
 	gamui::PushButton	coreWarningIcon;
 	gamui::PushButton	domainWarningIcon;
 	gamui::PushButton	atlasButton;
-	gamui::TextLabel	buildDescription;
-	gamui::PushButton	swapWeapons;
 	gamui::Image		helpImage;
 	gamui::TextLabel	helpText;
-	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
-	HPBar				squadBar[MAX_CITIZENS];
-	gamui::Image		uiBackground;
 	gamui::PushButton	abandonButton, abandonConfirmButton;
 	gamui::TextLabel	pausedLabel;
 
