@@ -105,8 +105,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
-//	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
-//	swapWeapons.SetText("Swap\nWeapons");
 
 	abandonButton.Init(&gamui2D, game->GetButtonLook(0));
 	abandonButton.SetText("Abandon\nDomain");
@@ -230,7 +228,6 @@ void GameScene::Resize()
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
-//	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
@@ -532,7 +529,6 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
 	if (!map->Bounds().Contains(plane2i)) return;
 
-	//const BuildData& buildData = buildScript.GetData(buildActive);
 	BuildAction(plane2i);
 	int uiMode = menu->UIMode();
 
@@ -913,7 +909,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if (item == &abandonConfirmButton) {
 		OpenEndGame();
-//		sim->AbandonDomain();
 		sim->GetChitBag()->SetHomeTeam(TEAM_HOUSE);
 		endTimer = 1;	// open immediate
 	}
@@ -929,13 +924,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 							 0, 0 ));
 		}
 	}
-//	else if (item == &swapWeapons) {
-//		GLASSERT(0);
-//		Chit* player = GetPlayerChit();
-//		if (player && player->GetItemComponent()) {
-//			player->GetItemComponent()->SwapWeapons();
-//		}
-//	}
 	else if ( item == &menu->useBuildingButton ) {
 		sim->UseBuilding();
 	}
@@ -1337,59 +1325,6 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 }
 
 
-/*
-void GameScene::SetHelpText(const int* arr, int nWorkers)
-{
-	static const int BUILD_ADVISOR[] = {
-		BuildScript::FARM,
-		BuildScript::SLEEPTUBE,
-		BuildScript::DISTILLERY,
-		BuildScript::BAR,
-		BuildScript::MARKET,
-		BuildScript::FORGE,
-		BuildScript::TEMPLE,
-		BuildScript::GUARDPOST,
-		BuildScript::EXCHANGE,
-		BuildScript::KIOSK_N,
-		BuildScript::KIOSK_M,
-		BuildScript::KIOSK_C,
-		BuildScript::KIOSK_S,
-		BuildScript::VAULT,
-		BuildScript::CIRCUITFAB
-	};
-
-	static const int NUM_BUILD_ADVISORS = GL_C_ARRAY_SIZE(BUILD_ADVISOR);
-	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-	CStr<100> str = "";
-
-	if (cs) {
-		if (nWorkers == 0) {
-			str.Format("Build a worker bot.");
-		}
-		else {
-			const Wallet& wallet = cs->ParentChit()->GetItem()->wallet;
-
-			for (int i = 0; i < NUM_BUILD_ADVISORS; ++i) {
-				int id = BUILD_ADVISOR[i];
-				if (arr[id] == 0) {
-					BuildScript buildScript;
-					const BuildData& data = buildScript.GetData(id);
-
-					if (wallet.gold >= data.cost) {
-						str.Format("Advisor: Build a %s.", data.cName);
-					}
-					else {
-						str.Format("Advisor: Collect gold by defeating attackers\nor raiding domains.");
-					}
-					break;
-				}
-			}
-		}
-	}
-	helpText.SetText(str.c_str());
-}
-*/
-
 #if 0
 void GameScene::SetBuildButtons(const int* arr)
 {
@@ -1524,10 +1459,6 @@ void GameScene::DoTick( U32 delta )
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
 	Chit* playerChit = GetPlayerChit();
-//	if ( !playerChit && !homeCoreScript ) {
-//		menu->SetUIMode(GameSceneMenu::UI_VIEW);
-//	}
-//	uiMode[UI_BUILD].SetEnabled(homeCoreScript != 0);
 	menu->EnableBuildAndControl(homeCoreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
@@ -1602,11 +1533,6 @@ void GameScene::DoTick( U32 delta )
 		dateLabel.SetText( str.c_str() );
 	}
 
-	// This doesn't really work. The AI will swap weapons
-	// at will, so it's more frustrating than useful.
-	//swapWeapons.SetVisible(track && track == playerChit);
-//	swapWeapons.SetVisible(false);
-
 	pausedLabel.SetVisible(paused);
 	str.Clear();
 
@@ -1622,13 +1548,6 @@ void GameScene::DoTick( U32 delta )
 		const GameTrait& stat = playerChit->GetItem()->Traits();
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
-
-//	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-//		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
-//	}
-//	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
-//	static const int CIRCUIT_MODE = NUM_BUILD_MODES - 1;
-//	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() && !modeButton[CIRCUIT_MODE].Down() );
 
 	bool debugUiVisible = game->GetDebugUI();
 	bool abandonVisible = (menu->UIMode() == GameSceneMenu::UI_BUILD) && homeCoreScript;
@@ -1667,7 +1586,6 @@ void GameScene::DoTick( U32 delta )
 		Vector2I sector = GetHomeSector();
 		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
 		cb->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
-//		SetBuildButtons(arr);
 		adviser->DoTick(delta, homeCoreScript, nWorkers, arr, BuildScript::NUM_PLAYER_OPTIONS);
 	}
 
@@ -1684,19 +1602,7 @@ void GameScene::DoTick( U32 delta )
 		}
 	}
 	menu->SetUseBuilding(useBuildingVisible);
-//	useBuildingButton.SetVisible( useBuildingVisible );
-//	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
-//	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
-//	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
-//	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
-
 	menu->SetCanTeleport(AvatarSelected() && CameraTrackingAvatar());
-//		avatarUnit.SetText("Teleport\nAvatar");
-//	}
-//	else {
-//		avatarUnit.SetText("Avatar");
-//	}
-
 	sim->GetEngine()->RestrictCamera( 0 );
 
 	// The game will open scenes - say the CharacterScene for the
@@ -1714,8 +1620,6 @@ void GameScene::DoTick( U32 delta )
 
 	domainWarningIcon.SetVisible(domainWarningTimer > 0);
 	domainWarningTimer -= delta;
-
-//	SetSquadDisplay(uiMode[UI_CONTROL].Down());
 }
 
 
