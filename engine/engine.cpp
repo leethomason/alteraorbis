@@ -80,6 +80,8 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	overlay.SetScale(port->PhysicalWidth(), port->PhysicalHeight(), LAYOUT_VIRTUAL_HEIGHT);
 	FontSingleton* bridge = FontSingleton::Instance();
 	overlay.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
+	overlay.SetPixelSnap(false);
+
 	PushInstance( this );
 }
 

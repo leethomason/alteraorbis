@@ -288,6 +288,7 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 {
 	if ( !m_gamui )
 		return;
+	bool pixelSnap = m_gamui->PixelSnap();
 
 	/*	This routine gets done in physical pixels, not virtual.
 		Hence all the Transform() calls to convert from virtual to physical.
@@ -299,8 +300,8 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 	iText->GamuiFont(&font);
 
 	const char* p = m_str;
-	const float X0 = floorf(m_gamui->TransformVirtualToPhysical(X()));
-	const float Y0 = floorf(m_gamui->TransformVirtualToPhysical(Y()));
+	const float X0 = pixelSnap ? floorf(m_gamui->TransformVirtualToPhysical(X())) : m_gamui->TransformVirtualToPhysical(X());
+	const float Y0 = pixelSnap ? floorf(m_gamui->TransformVirtualToPhysical(Y())) : m_gamui->TransformVirtualToPhysical(Y());
 	float x = X0;
 	float y = Y0 + float(font.ascent);	// move to the baseline
 	const float tabWidth = m_gamui->TransformVirtualToPhysical(m_tabWidth);
@@ -364,9 +365,11 @@ void TextLabel::ConstQueue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Ver
 
 		// Everything above is about a word; now we are
 		// committed and can run in a tight loop.
-		y = floorf(y);
+		if (pixelSnap)
+			y = floorf(y);
 		while( p && *p && *p != '\n' && *p != '\t' ) {
-			x = floorf(x);
+			if (pixelSnap) 
+				x = floorf(x);
 
 			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, &metrics );
 
@@ -1330,7 +1333,8 @@ Gamui::Gamui()
 		m_relativeY( 0 ),
 		m_focus( -1 ),
 		m_focusImage( 0 ),
-		m_currentDialog(0)
+		m_currentDialog(0),
+		m_pixelSnap(true)
 {
 }
 

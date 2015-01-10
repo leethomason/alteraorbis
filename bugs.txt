@@ -12,12 +12,15 @@ x avatar ids are weird: track through the core, so that if we lose the core, Ava
 x console: Foo is taken over by Foo for House-1(core)
 x pause
 x engine time independent of pause
-x simplify fluid
-- refactor GameScene
+x simplify fluidx
+x refactor GameScene
 	x restore worker count
 	x canTeleport
 	x return build id
 	x workerbot -> utility
+- 'escape' should clear build mark
+- goblins wandering around claimed core
+- weapon assert on start
 - check gobman that is House denizen healing
 - should buy weapons more aggressively
 - warnings of “core attack” not in place

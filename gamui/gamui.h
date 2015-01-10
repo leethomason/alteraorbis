@@ -357,6 +357,9 @@ public:
 	/// Query the text height in virtual pixels.
 	float TextHeightVirtual() const;
 
+	bool PixelSnap() const { return m_pixelSnap; }
+	void SetPixelSnap(bool snap) { m_pixelSnap = snap; }
+
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
 		* TapDown return the item tapped on. This does not activate anything except capture.
@@ -428,6 +431,7 @@ private:
 	int				m_focus;
 	Image*			m_focusImage;
 	int				m_currentDialog;
+	bool			m_pixelSnap;
 
 	struct State {
 		uint16_t	vertexStart;
