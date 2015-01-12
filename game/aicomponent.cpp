@@ -1083,14 +1083,15 @@ Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector(pos2i);
+	CoreScript* cs = CoreScript::GetCore(sector);
 
-	// FIXME: generalize "I want a home logic."
 	// See also the EnterGrid(), where it takes over a neutral core.
-	if ( (thisComp.item->flags & GameItem::AI_DOES_WORK )								// workers stay close
-		|| (thisComp.item->IName() == ISC::gobman && Team::IsRogue(parentChit->Team())))	// as do denizens trying to find a home.
+	// Workers stay close to home, as 
+	// do denizens trying to find a new home core.
+	if (   (thisComp.item->flags & GameItem::AI_DOES_WORK )														
+		|| (thisComp.item->MOB() == ISC::denizen && Team::IsRogue(parentChit->Team()) && cs && !cs->InUse()))
 	{
-		// workers stay close to core.
-		Vector2F dest = GetWanderOrigin( thisComp );
+		Vector2F dest = GetWanderOrigin(thisComp);
 		dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 		dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 		return dest;
@@ -1985,7 +1986,8 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 		}
 		if (porch.IsZero())	continue;
 
-		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit);
+		bool functional = false;
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit, &functional);
 		if (buildingNeeds.IsZero()) continue;
 
 		// The needs match.
@@ -2011,7 +2013,10 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 				GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
 			}
 		}
-		if (score > 0 && score > bestScore) {
+
+		if ((score > 0.4 || (score > 0.1 && functional))
+			&& score > bestScore)
+		{
 			bestScore = score;
 			bestIndex = i;
 			bestBD = bd;
@@ -2019,7 +2024,7 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 		}
 	}
 
-	if (bestScore >= 0.4) {
+	if (bestScore >0) {
 		GLASSERT(bestPorch.x > 0);
 		if (debugLog) {
 			GLOUTPUT(("  --> %s\n", bestBD->structure.c_str()));
@@ -2590,7 +2595,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Domain Takeover.
-	if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen
+	if (thisComp.item->MOB() == ISC::denizen
 		&& Team::IsRogue(thisComp.chit->Team())
 		&& Team::IsDefault(thisComp.item->IName(), thisComp.chit->Team()))
 	{
@@ -3065,7 +3070,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			// Pulled out the old "summoning" system, but left in 
 			// the cool message for Greaters attracted to tech.
 			if (parentChit->GetItem()
-				&& parentChit->GetItem()->keyValues.GetIString(ISC::mob) == ISC::greater
+				&& parentChit->GetItem()->MOB() == ISC::greater
 				&& cs && (cs->GetTech() >= TECH_ATTRACTS_GREATER))
 			{
 				Vector2I target = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();

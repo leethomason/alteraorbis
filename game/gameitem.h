@@ -399,7 +399,8 @@ public:
 	grinliz::MicroDB keyValues;
 	grinliz::MicroDB historyDB;
 
-	bool Intrinsic() const	{ return (flags & INTRINSIC) != 0; }
+	bool Intrinsic() const			{ return (flags & INTRINSIC) != 0; }
+	grinliz::IString MOB() const	{ return keyValues.GetIString(ISC::mob); }
 
 	virtual MeleeWeapon*	ToMeleeWeapon()		{ return 0; }
 	virtual RangedWeapon*	ToRangedWeapon()	{ return 0; }

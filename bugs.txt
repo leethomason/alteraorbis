@@ -18,22 +18,22 @@ x refactor GameScene
 	x canTeleport
 	x return build id
 	x workerbot -> utility
+x goblins wandering around claimed core
+x should buy weapons more aggressively
+x increase drive to make weapons
+x *still* not enough forging
+x lots more forging needs to happen!
+x market use not correct
 - 'escape' should clear build mark
-- goblins wandering around claimed core
 - weapon assert on start
 - check gobman that is House denizen healing
-- should buy weapons more aggressively
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
 - should show information about anyone you click
 - visitors don't visit (until they do...)
-- increase drive to make weapons
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
 - walk target for the avatar
-- *still* not enough forging
-- lots more forging needs to happen!
-- market use not correct
 - deity -> MotherCore
 - task serialization
 - any building attack should cause awareness in domainAI
@@ -59,6 +59,7 @@ x refactor GameScene
 - mouse wheel support
 - see monsters when you click on them
 - unify rotation model
+- domains always deleted by "unknown"
 
 - “data” the default screen of census
 - switch to war mode

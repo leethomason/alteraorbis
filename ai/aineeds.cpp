@@ -10,6 +10,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/itemcomponent.h"
 #include "../script/evalbuildingscript.h"
+#include "marketai.h"
 
 using namespace ai;
 using namespace grinliz;
@@ -138,10 +139,11 @@ void Needs::Serialize(XStream* xs)
 }
 
 
-grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor)
+grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor, bool *functional)
 {
 	static const Vector3<double> ZERO = { 0, 0, 0 };
 	static const double LIKE_BOOST = 1.5;
+	*functional = false;
 
 	GLASSERT(Needs::NUM_NEEDS == 3);		// use a Vector3
 	const GameItem* buildingItem = building->GetItem();
@@ -181,6 +183,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 		// On the other hand, hard to get out of the sleep - bar loop.
 		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= LIKE_BOOST;
 		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
+		*functional = true;
 	}
 	else if (buildingName == ISC::bed) {
 		// Beds always work for energy. Up importance if wounded.
@@ -221,6 +224,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 		if (likesCrafting) {
 			needs = needs * LIKE_BOOST;
 		}
+		*functional = true;
 	}
 	else if (buildingName == ISC::bar) {
 		if (building->GetItemComponent()->FindItem(ISC::elixir) == 0) needs.Zero();

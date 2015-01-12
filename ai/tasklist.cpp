@@ -455,7 +455,8 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 	if (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) {
 		// Need based.
-		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit);
+		bool functional = false;
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit, &functional);
 		if (buildingNeeds.IsZero()) {
 			// doesn't have what is needed, etc.
 			return;
