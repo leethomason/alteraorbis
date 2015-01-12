@@ -1093,6 +1093,7 @@ void GameScene::HandleHotKey( int mask )
 {
 	if (mask == GAME_HK_ESCAPE) {
 		menu->DoEscape(false);
+		SetSelectionModel(tapView);
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();

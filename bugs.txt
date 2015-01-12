@@ -14,6 +14,7 @@ x pause
 x engine time independent of pause
 x simplify fluidx
 x refactor GameScene
+	x factor gamescene ui code
 	x restore worker count
 	x canTeleport
 	x return build id
@@ -24,8 +25,9 @@ x increase drive to make weapons
 x *still* not enough forging
 x lots more forging needs to happen!
 x market use not correct
-- 'escape' should clear build mark
+x 'escape' should clear build mark
 - weapon assert on start
+- AIComponent::DoShoot assert fires after loading
 - check gobman that is House denizen healing
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
@@ -49,8 +51,6 @@ x market use not correct
 - improve hinting of text?
 - new art from GT
 - de-saturate colors correctly
-- AIComponent::DoShoot assert fires after loading
-- factor gamescene ui code
 - fruit & food
 	- deal with fruit overflow
 	- cyclops should eat rock to heal. (Or everyone to fruit?)
