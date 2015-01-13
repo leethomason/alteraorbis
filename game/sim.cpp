@@ -241,7 +241,7 @@ void Sim::CreateCores()
 			int team = TEAM_NEUTRAL;
 			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
 				// Mother Core. Always at the center: spawn point of the Visitors.
-				team = TEAM_DEITY;
+				team = Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE);
 			}
 			CoreScript* cs = CoreScript::CreateCore(sector, team, &context);
 			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {

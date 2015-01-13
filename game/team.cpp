@@ -49,7 +49,11 @@ grinliz::IString Team::TeamName(int team)
 		break;
 
 		case TEAM_DEITY:
-		name = ISC::deity;
+		switch (id) {
+			case 0: name = ISC::deity; break;
+			case DEITY_MOTHER_CORE:	name = ISC::MotherCore; break;
+			default: GLASSERT(0);
+		}
 		break;
 
 		case TEAM_CHAOS:
@@ -85,7 +89,7 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	else if (itemName == ISC::kamakiri) {
 		return TEAM_KAMAKIRI;
 	}
-	else if (itemName == ISC::deity) {
+	else if (itemName == ISC::deity || itemName == ISC::MotherCore){
 		return TEAM_DEITY;
 	}
 	else if (    itemName == ISC::cyclops

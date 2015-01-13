@@ -26,8 +26,13 @@ x *still* not enough forging
 x lots more forging needs to happen!
 x market use not correct
 x 'escape' should clear build mark
-- weapon assert on start
-- AIComponent::DoShoot assert fires after loading
+x getting hit should cause awareness
+x [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+x deity -> MotherCore
+x proper font
+	x interface: select filename
+	x tweak spacing
+	x tweak height
 - check gobman that is House denizen healing
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
@@ -35,15 +40,11 @@ x 'escape' should clear build mark
 - visitors don't visit (until they do...)
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
-- walk target for the avatar
-- deity -> MotherCore
 - task serialization
 - any building attack should cause awareness in domainAI
-- getting hit should cause awareness
 - build tasks aren't getting serialized correctly. wrong rotation?
 - [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
 - [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
-- [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
 - [Reenen] Cyclops heal at rocks.
 - Mini map flash of battles.
 - console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
@@ -60,12 +61,24 @@ x 'escape' should clear build mark
 - see monsters when you click on them
 - unify rotation model
 - domains always deleted by "unknown"
+- unified build marks
+- improved strategic view
+	- mark mother core at center
+	- line thickness to show visitor distribution
+	- all MOBs to center line
+	- show civtech
+	- show wealth
+	- show mil strength
+	- reserve diplomacy slot
 
 - “data” the default screen of census
 - switch to war mode
 - bar-market-forge need to look more distinct
 - should be able to browse units in character screen
 
+- weapon assert on start
+- AIComponent::DoShoot assert fires after loading
+- walk target for the avatar
 - GT: ui to show idle and busy workers
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation

@@ -95,10 +95,10 @@ public:
 
 	void Clear() {
 		action = 0;
+		buildScriptID = 0;
 		pos2i.Zero();
 		timer = 0;
 		data = 0;
-		buildScriptID = 0;
 	}
 
 	void Serialize( XStream* xs );

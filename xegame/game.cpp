@@ -93,7 +93,8 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	GLString settingsPath;
 	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &settingsPath );
 	SettingsManager::Create(settingsPath.c_str());
-	debugUI = SettingsManager::Instance()->DebugUI();
+	SettingsManager* settings = SettingsManager::Instance();
+	debugUI = settings->DebugUI();
 
 	LoadTextures();
 	modelLoader = new ModelLoader();
@@ -105,9 +106,13 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	delete modelLoader;
 	modelLoader = 0;
 
+	GLString fontPath = "./res/";
+	fontPath += settings->FontName();
 
 	FontSingleton* bridge = FontSingleton::Instance();
-	bridge->Init("./res/font.ttf");
+	bridge->Init(fontPath.c_str());
+	bridge->SetHeightDelta(settings->FontHeight());
+	bridge->SetLineSpacingDelta(settings->FontSpacing());
 	
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
 	GLASSERT( textTexture );

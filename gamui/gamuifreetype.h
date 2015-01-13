@@ -22,6 +22,8 @@ public:
 
 	virtual void GamuiFont(gamui::IGamuiText::FontMetrics* metric);
 
+	void SetHeightDelta(int v) { deltaHeight = v; }
+	void SetLineSpacingDelta(int v) { deltaLineSpacing = v; }
 
 	enum {
 		FIRST_CHAR_CODE = 33,	// space (32) is special
@@ -47,6 +49,8 @@ private:
 	int			fontHeight;
 	int			textureWidth, textureHeight;
 	int			ascent, descent;
+	int			deltaHeight;
+	int			deltaLineSpacing;
 	FT_Library  library;
 	FT_Face		face;
 

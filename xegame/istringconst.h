@@ -143,6 +143,7 @@ public:
 
 	static grinliz::IString deity;
 	static grinliz::IString Truulga;
+	static grinliz::IString MotherCore;
 
 	// double underscore -> '.'
 	static grinliz::IString need__food;

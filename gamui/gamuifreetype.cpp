@@ -9,7 +9,8 @@ using namespace gamui;
 
 GamuiFreetypeBridge::GamuiFreetypeBridge()
 {
-
+	deltaHeight = 0;
+	deltaLineSpacing = 0;
 }
 
 
@@ -42,9 +43,9 @@ void GamuiFreetypeBridge::Blit(uint8_t* target, int scanbytes, const FT_Bitmap& 
 }
 
 
-bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
+bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h)
 {
-	fontHeight = height;
+	fontHeight = _height + deltaHeight;
 	textureWidth = w;
 	textureHeight = h;
 
@@ -59,7 +60,7 @@ bool GamuiFreetypeBridge::Generate(int height, uint8_t* pixels, int w, int h)
 		int maxHeight = 0;
 		done = true;
 
-		FT_Set_Pixel_Sizes(face, 0, height / scale);
+		FT_Set_Pixel_Sizes(face, 0, fontHeight / scale);
 		memset(pixels, 0, w*h);
 		memset(glyphs, 0, sizeof(Glyph)*NUM_CODES);
 
@@ -167,5 +168,5 @@ void GamuiFreetypeBridge::GamuiFont(gamui::IGamuiText::FontMetrics* metric)
 	metric->ascent  = ascent * scale;
 	metric->descent = descent * scale;
 
-	metric->linespace = (ascent + descent) * scale;
+	metric->linespace = (ascent + descent + deltaLineSpacing) * scale;
 }

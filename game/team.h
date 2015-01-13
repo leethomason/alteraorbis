@@ -40,6 +40,10 @@ enum {
 };
 
 enum {
+	DEITY_MOTHER_CORE = 1
+};
+
+enum {
 	TEAM_ID_LEFT  = 0x1fffff,
 	TEAM_ID_RIGHT = 0x2fffff,
 };

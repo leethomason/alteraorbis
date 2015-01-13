@@ -502,7 +502,11 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	Vector3F leading = { 0, 0, 0 };
 	bool isMoving = false;
 	RangedWeapon* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-	GLASSERT(weapon);
+	// FIXME: real bug here, although maybe minor. serialization in 
+	// ItemComponent() calls UseBestItems(), which can re-order weapons,
+	// which (I think) causes the ranged weapon to be !current.
+	// It will eventually reset. But annoying and may be occasionally visible.
+	//GLASSERT(weapon);
 	if (!weapon) return;
 
 	if ( targetDesc.id ) {
@@ -3029,6 +3033,15 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	Vector2I sector = ToSector(mapPos);
 
 	switch (msg.ID()) {
+		case ChitMsg::CHIT_DAMAGE:
+		{
+			// If something hits us, make sure we notice.
+			const ChitDamageInfo* info = (const ChitDamageInfo*) msg.Ptr();
+			GLASSERT(info);
+			this->MakeAware(&info->originID, 1);
+		}
+		break;
+
 		case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
@@ -3046,7 +3059,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		parentChit->SetTickNeeded();
 
 		// Generally not what we expected.
-		// Do a re-think.
+		// Do a re-think.get
 		// Never expect move troubles in rampage mode.
 		if (aiMode != BATTLE_MODE) {
 			aiMode = NORMAL_MODE;

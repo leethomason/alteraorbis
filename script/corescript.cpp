@@ -798,7 +798,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {
 		// Assert that the 'team' is correctly formed.
-		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || team == TEAM_DEITY || Team::ID(team));
+		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::ID(team));
 		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
