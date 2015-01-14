@@ -113,6 +113,7 @@ public:
 	int PowerRating(bool current) const;
 
 	void EnableDebug(bool d) { debugEnabled = d;  }
+	int LastDamageID() const { return lastDamageID;  }
 
 private:
 	// If there is a RenderComponent, bring it in sync with the inventory.

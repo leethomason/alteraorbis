@@ -272,30 +272,11 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			coreCreateList.Push(sector);
 
 			if (chit->Team() != TEAM_NEUTRAL) {
-				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
+				int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
+				Chit* deleter = context.chitBag->GetChit(deleterID);
+				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit, deleter);
 				context.chitBag->GetNewsHistory()->Add(news);
-
-				// All the buildings become neutral. Some become ruins...
-				BuildingFilter filter;
-				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
-				context.chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
-				for (int i = 0; i < queryArr.Size(); ++i) {
-					/*
-					// Make an ornamental copy.
-					GameItem* item = queryArr[i]->GetItem();
-					if (item && queryArr[i]->GetRenderComponent()) {
-						Vector2I pos = queryArr[i]->GetSpatialComponent()->Bounds().min;
-						float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
-						Chit* c = context.chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
-						c->GetSpatialComponent()->SetYRotation(yrot);
-					}
-					queryArr[i]->DeRez();
-					*/
-				}
 			}
-//			if (context.chitBag->GetHomeTeam() && (chit->Team() == context.chitBag->GetHomeTeam())) {
-//				AbandonDomain();
-//			}
 		}
 	}
 }
