@@ -33,7 +33,9 @@ x proper font
 	x interface: select filename
 	x tweak spacing
 	x tweak height
-- check gobman that is House denizen healing
+x domains always deleted by "unknown"
+x improve hinting of text?
+- glow is broken (actually it glows, just not brighter. screwed up saturation??)
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
 - should show information about anyone you click
@@ -49,19 +51,18 @@ x proper font
 - Mini map flash of battles.
 - console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
-- improve hinting of text?
 - new art from GT
 - de-saturate colors correctly
 - fruit & food
 	- deal with fruit overflow
 	- cyclops should eat rock to heal. (Or everyone to fruit?)
 	- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
+	- check gobman that is House denizen healing
 - gobman statues
 - mouse wheel support
 - see monsters when you click on them
 - unify rotation model
-- domains always deleted by "unknown"
-- unified build marks
+- tweak ascent / descent? (Or is that a layout bug?)
 - improved strategic view
 	- mark mother core at center
 	- line thickness to show visitor distribution
@@ -71,6 +72,7 @@ x proper font
 	- show mil strength
 	- reserve diplomacy slot
 
+- unified build marks
 - “data” the default screen of census
 - switch to war mode
 - bar-market-forge need to look more distinct

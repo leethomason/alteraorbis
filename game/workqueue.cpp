@@ -32,13 +32,8 @@ WorkQueue::WorkQueue()
 WorkQueue::~WorkQueue()
 {
 	GLASSERT( parentChit );
-	Engine* engine = parentChit->Context()->engine;
-
-	for( int i=0; i<queue.Size(); ++i ) {
-		Model* m = queue[i].model;
-		if ( m ) {
-			engine->FreeModel( m );
-		}
+	for (int i = 0; i < queue.Size(); ++i) {
+		delete queue[i].image;
 	}
 }
 
@@ -61,79 +56,33 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 
 void WorkQueue::AddImage( QueueItem* item )
 {
-	const char* name = 0;
-	Vector3F pos = { 0, 0, 0 };
+	GLASSERT(item->image == 0);
+	item->image = new gamui::Image();
+
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(item->buildScriptID);
 	int size = buildData.size;
 
 	GLASSERT( parentChit );
-	const ChitContext* context = parentChit->Context();
-	Engine* engine = context->engine;
-	WorldMap* worldMap = context->worldMap;
 
+	RenderAtom atom;
 	if (item->buildScriptID == BuildScript::CLEAR) {
-		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
-		if ( wg.Height() ) {
-			// Clearing ice or plant
-			switch ( wg.Height() ) {
-			case 0:
-			case 1:	name = "clearMarker1";	break;
-			case 2: name = "clearMarker2";	break;
-			case 3:	name = "clearMarker3";	break;
-			default: name = "clearMarker1"; break;
-			}
-			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
-		}
-		else {
-			if ( size == 1 ) {
-				name = "clearMarker1";
-				pos.Set( (float)item->pos.x+0.5f, 0, (float)item->pos.y+0.5f );
-			}
-			else {
-				name = "clearMarker2";
-				pos.Set( (float)item->pos.x+1.f, 0, (float)item->pos.y+1.f );
-			}
-		}
+		atom = LumosGame::CalcIconAtom("delete");
 	}
 	else {
-		if ( size == 1 ) {
-			name = "buildMarker1";
-			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
-		}
-		else {
-			name = "buildMarker2";
-			pos.Set( (float)item->pos.x + 1.f, 0, (float)item->pos.y+1.f );
-		}
+		atom = LumosGame::CalcIconAtom("build");
 	}
-	GLASSERT( name );
-	if ( name ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
-		GLASSERT( res );
-		Model* m = engine->AllocModel( res );
-		GLASSERT( m );
-		m->SetFlag( MODEL_CLICK_THROUGH );
-
-		m->SetPos( pos );
-		GLASSERT( item->model == 0 );
-		item->model = m;
-	}
-	GLASSERT( item->model );
+	item->image->Init(&parentChit->Context()->worldMap->overlay1, atom, false);
+	item->image->SetPos((float)item->pos.x, (float)item->pos.y);
+	item->image->SetSize((float)size, (float)size);
+	item->image->SetVisible(true);
 }
 
 
 void WorkQueue::RemoveImage( QueueItem* item )
 {
-	GLASSERT( parentChit );
-	const ChitContext* context = parentChit->Context();
-	Engine* engine = context->engine;
-
-	if ( item->model ) {
-		engine->FreeModel( item->model );
-		item->model = 0;
-		return;
-	}
-	GLASSERT( 0 );
+	delete item->image;
+	item->image = 0;
 }
 
 
@@ -209,7 +158,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == id ) {
-			GLASSERT( queue[i].model );
+			GLASSERT( queue[i].image );
 			return &queue[i];
 		}
 	}
@@ -275,7 +224,7 @@ void WorkQueue::RemoveItem( int index )
 		}
 	}
 
-	GLASSERT( queue[index].model );
+	GLASSERT( queue[index].image );
 	RemoveImage( &queue[index] );
 	queue.Remove( index );
 }
@@ -508,7 +457,7 @@ void WorkQueue::InitSector( Chit* _parent, const grinliz::Vector2I& _sector )
 	parentChit = _parent; 
 	sector = _sector; 
 	for( int i=0; i<queue.Size(); ++i ) {
-		if ( !queue[i].model ) {
+		if ( !queue[i].image ) {
 			AddImage( &queue[i] );
 		}
 	}

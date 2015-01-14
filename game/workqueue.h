@@ -44,7 +44,7 @@ public:
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
-		QueueItem() : buildScriptID(0), assigned(0), model(0), rotation(0), variation(0) { pos.Zero(); }
+		QueueItem() : buildScriptID(0), assigned(0), image(0), rotation(0), variation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
 
@@ -54,7 +54,8 @@ public:
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;		// id of worker assigned this task.			
-		Model*				model;			// model used to show map work location
+		//Model*				model;			// model used to show map work location
+		gamui::Image		*image;			// map work location
 		float				rotation;
 		int					variation;		// which PAVE
 	};

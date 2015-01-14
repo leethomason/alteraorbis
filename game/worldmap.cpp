@@ -62,7 +62,7 @@ using namespace tinyxml2;
 // Bug fix: incorrect recusion   4	yes, 4
 // 
 
-static const float MAP_SATURATION = 0.5f;
+static const float MAP_SATURATION   = 1.0f;
 static const float PLANT_SATURATION = 1.0f;
 
 static const Vector2I DIR_I4[4] = {
@@ -1947,24 +1947,6 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 	data.controlParam	= &control;
 
 	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
-
-#if 0
-	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-		if ( emissiveOnly && !texture[i]->Emissive() )
-			continue;
-		if ( vertexVBO[i] && indexVBO[i] ) {
-			PTVertex pt;
-			GPUStream stream( pt );
-			Vector4F control = { 1, Saturation(), 1, 1 };
-			GPUStreamData data;
-			data.vertexBuffer = vertexVBO[i]->ID();
-			data.indexBuffer  = indexVBO[i]->ID();
-			data.texture0	  = texture[i];
-			data.controlParam = &control;
-			GPUDevice::Instance()->Draw( *shader, stream, data, 0, nIndex[i], 1 );
-		}
-	}
-#endif
 }
 
 

@@ -67,6 +67,13 @@ RenderTarget::~RenderTarget()
 }
 
 
+void RenderTarget::Clear()
+{
+	glClearColor(.0f, .0f, .0f, 1.0f);
+	glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+
 void RenderTarget::SetActive( bool active, Engine* engine )
 {
 
@@ -86,8 +93,6 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 			int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			GLASSERT( status == GL_FRAMEBUFFER_COMPLETE);
 		}
-		glClearColor(.0f, .0f, .0f, 1.0f);
-		glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	}
 	else {
 		engine->SetScreenport( savedScreenport );

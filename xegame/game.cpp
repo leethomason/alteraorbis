@@ -113,6 +113,8 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	bridge->Init(fontPath.c_str());
 	bridge->SetHeightDelta(settings->FontHeight());
 	bridge->SetLineSpacingDelta(settings->FontSpacing());
+	bridge->SetAscentDelta(settings->FontAscent());
+	bridge->SetDescentDelta(settings->FontDescent());
 	
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
 	GLASSERT( textTexture );

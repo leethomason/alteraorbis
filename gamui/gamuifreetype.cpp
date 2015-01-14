@@ -11,6 +11,8 @@ GamuiFreetypeBridge::GamuiFreetypeBridge()
 {
 	deltaHeight = 0;
 	deltaLineSpacing = 0;
+	deltaAscent = 0;
+	deltaDescent = 0;
 }
 
 
@@ -165,8 +167,8 @@ void GamuiFreetypeBridge::GamuiFont(gamui::IGamuiText::FontMetrics* metric)
 	metric->descent = -(face->descender >> 6);
 	metric->linespace = face->height >> 6;
 	*/
-	metric->ascent  = ascent * scale;
-	metric->descent = descent * scale;
+	metric->ascent  = (ascent + deltaAscent) * scale;
+	metric->descent = (descent + deltaDescent) * scale;
 
 	metric->linespace = (ascent + descent + deltaLineSpacing) * scale;
 }

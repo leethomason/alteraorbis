@@ -33,6 +33,8 @@ public:
 
 	// Sets this active, initializes and resizes the screenport.
 	void SetActive( bool active, Engine* engine );
+	void Clear();
+
 	Texture* GetTexture() { return &texture; }
 	Screenport* screenport;
 

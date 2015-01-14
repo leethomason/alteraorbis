@@ -44,6 +44,8 @@ public:
 	const char* FontName() const		{ return fontName.c_str(); }
 	int FontHeight() const				{ return fontHeight; }
 	int FontSpacing() const				{ return fontSpacing; }
+	int FontAscent() const				{ return fontAscent; }
+	int FontDescent() const				{ return fontDescent; }
 
 protected:
 	SettingsManager( const char* path );
@@ -66,6 +68,7 @@ private:
 	grinliz::GLString fontName;
 	int fontHeight;
 	int fontSpacing;
+	int fontAscent, fontDescent;
 	grinliz::GLString path;
 };
 

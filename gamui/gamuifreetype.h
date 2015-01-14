@@ -24,6 +24,8 @@ public:
 
 	void SetHeightDelta(int v) { deltaHeight = v; }
 	void SetLineSpacingDelta(int v) { deltaLineSpacing = v; }
+	void SetAscentDelta(int v) { deltaAscent = v; }
+	void SetDescentDelta(int v) { deltaDescent = v; }
 
 	enum {
 		FIRST_CHAR_CODE = 33,	// space (32) is special
@@ -49,8 +51,7 @@ private:
 	int			fontHeight;
 	int			textureWidth, textureHeight;
 	int			ascent, descent;
-	int			deltaHeight;
-	int			deltaLineSpacing;
+	int			deltaHeight, deltaLineSpacing, deltaAscent, deltaDescent;
 	FT_Library  library;
 	FT_Face		face;
 

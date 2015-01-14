@@ -82,7 +82,6 @@ private:
 	void SetBars(Chit* chit, bool isAvatar);
 
 	void SetPickupButtons();	// if the avatar can pick things up
-	//void SetBuildButtons(const int* buildingCount);		// enable / disable menu items
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);

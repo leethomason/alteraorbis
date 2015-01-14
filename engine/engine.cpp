@@ -44,11 +44,12 @@
 using namespace grinliz;
 
 #define ENGINE_RENDER_MODELS
-#define ENGINE_RENDER_SHADOWS
+//#define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
 #define ENGINE_RENDER_GLOW
-//#define ENGINE_DETAILED_PROFILE
 
+//#define ENGINE_DETAILED_PROFILE PROFILE_BLOCK
+#define ENGINE_DETAILED_PROFILE(name)
 
 Engine* StackedSingleton<Engine>::instance = 0;
 
@@ -283,13 +284,13 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	}
 
 #ifdef DEBUG
+#if 0	// turn back on if camera problems
 	{
 		Vector3F at;
 		CameraLookingAt(&at);
 		//GLOUTPUT(( "View set. Camera at (%.1f,%.1f,%.1f) looking at (%.1f,%.1f,%.1f)\n",
 		//	camera.PosWC().x, camera.PosWC().y, camera.PosWC().z,
 		//	at.x, at.y, at.z ));
-#if 0	// turn back on if camera problems
 		if (map) {
 			Rectangle2I b = map->Bounds();
 			b.Outset(20);
@@ -297,8 +298,8 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 				GLASSERT(0);	// looking at nothing.
 			}
 		}
-#endif
 	}
+#endif
 #endif
 
 	// Compute the frustum planes and query the tree.
@@ -306,8 +307,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	CalcFrustumPlanes(planes);
 
 	// Get the working set of models.
-	int exclude = Model::MODEL_INVISIBLE;
-	Model* modelRoot = spaceTree->Query(planes, 6, 0, true, 0, exclude);
+	Model* modelRoot = spaceTree->Query(planes, 6, 0, true, 0, Model::MODEL_INVISIBLE);
 
 	// Track the UI relevant ones:
 	trackedModels.Clear();
@@ -318,9 +318,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	}
 
 	if ( map && (stages & STAGE_VOXEL) ) {
-#ifdef ENGINE_DETAILED_PROFILE
-		PROFILE_BLOCK( MapPrep );
-#endif
+		ENGINE_DETAILED_PROFILE(MapPrep);
 		map->PrepVoxels(spaceTree, &modelRoot, planes);
 		map->PrepGrid( spaceTree );
 	}
@@ -354,59 +352,56 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	// ----------- Render Passess ---------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( stages & STAGE_GLOW ) {
-#ifdef ENGINE_DETAILED_PROFILE
-		PROFILE_BLOCK( Glow );
-#endif
+		ENGINE_DETAILED_PROFILE(Glow);
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
 		renderTarget[RT_LIGHTS]->SetActive( true, this );
+		renderTarget[RT_LIGHTS]->Clear();
 		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
 
 		// ---------- Pass 1 -----------
-		// Tweak the shaders for glow-only rendering.
-		// Make the light shader flat black:
-		FlatShader black;
-		black.SetColor( 0, 0, 0, 0 );
-
-		// Render flat black everything that does NOT emit light:
-		engineShaders.PushAll( black );
-		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		{
-			modelDrawCalls[GLOW_BLACK] = device->DrawCalls();
-			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_BLACK] = device->DrawCalls() - modelDrawCalls[GLOW_BLACK];
-		}
-		engineShaders.PopAll();
+			// Tweak the shaders for glow-only rendering.
+			// Make the light shader flat black:
+			FlatShader black;
+			black.SetColor(0, 0, 0, 0);
 
+			// Render flat black everything that does NOT emit light. 
+			// This seeds the Z-Budffer.
+			// FIXME: don't even need to write the color buffer.
+			engineShaders.PushAll(black);
+			QueueSet(&engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE);
+
+			int dc = device->DrawCalls();
+			//if (map && (stages & STAGE_VOXEL)) map->DrawVoxels(&black, 0);	should only draw non-emissive parts. no way to do that.
+			renderQueue->Submit(0, 0, 0);
+			modelDrawCalls[GLOW_BLACK] = dc - device->DrawCalls();
+
+			engineShaders.PopAll();
+		}
 		// ---------- Pass 2 -----------
-		GPUState ex = FlatShader();
-		ex.SetShaderFlag( ShaderManager::EMISSIVE );
-		ex.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		engineShaders.Push( EngineShaders::EMISSIVE, ex );
-		QueueSet( &engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
-
-		if ( map ) {
-			map->Submit( &ex, true );
-		}
-		// And throw the emissive shader to exclusive:
 		{
-			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls();
-			if ( map && (stages & STAGE_VOXEL) ) {
-				map->DrawVoxels( &ex, 0 );
-			}
-			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
+			GPUState ex = FlatShader();
+			ex.SetShaderFlag(ShaderManager::EMISSIVE);
+			ex.SetShaderFlag(ShaderManager::EMISSIVE_EXCLUSIVE);
+			engineShaders.Push(EngineShaders::EMISSIVE, ex);
+			QueueSet(&engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0);
+
+			map->Submit(&ex, true);
+			// And throw the emissive shader to exclusive:
+			int dc = device->DrawCalls();
+			if (map && (stages & STAGE_VOXEL)) map->DrawVoxels(&ex, 0);
+			renderQueue->Submit(0, 0, 0);
+			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls() - dc;
+			engineShaders.Pop(EngineShaders::EMISSIVE);
+			renderTarget[RT_LIGHTS]->SetActive(false, this);
 		}
-		engineShaders.Pop( EngineShaders::EMISSIVE );
-		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 #endif
 
 	if ( map ) {
-#ifdef ENGINE_DETAILED_PROFILE
-		PROFILE_BLOCK( Map );
-#endif
+		ENGINE_DETAILED_PROFILE(Map);
 #ifdef ENGINE_RENDER_MAP
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
@@ -445,7 +440,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		}
 		map->Draw3D( lighted, STENCIL_CLEAR, true );
 #else
-		map->Draw3D( lighted, GPUState::STENCIL_OFF );
+		map->Draw3D( lighted, STENCIL_OFF, true );
 #endif
 
 		map->DrawOverlay(0);
@@ -455,9 +450,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-#ifdef ENGINE_DETAILED_PROFILE
-		PROFILE_BLOCK( Models );
-#endif
+		ENGINE_DETAILED_PROFILE(Models);
 		if ( map && (stages & STAGE_VOXEL) ) {
 			GPUState state;
 			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
@@ -484,9 +477,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	// --------- Composite Glow -------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( stages & STAGE_GLOW ) {
-#ifdef ENGINE_DETAILED_PROFILE
-		PROFILE_BLOCK( CompositeGlow );
-#endif
+		ENGINE_DETAILED_PROFILE(CompositeGlow);
 		Blur();
 
 		screenport->SetUI();
@@ -545,9 +536,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 void Engine::Blur()
 {
-#ifdef ENGINE_DETAILED_PROFILE
-	PROFILE_FUNC();
-#endif
+	ENGINE_DETAILED_PROFILE(Blur);
 	GPUDevice* device = GPUDevice::Instance();
 
 #ifdef EL_USE_MRT_BLUR
@@ -559,6 +548,7 @@ void Engine::Blur()
 	}
 	for( int i=0; i<BLUR_COUNT; ++i ) {
 		renderTarget[i+RT_BLUR_0]->SetActive( true, this );
+		renderTarget[i + RT_BLUR_0]->Clear();
 		renderTarget[i+RT_BLUR_0]->screenport->SetUI();
 		//int shift = i+1;
 

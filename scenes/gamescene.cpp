@@ -155,7 +155,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	sim->GetChitBag()->AddListener(this);
 
 	for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
-		buildMark[i].Init(&sim->GetWorldMap()->overlay1, grey, false);
+		buildMark[i].Init(&sim->GetWorldMap()->overlay1, grey, true);
 		buildMark[i].SetVisible(false);
 	}
 

@@ -57,6 +57,8 @@ SettingsManager::SettingsManager( const char* savepath )
 	fontName = "font.ttf";
 	fontHeight = 0;
 	fontSpacing = 0;
+	fontAscent = 0;
+	fontDescent = 0;
 }
 
 
@@ -116,6 +118,8 @@ void SettingsManager::Save()
 		printer.PushAttribute("name", fontName.c_str());
 		printer.PushAttribute("height", fontHeight);
 		printer.PushAttribute("spacing", fontSpacing);
+		printer.PushAttribute("ascent", fontAscent);
+		printer.PushAttribute("descent", fontDescent);
 		printer.CloseElement();
 
 		printer.CloseElement();
@@ -147,6 +151,8 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 			}
 			fontElement->QueryAttribute("height", &fontHeight);
 			fontElement->QueryAttribute("spacing", &fontSpacing);
+			fontElement->QueryAttribute("ascent", &fontAscent);
+			fontElement->QueryAttribute("descent", &fontDescent);
 		}
 	}
 }
