@@ -74,6 +74,7 @@ public:
 
 	void Target( Chit* chit, bool focused );
 	void Target(const grinliz::Vector2I& voxel, bool focused);
+	bool TargetAdjacent(const grinliz::Vector2I& pos, bool focused);
 
 	Chit* GetTarget();
 	void MakeAware( const int* enemyIDs, int n );
@@ -173,6 +174,15 @@ private:
 
 	grinliz::Vector2I RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter );
 
+	void DoMelee(const ComponentSet& thisComp);
+	void DoShoot(const ComponentSet& thisComp);
+	void DoMove(const ComponentSet& thisComp);
+	bool DoStand(const ComponentSet& thisComp, U32 since);	// return true if doing something
+	bool SectorHerd(const ComponentSet& thisComp, bool focus);	// "upper" function: look for dest, etc.
+	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector);	// lower function: go
+	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
+	void EnterNewGrid(const ComponentSet& thisComp);
+
 	enum { 
 		FOCUS_NONE,
 		FOCUS_MOVE,
@@ -221,15 +231,6 @@ private:
 
 	static const char*	MODE_NAMES[NUM_MODES];
 	static const char*	ACTION_NAMES[NUM_ACTIONS];
-
-	void DoMelee( const ComponentSet& thisComp );
-	void DoShoot( const ComponentSet& thisComp );
-	void DoMove( const ComponentSet& thisComp );
-	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
-	bool SectorHerd( const ComponentSet& thisComp, bool focus );	// "upper" function: look for dest, etc.
-	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector);	// lower function: go
-	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
-	void EnterNewGrid( const ComponentSet& thisComp );
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
 	grinliz::CArray<int, MAX_TRACK> friendList;

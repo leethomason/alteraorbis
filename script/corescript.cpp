@@ -495,6 +495,8 @@ int CoreScript::DoTick(U32 delta)
 
 	int nScoreTicks = scoreTicker.Delta(delta);
 	int nAITicks = aiTicker.Delta(delta);
+
+	Citizens(0);	// if someone was deleted, the spawn tick will reset.
 	int nSpawnTicks = spawnTick.Delta(delta);
 
 	if (InUse()) {
@@ -750,7 +752,7 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 		// Make sure it is current:
 		GLASSERT(index >= 0 && index < NUM_SECTORS*NUM_SECTORS);
 		CoreScript* cs = coreInfoArr[index].coreScript;
-		GLASSERT(cs);
+//		GLASSERT(cs);	// cores get destroyed at odd times.
 		if (cs && cs->ParentChit()->Team() == team) {
 			return cs;
 		}

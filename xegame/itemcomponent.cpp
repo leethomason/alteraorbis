@@ -1024,6 +1024,24 @@ const MeleeWeapon* ItemComponent::QuerySelectMelee() const
 }
 
 
+bool ItemComponent::IsBetterItem(const GameItem* item) const
+{
+	if (item->ToMeleeWeapon()) {
+		const MeleeWeapon* melee = QuerySelectMelee();
+		return !melee || (item->GetValue() > melee->GetValue());
+	}
+	if (item->ToRangedWeapon()) {
+		const RangedWeapon* ranged = QuerySelectRanged();
+		return !ranged || (item->GetValue() > ranged->GetValue());
+	}
+	if (item->ToShield()) {
+		const Shield* shield = GetShield();
+		return !shield || (item->GetValue() > shield->GetValue());
+	}
+	return false;
+}
+
+
 const GameItem* ItemComponent::QuerySelectWeapon(int type) const
 {
 	if (type == SELECT_MELEE && this->GetMeleeWeapon()) return this->GetMeleeWeapon();

@@ -72,6 +72,8 @@ public:
 	const RangedWeapon* QuerySelectRanged() const;		// queries ranged, but doesn't swap
 	const MeleeWeapon* QuerySelectMelee() const;		// queries melee, but doesn't swap
 
+	bool IsBetterItem(const GameItem* item) const;		// return true if 'item' is better than the one this has
+
 	bool Swap( int i, int j );	// swap 2 slots 
 
 	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents

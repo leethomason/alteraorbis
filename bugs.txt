@@ -37,9 +37,12 @@ x domains always deleted by "unknown"
 x improve hinting of text?
 x glow is broken (actually it glows, just not brighter. screwed up saturation?? turned out to be depth buffers in the blur generation)
 x [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
-- warnings of “core attack” not in place
-- console messages...unreliable. some not getting through.
-- should show information about anyone you click
+x citizen death delays re-spawn
+x don't get stuck in battle mode: if can't move, attack something
+x more aggressively pick up weapons in battle
+x console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
+t warnings of “core attack” not in place
+- console messages...unreliable. some not getting through. market buy/sells
 - visitors don't visit (until they do...)
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
@@ -49,7 +52,6 @@ x [Reenen] The ranged cyclopses are really dangerous, but if your gun is suffici
 - [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - [Reenen] Cyclops heal at rocks.
 - Mini map flash of battles.
-- console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
 - new art from GT
 - de-saturate colors correctly
@@ -63,6 +65,10 @@ x [Reenen] The ranged cyclopses are really dangerous, but if your gun is suffici
 - see monsters when you click on them
 - unify rotation model
 - tweak ascent / descent? (Or is that a layout bug?)
+- enemy face shows morale and not level
+- tax on buy or sell
+- when a building checks connection to core, it should check that the core is still its team
+- still attacking neutral cores...
 - improved strategic view
 	- mark mother core at center
 	- line thickness to show visitor distribution
@@ -72,6 +78,7 @@ x [Reenen] The ranged cyclopses are really dangerous, but if your gun is suffici
 	- show mil strength
 	- reserve diplomacy slot
 
+- should show information about anyone you click
 - unified build marks
 - “data” the default screen of census
 - switch to war mode

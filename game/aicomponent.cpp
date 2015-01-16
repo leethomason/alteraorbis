@@ -316,17 +316,32 @@ void AIComponent::GetFriendEnemyLists()
 		// The building doesn't work until there is a path from the porch
 		// to the core, so we'll use that metric.
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
+
+		// Look for enemy core filter
+		bool coreFound = false;
 		for (int i = 0; i < chitArr.Size(); ++i) {
 			Chit* building = chitArr[i];
-			int status = Team::GetRelationship(building, parentChit);
-			if (building->Team() && status == RELATE_ENEMY) {				// never attack neutral buildings, no matter what we are.
-				// Note that buildings are behind walls and such, so we can't use HasStraightPath()
+			if (building->GetItem()->IName() == ISC::core && Team::GetRelationship(building, parentChit) == RELATE_ENEMY) {
 				if (enemyList.HasCap()) {
-					if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {
-						Vector3F walkPos = EnemyPos(building);
-						if ( walkPos != V3F_ZERO ) {
-							if (context->worldMap->CalcPath(center, ToWorld2F(walkPos), 0, 0, false)) {
-								enemyList.Push(chitArr[i]->ID());
+					enemyList.Push(building->ID());
+					coreFound = true;
+				}
+			}
+		}
+
+		if (!coreFound) {
+			for (int i = 0; i < chitArr.Size(); ++i) {
+				Chit* building = chitArr[i];
+				int status = Team::GetRelationship(building, parentChit);
+				if (building->Team() && status == RELATE_ENEMY) {				// never attack neutral buildings, no matter what we are.
+					// Note that buildings are behind walls and such, so we can't use HasStraightPath()
+					if (enemyList.HasCap()) {
+						if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {
+							Vector3F walkPos = EnemyPos(building);
+							if (walkPos != V3F_ZERO) {
+								if (context->worldMap->CalcPath(center, ToWorld2F(walkPos), 0, 0, false)) {
+									enemyList.Push(chitArr[i]->ID());
+								}
 							}
 						}
 					}
@@ -867,6 +882,20 @@ void AIComponent::Target( Chit* chit, bool focused )
 	focus = focused ? FOCUS_TARGET : 0;
 }
 
+
+bool AIComponent::TargetAdjacent(const grinliz::Vector2I& pos, bool focused)
+{
+	static const Vector2I DELTA[4] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	for (int i = 0; i < 4; ++i) {
+		Vector2I v = pos + DELTA[i];
+		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(v);
+		if (wg.BlockingPlant() || wg.RockHeight()) {
+			Target(v, focused);
+			return true;
+		}
+	}
+	return false;
+}
 
 void AIComponent::Target( const Vector2I& pos2i, bool focused )
 {
@@ -2598,6 +2627,24 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		}
 	}
 
+	// Pick up stuff in battle
+	if (aiMode == BATTLE_MODE && (thisComp.item->flags & GameItem::AI_USES_BUILDINGS)) {
+		if (thisComp.okay) {
+			LootFilter filter;
+			CChitArray arr;
+			Context()->chitBag->QuerySpatialHash(&arr, thisComp.spatial->GetPosition2D(), 0.7f, 0, &filter);
+			for (int i = 0; i < arr.Size() && thisComp.itemComponent->CanAddToInventory(); ++i) {
+				const GameItem* item = arr[i]->GetItem();
+				if (thisComp.itemComponent->IsBetterItem(item)) {
+					ItemComponent* ic = arr[i]->GetItemComponent();
+					arr[i]->Remove(ic);
+					thisComp.itemComponent->AddToInventory(ic);
+					Context()->chitBag->DeleteChit(arr[i]);
+				}
+			}
+		}
+	}
+
 	// Domain Takeover.
 	if (thisComp.item->MOB() == ISC::denizen
 		&& Team::IsRogue(thisComp.chit->Team())
@@ -3054,21 +3101,35 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 		case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
 		destinationBlocked++;
-		focus = 0;
-		currentAction = NO_ACTION;
-		parentChit->SetTickNeeded();
 
-		// Generally not what we expected.
-		// Do a re-think.get
-		// Never expect move troubles in rampage mode.
-		if (aiMode != BATTLE_MODE) {
-			aiMode = NORMAL_MODE;
+		if (aiMode == BATTLE_MODE) {
+			// We are stuck in battle - attack something! Keeps everyone from just
+			// standing around wishing they could fight. Try to target anything
+			// adjacent. If that fails, walk towards the core.
+			if (!TargetAdjacent(mapPos, true)) {
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(mapPos);
+				Vector2I next = mapPos + wg.Path(0);
+				this->Move(ToWorld2F(next), true);
+			}
 		}
-		taskList.Clear();
-		{
-			PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
-			if (pmc) {
-				pmc->Clear();	// make sure to clear the path and the queued path
+		else {
+			focus = 0;
+			currentAction = NO_ACTION;
+			parentChit->SetTickNeeded();
+
+
+			// Generally not what we expected.
+			// Do a re-think.get
+			// Never expect move troubles in rampage mode.
+			if (aiMode != BATTLE_MODE) {
+				aiMode = NORMAL_MODE;
+			}
+			taskList.Clear();
+			{
+				PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+				if (pmc) {
+					pmc->Clear();	// make sure to clear the path and the queued path
+				}
 			}
 		}
 		break;
