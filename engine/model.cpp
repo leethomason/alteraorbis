@@ -789,6 +789,15 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			if ( control.y != 1 ) {
 				mod |= ShaderManager::SATURATION;
 			}
+			// For 32 bit textures, the alpha channel is
+			// set and the shader interprets as 'emissive' 
+			// or 'transparency'. For 24 bit textuers,
+			// the shader needs to know what the alpha
+			// value is: 1 or 0? Set that here. Only matters
+			// for emmissive, where the default is wrong.
+			// Better solution: only 32 bit textures?
+			//					emmissive is sign flipped?
+			control.z = t->Alpha() ? 1.0f : 0.0f;
 
 			GPUState state;
 			engineShaders->GetState( base, mod, &state );
@@ -811,6 +820,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
 				modelAuxTex = auxTex;
 			}
+
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
 						state,

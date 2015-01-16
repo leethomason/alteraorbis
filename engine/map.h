@@ -66,7 +66,7 @@ public:
 	virtual WorldMap* ToWorldMap() { return 0; }
 
 	void DrawOverlay( int layer );
-	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
+	virtual void Submit( GPUState* shader )	{}
 
 	virtual void PrepVoxels( const SpaceTree*, Model** root, const grinliz::Plane* planes6 )	{}
 	virtual void PrepGrid( const SpaceTree* )	{}

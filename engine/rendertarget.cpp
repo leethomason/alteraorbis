@@ -17,33 +17,38 @@
 #include "platformgl.h"
 #include "engine.h"
 
-RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
+RenderTarget::RenderTarget(int width, int height, bool depthBuffer)
 {
 	CHECK_GL_ERROR;
 
 	screenport = 0;
 	savedScreenport = 0;
+	frameBufferID = 0;
+	depthBufferID = 0;
 
-	glGenFramebuffers(1, &frameBufferID );
-	glGenRenderbuffers(1, &depthBufferID ); // the depth buffer
-	glGenTextures(1, &renderTextureID );
+	glGenFramebuffers(1, &frameBufferID);
+	if (depthBuffer) {
+		glGenRenderbuffers(1, &depthBufferID); // the depth buffer
+	}
+	glGenTextures(1, &renderTextureID);
 
-	glBindTexture( GL_TEXTURE_2D, renderTextureID );
+	glBindTexture(GL_TEXTURE_2D, renderTextureID);
 
 	// Texture params. Be sure to clamp and turn filtering to not use mips.
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	// generate the textures
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 0 );
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 0);
 
 	// create 16 bit depth buffer
-	glBindRenderbuffer( GL_RENDERBUFFER, depthBufferID );
-	glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height );
-
-	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	if (depthBufferID) {
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	CHECK_GL_ERROR;
 
 	texture.w = width;
@@ -52,14 +57,16 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 	texture.flags = Texture::PARAM_LINEAR;
 	texture.creator = 0;
 	texture.item = 0;
-	texture.glID= renderTextureID;
+	texture.glID = renderTextureID;
 }
 
 
 RenderTarget::~RenderTarget()
 {
 	CHECK_GL_ERROR;
-	glDeleteRenderbuffers( 1, &depthBufferID );
+	if (depthBufferID) {
+		glDeleteRenderbuffers(1, &depthBufferID);
+	}
 	glDeleteTextures( 1, &renderTextureID );
 	glDeleteFramebuffers( 1, &frameBufferID );
 	CHECK_GL_ERROR;
@@ -76,7 +83,6 @@ void RenderTarget::Clear()
 
 void RenderTarget::SetActive( bool active, Engine* engine )
 {
-
 	if ( active ) {
 		if ( !screenport ) {
 			screenport = new Screenport( texture.w, texture.h, texture.h );
@@ -87,7 +93,9 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBufferID );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID );
+		if (depthBufferID) {
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID);
+		}
 
 		if ( gDebugging ) {
 			int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

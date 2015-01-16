@@ -66,19 +66,18 @@ in 		vec3 a_pos;				// vertex position
 	uniform vec4 u_diffuse;			// diffuse light
 #endif
 
-#if SATURATION
-	out float v_saturation;
-#endif
-
 out vec4 v_color;
+// x: fadeFX
+// y: saturation
+// z: alpha support (0 or 1)
+// w: available
+out vec4 v_control;
 
 void main() {
 
 	vec4 controlParam 	= u_controlParamArr[gl_InstanceID];
+	v_control = controlParam;
 
-	#if SATURATION
-		v_saturation = controlParam.y;
-	#endif
 	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
 		vec4 colorParam 	= u_colorParamArr[gl_InstanceID];

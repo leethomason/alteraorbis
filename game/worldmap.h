@@ -214,7 +214,7 @@ public:
 		ICE
 	};
 	// 2D voxels
-	virtual void Submit( GPUState* shader, bool emissiveOnly );
+	virtual void Submit( GPUState* shader );
 	virtual void PrepGrid( const SpaceTree* spaceTree );
 
 	// 3D voxels

@@ -1931,7 +1931,7 @@ void WorldMap::CreateTexture( Texture* t )
 }
 
 
-void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
+void WorldMap::Submit( GPUState* shader )
 {
 	if ( !gridTexture ) {
 		gridTexture = TextureManager::Instance()->GetTexture( "voxmap" );
@@ -1943,6 +1943,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 	GPUStreamData data;
 	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
+	// no fix, saturation, emmissive
 	Vector4F control	= { 1, Saturation()*MAP_SATURATION, 1, 1 };
 	data.controlParam	= &control;
 
@@ -2320,6 +2321,7 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 		device->MultMatrix( GPUDevice::MODELVIEW_MATRIX, *xform );
 	}
 
+	// no fix, saturation, emmissive
 	Vector4F control = { 1, Saturation(), 1, 1 };
 
 	GPUStreamData data;
@@ -2346,7 +2348,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, boo
 	if ( useSaturation ) {
 		shader.SetShaderFlag( ShaderManager::SATURATION );
 	}
-	Submit( &shader, false );
+	Submit( &shader );
 
 	if ( debugRegionOverlay.Area() > 0 ) {
 		if ( mode == STENCIL_CLEAR ) {

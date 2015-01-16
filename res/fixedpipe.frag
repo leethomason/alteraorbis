@@ -12,11 +12,9 @@
 	#endif
 #endif
 
+// seet fixedpipe.vert for docs
+in vec4 v_control;
 in vec4 v_color;
-
-#if SATURATION
-	in float v_saturation;
-#endif
 
 out vec4 color;
 
@@ -37,19 +35,21 @@ void main()
 		#endif
 
 		#if EMISSIVE == 1
-			// Basically, the alpha color is used to
-			// modulate the incoming fragment color, which
-			// is the result of lighting.
+			// Alpha is interpreted as Emissiveness.
+			// This gives glows and such.
+			// sample.a is the emissive coeff - if the texture supports alpha at all!
+			// Alpha support (1 or 0) is in the control.z slot.
+			float emCoeff = v_control.z * sample.a;
+
 			#if EMISSIVE_EXCLUSIVE == 0
 				// In 'normal'emissive mode, the incoming color (lighting)
 				// is mixed out as the emissiveness increases.
-				color = mix( color, vec4(1,1,1,1), sample.a ) * sample;
+				color = mix( color, vec4(1,1,1,1), emCoeff ) * sample;
 			#elif EMISSIVE_EXCLUSIVE == 1
 				// In 'exclusive' mode, everything is black, and mixed
 				// to the emmissive color. Note that the incoming color.a
 				// doesn't do anything unless it's used in mix()
-				color = mix( vec4(0,0,0,1), sample, sample.a*color.a ) * color;
-				//color = vec4( 1,0,0,1 );
+				color = mix( vec4(0,0,0,1), sample, emCoeff*color.a ) * color;
 			#endif
 		#else
 			color *= sample;
@@ -61,7 +61,7 @@ void main()
 	#if SATURATION == 1
 		float g = (color.r + color.g + color.b) * 0.33;
 		vec4 gray = vec4( g, g, g, color.a );
-		color = mix( gray, color, v_saturation );
+		color = mix( gray, color, v_control.y );
 	#endif
 }
 

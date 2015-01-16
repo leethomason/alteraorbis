@@ -177,8 +177,7 @@ bool Scene::Process3DTap(int action, const grinliz::Vector2F& view, const grinli
 void Scene::DrawDebugTextDrawCalls( int x, int y, Engine* engine )
 {
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw( x, y, "Model Draw Calls glow-black=%d glow-em=%d shadow=%d model=%d nPart=%d",
-		engine->modelDrawCalls[Engine::GLOW_BLACK],
+	ufoText->Draw( x, y, "Model Draw Calls glow-em=%d shadow=%d model=%d nPart=%d",
 		engine->modelDrawCalls[Engine::GLOW_EMISSIVE],
 		engine->modelDrawCalls[Engine::SHADOW],
 		engine->modelDrawCalls[Engine::MODELS],

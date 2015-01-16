@@ -99,7 +99,6 @@ public:
 	void Draw( U32 deltaTime, const Bolt* bolts=0, int nBolts=0, IUITracker* tracker=0 );
 
 	enum {
-		GLOW_BLACK,
 		GLOW_EMISSIVE,
 		SHADOW,
 		MODELS,

@@ -44,9 +44,13 @@
 using namespace grinliz;
 
 #define ENGINE_RENDER_MODELS
-//#define ENGINE_RENDER_SHADOWS
+#define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
 #define ENGINE_RENDER_GLOW
+
+// Debugging:
+//#define ENGINE_GLOW_TO_FRAMEBUFFER
+//#define ENGINE_RT1_TO_FRAMEBUFFER
 
 //#define ENGINE_DETAILED_PROFILE PROFILE_BLOCK
 #define ENGINE_DETAILED_PROFILE(name)
@@ -351,52 +355,35 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 	// ----------- Render Passess ---------- //
 #ifdef ENGINE_RENDER_GLOW
-	if ( stages & STAGE_GLOW ) {
+	if (stages & STAGE_GLOW) {
 		ENGINE_DETAILED_PROFILE(Glow);
-		if ( !renderTarget[RT_LIGHTS] ) {
-			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
+		if (!renderTarget[RT_LIGHTS]) {
+			renderTarget[RT_LIGHTS] = new RenderTarget(screenport->PhysicalWidth(), screenport->PhysicalHeight(), true);
 		}
-		renderTarget[RT_LIGHTS]->SetActive( true, this );
+		renderTarget[RT_LIGHTS]->SetActive(true, this);
 		renderTarget[RT_LIGHTS]->Clear();
 		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
-
 		// ---------- Pass 1 -----------
 		{
 			// Tweak the shaders for glow-only rendering.
-			// Make the light shader flat black:
-			FlatShader black;
-			black.SetColor(0, 0, 0, 0);
+			FlatShader emEx;
+			//emEx.SetColor(1, 0, 0);
+			emEx.SetShaderFlag(ShaderManager::EMISSIVE);			// Interpret alpha as emissive.
+			emEx.SetShaderFlag(ShaderManager::EMISSIVE_EXCLUSIVE);	// Render emmissive colors or black.
 
-			// Render flat black everything that does NOT emit light. 
-			// This seeds the Z-Budffer.
-			// FIXME: don't even need to write the color buffer.
-			engineShaders.PushAll(black);
-			QueueSet(&engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE);
+			// Replace all kinds of lighting with emissive:
+			engineShaders.PushAll(emEx);
+			QueueSet(&engineShaders, modelRoot, 0, 0, 0, 0);
 
 			int dc = device->DrawCalls();
-			//if (map && (stages & STAGE_VOXEL)) map->DrawVoxels(&black, 0);	should only draw non-emissive parts. no way to do that.
+			if (map) map->Submit(&emEx);
+			if (map && (stages & STAGE_VOXEL)) map->DrawVoxels(&emEx, 0);
 			renderQueue->Submit(0, 0, 0);
-			modelDrawCalls[GLOW_BLACK] = dc - device->DrawCalls();
+			modelDrawCalls[GLOW_EMISSIVE] = dc - device->DrawCalls();
 
 			engineShaders.PopAll();
 		}
-		// ---------- Pass 2 -----------
-		{
-			GPUState ex = FlatShader();
-			ex.SetShaderFlag(ShaderManager::EMISSIVE);
-			ex.SetShaderFlag(ShaderManager::EMISSIVE_EXCLUSIVE);
-			engineShaders.Push(EngineShaders::EMISSIVE, ex);
-			QueueSet(&engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0);
-
-			map->Submit(&ex, true);
-			// And throw the emissive shader to exclusive:
-			int dc = device->DrawCalls();
-			if (map && (stages & STAGE_VOXEL)) map->DrawVoxels(&ex, 0);
-			renderQueue->Submit(0, 0, 0);
-			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls() - dc;
-			engineShaders.Pop(EngineShaders::EMISSIVE);
-			renderTarget[RT_LIGHTS]->SetActive(false, this);
-		}
+		renderTarget[RT_LIGHTS]->SetActive(false, this);
 	}
 #endif
 
@@ -482,13 +469,23 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 		screenport->SetUI();
 
-	#ifdef ENGINE_DEBUG_GLOW
-		CompositingShader shader( GPUState::BLEND_NONE );
-	#else
-		CompositingShader shader( BLEND_ADD );
 	#endif
 
+#ifdef ENGINE_GLOW_TO_FRAMEBUFFER
+		CompositingShader shader( BLEND_NONE );
+		Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
+		Vector3F p1 = { (float)screenport->PhysicalWidth(), 0, 0 };
+
+		device->DrawQuad( shader, renderTarget[RT_LIGHTS]->GetTexture(), p0, p1 );
+#elif defined(ENGINE_RT1_TO_FRAMEBUFFER)
+		CompositingShader shader( BLEND_NONE );
+		Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
+		Vector3F p1 = { (float)screenport->PhysicalWidth(), 0, 0 };
+
+		device->DrawQuad( shader, renderTarget[RT_BLUR_1]->GetTexture(), p0, p1 );
+#else
 	#ifdef EL_USE_MRT_BLUR
+		CompositingShader shader( BLEND_ADD );
 		for( int i=0; i<BLUR_COUNT; ++i ) {
 			shader.SetColor( lighting.glow.x, lighting.glow.y, lighting.glow.z, 0 );
 			Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
@@ -503,13 +500,13 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
 	#endif
-
+#endif
 		screenport->SetPerspective();
 		screenport->SetView( camera.ViewMatrix() );	// Draw the camera
 	}
-#endif
 
 	// ------ Particle system ------------- //
+
 	if ( stages & STAGE_BOLT ) {
 		boltRenderer->DrawAll( bolts, nBolts, this );
 	}
@@ -553,6 +550,9 @@ void Engine::Blur()
 		//int shift = i+1;
 
 		FlatShader shader;
+		shader.SetDepthTest(false);
+		shader.SetDepthWrite(false);
+
 		Vector3F p0 = { 0, (float)screenport->PhysicalHeight(), 0 };
 		Vector3F p1 = { (float)screenport->PhysicalWidth(), 0, 0 };
 		device->DrawQuad( shader, renderTarget[i+RT_BLUR_0-1]->GetTexture(), p0, p1 );
