@@ -53,6 +53,8 @@ using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
 
+static const float PLANT_SATURATION = 1.0f;
+static const float GRID_SATURATION = 1.0f;
 
 // Startup for test world
 // Baseline:				15,000
@@ -61,9 +63,6 @@ using namespace tinyxml2;
 // Region : public PathNode	 1,600
 // Bug fix: incorrect recusion   4	yes, 4
 // 
-
-static const float MAP_SATURATION   = 1.0f;
-static const float PLANT_SATURATION = 1.0f;
 
 static const Vector2I DIR_I4[4] = {
 	{ 1, 0 },
@@ -1944,7 +1943,7 @@ void WorldMap::Submit( GPUState* shader )
 	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
 	// no fix, saturation, emmissive
-	Vector4F control	= { 1, Saturation()*MAP_SATURATION, 1, 1 };
+	Vector4F control	= { 1, Saturation()*GRID_SATURATION, 1, 1 };
 	data.controlParam	= &control;
 
 	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
@@ -2322,7 +2321,7 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 	}
 
 	// no fix, saturation, emmissive
-	Vector4F control = { 1, Saturation(), 1, 1 };
+	Vector4F control = { 1, Saturation() * GRID_SATURATION, 1, 1 };
 
 	GPUStreamData data;
 	data.vertexBuffer	= voxelVertexVBO->ID();
