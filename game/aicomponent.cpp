@@ -2014,7 +2014,7 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 			if (!debugBuildingOutput[buildDataID]) {
 				GLASSERT(buildDataID >= 0 && buildDataID < GL_C_ARRAY_SIZE(debugBuildingOutput));
 				debugBuildingOutput[buildDataID] = true;
-				GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
+				GLOUTPUT(("  %.2f %s %s\n", score, building->GetItem()->Name(), functional ? "func" : "norm" ));
 			}
 		}
 

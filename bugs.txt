@@ -35,7 +35,8 @@ x proper font
 	x tweak height
 x domains always deleted by "unknown"
 x improve hinting of text?
-- glow is broken (actually it glows, just not brighter. screwed up saturation??)
+x glow is broken (actually it glows, just not brighter. screwed up saturation?? turned out to be depth buffers in the blur generation)
+x [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
 - warnings of “core attack” not in place
 - console messages...unreliable. some not getting through.
 - should show information about anyone you click
@@ -45,7 +46,6 @@ x improve hinting of text?
 - task serialization
 - any building attack should cause awareness in domainAI
 - build tasks aren't getting serialized correctly. wrong rotation?
-- [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
 - [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - [Reenen] Cyclops heal at rocks.
 - Mini map flash of battles.

@@ -195,6 +195,9 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 			if (visitorItem->wallet.Gold() == 0)						needs.Zero();	// broke
 			if (building->GetItemComponent()->NumCarriedItems() == 0)	needs.Zero();	// market empty
 		}
+		if (sell || !needs.IsZero()) {
+			*functional = true;
+		}
 	}
 	else if (buildingName == ISC::exchange) {
 		if (likesCrafting != Personality::DISLIKES) {
