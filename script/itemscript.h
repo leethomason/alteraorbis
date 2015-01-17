@@ -95,8 +95,13 @@ public:
 	void Update( const GameItem* );		// item changed
 	void Remove( const GameItem* );		// stop tracking
 
+	// Which IC - if any - is holding the item.
+	//void TrackItemComponent(const GameItem* item, const ItemComponent* ic);
+
 	// Find an item by id; if null, can use History
 	const GameItem*	Active( int id );
+	//const ItemComponent* ActiveItemComponent(const GameItem* item);
+
 	bool Registry(int id, ItemHistory* h);
 
 	void Serialize( XStream* xs );
@@ -105,7 +110,9 @@ public:
 	const ItemHistory& RegistryByIndex(int i) { return itemRegistry.GetValue(i); }
 
 private:
-	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
+	grinliz::HashTable< int, const GameItem* > itemMap;							// map of all the active, allocated items.
+	//grinliz::HashTable< const GameItem*, const ItemComponent* > itemToICMap;	// map of allocated items.
+
 	grinliz::HashTable<int, ItemHistory> itemRegistry; // all the significant items ever created
 };
 

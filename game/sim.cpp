@@ -274,7 +274,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->Team() != TEAM_NEUTRAL) {
 				int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
 				Chit* deleter = context.chitBag->GetChit(deleterID);
-				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit, deleter);
+				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID(), chit->Team());
 				context.chitBag->GetNewsHistory()->Add(news);
 			}
 		}
@@ -747,7 +747,7 @@ void Sim::CreateVolcano( int x, int y )
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 	
 	Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
-	NewsEvent event(NewsEvent::VOLCANO, pos);
+	NewsEvent event(NewsEvent::VOLCANO, pos, 0, 0, 0);
 	context.chitBag->GetNewsHistory()->Add(event);
 }
 

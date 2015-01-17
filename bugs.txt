@@ -43,6 +43,7 @@ x more aggressively pick up weapons in battle
 x console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 t warnings of “core attack” not in place
 - console messages...unreliable. some not getting through. market buy/sells
+- player console messages 3 lines long
 - visitors don't visit (until they do...)
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)

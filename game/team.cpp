@@ -124,12 +124,14 @@ int Team::GetRelationship( int _t0, int _t1 )
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
 
+	// Neutral is just neutral. Else Chaos units
+	// keep attacking neutral cores. Very annoying.
+	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
+		return RELATE_NEUTRAL;
+
 	// CHAOS hates all - even each other.
 	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
 		return RELATE_ENEMY;
-	// Likewise, neutral is neutral even to themselves.
-	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
-		return RELATE_NEUTRAL;
 
 	GLASSERT(t0 >= TEAM_RAT && t0 < NUM_TEAMS);
 	GLASSERT(t1 >= TEAM_RAT && t1 < NUM_TEAMS);

@@ -856,12 +856,12 @@ void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int cre
 {
 	// Mark this item as important with a destroyMsg:
 	keyValues.Set("destroyMsg", destructionMsg);
-	NewsEvent news(creationMsg, pos, this, creator);
-	history->Add(news);
 
 	if (creator && team == 0) {
 		team = creator->Team();
 	}
+	NewsEvent news(creationMsg, pos, this->ID(), creator ? creator->GetItemID() : 0, this->team);
+	history->Add(news);
 }
 
 

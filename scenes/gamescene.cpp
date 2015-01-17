@@ -230,8 +230,8 @@ void GameScene::Resize()
 					  moneyWidget.Y() );
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
-	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
-	newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
+	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
+	//newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
@@ -1018,13 +1018,13 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if (index >= 0) {
 				const NewsEvent& ne = current[index];
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				if (cc && ne.FirstChitID()) {
-					cc->SetTrack(ne.FirstChitID());
-				}
-				else {
+				//if (cc && ne.FirstChitID()) {
+				//	cc->SetTrack(ne.FirstChitID());
+				//}
+				//else {
 					sim->GetEngine()->CameraLookAt(ne.Pos().x, ne.Pos().y);
 					if (cc) cc->SetTrack(0);
-				}
+				//}
 			}
 		}
 	}

@@ -252,6 +252,7 @@ void AIComponent::GetFriendEnemyLists()
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
+	Vector2I sector = ToSector(center);
 
 	Rectangle2F zone;
 	zone.min = zone.max = center;
@@ -259,9 +260,7 @@ void AIComponent::GetFriendEnemyLists()
 
 	const ChitContext* context = Context();
 	if ( context->worldMap->UsingSectors() ) {
-		Rectangle2I ri = SectorData::InnerSectorBounds( center.x, center.y );
-		Rectangle2F rf = ToWorld(ri);
-
+		Rectangle2F rf = ToWorld( SectorData::InnerSectorBounds( center.x, center.y ));
 		zone.DoIntersection( rf );
 	}
 
@@ -292,6 +291,13 @@ void AIComponent::GetFriendEnemyLists()
 	// Add the currentTarget back in, if we lost it. But only if
 	// it hasn't gone too far away.
 	Chit* currentTargetChit = Context()->chitBag->GetChit( targetDesc.id );
+	if (currentTargetChit &&
+		(currentTargetChit->GetSpatialComponent()->GetSector() != sector
+		  || Team::GetRelationship(currentTargetChit, parentChit) != RELATE_ENEMY)) 
+	{
+		currentTargetChit = 0;
+		targetDesc.Clear();
+	}
 	if (currentTargetChit && enemyList.Size() && buildingFilter.Accept(currentTargetChit)) {
 		// We have enemies that aren't buildings, and the target 
 		// is a building. Clear and go after non-buildings.
@@ -349,6 +355,18 @@ void AIComponent::GetFriendEnemyLists()
 			}
 		}
 	}
+	/*
+	for (int i = 0; i < enemyList.Size(); ++i) {
+		Chit* enemy = Context()->chitBag->GetChit(enemyList[i]);
+		if (Team::GetRelationship(parentChit, enemy) == RELATE_ENEMY && enemy->GetSpatialComponent()->GetSector() == sector) {
+			// all good!
+		}
+		else {
+			enemyList.SwapRemove(i);
+			--i;
+		}
+	}
+	*/
 }
 
 
@@ -955,7 +973,8 @@ void AIComponent::Rampage( int dest )
 	aiMode = RAMPAGE_MODE; 
 	currentAction = NO_ACTION;
 
-	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), parentChit );
+	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), 
+				    parentChit->GetItemID(), 0, parentChit->Team() );
 	Context()->chitBag->GetNewsHistory()->Add( news );	
 }
 
@@ -1355,7 +1374,8 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 
 		// Trolls herd *all the time*
 		if ( thisComp.item->IName() != ISC::troll ) {
-			NewsEvent news( NewsEvent::SECTOR_HERD, thisComp.spatial->GetPosition2D(), parentChit );
+			NewsEvent news( NewsEvent::SECTOR_HERD, thisComp.spatial->GetPosition2D(), 
+						   parentChit->GetItemID(), 0, parentChit->Team() );
 			Context()->chitBag->GetNewsHistory()->Add( news );
 		}
 
@@ -2473,11 +2493,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT( 0 );
 	};
 
-	if ( debugLog ) {
+	if (debugLog) {
 		static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
-		GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
-				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
-				   optionName[index] ));
+		GLOUTPUT(("ID=%d Battle: nEnemies=%d nM=%d nR=%d flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
+			enemyList.Size(),
+			nMeleeEnemies,
+			nRangedEnemies,
+			thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
+			optionName[index]));
 	}
 
 	// And finally, do a swap if needed!
@@ -2574,12 +2597,12 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 	switch ( option ) {
 	case STARVE:
 		thisComp.item->hp = 0;
-		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::STARVATION, pos2, parentChit, 0));
+		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::STARVATION, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
 		break;
 
 	case BLOODRAGE:
 		thisComp.item->SetChaos();
-		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit, 0));
+		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
 		break;
 
 	case VISION_QUEST:
@@ -2604,7 +2627,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 					}
 				}
 				this->Move( sectorPort, true );
-				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit, 0));
+				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
 				thisComp.item->SetRogue();
 			}
 		}
@@ -2679,7 +2702,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 					}
 
 					NewsEvent news(NewsEvent::DOMAIN_CONQUER, newCS->ParentChit()->GetSpatialComponent()->GetPosition2D(),
-								   newCS->ParentChit(), parentChit);
+								   newCS->ParentChit()->GetItemID(), parentChit->GetItemID(), newCS->ParentChit()->Team());
 					Context()->chitBag->GetNewsHistory()->Add(news);
 				}
 			}
@@ -2849,14 +2872,14 @@ int AIComponent::DoTick( U32 deltaTime )
 	ChitBag* chitBag = this->Context()->chitBag;
 	const ChitContext* context = Context();
 
-	if (parentChit->ID() == 42169) {
-		int debug = 1;
+	if (parentChit->ID() == 405) {
+		debugLog = true;
 	}
 
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {
 		Chit* chit = chitBag->GetChit( targetDesc.id );
-		if ( !chit || (Team::GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
+		if ( !chit || chit->Team() == 0 || (Team::GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
 			targetDesc.Clear();
 			currentAction = 0;
 		}
@@ -2871,11 +2894,13 @@ int AIComponent::DoTick( U32 deltaTime )
 
 		// If we still have a targetDesc.id after the above checks, make
 		// sure it is in the enemy list!
-		if (enemyList.Find(targetDesc.id) < 0) {
-			if (enemyList.HasCap())
-				enemyList.Push(targetDesc.id);
-			else
-				enemyList[0] = targetDesc.id;
+		if (targetDesc.id) {
+			if (enemyList.Find(targetDesc.id) < 0) {
+				if (enemyList.HasCap())
+					enemyList.Push(targetDesc.id);
+				else
+					enemyList[0] = targetDesc.id;
+			}
 		}
 	}
 
@@ -2883,6 +2908,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		focus = FOCUS_NONE;
 	}
 
+	GL_ARRAY_FILTER(enemyList, (ele == 0));
 	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
 	}
@@ -3148,7 +3174,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				&& cs && (cs->GetTech() >= TECH_ATTRACTS_GREATER))
 			{
 				Vector2I target = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
-				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit->GetItemID(), 0, parentChit->Team()));
 			}
 		}
 		break;

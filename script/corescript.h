@@ -75,9 +75,10 @@ public:
 
 	int GetPave();
 
-	void AddCitizen( Chit* chit );
-	bool IsCitizen( Chit* chit ); 
-	bool IsCitizen( int id );
+	void AddCitizen(Chit* chit);
+	bool IsCitizen(Chit* chit);
+	bool IsCitizen(int id);
+	bool IsCitizenItemID(int id);
 	int  Citizens(CChitArray* arr);
 
 	// A prime citizen is:
