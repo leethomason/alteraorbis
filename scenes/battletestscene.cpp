@@ -319,8 +319,10 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<leftCount; ++i ) {
 		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), leftLevel );
 		if ( i==0 ) {
-			c->GetAIComponent()->EnableLog( true );
-			c->GetItemComponent()->EnableDebug(true);
+			if (c->GetAIComponent()) {
+				c->GetAIComponent()->EnableLog(true);
+				c->GetItemComponent()->EnableDebug(true);
+			}
 		}
 
 	}
@@ -381,6 +383,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent());
+		AIComponent* ai = new AIComponent();
+		ai->SetSectorAwareness( true );
+		chit->Add( ai );
 	}
 	else {
 		// The avoider only avoids things with move components. Makes sense and yet
@@ -388,9 +393,6 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 		// handles those just fine.)
 		chit->Add( new GameMoveComponent());
 	}
-	AIComponent* ai = new AIComponent();
-	ai->SetSectorAwareness( true );
-	chit->Add( ai );
 	chit->Add( new HealthComponent());
 	chit->Add( new DebugStateComponent());
 

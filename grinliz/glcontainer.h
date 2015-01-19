@@ -419,7 +419,8 @@ public:
 	}
 
 	void Insert(int index, const T& t) {
-		GLASSERT(size < CAPACITY);
+		GLASSERT(size <= CAPACITY);
+		if (size == CAPACITY) --size;
 		for (int i = size; i > index; --i) {
 			mem[i] = mem[i - 1];
 		}
@@ -476,6 +477,16 @@ public:
 		GLASSERT( i >= 0 && i < (int)size );
 		mem[i] = mem[size-1];
 		Pop();
+	}
+
+	template<typename Context, typename Func>
+	void Filter(Context context, Func func) {
+		for (int i = 0; i < size; ++i) {
+			if (!func(context, mem[i])) {
+				SwapRemove(i);
+				--i;
+			}
+		}
 	}
 
 	const T& Max(int *index = 0) const {

@@ -1,3 +1,4 @@
+
 /*
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,7 +68,7 @@ using namespace grinliz;
 using namespace ai;
 
 static const float	NORMAL_AWARENESS			= 10.0f;
-static const float	LOOSE_AWARENESS				= 16.0f;
+static const float	LOOSE_AWARENESS = LONGEST_WEAPON_RANGE;
 static const float	SHOOT_ANGLE					= 10.0f;	// variation from heading that we can shoot
 static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
@@ -90,6 +91,44 @@ static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
+
+Vector2I ToWG(int id) {
+	Vector2I v = { 0, 0 };
+	if (id < 0) {
+		int i = -id;
+		v.y   = i / MAX_MAP_SIZE;
+		v.x   = i - v.y*MAX_MAP_SIZE;
+	}
+	return v;
+}
+
+inline int ToWG(const grinliz::Vector2I& v) {
+	return -(v.y * MAX_MAP_SIZE + v.x);
+}
+
+
+template<int EXCLUDED>
+bool FEFilter(Chit* parentChit, int id) {
+		const ChitContext* context = parentChit->Context();
+		if (id < 0) {
+			Vector2I p = ToWG(id);
+			const WorldGrid& wg = context->worldMap->GetWorldGrid(p);
+			return wg.Plant() || wg.RockHeight();
+		}
+		Chit* chit = context->chitBag->GetChit(id);
+		if (!chit) return false;
+		if (chit->Destroyed()) return false;
+
+		SpatialComponent* sc = chit->GetSpatialComponent();
+		SpatialComponent* parentSC = parentChit->GetSpatialComponent();
+		GLASSERT(sc && parentSC);
+		float range2 = (sc->GetPosition() - parentSC->GetPosition()).LengthSquared();
+
+		return (chit != parentChit) 
+			&& (range2 < LOOSE_AWARENESS * LOOSE_AWARENESS)
+			&& (sc->GetSector() == parentSC->GetSector()) 
+			&& (Team::GetRelationship(chit, parentChit) != EXCLUDED);
+}
 
 
 AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
@@ -117,8 +156,8 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
-	XARC_SER_DEF( xs, targetDesc.id, 0 );
-	XARC_SER( xs, targetDesc.mapPos );
+//	XARC_SER_DEF( xs, targetDesc.id, 0 );
+//	XARC_SER( xs, targetDesc.mapPos );
 	XARC_SER_DEF( xs, focus, 0 );
 	XARC_SER_DEF( xs, wanderTime, 0 );
 	XARC_SER( xs, rethink );
@@ -127,6 +166,8 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER_DEF( xs, rampageTarget, 0 );
 	XARC_SER_DEF( xs, destinationBlocked, 0 );
 	XARC_SER( xs, lastGrid );
+	XARC_SER_VAL_CARRAY(xs, friendList2);
+	XARC_SER_VAL_CARRAY(xs, enemyList2);
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
 	needs.Serialize( xs );
@@ -214,12 +255,15 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 {
 	for( int i=0; i<n; ++i ) {
 		int id = enemyIDs[i];
+		// Be careful to not duplicate list entries:
+		if (enemyList2.Find(id) >= 0) continue;
+
 		Chit* chit = Context()->chitBag->GetChit( enemyIDs[i] );
 		if ( chit ) {
 			int status = Team::GetRelationship( chit, parentChit );
 			if ( status == RELATE_ENEMY ) {
-				if ( enemyList.HasCap() && enemyList.Find( id ) < 0 ) {
-					enemyList.Push( id );
+				if (FEFilter<RELATE_FRIEND>(parentChit, id)) {
+					enemyList2.Push( id );
 				}
 			}
 		}
@@ -227,146 +271,99 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 }
 
 
-Vector3F AIComponent::EnemyPos(Chit* chit)
+Vector3F AIComponent::EnemyPos(int id)
 {
-	SpatialComponent* sc = chit->GetSpatialComponent();
-	GLASSERT(sc);
-	MapSpatialComponent* msc = sc->ToMapSpatialComponent();
-	if (msc) {
-		Rectangle2I porch = msc->PorchPos();
-		if (!porch.min.IsZero()) {
-			return ToWorld3F(porch.Center());
+	Vector3F pos = { 0, 0, 0 };
+	if (id > 0) {
+		Chit* chit = Context()->chitBag->GetChit(id);
+		if (chit) {
+			RenderComponent* rc = chit->GetRenderComponent();
+			GLASSERT(rc);
+			if (rc) {
+				if (rc->GetMetaData(META_TARGET, &pos)) {
+					return pos;
+				}
+				return rc->MainModel()->AABB().Center();
+			}
 		}
-		else if (msc->Mode() == GRID_IN_USE) {
-			return ToWorld3F(msc->Bounds().min);
-		}
-		return V3F_ZERO;	// don't support attaching buildings without porches...this may work fine.
-						// But need to check we aren't pathing to a Block, so that the path always fails.
 	}
-	return sc->GetPosition();
+	else if (id < 0) {
+		Vector2I v2i = ToWG(id);
+		pos.Set((float)v2i.x + 0.5f, 0.5f, (float)v2i.y + 0.5f);
+		return pos;
+	}
+	return pos;
 }
 
 
-void AIComponent::GetFriendEnemyLists()
+void AIComponent::ProcessFriendEnemyLists(bool tick)
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
 	Vector2I sector = ToSector(center);
 
+	// Clean the lists we have.
+	int target = enemyList2.Empty() ? -1 : enemyList2[0];
+
+	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
+		return FEFilter<RELATE_FRIEND>(parentChit, id);
+	});
+
+	friendList2.Filter(parentChit, [](Chit* parentChit, int id) {
+		return FEFilter<RELATE_ENEMY>(parentChit, id);
+	});
+
+	// Did we lose our focused target?
+	if (focus == FOCUS_TARGET) {
+		if (enemyList2.Empty() || (focus != enemyList2[0])) {
+			focus = FOCUS_NONE;
+		}
+	}
+
+	// Compute the area for the query.
 	Rectangle2F zone;
 	zone.min = zone.max = center;
 	zone.Outset( fullSectorAware ? SECTOR_SIZE : NORMAL_AWARENESS );
 
-	const ChitContext* context = Context();
-	if ( context->worldMap->UsingSectors() ) {
+	if ( Context()->worldMap->UsingSectors() ) {
 		Rectangle2F rf = ToWorld( SectorData::InnerSectorBounds( center.x, center.y ));
 		zone.DoIntersection( rf );
 	}
 
-	friendList.Clear();
-	enemyList.Clear();
+	if (tick) {
+		CChitArray chitArr;
 
-	CChitArray chitArr;
-	MOBIshFilter mobFilter;
-	BuildingFilter buildingFilter;
+		MOBIshFilter mobFilter;
+		BuildingFilter buildingFilter;
+		ItemNameFilter coreFilter(ISC::core, IChitAccept::MAP);
+		// Order matters: prioritize mobs, then a core, then buildings.
+		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
 
-	Context()->chitBag->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
-	for( int i=0; i<chitArr.Size(); ++i ) {
-		int status = Team::GetRelationship( parentChit, chitArr[i] );
-		if ( status == RELATE_ENEMY ) {
-			if (    enemyList.HasCap() 
-				 && ( fullSectorAware || context->worldMap->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() ))) 
-			{
-				enemyList.Push( chitArr[i]->ID());
-			}
-		}
-		else if ( status == RELATE_FRIEND ) {
-			if ( friendList.HasCap() ) {
-				friendList.Push( chitArr[i]->ID());
-			}
-		}
-	}
-
-	// Add the currentTarget back in, if we lost it. But only if
-	// it hasn't gone too far away.
-	Chit* currentTargetChit = Context()->chitBag->GetChit( targetDesc.id );
-	if (currentTargetChit &&
-		(currentTargetChit->GetSpatialComponent()->GetSector() != sector
-		  || Team::GetRelationship(currentTargetChit, parentChit) != RELATE_ENEMY)) 
-	{
-		currentTargetChit = 0;
-		targetDesc.Clear();
-	}
-	if (currentTargetChit && enemyList.Size() && buildingFilter.Accept(currentTargetChit)) {
-		// We have enemies that aren't buildings, and the target 
-		// is a building. Clear and go after non-buildings.
-		currentTargetChit = 0;
-		targetDesc.Clear();
-	}
-	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
-		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
-		if (    (targetCenter - center).LengthSquared() < LOOSE_AWARENESS*LOOSE_AWARENESS		// close enough OR
-			 || (focus == FOCUS_TARGET) )														// focused
-		{
-			int i = enemyList.Find( targetDesc.id );
-			if ( i < 0 && enemyList.HasCap() ) {
-				enemyList.Push( targetDesc.id );
-			}
-		}
-	}
-
-	// If the enemy list is empty of MOBs, look for buildings.
-	if (enemyList.Empty()) {
-		// This is a little subtle: what's the path to a building?
-		// The building doesn't work until there is a path from the porch
-		// to the core, so we'll use that metric.
-		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
-
-		// Look for enemy core filter
-		bool coreFound = false;
-		for (int i = 0; i < chitArr.Size(); ++i) {
-			Chit* building = chitArr[i];
-			if (building->GetItem()->IName() == ISC::core && Team::GetRelationship(building, parentChit) == RELATE_ENEMY) {
-				if (enemyList.HasCap()) {
-					enemyList.Push(building->ID());
-					coreFound = true;
-				}
-			}
-		}
-
-		if (!coreFound) {
+		for (int pass = 0; pass < 3; ++pass) {
+			// Add extra friends or enemies into the list.
+			Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, filters[pass]);
 			for (int i = 0; i < chitArr.Size(); ++i) {
-				Chit* building = chitArr[i];
-				int status = Team::GetRelationship(building, parentChit);
-				if (building->Team() && status == RELATE_ENEMY) {				// never attack neutral buildings, no matter what we are.
-					// Note that buildings are behind walls and such, so we can't use HasStraightPath()
-					if (enemyList.HasCap()) {
-						if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {
-							Vector3F walkPos = EnemyPos(building);
-							if (walkPos != V3F_ZERO) {
-								if (context->worldMap->CalcPath(center, ToWorld2F(walkPos), 0, 0, false)) {
-									enemyList.Push(chitArr[i]->ID());
-								}
-							}
+				int status = Team::GetRelationship(parentChit, chitArr[i]);
+				int id = chitArr[i]->ID();
+
+				if (status == RELATE_ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
+					if (   fullSectorAware 
+						|| Context()->worldMap->HasStraightPath(center, chitArr[i]->GetSpatialComponent()->GetPosition2D())) 
+					{
+						if (FEFilter<RELATE_FRIEND>(parentChit, id)) {
+							enemyList2.Push(id);
 						}
+					}
+				}
+				else if (pass == 0 && status == RELATE_FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
+					if (FEFilter<RELATE_ENEMY>(parentChit, id)) {
+						friendList2.Push(id);
 					}
 				}
 			}
 		}
 	}
-	/*
-	for (int i = 0; i < enemyList.Size(); ++i) {
-		Chit* enemy = Context()->chitBag->GetChit(enemyList[i]);
-		if (Team::GetRelationship(parentChit, enemy) == RELATE_ENEMY && enemy->GetSpatialComponent()->GetSector() == sector) {
-			// all good!
-		}
-		else {
-			enemyList.SwapRemove(i);
-			--i;
-		}
-	}
-	*/
 }
 
 
@@ -470,8 +467,8 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 															   true,
 															   true );	// Doesn't matter to utility.
 
-				for( int k=0; k<enemyList.Size(); ++k ) {
-					ComponentSet enemy( Context()->chitBag->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+				for( int k=0; k<enemyList2.Size(); ++k ) {
+					ComponentSet enemy( Context()->chitBag->GetChit(enemyList2[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 					if ( !enemy.okay ) {
 						continue;
 					}
@@ -541,25 +538,25 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	// It will eventually reset. But annoying and may be occasionally visible.
 	//GLASSERT(weapon);
 	if (!weapon) return;
+	if (enemyList2.Empty()) return;	// no target
 
-	if ( targetDesc.id ) {
-		ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-		if ( !target.okay ) {
-			currentAction = NO_ACTION;
-			return;
-		}
+	int targetID = enemyList2[0];
+	GLASSERT(targetID != 0);
+	if (targetID == 0) return;
 
-		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, weapon->BoltSpeed(), 0 );
-		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
-	}
-	else if ( !targetDesc.mapPos.IsZero() ) {
-		leading.Set( (float)targetDesc.mapPos.x + 0.5f, 0.5f, (float)targetDesc.mapPos.y + 0.5f );
+	if ( targetID > 0 ) {
+		Chit* targetChit = Context()->chitBag->GetChit(targetID);
+		GLASSERT(targetChit);
+		if (!targetChit) return;
+
+		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetChit, weapon->BoltSpeed(), 0 );
+		isMoving = targetChit->GetMoveComponent() ? targetChit->GetMoveComponent()->IsMoving() : false;
 	}
 	else {
-		// case not supposed to happen, but never seen it be harmful:
-		currentAction = 0;
-		return;
+		Vector2I p = ToWG(targetID);
+		leading.Set( (float)p.x + 0.5f, 0.5f, (float)p.y + 0.5f );
 	}
+
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
@@ -603,28 +600,22 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
+	if (enemyList2.Empty()) return;
+	int targetID = enemyList2[0];
+
 	MeleeWeapon* weapon = thisComp.itemComponent->GetMeleeWeapon();
-	ComponentSet target( Context()->chitBag->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+	Chit* targetChit = Context()->chitBag->GetChit(targetID);
+	Vector2I mapPos = ToWG(targetID);
 
 	const ChitContext* context = Context();
-	bool targetOkay = false;
-	if ( targetDesc.id ) {
-		targetOkay = target.okay;
-	}
-	else if ( !targetDesc.mapPos.IsZero() ) {
-		const WorldGrid& wg = context->worldMap->GetWorldGrid(targetDesc.mapPos);
-		// make sure we aren't swinging at an empty voxel.
-		targetOkay = wg.RockHeight() || wg.Plant();
-	}
-
-	if ( !weapon || !targetOkay ) {
+	if ( !weapon ) {
 		currentAction = NO_ACTION;
 		return;
 	}
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 	// Are we close enough to hit? Then swing. Else move to target.
-	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {
+	if ( targetChit && BattleMechanics::InMeleeZone( context->engine, parentChit, targetChit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 		IString sound = weapon->keyValues.GetIString(ISC::sound);
@@ -633,7 +624,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
-		Vector2F heading = target.spatial->GetPosition2D() - pos2;
+		Vector2F heading = targetChit->GetSpatialComponent()->GetPosition2D() - pos2;
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
@@ -644,7 +635,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		thisComp.spatial->SetYRotation(angle);
 		if (pmc) pmc->Stop();
 	}
-	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
+	else if ( targetID < 0 && BattleMechanics::InMeleeZone( context->engine, parentChit, mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 		IString sound = weapon->keyValues.GetIString(ISC::sound);
@@ -653,7 +644,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
-		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
+		Vector2F heading = ToWorld2F( mapPos ) - pos2;
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
@@ -667,11 +658,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else {
 		// Move to target.
 		if ( pmc ) {
-			Vector2F targetPos = { 0, 0 };
-			if (targetDesc.id)
-				targetPos = ToWorld2F(EnemyPos(target.chit));
-			else 
-				targetPos.Set( (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f );
+			Vector2F targetPos = ToWorld2F(EnemyPos(targetID));
 
 			Vector2F pos = thisComp.spatial->GetPosition2D();
 			Vector2F dest = { -1, -1 };
@@ -888,19 +875,6 @@ void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vecto
 }
 
 
-void AIComponent::Target( Chit* chit, bool focused )
-{
-	if ( aiMode != BATTLE_MODE ) {
-		aiMode = BATTLE_MODE;
-		if ( parentChit->GetRenderComponent() ) {
-			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
-		}
-	}
-	targetDesc.Set( chit->ID() );
-	focus = focused ? FOCUS_TARGET : 0;
-}
-
-
 bool AIComponent::TargetAdjacent(const grinliz::Vector2I& pos, bool focused)
 {
 	static const Vector2I DELTA[4] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
@@ -915,7 +889,20 @@ bool AIComponent::TargetAdjacent(const grinliz::Vector2I& pos, bool focused)
 	return false;
 }
 
-void AIComponent::Target( const Vector2I& pos2i, bool focused )
+
+void AIComponent::Target(Chit* chit, bool focused) 
+{
+	Target(chit->ID(), focused);
+}
+
+
+void AIComponent::Target(const Vector2I& pos, bool focused) 
+{
+	Target(ToWG(pos), focused);
+}
+
+
+void AIComponent::Target( int id, bool focused )
 {
 	if ( aiMode != BATTLE_MODE ) {
 		aiMode = BATTLE_MODE;
@@ -923,15 +910,22 @@ void AIComponent::Target( const Vector2I& pos2i, bool focused )
 			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
 		}
 	}
-	targetDesc.Set(pos2i);
+	int idx = enemyList2.Find(id);
+	if (idx >= 0) {
+		Swap(&enemyList2[idx], &enemyList2[0]);
+	}
+	else {
+		enemyList2.Insert(0, id);
+	}
+	enemyList2.Insert(0, id);
 	focus = focused ? FOCUS_TARGET : 0;
 }
 
 
 Chit* AIComponent::GetTarget()
 {
-	if (targetDesc.HasTarget()) {
-		return Context()->chitBag->GetChit(targetDesc.id);
+	if (!enemyList2.Empty()) {
+		return Context()->chitBag->GetChit(enemyList2[0]);
 	}
 	return 0;
 }
@@ -1075,7 +1069,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	}
 
 	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
-		targetDesc.Set( next ); 
+		this->Target(next, false);
 		currentAction = MELEE;
 
 		const GameItem* melee = thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
@@ -1165,8 +1159,8 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 
 	// +1 for origin, +4 for plants
 	CArray<Vector2F, MAX_TRACK+1+NPLANTS> pos;
-	for( int i=0; i<friendList.Size(); ++i ) {
-		Chit* c = parentChit->Context()->chitBag->GetChit( friendList[i] );
+	for( int i=0; i<friendList2.Size(); ++i ) {
+		Chit* c = parentChit->Context()->chitBag->GetChit( friendList2[i] );
 		if ( c && c->GetSpatialComponent() ) {
 			Vector2F v = c->GetSpatialComponent()->GetPosition2D();
 			pos.Push( v );
@@ -1380,8 +1374,8 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 		}
 
 		ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );
-		for( int i=0; i<friendList.Size(); ++i ) {
-			Chit* c = Context()->chitBag->GetChit( friendList[i] );
+		for( int i=0; i<friendList2.Size(); ++i ) {
+			Chit* c = Context()->chitBag->GetChit( friendList2[i] );
 			if ( c ) {
 				c->SendMessage( msg );
 			}
@@ -2174,10 +2168,6 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		return;
 	if (ThinkLoot(thisComp))
 		return;
-	/*
-	if (ThinkCriticalShopping(thisComp))
-		return;
-	*/
 	if (ThinkHungry(thisComp))
 		return;
 
@@ -2210,7 +2200,7 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
 							&& itemFlags & GameItem::AI_SECTOR_HERD
-							&& (friendList.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
+							&& (friendList2.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
 							&& (thisComp.chit->random.Rand(WANDER_ODDS) == 0)
 							&& (CoreScript::GetCoreFromTeam(thisComp.chit->Team()) == 0);
 		bool sectorWander =		pmc
@@ -2259,7 +2249,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	const MeleeWeapon*  meleeWeapon = thisComp.itemComponent->QuerySelectMelee();
 
 	enum {
-		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
+		OPTION_NONE,			// Stand around
 		OPTION_MOVE_TO_RANGE,	// Move to shooting range or striking range
 		OPTION_MELEE,			// Focused melee attack
 		OPTION_SHOOT,			// Stand and shoot. (Don't pay run-n-gun accuracy penalty.)
@@ -2267,14 +2257,13 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	};
 
 	float utility[NUM_OPTIONS] = { 0,0,0,0 };
-	Chit* target[NUM_OPTIONS]  = { 0,0,0,0 };
+	int   target[NUM_OPTIONS]  = { 0,0,0,0 };
 
 	// Moves are always to the target location, since intermediate location could
 	// cause very strange pathing. Time is set to when to "rethink". If we are moving
 	// to melee for example, the time is set to when we should actually switch to
 	// melee. Same applies to effective range. If it isn't a straight path, we will
 	// rethink too soon, which is okay.
-	Vector2F moveToRange;		// Destination of move (uses final destination).
 	float    moveToTime = 1.0f;	// Seconds to the desired location is reached.
 
 	// Consider flocking. This wasn't really working in a combat situation.
@@ -2282,13 +2271,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	//static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	//Vector2F flockDir = heading;
-	utility[OPTION_FLOCK_MOVE] = 0.001f;
+	utility[OPTION_NONE] = 0;
 
 	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
 	int nMeleeEnemies = 0;	// number of enemies that could be pounding at me
 
-	for( int k=0; k<enemyList.Size(); ++k ) {
-		Chit* chit = Context()->chitBag->GetChit( enemyList[k] );
+	// Count melee and ranged enemies.
+	for( int k=0; k<enemyList2.Size(); ++k ) {
+		Chit* chit = Context()->chitBag->GetChit( enemyList2[k] );
 		if ( chit ) {
 			ItemComponent* ic = chit->GetItemComponent();
 			if ( ic ) {
@@ -2306,52 +2296,43 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	BuildingFilter buildingFilter;
 
-	for( int k=0; k<enemyList.Size(); ++k ) {
+	for( int k=0; k<enemyList2.Size(); ++k ) {
 		const ChitContext* context = Context();
-		ComponentSet enemy( Context()->chitBag->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-		if ( !enemy.okay ) {
-			enemyList[k] = 0;
-			continue;
-		}
-		if ( context->worldMap->UsingSectors() ) {
-			Vector2I s = ToSector( enemy.spatial->GetPosition2DI());
-			if ( s != sector ) {
-				enemyList[k] = 0;
-				continue;
-			}
-		}
+		int targetID = enemyList2[k];
 
-		const Vector3F	enemyPos		= EnemyPos(enemy.chit);
+		Chit* enemyChit = context->chitBag->GetChit(targetID);	// null if there isn't a chit
+		Vector2I voxelTarget = ToWG(targetID);						// zero if there isn't a voxel target
+
+		const Vector3F	enemyPos = EnemyPos(targetID);
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
+		const Vector2I  enemyPos2I		= ToWorld2I(enemyPos2);
 		float			range			= (enemyPos - pos).Length();
 		Vector3F		toEnemy			= (enemyPos - pos);
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
+		bool			enemyMoving = (enemyChit && enemyChit->GetMoveComponent()) ? enemyChit->GetMoveComponent()->IsMoving() : false;
 
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
-
-		// If we have melee targets, focus in on those.
-		if ( nMeleeEnemies && range > MELEE_RANGE) {
-			continue;
-		}
-
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
-		// Prefer the current target & focused target.
-		if ( enemyList[k] == targetDesc.id ) {
-			q *= 2;
-			if ( focus == FOCUS_TARGET ) {
-				q *= 20;	// have trouble with "target wander"...so make this big multiplier.
-			}
+
+		// If we have melee targets, focus in on those.
+		if ( nMeleeEnemies && range > MELEE_RANGE) {
+			q *= 0.1f;
 		}
+
+		// Prefer the current target & focused target.
+		if (k == 0) q *= 2;
+		if (k == 0 && focus == FOCUS_TARGET) q *= 20;
+		if (!enemyChit) q *= 0.5f;
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
 		if ( rangedWeapon ) {
 			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
 															rangedWeapon,
 															false,	// SHOOT implies stopping.
-															enemy.move && enemy.move->IsMoving() );
+															enemyMoving );
 			
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 			float longShot       = BattleMechanics::EffectiveRange( radAt1, 0.5f, 0.35f );
@@ -2380,9 +2361,17 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					}
 				}
 
-				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit, rangedWeapon ) ) {
-					utility[OPTION_SHOOT] = u;
-					target[OPTION_SHOOT] = enemy.chit;
+				if (enemyChit) {
+					if (u > utility[OPTION_SHOOT] && LineOfSight(thisComp, enemyChit, rangedWeapon)) {
+						utility[OPTION_SHOOT] = u;
+						target[OPTION_SHOOT] = targetID;
+					}
+				}
+				else {
+					if (u > utility[OPTION_SHOOT] && LineOfSight(thisComp, enemyPos2I)) {
+						utility[OPTION_SHOOT] = u;
+						target[OPTION_SHOOT] = targetID;
+					}
 				}
 			}
 			// Move to the effective range?
@@ -2397,9 +2386,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 				utility[OPTION_MOVE_TO_RANGE] = u;
-				moveToRange = enemyPos2;//pos2 + normalToEnemy * (range - effectiveRange);
 				moveToTime  = (range - effectiveRange ) / pmc->Speed();
-				target[OPTION_MOVE_TO_RANGE] = enemy.chit;
+				target[OPTION_MOVE_TO_RANGE] = targetID;
 			}
 		}
 
@@ -2412,33 +2400,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			if ( range > MELEE_RANGE * 3.0f ) {
 				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 					utility[OPTION_MOVE_TO_RANGE] = u;
-					//moveToRange = pos2 + normalToEnemy * (range - meleeRange*2.0f);
-					moveToRange = enemyPos2;
 					moveToTime = (range - MELEE_RANGE*2.0f) / pmc->Speed();
-					target[OPTION_MOVE_TO_RANGE] = enemy.chit;
+					target[OPTION_MOVE_TO_RANGE] = targetID;
 				}
 			}
 			u *= 0.95f;	// a little less utility than the move_to_range
 			if ( u > utility[OPTION_MELEE] ) {
 				utility[OPTION_MELEE] = u;
-				target[OPTION_MELEE] = enemy.chit;
-			}
-		}
-	}
-
-	// Handle having a location target:
-	if (enemyList.Size() == 0 && targetDesc.HasTarget() && !targetDesc.mapPos.IsZero()) {
-		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(targetDesc.mapPos);
-		if (wg.RockHeight() == 0 && wg.Plant() == 0) {
-			targetDesc.Clear();
-		}
-		else {
-			float range = (pos - targetDesc.MapTarget()).Length();
-			if (rangedWeapon && range > 3.0f && range < LONGEST_WEAPON_RANGE && LineOfSight(thisComp, targetDesc.mapPos)) {
-				utility[OPTION_SHOOT] = 1.0f;
-			}
-			else { //if (BattleMechanics::InMeleeZone(Context()->engine, parentChit, targetDesc.mapPos)) {
-				utility[OPTION_MELEE] = 1.0f;
+				target[OPTION_MELEE] = targetID;
 			}
 		}
 	}
@@ -2447,10 +2416,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	// Translate to action system:
 	switch ( index ) {
-		case OPTION_FLOCK_MOVE:
+		case OPTION_NONE:
 		{
-			//Vector2F dest = pos2 + flockDir;
-			//this->Move( dest, false );
 			pmc->Stop();
 		}
 		break;
@@ -2458,10 +2425,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MOVE_TO_RANGE:
 		{
 			GLASSERT(target[OPTION_MOVE_TO_RANGE]);
-			if (target[OPTION_MOVE_TO_RANGE]) {
-				targetDesc.Set(target[OPTION_MOVE_TO_RANGE]->ID());
-				GLASSERT(targetDesc.HasTarget());
-				this->Move(moveToRange, false);
+			int idx = enemyList2.Find(target[OPTION_MOVE_TO_RANGE]);
+			GLASSERT(idx >= 0);
+			if (idx >= 0) {
+				Swap(&enemyList2[0], &enemyList2[idx]);	// move target to 1st slot.
+				this->Move(ToWorld2F(EnemyPos(enemyList2[0])), false);
 			}
 		}
 		break;
@@ -2469,11 +2437,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MELEE:
 		{
 			currentAction = MELEE;
-			if (target[OPTION_MELEE]) {
-				targetDesc.Set(target[OPTION_MELEE]->ID());
+			int idx = enemyList2.Find(target[OPTION_MOVE_TO_RANGE]);
+			GLASSERT(idx >= 0);
+			if (idx >= 0) {
+				Swap(&enemyList2[0], &enemyList2[idx]);
 			}
-			// Either a new target specified, or already one in place.
-			GLASSERT(targetDesc.HasTarget());
 		}
 		break;
 		
@@ -2481,11 +2449,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		{
 			pmc->Stop();
 			currentAction = SHOOT;
-			if (target[OPTION_SHOOT]) {
-				targetDesc.Set(target[OPTION_SHOOT]->ID());
+			int idx = enemyList2.Find(target[OPTION_SHOOT]);
+			GLASSERT(idx >= 0);
+			if (idx >= 0) {
+				Swap(&enemyList2[0], &enemyList2[idx]);
 			}
-			// Either a new target specified, or already one in place.
-			GLASSERT(targetDesc.HasTarget());
 		}
 		break;
 
@@ -2494,12 +2462,13 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	};
 
 	if (debugLog) {
-		static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
-		GLOUTPUT(("ID=%d Battle: nEnemies=%d nM=%d nR=%d flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
-			enemyList.Size(),
+		static const char* optionName[NUM_OPTIONS] = { "none", "mtrange", "melee", "shoot" };
+		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) MTR=%.2f melee=%.2f shoot=%.2f -> %s\n",
+			parentChit->ID(),
+			enemyList2.Size(),
 			nMeleeEnemies,
 			nRangedEnemies,
-			thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
+			utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 			optionName[index]));
 	}
 
@@ -2876,42 +2845,8 @@ int AIComponent::DoTick( U32 deltaTime )
 		debugLog = true;
 	}
 
-	// If focused, make sure we have a target.
-	if ( targetDesc.id ) {
-		Chit* chit = chitBag->GetChit( targetDesc.id );
-		if ( !chit || chit->Team() == 0 || (Team::GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
-			targetDesc.Clear();
-			currentAction = 0;
-		}
-		else if ( context->worldMap->UsingSectors() ) {
-			if (    !chit->GetSpatialComponent() 
-				 || ( ToSector( thisComp.spatial->GetPosition2DI() ) != ToSector( chit->GetSpatialComponent()->GetPosition2DI() )))
-			{
-				targetDesc.Clear();
-				currentAction = 0;
-			}
-		}
-
-		// If we still have a targetDesc.id after the above checks, make
-		// sure it is in the enemy list!
-		if (targetDesc.id) {
-			if (enemyList.Find(targetDesc.id) < 0) {
-				if (enemyList.HasCap())
-					enemyList.Push(targetDesc.id);
-				else
-					enemyList[0] = targetDesc.id;
-			}
-		}
-	}
-
-	if ( focus == FOCUS_TARGET && !targetDesc.HasTarget() ) {
-		focus = FOCUS_NONE;
-	}
-
-	GL_ARRAY_FILTER(enemyList, (ele == 0));
-	if ( feTicker.Delta( deltaTime )) {
-		GetFriendEnemyLists();
-	}
+	// Clean up the enemy/friend lists so they are valid for this call stack.
+	ProcessFriendEnemyLists(feTicker.Delta(deltaTime) != 0);
 
 	// High level mode switch, in/out of battle?
 	if (focus != FOCUS_MOVE &&  !taskList.UsingBuilding()) {
@@ -2922,7 +2857,7 @@ int AIComponent::DoTick( U32 deltaTime )
 
 		if (    aiMode != BATTLE_MODE 
 			 && goesToBattle
-			 && enemyList.Size() ) 
+			 && enemyList2.Size() ) 
 		{
 			aiMode = BATTLE_MODE;
 			currentAction = 0;
@@ -2935,14 +2870,14 @@ int AIComponent::DoTick( U32 deltaTime )
 			if ( parentChit->GetRenderComponent() ) {
 				parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
 			}
-			for( int i=0; i<friendList.Size(); ++i ) {
-				Chit* fr = Context()->chitBag->GetChit( friendList[i] );
+			for( int i=0; i<friendList2.Size(); ++i ) {
+				Chit* fr = Context()->chitBag->GetChit( friendList2[i] );
 				if ( fr && fr->GetAIComponent() ) {
-					fr->GetAIComponent()->MakeAware( enemyList.Mem(), enemyList.Size() );
+					fr->GetAIComponent()->MakeAware( enemyList2.Mem(), enemyList2.Size() );
 				}
 			}
 		}
-		else if ( aiMode == BATTLE_MODE && !targetDesc.HasTarget() && enemyList.Empty() ) {
+		else if ( aiMode == BATTLE_MODE && enemyList2.Empty() ) {
 			aiMode = NORMAL_MODE;
 			currentAction = 0;
 			if ( debugLog ) {
