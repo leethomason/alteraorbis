@@ -1,4 +1,3 @@
-
 /*
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -253,7 +252,7 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 
 void AIComponent::MakeAware( const int* enemyIDs, int n )
 {
-	for( int i=0; i<n; ++i ) {
+	for( int i=0; i<n && enemyList2.HasCap(); ++i ) {
 		int id = enemyIDs[i];
 		// Be careful to not duplicate list entries:
 		if (enemyList2.Find(id) >= 0) continue;
@@ -304,7 +303,10 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
+	// Enemy list: not sure the best polity. Right now keeps.
+	// Friend list: clear and focus on near.
 	int target = enemyList2.Empty() ? -1 : enemyList2[0];
+	if (tick) friendList2.Clear();
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
 		return FEFilter<RELATE_FRIEND>(parentChit, id);
@@ -2227,7 +2229,11 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 	}
 	if ( !dest.IsZero() ) {
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
-		taskList.Push( Task::MoveTask( dest2i ));
+		// If the move is very near (happens if friendList empty)
+		// don't do the move to avoid jerk.
+		if (dest2i != thisComp.spatial->GetPosition2DI()) {
+			taskList.Push(Task::MoveTask(dest2i));
+		}
 		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
@@ -2437,7 +2443,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MELEE:
 		{
 			currentAction = MELEE;
-			int idx = enemyList2.Find(target[OPTION_MOVE_TO_RANGE]);
+			int idx = enemyList2.Find(target[OPTION_MELEE]);
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
 				Swap(&enemyList2[0], &enemyList2[idx]);
@@ -2462,8 +2468,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	};
 
 	if (debugLog) {
-		static const char* optionName[NUM_OPTIONS] = { "none", "mtrange", "melee", "shoot" };
-		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) MTR=%.2f melee=%.2f shoot=%.2f -> %s\n",
+		static const char* optionName[NUM_OPTIONS] = { "none", "mtr", "melee", "shoot" };
+		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) mtr=%.2f melee=%.2f shoot=%.2f -> %s\n",
 			parentChit->ID(),
 			enemyList2.Size(),
 			nMeleeEnemies,
@@ -2958,7 +2964,7 @@ int AIComponent::DoTick( U32 deltaTime )
 			rethink = 0;
 		}
 	}
-	else if ( !currentAction || (rethink > 1000 ) ) {
+	else if ( !currentAction || (rethink > 2000 ) ) {
 		Think( thisComp );
 		rethink = 0;
 	}
