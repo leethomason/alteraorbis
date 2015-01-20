@@ -76,37 +76,45 @@ void Web::Calc(const Vector2I* _cores, int nCores)
 
 	nodes.Reserve(nCores);
 	Node* node = nodes.PushArr(1);
+	node->sector = origin;
 	const Node* save = nodes.Mem();
 
-	CDynArray<bool> edgeSet;
+	CDynArray<Web::WebLink> edgeSet;
 	for (int i = 0; i < edges.Size(); ++i) {
-		edgeSet.Push(false);
+		edgeSet.Push(edges[i]);
 	}
 
-	BuildNodeRec(origin, node, &edgeSet);
+	BuildNodeRec(node, &edgeSet);
 	GLASSERT(save == nodes.Mem());
+	//DumpNodeRec(&nodes[0], 0);
 }
 
 
-void Web::BuildNodeRec(grinliz::Vector2I pos, Node* node, grinliz::CDynArray<bool>* edgeSet)
+void Web::DumpNodeRec(Node* node, int depth)
 {
-	node->sector = pos;
+	for (int i = 0; i < depth; ++i) GLOUTPUT(("  "));
+	GLOUTPUT(("%x, %x\n", node->sector.x, node->sector.y));
+	for (int i = 0; i < node->child.Size(); ++i)
+		DumpNodeRec(node->child[0], depth + 1);
+}
 
-	int i = -1;
-	GL_ARRAY_FIND(edges.Mem(), edges.Size(), ((ele.sector0 == pos || ele.sector1 == pos) && (*edgeSet)[index] == false), &i);
-	if (i >= 0) {
-		const WebLink& link = edges[i];
-		if (link.sector0 == pos) {
-			Node* next = nodes.PushArr(1);
-			node->adjacent.Push(next);
-			(*edgeSet)[i] = true;
-			BuildNodeRec(link.sector1, next, edgeSet);
+
+void Web::BuildNodeRec( Node* node, grinliz::CDynArray<Web::WebLink>* e)
+{
+	while (true) {
+		int i = -1;
+		GL_ARRAY_FIND(e->Mem(), e->Size(), 
+			(ele.sector0 == node->sector || ele.sector1 == node->sector), &i);
+
+		if (i < 0) {
+			break;
 		}
-		else if (link.sector1 == pos) {
-			Node* next = nodes.PushArr(1);
-			node->adjacent.Push(next);
-			(*edgeSet)[i] = true;
-			BuildNodeRec(link.sector0, next, edgeSet);
-		}
+		Node* next = nodes.PushArr(1);
+		next->sector = ((*e)[i].sector0 == node->sector) ? (*e)[i].sector1 : (*e)[i].sector0;
+		e->SwapRemove(i);
+		node->child.Push(next);
+	}
+	for (int i = 0; i < node->child.Size(); ++i) {
+		BuildNodeRec(node->child[i], e);
 	}
 }

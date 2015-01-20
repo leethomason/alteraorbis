@@ -744,7 +744,6 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		CoreScript* cs = CoreScript::GetCore(sector);
 
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
-//		IString kioskName = vd->CurrentKioskWant();
 
 		if (chit && chit->GetItem()->IName() == ISC::kiosk) {
 			vd->kioskTime += time;
@@ -2270,13 +2269,12 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	// to melee for example, the time is set to when we should actually switch to
 	// melee. Same applies to effective range. If it isn't a straight path, we will
 	// rethink too soon, which is okay.
-	float    moveToTime = 1.0f;	// Seconds to the desired location is reached.
+	//float    moveToTime = 1.0f;	// Seconds to the desired location is reached.
 
 	// Consider flocking. This wasn't really working in a combat situation.
 	// May reconsider later, or just use for spreading out.
 	//static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
-	//Vector2F flockDir = heading;
 	utility[OPTION_NONE] = 0;
 
 	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
@@ -2307,7 +2305,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		int targetID = enemyList2[k];
 
 		Chit* enemyChit = context->chitBag->GetChit(targetID);	// null if there isn't a chit
-		Vector2I voxelTarget = ToWG(targetID);						// zero if there isn't a voxel target
+		Vector2I voxelTarget = ToWG(targetID);					// zero if there isn't a voxel target
 
 		const Vector3F	enemyPos = EnemyPos(targetID);
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
@@ -2319,6 +2317,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
+
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
@@ -2331,6 +2330,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		// Prefer the current target & focused target.
 		if (k == 0) q *= 2;
 		if (k == 0 && focus == FOCUS_TARGET) q *= 20;
+		// Prefer MOBs over buildings
 		if (!enemyChit) q *= 0.5f;
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
@@ -2347,8 +2347,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
 			if (    range > 1.5f 
-				 &&    ( ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )							// we have ammod
-				    || ( nRangedEnemies == 0 && range > 2.0f && range < longShot ) ) )	// we need to reload
+				 && (    ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )		// we have ammod
+				      || ( nRangedEnemies == 0 && range > 2.0f && range < longShot )))	// we have a gun and they don't
 			{
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
 				u *= q;
@@ -2367,32 +2367,25 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					}
 				}
 
-				if (enemyChit) {
-					if (u > utility[OPTION_SHOOT] && LineOfSight(thisComp, enemyChit, rangedWeapon)) {
-						utility[OPTION_SHOOT] = u;
-						target[OPTION_SHOOT] = targetID;
-					}
-				}
-				else {
-					if (u > utility[OPTION_SHOOT] && LineOfSight(thisComp, enemyPos2I)) {
-						utility[OPTION_SHOOT] = u;
-						target[OPTION_SHOOT] = targetID;
-					}
+				bool lineOfSight = false;
+				if (enemyChit) lineOfSight = LineOfSight(thisComp, enemyChit, rangedWeapon);
+				else if (!enemyPos2I.IsZero()) lineOfSight = LineOfSight(thisComp, enemyPos2I);
+
+				if (u > utility[OPTION_SHOOT] && lineOfSight) {
+					utility[OPTION_SHOOT] = u;
+					target[OPTION_SHOOT] = targetID;
 				}
 			}
 			// Move to the effective range?
 			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
-			if ( rangedWeapon->CanShoot() ) {
-				// okay;
-			}
-			else {
+			if ( !rangedWeapon->CanShoot() ) {
 				// Moving to effective range is less interesting if the gun isn't ready.
 				u *= 0.5f;
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 				utility[OPTION_MOVE_TO_RANGE] = u;
-				moveToTime  = (range - effectiveRange ) / pmc->Speed();
+				//moveToTime  = (range - effectiveRange ) / pmc->Speed();
 				target[OPTION_MOVE_TO_RANGE] = targetID;
 			}
 		}
@@ -2406,7 +2399,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			if ( range > MELEE_RANGE * 3.0f ) {
 				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 					utility[OPTION_MOVE_TO_RANGE] = u;
-					moveToTime = (range - MELEE_RANGE*2.0f) / pmc->Speed();
+					//moveToTime = (range - MELEE_RANGE*2.0f) / pmc->Speed();
 					target[OPTION_MOVE_TO_RANGE] = targetID;
 				}
 			}

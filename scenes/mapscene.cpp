@@ -354,12 +354,15 @@ void MapScene::DrawMap()
 //		webCanvas[WHITE_CANVAS].DrawRectangle(0, 0, scale, scale);
 //		webCanvas[WHITE_CANVAS].DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
 		
-		for (int i = 0; i < web.NumEdges(); i++) {
-			Vector2I s0, s1;
-			web.Edge(i, &s0, &s1);
-			Vector2F p0 = { (float(s0.x)+0.5f) * scale, (float(s0.y)+0.5f) * scale };
-			Vector2F p1 = { (float(s1.x)+0.5f) * scale, (float(s1.y)+0.5f) * scale };
-			webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+		for (int i = 0; i < web.NumNodes(); i++) {
+			const Web::Node* node = web.NodeAt(i);
+			for (int k = 0; k < node->child.Size(); ++k) {
+				Vector2I s0 = node->sector;
+				Vector2I s1 = node->child[k]->sector;
+				Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
+				Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
+				webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+			}
 		}
 	}
 	for (int i = 0; i < 3; ++i) {

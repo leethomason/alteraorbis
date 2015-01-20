@@ -26,18 +26,6 @@ VisitorData::VisitorData()
 }
 
 
-/*
-void VisitorData::Memory::Serialize( XStream* xs ) 
-{
-	XarcOpen( xs, "Memory" );
-	XARC_SER( xs, sector );
-	XARC_SER( xs, kioskType );
-	XARC_SER( xs, rating );
-	XarcClose( xs );
-}
-*/
-
-
 Visitors* Visitors::instance = 0;
 
 Visitors::Visitors()
@@ -84,13 +72,16 @@ SectorPort Visitors::ChooseDestination(int index, const Web& web, ChitBag* chitB
 
 	Vector2I thisSector = visitorChit->GetSpatialComponent()->GetSector();
 	const Web::Node* node = web.FindNode(thisSector);
-	if (!node || node->adjacent.Empty()) return sectorPort;
+	if (!node || node->child.Empty()) 
+		return sectorPort;
 
-	int which = random.Rand(node->adjacent.Size());
-	Vector2I sector = node->adjacent[which]->sector;
+	int which = random.Rand(node->child.Size());
+	Vector2I sector = node->child[which]->sector;
 
 	const SectorData& sd = map->GetSectorData( sector );
-	if (!sd.ports) return sectorPort;
+	GLASSERT(sd.ports);
+	if (!sd.ports) 
+		return sectorPort;
 
 	int ports[4] = { 1, 2, 4, 8 };
 	int port = 0;

@@ -138,7 +138,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	moneyWidget.Init( &gamui2D );
 	newsConsole.Init( &gamui2D, sim->GetChitBag() );
 
-
 	LayoutCalculator layout = DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 	endGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -232,6 +231,8 @@ void GameScene::Resize()
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
 	//newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
+	RenderAtom backgroundAtom = LumosGame::CalcPaletteAtom(0, PAL_GRAY);
+	newsConsole.consoleWidget.SetBackground(backgroundAtom);
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
