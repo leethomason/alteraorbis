@@ -195,6 +195,7 @@ private:
 	int					aiMode;
 	int					currentAction;
 	int					focus;
+	int					lastTargetID;
 	CTicker				feTicker;
 	U32					wanderTime;
 	int					rethink;

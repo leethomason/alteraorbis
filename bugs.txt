@@ -45,6 +45,7 @@ t warnings of “core attack” not in place
 t console messages...unreliable. some not getting through. market buy/sells
 t player console messages 3 lines long
 x visitors don't visit (until they do...)
+x still attacking neutral cores...
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
 - task serialization
@@ -69,7 +70,6 @@ x visitors don't visit (until they do...)
 - enemy face shows morale and not level
 - tax on buy or sell
 - when a building checks connection to core, it should check that the core is still its team
-- still attacking neutral cores...
 - improved strategic view
 	- mark mother core at center
 	- line thickness to show visitor distribution

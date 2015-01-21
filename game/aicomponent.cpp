@@ -142,6 +142,7 @@ AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 	visitorIndex = -1;
 	rampageTarget = 0;
 	destinationBlocked = 0;
+	lastTargetID = 0;
 }
 
 
@@ -155,6 +156,7 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
+	XARC_SER(xs, lastTargetID);
 //	XARC_SER_DEF( xs, targetDesc.id, 0 );
 //	XARC_SER( xs, targetDesc.mapPos );
 	XARC_SER_DEF( xs, focus, 0 );
@@ -2251,7 +2253,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	
 	// Use the current or reserve - switch out later if we need to.
 	const RangedWeapon* rangedWeapon = thisComp.itemComponent->QuerySelectRanged();
-	const MeleeWeapon*  meleeWeapon = thisComp.itemComponent->QuerySelectMelee();
+	const MeleeWeapon*  meleeWeapon  = thisComp.itemComponent->QuerySelectMelee();
 
 	enum {
 		OPTION_NONE,			// Stand around
@@ -2289,8 +2291,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				if ( ic->GetRangedWeapon(0) ) {
 					++nRangedEnemies;
 				}
+				static const float MELEE_ZONE = (MELEE_RANGE + 0.5f) * (MELEE_RANGE + 0.5f);
 				if ( ic->GetMeleeWeapon() && chit->GetSpatialComponent() &&
-					( pos2 - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared() <= (MELEE_RANGE*MELEE_RANGE) )
+					( pos2 - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared() <= MELEE_ZONE )
 				{
 					++nMeleeEnemies;
 				}
@@ -2315,6 +2318,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
 		bool			enemyMoving = (enemyChit && enemyChit->GetMoveComponent()) ? enemyChit->GetMoveComponent()->IsMoving() : false;
 
+		GLASSERT(FEFilter<RELATE_FRIEND>(parentChit, targetID) == true);
+
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
 
@@ -2322,16 +2327,15 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
 
-		// If we have melee targets, focus in on those.
-		if ( nMeleeEnemies && range > MELEE_RANGE) {
-			q *= 0.1f;
-		}
-
 		// Prefer the current target & focused target.
-		if (k == 0) q *= 2;
+		if (targetID == lastTargetID) q *= 2.0f;
 		if (k == 0 && focus == FOCUS_TARGET) q *= 20;
 		// Prefer MOBs over buildings
 		if (!enemyChit) q *= 0.5f;
+		
+		if (debugLog) {
+			GLOUTPUT(("  id=%d rng=%.1f ", targetID, range));
+		}
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
 		if ( rangedWeapon ) {
@@ -2341,23 +2345,27 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 															enemyMoving );
 			
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
-			float longShot       = BattleMechanics::EffectiveRange( radAt1, 0.5f, 0.35f );
 
 			// 1.5f gives spacing for bolt to start.
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
 			if (    range > 1.5f 
 				 && (    ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )		// we have ammod
-				      || ( nRangedEnemies == 0 && range > 2.0f && range < longShot )))	// we have a gun and they don't
+				      || ( nRangedEnemies == 0 && range > 2.0f )))	// we have a gun and they don't
 			{
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
+				u = Clamp(u, 0.0f, 2.0f);	// just to keep the point blank shooting down.
 				u *= q;
 
+				// If we have melee targets, focus in on those.
+				if ( nMeleeEnemies) {
+					u *= 0.1f;
+				}
 				// This needs tuning.
 				// If the unit has been shooting, time to do something else.
 				// Stand around and shoot battles are boring and look crazy.
 				if ( currentAction == SHOOT ) {
-					u *= 0.5f;
+					u *= 0.8f;	// 0.5f;
 				} 
 
 				// Don't blow ourself up:
@@ -2371,6 +2379,10 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				if (enemyChit) lineOfSight = LineOfSight(thisComp, enemyChit, rangedWeapon);
 				else if (!enemyPos2I.IsZero()) lineOfSight = LineOfSight(thisComp, enemyPos2I);
 
+				if (debugLog) {
+					GLOUTPUT(("r=%.1f ", u));
+				}
+						
 				if (u > utility[OPTION_SHOOT] && lineOfSight) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = targetID;
@@ -2383,31 +2395,32 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				// Moving to effective range is less interesting if the gun isn't ready.
 				u *= 0.5f;
 			}
+			if (debugLog) {
+				GLOUTPUT(("mtr(r)=%.1f ", u));
+			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 				utility[OPTION_MOVE_TO_RANGE] = u;
-				//moveToTime  = (range - effectiveRange ) / pmc->Speed();
 				target[OPTION_MOVE_TO_RANGE] = targetID;
 			}
 		}
 
 		// Consider Melee
-		if ( meleeWeapon ) {
+		if (meleeWeapon) {
+			if (range < 0.001f) {
+				range = 0.001f;
+			}
 			float u = MELEE_RANGE / range;
 			u *= q;
-			// Utility of the actual charge vs. moving closer. This
-			// seems to work with an if case.
-			if ( range > MELEE_RANGE * 3.0f ) {
-				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
-					utility[OPTION_MOVE_TO_RANGE] = u;
-					//moveToTime = (range - MELEE_RANGE*2.0f) / pmc->Speed();
-					target[OPTION_MOVE_TO_RANGE] = targetID;
-				}
+			if (debugLog) {
+				GLOUTPUT(("m=%.1f ", u));
 			}
-			u *= 0.95f;	// a little less utility than the move_to_range
-			if ( u > utility[OPTION_MELEE] ) {
+			if (u > utility[OPTION_MELEE]) {
 				utility[OPTION_MELEE] = u;
 				target[OPTION_MELEE] = targetID;
 			}
+		}
+		if (debugLog) {
+			GLOUTPUT(("\n"));
 		}
 	}
 
@@ -2428,6 +2441,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
 				Swap(&enemyList2[0], &enemyList2[idx]);	// move target to 1st slot.
+				lastTargetID = enemyList2[0];
 				this->Move(ToWorld2F(EnemyPos(enemyList2[0])), false);
 			}
 		}
@@ -2440,6 +2454,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
 				Swap(&enemyList2[0], &enemyList2[idx]);
+				lastTargetID = enemyList2[0];
 			}
 		}
 		break;
@@ -2452,6 +2467,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
 				Swap(&enemyList2[0], &enemyList2[idx]);
+				lastTargetID = enemyList2[0];
 			}
 		}
 		break;
@@ -2462,13 +2478,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	if (debugLog) {
 		static const char* optionName[NUM_OPTIONS] = { "none", "mtr", "melee", "shoot" };
-		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) mtr=%.2f melee=%.2f shoot=%.2f -> %s\n",
+		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) mtr=%.2f melee=%.2f shoot=%.2f -> %s [%d]\n",
 			parentChit->ID(),
 			enemyList2.Size(),
 			nMeleeEnemies,
 			nRangedEnemies,
 			utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
-			optionName[index]));
+			optionName[index],
+			enemyList2[0]));
 	}
 
 	// And finally, do a swap if needed!
@@ -2951,6 +2968,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		WorkQueueToTask( thisComp );
 	}
 
+	int RETHINK = (aiMode == BATTLE_MODE) ? 1000 : 2000;
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp, deltaTime );
 		if ( taskList.Empty() ) {

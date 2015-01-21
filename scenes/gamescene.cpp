@@ -27,6 +27,7 @@
 #include "../game/team.h"
 #include "../game/adviser.h"
 #include "../game/fluidsim.h"
+#include "../game/gridmovecomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -557,7 +558,6 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 			// clicked on a rock. Melt away!
 			Chit* player = GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				//player->GetAIComponent()->RockBreak(mv.Voxel2());
 				if (mv.ModelHit())
 					player->GetAIComponent()->Target(mv.model->userData, false);
 				else
@@ -1065,19 +1065,26 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	Chit* chit = GetPlayerChit();
 	if (chit) {
 		AIComponent* ai = chit->GetAIComponent();
-		if ( ai ) {
-			Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
-			// Is this grid travel or normal travel?
-			Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
-			Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
-			SectorPort sectorPort;
+		GridMoveComponent* gridMove = GET_SUB_COMPONENT(chit, MoveComponent, GridMoveComponent);
 
-			if ( currentSector != destSector )
-			{
-				// Find the nearest port. (Somewhat arbitrary.)
-				sectorPort.sector = destSector;
-				sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
-			}
+		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+		// Is this grid travel or normal travel?
+		Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
+		Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+		SectorPort sectorPort;
+
+		if ( currentSector != destSector )
+		{
+			// Find the nearest port. (Somewhat arbitrary.)
+			sectorPort.sector = destSector;
+			sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
+		}
+
+		if (gridMove) {
+			if (sectorPort.IsValid())
+				gridMove->SetDest(sectorPort);
+		}
+		else if (ai) {
 			if ( sectorPort.IsValid() ) {
 				ai->Move( sectorPort, true );
 			}
