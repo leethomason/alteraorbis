@@ -2968,14 +2968,23 @@ int AIComponent::DoTick( U32 deltaTime )
 		WorkQueueToTask( thisComp );
 	}
 
-	int RETHINK = (aiMode == BATTLE_MODE) ? 1000 : 2000;
+	int RETHINK = 2000;
+	if (aiMode == BATTLE_MODE) {
+		RETHINK = 1000;	// so we aren't runnig past targets and such.
+		// And also check for losing our target.
+		if (enemyList2.Size() && (lastTargetID != enemyList2[0])) {
+			if (debugLog) GLOUTPUT(("BTL retarget.\n"));
+			rethink += RETHINK;
+		}
+	}
+
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp, deltaTime );
 		if ( taskList.Empty() ) {
 			rethink = 0;
 		}
 	}
-	else if ( !currentAction || (rethink > 2000 ) ) {
+	else if ( !currentAction || (rethink > RETHINK ) ) {
 		Think( thisComp );
 		rethink = 0;
 	}
