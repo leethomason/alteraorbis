@@ -811,7 +811,7 @@ void Reader::Manifest(int maxDepth) const
 {
 	grinliz::CDynArray<ManifestItem> items;
 	ManifestRec(Root(), 1, maxDepth, &items);
-	grinliz::Sort<ManifestItem, grinliz::CompValue>(items.Mem(), items.Size());
+	items.Sort();
 
 	printf("\n");
 	for (int i = 0; i < items.Size(); ++i) {

@@ -45,7 +45,11 @@ void MarkovBuilder::Process()
 	for( int i=0; i<table.Size(); ++i ) {
 		sortedArr.Push( table.GetValue(i) );
 	}
-	Sort< Triplet, DoubletSort >( &sortedArr[0], sortedArr.Size() );
+	sortedArr.Sort([](const Triplet& v0, const Triplet& v1) {
+			U32 a = (v0.value[0] << 8) + v0.value[1];
+			U32 b = (v1.value[0] << 8) + v1.value[1];
+			return a < b;
+	});
 }
 
 

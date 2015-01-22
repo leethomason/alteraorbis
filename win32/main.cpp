@@ -24,6 +24,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glcontainer.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "../xegame/cgame.h"
@@ -88,6 +89,7 @@ int main(int argc, char **argv)
 {
 	MemStartCheck();
 	{ char* test = new char[16]; delete[] test; }
+	grinliz::TestContainers();
 
 	{
 		grinliz::GLString releasePath;

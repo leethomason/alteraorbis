@@ -98,7 +98,7 @@ void RenderQueue::Submit(	int modelRequired,
 		}
 	}
 
-	Sort<Item*, CompareItem>( itemArr.Mem(), itemArr.Size() );
+	Sort( itemArr.Mem(), itemArr.Size(), CompareItem::Less );
 
 	int start = 0;
 	int end = 0;

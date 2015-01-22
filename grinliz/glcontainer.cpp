@@ -23,3 +23,65 @@ distribution.
 */
 
 #include "glcontainer.h"
+#include "glrandom.h"
+
+using namespace grinliz;
+
+template<typename T>
+bool InOrder(const T* mem, int N)
+{
+	for (int i = 0; i < N - 1; ++i) {
+		bool inOrder = mem[i] < mem[i + 1];
+		GLASSERT(inOrder);
+		if (!inOrder) return false;
+	}
+	return true;
+}
+
+void grinliz::TestContainers()
+{
+	Random random;
+	// Global functions.
+	{
+		static const int N = 10;
+		int arr[N] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		random.ShuffleArray(arr, N);
+
+		grinliz::Sort(arr, N);
+		GLASSERT(InOrder(arr, N));
+		random.ShuffleArray(arr, N);
+
+		grinliz::Sort(arr, N, [](const int& a, const int& b) {
+			return a < b;
+		});
+		GLASSERT(InOrder(arr, N));
+		random.ShuffleArray(arr, N);
+
+		struct Context {
+			int origin = -1;
+			bool Less(const int&a, const int& b) const {
+				return (origin + a) < (origin + b);
+			}
+		};
+		Context context;
+		grinliz::SortContext(arr, N, context);
+		GLASSERT(InOrder(arr, N));
+	}
+	// CArray
+	{
+		CArray<int, 10> arr;
+		for (int i = 0; i < 10; ++i) arr.Push(i);
+		random.ShuffleArray(arr.Mem(), arr.Size());
+
+		arr.Sort();
+		GLASSERT(InOrder(arr.Mem(), arr.Size()));
+
+		random.ShuffleArray(arr.Mem(), arr.Size());
+		arr.Sort([](const int& a, const int& b) {
+			return a < b;
+		});
+		GLASSERT(InOrder(arr.Mem(), arr.Size()));
+	}
+}
+
+

@@ -46,15 +46,6 @@ public:
 	int NumBytes() const									{ return sortedArr.Size()*sizeof(Triplet); }
 
 private:
-	struct DoubletSort
-	{
-		static bool Less( const Triplet& v0, const Triplet& v1 )	{ 
-			U32 a = (v0.value[0] << 8) + v0.value[1];
-			U32 b = (v1.value[0] << 8) + v1.value[1];
-			return a < b; 
-		}
-	};
-
 	grinliz::CDynArray< grinliz::GLString >			names;
 	grinliz::HashTable< Triplet, Triplet, Triplet > table;
 	grinliz::CDynArray< Triplet >					sortedArr;

@@ -37,6 +37,7 @@ public:
 	bool				view;		// if true, request is to view, not grid travel.
 };
 
+
 class MapScene : public Scene
 {
 public:
@@ -65,10 +66,6 @@ private:
 
 		grinliz::IString name;
 		int				 count;
-	};
-
-	struct MCountSorter {
-		static bool Less( const MCount& v0, const MCount& v1 )	{ return v0.count > v1.count; }
 	};
 
 	enum {	MAP2_RAD	= 2,

@@ -977,7 +977,7 @@ bool ItemComponent::Swap( int i, int j )
 class ItemValueCompare
 {
 public:
-	bool Less( const GameItem* v0, const GameItem* v1 ) const
+	static bool Less( const GameItem* v0, const GameItem* v1 )
 	{
 		int val0 = v0->GetValue();
 		int val1 = v1->GetValue();
@@ -989,13 +989,11 @@ public:
 
 void ItemComponent::SortInventory()
 {
-	ItemValueCompare compare;
-
 	for (int i = 1; i<itemArr.Size(); ++i) {
 		if (itemArr[i]->Intrinsic())
 			continue;
 		if (itemArr.Size() > i + 1) {
-			::Sort<const GameItem*, ItemValueCompare>((const GameItem**)&itemArr[i], itemArr.Size() - i, compare);
+			grinliz::Sort((const GameItem**)&itemArr[i], itemArr.Size() - i, ItemValueCompare::Less);
 		}
 		break;
 	}

@@ -233,7 +233,10 @@ void CoreScript::AssignToSquads()
 	// First, how many do we actually have?
 	// Filter out everyone that has gone away.
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		GL_ARRAY_FILTER(squads[i], (this->IsCitizen(ele)));
+		//GL_ARRAY_FILTER(squads[i], (this->IsCitizen(ele)));
+		squads[i].Filter(this, [](CoreScript* cs, int id) {
+			return cs->IsCitizen(id);
+		});
 		if (squads[i].Empty()) {
 			// Flush out dead squads so they don't have 
 			// control flags laying around.
@@ -251,13 +254,28 @@ void CoreScript::AssignToSquads()
 	int nExpected = nCitizens - CITIZEN_BASE;
 	if (nSquaddies >= nExpected) return;
 
+	struct FilterData {
+		CoreScript* cs;
+		Chit* avatar;;
+	};
+	FilterData fd = { this, Context()->chitBag->GetAvatar() };
+
 	// Filter to: not in squad AND not player controlled
-	Chit* avatar = Context()->chitBag->GetAvatar();
-	GL_ARRAY_FILTER(recruits, (this->SquadID(ele->ID()) < 0 && (ele != avatar) ));
+	recruits.Filter(fd, [](const FilterData& fd, Chit* chit) {
+		return (fd.cs->SquadID(chit->ID()) < 0 && chit != fd.avatar);
+	});
+
 	// Sort the best recruits to the end.
 	// FIXME: better if there was a (working) power approximation
-	GL_ARRAY_SORT_EXPR(recruits.Mem(), recruits.Size(), 
-		(-1 * ele->GetItem()->Traits().Level() * (ele->GetItem()->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1)));
+	recruits.Sort([](Chit* a, Chit* b) {
+		const GameItem* itemA = a->GetItem();
+		const GameItem* itemB = b->GetItem();
+		int scoreA = itemA->Traits().Level() * (itemA->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1);
+		int scoreB = itemB->Traits().Level() * (itemB->GetPersonality().Fighting() == Personality::LIKES ? 2 : 1);
+		
+		// Reverse order. Best at end.
+		return scoreA > scoreB;
+	});
 
 	while (nSquaddies < nExpected) {
 		for (int i = 0; i < MAX_SQUADS; ++i) {
@@ -278,7 +296,10 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 {
 	GLASSERT(id >= 0 && id < MAX_SQUADS);
 	if (arr) arr->Clear();
-	GL_ARRAY_FILTER(squads[id], (this->IsCitizen(ele)));
+
+	squads[id].Filter(this, [](CoreScript* cs, int id){
+		return cs->IsCitizen(id);
+	});
 	if (arr) {
 		for (int i = 0; i < squads[id].Size(); ++i) {
 			Chit* c = Context()->chitBag->GetChit(squads[id][i]);

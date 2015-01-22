@@ -107,12 +107,6 @@ private:
 		Attrib* next;
 	};
 
-	class CompAttribPtr {
-	public:
-		// Sort:
-		static bool Less( const Attrib* v0, const Attrib* v1 )	{ return v0->name < v1->name; }
-	};
-
 	WItem* CreateChild( const char* name );
 	int FindString( const grinliz::IString& str, const grinliz::CDynArray< grinliz::IString >& stringPoolVec );
 

@@ -36,6 +36,7 @@ distribution.
 namespace grinliz
 {
 
+void TestContainers();
 
 class CompValueBase {
 public:
@@ -86,8 +87,16 @@ inline int CombSortGap( int gap )
 	return gap;
 }
 
-template <class T, class KCOMPARE >
-inline void Sort( T* mem, int size )
+/*
+	3 top level sorts:
+
+	::Sort(T* mem, int size);						uses operator <
+	::Sort(T* mem, int size, LessFunc func );		uses lambda function
+	::SortContext(T* mem, int size, C& compare);	uses compare::Less(), where compare can be an *instance* with member vars.
+*/
+
+template <class T, typename LessFunc >
+inline void Sort( T* mem, int size, LessFunc lessfunc  )
 {
 	int gap = size;
 	for (;;) {
@@ -96,7 +105,7 @@ inline void Sort( T* mem, int size )
 		const int end = size - gap;
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
-			if ( KCOMPARE::Less(mem[j],mem[i]) ) {
+			if ( lessfunc(mem[j],mem[i]) ) {
 				Swap(mem+i, mem+j);
 				swapped = true;
 			}
@@ -108,8 +117,15 @@ inline void Sort( T* mem, int size )
 }
 	
 
-template <class T, class COMP>
-inline void Sort( T* mem, int size, const COMP& compare )
+template <typename T>
+inline void Sort(T* mem, int size) {
+	Sort(mem, size, [](const T&a, const T&b) {
+		return a < b;
+	});
+}
+
+template <typename T, class COMP>
+inline void SortContext( T* mem, int size, const COMP& compare )
 {
 	int gap = size;
 	for (;;) {
@@ -321,7 +337,14 @@ public:
 		}
 	}
 
-	void Sort() { grinliz::Sort<T, CompValue>(mem, size); }
+	void Sort() { 
+		grinliz::Sort(mem, size, [](const T& a, const T& b){
+			return CompValue::Less(a, b);
+		});
+	}
+	// LessFunc returns a < b
+	template<typename LessFunc>
+	void Sort(LessFunc func) { grinliz::Sort<T, LessFunc>(mem, size, func); }
 
 	// Binary Search: array must be sorted!
 	int BSearch( const T& t ) const {
@@ -488,6 +511,12 @@ public:
 			}
 		}
 	}
+
+	void Sort() { grinliz::Sort<T>(mem, size); }
+
+	// LessFunc returns a < b
+	template<typename LessFunc>
+	void Sort(LessFunc func) { grinliz::Sort<T, LessFunc>(mem, size, func); }
 
 	const T& Max(int *index = 0) const {
 		int m = 0;

@@ -2118,7 +2118,7 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 		parentChit->Context()->chitBag->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, &filter );
 
 		ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
-		Sort( chitArr.Mem(), chitArr.Size(), compare );
+		SortContext( chitArr.Mem(), chitArr.Size(), compare );
 
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
@@ -2671,7 +2671,10 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 			ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
 			Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
 
-			GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
+			//GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
+			arr.Filter(0, [](int, Chit* ele) {
+				return Team::IsRogue(ele->Team());
+			});
 
 			if (arr.Size() > 3) {
 				DomainAI* ai = DomainAI::Factory(thisComp.item->Team());

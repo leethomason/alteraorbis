@@ -62,8 +62,7 @@ void Writer::Save( const char* filename )
 	CDynArray< IString > poolVec;
 	stringPool->GetAllStrings( &poolVec );
 
-	// Sort them.
-	Sort< IString, CompValue>( poolVec.Mem(), poolVec.Size() );
+	poolVec.Sort();
 
 	// --- Header --- //
 	HeaderStruct headerStruct;	// come back later and fill in.
@@ -357,7 +356,10 @@ void WItem::Save(	FILE* fp,
 	for( Attrib* a = attrib; a; a=a->next ) {
 		attribArr.Push( a );
 	}
-	Sort< Attrib*, CompAttribPtr >( attribArr.Mem(), attribArr.Size() );
+
+	attribArr.Sort([](const Attrib* v0, const Attrib* v1) {
+		return v0->name < v1->name;
+	});
 
 	// Child items:
 	// Pull out the linked list and sort it.
@@ -366,7 +368,7 @@ void WItem::Save(	FILE* fp,
 	for( WItem* c = child; c; c=c->sibling ) {
 		childArr.Push( c );
 	}
-	Sort< WItem*, CompWItemPtr >( childArr.Mem(), childArr.Size() );
+	childArr.Sort();
 
 	ItemStruct itemStruct;
 	itemStruct.nameID = FindString( itemName, stringPool );

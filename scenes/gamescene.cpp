@@ -1411,7 +1411,7 @@ void GameScene::SetPickupButtons()
 		}
 
 		// Sort near to far.
-		Sort< PickupData, CompValue >( pickupData.Mem(), pickupData.Size() );
+		pickupData.Sort();
 
 		int i=0;
 		for( ; i<pickupData.Size() && i < NUM_PICKUP_BUTTONS; ++i ) {
@@ -1733,7 +1733,7 @@ void GameScene::CheckGameStage(U32 delta)
 			}
 		}
 		if (arr.Size()) {
-			Sort<SectorInfo, grinliz::CompValue>(arr.Mem(), arr.Size());
+			arr.Sort();
 			// Randomize the first 16 - it isn't all about bioflora
 			random.ShuffleArray(arr.Mem(), Min(arr.Size(), 16));
 

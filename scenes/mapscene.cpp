@@ -264,7 +264,9 @@ void MapScene::DrawMap()
 					counter.Push(c);
 				}
 			}
-			Sort<MCount, MCountSorter>(counter.Mem(), counter.Size());
+			counter.Sort([](const MCount& a, const MCount& b){
+				return a.count > b.count;
+			});
 
 			Rectangle2F r = GridBounds2(i, j, true);
 			float h = r.Width() / 3.0f;

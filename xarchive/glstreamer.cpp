@@ -541,7 +541,7 @@ const char* StreamReader::OpenElement()
 			break;
 		}
 	}
-	Sort< Attribute, CompValue >( attributes.Mem(), attributes.Size() );
+	attributes.Sort();
 	return elementName;
 }
 
