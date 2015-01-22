@@ -884,13 +884,15 @@ int CoreScript::GetPave()
 	}
 
 	nPave[0] = 0;
-	if (nPave.Max() == 0) {
+	int maxPave = nPave[nPave.FindMax(0, [](int, int count) { return count; })];
+
+	if (maxPave == 0) {
 		pave = 1 + parentChit->random.Rand(WorldGrid::NUM_PAVE - 1);
 	}
 	else {
-		nPave[0] = SECTOR_SIZE*SECTOR_SIZE;
-		nPave.Min(&pave);
+		pave = 1 + ArrayFindMax(nPave.Mem()+1, nPave.Size() - 1, 0, [](int, int count) { return -count; });
 	}
+	GLASSERT(pave > 0 && pave < nPave.Size());
 	if (pave == 0) {
 		pave = 1;
 	}

@@ -146,12 +146,27 @@ inline void SortContext( T* mem, int size, const COMP& compare )
 }
 
 
-template <class T, class KCOMPARE >
-inline int MaxValue( T* mem, int size )
+template <typename T, typename Context, typename Func >
+inline int ArrayFind(T* mem, int size, Context context, Func func)
+{
+	for (int i = 0; i < size; ++i) {
+		if (func(context, mem[i])) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+template <typename T, typename Context, typename Func >
+inline int ArrayFindMax( T* mem, int size, Context context, Func func)
 {
 	int r = 0;
+	auto best = func(context, mem[0]);
+
 	for( int i=1; i<size; ++i ) {
-		if ( KCOMPARE::Less(mem[r],mem[i] )) {
+		auto score = func(context, mem[i]);
+		if (score > best) {
+			best = score;
 			r = i;
 		}
 	}
@@ -307,6 +322,16 @@ public:
 				return i;
 		}
 		return -1;
+	}
+
+	template<typename Context, typename Func>
+	int Find(Context context, Func func) {
+		return ArrayFind(mem, size, context, func);
+	}
+
+	template<typename Context, typename Func>
+	int FindMax(Context context, Func func) {
+		return ArrayFindMax(mem, size, context, func);
 	}
 
 	int Size() const		{ return size; }
@@ -482,6 +507,16 @@ public:
 		return -1;
 	}
 
+	template<typename Context, typename Func>
+	int Find(Context context, Func func) {
+		return ArrayFind(mem, size, context, func);
+	}
+
+	template<typename Context, typename Func>
+	int FindMax(Context context, Func func) {
+		return ArrayFindMax(mem, size, context, func);
+	}
+
 	int Size() const		{ return size; }
 	int Capacity() const	{ return CAPACITY; }
 	bool HasCap() const		{ return size < CAPACITY; }
@@ -517,30 +552,6 @@ public:
 	// LessFunc returns a < b
 	template<typename LessFunc>
 	void Sort(LessFunc func) { grinliz::Sort<T, LessFunc>(mem, size, func); }
-
-	const T& Max(int *index = 0) const {
-		int m = 0;
-		if (index) *index = 0;
-		for( int i=1; i<size; ++i ) {
-			if (mem[i] > mem[m]) {
-				m = i;
-				if (index) *index = i;
-			}
-		}
-		return mem[m];
-	}
-
-	const T& Min(int *index = 0) const {
-		int m = 0;
-		if (index) *index = 0;
-		for( int i=1; i<size; ++i ) {
-			if (mem[i] < mem[m]) {
-				m = i;
-				if (index) *index = i;
-			}
-		}
-		return mem[m];
-	}
 
 private:
 	T mem[CAPACITY];

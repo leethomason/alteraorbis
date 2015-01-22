@@ -2424,7 +2424,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		}
 	}
 
-	int index = MaxValue<float, CompValue>( utility, NUM_OPTIONS );
+	int index = ArrayFindMax(utility, NUM_OPTIONS, (int)0, [](int, float f) { return f; });
 
 	// Translate to action system:
 	switch ( index ) {

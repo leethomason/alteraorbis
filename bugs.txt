@@ -47,12 +47,12 @@ t player console messages 3 lines long
 x visitors don't visit (until they do...)
 x still attacking neutral cores...
 x when a building checks connection to core, it should check that the core is still its team
+x [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - weapons, on destruction, should drop crystal
 - buildings, on destruction, should drop items (market, vault, etc.)
 - task serialization
 - any building attack should cause awareness in domainAI
 - build tasks aren't getting serialized correctly. wrong rotation?
-- [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
 - [Reenen] Cyclops heal at rocks.
 - Mini map flash of battles.
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
@@ -65,7 +65,6 @@ x when a building checks connection to core, it should check that the core is st
 	- check gobman that is House denizen healing
 - gobman statues
 - mouse wheel support
-- see monsters when you click on them
 - unify rotation model
 - tweak ascent / descent? (Or is that a layout bug?)
 - enemy face shows morale and not level
@@ -79,7 +78,7 @@ x when a building checks connection to core, it should check that the core is st
 	- show mil strength
 	- reserve diplomacy slot
 
-- should show information about anyone you click
+- should show information about anyone you click, see monsters when you click on them
 - unified build marks
 - “data” the default screen of census
 - switch to war mode

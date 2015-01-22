@@ -36,9 +36,10 @@ void Web::Calc(const Vector2I* _cores, int nCores)
 		cores.Push(_cores[i]);
 	}
 
-	int startIndex = 0;
 	const Vector2I center = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
-	GL_ARRAY_FIND_MAX(cores, nCores, (-(center - ele).LengthSquared()), &startIndex, 1);
+	int startIndex = cores.FindMax(center, [](const Vector2I& center, const Vector2I& core){
+		return -(center - core).LengthSquared();
+	});
 	GLASSERT(startIndex >= 0);
 
 	origin = cores[startIndex];
@@ -102,10 +103,9 @@ void Web::DumpNodeRec(Node* node, int depth)
 void Web::BuildNodeRec( Node* node, grinliz::CDynArray<Web::WebLink>* e)
 {
 	while (true) {
-		int i = -1;
-		GL_ARRAY_FIND(e->Mem(), e->Size(), 
-			(ele.sector0 == node->sector || ele.sector1 == node->sector), &i);
-
+		int i = e->Find(node->sector, [](const Vector2I& sector, const Web::WebLink& link) {
+			return (link.sector0 == sector) || (link.sector1 == sector);
+		});
 		if (i < 0) {
 			break;
 		}
