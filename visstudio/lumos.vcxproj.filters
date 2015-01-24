@@ -427,6 +427,9 @@
     <ClCompile Include="..\scenes\gamescenemenu.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\mapgridwidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -854,6 +857,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\gamescenemenu.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\mapgridwidget.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

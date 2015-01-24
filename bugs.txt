@@ -43,7 +43,7 @@ x more aggressively pick up weapons in battle
 x console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
 t warnings of “core attack” not in place
 t console messages...unreliable. some not getting through. market buy/sells
-t player console messages 3 lines long
+x player console messages 3 lines long
 x visitors don't visit (until they do...)
 x still attacking neutral cores...
 x when a building checks connection to core, it should check that the core is still its team
@@ -54,7 +54,6 @@ x [Reenen] When I grid-travel, and I click on a new location (sometimes I see in
 - any building attack should cause awareness in domainAI
 - build tasks aren't getting serialized correctly. wrong rotation?
 - [Reenen] Cyclops heal at rocks.
-- Mini map flash of battles.
 - news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
 - new art from GT
 - de-saturate colors correctly
@@ -78,6 +77,7 @@ x [Reenen] When I grid-travel, and I click on a new location (sometimes I see in
 	- show mil strength
 	- reserve diplomacy slot
 
+- Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them
 - unified build marks
 - “data” the default screen of census

@@ -368,7 +368,9 @@ void WItem::Save(	FILE* fp,
 	for( WItem* c = child; c; c=c->sibling ) {
 		childArr.Push( c );
 	}
-	childArr.Sort();
+	childArr.Sort([](const WItem* a, const WItem* b){
+		return a->IName() < b->IName();
+	});
 
 	ItemStruct itemStruct;
 	itemStruct.nameID = FindString( itemName, stringPool );

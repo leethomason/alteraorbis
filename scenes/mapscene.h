@@ -5,6 +5,7 @@
 #include "../gamui/gamui.h"
 #include "../game/gamelimits.h"
 #include "../game/lumosmath.h"
+#include "../widget/mapgridwidget.h"
 
 class LumosGame;
 class LumosChitBag;
@@ -57,7 +58,7 @@ private:
 	grinliz::Rectangle2F GridBounds2(int x, int y, bool gutter);
 	grinliz::Vector2F ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
 	void DrawMap();
-
+	/*
 	struct MCount {
 		MCount() : count(0) {}
 		MCount(const grinliz::IString& istr) : name(istr), count(0) {}
@@ -67,7 +68,7 @@ private:
 		grinliz::IString name;
 		int				 count;
 	};
-
+	*/
 	enum {	MAP2_RAD	= 2,
 			MAP2_SIZE	= 5,
 			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE,
@@ -85,16 +86,18 @@ private:
 	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
-	gamui::Image		face[MAX_FACE];
+	//gamui::Image		face[MAX_FACE];
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
 	gamui::Image		travelMark;
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
-	gamui::TextLabel	map2Text[MAP2_SIZE2];
+	//gamui::TextLabel	map2Text[MAP2_SIZE2];
 	enum {WHITE_CANVAS, RED_CANVAS, YELLOW_CANVAS, GREEN_CANVAS, NUM_CANVAS};
 	gamui::Canvas		webCanvas[NUM_CANVAS];
+
+	MapGridWidget		gridWidget[MAP2_SIZE2];
 };
 
 #endif // MAP_SCENE_INCLUDED

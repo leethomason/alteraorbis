@@ -71,13 +71,14 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	selectionMark.Init(&gamui2D, selectionAtom, true);
 
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
-		map2Text[i].Init( &gamui2D );
+		//map2Text[i].Init( &gamui2D );
+		gridWidget[i].Init(&gamui2D);
 	}
 
-	RenderAtom nullAtom;
-	for (int i = 0; i < MAX_FACE; ++i) {
-		face[i].Init(&gamui2D, nullAtom, true);
-	}
+//	RenderAtom nullAtom;
+//	for (int i = 0; i < MAX_FACE; ++i) {
+//		face[i].Init(&gamui2D, nullAtom, true);
+//	}
 
 	for (int i = 0; i < NUM_CANVAS; ++i) {
 		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
@@ -193,6 +194,7 @@ void MapScene::DrawMap()
 	CDynArray<Chit*> query;
 
 	int primaryTeam = lumosChitBag->GetHomeTeam();
+	const ChitContext* context = lumosChitBag->Context();
 	int nFace = 0;
 
 	Rectangle2I subBounds = MapBounds2();
@@ -227,10 +229,14 @@ void MapScene::DrawMap()
 		str.Format( "%s\n%s", sd.name, owner );
 
 		Rectangle2F r = GridBounds2(i, j, true);
-		map2Text[j*MAP2_SIZE + i].SetPos(r.min.x, r.min.y);
-		map2Text[j*MAP2_SIZE+i].SetBounds( r.Width(), 0 );
-		map2Text[index].SetText( str.c_str() );
+		//map2Text[j*MAP2_SIZE + i].SetPos(r.min.x, r.min.y);
+		//map2Text[j*MAP2_SIZE+i].SetBounds( r.Width(), 0 );
+		//map2Text[index].SetText( str.c_str() );
+		gridWidget[index].SetPos(r.min.x, r.min.y);
+		gridWidget[index].SetSize(r.Width(), r.Height());
+		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore());
 
+		/*
 		for (int pass = 0; pass < 2; ++pass) {
 			MOBKeyFilter mobFilter;
 			CChitArray query;
@@ -284,11 +290,12 @@ void MapScene::DrawMap()
 				++nFace;
 			}
 		}
+		*/
 	}
 
-	for (int i = nFace; i < MAX_FACE; ++i) {
-		face[i].SetVisible(false);
-	}
+//	for (int i = nFace; i < MAX_FACE; ++i) {
+//		face[i].SetVisible(false);
+//	}
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
 	if ( !data->destSector.IsZero() && data->destSector != homeSector ) {

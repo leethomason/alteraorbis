@@ -65,6 +65,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	paused = false;
 	attached.Zero();
 	voxelInfoID.Zero();
+	mapDragStart.Zero();
 	lumosGame = game;
 	adviser = new Adviser();
 	InitStd( &gamui2D, &okay, 0 );

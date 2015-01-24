@@ -53,12 +53,13 @@ HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
 
 void CoreScript::Init()
 {
-	teamToCoreInfo = new HashTable<int, int>();
+	teamToCoreInfo = new HashTable<int, int>();	
 }
 
 void CoreScript::Free()
 {
 	delete teamToCoreInfo;
+	teamToCoreInfo = 0;
 }
 
 
@@ -778,6 +779,8 @@ bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 
 CoreScript* CoreScript::GetCoreFromTeam(int team)
 {
+	if (!teamToCoreInfo) return 0;	// happens on tear down
+
 	int group = 0, id = 0;
 	Team::SplitID(team, &group, &id);
 	if (id == 0) 

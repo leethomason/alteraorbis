@@ -284,11 +284,11 @@ class Gamui
 public:
 	enum {
 		LEVEL_BACKGROUND = 0,
-		LEVEL_FOREGROUND = 1,
-		LEVEL_DECO		 = 2,
-		LEVEL_ICON		 = 3,
-		LEVEL_TEXT		 = 4,
-		LEVEL_FOCUS		 = 5
+		LEVEL_FOREGROUND = 10,
+		LEVEL_DECO		 = 20,
+		LEVEL_ICON		 = 30,
+		LEVEL_TEXT		 = 40,
+		LEVEL_FOCUS		 = 50
 	};
 
 	/// Description of a vertex used by Gamui.
