@@ -105,9 +105,11 @@ static const int INVERTORY_SLOTS		= 15;
 static const int MAX_SQUADS				= 4;
 static const int CITIZEN_BASE			= 8;		// Base # of citizens before squads form
 static const int SQUAD_SIZE				= 4;
-static const int MAX_TEMPLES			= 4;		// # that do something; each temple is a squad
 // WARNING: needs to equal or less than size of the CChitArray
 static const int MAX_CITIZENS			= CITIZEN_BASE + SQUAD_SIZE * MAX_SQUADS;	
+
+// AI Limits
+static const int MAX_HUMAN_TEMPLES		= 4;
 static const int MAX_GOBMEN_TEMPLES		= 3;
 static const int MAX_KAMAKIRI_TEMPLES	= 2;
 

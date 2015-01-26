@@ -46,7 +46,7 @@ DomainAI::DomainAI()
 	for (int i = 0; i < MAX_ROADS; ++i) {
 		buildDistance[i] = 0;
 	}
-	templeCap = MAX_TEMPLES;
+	templeCap = MAX_HUMAN_TEMPLES;
 }
 
 DomainAI::~DomainAI()

@@ -99,6 +99,7 @@ public:
 
 	int CorePower();	// approximation of the military strength of the core
 	int CoreWealth();	// amount of money in the core's treasury
+	float CivTech();	// current civtech score, from 0-1
 
 	/*	Controls flags are simple "denizen attractors"
 		in the same domain. When a denizen arrives

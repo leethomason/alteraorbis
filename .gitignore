@@ -8,6 +8,7 @@
 *.blend2
 *.obj
 *.mtl
+*.bmp
 
 Debug
 Release
@@ -18,6 +19,6 @@ worldgen/*.png
 rockgen/*.png
 Altera
 art/*.png
-
+visstudio
 
 

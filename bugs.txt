@@ -71,7 +71,7 @@ x [Reenen] When I grid-travel, and I click on a new location (sometimes I see in
 - improved strategic view
 	- mark mother core at center
 	- line thickness to show visitor distribution
-	- all MOBs to center line
+	x all MOBs to center line
 	- show civtech
 	- show wealth
 	- show mil strength

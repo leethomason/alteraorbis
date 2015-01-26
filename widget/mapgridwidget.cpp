@@ -7,6 +7,7 @@
 #include "../game/gameitem.h"
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
+#include "../game/reservebank.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -26,13 +27,13 @@ void MapGridWidget::Init(Gamui* gamui2D)
 	image[MOB_COUNT_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
 	image[MOB_COUNT_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
 	image[CIV_TECH_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[POPULATION_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+//	image[POPULATION_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
 
 	image[FACE_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
 	image[FACE_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
 	image[FACE_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
 	image[GOLD_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[GARRISON_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+//	image[GARRISON_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
 }
 
 
@@ -89,8 +90,8 @@ void MapGridWidget::DoLayout()
 	}
 	image[CIV_TECH_IMAGE].SetPos(x, y + dh*2.0f);
 	image[GOLD_IMAGE].SetPos(x, y + dh*2.0f);
-	image[GARRISON_IMAGE].SetPos(x + dw, y + dh*2.0f);
-	image[POPULATION_IMAGE].SetPos(x + dw, y + dh*2.0f);
+	//image[GARRISON_IMAGE].SetPos(x + dw, y + dh*2.0f);
+	//image[POPULATION_IMAGE].SetPos(x + dw, y + dh*2.0f);
 }
 
 
@@ -110,6 +111,10 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	}
 	str.Format( "%s\n%s", sd.name, owner );
 	textLabel.SetText(str.safe_str());
+
+	for (int i = 0; i < NUM_IMAGES; ++i) {
+		image[i].SetAtom(RenderAtom());
+	}
 
 	// ---- Count of MOBs ---
 	Rectangle2I inner = sd.InnerBounds();
@@ -160,20 +165,56 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	}
 
 	// CivTech
-	// FIXME
-	// - don't need the garrison
-	// - make layout square
 	if (coreScript->InUse()) {
-		RenderAtom atom = LumosGame::CalcUIIconAtom("civtech4");
+		float civTech = coreScript->CivTech();
+		RenderAtom atom;
+		if (civTech > 0.75f)		atom = LumosGame::CalcUIIconAtom("civtech4");
+		else if (civTech > 0.50f)	atom = LumosGame::CalcUIIconAtom("civtech3");
+		else if (civTech > 0.25f)	atom = LumosGame::CalcUIIconAtom("civtech2");
+		else						atom = LumosGame::CalcUIIconAtom("civtech1");
+
 		image[CIV_TECH_IMAGE].SetAtom(atom);
-		atom = LumosGame::CalcUIIconAtom("au4");
-		image[GOLD_IMAGE].SetAtom(atom);
-	}
-	else {
-		image[CIV_TECH_IMAGE].SetAtom(RenderAtom());
-		image[GOLD_IMAGE].SetAtom(RenderAtom());
 	}
 
+	// Gold
+	// Sources: core & value of buildings CoreWealth()
+	//			denizens & mobs
+	//			stuff on the ground
+	int gold = 0;
+	GoldLootFilter goldLootFilter;
+	CChitArray loot;
+	context->chitBag->QuerySpatialHash(&loot, innerF, 0, &goldLootFilter);
+
+	if (coreScript) {
+		gold += coreScript->CoreWealth();
+	}
+
+	for (int i = 0; i < loot.Size(); ++i) {
+		// For gold/crystal the value will be zero and the wallet set.
+		const GameItem* item = loot[i]->GetItem();
+		if (item->GetValue()) {
+			gold += item->GetValue();
+		}
+		else {
+			gold += ReserveBank::Instance()->ValueOfWallet(item->wallet);
+		}
+	}
+
+	CChitArray mobs;
+	context->chitBag->QuerySpatialHash(&mobs, innerF, 0, &mobFilter);
+	for (int i = 0; i<mobs.Size(); ++i) {
+		gold += ReserveBank::Instance()->ValueOfWallet(mobs[i]->GetItem()->wallet);
+	}
+
+	RenderAtom goldAtom;
+	if (gold > 2000)		goldAtom = LumosGame::CalcUIIconAtom("au4");
+	else if (gold > 1000)	goldAtom = LumosGame::CalcUIIconAtom("au3");
+	else if (gold> 500)		goldAtom = LumosGame::CalcUIIconAtom("au2");
+	else if (gold> 100)		goldAtom = LumosGame::CalcUIIconAtom("au1");
+
+	image[GOLD_IMAGE].SetAtom(goldAtom);
+
+	/*
 	// Garrison
 	CChitArray citizenIDArr;
 	int nCitizens = coreScript->Citizens(&citizenIDArr);
@@ -191,4 +232,5 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 		image[POPULATION_IMAGE].SetAtom(atom);
 	}
+	*/
 }

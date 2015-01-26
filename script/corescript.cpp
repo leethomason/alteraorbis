@@ -713,11 +713,20 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 }
 
 
+float CoreScript::CivTech()
+{
+	int nCitizens = Citizens(0);
+	int nTemples  = NumTemples();
+	float citizenScore = float(nCitizens) / float(MAX_CITIZENS);
+	float templeScore  = float(nTemples) / float(MAX_SQUADS);
+	return (citizenScore + templeScore) * 0.5f;
+}
+
+
 void CoreScript::UpdateScore(int n)
 {
 	if (n) {
-		double score = double(citizens.Size()) * sqrt(1.0 + tech);
-		score = score * double(n) * double(scoreTicker.Period() / (10.0*1000.0));
+		double score = CivTech() * double(n) * double(scoreTicker.Period() / (10.0*1000.0));
 		achievement.civTechScore += Min(1, (int)LRint(score));
 		// Push this to the GameItem, so it can be recorded in the history + census.
 		GameItem* gi = ParentChit()->GetItem();

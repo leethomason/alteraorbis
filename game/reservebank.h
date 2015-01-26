@@ -43,6 +43,19 @@ public:
 		return *(CrystalValue() + type);
 	}
 
+	int ValueOfWallet(const Wallet& wallet) {
+		return wallet.Gold() + ValueOfCrystals(wallet.Crystal());
+	}
+
+
+	int ValueOfCrystals(const int* crystalCount) {
+		int value = 0;
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			value += crystalCount[i] * CrystalValue(i);
+		}
+		return value;
+	}
+
 	// There is no CanBuy(), because having the economy
 	// falter because the bank is out of money is 
 	// crazy. Buy() still works. However, Withdraw()
