@@ -166,6 +166,7 @@ public:
 
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
+	int GetItemID();
 	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
 	Wallet* GetWallet();
 	bool PlayerControlled() const;	// more correctly: IsAvatar()

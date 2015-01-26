@@ -283,7 +283,7 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* s
 
 		if (history) {
 			NewsHistory::Data data;
-			history->Find(itemID, false, 0, &data);
+			history->FindItem(itemID, 0, 0, &data);
 			//GLASSERT(data.bornOrNamed);	// lessers don't have create/destroy dates.
 
 			if (data.born) {

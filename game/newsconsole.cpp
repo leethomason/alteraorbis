@@ -52,17 +52,17 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	for (; currentNews < history->NumNews(); ++currentNews) {
 		const NewsEvent& ne = history->News(currentNews);
 		Vector2I sector = ne.Sector();
-		Chit* chit = chitBag->GetChit(ne.FirstChitID());
-		SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
+		//Chit* chit = chitBag->GetChit(ne.FirstChitID());
+		//SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
+		Vector2F pos2 = ne.Pos();
 
 		str = "";
 
 		switch (ne.What()) {
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
-			if (homeCore && homeCore->IsCitizen(ne.FirstChitID())) {
+			if (homeCore && homeCore->IsCitizenItemID(ne.FirstItemID())) {
 				ne.Console(&str, chitBag, 0);
-				if (sc) pos2 = sc->GetPosition2D();
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
 			break;
@@ -71,9 +71,8 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::STARVATION:
 			case NewsEvent::BLOOD_RAGE:
 			case NewsEvent::VISION_QUEST:
-			if (homeCore && homeCore->IsCitizen(ne.FirstChitID())) {
+			if (homeCore && homeCore->IsCitizenItemID(ne.FirstItemID())) {
 				ne.Console(&str, chitBag, 0);
-				if (sc) pos2 = sc->GetPosition2D();
 				atom = LumosGame::CalcUIIconAtom("warning");
 			}
 			break;
@@ -81,11 +80,10 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::FORGED:
 			case NewsEvent::UN_FORGED:
 			case NewsEvent::PURCHASED:
-			if ((homeCore && homeCore->IsCitizen(ne.FirstChitID()))
+			if ((homeCore && homeCore->IsCitizenItemID(ne.FirstItemID()))
 				|| sector == homeSector)
 			{
 				ne.Console(&str, chitBag, 0);
-				if (sc) pos2 = sc->GetPosition2D();
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
 			break;
@@ -93,7 +91,6 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::GREATER_MOB_CREATED:
 			case NewsEvent::GREATER_MOB_KILLED:
 			ne.Console(&str, chitBag, 0);
-			if (sc) pos2 = sc->GetPosition2D();
 			atom = LumosGame::CalcUIIconAtom("greeninfo");
 			break;
 

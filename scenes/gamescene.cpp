@@ -27,6 +27,7 @@
 #include "../game/team.h"
 #include "../game/adviser.h"
 #include "../game/fluidsim.h"
+#include "../game/gridmovecomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -138,7 +139,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	moneyWidget.Init( &gamui2D );
 	newsConsole.Init( &gamui2D, sim->GetChitBag() );
 
-
 	LayoutCalculator layout = DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 	endGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
@@ -230,8 +230,10 @@ void GameScene::Resize()
 					  moneyWidget.Y() );
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
-	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT - 1);
-	newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
+	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
+	//newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
+	RenderAtom backgroundAtom = LumosGame::CalcPaletteAtom(0, PAL_GRAY);
+	newsConsole.consoleWidget.SetBackground(backgroundAtom);
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
@@ -556,7 +558,6 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 			// clicked on a rock. Melt away!
 			Chit* player = GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				//player->GetAIComponent()->RockBreak(mv.Voxel2());
 				if (mv.ModelHit())
 					player->GetAIComponent()->Target(mv.model->userData, false);
 				else
@@ -1018,13 +1019,13 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if (index >= 0) {
 				const NewsEvent& ne = current[index];
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				if (cc && ne.FirstChitID()) {
-					cc->SetTrack(ne.FirstChitID());
-				}
-				else {
+				//if (cc && ne.FirstChitID()) {
+				//	cc->SetTrack(ne.FirstChitID());
+				//}
+				//else {
 					sim->GetEngine()->CameraLookAt(ne.Pos().x, ne.Pos().y);
 					if (cc) cc->SetTrack(0);
-				}
+				//}
 			}
 		}
 	}
@@ -1064,19 +1065,26 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	Chit* chit = GetPlayerChit();
 	if (chit) {
 		AIComponent* ai = chit->GetAIComponent();
-		if ( ai ) {
-			Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
-			// Is this grid travel or normal travel?
-			Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
-			Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
-			SectorPort sectorPort;
+		GridMoveComponent* gridMove = GET_SUB_COMPONENT(chit, MoveComponent, GridMoveComponent);
 
-			if ( currentSector != destSector )
-			{
-				// Find the nearest port. (Somewhat arbitrary.)
-				sectorPort.sector = destSector;
-				sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
-			}
+		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+		// Is this grid travel or normal travel?
+		Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
+		Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+		SectorPort sectorPort;
+
+		if ( currentSector != destSector )
+		{
+			// Find the nearest port. (Somewhat arbitrary.)
+			sectorPort.sector = destSector;
+			sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
+		}
+
+		if (gridMove) {
+			if (sectorPort.IsValid())
+				gridMove->SetDest(sectorPort);
+		}
+		else if (ai) {
 			if ( sectorPort.IsValid() ) {
 				ai->Move( sectorPort, true );
 			}

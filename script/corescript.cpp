@@ -327,6 +327,19 @@ bool CoreScript::IsCitizen( int id )
 }
 
 
+bool CoreScript::IsCitizenItemID(int id)
+{
+	for (int i = 0; i < citizens.Size(); ++i) {
+		int id = citizens[i];
+		Chit* chit = Context()->chitBag->GetChit(id);
+		if (chit && chit->GetItemID() == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 int CoreScript::SquadID(int id)
 {
 	for (int i = 0; i < MAX_SQUADS; ++i) {
@@ -474,7 +487,9 @@ bool CoreScript::RecruitNeutral()
 				this->AddCitizen( chit );
 				GLASSERT(chit->GetItem()->Significant());
 
-				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(), chit, 0);
+				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(),
+							   parentChit->GetItemID(), 0, parentChit->Team());
+							   
 				Context()->chitBag->GetNewsHistory()->Add(news);
 				return true;
 			}
@@ -813,7 +828,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
+			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit->GetItemID(), 0, chit->Team());
 			context->chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());

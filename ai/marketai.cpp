@@ -127,7 +127,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 			}
 
 			NewsHistory* history = seller->ParentChit()->Context()->chitBag->GetNewsHistory();
-			history->Add(NewsEvent(NewsEvent::PURCHASED, pos, gi, buyer->ParentChit()));
+			history->Add(NewsEvent(NewsEvent::PURCHASED, pos, gi->ID(), buyer->ParentChit()->GetItemID(), buyer->ParentChit()->Team()));
 		}
 		return cost;
 	}

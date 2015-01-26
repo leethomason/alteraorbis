@@ -71,7 +71,7 @@ void EndGameWidget::SetBodyText()
 
 	int num;
 	NewsHistory::Data data;
-	history->Find(itemID, false, &num, &data);
+	history->FindItem(itemID, 0, &num, &data);
 	
 	str.AppendFormat(" %s has fallen.\nFounded %.2f and fell %.2f, lasting %.2f cycles.\nCiv-Tech score %d.\n\nAchievements: "
 					 "tech=%d gold=%d population=%d.",

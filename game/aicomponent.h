@@ -57,7 +57,7 @@ public:
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	// Approximate. enemyList may not be flushed.
-	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
+	bool AwareOfEnemy() const { return enemyList2.Size() > 0; }
 
 	// Tell the AI to take actions. If the "focused" is set,
 	// it is given extra priority. The 'dest' must be in the same
@@ -121,7 +121,9 @@ private:
 		MAX_TRACK = 8,
 	};
 
-	void GetFriendEnemyLists();
+	void Target( int id, bool focused );
+	// Process the lists, makes sure they only include valid targets.
+	void ProcessFriendEnemyLists(bool tick);
 	Chit* Closest( const ComponentSet& thisComp, Chit* arr[], int n, 
 				   grinliz::Vector2F* pos, float* distance );
 
@@ -154,7 +156,8 @@ private:
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
 	void FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest, grinliz::CArray<Chit*, 32 >* arr, bool* nearPath );
-	grinliz::Vector3F EnemyPos(Chit* chit);	// find the correct position, if building, if mob, etc. Will return Zero if not available (happens with buildings)
+	// find the correct position, if building, if mob, etc. Will return Zero if not available (happens with buildings)
+	grinliz::Vector3F EnemyPos(int id);
 
 	// Returns true if this action was actually taken.
 	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
@@ -189,33 +192,10 @@ private:
 		FOCUS_TARGET
 	};
 
-	// A description of the current target, which
-	// can either be a chit or a location on the map.
-	struct TargetDesc
-	{
-		TargetDesc() { Clear(); }
-
-		int id;
-		grinliz::Vector2I mapPos;
-		grinliz::IString  name;
-
-		grinliz::Vector3F MapTarget() const {
-			GLASSERT( !mapPos.IsZero() );
-			grinliz::Vector3F v = { (float)mapPos.x+0.5f, 0.5f, (float)mapPos.y+0.5f };
-			return v;
-		}
-
-		void Clear() { id = 0; mapPos.Zero(); name = grinliz::IString(); }
-		void Set( int _id ) { id = _id; mapPos.Zero(); name = grinliz::IString(); }
-		void Set( const grinliz::Vector2I& _mapPos, grinliz::IString _name = grinliz::IString() ) 
-			{ mapPos = _mapPos; id = 0; name = _name; }
-		bool HasTarget() const { return id != 0 || !mapPos.IsZero(); }
-	};
-
 	int					aiMode;
-	TargetDesc			targetDesc;
 	int					currentAction;
 	int					focus;
+	int					lastTargetID;
 	CTicker				feTicker;
 	U32					wanderTime;
 	int					rethink;
@@ -233,8 +213,10 @@ private:
 	static const char*	ACTION_NAMES[NUM_ACTIONS];
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
-	grinliz::CArray<int, MAX_TRACK> friendList;
-	grinliz::CArray<int, MAX_TRACK> enemyList;
+	grinliz::CArray<int, MAX_TRACK> friendList2;
+	// The first entry is the current target.
+	// If an entry is negative, then it is a map location to attack.
+	grinliz::CArray<int, MAX_TRACK> enemyList2;
 };
 
 

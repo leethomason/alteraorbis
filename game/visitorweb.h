@@ -30,14 +30,18 @@ public:
 		Node() { sector.Zero(); }
 		Node(const Node& node) { 
 			sector = node.sector; 
-			for (int i = 0; i < adjacent.Size(); ++i) {
-				adjacent.Push(node.adjacent[i]);
+			for (int i = 0; i < child.Size(); ++i) {
+				child.Push(node.child[i]);
 			}
 		}
 
 		grinliz::Vector2I sector;
-		grinliz::CDynArray<Node*> adjacent;
+		grinliz::CDynArray<Node*> child;
 	};
+
+	int NumNodes() const { return nodes.Size(); }
+	const Node* NodeAt(int i) const { return &nodes[i]; }
+
 	const Node* Root() const { return nodes.Empty() ? 0 : nodes.Mem(); }
 	const Node* FindNode(const grinliz::Vector2I& v) const;
 
@@ -50,7 +54,8 @@ private:
 		}
 	};
 
-	void BuildNodeRec(grinliz::Vector2I pos, Node* node, grinliz::CDynArray<bool>* edgeSet );
+	void BuildNodeRec(Node* node, grinliz::CDynArray<Web::WebLink>* edgeSet );
+	void DumpNodeRec(Node* node, int depth);
 
 	grinliz::Vector2I origin;
 	grinliz::CDynArray<WebLink> edges;

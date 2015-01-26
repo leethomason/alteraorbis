@@ -321,6 +321,14 @@ GameItem* Chit::GetItem()
 }
 
 
+int Chit::GetItemID()
+{
+	const GameItem* gi = GetItem();
+	if (gi) return gi->ID();
+	return 0;
+}
+
+
 Wallet* Chit::GetWallet()
 {
 	GameItem* item = GetItem();

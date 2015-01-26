@@ -279,7 +279,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 
 	int msg = 0;
 	if ( item->keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
-		history->Add( NewsEvent( msg, pos, parentChit, destroyer ));
+		history->Add( NewsEvent( msg, pos, parentChit->GetItemID(), destroyer ? destroyer->GetItemID() : 0, parentChit->Team() ));
 	}
 }
 

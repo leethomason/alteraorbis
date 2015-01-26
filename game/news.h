@@ -22,32 +22,32 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-	NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main=0, Chit* second=0 );
-	NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* item, Chit* second=0 );
+
+	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem, int team );
 
 	void Serialize( XStream* xs );
 
 public:
 	// Be sure to update GetWhat() when this list chnages.
-	enum {							//	FIRST		SECOND		CHIT
+	enum {							//	FIRST		SECOND
 		NONE,
-		DENIZEN_CREATED ,			//	created					created		
-		DENIZEN_KILLED,				//  killed		killer		killed
-		GREATER_MOB_CREATED,		//  created					created		
-		GREATER_MOB_KILLED,			//  killed		killer		killed
-		DOMAIN_CREATED,				//  domain					domain
-		DOMAIN_DESTROYED,			//  domain		killer		domain	
-		ROQUE_DENIZEN_JOINS_TEAM,	// denizen					denizen
+		DENIZEN_CREATED ,			//	created
+		DENIZEN_KILLED,				//  killed		killer
+		GREATER_MOB_CREATED,		//  created				
+		GREATER_MOB_KILLED,			//  killed		killer
+		DOMAIN_CREATED,				//  domain
+		DOMAIN_DESTROYED,			//  domain		killer	
+		ROQUE_DENIZEN_JOINS_TEAM,	//  denizen	
 
-		FORGED,						//	item		maker		maker		
-		UN_FORGED,					//  item		killer	
+		FORGED,						//	item		maker
+		UN_FORGED,					//  item		killer
 
-		PURCHASED,					//	item		purchaser	0
-		STARVATION,					//  victim					victim
-		BLOOD_RAGE,					//  victim					victim
-		VISION_QUEST,				//	victim					victim
+		PURCHASED,					//	purchaser	item
+		STARVATION,					//  victim				
+		BLOOD_RAGE,					//  victim				
+		VISION_QUEST,				//	victim
 		GREATER_SUMMON_TECH,		//  mob
-		DOMAIN_CONQUER,				//	conquered	conquerer	conquered
+		DOMAIN_CONQUER,				//	conquered	conquerer
 
 		// Current events, but not logged:
 		START_CURRENT,
@@ -68,30 +68,27 @@ public:
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
 
-	int What() const { return what; }
-	const grinliz::Vector2F& Pos() const { return pos; }
-	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
+	int What() const			{ return what; }
+	const grinliz::Vector2F& Pos() const	{ return pos; }
+	grinliz::Vector2I	Sector() const		{ return ToSector( ToWorld2I( pos )); }
 
-	int	FirstChitID() const { return chitID; }
-	int FirstItemID() const { return itemID; }
-	int SecondItemID() const { return secondItemID; }
+	int	FirstItemID() const		{ return firstItemID; }
+	int SecondItemID() const	{ return secondItemID; }
 
 	static grinliz::IString IDToName( int id, bool shortName );
 
 private:
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened
-	// Use Items instead of Chits so we can look up history.
-	int					chitID;			// to track it
-	int					itemID;			// whom the news in about (subject)
-	int					secondItemID;	// secondary player
+	int					firstItemID;
+	int					secondItemID;
 	U32					date;			// when it happened, in msec
 	int					team;			// team of the primary item
 
 	void Clear() {
 		what = 0;
 		pos.Zero();
-		itemID = 0;
+		firstItemID = 0;
 		secondItemID = 0;
 		date = 0;
 		team = 0;
@@ -125,7 +122,7 @@ public:
 		U32 born;
 		U32 died;
 	};
-	const NewsEvent** Find( int itemID, bool includeSecond, int* num, Data* data );
+	const NewsEvent** FindItem( int itemID, int secondItemID, int* num, Data* data );
 
 private:
 	// Time

@@ -1,14 +1,15 @@
 #include "evalbuildingscript.h"
 #include "plantscript.h"
+#include "corescript.h"
 #include "../game/lumoschitbag.h"
 #include "../game/gameitem.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/worldmap.h"
+#include "../game/fluidsim.h"
 #include "../game/worldinfo.h"
 #include "../grinliz/glstringutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/spatialcomponent.h"
-#include "../game/fluidsim.h"
 
 using namespace grinliz;
 
@@ -77,8 +78,14 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		}
 
 		// Check if we can go from the core to the porch.
-		const SectorData& sd = worldMap->GetSectorData(ToSector(porch.min));
-		reachable = worldMap->CalcPath(ToWorld2F(sd.core), ToWorld2F(porch.min), 0, 0, false);
+		// And make sure the core is inUse!
+		CoreScript* cs = CoreScript::GetCore(ToSector(porch.min));
+		if (!cs || !cs->InUse())
+			reachable = false;
+		if (reachable) {
+			const SectorData& sd = worldMap->GetSectorData(ToSector(porch.min));
+			reachable = worldMap->CalcPath(ToWorld2F(sd.core), ToWorld2F(porch.min), 0, 0, false);
+		}
 
 		CChitArray arr;
 		BuildingFilter buildingFilter;
