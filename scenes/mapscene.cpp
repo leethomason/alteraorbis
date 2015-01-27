@@ -71,14 +71,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	selectionMark.Init(&gamui2D, selectionAtom, true);
 
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
-		//map2Text[i].Init( &gamui2D );
 		gridWidget[i].Init(&gamui2D);
 	}
-
-//	RenderAtom nullAtom;
-//	for (int i = 0; i < MAX_FACE; ++i) {
-//		face[i].Init(&gamui2D, nullAtom, true);
-//	}
 
 	for (int i = 0; i < NUM_CANVAS; ++i) {
 		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
@@ -87,6 +81,9 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		webCanvas[i].Init(&gamui2D, webAtom);
 	}
 	webCanvas[WHITE_CANVAS].SetLevel(Gamui::LEVEL_ICON);
+
+	RenderAtom mc = LumosGame::CalcUIIconAtom("motherCore");
+	motherCore.Init(&gamui2D, mc, true);
 }
 
 
@@ -164,6 +161,7 @@ void MapScene::Resize()
 	for (int i = 0; i < NUM_CANVAS; ++i) {
 		webCanvas[i].SetPos(mapImage.X(), mapImage.Y());
 	}
+	motherCore.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	DrawMap();
 }
 
@@ -360,9 +358,6 @@ void MapScene::DrawMap()
 		const Web& web = lumosChitBag->GetSim()->CalcWeb();
 		webCanvas[WHITE_CANVAS].Clear();
 
-//		webCanvas[WHITE_CANVAS].DrawRectangle(0, 0, scale, scale);
-//		webCanvas[WHITE_CANVAS].DrawRectangle(scale*float(NUM_SECTORS - 1), scale*float(NUM_SECTORS - 1), scale, scale);
-		
 		for (int i = 0; i < web.NumNodes(); i++) {
 			const Web::Node* node = web.NodeAt(i);
 			for (int k = 0; k < node->child.Size(); ++k) {
@@ -384,12 +379,18 @@ void MapScene::DrawMap()
 
 		CCoreArray arr;
 		Sim* sim = lumosChitBag->GetSim();
-//		sim->CalcStrategicRelationships(data->destSector.IsZero() ? homeSector : data->destSector, NUM_SECTORS, relate, &arr);
 		sim->CalcStrategicRelationships(homeSector, NUM_SECTORS, relate, &arr);
 
 		for (int k = 0; k < arr.Size(); ++k) {
 			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();
-			webCanvas[canvas].DrawRectangle(scale*float(s.x), scale*float(s.y), scale, scale);
+			CoreScript* core = CoreScript::GetCore(s);
+			if (core && core->InUse() && core->ParentChit()->Team() == Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE)) {
+				motherCore.SetPos(mapImage.X() + mapImage.Width() * float(s.x) / float(NUM_SECTORS),
+								  mapImage.Y() + mapImage.Height() * float(s.y) / float(NUM_SECTORS));
+			}
+			else {
+				webCanvas[canvas].DrawRectangle(scale*float(s.x), scale*float(s.y), scale, scale);
+			}
 		}
 	}
 }

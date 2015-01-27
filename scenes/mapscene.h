@@ -86,14 +86,13 @@ private:
 	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
-	//gamui::Image		face[MAX_FACE];
+	gamui::Image		motherCore;
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
 	gamui::Image		travelMark;
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
-	//gamui::TextLabel	map2Text[MAP2_SIZE2];
 	enum {WHITE_CANVAS, RED_CANVAS, YELLOW_CANVAS, GREEN_CANVAS, NUM_CANVAS};
 	gamui::Canvas		webCanvas[NUM_CANVAS];
 
