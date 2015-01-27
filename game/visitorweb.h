@@ -27,16 +27,18 @@ public:
 	void Edge(int i, grinliz::Vector2I* s0, grinliz::Vector2I* s1) const;
 
 	struct Node {
-		Node() { sector.Zero(); }
+		Node() { sector.Zero(); strength = 1.0; }
 		Node(const Node& node) { 
 			sector = node.sector; 
+			strength = node.strength;
 			for (int i = 0; i < child.Size(); ++i) {
 				child.Push(node.child[i]);
 			}
 		}
 
-		grinliz::Vector2I sector;
-		grinliz::CDynArray<Node*> child;
+		grinliz::Vector2I			sector;
+		grinliz::CDynArray<Node*>	child;
+		float						strength;
 	};
 
 	int NumNodes() const { return nodes.Size(); }

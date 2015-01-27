@@ -12,6 +12,7 @@ class MapGridWidget : public gamui::IWidget
 public:
 	MapGridWidget();
 	void Init( gamui::Gamui* gamui );
+	void SetCompactMode(bool value);
 
 	virtual float X() const							{ return textLabel.X(); }
 	virtual float Y() const							{ return textLabel.Y(); }
@@ -30,6 +31,7 @@ public:
 private:
 	void DoLayout();
 
+	bool				compact = false;
 	float				width = 100.0f;
 	float				height = 100.0f;
 	gamui::TextLabel	textLabel;

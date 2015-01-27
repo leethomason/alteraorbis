@@ -37,6 +37,14 @@ void MapGridWidget::Init(Gamui* gamui2D)
 }
 
 
+void MapGridWidget::SetCompactMode(bool value) 
+{
+	if (value != compact) {
+		compact = value;
+		DoLayout();
+	}
+}
+
 void MapGridWidget::SetPos(float x, float y)
 {
 	textLabel.SetPos(x, y);
@@ -79,19 +87,25 @@ void MapGridWidget::DoLayout()
 	float dw = w / float(NUM_FACE_IMAGES);
 	float dh = h / 3.0f;
 
+	if (compact) {
+		dw = w / 2.0f;
+		dh = h / 2.0f;
+	}
+
 	textLabel.SetPos(x, y);
 
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].SetSize(dw, dh);
 	}
 	for (int i = 0; i < NUM_FACE_IMAGES; ++i) {
-		image[FACE_IMAGE_0+i].SetPos(x + dw * float(i), y + dh);
-		image[MOB_COUNT_IMAGE_0 + i].SetPos(x + dw*float(i), y + dh);
+		float fy = compact ? y : y + dh;
+		image[FACE_IMAGE_0 + i].SetPos(x + dw * float(i), fy);
+		image[MOB_COUNT_IMAGE_0 + i].SetPos(x + dw*float(i), fy);
 	}
-	image[CIV_TECH_IMAGE].SetPos(x, y + dh*2.0f);
-	image[GOLD_IMAGE].SetPos(x, y + dh*2.0f);
-	//image[GARRISON_IMAGE].SetPos(x + dw, y + dh*2.0f);
-	//image[POPULATION_IMAGE].SetPos(x + dw, y + dh*2.0f);
+
+	float fy = compact ? y + dh : y + dh * 2.0f;
+	image[CIV_TECH_IMAGE].SetPos(x, fy);
+	image[GOLD_IMAGE].SetPos(x, fy);
 }
 
 
@@ -105,13 +119,14 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	// ---- Text at top. ----
 	CStr<64> str = "";
-	const char* owner = "";
-	if ( coreScript->InUse() ) {
-		owner = Team::TeamName( coreScript->ParentChit()->Team() ).safe_str();
+	if (!compact) {
+		const char* owner = "";
+		if (coreScript->InUse()) {
+			owner = Team::TeamName(coreScript->ParentChit()->Team()).safe_str();
+		}
+		str.Format("%s\n%s", sd.name, owner);
+		textLabel.SetText(str.safe_str());
 	}
-	str.Format( "%s\n%s", sd.name, owner );
-	textLabel.SetText(str.safe_str());
-
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].SetAtom(RenderAtom());
 	}
@@ -149,7 +164,8 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 		return (a.count * (a.greater ? 20 : 1)) > (b.count * (b.greater ? 20 : 1));
 	});
 
-	for (int i = 0; i < NUM_FACE_IMAGES; ++i) {
+	const int N = compact ? 2 : 3;
+	for (int i = 0; i < N; ++i) {
 		RenderAtom atom, countAtom;
 		if (countArr.Size() > i) {
 			atom = LumosGame::CalcUIIconAtom(countArr[i].name.c_str(), true, 0);
@@ -213,24 +229,4 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	else if (gold> 100)		goldAtom = LumosGame::CalcUIIconAtom("au1");
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
-
-	/*
-	// Garrison
-	CChitArray citizenIDArr;
-	int nCitizens = coreScript->Citizens(&citizenIDArr);
-	image[GARRISON_IMAGE].SetAtom(RenderAtom());
-	image[POPULATION_IMAGE].SetAtom(RenderAtom());
-
-	if (citizenIDArr.Size()) {
-		Chit* citizen = citizenIDArr[0];
-		RenderAtom atom = LumosGame::CalcUIIconAtom(citizen->GetItem()->Name());
-		image[GARRISON_IMAGE].SetAtom(atom);
-		if (nCitizens > 12) atom = LumosGame::CalcUIIconAtom("num4");
-		else if (nCitizens > 8) atom = LumosGame::CalcUIIconAtom("num3");
-		else if (nCitizens > 4) atom = LumosGame::CalcUIIconAtom("num2");
-		else atom = LumosGame::CalcUIIconAtom("num1");
-
-		image[POPULATION_IMAGE].SetAtom(atom);
-	}
-	*/
 }

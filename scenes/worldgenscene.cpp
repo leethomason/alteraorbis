@@ -13,6 +13,7 @@
 
 #include "../script/rockgen.h"
 #include "../script/procedural.h"
+#include "../script/corescript.h"
 #include "../audio/xenoaudio.h"
 #include <time.h>
 
@@ -53,6 +54,12 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	newsConsole.consoleWidget.SetSize(400, 100);
 	newsConsole.consoleWidget.SetTime(VERY_LONG_TICK);
 
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		gridWidget[i].Init(&gamui2D);
+		gridWidget[i].SetCompactMode(true);
+		gridWidget[i].SetVisible(false);
+	}
+
 	genState.Clear();
 }
 
@@ -83,8 +90,7 @@ void WorldGenScene::Resize()
 	const float CONSOLE_HEIGHT = DY * 16.0f;
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
-	newsConsole.consoleWidget.SetPos(worldImage.X(), headerText.Y() + DY*3.0f);
-	//newsConsole.consoleWidget.SetPos(0, 0);
+	newsConsole.consoleWidget.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
 	newsConsole.consoleWidget.SetSize(400, CONSOLE_HEIGHT);
 
 //	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
@@ -92,13 +98,23 @@ void WorldGenScene::Resize()
 
 	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(), 
 					worldImage.Y());
-	footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
+	footerText.SetPos(headerText.X(), headerText.Y() + gamui2D.TextHeightVirtual());
+	//footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
 
 	headerText.SetTab(worldImage.Width() / 5.0f);
 	statText.SetTab(worldImage.Width() / 5.0f);
 	footerText.SetTab(worldImage.Width() / 5.0f);
 
 	statText.SetVisible(SettingsManager::Instance()->DebugFPS());
+
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			const float dx = worldImage.Width() / float(NUM_SECTORS);
+			const float dy = worldImage.Height() / float(NUM_SECTORS);
+			gridWidget[j*NUM_SECTORS + i].SetSize(dx, dy);
+			gridWidget[j*NUM_SECTORS + i].SetPos(worldImage.X() + dx * float(i), worldImage.Y() + dy * float(j));
+		}
+	}
 }
 
 
@@ -409,6 +425,16 @@ void WorldGenScene::DoTick(U32 delta)
 			CStr<32> str;
 			str.Format("Stage 3/3 Simulation: %1.f%%", 100.0f * age);
 			footerText.SetText(str.c_str());
+
+			for (int j = 0; j < NUM_SECTORS; ++j) {
+				for (int i = 0; i < NUM_SECTORS; ++i) {
+					Vector2I sector = { i, j };
+					CoreScript* cs = CoreScript::GetCore(sector);
+					gridWidget[j*NUM_SECTORS + i].Set(sim->Context(), cs, 0);
+					gridWidget[j*NUM_SECTORS + i].SetVisible(true);
+				}
+			}
+
 
 			if (age > SettingsManager::Instance()->SpawnDate()) {
 				sim->EnableSpawn(true);

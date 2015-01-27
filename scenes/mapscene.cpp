@@ -365,7 +365,7 @@ void MapScene::DrawMap()
 				Vector2I s1 = node->child[k]->sector;
 				Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
 				Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
-				webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 2);
+				webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node->strength * 2.0f);
 			}
 		}
 	}

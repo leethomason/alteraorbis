@@ -68,14 +68,15 @@ x [Reenen] When I grid-travel, and I click on a new location (sometimes I see in
 - tweak ascent / descent? (Or is that a layout bug?)
 - enemy face shows morale and not level
 - tax on buy or sell
-- improved strategic view
-	- mark mother core at center
-	- line thickness to show visitor distribution
+x improved strategic view
+	x mark mother core at center
+	x line thickness to show visitor distribution
 	x all MOBs to center line
-	- show civtech
-	- show wealth
-	- show mil strength
-	- reserve diplomacy slot
+	x show civtech
+	x show wealth
+	x show mil strength
+	x reserve diplomacy slot
+	x compact mode, worldgen
 
 - Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them

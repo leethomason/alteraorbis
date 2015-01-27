@@ -102,6 +102,7 @@ void Web::DumpNodeRec(Node* node, int depth)
 
 void Web::BuildNodeRec( Node* node, grinliz::CDynArray<Web::WebLink>* e)
 {
+	int nChildren = 0;
 	while (true) {
 		int i = e->Find(node->sector, [](const Vector2I& sector, const Web::WebLink& link) {
 			return (link.sector0 == sector) || (link.sector1 == sector);
@@ -113,8 +114,13 @@ void Web::BuildNodeRec( Node* node, grinliz::CDynArray<Web::WebLink>* e)
 		next->sector = ((*e)[i].sector0 == node->sector) ? (*e)[i].sector1 : (*e)[i].sector0;
 		e->SwapRemove(i);
 		node->child.Push(next);
+		++nChildren;
 	}
+	if (nChildren == 0) return;
+
+	float strength = node->strength / float(nChildren);
 	for (int i = 0; i < node->child.Size(); ++i) {
+		node->child[i]->strength = strength;
 		BuildNodeRec(node->child[i], e);
 	}
 }

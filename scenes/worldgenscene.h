@@ -23,6 +23,7 @@
 #include "../script/worldgen.h"
 #include "../script/rockgen.h"
 #include "../game/newsconsole.h"
+#include "../widget/mapgridwidget.h"
 
 class LumosGame;
 class WorldMap;
@@ -84,6 +85,7 @@ private:
 	gamui::TextLabel	footerText;			// bottom label
 	gamui::TextLabel	statText;			// (at this time) mostly debug.
 	NewsConsole			newsConsole;
+	MapGridWidget		gridWidget[NUM_SECTORS * NUM_SECTORS];
 };
 
 #endif // WORLDGEN_SCENE_INCLUDED
