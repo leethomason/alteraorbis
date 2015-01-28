@@ -87,11 +87,11 @@ void WorldGenScene::Resize()
 	LayoutCalculator layout = DefaultLayout();
 
 	const float DY = 16.0f;
-	const float CONSOLE_HEIGHT = DY * 16.0f;
+	//const float CONSOLE_HEIGHT = DY * 16.0f;
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
-	newsConsole.consoleWidget.SetSize(400, CONSOLE_HEIGHT);
+	newsConsole.consoleWidget.SetSize(400, okay.Y() + okay.Height() - newsConsole.consoleWidget.Y() );
 
 //	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
 //	newsConsole.consoleWidget.SetBackground(gray);
@@ -388,8 +388,9 @@ void WorldGenScene::DoTick(U32 delta)
 
 			simStr.Format("Age=%.2f\n", age);
 			headerText.SetText(simStr.safe_str());
+			const Census& census = sim->GetChitBag()->census;
 
-			simStr.Format("Plants=%d Pools=%d Waterfalls=%d\n\n"
+			simStr.Format("Plants=%d Pools=%d Waterfalls=%d wildFruit=%d\n\n"
 						  "Orbstalk=%d\t\t[%d, %d, %d, %d]\n"
 						  "Tree=%d\t\t[%d, %d, %d, %d]\n"
 						  "Fern=%d\t\t[%d, %d, %d, %d]\n"
@@ -399,7 +400,7 @@ void WorldGenScene::DoTick(U32 delta)
 						  "SunBloom=%d\t\t[%d, %d]\n"
 						  "MoonBloom=%d\t\t[%d, %d]\n\n",
 						  swm->CountPlants(),
-						  pools, waterfalls,
+						  pools, waterfalls, census.wildFruit,
 						  typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
 						  typeCount[1], swm->plantCount[1][0], swm->plantCount[1][1], swm->plantCount[1][2], swm->plantCount[1][3],
 						  typeCount[2], swm->plantCount[2][0], swm->plantCount[2][1], swm->plantCount[2][2], swm->plantCount[2][3],
@@ -409,7 +410,6 @@ void WorldGenScene::DoTick(U32 delta)
 						  typeCount[6], swm->plantCount[6][0], swm->plantCount[6][1],
 						  typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1]);
 
-			const Census& census = sim->GetChitBag()->census;
 			for (int i = 0; i < census.MOBItems().Size(); ++i) {
 				const Census::MOBItem& mobItem = census.MOBItems()[i];
 				simStr.AppendFormat("%s\t%d\n", mobItem.name.safe_str(), mobItem.count);

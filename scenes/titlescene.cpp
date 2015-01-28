@@ -139,7 +139,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	engine->CameraLookAt(CAM, TARGET);
 	{
-		const int team = Team::CombineID(TEAM_HOUSE, 1);
+		const int team = Team::CombineID(TEAM_HOUSE, 18);
 		HumanGen gen(true, 99, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
@@ -147,7 +147,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 		model[HUMAN_FEMALE]->SetColorMap(info.color);
 	}
 	{
-		const int team = Team::CombineID(TEAM_HOUSE, 5);
+		const int team = Team::CombineID(TEAM_HOUSE, 19);
 		HumanGen gen(false, 1, team, false);
 		ProcRenderInfo info;
 		gen.AssignSuit(&info);
@@ -324,17 +324,18 @@ void TitleScene::HandleHotKey(int key)
 {
 	if (key == GAME_HK_DEBUG_ACTION) {
 		seed++;
-#if 0
+#if 1
 		GLOUTPUT(("Seed=%d\n", seed));
-		if (model[HUMAN_FEMALE]) {
-			HumanGen gen(true, seed, TEAM_HOUSE, false);
-			ProcRenderInfo info;
-			gen.AssignSuit(&info);
-			model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
-			model[HUMAN_FEMALE]->SetColorMap(info.color);
+		for (int i = HUMAN_FEMALE; i <= HUMAN_MALE; ++i) {
+			if (model[i]) {
+				HumanGen gen(true, seed + i - HUMAN_FEMALE, TEAM_HOUSE, false);
+				ProcRenderInfo info;
+				gen.AssignSuit(&info);
+				model[i]->SetTextureXForm(info.te.uvXForm);
+				model[i]->SetColorMap(info.color);
+			}
 		}
-#endif
-
+#else
 		model[0]->SetYRotation(0);
 
 		const ModelResource* res = model[0]->GetResource();
@@ -354,6 +355,7 @@ void TitleScene::HandleHotKey(int key)
 		const Vector3F TARGET = { local.x, local.y, local.z };
 
 		engine->CameraLookAt(CAM, TARGET);
+#endif
 	}
 	else {
 		super::HandleHotKey(key);

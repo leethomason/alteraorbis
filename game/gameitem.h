@@ -351,8 +351,6 @@ public:
 		AI_WANDER_CIRCLE	= (1<<16),		// creepy circle herding
 		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
 
-		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
-		AI_HEAL_AT_CORE		= (1<<18),		// stands at a core to regain health (greater monsters, generally)
 		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
 		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
 		AI_DOES_WORK		= (1<<21),

@@ -54,7 +54,6 @@ public:
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;		// id of worker assigned this task.			
-		//Model*				model;			// model used to show map work location
 		gamui::Image		*image;			// map work location
 		float				rotation;
 		int					variation;		// which PAVE

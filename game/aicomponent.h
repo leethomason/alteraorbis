@@ -157,11 +157,12 @@ private:
 	WorkQueue* GetWorkQueue();
 	void FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest, grinliz::CArray<Chit*, 32 >* arr, bool* nearPath );
 	// find the correct position, if building, if mob, etc. Will return Zero if not available (happens with buildings)
-	grinliz::Vector3F EnemyPos(int id);
+	// if 'target' is true, returns the target, else returns the foot.
+	// 'id' can be positive (Chit) or negative (voxel)
+	grinliz::Vector3F EnemyPos(int id, bool target);
 
 	// Returns true if this action was actually taken.
-	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
-	bool ThinkWanderHealAtCore( const ComponentSet& thisComp );
+	bool ThinkWanderEat( const ComponentSet& thisComp );
 	bool ThinkCriticalShopping( const ComponentSet& thisComp );
 	bool ThinkNeeds( const ComponentSet& thisComp );
 	bool ThinkLoot( const ComponentSet& thisComp );

@@ -259,8 +259,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						context->worldMap->SetRock(it.Pos().x, it.Pos().y, 0, false, 0);
 					}
 
-					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,
-					// but the plant will be de-rezzed at the next tick.
+					// Now build.
 					if (task->buildScriptID == BuildScript::ICE) {
 						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE);
 					}

@@ -232,9 +232,6 @@ void GameScene::Resize()
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
-	//newsConsole.consoleWidget.SetSize(400, newsConsole.consoleWidget.Height());
-	//RenderAtom backgroundAtom = LumosGame::CalcPaletteAtom(0, PAL_GRAY);
-	//newsConsole.consoleWidget.SetBackground(backgroundAtom);
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
@@ -322,8 +319,8 @@ void GameScene::Zoom( int style, float delta )
 		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
 	else
 		engine->SetZoom( engine->GetZoom() + delta );
-
 }
+
 
 void GameScene::Rotate( float degrees )
 {

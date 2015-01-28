@@ -100,22 +100,6 @@ public:
 };
 
 
-#if 0
-class PlantFilter : public IChitAccept
-{
-public:
-	PlantFilter( int type=-1, int minStage=0, int maxStage=3 );
-	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MAP; }
-
-private:
-	int typeFilter;
-	int minStage;
-	int maxStage;
-};
-#endif
-
-
 class RemovableFilter : public IChitAccept
 {
 public:
@@ -251,6 +235,7 @@ public:
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
 	Chit* NewVisitor( int visitorIndex, const Web& web );
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
+	Chit* NewWildFruit(const grinliz::Vector2I& pos);
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
 	Chit* NewItemChit(  const grinliz::Vector3F& pos, 

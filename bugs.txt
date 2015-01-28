@@ -48,26 +48,6 @@ x visitors don't visit (until they do...)
 x still attacking neutral cores...
 x when a building checks connection to core, it should check that the core is still its team
 x [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
-- weapons, on destruction, should drop crystal
-- buildings, on destruction, should drop items (market, vault, etc.)
-- task serialization
-- any building attack should cause awareness in domainAI
-- build tasks aren't getting serialized correctly. wrong rotation?
-- [Reenen] Cyclops heal at rocks.
-- news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
-- new art from GT
-- de-saturate colors correctly
-- fruit & food
-	- deal with fruit overflow
-	- cyclops should eat rock to heal. (Or everyone to fruit?)
-	- GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
-	- check gobman that is House denizen healing
-- gobman statues
-- mouse wheel support
-- unify rotation model
-- tweak ascent / descent? (Or is that a layout bug?)
-- enemy face shows morale and not level
-- tax on buy or sell
 x improved strategic view
 	x mark mother core at center
 	x line thickness to show visitor distribution
@@ -77,7 +57,32 @@ x improved strategic view
 	x show mil strength
 	x reserve diplomacy slot
 	x compact mode, worldgen
+t news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+t weapons, on destruction, should drop crystal
+t buildings, on destruction, should drop items (market, vault, etc.)
+x task serialization
+x build tasks aren't getting serialized correctly. wrong rotation?
+x fix worldgen news console height
+x title screen colors
+x enemy face shows morale and not level
+x [Reenen] Cyclops heal at rocks. Resolve: all fruit
+x fruit & food
+	x cyclops should eat rock to heal. (Or everyone to fruit?)
+	x GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
+x write the list to improve icons
+- fruit logic: clean up to remove wild vs. domestic logic?
+- new art from GT
+- de-saturate colors correctly
+- gobman statues
+- mouse wheel support
+- tweak ascent / descent? (Or is that a layout bug?)
+- improve map icon art
 
+- deal with fruit overflow
+- check gobman that is House denizen healing
+- unify rotation model
+- tax on buy or sell. show tax income on main screen.
+- any building attack should cause awareness in domainAI
 - Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them
 - unified build marks

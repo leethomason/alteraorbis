@@ -105,7 +105,6 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 		GetButton()->SetVisible( false );
 		upper.SetText( "" );
 	}
- 	//barStack.SetVisible(GetButton()->Visible());
 	SetFlags(flags);	// sets visibility
 }
 
@@ -115,8 +114,6 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-	//RenderAtom red	  = LumosGame::CalcPaletteAtom( 0, 1 );	
-	//RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 
 	CStr<30> str;
 
@@ -191,6 +188,5 @@ void FaceWidget::SetVisible( bool vis )
 { 
 	GetButton()->SetVisible( vis ); 
 	upper.SetVisible( vis );
-	//barStack.SetVisible(vis);
 	SetFlags(flags);
 }

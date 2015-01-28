@@ -16,20 +16,20 @@ public:
 	FaceWidget()	{}
 
 	enum {
-		HP_BAR = 0x01,		// also shield
-		AMMO_BAR = 0x02,
-		LEVEL_BAR = 0x08,
-		MORALE_BAR = 0x10,
+		HP_BAR		= 0x001,		// also shield
+		AMMO_BAR	= 0x002,
+		LEVEL_BAR	= 0x004,
+		MORALE_BAR	= 0x008,
 
-		FOOD_BAR   = 0x020,
-		ENERGY_BAR = 0x040,
-		FUN_BAR    = 0x080,
+		FOOD_BAR	= 0x010,
+		ENERGY_BAR	= 0x020,
+		FUN_BAR		= 0x040,
 
 		BATTLE_BARS = HP_BAR | AMMO_BAR | LEVEL_BAR,
 		NEED_BARS	= MORALE_BAR | FOOD_BAR | ENERGY_BAR | FUN_BAR,
-		ALL_BARS	= NEED_BARS | LEVEL_BAR | AMMO_BAR | HP_BAR,
+		ALL_BARS	= BATTLE_BARS | NEED_BARS,
 
-		SHOW_NAME	= 0x200,
+		SHOW_NAME	= 0x100,
 		ALL			= 0xffff
 	};
 

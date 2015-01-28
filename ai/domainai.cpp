@@ -523,6 +523,7 @@ int DomainAI::DoTick(U32 delta)
 
 		// The tax man!
 		// Solves the sticky problem: "how do non-player domains fund themselves?"
+		// They fund themselves by sucking money out of their denizens.
 		int gold = parentChit->GetItem()->wallet.Gold();
 		CChitArray citizens;
 		cs->Citizens(&citizens);

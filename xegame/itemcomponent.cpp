@@ -729,7 +729,14 @@ void ItemComponent::InformCensus(bool add)
 		IString mob = mainItem->keyValues.GetIString("mob");
 		IString core = mainItem->IName();
 
-		if (!mob.empty()) {
+		if (mainItem->IName() == ISC::fruit && mainItem->IProperName() == ISC::wildFruit) {
+			if (add)
+				Context()->chitBag->census.wildFruit += 1;
+			else
+				Context()->chitBag->census.wildFruit -= 1;
+			GLASSERT(Context()->chitBag->census.wildFruit >= 0);
+		}
+		else if (!mob.empty()) {
 			if (add)
 				Context()->chitBag->census.AddMOB(mainItem->IName());
 			else
@@ -747,6 +754,7 @@ void ItemComponent::InformCensus(bool add)
 		}
 	}
 }
+
 
 void ItemComponent::OnAdd( Chit* chit, bool init )
 {

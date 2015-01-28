@@ -24,7 +24,7 @@
 class Census
 {
 public:
-	Census() {
+	Census() : wildFruit(0) {
 	}
 
 	void AddMOB(const grinliz::IString& name);
@@ -46,6 +46,8 @@ public:
 
 	const grinliz::CDynArray<MOBItem>& MOBItems() const { return mobItems; }
 	const grinliz::CDynArray<MOBItem>& CoreItems() const { return coreItems; }
+
+	int wildFruit;
 
 private:
 	grinliz::CDynArray<MOBItem> mobItems;

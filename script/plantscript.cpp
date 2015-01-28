@@ -14,6 +14,8 @@
 #include "../game/sim.h"
 #include "../game//lumoschitbag.h"
 
+#include "../script/corescript.h"
+
 using namespace grinliz;
 
 static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
@@ -85,6 +87,7 @@ void PlantScript::DoTick(U32 delta)
 	const Vector3F& light = context->engine->lighting.direction;
 	const float		norm = Max(fabs(light.x), fabs(light.z));
 	Vector2I		lightTap = { LRintf(light.x / norm), LRintf(light.z / norm) };
+	Census*			census = &context->chitBag->census;
 
 	for (int i = 0; i < n; ++i) {
 		index += PRIME;
@@ -198,7 +201,7 @@ void PlantScript::DoTick(U32 delta)
 			// Grow
 			int nStage = wg.Plant() < 7 ? 4 : 2;
 
-			if (wg.HPFraction() > 0.9f) {
+			if (wg.HPFraction() > 0.8f) {
 				if (wg.PlantStage() < (nStage - 1)) {
 					int hp = wg.HP();
 					worldMap->SetPlant(pos2i.x, pos2i.y, wg.Plant(), wg.PlantStage() + 1);
@@ -216,6 +219,12 @@ void PlantScript::DoTick(U32 delta)
 					GLASSERT(sim);
 					sim->CreatePlant(pos2i.x + dx, pos2i.y + dy, -1);
 				}
+			}
+			int stage = wg.PlantStage();	// 0-3
+			CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
+			// Totally "what feels right in world gen" constant in the random.Rand()
+			if ((census->wildFruit < MAX_WILD_FRUIT) && cs && (!cs->InUse()) && int(random.Rand(200)) < (stage*stage)) {
+				context->chitBag->NewWildFruit(pos2i);
 			}
 		}
 		else if (distance > DIE) {

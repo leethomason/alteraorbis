@@ -698,6 +698,28 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, Wallet* wallet 
 }
 
 
+Chit* LumosChitBag::NewWildFruit(const grinliz::Vector2I& pos)
+{
+	Vector3F pos3 = ToWorld3F(pos);
+	pos3.x = floorf(pos3.x) + random.Uniform();
+	pos3.z = floorf(pos3.z) + random.Uniform();
+
+	const GameItem& root = ItemDefDB::Instance()->Get("fruit");
+	GameItem* item = root.Clone();
+	item->SetProperName(ISC::wildFruit);
+
+	Chit* chit = this->NewChit();
+	chit->Add(new SpatialComponent());
+	chit->Add(new ItemComponent(item));
+	chit->Add(new RenderComponent(item->ResourceName()));
+	chit->Add(new GameMoveComponent());
+	chit->Add(new HealthComponent());
+
+	chit->GetSpatialComponent()->SetPosition(pos3);
+	return chit;
+}
+
+
 Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround, int selfDestructTimer )
 {
 	GLASSERT( !orphanItem->Intrinsic() );

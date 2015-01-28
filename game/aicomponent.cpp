@@ -76,7 +76,7 @@ static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants.
 static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
-static const int	PLANT_AWARE					=  3;
+static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
 static const float	FRUIT_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
@@ -203,7 +203,8 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, const Rang
 		return false;
 	}
 	thisComp.render->GetMetaData( HARDPOINT_TRIGGER, &origin );
-	target.render->GetMetaData( META_TARGET, &dest );
+	//target.render->GetMetaData( META_TARGET, &dest );
+	dest = EnemyPos(target.chit->ID(), true);
 
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 0.01f;	// a little extra just in case
@@ -272,25 +273,35 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 }
 
 
-Vector3F AIComponent::EnemyPos(int id)
+Vector3F AIComponent::EnemyPos(int id, bool target)
 {
 	Vector3F pos = { 0, 0, 0 };
 	if (id > 0) {
 		Chit* chit = Context()->chitBag->GetChit(id);
 		if (chit) {
-			RenderComponent* rc = chit->GetRenderComponent();
-			GLASSERT(rc);
-			if (rc) {
-				if (rc->GetMetaData(META_TARGET, &pos)) {
+			if (target) {
+				RenderComponent* rc = chit->GetRenderComponent();
+				GLASSERT(rc);
+				if (rc) {
+					// The GetMetaData is expensive, because
+					// of the animation xform. Cheat a bit;
+					// use the base xform.
+					const ModelMetaData* metaData = rc->MainResource()->GetMetaData(META_TARGET);
+					pos = rc->MainModel()->XForm() * metaData->pos;
 					return pos;
 				}
-				return rc->MainModel()->AABB().Center();
+			}
+			else {
+				return chit->GetSpatialComponent()->GetPosition();
 			}
 		}
 	}
 	else if (id < 0) {
 		Vector2I v2i = ToWG(id);
-		pos.Set((float)v2i.x + 0.5f, 0.5f, (float)v2i.y + 0.5f);
+		if (target)
+			pos.Set((float)v2i.x + 0.5f, 0.5f, (float)v2i.y + 0.5f);
+		else
+			pos.Set((float)v2i.x + 0.5f, 0.0f, (float)v2i.y + 0.5f);
 		return pos;
 	}
 	return pos;
@@ -662,7 +673,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else {
 		// Move to target.
 		if ( pmc ) {
-			Vector2F targetPos = ToWorld2F(EnemyPos(targetID));
+			Vector2F targetPos = ToWorld2F(EnemyPos(targetID, false));
 
 			Vector2F pos = thisComp.spatial->GetPosition2D();
 			Vector2F dest = { -1, -1 };
@@ -696,11 +707,11 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 	int tick = 400;
 	const ChitContext* context = Context();
 
+#if 0
 	// Plant eater
 	if (	!thisComp.move->IsMoving()    
 		 && (item->hp < totalHP ))  
 	{
-
 		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
 			// Are we on a plant?
 			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
@@ -736,7 +747,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 			}
 		}
 	}
-	
+#endif	
 	if (visitorIndex >= 0 && !thisComp.move->IsMoving())
 	{
 		// Visitors at a kiosk.
@@ -1177,7 +1188,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	// And plants are friends.
 	Rectangle2I r;
 	r.min = r.max = ToWorld2I(origin);
-	r.Outset( PLANT_AWARE );
+	r.Outset(int(PLANT_AWARE));
 	r.DoIntersection(Context()->worldMap->Bounds());
 
 	int nPlants = 0;
@@ -1468,49 +1479,44 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 }
 
 
-bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
+bool AIComponent::ThinkWanderEat( const ComponentSet& thisComp )
 {
 	GLASSERT( thisComp.item );
 	// Plant eater
-	if (    (thisComp.item->flags & GameItem::AI_EAT_PLANTS) 
-		 && (thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 ))  
-	{
+	if ( thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 ) {
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 
-		// Are we standing on a plant?
-		{
-			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-			if (wg.Plant() && !wg.BlockingPlant()) {
-				this->Stand();
-				return true;
-			}
+		// Denizens won't eat non-wild fruit (so they don't eat up their own domain.)
+		// Everyone else eats any fruit. WARNING: code in 2 places.
+		bool onlyWild = false;
+		CoreScript* cs = CoreScript::GetCore(ToSector(pos2));
+		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen && cs && cs->InUse()) {
+			onlyWild = true;
 		}
 
-		// Are we near a plant?
-		// Note that currently only support eating stage 0-1 plants.
-		Vector2F plantPos = { 0, 0 };
-		for (int rad = 0; rad <= PLANT_AWARE; ++rad) {
-			Rectangle2I r;
-			r.min = r.max = pos2i;
-			r.Outset(rad);
-			for (Rectangle2IEdgeIterator it(r); !it.Done(); it.Next()) {
-				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if (wg.Plant() && !wg.BlockingPlant() && Context()->worldMap->HasStraightPath(pos2, ToWorld2F(it.Pos()))) {
-					plantPos = ToWorld2F(it.Pos());
-					break;
-				}
-			}
+		// Are we near fruit?
+		CChitArray arr;
+		ItemNameFilter fruitFilter(ISC::fruit, IChitAccept::MOB);
+		Context()->chitBag->QuerySpatialHash(&arr, pos2, PLANT_AWARE, 0, &fruitFilter);
+		if (onlyWild) {
+			arr.Filter(0, [](int, Chit* fruit){
+				return fruit->GetItem()->IProperName() != ISC::wildFruit;
+			});
 		}
-		if ( !plantPos.IsZero()) {
-			this->Move( plantPos, false );
-			return true;
+		for (int i = 0; i < arr.Size(); ++i) {
+			Vector2I plantPos = arr[i]->GetSpatialComponent()->GetPosition2DI();
+			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos))) {
+				this->Move( ToWorld2F(plantPos), false );
+				return true;
+			}
 		}
 	}
 	return false;
 }
 
 
+#if 0
 bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 {
 	// Core healer
@@ -1530,6 +1536,7 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 	}
 	return false;
 }
+#endif
 
 
 Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter )
@@ -2165,9 +2172,7 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 	if (ThinkWaypoints(thisComp))
 		return;
 
-	if (ThinkWanderEatPlants(thisComp))
-		return;
-	if (ThinkWanderHealAtCore(thisComp))
+	if (ThinkWanderEat(thisComp))
 		return;
 	if (ThinkLoot(thisComp))
 		return;
@@ -2310,7 +2315,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		Chit* enemyChit = context->chitBag->GetChit(targetID);	// null if there isn't a chit
 		Vector2I voxelTarget = ToWG(targetID);					// zero if there isn't a voxel target
 
-		const Vector3F	enemyPos = EnemyPos(targetID);
+		const Vector3F	enemyPos = EnemyPos(targetID, true);
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
 		const Vector2I  enemyPos2I		= ToWorld2I(enemyPos2);
 		float			range			= (enemyPos - pos).Length();
@@ -2442,7 +2447,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			if (idx >= 0) {
 				Swap(&enemyList2[0], &enemyList2[idx]);	// move target to 1st slot.
 				lastTargetID = enemyList2[0];
-				this->Move(ToWorld2F(EnemyPos(enemyList2[0])), false);
+				this->Move(ToWorld2F(EnemyPos(enemyList2[0], false)), false);
 			}
 		}
 		break;
@@ -2623,6 +2628,8 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 
 void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 {
+	// FIXME: this function does way too much.
+
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 
 	// Circuits.
@@ -2632,6 +2639,35 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs && Team::GetRelationship(cs->ParentChit(), parentChit) == RELATE_ENEMY) {
 			Context()->circuitSim->TriggerDetector(pos2i);
+		}
+	}
+
+	// Is there food to eat?
+	if (!thisComp.chit->Destroyed() && thisComp.item->HPFraction() < 0.8) {
+		ItemNameFilter fruitFilter(ISC::fruit, IChitAccept::MOB);
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		CChitArray arr;
+		Context()->chitBag->QuerySpatialHash(&arr, pos2, 0.7f, 0, &fruitFilter);
+
+		// Denizens won't eat non-wild fruit (so they don't eat up their own domain.)
+		// Everyone else eats any fruit. WARNING: code in 2 places.
+		bool onlyWild = false;
+		CoreScript* cs = CoreScript::GetCore(ToSector(pos2));
+		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen && cs && cs->InUse()) {
+			onlyWild = true;
+		}
+
+		for (int i = 0; i < arr.Size(); ++i) {
+			const GameItem* item = arr[i]->GetItem();
+			if (!onlyWild || (item->IProperName() == ISC::wildFruit)) {
+				thisComp.item->hp = thisComp.item->TotalHP();
+				RenderComponent* rc = parentChit->GetRenderComponent();
+				if (rc) {
+					parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
+				}
+				Context()->chitBag->DeleteChit(arr[i]);
+				break;
+			}
 		}
 	}
 
