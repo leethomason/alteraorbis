@@ -207,9 +207,9 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - World Gen
 	- less techy, more interesting world gen
 	- use some of the time and space to introduce and explain the game
-	- text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
+	x text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
 	- text report on major battles
-	- text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
+	x text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
 	- enhance the text reports with screen shots of the events (which replace the map as it is now)
 	
 - Census

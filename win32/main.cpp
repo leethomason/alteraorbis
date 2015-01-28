@@ -50,33 +50,17 @@ static const float KEY_ZOOM_SPEED		= 0.04f;
 static const float KEY_ROTATE_SPEED		= 4.0f;
 static const float KEY_MOVE_SPEED		= 0.4f;
 
-/*
-// 4:3 test
-static const int SCREEN_WIDTH  = 800;
-static const int SCREEN_HEIGHT = 600;
-*/
-
-/*
-// Virtual size test.
-static const int SCREEN_WIDTH  = 800;	// 750 virtual
-static const int SCREEN_HEIGHT = 640;	// 600 virtual
-*/
+// 4:3 test			800x600
+// virtual size		800x640	virtual: 750x600
 
 // Laptop
 static const int SCREEN_WIDTH  = 700;
 static const int SCREEN_HEIGHT = 520;
 
-/*
-static const int SCREEN_WIDTH  = 952;
-static const int SCREEN_HEIGHT = 600;
-*/
-
 const int multisample = 2;
 bool fullscreen = false;
-int screenWidth  = SCREEN_WIDTH;
-int screenHeight = SCREEN_HEIGHT;
-int restoreWidth = screenWidth;
-int restoreHeight = screenHeight;
+int restoreWidth = SCEEN_WIDTH;
+int restoreHeight = SCEEN_HEIGHT;
 bool cameraIso = true;
 
 int nModDB = 0;
@@ -152,6 +136,14 @@ int main(int argc, char **argv)
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisample);
 	}
 
+	SDL_DisplayMode displayMode;
+	SDL_GetCurrentDisplayMode(0, &displayMode);
+
+	int screenX = displayMode.w / 8;
+	int screenY = displayMode.h / 8;
+	int screenWidth = displayMode.w * 3 / 4;
+	int screenHeight = displayMode.h * 3 / 4;
+
 	if (argc == 3) {
 		screenWidth = atoi(argv[1]);
 		screenHeight = atoi(argv[2]);
@@ -159,13 +151,11 @@ int main(int argc, char **argv)
 		if (screenHeight <= 0) screenHeight = SCREEN_HEIGHT;
 	}
 
-	SDL_DisplayMode displayMode;
-	SDL_GetCurrentDisplayMode(0, &displayMode);
+	restoreWidth = screenWidth;
+	restoreHeight = screenHeight;
 
-	// Note that our output surface is rotated from the iPod.
 	SDL_Window *screen = SDL_CreateWindow("Altera",
-		50, 50,
-		screenWidth, screenHeight,
+		screenX, screenY, screenWidth, screenHeight,
 		/*SDL_WINDOW_FULLSCREEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	GLASSERT(screen);
 	SDL_GL_CreateContext(screen);
