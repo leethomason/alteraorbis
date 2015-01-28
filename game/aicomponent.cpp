@@ -79,6 +79,7 @@ static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
 static const float	FRUIT_AWARE					=  5.0f;
+static const float  EAT_WILD_FRUIT				= 0.70f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
@@ -1479,35 +1480,23 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 }
 
 
-bool AIComponent::ThinkWanderEat( const ComponentSet& thisComp )
+bool AIComponent::ThinkWanderEat(const ComponentSet& thisComp)
 {
-	GLASSERT( thisComp.item );
+	GLASSERT(thisComp.item);
 	// Plant eater
-	if ( thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 ) {
+	if (thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 
-		// Denizens won't eat non-wild fruit (so they don't eat up their own domain.)
-		// Everyone else eats any fruit. WARNING: code in 2 places.
-		bool onlyWild = false;
-		CoreScript* cs = CoreScript::GetCore(ToSector(pos2));
-		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen && cs && cs->InUse()) {
-			onlyWild = true;
-		}
-
 		// Are we near fruit?
 		CChitArray arr;
-		ItemNameFilter fruitFilter(ISC::fruit, IChitAccept::MOB);
+		FruitElixirFilter fruitFilter;
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, PLANT_AWARE, 0, &fruitFilter);
-		if (onlyWild) {
-			arr.Filter(0, [](int, Chit* fruit){
-				return fruit->GetItem()->IProperName() != ISC::wildFruit;
-			});
-		}
+
 		for (int i = 0; i < arr.Size(); ++i) {
 			Vector2I plantPos = arr[i]->GetSpatialComponent()->GetPosition2DI();
 			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos))) {
-				this->Move( ToWorld2F(plantPos), false );
+				this->Move(ToWorld2F(plantPos), false);
 				return true;
 			}
 		}
@@ -1646,8 +1635,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 	const Vector2I sector		= ToSector(pos2);
 	CoreScript* cs				= CoreScript::GetCore(sector);
 
-	const IString names[2] = { ISC::fruit, ISC::elixir };
-	ItemNameFilter filter(names, 2, IChitAccept::MOB);
+	FruitElixirFilter filter;
 	*nearPath = false;
 
 	// Check local. For local, use direct path.
@@ -1729,10 +1717,6 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 	if ( parentChit->PlayerControlled() ) {
 		return false;
 	}
-
-	//int index = thisComp.itemComponent->FindItem( ISC::fruit );
-	//bool carrying = index >= 0;
-	//if ( carrying ) return false;	// only carry one fruit, at least intentionally?
 
 	double need = 1;
 	if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
@@ -2643,31 +2627,21 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Is there food to eat?
-	if (!thisComp.chit->Destroyed() && thisComp.item->HPFraction() < 0.8) {
-		ItemNameFilter fruitFilter(ISC::fruit, IChitAccept::MOB);
+	if (!thisComp.chit->Destroyed() && thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
+		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		CChitArray arr;
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, 0.7f, 0, &fruitFilter);
 
-		// Denizens won't eat non-wild fruit (so they don't eat up their own domain.)
-		// Everyone else eats any fruit. WARNING: code in 2 places.
-		bool onlyWild = false;
-		CoreScript* cs = CoreScript::GetCore(ToSector(pos2));
-		if (thisComp.item->keyValues.GetIString(ISC::mob) == ISC::denizen && cs && cs->InUse()) {
-			onlyWild = true;
-		}
-
 		for (int i = 0; i < arr.Size(); ++i) {
 			const GameItem* item = arr[i]->GetItem();
-			if (!onlyWild || (item->IProperName() == ISC::wildFruit)) {
-				thisComp.item->hp = thisComp.item->TotalHP();
-				RenderComponent* rc = parentChit->GetRenderComponent();
-				if (rc) {
-					parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
-				}
-				Context()->chitBag->DeleteChit(arr[i]);
-				break;
+			thisComp.item->hp = thisComp.item->TotalHP();
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			if (rc) {
+				parentChit->GetRenderComponent()->AddDeco("fruit", STD_DECO);
 			}
+			Context()->chitBag->DeleteChit(arr[i]);
+			break;
 		}
 	}
 

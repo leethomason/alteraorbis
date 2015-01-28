@@ -1117,6 +1117,15 @@ bool LootFilter::Accept( Chit* chit )
 	return  false;
 }
 
+bool FruitElixirFilter::Accept(Chit* chit)
+{
+	const GameItem* item = chit->GetItem();
+	if (item) {
+		return item->IName() == ISC::fruit || item->IName() == ISC::elixir;
+	}
+	return false;
+}
+
 
 Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 								Vector3F dir,

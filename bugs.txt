@@ -70,7 +70,7 @@ x fruit & food
 	x cyclops should eat rock to heal. (Or everyone to fruit?)
 	x GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
 x write the list to improve icons
-- fruit logic: clean up to remove wild vs. domestic logic?
+x fruit logic: clean up to remove wild vs. domestic logic?
 - new art from GT
 - de-saturate colors correctly
 - gobman statues

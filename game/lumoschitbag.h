@@ -173,6 +173,14 @@ public:
 };
 
 
+class FruitElixirFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MOB; }
+};
+
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {
