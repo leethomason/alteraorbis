@@ -124,7 +124,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 		if (coreScript->InUse()) {
 			owner = Team::TeamName(coreScript->ParentChit()->Team()).safe_str();
 		}
-		str.Format("%s\n%s", sd.name, owner);
+		str.Format("%s\n%s", sd.name.c_str(), owner);
 		textLabel.SetText(str.safe_str());
 	}
 	for (int i = 0; i < NUM_IMAGES; ++i) {
@@ -168,7 +168,9 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	for (int i = 0; i < N; ++i) {
 		RenderAtom atom, countAtom;
 		if (countArr.Size() > i) {
-			atom = LumosGame::CalcUIIconAtom(countArr[i].name.c_str(), true, 0);
+			CStr<64> str;
+			str.Format("%s_sil", countArr[i].name.safe_str());
+			atom = LumosGame::CalcUIIconAtom(str.safe_str(), true, 0);
 			atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
 
 			if (countArr[i].count > 12) countAtom = LumosGame::CalcUIIconAtom("num4");

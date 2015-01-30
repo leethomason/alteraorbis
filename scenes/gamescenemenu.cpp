@@ -369,7 +369,7 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 
 		CStr<32> str = NAME[i];
 		if (squaddies.Size() && !waypoint.IsZero()) {
-			str.Format("%s\nRoute %x%x", NAME[i], waypoint.x / SECTOR_SIZE, waypoint.y / SECTOR_SIZE);
+			str.Format("%s\nRoute %c%d", NAME[i], 'A' + (waypoint.x / SECTOR_SIZE), 1 + (waypoint.y / SECTOR_SIZE));
 		}
 		else if (squaddies.Size() && moraleAve > 0.95) {
 			str.Format("%s\nReady", NAME[i]);

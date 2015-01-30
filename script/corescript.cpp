@@ -999,9 +999,9 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 			p0 = destSD.GetPortLoc(destPort).Center();			// meet at the DESTINATION port
 		}
 		waypoints[squadID].Push(p0);
-		GLOUTPUT(("%d,%d [s%x%x]  ", p0.x, p0.y, p0.x / SECTOR_SIZE, p0.y / SECTOR_SIZE));
+		GLOUTPUT(("%d,%d [s%c%d]  ", p0.x, p0.y, 'A' + p0.x / SECTOR_SIZE, 1 + p0.y / SECTOR_SIZE));
 	}
-	GLOUTPUT(("%d,%d [s%x%x]\n", dest.x, dest.y, dest.x/SECTOR_SIZE, dest.y/SECTOR_SIZE));
+	GLOUTPUT(("%d,%d [s%c%d]\n", dest.x, dest.y, 'A' + dest.x/SECTOR_SIZE, 1 + dest.y/SECTOR_SIZE));
 	waypoints[squadID].Push(dest);
 
 	if (!waypointFlags[squadID]) {

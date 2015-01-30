@@ -59,8 +59,8 @@ static const int SCREEN_HEIGHT = 520;
 
 const int multisample = 2;
 bool fullscreen = false;
-int restoreWidth = SCEEN_WIDTH;
-int restoreHeight = SCEEN_HEIGHT;
+int restoreWidth = SCREEN_WIDTH;
+int restoreHeight = SCREEN_HEIGHT;
 bool cameraIso = true;
 
 int nModDB = 0;

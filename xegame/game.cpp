@@ -106,15 +106,31 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	delete modelLoader;
 	modelLoader = 0;
 
-	GLString fontPath = "./res/";
-	fontPath += settings->FontName();
 
+	// Load font:
+	GLString fontPath = "./res/";
 	FontSingleton* bridge = FontSingleton::Instance();
-	bridge->Init(fontPath.c_str());
-	bridge->SetHeightDelta(settings->FontHeight());
-	bridge->SetLineSpacingDelta(settings->FontSpacing());
-	bridge->SetAscentDelta(settings->FontAscent());
-	bridge->SetDescentDelta(settings->FontDescent());
+	{
+		XMLDocument doc;
+		doc.LoadFile("./res/font.xml");
+		XMLElement* ele = doc.FirstChildElement("Font");
+		GLASSERT(ele && ele->Attribute("name"));
+		if (ele && ele->Attribute("name")) {
+			fontPath += ele->Attribute("name");
+		}
+		bridge->Init(fontPath.c_str());
+
+		int spacing = 0, height = 0, ascent = 0, descent = 0;
+		ele->QueryAttribute("spacing", &spacing);
+		ele->QueryAttribute("height", &height);
+		ele->QueryAttribute("ascent", &ascent);
+		ele->QueryAttribute("descent", &descent);
+		
+		bridge->SetAscentDelta(ascent);
+		bridge->SetDescentDelta(descent);
+		bridge->SetHeightDelta(height);
+		bridge->SetLineSpacingDelta(spacing);
+	}
 	
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
 	GLASSERT( textTexture );

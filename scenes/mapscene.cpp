@@ -32,7 +32,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	viewButton.SetText("View");
 
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
-	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
+	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_GRAYSCALE_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
 	mapImage.Init( &gamui2D, mapAtom, false );
 	mapImage.SetCapturesTap( true );
 	
@@ -224,76 +224,13 @@ void MapScene::DrawMap()
 				owner = Team::TeamName( coreScript->ParentChit()->Team() ).safe_str();
 			}
 		}
-		str.Format( "%s\n%s", sd.name, owner );
+		str.Format( "%s\n%s", sd.name.safe_str(), owner );
 
 		Rectangle2F r = GridBounds2(i, j, true);
-		//map2Text[j*MAP2_SIZE + i].SetPos(r.min.x, r.min.y);
-		//map2Text[j*MAP2_SIZE+i].SetBounds( r.Width(), 0 );
-		//map2Text[index].SetText( str.c_str() );
 		gridWidget[index].SetPos(r.min.x, r.min.y);
 		gridWidget[index].SetSize(r.Width(), r.Height());
 		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore());
-
-		/*
-		for (int pass = 0; pass < 2; ++pass) {
-			MOBKeyFilter mobFilter;
-			CChitArray query;
-			if (pass == 0) {
-				CChitArray arr0;
-				mobFilter.value = ISC::lesser;
-				lumosChitBag->QuerySpatialHash(&query, ToWorld(inner), 0, &mobFilter);
-				mobFilter.value = ISC::denizen;
-				lumosChitBag->QuerySpatialHash(&arr0, ToWorld(inner), 0, &mobFilter);
-				for (int i = 0; i < arr0.Size(); ++i) {
-					if (query.HasCap()) {
-						query.Push(arr0[i]);
-					}
-				}
-			}
-			else {
-				mobFilter.value = ISC::greater;
-				lumosChitBag->QuerySpatialHash(&query, ToWorld(inner), 0, &mobFilter);
-			}
-
-			CArray<MCount, 16> counter;
-			for (int k = 0; k < query.Size(); ++k) {
-				const GameItem* item = query[k]->GetItem();
-				IString name = item->IName();
-				int idx = counter.Find(name);
-				if (idx >= 0) {
-					counter[idx].count += 1;
-				}
-				else {
-					MCount c(name);
-					counter.Push(c);
-				}
-			}
-			counter.Sort([](const MCount& a, const MCount& b){
-				return a.count > b.count;
-			});
-
-			Rectangle2F r = GridBounds2(i, j, true);
-			float h = r.Width() / 3.0f;
-			float x = r.min.x;
-			float y = r.min.y + h * float(pass + 1);
-
-			for (int k = 0; k < counter.Size() && k < MAX_COL && nFace < MAX_FACE; ++k) {
-				float ratio = 1;
-				RenderAtom atom = LumosGame::CalcUIIconAtom(counter[k].name.c_str(), true, &ratio);
-				atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
-				face[nFace].SetAtom(atom);
-				face[nFace].SetSize(ratio * h, h);
-				face[nFace].SetPos(x + float(k)*h, y);
-				face[nFace].SetVisible(true);
-				++nFace;
-			}
-		}
-		*/
 	}
-
-//	for (int i = nFace; i < MAX_FACE; ++i) {
-//		face[i].SetVisible(false);
-//	}
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
 	if ( !data->destSector.IsZero() && data->destSector != homeSector ) {

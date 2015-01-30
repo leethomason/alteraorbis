@@ -283,7 +283,7 @@ void WorldGenScene::DoTick(U32 delta)
 							}
 							GLASSERT(NUM_SECTORS == 16);	// else the printing below won't be correct.
 							postfix = "";
-							postfix.Format("-%x%x", i, j);
+							postfix.Format("(%c%d)", 'A' + i, j+1);
 							name += postfix;
 							sectorData[j*NUM_SECTORS + i].name = StringPool::Intern(name.c_str());
 						}

@@ -41,12 +41,6 @@ public:
 	float SpawnDate() const				{ return spawnDate; }
 	float WorldGenDone() const			{ return worldGenDone; }
 
-	const char* FontName() const		{ return fontName.c_str(); }
-	int FontHeight() const				{ return fontHeight; }
-	int FontSpacing() const				{ return fontSpacing; }
-	int FontAscent() const				{ return fontAscent; }
-	int FontDescent() const				{ return fontDescent; }
-
 protected:
 	SettingsManager( const char* path );
 	virtual ~SettingsManager()	{ instance = 0; }
@@ -65,10 +59,6 @@ private:
 	bool debugFPS;
 	float spawnDate;	// would like to be 0.20, but in interest of performance, 0.90 is used. On a debug 0.98 may be correct.
 	float worldGenDone;
-	grinliz::GLString fontName;
-	int fontHeight;
-	int fontSpacing;
-	int fontAscent, fontDescent;
 	grinliz::GLString path;
 };
 

@@ -59,6 +59,7 @@ public:
 
 		RENDERSTATE_UI_NORMAL = 1,		// a=1, normal UI rendering (1.0 alpha)
 		RENDERSTATE_UI_NORMAL_OPAQUE,	// a=1, same, but for resources that don't blend (background images)
+		RENDERSTATE_UI_GRAYSCALE_OPAQUE,// a=1, grayscale, but for resources that don't blend (background images)
 		RENDERSTATE_UI_DISABLED,		// a=0.5, disabled of both above
 		RENDERSTATE_UI_TEXT,			// text rendering
 		RENDERSTATE_UI_TEXT_DISABLED,

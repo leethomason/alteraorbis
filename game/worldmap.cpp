@@ -176,6 +176,7 @@ void WorldMap::FreeVBOs()
 }
 
 
+/*
 void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name)
 {
 	SectorData* data = worldInfo->SectorDataMemMutable();
@@ -184,7 +185,7 @@ void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::ISt
 	GLASSERT(!name.empty());
 	data[sector.y*NUM_SECTORS + sector.x].name = name;
 }
-
+*/
 
 const SectorData& WorldMap::GetSectorData( int x, int y ) const
 {

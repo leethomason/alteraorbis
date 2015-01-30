@@ -53,12 +53,6 @@ SettingsManager::SettingsManager( const char* savepath )
 	debugFPS = false;
 	spawnDate = 0.90f;
 	worldGenDone = 1.0f;
-
-	fontName = "font.ttf";
-	fontHeight = 0;
-	fontSpacing = 0;
-	fontAscent = 0;
-	fontDescent = 0;
 }
 
 
@@ -114,14 +108,6 @@ void SettingsManager::Save()
 		printer.PushAttribute("debugFPS", debugFPS);
 		printer.CloseElement();
 
-		printer.OpenElement("Font");
-		printer.PushAttribute("name", fontName.c_str());
-		printer.PushAttribute("height", fontHeight);
-		printer.PushAttribute("spacing", fontSpacing);
-		printer.PushAttribute("ascent", fontAscent);
-		printer.PushAttribute("descent", fontDescent);
-		printer.CloseElement();
-
 		printer.CloseElement();
 		fclose( fp );
 	}
@@ -143,16 +129,6 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 			debugElement->QueryAttribute("debugGLCalls", &debugGLCalls);
 			debugElement->QueryAttribute("debugUI", &debugUI);
 			debugElement->QueryAttribute("debugFPS", &debugFPS);
-		}
-		const XMLElement* fontElement = root->FirstChildElement("Font");
-		if (fontElement) {
-			if (fontElement->Attribute("name")) {
-				fontName = fontElement->Attribute("name");
-			}
-			fontElement->QueryAttribute("height", &fontHeight);
-			fontElement->QueryAttribute("spacing", &fontSpacing);
-			fontElement->QueryAttribute("ascent", &fontAscent);
-			fontElement->QueryAttribute("descent", &fontDescent);
 		}
 	}
 }

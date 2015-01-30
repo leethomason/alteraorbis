@@ -111,12 +111,12 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				pos = seller->ParentChit()->GetSpatialComponent()->GetPosition2D();
 				sector = ToSector(seller->ParentChit()->GetSpatialComponent()->GetPosition2DI());
 			}
-			GLOUTPUT(("'%s' sold to '%s' the item '%s' for %d Au at sector=%x%x\n",
+			GLOUTPUT(("'%s' sold to '%s' the item '%s' for %d Au at sector=%c%d\n",
 				seller->ParentChit()->GetItem()->BestName(),
 				buyer->ParentChit()->GetItem()->BestName(),
 				gi->BestName(),
 				cost,
-				sector.x, sector.y));
+				'A' + sector.x, 1 + sector.y));
 
 			if (salesTax && ReserveBank::Instance()) {
 				int tax = LRint(float(cost) * SALES_TAX);

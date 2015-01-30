@@ -134,6 +134,12 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		shader.SetBlendMode( BLEND_NONE );
 		break;
 
+	case RENDERSTATE_UI_GRAYSCALE_OPAQUE:
+		shader.SetColor( 1, 1, 1, 1 );
+		shader.SetShaderFlag(ShaderManager::SATURATION);
+		shader.SetBlendMode( BLEND_NONE );
+		break;
+
 	case RENDERSTATE_UI_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.5f );
 		shader.SetBlendMode( BLEND_NORMAL );
@@ -192,8 +198,13 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.texture0 = (Texture*)textureHandle;
 	data.indexBuffer  = ibo->ID();
 	data.vertexBuffer = vbo->ID();
+	Vector4F control = { 1, 0, 1, 1 };
 
 	int rs = (int)renderState;
+	if (rs == RENDERSTATE_UI_GRAYSCALE_OPAQUE) {
+		data.controlParam = &control;
+	}
+
 	if (rs >= RENDERSTATE_UI_CLIP_XFORM_MAP_0 && rs <= RENDERSTATE_UI_CLIP_XFORM_MAP_3) {
 		int id = rs - RENDERSTATE_UI_CLIP_XFORM_MAP_0;
 		data.texture0XForm = uv + id;

@@ -71,12 +71,15 @@ x fruit & food
 	x GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
 x write the list to improve icons
 x fruit logic: clean up to remove wild vs. domestic logic?
-- new art from GT
+x new art from GT
+x clean up portrait colors
 - de-saturate colors correctly
 - gobman statues
 - mouse wheel support
-- tweak ascent / descent? (Or is that a layout bug?)
 - improve map icon art
+- clean up mother-core image
+xform font default settings. (ascent=1 - where to code??) move font to .dat?
+	- tweak ascent / descent? (Or is that a layout bug?)
 
 - deal with fruit overflow
 - check gobman that is House denizen healing
