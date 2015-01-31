@@ -135,7 +135,7 @@ void GamuiFreetypeBridge::GamuiGlyph(int c0, int cPrev,	// character, prev chara
 		// Space.
 		GlyphMetrics space;
 		*metric = space;
-		metric->advance = fontHeight / 2;
+		metric->advance = fontHeight * 3 / 10;
 		return;
 	}
 

@@ -127,7 +127,8 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 			if (chit && chit->GetItemComponent()) {
 				const GameItem* gi = ItemDB::Instance()->Active(itemID);
 
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, 0, gi);
+
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, gi);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}

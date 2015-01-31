@@ -396,6 +396,15 @@ int main(int argc, char **argv)
 				}
 				break;
 
+				case SDL_MOUSEWHEEL:
+				{
+					if (event.wheel.y) {
+						float deltaZoom = 0.01f * float(event.wheel.y);
+						GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
+					}
+				}
+				break;
+
 				case SDL_QUIT:
 				{
 					done = true;
@@ -509,58 +518,58 @@ void ScreenCapture()
 {
 	int viewPort[4];
 	glGetIntegerv(GL_VIEWPORT, viewPort);
-	int width  = viewPort[2]-viewPort[0];
-	int height = viewPort[3]-viewPort[1];
+	int width = viewPort[2] - viewPort[0];
+	int height = viewPort[3] - viewPort[1];
 
-	SDL_Surface* surface = SDL_CreateRGBSurface( 0, width, height, 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
-	if ( !surface )
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0xff, 0xff << 8, 0xff << 16, 0xff << 24);
+	if (!surface)
 		return;
 
-	glReadPixels( 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels );
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 
 	// This is a fancy swap, for the screen pixels:
 	int i;
 	U32* buffer = new U32[width];
 
-	for( i=0; i<height/2; ++i )
+	for (i = 0; i < height / 2; ++i)
 	{
-		memcpy( buffer, 
-				( (U32*)surface->pixels + i*width ), 
-				width*4 );
-		memcpy( ( (U32*)surface->pixels + i*width ), 
-				( (U32*)surface->pixels + (height-1-i)*width ),
-				width*4 );
-		memcpy( ( (U32*)surface->pixels + (height-1-i)*width ),
-				buffer,
-				width*4 );
+		memcpy(buffer,
+			   ((U32*)surface->pixels + i*width),
+			   width * 4);
+		memcpy(((U32*)surface->pixels + i*width),
+			   ((U32*)surface->pixels + (height - 1 - i)*width),
+			   width * 4);
+		memcpy(((U32*)surface->pixels + (height - 1 - i)*width),
+			   buffer,
+			   width * 4);
 	}
-	delete [] buffer;
+	delete[] buffer;
 
 	// And now, set all the alphas to opaque:
-	for( i=0; i<width*height; ++i )
-		*( (U32*)surface->pixels + i ) |= 0xff000000;
+	for (i = 0; i < width*height; ++i)
+		*((U32*)surface->pixels + i) |= 0xff000000;
 
 	grinliz::Rectangle2I r;
-	r.Set( 0, 0, width-1, height-1 );
-	if ( width == 0 || height == 0 ) {
+	r.Set(0, 0, width - 1, height - 1);
+	if (width == 0 || height == 0) {
 		return;
 	}
 
 	int index = 0;
 	grinliz::GLString path;
-	for (index = 0; index<100; ++index)
+	for (index = 0; index < 100; ++index)
 	{
 		char buf[32];
 		grinliz::SNPrintf(buf, 32, "cap%02d.png", index);
 		GetSystemPath(GAME_SAVE_DIR, buf, &path);
-		FILE* fp = fopen(path.c_str(), "rb" );
-		if ( fp )
-			fclose( fp );
+		FILE* fp = fopen(path.c_str(), "rb");
+		if (fp)
+			fclose(fp);
 		else
 			break;
 	}
-	if ( index < 100 ) {
-		lodepng_encode32_file( path.c_str(), (const unsigned char*)surface->pixels, width, height );
+	if (index < 100) {
+		lodepng_encode32_file(path.c_str(), (const unsigned char*)surface->pixels, width, height);
 	}
-	SDL_FreeSurface(surface); 
+	SDL_FreeSurface(surface);
 }

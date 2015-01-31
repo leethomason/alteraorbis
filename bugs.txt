@@ -73,15 +73,19 @@ x write the list to improve icons
 x fruit logic: clean up to remove wild vs. domestic logic?
 x new art from GT
 x clean up portrait colors
-- de-saturate colors correctly
+x font default settings. (ascent=1 - where to code??) move font to .dat?
+	x tweak ascent / descent? (Or is that a layout bug?)
+x mouse wheel support
+- de-saturate colors correctly: world grid changes, plant changes
 - gobman statues
-- mouse wheel support
 - improve map icon art
 - clean up mother-core image
-xform font default settings. (ascent=1 - where to code??) move font to .dat?
-	- tweak ascent / descent? (Or is that a layout bug?)
+- tune mouse wheel with real mouse
+- hide abandom domain somewhere...
+- console, show tax paid
 
 - deal with fruit overflow
+	- medkit manufacture?
 - check gobman that is House denizen healing
 - unify rotation model
 - tax on buy or sell. show tax income on main screen.
@@ -94,12 +98,13 @@ xform font default settings. (ascent=1 - where to code??) move font to .dat?
 - bar-market-forge need to look more distinct
 - should be able to browse units in character screen
 
+- why are the dry lands relatively empty of plants?
 - weapon assert on start
 - AIComponent::DoShoot assert fires after loading
 - walk target for the avatar
-- GT: ui to show idle and busy workers
-- rethink spawning. spawn based on need? what's around?
-- add rez-in animation
+d GT: ui to show idle and busy workers
+x rethink spawning. spawn based on need? what's around?
+d add rez-in animation
 - maps: what direction is player pointed?
 - Click through of disabled buttons is surprising
 x colors of buildings (not enough)
@@ -108,7 +113,7 @@ x colors of buildings (not enough)
 - general extension of the effect of tech on buildings, and morale on MOBs
 - console: add icons to match screen
 - console: links
-- buttons for weapons changing
+d buttons for weapons changing
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
 - fabricator. trinkets. (see notes)

@@ -22,28 +22,28 @@ using namespace gamui;
 
 // FIXME clock() assumes milliseconds
 
-WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
+WorldGenScene::WorldGenScene(LumosGame* game) : Scene(game)
 {
-	InitStd( &gamui2D, &okay, &cancel );
+	InitStd(&gamui2D, &okay, &cancel);
 	sim = 0;
 
-	worldMap = new WorldMap( WorldGen::SIZE, WorldGen::SIZE );
+	worldMap = new WorldMap(WorldGen::SIZE, WorldGen::SIZE);
 	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
-	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, TEX_RGB16, Texture::PARAM_NONE, this );
+	texman->CreateTexture("worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, TEX_RGB16, Texture::PARAM_NONE, this);
 
 	worldGen = new WorldGen();
-	worldGen->LoadFeatures( "./res/features.png" );
+	worldGen->LoadFeatures("./res/features.png");
 
-	rockGen = new RockGen( WorldGen::SIZE );
+	rockGen = new RockGen(WorldGen::SIZE);
 
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
-					 0, 1, 1, 0 );	// y-flip: image to texture coordinate conversion
-	worldImage.Init( &gamui2D, atom, false );
-	worldImage.SetSize( 400, 400 );
+	RenderAtom atom((const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture("worldGenPreview"),
+					0, 1, 1, 0);	// y-flip: image to texture coordinate conversion
+	worldImage.Init(&gamui2D, atom, false);
+	worldImage.SetSize(400, 400);
 
-	headerText.Init( &gamui2D );
+	headerText.Init(&gamui2D);
 	headerText.SetBounds(400, 0);
 	statText.Init(&gamui2D);
 	statText.SetBounds(400, 0);
@@ -66,9 +66,9 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 
 WorldGenScene::~WorldGenScene()
 {
-	TextureManager::Instance()->TextureCreatorInvalid( this );
-	delete [] worldMap;
-	delete [] pix16;
+	TextureManager::Instance()->TextureCreatorInvalid(this);
+	delete[] worldMap;
+	delete[] pix16;
 	delete worldGen;
 	delete rockGen;
 	delete sim;
@@ -78,10 +78,10 @@ WorldGenScene::~WorldGenScene()
 void WorldGenScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
-	PositionStd( &okay, &cancel );
-	
+	PositionStd(&okay, &cancel);
+
 	float size = gamui2D.Height() * 0.75f;
-	worldImage.SetSize( size, size );
+	worldImage.SetSize(size, size);
 	worldImage.SetPos(gamui2D.Width()*0.5f - size*0.5f, 10.0f);
 
 	LayoutCalculator layout = DefaultLayout();
@@ -91,12 +91,12 @@ void WorldGenScene::Resize()
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
-	newsConsole.consoleWidget.SetSize(400, okay.Y() + okay.Height() - newsConsole.consoleWidget.Y() );
+	newsConsole.consoleWidget.SetSize(400, okay.Y() + okay.Height() - newsConsole.consoleWidget.Y());
 
-//	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
-//	newsConsole.consoleWidget.SetBackground(gray);
+	//	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
+	//	newsConsole.consoleWidget.SetBackground(gray);
 
-	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(), 
+	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(),
 					worldImage.Y());
 	footerText.SetPos(headerText.X(), headerText.Y() + gamui2D.TextHeightVirtual());
 	//footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
@@ -124,9 +124,9 @@ void WorldGenScene::DeActivate()
 }
 
 
-void WorldGenScene::ItemTapped( const gamui::UIItem* item )
+void WorldGenScene::ItemTapped(const gamui::UIItem* item)
 {
-	if ( item == &okay ) {
+	if (item == &okay) {
 		if (genState.mode == GenState::GEN_NOTES) {
 			genState.mode = GenState::WORLDGEN;
 			okay.SetEnabled(false);
@@ -136,67 +136,67 @@ void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 			game->PopScene();
 		}
 	}
-	else if ( item == &cancel ) {
+	else if (item == &cancel) {
 		game->PopScene();
 	}
 }
 
 
-void WorldGenScene::CreateTexture( Texture* t )
+void WorldGenScene::CreateTexture(Texture* t)
 {
-	if ( StrEqual( t->Name(), "worldGenPreview" ) ) {
+	if (StrEqual(t->Name(), "worldGenPreview")) {
 
-		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE; 
+		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
 
-		if ( !pix16 ) {
+		if (!pix16) {
 			pix16 = new U16[SIZE2];
 		}
 		// Must also set SectorData, which is done elsewhere.
-		worldMap->MapInit( worldGen->Land(), worldGen->Path() );
+		worldMap->MapInit(worldGen->Land(), worldGen->Path());
 
-		int i=0;
-		for( int y=0; y<WorldGen::SIZE; ++y ) {
-			for( int x=0; x<WorldGen::SIZE; ++x ) {
-				pix16[i++] = Surface::CalcRGB16( worldMap->Pixel( x, y ));
+		int i = 0;
+		for (int y = 0; y < WorldGen::SIZE; ++y) {
+			for (int x = 0; x < WorldGen::SIZE; ++x) {
+				pix16[i++] = Surface::CalcRGB16(worldMap->Pixel(x, y));
 			}
 		}
-		t->Upload( pix16, SIZE2*sizeof(U16) );
+		t->Upload(pix16, SIZE2*sizeof(U16));
 	}
 	else {
-		GLASSERT( 0 );
+		GLASSERT(0);
 	}
 }
 
 
-void WorldGenScene::BlendLine( int y )
+void WorldGenScene::BlendLine(int y)
 {
-	for( int x=0; x<WorldGen::SIZE; ++x ) {
-		int h = *(worldGen->Land()  + y*WorldGen::SIZE + x);
+	for (int x = 0; x < WorldGen::SIZE; ++x) {
+		int h = *(worldGen->Land() + y*WorldGen::SIZE + x);
 		int r = *(rockGen->Height() + y*WorldGen::SIZE + x);
 
-		if ( h >= WorldGen::LAND0 && h <= WorldGen::LAND3 ) {
-			if ( r ) {
+		if (h >= WorldGen::LAND0 && h <= WorldGen::LAND3) {
+			if (r) {
 				// It is land. The World land is the minimum;
 				// apply the rockgen value.
 
-				h = Max( h, WorldGen::LAND1 + r / 102 );
+				h = Max(h, WorldGen::LAND1 + r / 102);
 				//h = WorldGen::LAND1 + r / 102;
-				GLASSERT( h >= WorldGen::LAND0 && h <= WorldGen::LAND3 );
+				GLASSERT(h >= WorldGen::LAND0 && h <= WorldGen::LAND3);
 			}
 			else {
 				h = WorldGen::LAND0;
 			}
 		}
-		worldGen->SetHeight( x, y, h );
+		worldGen->SetHeight(x, y, h);
 	}
 }
 
 
 void WorldGenScene::SetMapBright(bool b)
 {
-	RenderAtom atom((const void*)(b ? UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE : UIRenderer::RENDERSTATE_UI_DISABLED), 
-		TextureManager::Instance()->GetTexture("worldGenPreview"),
-		0, 1, 1, 0);	// y-flip: image to texture coordinate conversion
+	RenderAtom atom((const void*)(b ? UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE : UIRenderer::RENDERSTATE_UI_DISABLED),
+					TextureManager::Instance()->GetTexture("worldGenPreview"),
+					0, 1, 1, 0);	// y-flip: image to texture coordinate conversion
 	worldImage.SetAtom(atom);
 }
 
@@ -226,15 +226,15 @@ void WorldGenScene::DoTick(U32 delta)
 			cancel.SetEnabled(true);
 
 			headerText.SetText("Welcome to world generation!\n\n"
-							  "This process will take a few minutes (grab some water "
-							  "or coffee) while the world is generated. This will delete any game in progress. Once generated, "
-							  "the world persists and you can play a game, with time passing and domains rising and falling, for "
-							  "as long as you wish.\n\n"
-							  "World generation plays the 1st Age: The Age of Fire, from date 0.00 to 1.00.\n\n"
-							  "Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
-							  "destroying land. There are few monsters during the Age of Fire, so at the end of world generation "
-							  "rock will dominate the landscape. Over time, the forces of motion and rock will balance.\n\n"
-							  "Tap 'okay' to generate or world or 'cancel' to return to title.");
+							   "This process will take a few minutes (grab some water "
+							   "or coffee) while the world is generated. This will delete any game in progress. Once generated, "
+							   "the world persists and you can play a game, with time passing and domains rising and falling, for "
+							   "as long as you wish.\n\n"
+							   "World generation plays the 1st Age: The Age of Fire, from date 0.00 to 1.00.\n\n"
+							   "Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
+							   "destroying land. There are few monsters during the Age of Fire, so at the end of world generation "
+							   "rock will dominate the landscape. Over time, the forces of motion and rock will balance.\n\n"
+							   "Tap 'okay' to generate or world or 'cancel' to return to title.");
 		}
 		break;
 
@@ -281,9 +281,8 @@ void WorldGenScene::DoTick(U32 delta)
 							if (!n.empty()) {
 								name = n.safe_str();
 							}
-							GLASSERT(NUM_SECTORS == 16);	// else the printing below won't be correct.
 							postfix = "";
-							postfix.Format("(%c%d)", 'A' + i, j+1);
+							postfix.Format(" (%c%d)", 'A' + i, j + 1);
 							name += postfix;
 							sectorData[j*NUM_SECTORS + i].name = StringPool::Intern(name.c_str());
 						}

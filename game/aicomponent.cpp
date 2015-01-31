@@ -2931,15 +2931,13 @@ int AIComponent::DoTick( U32 deltaTime )
 	if (thisComp.item->flags & (GameItem::HAS_NEEDS | GameItem::AI_USES_BUILDINGS)) {
 		if (needsTicker.Delta(deltaTime)) {
 			CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
-			bool atHomeCore = cs && cs->IsCitizen(parentChit->ID());
+			CoreScript* homeCore = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
+			bool atHomeCore = cs && (cs == homeCore);
 
 			// Squaddies, on missions, don't have needs. Keeps them 
 			// from running off or falling apart in the middle.
-			CoreScript* homeCore = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
-			// FIXME: this assert fires. working on a different bug.
-			//GLASSERT(!atHomeCore || (cs == homeCore));
+			// But for the other denizens:
 			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID())) {
-
 				static const double LOW_MORALE = 0.25;
 
 				if (AtFriendlyOrNeutralCore()) {
@@ -3005,7 +3003,6 @@ int AIComponent::DoTick( U32 deltaTime )
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
 	switch( currentAction ) {
-
 		case MOVE:		
 			DoMove( thisComp );
 			break;

@@ -241,7 +241,7 @@ void TitleScene::Resize()
 
 	layout.PosAbs( &note, 0, -2 );
 	note.SetVisible(!visible);
-	note.SetBounds( gamui2D.Width() / 2.0f, 0 );
+	note.SetBounds( gamui2D.Width() -(layout.GutterX() * 2.0f), 0 );
 
 	layout.PosAbs(&audioButton, -1, 0);
 	layout.PosAbs(&creditsButton, -2, 0);

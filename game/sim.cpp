@@ -875,16 +875,16 @@ void Sim::UseBuilding()
 		if ( cs && ic ) {
 			if ( name == ISC::vault ) {
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0, 0 ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0 ));
 			}
 			else if ( name == ISC::market ) {
 				// The avatar doesn't pay sales tax.
 				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0, 0 ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0 ));
 			}
 			else if (name == ISC::exchange) {
 				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
-					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0, 0));
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0));
 			}
 			else if ( name == ISC::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
