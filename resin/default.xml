@@ -40,6 +40,7 @@
   <!-- Model textures -->
   <texture filename="palette.png" depth="32" />
   
+  <texture filename="palette_desat50.png" depth="32" />
   <texture filename="palette_50.png" emissive="true" depth="32" />
   <texture filename="palette_100.png" emissive="true" depth="32" />
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" depth="32" />
@@ -50,7 +51,7 @@
   <texture filename="kioskscreen.png" filename2="black512.png" emissive="true" colorMap="true"/>
 
   <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64" depth="32"/>
-  <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" depth="32"/>
+  <texture assetName="voxmap" filename="voxmap_50sat.png" filename2="voxmap_em.png" emissive="true" depth="32"/>
   <texture filename="flags.png" />
   <texture filename="calibration.png" />
   <texture filename="fixedfont.png" noMip="true"/>

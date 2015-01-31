@@ -23,17 +23,15 @@ void MapGridWidget::Init(Gamui* gamui2D)
 		image[i].Init(gamui2D, RenderAtom(), true);
 	}
 
-	image[MOB_COUNT_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[MOB_COUNT_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[MOB_COUNT_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[CIV_TECH_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-//	image[POPULATION_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+	image[FACE_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+	image[FACE_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+	image[FACE_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+	image[GOLD_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
 
-	image[FACE_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[FACE_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[FACE_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[GOLD_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-//	image[GARRISON_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+	image[MOB_COUNT_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+	image[MOB_COUNT_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+	image[MOB_COUNT_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+	image[CIV_TECH_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
 }
 
 
@@ -93,19 +91,26 @@ void MapGridWidget::DoLayout()
 	}
 
 	textLabel.SetPos(x, y);
+	static const float MULT = 0.8f;
 
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].SetSize(dw, dh);
 	}
 	for (int i = 0; i < NUM_FACE_IMAGES; ++i) {
 		float fy = compact ? y : y + dh;
-		image[FACE_IMAGE_0 + i].SetPos(x + dw * float(i), fy);
+		image[FACE_IMAGE_0 + i].SetSize(dw * MULT, dh * MULT);
+		image[FACE_IMAGE_0 + i].SetCenterPos(x + dw * float(i) + dw * 0.5f, fy + dh * 0.5f);
 		image[MOB_COUNT_IMAGE_0 + i].SetPos(x + dw*float(i), fy);
 	}
 
 	float fy = compact ? y + dh : y + dh * 2.0f;
 	image[CIV_TECH_IMAGE].SetPos(x, fy);
-	image[GOLD_IMAGE].SetPos(x, fy);
+
+//	image[GOLD_IMAGE].SetSize(dw * MULT, dh * MULT);
+	image[GOLD_IMAGE].SetCenterPos(x + dw * 0.5f, fy + dh * 0.5f);
+
+	float fx = compact ? x + dw : x + dw*2.0f;
+	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
 }
 
 
@@ -171,6 +176,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 			CStr<64> str;
 			str.Format("%s_sil", countArr[i].name.safe_str());
 			atom = LumosGame::CalcUIIconAtom(str.safe_str(), true, 0);
+			GLASSERT(atom.textureHandle);
 			atom.renderState = (void*)UIRenderer::RENDERSTATE_UI_NORMAL;
 
 			if (countArr[i].count > 12) countAtom = LumosGame::CalcUIIconAtom("num4");
@@ -231,4 +237,13 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	else if (gold> 100)		goldAtom = LumosGame::CalcUIIconAtom("au1");
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
+
+	if (coreScript && home) {
+		RenderAtom atom;
+		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
+
+		if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
+		else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+		else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+	}
 }

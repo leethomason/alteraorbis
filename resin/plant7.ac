@@ -13,7 +13,7 @@ kids 7
 OBJECT poly
 name "sphere"
 loc -0.0048815 -0.19675 0.0109318
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 -2.98023e-008 0.0968773 5.96046e-008
@@ -298,7 +298,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0879038 -0.0917809 -0.222667
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.027006 0.0932118 -0.186796
@@ -433,7 +433,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.224817 -0.0215489 -0.0352061
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.128797 -0.146046 0.106227
@@ -568,7 +568,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.136106 -0.0215489 -0.155174
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.140308 0.119421 -0.0918005
@@ -703,7 +703,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0587505 -0.126897 0.180262
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0107663 0.0683728 0.202272
@@ -838,7 +838,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.243005 -0.059821 0.0167591
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.188663 -0.101525 -0.0844375
@@ -973,7 +973,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.120259 -0.0917808 0.205094
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.167967 -0.0868196 -0.135064
@@ -1112,7 +1112,7 @@ kids 7
 OBJECT poly
 name "sphere"
 loc 0.000848234 -0.19675 -0.0119421
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 0.0596167 -0.0484387 0.0710485
@@ -1397,7 +1397,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.158759 -0.0917809 0.179173
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0694703 -0.0868196 -0.204032
@@ -1532,7 +1532,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.2233 -0.0215489 -0.0438089
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.136158 0.145345 0.0180764
@@ -1667,7 +1667,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0748252 -0.0215489 0.192367
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.142187 -0.111223 -0.140451
@@ -1802,7 +1802,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.116861 -0.126897 -0.149297
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0528603 -0.0631727 0.22009
@@ -1937,7 +1937,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.234082 -0.059821 0.0673641
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.184125 0.0979816 0.0221721
@@ -2072,7 +2072,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0428604 -0.0917808 -0.233857
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0700103 0.0932118 -0.175273
@@ -2211,7 +2211,7 @@ kids 7
 OBJECT poly
 name "sphere"
 loc 0.0119706 -0.19675 -0.000195816
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 5.96046e-008 0.0968773 -1.49012e-008
@@ -2496,7 +2496,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.164655 -0.0917809 0.173771
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.157882 0.0932118 0.103419
@@ -2631,7 +2631,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0631041 -0.0215489 0.218632
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0418425 -0.146046 -0.161623
@@ -2766,7 +2766,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.198157 -0.0215489 -0.0577746
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.142496 0.119421 -0.0883659
@@ -2901,7 +2901,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.138544 -0.126897 -0.129428
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.178771 0.0683728 -0.0952414
@@ -3036,7 +3036,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0875093 -0.059821 -0.22732
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.00320581 -0.101525 0.206671
@@ -3171,7 +3171,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.236702 -0.0917808 0.0223153
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.193395 -0.0868196 -0.0951494
@@ -3310,7 +3310,7 @@ kids 7
 OBJECT poly
 name "sphere"
 loc -0.00904411 -0.19675 0.00784454
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 0.00808343 -0.0484387 -0.0923943
@@ -3595,7 +3595,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0144351 -0.0917809 -0.238954
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0951492 -0.0868196 0.193395
@@ -3730,7 +3730,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.188874 -0.0215489 -0.126919
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0834966 0.145345 -0.10906
@@ -3865,7 +3865,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.188934 -0.0215489 -0.0831149
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.199855 -0.111223 -0.00122735
@@ -4000,7 +4000,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0229361 -0.126897 0.188202
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.118249 -0.0631727 -0.193005
@@ -4135,7 +4135,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.213154 -0.059821 0.117887
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.145874 0.0979816 0.114518
@@ -4270,7 +4270,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.195669 -0.0917808 0.135055
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.173442 0.0932118 0.074432
@@ -4409,7 +4409,7 @@ kids 21
 OBJECT poly
 name "block"
 loc -0.31691 -0.00258313 -0.104376
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.116421 0.0521188 0.0509265
@@ -4544,7 +4544,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0424891 0.015287 -0.116122
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0979168 0.0547858 0.0783532
@@ -4679,7 +4679,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.200964 -0.0222181 -0.0680129
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0793743 -0.0353226 -0.132054
@@ -4814,7 +4814,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.0587473 0.0366866 -0.253648
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.134152 -0.0621896 -0.000839725
@@ -4949,7 +4949,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.312349 0.0366866 -0.283619
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0560467 0.0812687 -0.0746193
@@ -5084,7 +5084,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -0.175879 -0.00258314 -0.360274
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0638683 -0.0485446 0.132321
@@ -5219,7 +5219,7 @@ kids 0
 OBJECT poly
 name "sphere"
 loc -0.191639 -0.0612759 -0.191414
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 0.00542617 -0.0270842 -0.0632163
@@ -5504,7 +5504,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.362726 -0.00258313 -0.138267
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.129815 -0.0485447 -0.0651013
@@ -5639,7 +5639,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.145101 0.015287 -0.309068
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.00215197 -0.0567673 0.141405
@@ -5774,7 +5774,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.296838 -0.0222181 -0.24209
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.119999 0.0382302 -0.0651643
@@ -5909,7 +5909,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0708296 0.0366866 -0.193065
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.09565 0.0667733 -0.06046
@@ -6044,7 +6044,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.2462 0.0366866 -0.00394718
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0280864 -0.081661 -0.110583
@@ -6179,7 +6179,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0933175 -0.00258314 -0.0346412
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.105977 0.0521188 0.0707596
@@ -6314,7 +6314,7 @@ kids 0
 OBJECT poly
 name "sphere"
 loc 0.211877 -0.0612759 -0.153669
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 0 0.0541684 0
@@ -6599,7 +6599,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.107587 -0.00258313 0.329475
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.112747 -0.0485447 -0.0924108
@@ -6734,7 +6734,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.351426 0.015287 0.200616
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.126639 -0.0567673 -0.0577723
@@ -6869,7 +6869,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.227746 -0.0222181 0.312485
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.00722718 0.0382302 0.138395
@@ -7004,7 +7004,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.279671 0.0366866 0.0829788
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0941811 0.0667733 -0.06281
@@ -7139,7 +7139,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.0374031 0.0366866 0.165061
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 0.0864544 -0.081661 0.0726806
@@ -7274,7 +7274,7 @@ kids 0
 OBJECT poly
 name "block"
 loc 0.129305 -0.00258314 0.0368005
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 17
 -0.0181277 0.0521188 -0.127806
@@ -7409,7 +7409,7 @@ kids 0
 OBJECT poly
 name "sphere"
 loc 0.185034 -0.0612759 0.196629
-texture "palette.png"
+texture "palette_desat50.png"
 crease 45.000000
 numvert 25
 0 0.0541684 2.98023e-008

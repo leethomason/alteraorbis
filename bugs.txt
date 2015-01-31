@@ -76,7 +76,9 @@ x clean up portrait colors
 x font default settings. (ascent=1 - where to code??) move font to .dat?
 	x tweak ascent / descent? (Or is that a layout bug?)
 x mouse wheel support
-- de-saturate colors correctly: world grid changes, plant changes
+- de-saturate colors correctly: 
+	x world grid changes
+	- plant changes
 - gobman statues
 - improve map icon art
 - clean up mother-core image
