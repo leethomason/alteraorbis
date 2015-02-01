@@ -63,6 +63,10 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		squadMark[1][i].Init(&gamui2D, atom, true);
 	}
 
+	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
+		diplomacy[i].Init(&gamui2D, RenderAtom(), true);
+	}
+
 	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
 	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 	travelMark.Init( &gamui2D, travelAtom, true );
@@ -74,16 +78,17 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		gridWidget[i].Init(&gamui2D);
 	}
 
-	for (int i = 0; i < NUM_CANVAS; ++i) {
-		static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
-		RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
-		webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
-		webCanvas[i].Init(&gamui2D, webAtom);
-	}
-	webCanvas[WHITE_CANVAS].SetLevel(Gamui::LEVEL_ICON);
+	//for (int i = 0; i < NUM_CANVAS; ++i) {
+	//	static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
+	//	RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
+	//	webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+	//	webCanvas[i].Init(&gamui2D, webAtom);
+	//}
+	webCanvas.Init(&gamui2D, LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY));
+	webCanvas.SetLevel(Gamui::LEVEL_ICON);
 
-	RenderAtom mc = LumosGame::CalcUIIconAtom("motherCore");
-	motherCore.Init(&gamui2D, mc, true);
+//	RenderAtom mc = LumosGame::CalcUIIconAtom("motherCore");
+//	motherCore.Init(&gamui2D, mc, true);
 }
 
 
@@ -158,10 +163,9 @@ void MapScene::Resize()
 	homeMark[1].SetSize(dx / float(MAP2_SIZE), dy / float(MAP2_SIZE));
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 
-	for (int i = 0; i < NUM_CANVAS; ++i) {
-		webCanvas[i].SetPos(mapImage.X(), mapImage.Y());
-	}
-	motherCore.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+	webCanvas.SetPos(mapImage.X(), mapImage.Y());
+//	motherCore.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+
 	DrawMap();
 }
 
@@ -257,6 +261,15 @@ void MapScene::DrawMap()
 		playerPos = player->GetSpatialComponent()->GetPosition2D();
 	}
 
+	const float dx = mapImage.Width() / float(NUM_SECTORS);
+	const float dy = mapImage.Height() / float(NUM_SECTORS);
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			diplomacy[j*NUM_SECTORS + i].SetSize(dx, dy);
+			diplomacy[j*NUM_SECTORS + i].SetPos(mapImage.X() + dx * float(i), mapImage.Y() + dy * float(j));
+		}
+	}
+
 	bool inBounds = true;
 	Vector2F v;
 
@@ -293,7 +306,7 @@ void MapScene::DrawMap()
 	float scale = float(mapImage.Width()) / float(NUM_SECTORS);
 	{
 		const Web& web = lumosChitBag->GetSim()->CalcWeb();
-		webCanvas[WHITE_CANVAS].Clear();
+		webCanvas.Clear();
 
 		for (int i = 0; i < web.NumNodes(); i++) {
 			const Web::Node* node = web.NodeAt(i);
@@ -302,32 +315,37 @@ void MapScene::DrawMap()
 				Vector2I s1 = node->child[k]->sector;
 				Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
 				Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
-				webCanvas[WHITE_CANVAS].DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node->strength * 2.0f);
+				webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node->strength * 2.0f);
 			}
 		}
 	}
-	for (int i = 0; i < 3; ++i) {
-		static const int RELATE[3] = { RELATE_FRIEND, RELATE_NEUTRAL, RELATE_ENEMY };
-		static const int CANVAS[3] = { GREEN_CANVAS, YELLOW_CANVAS, RED_CANVAS };
 
-		int canvas = CANVAS[i];
-		int relate = RELATE[i];
-		webCanvas[canvas].Clear();
+	CoreScript* homeCore = context->chitBag->GetHomeCore();
 
-		CCoreArray arr;
-		Sim* sim = lumosChitBag->GetSim();
-		sim->CalcStrategicRelationships(homeSector, NUM_SECTORS, relate, &arr);
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			diplomacy[i].SetAtom(RenderAtom());
 
-		for (int k = 0; k < arr.Size(); ++k) {
-			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();
-			CoreScript* core = CoreScript::GetCore(s);
+			Vector2I sector = { i, j };
+			CoreScript* core = CoreScript::GetCore(sector);
+			RenderAtom atom;
+
+			if (core && homeCore && homeCore->InUse() && core->InUse()) {
+				int relate = Team::GetRelationship(core->ParentChit(), homeCore->ParentChit());
+				if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
+				else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+				else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+				
+				diplomacy[j*NUM_SECTORS + i].SetSize(scale*0.8f, scale*0.8f);
+			}
+
 			if (core && core->InUse() && core->ParentChit()->Team() == Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE)) {
-				motherCore.SetPos(mapImage.X() + mapImage.Width() * float(s.x) / float(NUM_SECTORS),
-								  mapImage.Y() + mapImage.Height() * float(s.y) / float(NUM_SECTORS));
+				atom = LumosGame::CalcUIIconAtom("motherCore");
+				diplomacy[j*NUM_SECTORS + i].SetSize(scale, scale);
 			}
-			else {
-				webCanvas[canvas].DrawRectangle(scale*float(s.x), scale*float(s.y), scale, scale);
-			}
+
+			diplomacy[j*NUM_SECTORS + i].SetAtom(atom);
+			diplomacy[j*NUM_SECTORS + i].SetCenterPos(mapImage.X() + scale * (float(i) + 0.5f), mapImage.Y() + scale * (float(j) + 0.5f));
 		}
 	}
 }

@@ -621,6 +621,7 @@ void DomainAI::DoBuild()
 			
 			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::KIOSK] < 2 && BuildBuilding(BuildScript::KIOSK)) break;
+			if (BuildRoad()) break;	// will return true until all roads are built. must have roads to get to kiosk
 		}
 		if (eff >= 2 && nElixir > 4 && arr[BuildScript::TEMPLE] ) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
@@ -629,7 +630,6 @@ void DomainAI::DoBuild()
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::KIOSK] < 4 && BuildBuilding(BuildScript::KIOSK)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-			if (BuildRoad()) break;	// will return true until all roads are built.
 		}
 	} while (false);
 }

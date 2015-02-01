@@ -1066,7 +1066,9 @@ bool AIComponent::RampageDone(const ComponentSet& thisComp)
 
 void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 {
-	if ( thisComp.move->IsMoving() )
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+	// FIXME: 2 checks, Moving and !stopped.
+	if (pmc && pmc->IsMoving() && !pmc->Stopped())
 		return;
 
 	// Where are we, and where to next?
@@ -1082,6 +1084,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		currentAction = NO_ACTION;
 		return;
 	}
+
+	// FIXME how to handle buildings?
 
 	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
 		this->Target(next, false);
