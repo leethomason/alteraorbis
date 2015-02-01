@@ -160,10 +160,5 @@ void SpatialComponent::Teleport(const grinliz::Vector3F& pos)
 
 void SpatialComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
-		// NOT deleted by destroy sequence.
-	}
-	else {
-		super::OnChitMsg( chit, msg );
-	}
+	super::OnChitMsg( chit, msg );
 }

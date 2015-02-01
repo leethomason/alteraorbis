@@ -510,7 +510,7 @@ int DomainAI::DoTick(U32 delta)
 {
 	PROFILE_FUNC();
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial || !parentChit->GetItem() || parentChit->Destroyed() ) 
+	if (!spatial || !parentChit->GetItem()) 
 		return ticker.Next();
 
 	if (ticker.Delta(delta)) {
@@ -667,7 +667,7 @@ int DeityDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (!parentChit->Destroyed() && item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
+	if (item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
 		item->wallet.Deposit(ReserveBank::GetWallet(), 100);
 	}
 
@@ -739,7 +739,7 @@ int TrollDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (!parentChit->Destroyed() && item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
+	if (item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
 		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
 	}
 

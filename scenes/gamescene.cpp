@@ -1649,7 +1649,7 @@ void GameScene::OpenEndGame()
 
 void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
 		if (chit->GetComponent("CoreScript")) {
 			if (sim->GetChitBag()->GetHomeTeam() && (chit->Team() == sim->GetChitBag()->GetHomeTeam())) {
 				OpenEndGame();

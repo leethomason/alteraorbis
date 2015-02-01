@@ -30,8 +30,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), playerControlled( false ), timeToTick( 0 ), timeSince( 0 ),
-destroyed(0)
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), playerControlled( false ), timeToTick( 0 ), timeSince( 0 )
 {
 	Init( _id, bag );
 }
@@ -45,7 +44,6 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 
 	id = _id;
 	chitBag = _chitBag;
-	destroyed = 0;
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
@@ -86,9 +84,6 @@ void Chit::Serialize(XStream* xs)
 	XARC_SER( xs, id );
 	XARC_SER( xs, timeSince );
 	XARC_SER_DEF( xs, playerControlled, false );
-
-	// Data Binding
-	XARC_SER(xs, destroyed);
 
 	if ( xs->Saving() ) {
 		for( int i=0; i<NUM_SLOTS; ++i ) {
@@ -291,8 +286,7 @@ void Chit::OnChitEvent( const ChitEvent& event )
 void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
 	switch (msg.ID()) {
-		case ChitMsg::CHIT_DESTROYED_START:
-		case ChitMsg::CHIT_DESTROYED_END:
+		case ChitMsg::CHIT_DESTROYED:
 		case ChitMsg::CHIT_DAMAGE:
 		Context()->chitBag->SendMessage(this, msg);
 		break;
