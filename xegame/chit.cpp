@@ -54,6 +54,10 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	timeToTick = 0;
 	timeSince = 0;
 	playerControlled = false;
+
+	position.Zero();
+	static const grinliz::Vector3F UP = { 0, 1, 0 };
+	rotation.FromAxisAngle( UP, 0 );
 }
 
 
@@ -86,6 +90,8 @@ void Chit::Serialize(XStream* xs)
 	XARC_SER( xs, id );
 	XARC_SER( xs, timeSince );
 	XARC_SER_DEF( xs, playerControlled, false );
+	XARC_SER(xs, position);
+	XARC_SER(xs, rotation);
 
 	// Data Binding
 	XARC_SER(xs, destroyed);
@@ -199,6 +205,8 @@ void Chit::Add( Component* c, bool loading )
 	GLASSERT(!aiComponent || aiComponent->ToAIComponent());
 	GLASSERT(!healthComponent || healthComponent->ToHealthComponent());
 	GLASSERT(!renderComponent || renderComponent->ToRenderComponent());
+
+	Context()->chitBag->AddToSpatialHash( this, (int)position.x, (int)position.z );
 }
 
 
@@ -385,6 +393,61 @@ void Chit::DebugStr( GLString* str )
 }
 
 
+void Chit::SetPosition(const grinliz::Vector3F& value)
+{
+	Vector2I oldWorld = ToWorld2I(position);
+	Vector2I newWorld = ToWorld2I(value);
+
+	if (oldWorld != newWorld) {
+		Context()->chitBag->UpdateSpatialHash(this, oldWorld.x, oldWorld.y, newWorld.x, newWorld.y);
+	}
+	if (position != value) {
+		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		SetTickNeeded();
+	}
+	position = value;
+}
+
+
+void Chit::SetRotation(const grinliz::Quaternion& value)
+{
+	if (value != rotation) {
+		rotation = value;
+		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		SetTickNeeded();
+	}
+}
+
+
+void Chit::SetPosRot(const grinliz::Vector3F& p, const grinliz::Quaternion& q)
+{
+	if (p != position || q != rotation) {
+		position = p;
+		rotation = q;
+		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		SetTickNeeded();
+	}
+}
+
+
+Vector3F Chit::Heading() const
+{
+	Matrix4 r;
+	rotation.ToMatrix( &r );
+	Vector3F v = r * V3F_OUT;
+	return v;
+}
+
+
+Vector2F Chit::Heading2D() const
+{
+	Vector3F h = Heading();
+	Vector2F norm = { h.x, h.z };
+	norm.Normalize();
+	return norm;	
+}
+
+
 int Chit::Team() const
 {
 	const GameItem* item = GetItem();
@@ -407,10 +470,6 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 	if ( _chit ) {
 		chit = _chit;
 		int error = 0;
-		if ( bits & Chit::SPATIAL_BIT ) {
-			spatial = chit->GetSpatialComponent();
-			if ( !spatial ) ++error;
-		}
 		if ( bits & Chit::AI_BIT ) {
 			ai = chit->GetAIComponent();
 			if ( !ai ) ++error;
@@ -463,21 +522,9 @@ void ComponentSet::Zero()
 {
 	okay = false;
 	chit = 0;
-	spatial = 0;
 	move = 0;
 	itemComponent = 0;
 	item = 0;
 	render = 0;
 	ai = 0;
-}
-
-
-bool InSameSector(Chit* a, Chit* b)
-{
-	SpatialComponent* sca = a->GetSpatialComponent();
-	SpatialComponent* scb = b->GetSpatialComponent();
-	if (sca && scb) {
-		return sca->GetSector() == scb->GetSector();
-	}
-	return false;
 }

@@ -360,7 +360,6 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	Chit* chit = context.chitBag->NewChit();
 
-	chit->Add( new SpatialComponent());
 	const char* resourceName = itemDefArr[0]->ResourceName();
 	RenderComponent* rc = new RenderComponent( resourceName );
 	chit->Add( rc );
@@ -396,7 +395,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	chit->Add( new HealthComponent());
 	chit->Add( new DebugStateComponent());
 
-	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
+	chit->SetPosition((float)p.x + 0.5f, 0, (float)p.y + 0.5f);
+	Quaternion q = Quaternion::MakeYRotation(float(random.Rand(360)));
+	chit->SetRotation(q);
 
 	return chit;
 }

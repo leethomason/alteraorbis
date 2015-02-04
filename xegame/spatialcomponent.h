@@ -37,10 +37,6 @@ private:
 	typedef Component super;
 public:
 	SpatialComponent() {
-		position.Zero();
-
-		static const grinliz::Vector3F UP = { 0, 1, 0 };
-		rotation.FromAxisAngle( UP, 0 );
 	}
 
 	virtual const char* Name() const { return "SpatialComponent"; }
@@ -55,6 +51,9 @@ public:
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
+	static void Teleport(Chit* chit, const grinliz::Vector3F& pos);
+
+#if 0
 	// Position and rotation are absolute (post-transform)
 	void SetPosition( float x, float y, float z )	{ grinliz::Vector3F v = { x, y, z }; SetPosition( v ); }
 	void SetPosition( const grinliz::Vector3F& v )	{ SetPosRot( v, rotation ); }
@@ -68,7 +67,6 @@ public:
 	void SetPosYRot( float x, float y, float z, float yRot );
 	void SetPosYRot( const grinliz::Vector3F& v, float yRot ) { SetPosYRot( v.x, v.y, v.z, yRot ); }
 	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
-	void Teleport(const grinliz::Vector3F& pos);
 
 	grinliz::Vector3F GetHeading() const;
 
@@ -82,10 +80,8 @@ public:
 	}
 
 	virtual grinliz::Rectangle2I Bounds() const		{ grinliz::Rectangle2I b; b.min = b.max = GetPosition2DI(); return b; }
-
+#endif
 protected:
-	grinliz::Vector3F	position;
-	grinliz::Quaternion	rotation;
 };
 
 

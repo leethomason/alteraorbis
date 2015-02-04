@@ -59,7 +59,7 @@ void DomainAI::OnAdd(Chit* chit, bool initialize)
 	ticker.SetPeriod(10 * 1000 + chit->random.Rand(1000));
 
 	// Computer the roads so that we have them later.
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 	roads = new RoadAI(sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE);
 	CDynArray<Vector2I> road;
@@ -126,7 +126,7 @@ bool DomainAI::BuyWorkers()
 	for (int i = 0; i < 4; ++i) {
 		if (arr.Size() == i && mainItem->wallet.Gold() >= GOLD[i]) {
 			ReserveBank::GetWallet()->Deposit( &mainItem->wallet, WORKER_BOT_COST);
-			Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
+			Context()->chitBag->NewWorkerChit(cs->ParentChit()->Position(), parentChit->Team());
 			return true;	// we should be buying workers, even if we can't.
 		}
 	}
@@ -136,8 +136,7 @@ bool DomainAI::BuyWorkers()
 
 bool DomainAI::Preamble(grinliz::Vector2I* sector, CoreScript** cs, WorkQueue** wq, int *pave)
 {
-	GLASSERT(parentChit->GetSpatialComponent());
-	*sector = parentChit->GetSpatialComponent()->GetSector();
+	*sector = ToSector(parentChit->Position());
 	*cs = CoreScript::GetCore(*sector);
 	GLASSERT(*cs);
 	if (!(*cs)) return false;
@@ -354,7 +353,7 @@ bool DomainAI::BuildFarm()
 
 	int bestScore = 0;
 	RoadAI::BuildZone bestZone;
-	Vector2I center = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+	Vector2I center = ToWorld2I(cs->ParentChit()->Position());
 
 	for (roads->Begin(7); !roads->Done(); roads->Next()) {
 
@@ -422,12 +421,12 @@ bool DomainAI::ClearDisconnected()
 
 	// FIXME: handle case where there are more than 32 buildings. Cache dynarray?
 	CChitArray arr;
-	Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
+	Rectangle2I inner = InnerSectorBounds(ToSector(parentChit->Position()));
 	Context()->chitBag->QueryBuilding(IString(), inner, &arr);
 
 	for (int i = 0; i < arr.Size(); ++i) {
 		Chit* chit = arr[i];
-		MapSpatialComponent* msc = chit->GetSpatialComponent()->ToMapSpatialComponent();
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 		if (msc && chit->GetItem()) {
 			if (!roads->IsOnRoad(msc, chit->GetItem()->IName() == ISC::farm)) {
 				workQueue->AddAction(msc->Bounds().min, BuildScript::CLEAR, 0, 0);
@@ -473,14 +472,15 @@ bool DomainAI::ClearRoadsAndPorches()
 	CChitArray arr;
 	Context()->chitBag->QueryBuilding(IString(), bounds, &arr);
 	for (int i = 0; i < arr.Size(); ++i) {
-		MapSpatialComponent* msc = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
+		Chit* chit = arr[i];
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 		Rectangle2I pb;
 		pb.SetInvalid();
 
-		if (msc && arr[i]->GetItem() && arr[i]->GetItem()->IName() == ISC::farm) {
-			Vector2I normal = WorldRotationToNormal(LRint(msc->GetYRotation()));
-			Vector2I p0 = msc->GetPosition2DI() + normal;
-			Vector2I p1 = msc->GetPosition2DI() + normal * FARM_GROW_RAD;
+		if (chit && chit->GetItem() && chit->GetItem()->IName() == ISC::farm) {
+			Vector2I normal = WorldRotationToNormal(LRint(YRotation(chit->Rotation())));
+			Vector2I p0 = ToWorld2I(chit->Position()) + normal;
+			Vector2I p1 = ToWorld2I(chit->Position()) + normal * FARM_GROW_RAD;
 			pb.FromPair(p0, p1);
 		}
 		else if (msc && msc->HasPorch()) {
@@ -509,8 +509,7 @@ bool DomainAI::ClearRoadsAndPorches()
 int DomainAI::DoTick(U32 delta)
 {
 	PROFILE_FUNC();
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial || !parentChit->GetItem() || parentChit->Destroyed() ) 
+	if (!parentChit->GetItem() || parentChit->Destroyed() ) 
 		return ticker.Next();
 
 	if (ticker.Delta(delta)) {
@@ -647,7 +646,7 @@ void DeityDomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
@@ -719,7 +718,7 @@ void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
 	super::OnAdd(chit, initialize);
 	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
 
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
@@ -745,12 +744,12 @@ int TrollDomainAI::DoTick(U32 delta)
 
 	// Build stuff for the trolls to buy.
 	if (forgeTicker.Delta(delta)) {
-		Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+		Vector2I sector = ToSector(parentChit->Position());
 
 		// find a market.
 		// if has cap, make an item
 		// add the item, transfer from reserve bank
-		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+		Vector2F pos = ToWorld2F(parentChit->Position());
 		Chit* market = Context()->chitBag->FindBuilding(ISC::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0);
 		if (market && market->GetItemComponent() && market->GetItemComponent()->CanAddToInventory()) {
 
@@ -846,7 +845,7 @@ void GobDomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
@@ -886,7 +885,7 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 
 	Vector2I c = sectorData.core;
@@ -951,7 +950,7 @@ void HumanDomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
 
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
 	Vector2I c = sectorData.core;
 	Rectangle2I innerBounds = InnerSectorBounds(sector);

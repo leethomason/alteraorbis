@@ -270,11 +270,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 	NewsHistory* history = Context()->chitBag->GetNewsHistory();
 	GLASSERT(history);
 
-	Vector2F pos = { 0, 0 };
-	if ( parentChit->GetSpatialComponent() ) {
-		pos = parentChit->GetSpatialComponent()->GetPosition2D();
-	}
-
+	Vector2F pos = ToWorld2F(parentChit->Position());
 	Chit* destroyer = Context()->chitBag->GetChit( lastDamageID );
 
 	int msg = 0;
@@ -380,10 +376,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			mainItem->hp = double(mainItem->TotalHP());
 		}
 
-		if ( parentChit->GetSpatialComponent() ) {
-			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
-			context->engine->particleSystem->EmitPD( ISC::heal, v, V3F_UP, 30 );
-		}
+		Vector3F v = parentChit->Position();
+		context->engine->particleSystem->EmitPD( ISC::heal, v, V3F_UP, 30 );
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED ) {
 		Chit* gold = (Chit*)msg.Ptr();
@@ -404,12 +398,12 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	else if (msg.ID() == ChitMsg::CHIT_DESTROYED_START)
 	{
 		// Exploding!
-		if ((mainItem->flags & GameItem::EXPLODES) && parentChit->GetSpatialComponent()) {
+		if (mainItem->flags & GameItem::EXPLODES) {
 			int effect = 0;
 			if (mainItem->fireTime) effect |= GameItem::EFFECT_FIRE;
 			if (mainItem->shockTime) effect |= GameItem::EFFECT_SHOCK;
 
-			Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+			Vector3F pos = parentChit->Position();
 
 			DamageDesc dd( MASS_TO_EXPLOSION_DAMAGE * float(mainItem->mass), effect );
 			BattleMechanics::GenerateExplosion(dd, pos, parentChit->ID(), Context()->engine, Context()->chitBag, Context()->worldMap);
@@ -443,10 +437,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// or carrying crystal.
 		MOBIshFilter mobFilter;
 
-		Vector3F pos = { 0, 0, 0 };
-		if ( parentChit->GetSpatialComponent() ) {
-			pos = parentChit->GetSpatialComponent()->GetPosition();
-		}
+		Vector3F pos = parentChit->Position();
 
 		while( itemArr.Size() > 1 ) {
 			const GameItem* remove = itemArr[itemArr.Size() - 1];
@@ -499,10 +490,7 @@ int ItemComponent::ProcessEffect(int delta)
 
 	const float deltaF = float(delta) * 0.001f;
 
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if (!sc) return VERY_LONG_TICK;
-
-	Vector2F pos2 = sc->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(parentChit->Position());
 	Vector2I pos2i = ToWorld2I(pos2);
 	if (pos2i.IsZero()) return VERY_LONG_TICK;	// if we are at origin, not really for processing.
 
@@ -640,7 +628,7 @@ void ItemComponent::DoSlowTick()
 		if ( thisComp.okay ) {
 			CChitArray arr;
 
-			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+			Vector2F pos = ToWorld2F(parentChit->Position());
 			GoldCrystalFilter goldCrystalFilter;
 			Context()->chitBag->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
@@ -787,12 +775,12 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 
 	if ( compSet.okay ) {
 		if ( it.fireTime > 0 ) {
-			ps->EmitPD( ISC::fire, compSet.spatial->GetPosition(), V3F_UP, delta );
-			ps->EmitPD( ISC::smoke, compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( ISC::fire, compSet.chit->Position(), V3F_UP, delta );
+			ps->EmitPD( ISC::smoke, compSet.chit->Position(), V3F_UP, delta );
 			emitted = true;
 		}
 		if ( it.shockTime > 0 ) {
-			ps->EmitPD( ISC::shock, compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( ISC::shock, compSet.chit->Position(), V3F_UP, delta );
 			emitted = true;
 		}
 	}
@@ -939,12 +927,9 @@ GameItem* ItemComponent::RemoveFromInventory( const GameItem* citem )
 
 void ItemComponent::Drop(const GameItem* citem)
 {
-	if (!parentChit->GetSpatialComponent())
-		return;
-
 	GameItem* item = RemoveFromInventory(citem);
 	if (item) {
-		Context()->chitBag->NewItemChit(parentChit->GetSpatialComponent()->GetPosition(), item, true, true, 0);
+		Context()->chitBag->NewItemChit(parentChit->Position(), item, true, true, 0);
 		return;
 	}
 	GLASSERT(0);	// should have found the item.

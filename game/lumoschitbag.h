@@ -182,7 +182,7 @@ public:
 
 
 class LumosChitBag : public ChitBag,
-					 public IMapGridUse
+					 public IMapGridBlocked
 {
 private:
 	typedef ChitBag super;
@@ -267,7 +267,7 @@ public:
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
-	virtual int MapGridUse( int x, int y );
+	virtual bool MapGridBlocked( int x, int y );
 
 	int GetHomeTeam() const	{ return homeTeam; }
 	// Don't set to NEUTRAL: it's important to know that we're in the
@@ -293,7 +293,7 @@ public:
 	}
 	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr );
 
-	Chit* QueryRemovable( const grinliz::Vector2I& pos );
+	//Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 	//LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request

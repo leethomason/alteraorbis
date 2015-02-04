@@ -119,14 +119,11 @@ bool FEFilter(Chit* parentChit, int id) {
 		if (!chit) return false;
 		if (chit->Destroyed()) return false;
 
-		SpatialComponent* sc = chit->GetSpatialComponent();
-		SpatialComponent* parentSC = parentChit->GetSpatialComponent();
-		GLASSERT(sc && parentSC);
-		float range2 = (sc->GetPosition() - parentSC->GetPosition()).LengthSquared();
+		float range2 = (chit->Position() - parentChit->Position()).LengthSquared();
 
 		return (chit != parentChit) 
 			&& (range2 < LOOSE_AWARENESS * LOOSE_AWARENESS)
-			&& (sc->GetSector() == parentSC->GetSector()) 
+			&& (ToSector(chit->Position()) == ToSector(parentChit->Position())) 
 			&& (Team::GetRelationship(chit, parentChit) != EXCLUDED);
 }
 
@@ -293,7 +290,7 @@ Vector3F AIComponent::EnemyPos(int id, bool target)
 				}
 			}
 			else {
-				return chit->GetSpatialComponent()->GetPosition();
+				return chit->Position();
 			}
 		}
 	}
@@ -311,9 +308,7 @@ Vector3F AIComponent::EnemyPos(int id, bool target)
 
 void AIComponent::ProcessFriendEnemyLists(bool tick)
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if ( !sc ) return;
-	Vector2F center = sc->GetPosition2D();
+	Vector2F center = ToWorld2F(parentChit->Position());
 	Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
@@ -365,7 +360,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 
 				if (status == RELATE_ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
 					if (   fullSectorAware 
-						|| Context()->worldMap->HasStraightPath(center, chitArr[i]->GetSpatialComponent()->GetPosition2D())) 
+						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chitArr[i]->Position()))) 
 					{
 						if (FEFilter<RELATE_FRIEND>(parentChit, id)) {
 							enemyList2.Push(id);
@@ -396,8 +391,9 @@ public:
 		return ( v0->GetSpatialComponent()->GetPosition() - origin ).LengthSquared() <
 			   ( v1->GetSpatialComponent()->GetPosition() - origin ).LengthSquared();
 #endif
-		Vector3F p0 = v0->GetSpatialComponent()->GetPosition() - origin;
-		Vector3F p1 = v1->GetSpatialComponent()->GetPosition() - origin;
+
+		Vector3F p0 = v0->Position() - origin;
+		Vector3F p1 = v1->Position() - origin;
 		float len0 = p0.LengthSquared();
 		float len1 = p1.LengthSquared();
 		return len0 < len1;
@@ -411,17 +407,14 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Ve
 {
 	float best = FLT_MAX;
 	Chit* chit = 0;
-	Vector3F pos = thisComp.spatial->GetPosition();
+	Vector3F pos = parentChit->Position();
 
-	for( int i=0; i<n; ++i ) {
+	for (int i = 0; i < n; ++i) {
 		Chit* c = arr[i];
-		SpatialComponent* sc = c->GetSpatialComponent();
-		if ( sc ) {
-			float len2 = (sc->GetPosition() - pos).LengthSquared();
-			if ( len2 < best ) {
-				best = len2;
-				chit = c;
-			}
+		float len2 = (c->Position() - pos).LengthSquared();
+		if (len2 < best) {
+			best = len2;
+			chit = c;
 		}
 	}
 	if ( distance ) {
@@ -429,7 +422,7 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Ve
 	}
 	if ( outPos ) {
 		if ( chit ) {
-			*outPos = chit->GetSpatialComponent()->GetPosition2D();
+			*outPos = ToWorld2F(chit->Position());
 		}
 		else {
 			outPos->Zero();
@@ -474,7 +467,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 
 		RangedWeapon* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 		if ( rangedWeapon ) {
-			Vector3F heading = thisComp.spatial->GetHeading();
+			Vector3F heading = thisComp.chit->Heading();
 			bool explosive = (rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
 
 			if ( rangedWeapon->CanShoot() ) {
@@ -575,8 +568,8 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
-	Vector2F heading = thisComp.spatial->GetHeading2D();
-	Vector2F normalToTarget = leading2D - thisComp.spatial->GetPosition2D();
+	Vector2F heading = thisComp.chit->Heading2D();
+	Vector2F normalToTarget = leading2D - ToWorld2F(thisComp.chit->Position());
 	float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
 	float dot = DotProduct( heading, normalToTarget );
@@ -589,7 +582,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			//float angle = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
-			pmc->QueueDest( thisComp.spatial->GetPosition2D(), &normalToTarget );
+			pmc->QueueDest( ToWorld2F(thisComp.chit->Position()), &normalToTarget );
 		}
 		return;
 	}
@@ -636,11 +629,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
+
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.chit->Position());
 		}
 
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
-		Vector2F heading = targetChit->GetSpatialComponent()->GetPosition2D() - pos2;
+		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
+		Vector2F heading = ToWorld2F(targetChit->Position()) - pos2;
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
@@ -648,7 +642,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
-		thisComp.spatial->SetYRotation(angle);
+		thisComp.chit->SetRotation(Quaternion::MakeYRotation(angle));
 		if (pmc) pmc->Stop();
 	}
 	else if ( targetID < 0 && BattleMechanics::InMeleeZone( context->engine, parentChit, mapPos )) {
@@ -656,10 +650,10 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 		IString sound = weapon->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, weapon->ID(), &thisComp.chit->Position());
 		}
 
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 		Vector2F heading = ToWorld2F( mapPos ) - pos2;
 		heading.Normalize();
 
@@ -668,7 +662,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
-		thisComp.spatial->SetYRotation(angle);
+		thisComp.chit->SetRotation(Quaternion::MakeYRotation(angle));
 		if ( pmc ) pmc->Stop();
 	}
 	else {
@@ -676,7 +670,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		if ( pmc ) {
 			Vector2F targetPos = ToWorld2F(EnemyPos(targetID, false));
 
-			Vector2F pos = thisComp.spatial->GetPosition2D();
+			Vector2F pos = ToWorld2F(thisComp.chit->Position());
 			Vector2F dest = { -1, -1 };
 			pmc->QueuedDest( &dest );
 
@@ -752,7 +746,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 	if (visitorIndex >= 0 && !thisComp.move->IsMoving())
 	{
 		// Visitors at a kiosk.
-		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 		Vector2I sector = ToSector(pos2i);
 		Chit* chit = this->Context()->chitBag->QueryPorch(pos2i, 0);
 		CoreScript* cs = CoreScript::GetCore(sector);
@@ -820,12 +814,12 @@ bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)
 	CoreScript* cs = CoreScript::GetCoreFromTeam(parentChit->Team());
 	if (!cs) return false;
 
-	Vector2I dstSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+	Vector2I dstSector = ToSector(cs->ParentChit()->Position());
 	const SectorData& dstSD = Context()->worldMap->GetSectorData(dstSector);
 
 	SectorPort dstSP;
 	dstSP.sector = dstSector;
-	dstSP.port = dstSD.NearestPort(cs->ParentChit()->GetSpatialComponent()->GetPosition2D());
+	dstSP.port = dstSD.NearestPort(ToWorld2F(cs->ParentChit()->Position()));
 
 	return Move(dstSP, focus);
 }
@@ -834,14 +828,13 @@ bool AIComponent::TravelHome(const ComponentSet& thisComp, bool focus)
 bool AIComponent::Move( const SectorPort& sp, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	SpatialComponent*  sc	  = parentChit->GetSpatialComponent();
 	const ChitContext* context = Context();
-	if ( pmc && sc ) {
+	if ( pmc ) {
 		// Read our destination port information:
 		const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
 				
 		// Read our local get-on-the-grid info
-		SectorPort local = context->worldMap->NearestPort( sc->GetPosition2D() );
+		SectorPort local = context->worldMap->NearestPort( ToWorld2F(parentChit->Position()) );
 		// Completely possible this chit can't actually path anywhere.
 		if ( local.IsValid() ) {
 			const SectorData& localSD = context->worldMap->GetSectorData( local.sector );
@@ -873,7 +866,7 @@ void AIComponent::Stand()
 
 void AIComponent::Pickup( Chit* item )
 {
-	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D() ));
+	taskList.Push( Task::MoveTask( ToWorld2F(item->Position()) ));
 	taskList.Push( Task::PickupTask( item->ID() ));
 }
 
@@ -948,11 +941,7 @@ Chit* AIComponent::GetTarget()
 
 WorkQueue* AIComponent::GetWorkQueue()
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if ( !sc )
-		return 0;
-
-	Vector2I sector = sc->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	if ( !coreScript )
 		return 0;
@@ -982,8 +971,7 @@ void AIComponent::Rampage( int dest )
 	aiMode = RAMPAGE_MODE; 
 	currentAction = NO_ACTION;
 
-	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), 
-				    parentChit->GetItemID(), 0, parentChit->Team() );
+	NewsEvent news( NewsEvent::RAMPAGE, ToWorld2F(parentChit->Position()), parentChit->GetItemID(), 0, parentChit->Team() );
 	Context()->chitBag->GetNewsHistory()->Add( news );	
 }
 
@@ -1001,12 +989,12 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 
 	// Workers teleport. Rampaging was annoying.
 	if (thisComp.item->flags & GameItem::AI_DOES_WORK) {
-		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs) {
-			Vector2I csPos2i = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+			Vector2I csPos2i = ToWorld2I(cs->ParentChit()->Position());
 			if (csPos2i != pos2i) {
-				thisComp.spatial->Teleport(ToWorld3F(csPos2i));
+				SpatialComponent::Teleport(parentChit, ToWorld3F(csPos2i));
 			}
 			if (csPos2i == pos2i) {
 				destinationBlocked = 0;
@@ -1019,8 +1007,8 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 	// Go for a rampage: remember, if the path is clear,
 	// it's essentially just a random walk.
 	destinationBlocked = 0;
-	const SectorData& sd = context->worldMap->GetSectorData( ToSector( thisComp.spatial->GetPosition2DI() ));
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	const SectorData& sd = context->worldMap->GetSectorData( ToSector( thisComp.chit->Position() ));
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 
 	CArray< int, 5 > targetArr;
 
@@ -1044,7 +1032,7 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 bool AIComponent::RampageDone(const ComponentSet& thisComp)
 {
 	const ChitContext* context = Context();
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 	const SectorData& sd = context->worldMap->GetSectorData(ToSector(pos2i));
 	Rectangle2I dest;
 
@@ -1071,7 +1059,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 
 	// Where are we, and where to next?
 	const ChitContext* context = Context();
-	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i			= ToWorld2I(thisComp.chit->Position());
 	const WorldGrid& wg0	= context->worldMap->GetWorldGrid( pos2i.x, pos2i.y );
 	Vector2I next			= pos2i + wg0.Path( rampageTarget );
 	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
@@ -1102,7 +1090,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 
 Vector2F AIComponent::GetWanderOrigin( const ComponentSet& thisComp )
 {
-	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2F pos = ToWorld2F(thisComp.chit->Position());
 	Vector2I m = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
 	const ChitContext* context = Context();
 	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector( m );
@@ -1142,7 +1130,7 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 
 Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 	Vector2I sector = ToSector(pos2i);
 	CoreScript* cs = CoreScript::GetCore(sector);
 
@@ -1167,7 +1155,7 @@ Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 
 Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 {
-	Vector2F origin = thisComp.spatial->GetPosition2D();
+	Vector2F origin = ToWorld2F(thisComp.chit->Position());
 
 	static const int NPLANTS = 4;
 	static const float TOO_CLOSE = 2.0f;
@@ -1176,8 +1164,8 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	CArray<Vector2F, MAX_TRACK+1+NPLANTS> pos;
 	for( int i=0; i<friendList2.Size(); ++i ) {
 		Chit* c = parentChit->Context()->chitBag->GetChit( friendList2[i] );
-		if ( c && c->GetSpatialComponent() ) {
-			Vector2F v = c->GetSpatialComponent()->GetPosition2D();
+		if ( c ) {
+			Vector2F v = ToWorld2F(c->Position());
 			pos.Push( v );
 		}
 	}
@@ -1207,7 +1195,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 		mean = mean + pos[i];
 	}
 	Vector2F dest = mean * (1.0f/(float)(1+pos.Size()));
-	Vector2F heading = thisComp.spatial->GetHeading2D();
+	Vector2F heading = thisComp.chit->Heading2D();
 
 	// But not too close.
 	for( int i=0; i<pos.Size(); ++i ) {
@@ -1260,7 +1248,7 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	parentChit->random.ShuffleArray(rinit.Mem(), rinit.Size());
 
 	const ChitContext* context = Context();
-	const Vector2F pos = thisComp.spatial->GetPosition2D();
+	const Vector2F pos = ToWorld2F(thisComp.chit->Position());
 	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
 	const SectorPort start = context->worldMap->NearestPort(pos);
 	//Sometimes we can't path to any port. Hopefully rampage cuts in.
@@ -1274,9 +1262,9 @@ bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 	if (thisComp.item->IName() == ISC::troll) {
 		// Visit Truulga every now and again. And if leaving truuga...go far.
 		Chit* truulga = Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
-		if (truulga && truulga->GetSpatialComponent()) {
-			Vector2I truulgaSector = truulga->GetSpatialComponent()->GetSector();
-			if (thisComp.spatial->GetSector() == truulgaSector) {
+		if (truulga) {
+			Vector2I truulgaSector = ToSector(truulga->Position());
+			if (ToSector(thisComp.chit->Position()) == truulgaSector) {
 				// At Truulga - try to go far.
 				Vector2I destSector = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
 				if (DoSectorHerd(thisComp, focus, destSector))
@@ -1364,8 +1352,7 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const g
 	SectorPort dest;
 	dest.sector = sector;
 	const SectorData& destSD = Context()->worldMap->GetSectorData(dest.sector);
-	GLASSERT(thisComp.spatial);
-	dest.port = destSD.NearestPort(thisComp.spatial->GetPosition2D());
+	dest.port = destSD.NearestPort(ToWorld2F(thisComp.chit->Position()));
 	return DoSectorHerd(thisComp, focus, dest);
 }
 
@@ -1383,7 +1370,7 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 
 		// Trolls herd *all the time*
 		if ( thisComp.item->IName() != ISC::troll ) {
-			NewsEvent news( NewsEvent::SECTOR_HERD, thisComp.spatial->GetPosition2D(), 
+			NewsEvent news( NewsEvent::SECTOR_HERD, ToWorld2F(thisComp.chit->Position()), 
 						   parentChit->GetItemID(), 0, parentChit->Team() );
 			Context()->chitBag->GetNewsHistory()->Add( news );
 		}
@@ -1418,8 +1405,8 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	bool disconnect = false;
 	const ChitContext* context = Context();
 
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
+	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i, 0 );
@@ -1451,7 +1438,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		// Find a kiosk.
 		Chit* kiosk = Context()->chitBag->FindBuilding(	ISC::kiosk,
 														sector,
-														&thisComp.spatial->GetPosition2D(),
+														&ToWorld2F(thisComp.chit->Position()),
 														LumosChitBag::RANDOM_NEAR, 0, 0 );
 
 		if ( !kiosk ) {
@@ -1464,7 +1451,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Rectangle2I porch = msc->PorchPos();
 
 			// The porch is a rectangle; go to a particular point based on the ID()
-			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F(porch.min), 0, 0 ) ) {
+			if ( context->worldMap->CalcPath( ToWorld2F(thisComp.chit->Position()), ToWorld2F(porch.min), 0, 0 ) ) {
 				this->Move(ToWorld2F(porch.min), false);
 			}
 			else {
@@ -1485,8 +1472,8 @@ bool AIComponent::ThinkWanderEat(const ComponentSet& thisComp)
 	GLASSERT(thisComp.item);
 	// Plant eater
 	if (thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
-		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
+		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 
 		// Are we near fruit?
 		CChitArray arr;
@@ -1494,7 +1481,7 @@ bool AIComponent::ThinkWanderEat(const ComponentSet& thisComp)
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, PLANT_AWARE, 0, &fruitFilter);
 
 		for (int i = 0; i < arr.Size(); ++i) {
-			Vector2I plantPos = arr[i]->GetSpatialComponent()->GetPosition2DI();
+			Vector2I plantPos = ToWorld2I(arr[i]->Position());
 			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos))) {
 				this->Move(ToWorld2F(plantPos), false);
 				return true;
@@ -1556,7 +1543,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 		return false;
 	}
 
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 	Vector2I sector = ToSector( pos2i );
 	Rectangle2I bounds = InnerSectorBounds( sector );
 
@@ -1572,7 +1559,8 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	// Are we already guarding??
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		Rectangle2I guardBounds;
-		guardBounds.min = guardBounds.max = chitArr[i]->GetSpatialComponent()->GetPosition2DI();
+
+		guardBounds.min = guardBounds.max = ToWorld2I(chitArr[i]->Position());
 		guardBounds.Outset( GUARD_RANGE );
 		guardBounds.DoIntersection( bounds );
 
@@ -1585,7 +1573,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 
 	int post = thisComp.chit->random.Rand( chitArr.Size() );
 	Rectangle2I guardBounds;
-	guardBounds.min = guardBounds.max = chitArr[post]->GetSpatialComponent()->GetPosition2DI();
+	guardBounds.min = guardBounds.max = ToWorld2I(chitArr[post]->Position());
 	guardBounds.Outset( GUARD_RANGE );
 	guardBounds.DoIntersection( bounds );
 
@@ -1597,10 +1585,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 
 bool AIComponent::AtHomeCore()
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if ( !sc ) return false;
-
-	Vector2I sector = ToSector( sc->GetPosition2DI());
+	Vector2I sector = ToSector( parentChit->Position());
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 
 	if ( !coreScript ) return false;
@@ -1610,10 +1595,7 @@ bool AIComponent::AtHomeCore()
 
 bool AIComponent::AtFriendlyOrNeutralCore()
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if ( !sc ) return false;
-
-	Vector2I sector = ToSector( sc->GetPosition2DI());
+	Vector2I sector = ToSector( parentChit->Position());
 	CoreScript* coreScript = CoreScript::GetCore( sector );
 	if (coreScript) {
 		return Team::GetRelationship(parentChit, coreScript->ParentChit()) != RELATE_ENEMY;
@@ -1643,13 +1625,13 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 	chitBag->QuerySpatialHash( &chitArr, pos2, FRUIT_AWARE, 0, &filter );
 	for (int i = 0; i < chitArr.Size(); ++i) {
 		Chit* chit = chitArr[i];
-		Vector2F fruitPos = chit->GetSpatialComponent()->GetPosition2D();
+		Vector2F fruitPos = ToWorld2F(chit->Position());
 		if (context->worldMap->HasStraightPath(pos2, fruitPos)) {
 			*dest = fruitPos;
 			arr->Push(chit);
 			// Push other fruit at this same location.
 			for (int k = i + 1; k < chitArr.Size(); ++k) {
-				if (chitArr[k]->GetSpatialComponent()->GetPosition2DI() == chit->GetSpatialComponent()->GetPosition2DI()) {
+				if (ToWorld2I(chitArr[k]->Position()) == ToWorld2I(chit->Position())) {
 					arr->Push(chitArr[k]);
 				}
 			}
@@ -1680,7 +1662,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 				chitBag->QuerySpatialHash(&chitArr, farmLoc, 1.0f, 0, &filter);
 
 				for (int j = 0; j < chitArr.Size(); ++j) {
-					Vector2F fruitLoc = chitArr[j]->GetSpatialComponent()->GetPosition2D();
+					Vector2F fruitLoc = ToWorld2F(chitArr[j]->Position());
 					Vector2I fruitLoc2i = ToWorld2I(fruitLoc);
 					// Skip if someone probably heading there.
 					if (cs && cs->HasTask(fruitLoc2i)) {
@@ -1693,7 +1675,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 						arr->Push(chit);
 						// Push other fruit at this same location.
 						for (int k = j + 1; k < chitArr.Size(); ++k) {
-							if (chitArr[k]->GetSpatialComponent()->GetPosition2DI() == chit->GetSpatialComponent()->GetPosition2DI()) {
+							if (ToWorld2I(chitArr[k]->Position()) == ToWorld2I(chit->Position())) {
 								arr->Push(chitArr[k]);
 							}
 						}
@@ -1737,7 +1719,7 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 				Vector2F fruitPos = { 0, 0 };
 				CChitArray fruit;
 				bool nearPath = false;
-				FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos, &fruit, &nearPath );
+				FindFruit( ToWorld2F(thisComp.chit->Position()), &fruitPos, &fruit, &nearPath );
 				if ( fruit.Size() ) {
 					//GameItem* gi = fruit[0]->GetItem();
 					Vector2I fruitPos2i = ToWorld2I(fruitPos);
@@ -1777,8 +1759,8 @@ bool AIComponent::ThinkFlag(const ComponentSet& thisComp)
 	if (!homeCoreScript)
 		return false;
 
-	Vector2I homeCoreSector = homeCoreScript->ParentChit()->GetSpatialComponent()->GetSector();
-	Vector2I sector = thisComp.spatial->GetSector();
+	Vector2I homeCoreSector = ToSector(homeCoreScript->ParentChit()->Position());
+	Vector2I sector = ToSector(thisComp.chit->Position());
 
 	if (   homeCoreScript->IsCitizen(parentChit->ID())
 		&& ( homeCoreSector == sector))
@@ -1856,10 +1838,10 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			}
 		}
 		if ( needVaultRun ) {
-			Vector2I sector = thisComp.spatial->GetSector();
+			Vector2I sector = ToSector(thisComp.chit->Position());
 			Chit* vault = Context()->chitBag->FindBuilding(	ISC::vault, 
 															sector, 
-															&thisComp.spatial->GetPosition2D(), 
+															&ToWorld2F(thisComp.chit->Position()),
 															LumosChitBag::RANDOM_NEAR, 0, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
@@ -1887,9 +1869,9 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 
 			const GameItem* item = thisComp.itemComponent->FindItem(iItem);
 			if (item) {
-				Vector2I sector = thisComp.spatial->GetSector();
+				Vector2I sector = ToSector(thisComp.chit->Position());
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
-																  &thisComp.spatial->GetPosition2D(),
+																  &ToWorld2F(thisComp.chit->Position()),
 																  LumosChitBag::RANDOM_NEAR, 0, 0);
 				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
@@ -1923,16 +1905,16 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 	if (!worker) return false;
 
 	BuildingRepairFilter filter;
-	Vector2I sector = thisComp.spatial->GetSector();
+	Vector2I sector = ToSector(thisComp.chit->Position());
 
 	Chit* building = Context()->chitBag->FindBuilding(IString(),
 		sector,
-		&thisComp.spatial->GetPosition2D(),
+		&ToWorld2F(thisComp.chit->Position()),
 		LumosChitBag::RANDOM_NEAR, 0, &filter);
 
 	if (!building) return false;
 
-	MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 	GLASSERT(msc);
 	Rectangle2I repair;
 	repair.Set(0, 0, 0, 0);
@@ -1949,7 +1931,7 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 	if (!coreScript) return false;
 
 	WorldMap* worldMap = Context()->worldMap;
-	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 
 	for (Rectangle2IIterator it(repair); !it.Done(); it.Next()) {
 		if (!coreScript->HasTask(it.Pos()) 
@@ -1974,7 +1956,7 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 		return false;
 	}
 
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 
@@ -2104,15 +2086,15 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 			filter.filters.Push( &gold );
 		}
 
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 		CChitArray chitArr;
 		parentChit->Context()->chitBag->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, &filter );
 
-		ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
+		ChitDistanceCompare compare(thisComp.chit->Position());
 		SortContext( chitArr.Mem(), chitArr.Size(), compare );
 
 		for( int i=0; i<chitArr.Size(); ++i ) {
-			Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
+			Vector2F goldPos = ToWorld2F(chitArr[i]->Position());
 			if ( context->worldMap->HasStraightPath( goldPos, pos2 )) {
 				// Pickup and gold use different techniques. (Because of player UI. 
 				// Always want gold - not all items.)
@@ -2144,7 +2126,7 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
-	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
 	const ChitContext* context = Context();
 
@@ -2221,7 +2203,7 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
 		// If the move is very near (happens if friendList empty)
 		// don't do the move to avoid jerk.
-		if (dest2i != thisComp.spatial->GetPosition2DI()) {
+		if (dest2i != ToWorld2I(thisComp.chit->Position())) {
 			taskList.Push(Task::MoveTask(dest2i));
 		}
 		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
@@ -2236,9 +2218,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		currentAction = NO_ACTION;
 		return;
 	}
-	const Vector3F& pos = thisComp.spatial->GetPosition();
+	const Vector3F pos = thisComp.chit->Position();
 	Vector2F pos2 = { pos.x, pos.z };
-	Vector2I sector = ToSector( ToWorld2I( pos2 ));
+	Vector2I sector = ToSector(pos2);
 	
 	// Use the current or reserve - switch out later if we need to.
 	const RangedWeapon* rangedWeapon = thisComp.itemComponent->QuerySelectRanged();
@@ -2265,7 +2247,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	// Consider flocking. This wasn't really working in a combat situation.
 	// May reconsider later, or just use for spreading out.
 	//static  float FLOCK_MOVE_BIAS = 0.2f;
-	Vector2F heading = thisComp.spatial->GetHeading2D();
+	Vector2F heading = thisComp.chit->Heading2D();
 	utility[OPTION_NONE] = 0;
 
 	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
@@ -2281,8 +2263,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					++nRangedEnemies;
 				}
 				static const float MELEE_ZONE = (MELEE_RANGE + 0.5f) * (MELEE_RANGE + 0.5f);
-				if ( ic->GetMeleeWeapon() && chit->GetSpatialComponent() &&
-					( pos2 - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared() <= MELEE_ZONE )
+				if ( ic->GetMeleeWeapon() &&
+					( pos2 - ToWorld2F(chit->Position()) ).LengthSquared() <= MELEE_ZONE )
 				{
 					++nMeleeEnemies;
 				}
@@ -2491,8 +2473,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 {
 	if ( !taskList.Empty() ) {
-		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
-		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
+		Vector2I sector = ToSector(pos2i);
 
 		WorkQueue* workQueue = GetWorkQueue();
 		taskList.DoTasks(parentChit, delta);	
@@ -2503,7 +2485,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 {
 	// Is there work to do?		
-	Vector2I sector = thisComp.spatial->GetSector();
+	Vector2I sector = ToWorld2I(thisComp.chit->Position());
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	const ChitContext* context = Context();
 
@@ -2514,7 +2496,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 		// Get the current job, or find a new one.
 		const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
 		if ( !item ) {
-			item = workQueue->Find( thisComp.spatial->GetPosition2DI() );
+			item = workQueue->Find( ToWorld2I(thisComp.chit->Position()) );
 			if ( item ) {
 				workQueue->Assign( parentChit->ID(), item );
 			}
@@ -2523,7 +2505,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			Vector2F dest = { 0, 0 };
 			float cost = 0;
 
-			bool hasPath = context->worldMap->CalcWorkPath(thisComp.spatial->GetPosition2D(), item->Bounds(), &dest, &cost);
+			bool hasPath = context->worldMap->CalcWorkPath(ToWorld2F(thisComp.chit->Position()), item->Bounds(), &dest, &cost);
 
 			if (hasPath) {
 				if (BuildScript::IsClear(item->buildScriptID)) {
@@ -2565,7 +2547,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 	int option = parentChit->random.Select( options, NUM_OPTIONS );
 	this->GetNeedsMutable()->SetMorale( 1 );
 
-	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 	thisComp.chit->SetTickNeeded();
 
 	switch ( option ) {
@@ -2614,7 +2596,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 {
 	// FIXME: this function does way too much.
 
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 
 	// Circuits.
 	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
@@ -2629,7 +2611,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	// Is there food to eat?
 	if (!thisComp.chit->Destroyed() && thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
 		FruitElixirFilter fruitFilter;
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 		CChitArray arr;
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, 0.7f, 0, &fruitFilter);
 
@@ -2650,7 +2632,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		if (thisComp.okay) {
 			LootFilter filter;
 			CChitArray arr;
-			Context()->chitBag->QuerySpatialHash(&arr, thisComp.spatial->GetPosition2D(), 0.7f, 0, &filter);
+			Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(thisComp.chit->Position()), 0.7f, 0, &filter);
 			for (int i = 0; i < arr.Size() && thisComp.itemComponent->CanAddToInventory(); ++i) {
 				const GameItem* item = arr[i]->GetItem();
 				if (thisComp.itemComponent->IsBetterItem(item)) {
@@ -2673,7 +2655,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 		CoreScript* cs = CoreScript::GetCore(sector);
 		if (cs
 			&& !cs->InUse()
-			&& cs->ParentChit()->GetSpatialComponent()->GetPosition2DI() == pos2i)
+			&& ToWorld2I(cs->ParentChit()->Position()) == pos2i)
 		{
 			// Need some team. And some cash.
 			Rectangle2I inner = InnerSectorBounds(sector);
@@ -2699,7 +2681,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 						newCS->AddCitizen(arr[i]);
 					}
 
-					NewsEvent news(NewsEvent::DOMAIN_CONQUER, newCS->ParentChit()->GetSpatialComponent()->GetPosition2D(),
+					NewsEvent news(NewsEvent::DOMAIN_CONQUER, ToWorld2F(newCS->ParentChit()->Position()),
 								   newCS->ParentChit()->GetItemID(), parentChit->GetItemID(), newCS->ParentChit()->Team());
 					Context()->chitBag->GetNewsHistory()->Add(news);
 				}
@@ -2711,7 +2693,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	if ( aiMode == NORMAL_MODE ) {
 		if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
 			RenderComponent* rc = parentChit->GetRenderComponent();
-			Vector2F center = ToWorld2F( thisComp.spatial->GetPosition2DI() );	// center of the grid.
+			Vector2F center = ToWorld2F( thisComp.chit->Position() );	// center of the grid.
 			CChitArray arr;
 			const ChitContext* context = this->Context();
 			LumosChitBag* chitBag = this->Context()->chitBag;
@@ -2770,7 +2752,7 @@ bool AIComponent::AtWaypoint()
 	Vector2F dest2 = ToWorld2F(waypoint);
 
 	static const float DEST_RANGE = 1.0f;
-	Vector2F pos2 = ParentChit()->GetSpatialComponent()->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(ParentChit()->Position());
 	float len = (dest2 - pos2).Length();
 	return len < DEST_RANGE;
 }
@@ -2817,12 +2799,12 @@ bool AIComponent::ThinkWaypoints(const ComponentSet& thisComp)
 	}
 
 	Vector2F dest2 = ToWorld2F(waypoint);
-	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 
 	static const float FRIEND_RANGE = 2.0f;
 
 	Vector2I destSector = ToSector(waypoint);
-	Vector2I currentSector = thisComp.spatial->GetSector();
+	Vector2I currentSector = ToSector(thisComp.chit->Position());
 
 	if (destSector == currentSector) {
 		this->Move(dest2, false);
@@ -2879,7 +2861,7 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	// High level mode switch, in/out of battle?
 	if (focus != FOCUS_MOVE &&  !taskList.UsingBuilding()) {
-		CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
+		CoreScript* cs = CoreScript::GetCore(ToSector(thisComp.chit->Position()));
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
 		bool goesToBattle = (thisComp.item->IName() != ISC::worker)
 			|| (cs && cs->Citizens(0) <= 4);
@@ -2916,8 +2898,8 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	
-	if ( lastGrid != thisComp.spatial->GetPosition2DI() ) {
-		lastGrid = thisComp.spatial->GetPosition2DI();
+	if ( lastGrid != ToWorld2I(thisComp.chit->Position()) ) {
+		lastGrid = ToWorld2I(thisComp.chit->Position());
 		EnterNewGrid( thisComp );
 	}
 
@@ -2930,7 +2912,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	// FIXME: remove "lower difficulty" from needs.DoTick()
 	if (thisComp.item->flags & (GameItem::HAS_NEEDS | GameItem::AI_USES_BUILDINGS)) {
 		if (needsTicker.Delta(deltaTime)) {
-			CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
+			CoreScript* cs = CoreScript::GetCore(ToSector(thisComp.chit->Position()));
 			CoreScript* homeCore = CoreScript::GetCoreFromTeam(thisComp.chit->Team());
 			bool atHomeCore = cs && (cs == homeCore);
 
@@ -3073,7 +3055,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	if (!thisComp.okay)
 		return;
 
-	Vector2I mapPos = thisComp.spatial->GetPosition2DI();
+	Vector2I mapPos = ToWorld2I(thisComp.chit->Position());
 	Vector2I sector = ToSector(mapPos);
 
 	switch (msg.ID()) {
@@ -3144,7 +3126,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				&& parentChit->GetItem()->MOB() == ISC::greater
 				&& cs && (cs->GetTech() >= TECH_ATTRACTS_GREATER))
 			{
-				Vector2I target = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+				Vector2I target = ToWorld2I(cs->ParentChit()->Position());
 				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit->GetItemID(), 0, parentChit->Team()));
 			}
 		}

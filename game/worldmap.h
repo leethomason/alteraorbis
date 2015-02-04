@@ -84,7 +84,7 @@ public:
 	virtual WorldMap* ToWorldMap() { return this; }
 
 	// Call to turn on rock rendering and make map aware of "InUse"
-	void AttachEngine( Engine* engine, IMapGridUse* iMapInUse  );
+	void AttachEngine( Engine* engine, IMapGridBlocked* iMapInUse  );
 	void AttachHistory(NewsHistory* h) { newsHistory = h; }
 
 	// Test initiliazation:
@@ -152,7 +152,11 @@ public:
 	void GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count, grinliz::Vector2I* dir );
 
 	void ResetPather( int x, int y );
-	void UpdateBlock( int x, int y );	// tell the map to check for blocks. will call ResetPather() if needed
+	// Updates the pathing for GRID_BLOCKED - external chits (MapSpatialComponents) that impact
+	// the pather. Works by doing a spatial query. Will automatically reset the pather if needed.
+	void UpdateBlock( int x, int y );
+	void UpdateBlock(const grinliz::Rectangle2I& rect);	// convenience variation.
+
 	bool IsPassable( int x, int y ) const;
 	
 	bool IsLand( int x, int y )		{ 
@@ -421,7 +425,7 @@ private:
 	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
 
 	Engine*						engine;
-	IMapGridUse*				iMapGridUse;
+	IMapGridBlocked*			iMapGridUse;
 	int							slowTick;
 	NewsHistory*				newsHistory;
 	FluidSim*					fluidSim[NUM_SECTORS*NUM_SECTORS];

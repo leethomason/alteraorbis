@@ -200,7 +200,7 @@ const SectorData& WorldMap::GetSectorData( const Vector2I& sector ) const
 }
 
 
-void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap ) 
+void WorldMap::AttachEngine( Engine* e, IMapGridBlocked* imap ) 
 {
 	GLASSERT( (e==0) || (e!=0 && engine==0) );
 
@@ -447,7 +447,7 @@ void WorldMap::Init( int w, int h )
 	// Reset the voxels
 	if ( engine ) {
 		Engine* savedEngine = engine;
-		IMapGridUse* savedIMap = iMapGridUse;
+		IMapGridBlocked* savedIMap = iMapGridUse;
 		AttachEngine( 0, 0 );
 		AttachEngine( savedEngine, savedIMap );
 	}
@@ -871,7 +871,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 
 	if ( h == -1 ) {
 		// Set to default.
-		if (    ( iMapGridUse && !iMapGridUse->MapGridUse( x, y ))
+		if (    ( iMapGridUse && !iMapGridUse->MapGridBlocked( x, y ))
 			 || ( !iMapGridUse ) )
 		{
 			h = grid[index].NominalRockHeight();
@@ -888,11 +888,11 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		}
 		h     = grid[index].RockHeight();
 		if ( iMapGridUse ) {
-			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
+			GLASSERT( iMapGridUse->MapGridBlocked( x, y ) == 0 );
 		}
 	}
 	else {
-		if ( iMapGridUse && iMapGridUse->MapGridUse( x, y )) {
+		if ( iMapGridUse && iMapGridUse->MapGridBlocked( x, y )) {
 			h = 0;
 		}
 	}
@@ -931,12 +931,19 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 }
 
 
+void WorldMap::UpdateBlock(const Rectangle2I& r)
+{
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		UpdateBlock(it.Pos().x, it.Pos().y);
+	}
+}
+
 void WorldMap::UpdateBlock( int x, int y )
 {
 	WorldGrid* wg = &grid[INDEX(x,y)];
 	int use = 0;
 	if ( iMapGridUse ) {
-		use = iMapGridUse->MapGridUse( x, y );
+		use = iMapGridUse->MapGridBlocked( x, y );
 	}
 	if ( use & GRID_BLOCKED ) {
 		if ( !wg->extBlock ) {

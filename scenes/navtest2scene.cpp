@@ -100,10 +100,12 @@ void NavTest2Scene::LoadMap()
 		Chit* chit = context.chitBag->NewChit();
 		const Vector2I& v = blocks[i];
 		MapSpatialComponent* msc = new MapSpatialComponent();
-		msc->SetMapPosition( v.x, v.y, 1, 1 );
-		msc->SetMode( GRID_BLOCKED );
+		msc->SetBuilding(1, false, 0);
+		msc->SetBlocks(true);
 		chit->Add( msc );
 		chit->Add( new RenderComponent( "unitCube" ));
+
+		MapSpatialComponent::SetMapPosition(chit, v.x, v.y);
 	}
 
 	for( int i=0; i<features.Size(); ++i ) {
@@ -128,7 +130,6 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	//GRINLIZ_PERFTRACK;
 
 	Chit* chit = context.chitBag->NewChit();
-	chit->Add( new SpatialComponent() );
 
 	const char* asset = "humanFemale";
 	if ( random.Rand( 4 ) == 0 ) {
@@ -141,7 +142,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
 
-	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
+	chit->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	chits.Push(chit->ID());
 }
 

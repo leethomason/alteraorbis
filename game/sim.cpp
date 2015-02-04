@@ -267,7 +267,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
 		if (chit->GetComponent("CoreScript")) {
-			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
+			Vector2I pos2i = ToWorld2I(chit->Position());
 			Vector2I sector = ToSector(pos2i);
 			coreCreateList.Push(sector);
 
@@ -354,7 +354,7 @@ void Sim::SpawnDenizens()
 
 
 				pos.x += 0.2f * float(i);
-				chit->GetSpatialComponent()->SetPosition(pos);
+				chit->SetPosition(pos);
 
 				GridMoveComponent* gmc = new GridMoveComponent();
 				chit->Add(gmc);
@@ -409,7 +409,7 @@ void Sim::CreateTruulgaCore()
 	Chit* truulga = context.chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
 	if (!truulga) return;
 
-	Vector2I sector = truulga->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(truulga->Position());
 	CoreScript* cs = CoreScript::GetCore(sector);
 
 	int team = 0;
@@ -425,7 +425,7 @@ void Sim::CreateTruulgaCore()
 		if (cs && cs->ParentChit()->Team() == 0) {
 			CoreScript* troll = CoreScript::CreateCore(newSector, TEAM_TROLL, &context);
 			troll->ParentChit()->Add(new TrollDomainAI());
-			truulga->GetSpatialComponent()->SetPosition(troll->ParentChit()->GetSpatialComponent()->GetPosition());
+			truulga->SetPosition(troll->ParentChit()->Position());
 			GLOUTPUT(("Truulga domain created at %c%d\n", 'A' + newSector.x, 1 + newSector.y));
 		}
 	}
@@ -453,7 +453,8 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
 	}
 
-	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+	chit->SetPosition((float)pos.x + 0.5f, 0, (float)pos.y + 0.5f);
+	chit->SetRotation(Quaternion());
 	context.chitBag->GetCamera( context.engine )->SetTrack( chit->ID() );
 
 	// Player speed boost
@@ -598,7 +599,7 @@ void Sim::DoTick( U32 delta )
 			avatarTimer -= delta;
 			if (avatarTimer <= 0) {
 				if (context.chitBag->GetHomeCore()) {
-					CreateAvatar(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
+					CreateAvatar(ToWorld2I(cs->ParentChit()->Position()));
 				}
 				avatarTimer = 0;
 			}
@@ -741,12 +742,11 @@ void Sim::CreateVolcano( int x, int y )
 	}
 
 	Chit* chit = context.chitBag->NewChit();
-	chit->Add( new SpatialComponent() );
 	chit->Add( new VolcanoScript());
 
-	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+	chit->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 	
-	Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+	Vector2F pos = ToWorld2F(chit->Position());
 	NewsEvent event(NewsEvent::VOLCANO, pos, 0, 0, 0);
 	context.chitBag->GetNewsHistory()->Add(event);
 }
@@ -814,7 +814,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 	if (    wg.IsPassable() 
 		 && wg.Plant() == 0
 		 && wg.Land() == WorldGrid::LAND 
-		 && !context.chitBag->MapGridUse(x,y) ) 
+		 && !context.chitBag->MapGridBlocked(x,y) ) 
 	{
 		if ( type < 0 ) {
 			// Scan for a good type!
@@ -855,7 +855,7 @@ void Sim::UseBuilding()
 	Chit* player = context.chitBag->GetAvatar();
 	if ( !player ) return;
 
-	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
+	Vector2I pos2i = ToWorld2I(player->Position());
 	Vector2I sector = ToSector( pos2i );
 
 	Chit* building = context.chitBag->QueryPorch( pos2i,0 );

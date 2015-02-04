@@ -18,6 +18,7 @@
 #include "lumoschitbag.h"
 #include "../engine/serialize.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/chit.h"
 #include "../script/evalbuildingscript.h"
 #include "../game/circuitsim.h"
 
@@ -25,88 +26,138 @@ using namespace grinliz;
 
 MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 {
-	mode = GRID_IN_USE;
-//	building = false;
+	nextBuilding = 0;
+	size = 1;
+	blocks = false;
 	hasPorch = 0;
 	hasCircuit = 0;
-	nextBuilding = 0;
+	bounds.Zero();
 }
 
 
-void MapSpatialComponent::SetMapPosition( int x, int y, int cx, int cy )
+void MapSpatialComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	GLASSERT( parentChit == 0 );
-	bounds.Set( x, y, x+cx-1, y+cy-1 );
-	GLASSERT( cx <= MAX_BUILDING_SIZE );
-	GLASSERT( cy <= MAX_BUILDING_SIZE );
+	if (msg.ID() == ChitMsg::CHIT_POS_CHANGE) {
+		SyncWithSpatial();
+	}
+}
+
+
+void MapSpatialComponent::SyncWithSpatial()
+{
+	if (!parentChit) return;
+	Vector3F pos = parentChit->Position();
+	if (pos.IsZero()) {
+		GLASSERT(bounds.min.IsZero());
+		return;
+	}
+
+	Rectangle2I oldBounds = bounds;
+
+	// Position is in the center!
+	if (size == 1) {
+		bounds.min = ToWorld2I(pos);
+	}
+	else if (size == 2) {
+		bounds.min = ToWorld2I(pos);
+		bounds.min.x -= 1;
+		bounds.min.y -= 1;
+	}
+	else {
+		GLASSERT(0);
+	}
+
+	bounds.max.x = bounds.min.x + size - 1;
+	bounds.max.y = bounds.min.y + size - 1;
+
+	if (oldBounds != bounds) {
+		// We have a new position, update in the hash tables:
+		Context()->chitBag->RemoveFromBuildingHash(this, oldBounds.min.x, oldBounds.min.y);
+		Context()->chitBag->AddToBuildingHash(this, bounds.min.x, bounds.min.y);
+
+		// And the pather.
+		Context()->worldMap->UpdateBlock(oldBounds);
+		Context()->worldMap->UpdateBlock(bounds);
+
+	}
+	// And the porches / circuits: (rotation doesn't change bounds);
+	Rectangle2I oldOutset = oldBounds, outset = bounds;
+	oldOutset.Outset(1);
+	outset.Outset(1);
+
+
+	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, oldOutset);
+	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, outset);
+}
+
+
+void MapSpatialComponent::SetMapPosition( Chit* chit, int x, int y )
+{
+	GLASSERT( chit);
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	GLASSERT(msc);
+	int size = msc->Size();
+
+	GLASSERT( size <= MAX_BUILDING_SIZE );
+	GLASSERT( size <= MAX_BUILDING_SIZE );
 	
-	float px = (float)x + (float)cx*0.5f;
-	float py = (float)y + (float)cy*0.5f;
+	float px = (float)x + float(size)*0.5f;
+	float py = (float)y + float(size)*0.5f;
 
-	SetPosition( px, 0, py );
+	chit->SetPosition( px, 0, py );
 }
 
 
-void MapSpatialComponent::UpdateBlock( WorldMap* map )
+void MapSpatialComponent::SetBlocks( bool value ) 
 {
-	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-			map->UpdateBlock( x, y );
-		}
-	}
+	blocks = value;	// UpdateBlock() makes callback occur - set mode first!
+	SyncWithSpatial();
 }
 
 
-void MapSpatialComponent::SetMode( int newMode ) 
+void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 {
-	mode = newMode;	// UpdateBlock() makes callback occur - set mode first!
-	// This code gets run on OnAdd() as well.
-	if ( parentChit ) {
-		if ( parentChit ) {
-			UpdateBlock( Context()->worldMap );
-		}
-	}
-}
+	GLASSERT(!parentChit);	// not sure this works after add.
 
-
-void MapSpatialComponent::SetBuilding( bool p, int circuit )
-{
-	GLASSERT( !parentChit );
+	size = size;
 	hasPorch = p ? 1 : 0;
 	hasCircuit = circuit;
+
+	SyncWithSpatial();	// probably does nothing. this really shouldn't be called after add.
 }
 
 
-
-void MapSpatialComponent::UpdatePorch( bool clearPorch )
+void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chitBag, CircuitSim* ciruitSim, const Rectangle2I& rect)
 {
-	GLASSERT(this->parentChit);
-	WorldMap* worldMap = Context()->worldMap;
-	LumosChitBag* bag = Context()->chitBag;
-
-	if (clearPorch) {
-		hasPorch = 0;
-	}
-
-	Rectangle2I b = Bounds();
-	b.Outset(1);
-	for (Rectangle2IEdgeIterator it(b); !it.Done(); it.Next()) {
+	for (Rectangle2IIterator it(rect); !it.Done(); it.Next()) {
 		int type = 0;
-		Chit* porch = bag->QueryPorch(it.Pos(), &type);
-		if (porch && porch->GetComponent("EvalBuildingScript")) {
-			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetComponent("EvalBuildingScript");
-			if (!ebs->Reachable()) {
-				type = WorldGrid::PORCH_UNREACHABLE;
+		chitBag->QueryPorch(it.Pos(), &type);
+//		if (porch && porch->GetComponent("EvalBuildingScript")) {
+//			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetComponent("EvalBuildingScript");
+//			if (!ebs->Reachable()) {
+//				type = WorldGrid::PORCH_UNREACHABLE;
+//			}
+//		}
+		worldMap->SetPorch(it.Pos().x, it.Pos().y, type);
+
+		int circuit = 0;
+		float yRotation = 0;
+
+		Chit* chit = chitBag->QueryBuilding(IString(), it.Pos(), 0);
+		if (chit) {
+			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+			if (msc) {
+				circuit = msc->CircuitType();
+				yRotation = YRotation(chit->Rotation());
 			}
 		}
-		worldMap->SetPorch(it.Pos().x, it.Pos().y, type);
-	}
 
-	if (hasPorch) {
-		hasPorch = 1;	// standard porch.
-		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetComponent("EvalBuildingScript"));
-		if (evalScript) {
-			GameItem* item = parentChit->GetItem();
+		worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, LRint(yRotation / 90.0f));
+		worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
+	}
+	ciruitSim->EtchLines(ToSector(rect.min));
+
+		/*
 			GLASSERT(item);
 			if (item) {
 				double consumes = item->GetBuildingIndustrial();
@@ -122,10 +173,11 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 			}
 		}
 	}
+	*/
 }
 
 
-
+/*
 void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat )
 {
 	super::SetPosRot( v, quat );
@@ -138,11 +190,14 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 		Context()->circuitSim->EtchLines(ToSector(p));
 	}
 }
+*/
 
 
 void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 {
 	super::OnAdd( chit, init );
+	SyncWithSpatial();
+#if 0
 	Context()->chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	UpdatePorch(false);
 
@@ -154,41 +209,37 @@ void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 		Context()->worldMap->SetCircuit(p.x, p.y, hasCircuit);
 		Context()->circuitSim->EtchLines(ToSector(p));
 	}
+#endif
 }
 
 
 void MapSpatialComponent::OnRemove()
 {
-	const ChitContext* context = Context();
-	LumosChitBag* chitBag = context->chitBag;
+	Context()->chitBag->RemoveFromBuildingHash(this, bounds.min.x, bounds.min.y);
 	
-	if (hasCircuit) {
-		Vector2I p = this->GetPosition2DI();
-		Context()->worldMap->SetCircuit(p.x, p.y, 0);
-	}
-	Vector2I pos = GetPosition2DI();
-	chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
-	UpdatePorch(true);
+	WorldMap* worldMap = Context()->worldMap;
+	LumosChitBag* chitBag = Context()->chitBag;
+	CircuitSim* circuitSim = Context()->circuitSim;
 
-	// Remove so that the callback doesn't return blocking.
 	super::OnRemove();
 
-	if ( mode == GRID_BLOCKED ) {
-		// This component is no longer in the block (the OnRemove() is above
-		// this LOC), so this will set things to the correct value.
-		UpdateBlock( context->worldMap );
-	}
+	// Since we are removed from the HashTable, this
+	// won't be found by UpdateGridLayer()
+	Rectangle2I b = bounds;
+	b.Outset(1);
+	worldMap->UpdateBlock(bounds);
+	UpdateGridLayer(worldMap, chitBag, circuitSim, b);
 }
 
 
 void MapSpatialComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "MapSpatialComponent" );
-	XARC_SER( xs, mode );
+	XARC_SER( xs, size );
+	XARC_SER( xs, blocks );
 	XARC_SER( xs, hasPorch );
-	XARC_SER(xs, hasCircuit);
+	XARC_SER(xs,  hasCircuit);
 	XARC_SER( xs, bounds );
-	super::Serialize( xs );
 	this->EndSerialize( xs );
 }
 
@@ -199,7 +250,8 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 	v.Set( 0, 0, 0, 0 );
 	if ( !hasPorch ) return v;
 
-	v = CalcPorchPos(bounds.min, bounds.Width(), this->GetYRotation());
+	float yRotation = YRotation(parentChit->Rotation());
+	v = CalcPorchPos(bounds.min, bounds.Width(), yRotation);
 	return v;
 
 	/*

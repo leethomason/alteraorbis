@@ -19,6 +19,7 @@
 #include "../xegame/spatialcomponent.h"
 
 class WorldMap;
+class CircuitSim;
 
 // Marks the WorldGrid inUse.
 // Not mutable; once added, can't be moved.
@@ -36,19 +37,15 @@ public:
 	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void Serialize( XStream* xs );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
-	// WARNING must be called before OnAdd
-	void SetMapPosition( int x, int y, int cx, int cy );
-	void SetBuilding( bool hasPorch, int circuit );
-	// -- end before OnAdd warning --
-
-	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
+	void SetBuilding( int size, bool hasPorch, int circuit );
+	int Size() const								{ return size; }
+	grinliz::Vector2I MapPosition() const			{ return bounds.min; }
 	virtual grinliz::Rectangle2I Bounds() const		{ return bounds; }
-	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
 
-	void SetMode( int mode );	// GRID_IN_USE or GRID_BLOCKED
-	int Mode() const			{ return mode; }
-	//bool Building() const		{ return building; }
+	void SetBlocks( bool blocks );
+	int Blocks() const			{ return blocks; }
 
 	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
@@ -58,18 +55,21 @@ public:
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;
-	// mostly internal: called when the porch changes.
-	void UpdatePorch(bool clearPorch);
+
+	// utility method to correctly position
+	static void SetMapPosition(Chit* chit, int x, int y);
 
 	// Utility code for dealing with porches
 	// 'pos' in minimum coordinates, size=1 or 2, rotation 0-270
 	static grinliz::Rectangle2I CalcPorchPos(const grinliz::Vector2I& pos, int size, float rotation);
 
 private:
-	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
+	void SyncWithSpatial();
+	void UpdatePorch(bool clearPorch);
+	static void UpdateGridLayer(WorldMap* map, LumosChitBag* chitBag, CircuitSim* ciruitSim, const grinliz::Rectangle2I& rect);
 
-	int						mode;
-	//bool					building;	// is this a building?
+	int						size;
+	bool					blocks;
 	int						hasPorch;	// if a building, does it have a porch?
 	int						hasCircuit;	
 	grinliz::Rectangle2I	bounds;

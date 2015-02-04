@@ -254,7 +254,7 @@ void MapScene::DrawMap()
 	Vector2F playerPos = { 0, 0 };
 	Chit* player = data->player;
 	if ( player ) {
-		playerPos = player->GetSpatialComponent()->GetPosition2D();
+		playerPos = ToWorld2F(player->Position());
 	}
 
 	bool inBounds = true;
@@ -319,7 +319,7 @@ void MapScene::DrawMap()
 		sim->CalcStrategicRelationships(homeSector, NUM_SECTORS, relate, &arr);
 
 		for (int k = 0; k < arr.Size(); ++k) {
-			Vector2I s = arr[k]->ParentChit()->GetSpatialComponent()->GetSector();
+			Vector2I s = ToSector(arr[k]->ParentChit()->Position());
 			CoreScript* core = CoreScript::GetCore(s);
 			if (core && core->InUse() && core->ParentChit()->Team() == Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE)) {
 				motherCore.SetPos(mapImage.X() + mapImage.Width() * float(s.x) / float(NUM_SECTORS),

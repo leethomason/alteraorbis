@@ -65,7 +65,7 @@ int DistilleryScript::DoTick( U32 delta )
 	if ( n ) { 
 		MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 		GLASSERT( msc );
-		Vector2I sector = msc->GetSector();
+		Vector2I sector = ToSector(parentChit->Position());
 		Rectangle2I porch = msc->PorchPos();
 		CoreScript* cs = CoreScript::GetCore( sector );
 		if (!cs) return VERY_LONG_TICK;

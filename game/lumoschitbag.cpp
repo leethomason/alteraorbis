@@ -211,10 +211,10 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	// NEAREST scans and finds the closest one.
 	// RANDOM_NEAR chooses one at random, but weighted by the (inverse) of the distance
 	if ( flags == NEAREST ) {
-		float closest = ( match[0]->GetSpatialComponent()->GetPosition2D() - *pos ).LengthSquared();
+		float closest = ( ToWorld2F(match[0]->Position()) - *pos ).LengthSquared();
 		int   ci = 0;
 		for( int i=1; i<match.Size(); ++i ) {
-			float len2 = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).LengthSquared();
+			float len2 = ( ToWorld2F(match[i]->Position()) - *pos ).LengthSquared();
 			if ( len2 < closest ) {
 				closest = len2;
 				ci = i;
@@ -224,7 +224,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	}
 	if ( flags == RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
-			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
+			float len = ( ToWorld2F(match[i]->Position()) - *pos ).Length();
 			if (len < 1) len = 1;
 			findWeight.Push( 1.0f/len );
 		}
@@ -261,8 +261,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 		}
 	}
 
-	int cx = 1;
-	rootItem.keyValues.Get(ISC::size, &cx);
+	int size = 1;
+	rootItem.keyValues.Get(ISC::size, &size);
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
 	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
@@ -271,10 +271,10 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	GLASSERT(context->worldMap->IsPassable(pos.x, pos.y));
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
-	msc->SetMapPosition(pos.x, pos.y, cx, cx);
-	msc->SetMode(GRID_BLOCKED);
-	msc->SetBuilding(porch != 0, circuit);
+	msc->SetBuilding(size, porch != 0, circuit);
+	msc->SetBlocks(true);
 	chit->Add(msc);
+	MapSpatialComponent::SetMapPosition(chit, pos.x, pos.y);
 
 	chit->Add(new RenderComponent(item->ResourceName()));
 	chit->Add(new HealthComponent());
@@ -339,14 +339,16 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 		rootItem->SetResource(str.c_str());
 	}
 
-	int cx = 1;
-	rootItem->keyValues.Get(ISC::size, &cx);
+	int size = 1;
+	rootItem->keyValues.Get(ISC::size, &size);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
-	msc->SetMapPosition(pos.x, pos.y, cx, cx);
-	msc->SetMode(GRID_BLOCKED);
-
+	msc->SetBuilding(size, false, 0);
+	msc->SetBlocks(true);
 	chit->Add(msc);
+	MapSpatialComponent::SetMapPosition(chit, pos.x, pos.y);
+
+
 	chit->Add(new RenderComponent(rootItem->ResourceName()));
 	chit->Add(new HealthComponent());
 	AddItem(rootItem, chit, context->engine, team, 0);
@@ -382,15 +384,6 @@ Chit* LumosChitBag::GetDeity(int id)
 		AddItem("deity", chit, context->engine, 0, 0);
 		chit->GetItem()->SetProperName(NAME[id]);
 	}
-
-	if (!chit->GetSpatialComponent()) {
-		// Have a spatial component but not a render component.
-		// Used to set the "focus" of the deity, and mark
-		// the location of a home core. (Truulga's base, for 
-		// example.)
-		chit->Add(new SpatialComponent());
-	}
-
 	return chit;
 }
 
@@ -400,14 +393,13 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
-	chit->Add( new SpatialComponent());
 	AddItem( name, chit, context->engine, team, 0 );
 
 	chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent());
 	chit->Add( new AIComponent());
 
-	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->SetPosition( pos );
 
 	chit->Add( new HealthComponent());
 
@@ -443,7 +435,6 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	Chit* chit = NewChit();
 	const GameItem& root = ItemDefDB::Instance()->Get(itemName.safe_str());
 
-	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
 
@@ -469,7 +460,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( ai );
 
 	chit->Add( new HealthComponent());
-	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+	chit->SetPosition( (float)pos.x+0.5f, 0, (float)pos.y+0.5f );
 
 	Vector2I sector = ToSector( pos );
 	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
@@ -488,11 +479,10 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "worker" );
 
-	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( rootItem.ResourceName() ));
 	chit->Add( new PathMoveComponent());
 	chit->Add( new AIComponent());
-	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->SetPosition( pos );
 	AddItem( rootItem.Name(), chit, context->engine, team, 0 );
 	chit->Add( new HealthComponent());
 	//chit->Add( new DebugStateComponent());
@@ -512,12 +502,11 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 	Vector2I startSector = web.Origin();
 	CoreScript* cs = CoreScript::GetCore(startSector);
 	if (!cs) return 0;	// cores get deleted, web is cached, etc.
-	Vector3F pos = cs->ParentChit()->GetSpatialComponent()->GetPosition();
+	Vector3F pos = cs->ParentChit()->Position();
 
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
-	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( rootItem.ResourceName() ));
 
 	AIComponent* ai = new AIComponent();
@@ -527,7 +516,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 	Visitors::Instance()->visitorData[visitorIndex].Connect();	// initialize.
 
 	// Visitors start at world center, with gridMove, and go from there.
-	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->SetPosition( pos );
 
 	PathMoveComponent* pmc = new PathMoveComponent();
 	chit->Add(pmc);
@@ -539,6 +528,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 }
 
 
+#if 0
 Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 {
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
@@ -565,6 +555,7 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 	}
 	return found;
 }
+#endif
 
 
 Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr )
@@ -633,10 +624,9 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 
 	if ( !chit ) {
 		chit = this->NewChit();
-		chit->Add( new SpatialComponent());
 		AddItem( "gold", chit, context->engine, 0, 0 );
 		chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
-		chit->GetSpatialComponent()->SetPosition( pos );
+		chit->SetPosition( pos );
 		chit->Add(new GameMoveComponent());
 	}
 	chit->GetWallet()->Deposit(src, src->Gold());
@@ -673,12 +663,11 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, b
 	const ChitContext* context = Context();
 
 	Chit* chit = this->NewChit();
-	chit->Add( new SpatialComponent());
 	AddItem( name, chit, context->engine, 0, 0 );
 	chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
 	chit->Add(new GameMoveComponent());
 
-	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->SetPosition( pos );
 	
 	int c[NUM_CRYSTAL_TYPES] = { 0 };
 	c[crystal] = 1;
@@ -709,13 +698,12 @@ Chit* LumosChitBag::NewWildFruit(const grinliz::Vector2I& pos)
 	item->SetProperName(ISC::wildFruit);
 
 	Chit* chit = this->NewChit();
-	chit->Add(new SpatialComponent());
 	chit->Add(new ItemComponent(item));
 	chit->Add(new RenderComponent(item->ResourceName()));
 	chit->Add(new GameMoveComponent());
 	chit->Add(new HealthComponent());
 
-	chit->GetSpatialComponent()->SetPosition(pos3);
+	chit->SetPosition(pos3);
 	return chit;
 }
 
@@ -732,7 +720,6 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 	}
 
 	Chit* chit = this->NewChit();
-	chit->Add( new SpatialComponent());
 	chit->Add( new ItemComponent( orphanItem ));
 	chit->Add( new RenderComponent( orphanItem->ResourceName() ));
 	chit->Add(new GameMoveComponent());
@@ -746,7 +733,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 			pos.y += 0.1f;
 		}
 	}
-	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->SetPosition( pos );
 	chit->Add( new HealthComponent());
 
 	if ( selfDestructTimer ) {
@@ -864,9 +851,9 @@ GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int 
 }
 
 
-int LumosChitBag::MapGridUse( int x, int y )
+bool LumosChitBag::MapGridBlocked(int x, int y)
 {
-	GLASSERT( MAX_BUILDING_SIZE == 2 );
+	GLASSERT(MAX_BUILDING_SIZE == 2);
 	// An object is either at the center or influence by
 	// something with 0.5 + EPS radius.
 
@@ -879,16 +866,16 @@ int LumosChitBag::MapGridUse( int x, int y )
 	r.max.y = (float)y + 0.5f + OFFSET;
 
 	ChitHasMapSpatial hasMapSpatial;
-	QuerySpatialHash( &inUseArr, r, 0, &hasMapSpatial );
+	QuerySpatialHash(&inUseArr, r, 0, &hasMapSpatial);
 	int flags = 0;
-	for( int i=0; i<inUseArr.Size(); ++i ) {
-		MapSpatialComponent* ms = GET_SUB_COMPONENT( inUseArr[i], SpatialComponent, MapSpatialComponent );
-		GLASSERT( ms );
-		if ( ms->Bounds().Contains( x, y )) {
-			flags |= ms->Mode();
+	for (int i = 0; i < inUseArr.Size(); ++i) {
+		MapSpatialComponent* ms = GET_SUB_COMPONENT(inUseArr[i], SpatialComponent, MapSpatialComponent);
+		GLASSERT(ms);
+		if (ms->Bounds().Contains(x, y) && ms->Blocks()) {
+			return true;
 		}
 	}
-	return flags;
+	return false;
 }
 
 
@@ -917,8 +904,8 @@ Vector2I LumosChitBag::GetHomeSector()	const
 { 
 	grinliz::Vector2I v = { 0, 0 };
 	CoreScript* home = GetHomeCore();
-	if (home && home->ParentChit() && home->ParentChit()->GetSpatialComponent()) {
-		v = home->ParentChit()->GetSpatialComponent()->GetSector();
+	if (home && home->ParentChit() ) {
+		v = ToSector(home->ParentChit()->Position());
 	}
 	return v;
 }

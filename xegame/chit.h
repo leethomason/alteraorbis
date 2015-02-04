@@ -23,6 +23,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glgeometry.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -86,6 +87,7 @@ public:
 								//					ptr = &SectorPort
 		CHIT_TRACKING_ARRIVED,	//			A tracking component arrived at its target.
 								//					ptr = Chit* that arrived
+		CHIT_POS_CHANGE,
 
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
@@ -201,11 +203,25 @@ public:
 	U32 Destroyed() const	{ return destroyed; }
 	void SetDestroyed(const HealthComponent*, U32 v) { destroyed = v;  }
 
+	const grinliz::Vector3F& Position() const			{ return position; }
+	void SetPosition(const grinliz::Vector3F& value);
+	void SetPosition(float x, float y, float z) { grinliz::Vector3F v = { x, y, z }; SetPosition(v); }
+
+	const grinliz::Quaternion& Rotation() const			{ return rotation;  }
+	void SetRotation(const grinliz::Quaternion& value);
+	grinliz::Vector2F Heading2D() const;
+	grinliz::Vector3F Heading() const;
+
+	// Slightly more efficient - sends one update.
+	void SetPosRot(const grinliz::Vector3F& pos, const grinliz::Quaternion& q);
+
 private:
 	U32		destroyed;
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
+	grinliz::Vector3F	position;
+	grinliz::Quaternion	rotation;
 
 	//grinliz::CDynArray< IChitListener* > listeners; doesn't work; can't be serialized
 
@@ -239,9 +255,6 @@ private:
 	};
 };
 
-// Utility (not quite sure where this should live)
-bool InSameSector(Chit* a, Chit* b);
-
 
 struct ComponentSet
 {
@@ -257,7 +270,6 @@ struct ComponentSet
 	Chit*	chit;
 	bool	alive;
 
-	SpatialComponent*	spatial;
 	MoveComponent*		move;
 	ItemComponent*		itemComponent;
 	GameItem*			item;

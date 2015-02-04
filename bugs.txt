@@ -79,6 +79,11 @@ x mouse wheel support
 - de-saturate colors correctly: 
 	x world grid changes
 	- plant changes
+- Spatial change
+	x scan code for GetSpatialComponent
+	- ComponentSet.spatial is all wrong
+	- optimize for AreaOfInterest
+	- fix render component to not have sync	
 - gobman statues
 - improve map icon art
 - clean up mother-core image

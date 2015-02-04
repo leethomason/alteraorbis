@@ -27,7 +27,7 @@ class Engine;
 class WorldMap;
 
 class NavTestScene : public Scene, 
-					 public IMapGridUse
+					 public IMapGridBlocked
 {
 public:
 	NavTestScene( LumosGame* game );
@@ -47,7 +47,7 @@ public:
 
 	virtual void DrawDebugText();
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
-	virtual int MapGridUse( int x, int y );
+	virtual bool MapGridBlocked( int x, int y );
 
 private:
 	gamui::PushButton	okay,

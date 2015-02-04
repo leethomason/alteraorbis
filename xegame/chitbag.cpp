@@ -403,9 +403,8 @@ int MultiFilter::Type()
 void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
-	GLASSERT(chit->GetSpatialComponent());
 
-	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
+	bool isMap = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent) != 0;
 	U32 index = HashIndex(x, y);
 	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
 
@@ -417,9 +416,8 @@ void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
-	GLASSERT(chit->GetSpatialComponent());
 
-	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
+	bool isMap = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent) != 0;
 	U32 index = HashIndex(x, y);
 	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
 
@@ -483,7 +481,7 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 
 					for (Chit* it = spatialHash[index]; it; it = it->next) {
 						if (it != ignore) {
-							const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
+							const Vector3F& pos = it->Position();
 							if (rf.Contains(pos.x, pos.z)) {
 								if (accept->Accept(it)) {
 									array->Push(it);

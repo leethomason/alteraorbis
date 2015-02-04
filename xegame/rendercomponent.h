@@ -121,7 +121,7 @@ public:
 
 private:
 	int CalcAnimation() const;
-	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
+	void SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 	void ProcessIcons( int time );
 
 	float					radiusOfBase;

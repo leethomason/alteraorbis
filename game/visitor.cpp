@@ -70,7 +70,7 @@ SectorPort Visitors::ChooseDestination(int index, const Web& web, ChitBag* chitB
 	SectorPort sectorPort;
 	if (!visitorChit) return sectorPort;
 
-	Vector2I thisSector = visitorChit->GetSpatialComponent()->GetSector();
+	Vector2I thisSector = ToSector(visitorChit->Position());
 	const Web::Node* node = web.FindNode(thisSector);
 	if (!node || node->child.Empty()) 
 		return sectorPort;

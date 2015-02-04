@@ -258,14 +258,11 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	GLASSERT(itemHistory.itemID);
 	itemIDToChitMap.Query(itemHistory.itemID, &chit);
 	if (chit) {
-		SpatialComponent* sc = chit->GetSpatialComponent();
-		if (sc) {
-			Vector2I sector = ToSector(sc->GetPosition2DI());
+		Vector2I sector = ToSector(chit->Position());
 
-			WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
-			const SectorData& sd = map->GetSectorData(sector);
-			str.AppendFormat("at %s", sd.name.safe_str());
-		}
+		WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
+		const SectorData& sd = map->GetSectorData(sector);
+		str.AppendFormat("at %s", sd.name.safe_str());
 	}
 
 	label[i].SetText(str.c_str());

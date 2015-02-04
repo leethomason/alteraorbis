@@ -7,6 +7,7 @@
 #include "../game/gameitem.h"
 #include "../game/reservebank.h"
 #include "../game/workqueue.h"
+#include "../game/mapspatialcomponent.h"
 
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
@@ -52,7 +53,7 @@ void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (   msg.ID() == ChitMsg::CHIT_DESTROYED_START 
 		&& (chit != ParentChit())
-		&& InSameSector(chit, ParentChit())
+		&& ToSector(chit->Position()) == ToSector(ParentChit()->Position())
 		&& chit->Team() == this->ParentChit()->Team())
 	{
 		BuildingFilter buildingFilter;
@@ -61,9 +62,12 @@ void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			GameItem* gi = chit->GetItem();
 			WorkItem* wi = workItems.PushArr(1);
 			wi->structure = gi->IName();
-			wi->pos = chit->GetSpatialComponent()->Bounds().min;
-			wi->rot = LRint(chit->GetSpatialComponent()->GetYRotation());
-			GLOUTPUT(("ReBuild: Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
+			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+			if (msc) {
+				wi->pos = msc->Bounds().min;
+				wi->rot = LRint(YRotation(chit->Rotation()));
+				GLOUTPUT(("ReBuild: Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
+			}
 		}
 	}
 	super::OnChitMsg(chit, msg);
@@ -72,14 +76,11 @@ void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 int RebuildAIComponent::DoTick(U32 delta)
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if (!spatial) return ticker.Next();
-
 	GameItem* mainItem = parentChit->GetItem();
-	Vector2I sector = spatial->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	CoreScript* cs = CoreScript::GetCore(sector);
 
-	if (ticker.Delta(delta) && mainItem && spatial && cs) {
+	if (ticker.Delta(delta) && mainItem && cs) {
 
 		// Create workers, if needed.
 		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
@@ -89,7 +90,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 		if (arr.Empty()) {
 			if (mainItem->wallet.Gold() >= WORKER_BOT_COST) {
 				ReserveBank::GetWallet()->Deposit(&mainItem->wallet, WORKER_BOT_COST);
-				Context()->chitBag->NewWorkerChit(cs->ParentChit()->GetSpatialComponent()->GetPosition(), parentChit->Team());
+				Context()->chitBag->NewWorkerChit(cs->ParentChit()->Position(), parentChit->Team());
 			}
 		}
 

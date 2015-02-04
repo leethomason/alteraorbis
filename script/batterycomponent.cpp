@@ -41,9 +41,6 @@ int BatteryComponent::UseCharge()
 
 int BatteryComponent::DoTick(U32 delta)
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if (!sc) return 0;
-
 	charge += ticker.Delta(delta);
 	if (charge > 4) charge = 4;
 

@@ -40,10 +40,7 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	GLASSERT( _name && *_name );
 	IString name = StringPool::Intern(_name);
 
-	if ( name == "SpatialComponent" ) {
-		return new SpatialComponent();
-	}
-	else if ( name == "PathMoveComponent" ) {
+	if ( name == "PathMoveComponent" ) {
 		return new PathMoveComponent();
 	}
 	else if ( name == "ItemComponent" ) {

@@ -149,20 +149,16 @@ void RenderComponent::OnRemove()
 }
 
 
-SpatialComponent* RenderComponent::SyncToSpatial()
+void RenderComponent::SyncToSpatial()
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if ( spatial ) {
-		model[0]->SetPos( spatial->GetPosition() );
-		model[0]->SetRotation( spatial->GetRotation() );
-	}
+	model[0]->SetPos(parentChit->Position());
+	model[0]->SetRotation(parentChit->Rotation());
 
 	const GameItem* item = parentChit->GetItem();
-	if ( item ) {
-		if ( item->flags & GameItem::CLICK_THROUGH )
-			model[0]->SetFlag( MODEL_CLICK_THROUGH );
+	if (item) {
+		if (item->flags & GameItem::CLICK_THROUGH)
+			model[0]->SetFlag(MODEL_CLICK_THROUGH);
 	}
-	return spatial;
 }
 
 
@@ -321,10 +317,10 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 	int tick = VERY_LONG_TICK;
 
-	SpatialComponent* spatial = SyncToSpatial();
+	SyncToSpatial();
 
 	// Animate the primary model.
-	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
+	if ( model[0] && model[0]->GetAnimationResource() ) {
 		tick = 0;	
 
 		// Update to the current, correct animation if we are

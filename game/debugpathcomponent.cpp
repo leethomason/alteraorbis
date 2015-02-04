@@ -61,36 +61,33 @@ void DebugPathComponent::OnRemove()
 }
 
 
-int DebugPathComponent::DoTick( U32 delta )
+int DebugPathComponent::DoTick(U32 delta)
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if ( spatial ) {
-		Vector3F pos = spatial->GetPosition();
-		pos.y = 0.01f;
+	Vector3F pos = parentChit->Position();
+	pos.y = 0.01f;
 
-		RenderComponent* render = parentChit->GetRenderComponent();
-		float radius = MAX_BASE_RADIUS;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	float radius = MAX_BASE_RADIUS;
 
-		if ( render ) {
-			radius = render->RadiusOfBase();
-			model->SetScale( radius*2.f );
-		}
-		model->SetPos( pos );
-		Vector4F color = { 0, 1, 0, 1 };
-		
-		PathMoveComponent* pmc = static_cast<PathMoveComponent*>( parentChit->GetComponent( "PathMoveComponent" ) );
-
-		if ( pmc ) {
-			if ( !pmc->IsMoving() )
-				color.Set( 0, 0, 0, 1 );
-			if ( pmc->BlockForceApplied() )
-				color.Set( 1, 1, 0, 1 );
-			if ( pmc->IsAvoiding() ) 
-				color.z = 1;
-		}
-
-		model->SetColor( color );
+	if (render) {
+		radius = render->RadiusOfBase();
+		model->SetScale(radius*2.f);
 	}
+	model->SetPos(pos);
+	Vector4F color = { 0, 1, 0, 1 };
+
+	PathMoveComponent* pmc = static_cast<PathMoveComponent*>(parentChit->GetComponent("PathMoveComponent"));
+
+	if (pmc) {
+		if (!pmc->IsMoving())
+			color.Set(0, 0, 0, 1);
+		if (pmc->BlockForceApplied())
+			color.Set(1, 1, 0, 1);
+		if (pmc->IsAvoiding())
+			color.z = 1;
+	}
+
+	model->SetColor(color);
 	return VERY_LONG_TICK;
 }
 

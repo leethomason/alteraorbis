@@ -31,10 +31,11 @@ using namespace grinliz;
 
 void SpatialComponent::DebugStr( GLString* str )
 {
-	str->AppendFormat( "[Spatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
+	str->AppendFormat("[Spatial] ");
 }
 
 
+#if 0
 void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 {
 	GLASSERT( v.x >= 0 && v.x < EL_MAP_SIZE );
@@ -108,15 +109,16 @@ Vector2F SpatialComponent::GetHeading2D() const
 	Vector2F norm = { h.x, h.z };
 	return norm;	
 }
+#endif
 
 
 void SpatialComponent::Serialize( XStream* xs )
 {
 	BeginSerialize( xs, Name() );
-	XARC_SER( xs, position );
-
-	static const Quaternion DEFQUAT; 
-	XARC_SER_DEF( xs, rotation, DEFQUAT );
+	//XARC_SER( xs, position );
+//
+//	static const Quaternion DEFQUAT; 
+//	XARC_SER_DEF( xs, rotation, DEFQUAT );
 	EndSerialize( xs );
 }
 
@@ -124,35 +126,35 @@ void SpatialComponent::Serialize( XStream* xs )
 void SpatialComponent::OnAdd( Chit* chit, bool init )
 {
 	Component::OnAdd( chit, init );
-	GLASSERT( chit == parentChit );
-	Context()->chitBag->AddToSpatialHash( chit, (int)position.x, (int)position.z );
+	//GLASSERT( chit == parentChit );
+	//Context()->chitBag->AddToSpatialHash( chit, (int)position.x, (int)position.z );
 }
 
 
 void SpatialComponent::OnRemove()
 {
-	Context()->chitBag->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
+	//Context()->chitBag->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
 	Component::OnRemove();
 }
 
 
-void SpatialComponent::Teleport(const grinliz::Vector3F& pos)
+void SpatialComponent::Teleport(Chit* chit, const grinliz::Vector3F& pos)
 {
-	GLASSERT(!GET_SUB_COMPONENT(ParentChit(), SpatialComponent, MapSpatialComponent));
-	if (ToWorld2I(pos) != ToWorld2I(position)) {
+	GLASSERT(!GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent));
+	if (ToWorld2I(pos) != ToWorld2I(chit->Position())) {
 
-		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
-		SetPosition(pos);
-		Context()->engine->particleSystem->EmitPD(ISC::teleport, position, V3F_UP, 0);
+		chit->Context()->engine->particleSystem->EmitPD(ISC::teleport, chit->Position(), V3F_UP, 0);
+		chit->SetPosition(pos);
+		chit->Context()->engine->particleSystem->EmitPD(ISC::teleport, chit->Position(), V3F_UP, 0);
 
 		// Sigh. Reaching into another component. Didn't think of this when I 
 		// added the teleport method.
-		while (parentChit->StackedMoveComponent()) {
-			Component* c = parentChit->Remove(parentChit->GetMoveComponent());
+		while (chit->StackedMoveComponent()) {
+			Component* c = chit->Remove(chit->GetMoveComponent());
 			delete c;
 		}
-		GLASSERT(parentChit->GetMoveComponent());
-		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+		GLASSERT(chit->GetMoveComponent());
+		PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 		if (pmc) pmc->Stop();
 	}
 }
