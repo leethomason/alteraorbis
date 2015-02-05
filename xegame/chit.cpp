@@ -395,6 +395,10 @@ void Chit::DebugStr( GLString* str )
 
 void Chit::SetPosition(const grinliz::Vector3F& newPosition)
 {
+	static bool checkRecursion = false;
+	GLASSERT(checkRecursion == false);		// don't call setPosition in setPosition!
+	checkRecursion = true;
+
 	Vector2I oldWorld = ToWorld2I(position);
 	Vector2I newWorld = ToWorld2I(newPosition);
 
@@ -413,6 +417,7 @@ void Chit::SetPosition(const grinliz::Vector3F& newPosition)
 		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
 		SetTickNeeded();
 	}
+	checkRecursion = false;
 }
 
 
