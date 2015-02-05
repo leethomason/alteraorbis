@@ -81,22 +81,6 @@ void LumosChitBag::Serialize( XStream* xs )
 }
 
 
-#if 0
-void LumosChitBag::AddToSpatialHash( Chit* chit, int x, int y )
-{
-	//MoBFilter filter : This seems like a good idea, accept that the chit can
-	// of course change its components, has an update sequence,
-	// and may or may not match criteria. 
-	Vector2I sector = { 0, 0 };
-	if ( worldMap->UsingSectors() ) {
-		sector.Set( x / SECTOR_SIZE, y / SECTOR_SIZE );
-	}
-	chitsInSector[sector.y*NUM_SECTORS+sector.x].Push( chit );
-	super::AddToSpatialHash( chit, x, y );
-}
-#endif
-
-
 void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
 	int sx = x / SECTOR_SIZE;
@@ -104,7 +88,7 @@ void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
 	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
 	GLASSERT( chit->nextBuilding == 0 );
-	
+
 	chit->nextBuilding = mapSpatialHash[sy*NUM_SECTORS+sx];
 	mapSpatialHash[sy*NUM_SECTORS+sx] = chit;
 }
@@ -116,6 +100,7 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 	int sy = y / SECTOR_SIZE;
 	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
 	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
+
 	GLASSERT( mapSpatialHash[sy*NUM_SECTORS+sx] );
 
 	MapSpatialComponent* prev = 0;
@@ -851,27 +836,14 @@ GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int 
 }
 
 
+// Only MapSpatialComponents block the grid, and there
+// is a linked list for every sector.
 bool LumosChitBag::MapGridBlocked(int x, int y)
 {
-	GLASSERT(MAX_BUILDING_SIZE == 2);
-	// An object is either at the center or influence by
-	// something with 0.5 + EPS radius.
-
-	static const float OFFSET = 0.6f;
-
-	Rectangle2F r;
-	r.min.x = (float)x + 0.5f - OFFSET;
-	r.min.y = (float)y + 0.5f - OFFSET;
-	r.max.x = (float)x + 0.5f + OFFSET;
-	r.max.y = (float)y + 0.5f + OFFSET;
-
-	ChitHasMapSpatial hasMapSpatial;
-	QuerySpatialHash(&inUseArr, r, 0, &hasMapSpatial);
-	int flags = 0;
-	for (int i = 0; i < inUseArr.Size(); ++i) {
-		MapSpatialComponent* ms = GET_SUB_COMPONENT(inUseArr[i], SpatialComponent, MapSpatialComponent);
-		GLASSERT(ms);
-		if (ms->Bounds().Contains(x, y) && ms->Blocks()) {
+	Vector2I sector = ToSector(x, y);
+	MapSpatialComponent* mscIt = mapSpatialHash[sector.y*NUM_SECTORS + sector.x];
+	for (; mscIt; mscIt = mscIt->nextBuilding) {
+		if (mscIt->Blocks() && mscIt->Bounds().Contains(x, y)) {
 			return true;
 		}
 	}

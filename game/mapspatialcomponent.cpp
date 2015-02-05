@@ -72,21 +72,25 @@ void MapSpatialComponent::SyncWithSpatial()
 
 	if (oldBounds != bounds) {
 		// We have a new position, update in the hash tables:
-		Context()->chitBag->RemoveFromBuildingHash(this, oldBounds.min.x, oldBounds.min.y);
+		if (!oldBounds.min.IsZero()) {
+			Context()->chitBag->RemoveFromBuildingHash(this, oldBounds.min.x, oldBounds.min.y);
+		}
 		Context()->chitBag->AddToBuildingHash(this, bounds.min.x, bounds.min.y);
 
 		// And the pather.
-		Context()->worldMap->UpdateBlock(oldBounds);
+		if (!oldBounds.min.IsZero()) {
+			Context()->worldMap->UpdateBlock(oldBounds);
+		}
 		Context()->worldMap->UpdateBlock(bounds);
-
 	}
 	// And the porches / circuits: (rotation doesn't change bounds);
 	Rectangle2I oldOutset = oldBounds, outset = bounds;
 	oldOutset.Outset(1);
 	outset.Outset(1);
-
-
-	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, oldOutset);
+	
+	if (!oldBounds.min.IsZero()) {
+		UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, oldOutset);
+	}
 	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, outset);
 }
 
@@ -152,11 +156,14 @@ void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chit
 			}
 		}
 
-		worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, LRint(yRotation / 90.0f));
+		if (circuit) {
+			worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, LRint(yRotation / 90.0f));
+		}
 		worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
 	}
-	ciruitSim->EtchLines(ToSector(rect.min));
-
+	if (ciruitSim) {
+		ciruitSim->EtchLines(ToSector(rect.min));
+	}
 		/*
 			GLASSERT(item);
 			if (item) {

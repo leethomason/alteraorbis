@@ -69,6 +69,9 @@ Chit::~Chit()
 
 void Chit::Free()
 {
+	if (!position.IsZero()) {
+		Context()->chitBag->RemoveFromSpatialHash( this, (int)position.x, (int)position.z );
+	}
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) {
 			slot[i]->OnRemove();
@@ -79,12 +82,11 @@ void Chit::Free()
 	id = 0;
 	next = 0;
 	chitBag = 0;
-//	listeners.Clear();
+	position.Zero();
 }
 
 
 void Chit::Serialize(XStream* xs)
-
 {
 	XarcOpen( xs, "Chit" );
 	XARC_SER( xs, id );
@@ -205,8 +207,6 @@ void Chit::Add( Component* c, bool loading )
 	GLASSERT(!aiComponent || aiComponent->ToAIComponent());
 	GLASSERT(!healthComponent || healthComponent->ToHealthComponent());
 	GLASSERT(!renderComponent || renderComponent->ToRenderComponent());
-
-	Context()->chitBag->AddToSpatialHash( this, (int)position.x, (int)position.z );
 }
 
 
@@ -393,19 +393,26 @@ void Chit::DebugStr( GLString* str )
 }
 
 
-void Chit::SetPosition(const grinliz::Vector3F& value)
+void Chit::SetPosition(const grinliz::Vector3F& newPosition)
 {
 	Vector2I oldWorld = ToWorld2I(position);
-	Vector2I newWorld = ToWorld2I(value);
+	Vector2I newWorld = ToWorld2I(newPosition);
 
-	if (oldWorld != newWorld) {
+	if (position.IsZero()) {
+		// The first time added to the hash!
+		GLASSERT(!ToWorld2I(newPosition).IsZero());
+		Context()->chitBag->AddToSpatialHash( this, (int)newPosition.x, (int)newPosition.z );
+	}
+	else if (oldWorld != newWorld) {
+		// update an existing hash.
 		Context()->chitBag->UpdateSpatialHash(this, oldWorld.x, oldWorld.y, newWorld.x, newWorld.y);
 	}
-	if (position != value) {
+
+	if (position != newPosition) {
+		position = newPosition;
 		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
 		SetTickNeeded();
 	}
-	position = value;
 }
 
 
@@ -421,11 +428,15 @@ void Chit::SetRotation(const grinliz::Quaternion& value)
 
 void Chit::SetPosRot(const grinliz::Vector3F& p, const grinliz::Quaternion& q)
 {
-	if (p != position || q != rotation) {
-		position = p;
+	if (p != position) {
+		// Then can optimize rotation, since the position will call
+		// the updates and send messages.
 		rotation = q;
-		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
-		SetTickNeeded();
+		SetPosition(p);
+	}
+	else {
+		SetRotation(q);
+		SetPosition(p);
 	}
 }
 

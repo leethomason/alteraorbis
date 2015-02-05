@@ -283,11 +283,8 @@ private:
 #ifdef OUTER_TICK
 	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];
 #endif
-	
-	// Split out into 2 hashes for performance, and
-	// independent tweaking.
-	Chit* mapSpatialHash[SIZE2];
-	Chit* mobSpatialHash[SIZE2];
+
+	Chit* spatialHash[SIZE2];
 };
 
 

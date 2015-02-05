@@ -254,10 +254,8 @@ void BattleTestScene::LoadMap()
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	//const GameItem& treeItem = itemDefDB->Get( "tree" );
 
 	for( int i=0; i<features.Size(); ++i ) {
-		//Chit* chit = context.chitBag->NewChit();
 		const Vector2I& v = features[i];
 		context.worldMap->SetPlant(v.x, v.y, 1+1, 3);
 	}

@@ -311,7 +311,7 @@ public:
 
 private:
 
-	static bool HasMapSpatialInUse( Chit* );
+	//static bool HasMapSpatialInUse( Chit* );
 
 	int							sceneID;
 	SceneData*					sceneData;

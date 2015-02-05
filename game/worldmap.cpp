@@ -941,21 +941,17 @@ void WorldMap::UpdateBlock(const Rectangle2I& r)
 void WorldMap::UpdateBlock( int x, int y )
 {
 	WorldGrid* wg = &grid[INDEX(x,y)];
-	int use = 0;
+	bool blocked = false;
 	if ( iMapGridUse ) {
-		use = iMapGridUse->MapGridBlocked( x, y );
+		blocked = iMapGridUse->MapGridBlocked( x, y );
 	}
-	if ( use & GRID_BLOCKED ) {
-		if ( !wg->extBlock ) {
-			wg->extBlock = 1;
-			ResetPather( x, y );
-		}
+	if (blocked && !wg->extBlock) {
+		wg->extBlock = 1;
+		ResetPather(x, y);
 	}
-	else {
-		if ( wg->extBlock ) {
-			wg->extBlock = 0;
-			ResetPather( x, y );
-		}
+	else if (!blocked && wg->extBlock) {
+		wg->extBlock = 0;
+		ResetPather(x, y);
 	}
 }
 

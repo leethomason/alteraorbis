@@ -204,6 +204,7 @@ public:
 	void SetDestroyed(const HealthComponent*, U32 v) { destroyed = v;  }
 
 	const grinliz::Vector3F& Position() const			{ return position; }
+
 	void SetPosition(const grinliz::Vector3F& value);
 	void SetPosition(float x, float y, float z) { grinliz::Vector3F v = { x, y, z }; SetPosition(v); }
 

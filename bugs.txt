@@ -81,9 +81,10 @@ x mouse wheel support
 	- plant changes
 - Spatial change
 	x scan code for GetSpatialComponent
-	- ComponentSet.spatial is all wrong
-	- optimize for AreaOfInterest
+	x ComponentSet.spatial is all wrong
+	- check for recursive setPosition
 	- fix render component to not have sync	
+	- optimize for AreaOfInterest
 - gobman statues
 - improve map icon art
 - clean up mother-core image

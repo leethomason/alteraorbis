@@ -317,8 +317,6 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 	int tick = VERY_LONG_TICK;
 
-	SyncToSpatial();
-
 	// Animate the primary model.
 	if ( model[0] && model[0]->GetAnimationResource() ) {
 		tick = 0;	
@@ -617,7 +615,6 @@ bool RenderComponent::HasMetaData( int id )
 bool RenderComponent::GetMetaData( int id, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
-		SyncToSpatial();
 		model[0]->CalcMetaData( id, xform );
 		return true;
 	}
@@ -687,7 +684,10 @@ void RenderComponent::DebugStr( GLString* str )
 void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	const ChitContext* context = Context();
-	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+	if (msg.ID() == ChitMsg::CHIT_POS_CHANGE) {
+		SyncToSpatial();
+	}
+	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		// Don't self delete.
 
 		static const Vector3F UP = { 0, 1, 0 };
