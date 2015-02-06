@@ -276,6 +276,16 @@ void ChitBag::ProcessDeleteList()
 }
 
 
+void ChitBag::PushCurrentNews(const CurrentNews& news)
+{
+	if (currentNews.Size() > 40) {
+		currentNews.PopFront();
+	}
+	currentNews.Push(news);
+}
+
+
+
 void ChitBag::DoTick( U32 delta )
 {
 	PROFILE_FUNC();

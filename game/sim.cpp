@@ -751,8 +751,8 @@ void Sim::CreateVolcano( int x, int y )
 	chit->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 	
 	Vector2F pos = ToWorld2F(chit->Position());
-	NewsEvent event(NewsEvent::VOLCANO, pos, 0, 0, 0);
-	context.chitBag->GetNewsHistory()->Add(event);
+	ChitBag::CurrentNews news = { StringPool::Intern("Volcano"), pos, 0 };
+	context.chitBag->PushCurrentNews(news);
 }
 
 

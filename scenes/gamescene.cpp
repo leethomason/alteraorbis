@@ -1014,20 +1014,19 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
-			NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-			const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+			auto& current = sim->GetChitBag()->GetCurrentNews();
 
 			int index = current.Size() - 1 - i;
 			if (index >= 0) {
-				const NewsEvent& ne = current[index];
+				const ChitBag::CurrentNews& ne = current[index];
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				//if (cc && ne.FirstChitID()) {
-				//	cc->SetTrack(ne.FirstChitID());
-				//}
-				//else {
-					sim->GetEngine()->CameraLookAt(ne.Pos().x, ne.Pos().y);
+				if (cc && ne.chitID) {
+					cc->SetTrack(ne.chitID);
+				}
+				else {
+					sim->GetEngine()->CameraLookAt(ne.pos.x, ne.pos.y);
 					if (cc) cc->SetTrack(0);
-				//}
+				}
 			}
 		}
 	}
@@ -1444,13 +1443,12 @@ void GameScene::DoTick( U32 delta )
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-		const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+		const auto& current = sim->GetChitBag()->GetCurrentNews();
 
 		int index = current.Size() - 1 - i;
 		if ( index >= 0 ) {
-			const NewsEvent& ne = current[index];
-			IString name = ne.GetWhat();
+			const ChitBag::CurrentNews& ne = current[index];
+			IString name = ne.name;
 			newsButton[i].SetText( name.c_str() );
 			newsButton[i].SetEnabled( true );
 		}

@@ -971,8 +971,8 @@ void AIComponent::Rampage( int dest )
 	aiMode = RAMPAGE_MODE; 
 	currentAction = NO_ACTION;
 
-	NewsEvent news( NewsEvent::RAMPAGE, ToWorld2F(parentChit->Position()), parentChit->GetItemID(), 0, parentChit->Team() );
-	Context()->chitBag->GetNewsHistory()->Add( news );	
+	ChitBag::CurrentNews news = { StringPool::Intern("Rampage"), ToWorld2F(parentChit->Position()), parentChit->ID() };
+	Context()->chitBag->PushCurrentNews(news);
 }
 
 
@@ -1370,9 +1370,8 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 
 		// Trolls herd *all the time*
 		if ( thisComp.item->IName() != ISC::troll ) {
-			NewsEvent news( NewsEvent::SECTOR_HERD, ToWorld2F(thisComp.chit->Position()), 
-						   parentChit->GetItemID(), 0, parentChit->Team() );
-			Context()->chitBag->GetNewsHistory()->Add( news );
+			ChitBag::CurrentNews news = { StringPool::Intern("SectorHerd"), ToWorld2F(parentChit->Position()), parentChit->ID() };
+			Context()->chitBag->PushCurrentNews(news);
 		}
 
 		ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );

@@ -74,13 +74,12 @@ void MapSpatialComponent::SyncWithSpatial()
 		// We have a new position, update in the hash tables:
 		Context()->chitBag->RemoveFromBuildingHash(this, oldBounds.min.x, oldBounds.min.y);
 		Context()->chitBag->AddToBuildingHash(this, bounds.min.x, bounds.min.y);
-
-		// And the pather.
-		if (!oldBounds.min.IsZero()) {
-			Context()->worldMap->UpdateBlock(oldBounds);
-		}
-		Context()->worldMap->UpdateBlock(bounds);
 	}
+	// And the pather.
+	if (!oldBounds.min.IsZero()) {
+		Context()->worldMap->UpdateBlock(oldBounds);
+	}
+	Context()->worldMap->UpdateBlock(bounds);
 
 	// Compute a new porch type:
 	if (hasPorch) {
@@ -109,7 +108,7 @@ void MapSpatialComponent::SyncWithSpatial()
 	Rectangle2I oldOutset = oldBounds, outset = bounds;
 	oldOutset.Outset(1);
 	outset.Outset(1);
-	
+
 	if (!oldBounds.min.IsZero()) {
 		UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, oldOutset);
 	}
