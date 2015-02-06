@@ -27,10 +27,7 @@ void GameMoveComponent::Serialize(XStream* xs)
 
 int GameMoveComponent::DoTick(U32 delta)
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if (!sc) return VERY_LONG_TICK;
-
-	Vector3F pos = sc->GetPosition();
+	Vector3F pos = parentChit->Position();
 	Vector3F start = pos;
 
 	// Basic physics and block avoidance.
@@ -47,7 +44,7 @@ int GameMoveComponent::DoTick(U32 delta)
 
 	velocity = (pos - start) * (1000.0f / float(delta));
 	if (start != pos) {
-		sc->SetPosition(pos);
+		parentChit->SetPosition(pos);
 		return 0;
 	}
 	return VERY_LONG_TICK;

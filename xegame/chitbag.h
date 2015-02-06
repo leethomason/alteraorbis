@@ -213,6 +213,14 @@ public:
 
 	NewsHistory* GetNewsHistory() { return newsHistory;  }
 
+	struct CurrentNews {
+		grinliz::IString name;
+		grinliz::Vector2F pos;
+		int chitID;
+	};
+	const grinliz::CDynArray<CurrentNews>& GetCurrentNews() const { return currentNews; }
+	void PushCurrentNews(const CurrentNews& news);
+
 	// Slow iteration: (for census)
 	int NumBlocks() const;
 	void GetBlockPtrs( int block, grinliz::CDynArray<Chit*>* arr ) const;
@@ -280,14 +288,9 @@ private:
 	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	grinliz::CDynArray<Bolt>		bolts;
-#ifdef OUTER_TICK
-	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];
-#endif
-	
-	// Split out into 2 hashes for performance, and
-	// independent tweaking.
-	Chit* mapSpatialHash[SIZE2];
-	Chit* mobSpatialHash[SIZE2];
+	grinliz::CDynArray<CurrentNews> currentNews;
+
+	Chit* spatialHash[SIZE2];
 };
 
 

@@ -68,7 +68,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		}
 
 		bounds.Outset(RAD);
-		Vector2I sector = building->GetSpatialComponent()->GetSector();
+		Vector2I sector = ToSector(building->Position());
 
 		WorldMap* worldMap = Context()->worldMap;
 		Rectangle2I mapBounds = worldMap->Bounds();
@@ -188,7 +188,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		eval = Clamp(eval, -1.0, 1.0);
 
 		if (debugLog) {
-			Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
+			Vector2I pos = ToWorld2I(building->Position());
 			GLOUTPUT(("Building %s at %d,%d eval=%.2f nRays=%d \n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
 				building->GetItem()->Name(),
 				pos.x, pos.y,
@@ -204,10 +204,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 int EvalBuildingScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
-		MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
-		if (msc) {
-			msc->UpdatePorch(false);
-		}
+		// Regular update to change the porch.
+		parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
 	}
 	return timer.Next();
 }

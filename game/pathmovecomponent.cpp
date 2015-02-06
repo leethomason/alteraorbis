@@ -104,9 +104,8 @@ float GameMoveComponent::Speed() const
 Vector3F PathMoveComponent::Velocity()
 {
 	Vector3F v = { 0, 0, 0 };
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if ( spatial && this->IsMoving() ) {
-		v = spatial->GetHeading() * Speed();
+	if ( this->IsMoving() ) {
+		v = parentChit->Heading() * Speed();
 	}
 	return v;
 }
@@ -131,15 +130,11 @@ void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, const grinliz::Ve
 
 void PathMoveComponent::QueueDest( Chit* target ) 
 {
-	SpatialComponent* targetSpatial = target->GetSpatialComponent();
-	SpatialComponent* srcSpatial = parentChit->GetSpatialComponent();
-	if ( targetSpatial && srcSpatial ) {
-		Vector2F v = targetSpatial->GetPosition2D();
-		Vector2F delta = v - srcSpatial->GetPosition2D();
-		delta.Normalize();
-		//float angle = RotationXZDegrees( delta.x, delta.y );
-		QueueDest( v, &delta );
-	}
+	Vector2F v = ToWorld2F(target->Position());
+	Vector2F delta = v - ToWorld2F(parentChit->Position());
+	delta.Normalize();
+	QueueDest( v, &delta );
+
 	parentChit->SetTickNeeded();
 }
 
@@ -174,7 +169,7 @@ void PathMoveComponent::ComputeDest()
 	
 	const ChitContext* context = Context();
 
-	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
+	const Vector2F& posVec = ToWorld2F(thisComp.chit->Position());
 	bool sameSector = true;
 	if ( context->worldMap->UsingSectors() ) {
 		Vector2I v0 = SectorData::SectorID( posVec.x, posVec.y );
@@ -225,18 +220,14 @@ void PathMoveComponent::ComputeDest()
 
 void PathMoveComponent::GetPosRot( grinliz::Vector2F* pos, grinliz::Vector2F* heading )
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	GLASSERT( spatial );
-	*pos = spatial->GetPosition2D();
-	*heading = spatial->GetHeading2D();
+	*pos = ToWorld2F(parentChit->Position());
+	*heading = parentChit->Heading2D();
 }
 
 
 void PathMoveComponent::SetPosRot( const grinliz::Vector2F& _pos, const grinliz::Vector2F& heading )
 {
 	Vector2F pos = _pos;
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	GLASSERT( spatial );
 
 	const ChitContext* context = Context();
 
@@ -253,7 +244,7 @@ void PathMoveComponent::SetPosRot( const grinliz::Vector2F& _pos, const grinliz:
 	Quaternion q;
 	q.FromAxisAngle( V3F_UP, rotation );
 	
-	spatial->SetPosRot( pos3, q );
+	parentChit->SetPosRot( pos3, q );
 }
 
 
@@ -389,7 +380,7 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 				continue;
 			}
 
-			Vector2F itPos2 = chit->GetSpatialComponent()->GetPosition2D();
+			Vector2F itPos2 = ToWorld2F(chit->Position());
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 
 			float d = ((*pos2)-itPos2).Length();
@@ -449,10 +440,10 @@ int PathMoveComponent::DoTick( U32 delta )
 	bool floating = false;
 
 	// Start with the physics move:
-	Vector3F pos3 = parentChit->GetSpatialComponent()->GetPosition();
+	Vector3F pos3 = parentChit->Position();
 	bool fluid = ApplyFluid(delta, &pos3, &floating );
 	if (fluid) {
-		parentChit->GetSpatialComponent()->SetPosition(pos3);
+		parentChit->SetPosition(pos3);
 		++forceCount;
 		if (floating)
 			return 0;

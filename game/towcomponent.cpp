@@ -62,13 +62,13 @@ int TowComponent::DoTick( U32 delta )
 
 	if ( delta > MAX_FRAME_TIME ) delta = MAX_FRAME_TIME;
 
-	Vector3F myTarget = thisComp.spatial->GetPosition();
+	Vector3F myTarget = thisComp.chit->Position();
 	thisComp.render->CalcTarget( &myTarget );
-	Vector3F myHeading = thisComp.spatial->GetHeading();
-	Quaternion myRot = thisComp.spatial->GetRotation();
+	Vector3F myHeading = thisComp.chit->Heading();
+	Quaternion myRot = thisComp.chit->Rotation();
 
 	Vector3F towTarget = myTarget - myHeading * TOW_DISTANCE;
-	Vector3F towPos = towComp.spatial->GetPosition();
+	Vector3F towPos = towComp.chit->Position();
 	Vector3F towDir = towTarget - towPos;
 	towDir.Normalize();
 
@@ -83,10 +83,10 @@ int TowComponent::DoTick( U32 delta )
 	}
 
 	// Not sure how to reasonably do constant rotation...see how this does:
-	Quaternion towRot = towComp.spatial->GetRotation();
+	Quaternion towRot = towComp.chit->Rotation();
 	Quaternion rot;
 	Quaternion::SLERP( towRot, myRot, 0.2f, &rot );
-	towComp.spatial->SetPosRot( v, rot );
+	towComp.chit->SetPosRot( v, rot );
 
 	return 0;
 }

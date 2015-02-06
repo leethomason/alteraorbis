@@ -91,11 +91,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	for( int i=0; i<NUM_CHITS; ++i ) {
 		chit[i] = context.chitBag->NewChit();
-		chit[i]->Add( new SpatialComponent() );
 		chit[i]->Add( new RenderComponent( "humanFemale" ) );
 		chit[i]->Add( new PathMoveComponent() );
 		chit[i]->Add( new DebugPathComponent() );
-		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
+		chit[i]->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
 	}
 }
 
@@ -159,9 +158,9 @@ void NavTestScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray&
 }
 
 
-int NavTestScene::MapGridUse( int x, int y )
+bool NavTestScene::MapGridBlocked( int x, int y )
 {
-	return blocks.IsSet(x,y) ? GRID_BLOCKED : 0;
+	return blocks.IsSet(x,y) ? true : false;
 }
 
 

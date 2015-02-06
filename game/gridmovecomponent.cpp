@@ -38,8 +38,8 @@ void GridMoveComponent::DebugStr( grinliz::GLString* str )
 void GridMoveComponent::Serialize( XStream* xs )
 {
 	if (state == TRAVELLING) {
-		if (Context() && parentChit && parentChit->GetSpatialComponent()) {
-			GLASSERT(Context()->worldMap->GetWorldGrid(parentChit->GetSpatialComponent()->GetPosition2DI()).IsGrid());
+		if (Context() && parentChit) {
+			GLASSERT(Context()->worldMap->GetWorldGrid(ToWorld2I(parentChit->Position())).IsGrid());
 		}
 	}
 
@@ -98,11 +98,8 @@ int GridMoveComponent::DoTick( U32 delta )
 		return VERY_LONG_TICK;
 	}
 
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if ( !sc ) return VERY_LONG_TICK;
-
 	int tick = 0;
-	Vector2F pos = sc->GetPosition2D();
+	Vector2F pos = ToWorld2F(parentChit->Position());
 
 	// Speed up or slow down, depending
 	// on on or off board.
@@ -157,7 +154,7 @@ int GridMoveComponent::DoTick( U32 delta )
 			GridBlock destBlock = worldInfo.GetGridBlock( destSectorPort.sector, destSectorPort.port );
 			GLASSERT(!destBlock.IsZero());
 			Vector2F destPt = { (float)destBlock.x, (float)destBlock.y };
-			GLASSERT(Context()->worldMap->GetWorldGrid(sc->GetPosition2DI()).IsGrid());
+			GLASSERT(Context()->worldMap->GetWorldGrid(ToWorld2I(parentChit->Position())).IsGrid());
 			
 			Rectangle2F destRect;
 			destRect.min = destRect.max = destPt;
@@ -246,7 +243,6 @@ int GridMoveComponent::DoTick( U32 delta )
 			state = stateIfDestReached;
 		}
 	}
-	GLASSERT( sc );
-	sc->SetPosition( pos.x, 0, pos.y );
+	parentChit->SetPosition( pos.x, 0, pos.y );
 	return tick;
 }

@@ -40,13 +40,7 @@ void NewsHistory::Add( const NewsEvent& e )
 	NewsEvent event = e;
 	event.date = date ? date : 1;	// don't write 0 date. confuses later logic.
 
-	if ( event.what < NewsEvent::START_CURRENT ) {
-		events.Push( event );
-	}
-	if ( !current.HasCap() ) {
-		current.PopFront();
-	}
-	current.Push( event );
+	events.Push( event );
 }
 
 
@@ -129,14 +123,6 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Vision Quest",
 		"Greater Summoned",
 		"Domain Conquered",
-
-		"",	// placeholder to mark minor events
-
-		"Sector Herd",
-		"Rampage",
-		"Volcano",
-		"Pool",
-		"Waterfall"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );

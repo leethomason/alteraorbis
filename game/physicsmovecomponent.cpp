@@ -72,9 +72,9 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 {
 	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT );
-	if ( thisComp.okay ) {
-		Vector3F pos = thisComp.spatial->GetPosition();
-		float rot = thisComp.spatial->GetYRotation();
+	if (thisComp.okay) {
+		Vector3F pos = thisComp.chit->Position();
+		float rot = YRotation(thisComp.chit->Rotation());
 
 		float dtime = (float)delta * 0.001f;
 		Vector3F travel = velocity * dtime;
@@ -115,7 +115,8 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 		Vector2F pos2 = { pos.x, pos.z };
 		ApplyBlocks( &pos2, 0 );
 		pos.XZ( pos2 );
-		thisComp.spatial->SetPosYRot( pos, rot );
+		Quaternion q = Quaternion::MakeYRotation(rot);
+		thisComp.chit->SetPosRot( pos, q );
 	}
 	bool isMoving = IsMoving();
 
@@ -149,11 +150,11 @@ Vector3F TrackingMoveComponent::Velocity()
 	Vector3F v = { 0, 0, 0 };
 
 	Chit* chit = Context()->chitBag->GetChit( target );
-	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+	if ( !chit )
 		return v;
 
-	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
-	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+	Vector3F targetPos = chit->Position();
+	Vector3F pos = parentChit->Position();
 
 	Vector3F delta = targetPos - pos;
 	delta.Normalize();
@@ -165,11 +166,11 @@ Vector3F TrackingMoveComponent::Velocity()
 bool TrackingMoveComponent::IsMoving()
 {
 	Chit* chit = Context()->chitBag->GetChit(target);
-	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent())
+	if (!chit )
 		return false;
 
-	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
-	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+	Vector3F targetPos = chit->Position();
+	Vector3F pos = parentChit->Position();
 	return targetPos != pos;
 }
 
@@ -177,14 +178,14 @@ bool TrackingMoveComponent::IsMoving()
 int TrackingMoveComponent::DoTick( U32 deltaTime )
 {
 	Chit* chit = Context()->chitBag->GetChit(target);
-	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent()) {
+	if (!chit ) {
 		GLASSERT(parentChit->StackedMoveComponent()); // not required, but should have a GameMoveComponent??
 		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 		return VERY_LONG_TICK;
 	}
 
-	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
-	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+	Vector3F targetPos = chit->Position();
+	Vector3F pos = parentChit->Position();
 
 	Vector3F delta = targetPos - pos;
 	float len = delta.Length();
@@ -193,7 +194,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 	float travel = Travel( TRACK_SPEED, Min( deltaTime, MAX_FRAME_TIME ));
 
 	if ( travel >= len ) {
-		parentChit->GetSpatialComponent()->SetPosition( targetPos );
+		parentChit->SetPosition( targetPos );
 		ChitMsg msg( ChitMsg::CHIT_TRACKING_ARRIVED, 0, parentChit );
 		chit->SendMessage( msg );
 
@@ -202,7 +203,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 	}
 	else {
 		delta.Normalize();
-		parentChit->GetSpatialComponent()->SetPosition( pos + delta*travel );
+		parentChit->SetPosition( pos + delta*travel );
 	}
 	return 0;
 }

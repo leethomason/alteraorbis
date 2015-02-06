@@ -343,6 +343,13 @@ class Quaternion
 public:
 	Quaternion() : x( 0.0f ), y( 0.0f ), z( 0.0f ), w( 1.0f )	{}
 
+	static Quaternion MakeYRotation(float yRot) {
+		Quaternion q;
+		static const Vector3F UP = { 0, 1, 0 };
+		q.FromAxisAngle(UP, yRot);
+		return q;
+	}
+
 	void Normalize();
 	void Zero() { x=0; y=0; z=0; w=1; }
 

@@ -49,15 +49,6 @@ public:
 		GREATER_SUMMON_TECH,		//  mob
 		DOMAIN_CONQUER,				//	conquered	conquerer
 
-		// Current events, but not logged:
-		START_CURRENT,
-		SECTOR_HERD,				//	mob
-		RAMPAGE,					//	mob
-
-		VOLCANO,
-		POOL,
-		WATERFALL,
-
 		NUM_WHAT
 	};
 
@@ -112,10 +103,6 @@ public:
 	int NumNews() const { return events.Size(); }
 	const NewsEvent& News( int i ) { GLASSERT( i >= 0 && i < events.Size() ); return events[i]; }
 
-	// Returns all events
-	enum { MAX_CURRENT = 20 };
-	const grinliz::CArray< NewsEvent, MAX_CURRENT >& CurrentNews() const { return current; }
-
 	struct Data {
 		Data() : born(0), died(0) {}
 
@@ -134,7 +121,6 @@ private:
 	ChitBag* chitBag;
 	grinliz::CDynArray< const NewsEvent* > cache;	// return from query call
 	grinliz::CDynArray< NewsEvent > events;			// big array of everything that has happend.
-	grinliz::CArray< NewsEvent, MAX_CURRENT > current;
 
 };
 

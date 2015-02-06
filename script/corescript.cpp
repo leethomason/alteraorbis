@@ -166,7 +166,7 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	if ( !workQueue ) {
 		workQueue = new WorkQueue();
 	}
-	Vector2I mapPos = parentChit->GetSpatialComponent()->GetPosition2DI();
+	Vector2I mapPos = ToWorld2I(parentChit->Position());
 	sector = ToSector(mapPos);
 	workQueue->InitSector( parentChit, sector );
 
@@ -490,7 +490,7 @@ void CoreScript::UpdateAI()
 
 bool CoreScript::RecruitNeutral()
 {
-	Vector2I sector = parentChit->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(parentChit->Position());
 	Rectangle2I inner = InnerSectorBounds(sector);
 
 	MOBKeyFilter filter;
@@ -509,7 +509,7 @@ bool CoreScript::RecruitNeutral()
 				this->AddCitizen( chit );
 				GLASSERT(chit->GetItem()->Significant());
 
-				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, parentChit->GetSpatialComponent()->GetPosition2D(),
+				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, ToWorld2F(parentChit->Position()),
 							   parentChit->GetItemID(), 0, parentChit->Team());
 							   
 				Context()->chitBag->GetNewsHistory()->Add(news);
@@ -708,7 +708,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	if (!workQueue || workQueue->HasJob()) {
 		delete workQueue;
 		workQueue = new WorkQueue();
-		workQueue->InitSector(parentChit, parentChit->GetSpatialComponent()->GetSector());
+		workQueue->InitSector(parentChit, ToSector(parentChit->Position()));
 	}
 }
 
@@ -747,7 +747,7 @@ void CoreScript::UpdateScore(int n)
 
 int CoreScript::MaxTech()
 {
-	Vector2I sector = ToSector(parentChit->GetSpatialComponent()->GetPosition2DI());
+	Vector2I sector = ToSector(parentChit->Position());
 	CChitArray chitArr;
 	Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
 	return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
@@ -854,7 +854,8 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		// 'in use' instead of blocking.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 		GLASSERT(ms);
-		ms->SetMode(GRID_IN_USE);
+		ms->SetBlocks(false);
+		
 		CoreScript* cs = new CoreScript();
 		chit->Add(cs);
 
@@ -888,7 +889,7 @@ int CoreScript::GetPave()
 	for (int i = 0; i < WorldGrid::NUM_PAVE; ++i) nPave.Push(0);
 
 	if (pave == 0) {
-		Rectangle2I inner = InnerSectorBounds(parentChit->GetSpatialComponent()->GetSector());
+		Rectangle2I inner = InnerSectorBounds(ToSector(parentChit->Position()));
 		for (Rectangle2IIterator it(inner); !it.Done(); it.Next()) {
 			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
 			nPave[wg.Pave()] += 1;
@@ -967,9 +968,9 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 	for (int i = 0; i<chitArr.Size(); ++i) {
 		Chit* chit = chitArr[i];
 		if (startSector.IsZero())
-			startSector = chit->GetSpatialComponent()->GetSector();
+			startSector = ToSector(chit->Position());
 		else
-			if (startSector != chit->GetSpatialComponent()->GetSector())
+			if (startSector != ToSector(chit->Position()))
 				startInSameSector = false;
 	}
 
@@ -985,8 +986,8 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 
 	if (startSector != destSector) {
 		Chit* chit = chitArr[0];
-		const SectorData& currentSD = Context()->worldMap->GetSectorData(chit->GetSpatialComponent()->GetSector());
-		int currentPort = currentSD.NearestPort(chit->GetSpatialComponent()->GetPosition2D());
+		const SectorData& currentSD = Context()->worldMap->GetSectorData(ToSector(chit->Position()));
+		int currentPort = currentSD.NearestPort(ToWorld2F(chit->Position()));
 
 		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
 		int destPort = destSD.NearestPort(ToWorld2F(dest));
@@ -1089,7 +1090,7 @@ void CoreScript::DoStrategicTick()
 	GLASSERT(sim);
 	if (!sim) return;
 
-	Vector2I sector = ParentChit()->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(ParentChit()->Position());
 	CCoreArray stateArr;
 	sim->CalcStrategicRelationships(sector, 3, RELATE_ENEMY, &stateArr);
 
@@ -1117,8 +1118,8 @@ void CoreScript::DoStrategicTick()
 	// Attack!!!
 	sim->DeclareWar(target, this);
 	bool first = true;
-	Vector2F targetCorePos2 = target->ParentChit()->GetSpatialComponent()->GetPosition2D();
-	Vector2I targetCorePos = target->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+	Vector2F targetCorePos2 = ToWorld2F(target->ParentChit()->Position());
+	Vector2I targetCorePos = ToWorld2I(target->ParentChit()->Position());;
 	Vector2I targetSector = ToSector(targetCorePos);
 
 	for (int i = 0; i < MAX_SQUADS; ++i) {
@@ -1133,7 +1134,7 @@ void CoreScript::DoStrategicTick()
 			BuildingWithPorchFilter filter;
 			Chit* building = Context()->chitBag->FindBuilding(IString(), targetSector, &targetCorePos2, LumosChitBag::RANDOM_NEAR, 0, &filter);
 			if (building) {
-				pos = building->GetSpatialComponent()->GetPosition2DI();
+				pos = ToWorld2I(building->Position());
 			}
 		}
 		GLASSERT(!pos.IsZero());

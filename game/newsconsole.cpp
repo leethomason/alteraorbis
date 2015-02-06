@@ -40,8 +40,8 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	currentNews = Max(currentNews, history->NumNews() - 40);
 	GLString str;
 	Vector2I homeSector = { 0, 0 };
-	if (homeCore && homeCore->ParentChit()->GetSpatialComponent()) {
-		homeSector = homeCore->ParentChit()->GetSpatialComponent()->GetSector();
+	if (homeCore) {
+		homeSector = ToSector(homeCore->ParentChit()->Position());
 	}
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
