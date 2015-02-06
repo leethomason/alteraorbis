@@ -268,7 +268,7 @@ void Sim::CreateCores()
 
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
 		// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
 		if (chit->GetComponent("CoreScript")) {
 			Vector2I pos2i = ToWorld2I(chit->Position());

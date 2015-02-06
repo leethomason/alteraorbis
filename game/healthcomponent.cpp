@@ -47,48 +47,15 @@ void HealthComponent::Serialize( XStream* xs )
 }
 
 
-float HealthComponent::DestroyedFraction() const 
-{ 
-	return (float)parentChit->Destroyed() / (float)COUNTDOWN; 
-}
-
 int HealthComponent::DoTick(U32 delta)
 {
-	DeltaHealth();
-	if ( parentChit->Destroyed() ) {
-		parentChit->SetDestroyed(this, parentChit->Destroyed() + delta);
-		if ( parentChit->Destroyed() >= COUNTDOWN ) {
-			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
-			Context()->chitBag->QueueDelete( parentChit );
-		}
-		else {
-			ChitMsg msg( ChitMsg::CHIT_DESTROYED_TICK );
-			msg.dataF = 1.0f - this->DestroyedFraction();
-			parentChit->SendMessage( msg );
-		}
-	}
-	return parentChit->Destroyed() ? 0 : VERY_LONG_TICK;
-}
-
-
-void HealthComponent::DeltaHealth()
-{
-	if ( parentChit->Destroyed() )
-		return;
-	const ChitContext* context = Context();
-
 	GameItem* item = 0;
-	if ( parentChit->GetItemComponent() ) {
+	if (parentChit->GetItemComponent()) {
 		item = parentChit->GetItem();
 	}
-	if ( item ) {
-		if ( item->hp == 0 && !parentChit->Destroyed() ) {
-			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_START), this );
-//			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
-			parentChit->SetDestroyed(this, 1);
-
-			const GameItem* item = parentChit->GetItem();
-			if ( item ) {
+	if (item) {
+		if (item->hp == 0) {
+			if (parentChit->GetSpatialComponent()) {
 				// Audio.
 				if (XenoAudio::Instance()) {
 					MOBIshFilter mobIsh;
@@ -99,19 +66,19 @@ void HealthComponent::DeltaHealth()
 				}
 
 				// Tombstone
-				IString mob = item->keyValues.GetIString( "mob" );
-				if ( !mob.empty() ) {
+				IString mob = item->keyValues.GetIString("mob");
+				if (!mob.empty()) {
 					const char* asset = 0;
-					if ( mob == ISC::lesser ) asset = "tombstoneLesser";
-					else if ( mob == ISC::greater ) asset = "tombstoneGreater";
-					else if ( mob == ISC::denizen ) asset = "tombstoneDenizen";
+					if (mob == ISC::lesser) asset = "tombstoneLesser";
+					else if (mob == ISC::greater) asset = "tombstoneGreater";
+					else if (mob == ISC::denizen) asset = "tombstoneDenizen";
 
-					if ( asset ) {
+					if (asset) {
 						Chit* chit = Context()->chitBag->NewChit();
 
-						Context()->chitBag->AddItem( "tombstone", chit, context->engine, 0, 0, asset );
-						chit->Add( new RenderComponent( asset ));
-						chit->Add( new CountDownScript( 30*1000 ));
+						Context()->chitBag->AddItem("tombstone", chit, Context()->engine, 0, 0, asset);
+						chit->Add(new RenderComponent(asset));
+						chit->Add(new CountDownScript(30 * 1000));
 
 						Vector3F pos = parentChit->Position();
 						float r = YRotation(parentChit->Rotation());
@@ -119,39 +86,40 @@ void HealthComponent::DeltaHealth()
 						chit->SetPosRot(pos, Quaternion::MakeYRotation(r));
 
 						GameItem* tombItem = chit->GetItem();
-						GLASSERT( item->Team() != 0 );	// how would a neutral create a tombstone??
-						tombItem->keyValues.Set( "tomb_team", item->Team() );
-						tombItem->keyValues.Set( "tomb_mob", mob );
+						GLASSERT(item->Team() != 0);	// how would a neutral create a tombstone??
+						tombItem->keyValues.Set("tomb_team", item->Team());
+						tombItem->keyValues.Set("tomb_mob", mob);
 					}
 				}
 			}
+			parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_DESTROYED), this);
+			Context()->chitBag->QueueDelete(parentChit);
 		}
 	}
+	return VERY_LONG_TICK;
 }
 
 
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
-		if ( !parentChit->Destroyed()) {
-			RenderComponent* render = parentChit->GetRenderComponent();
-			GLASSERT( render );	// it is a message from the render component, after all.
-			ItemComponent* inventory = parentChit->GetItemComponent();
-			GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
-									// was lost before impact, in which case this assert should
-									// be removed.
+		RenderComponent* render = parentChit->GetRenderComponent();
+		GLASSERT( render );	// it is a message from the render component, after all.
+		ItemComponent* inventory = parentChit->GetItemComponent();
+		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
+								// was lost before impact, in which case this assert should
+								// be removed.
 
-			MeleeWeapon* item=inventory->GetMeleeWeapon();
-			if ( render && inventory && item  ) { /* okay */ }
-			else return;
+		MeleeWeapon* item=inventory->GetMeleeWeapon();
+		if ( render && inventory && item  ) { /* okay */ }
+		else return;
 
-			Vector3F pos;
-			render->CalcTrigger( &pos, 0 );
+		Vector3F pos;
+		render->CalcTrigger( &pos, 0 );
 
-			const ChitContext* context = Context();
-			BattleMechanics::MeleeAttack( context->engine, parentChit, item );
-			context->engine->particleSystem->EmitPD( ISC::meleeImpact, pos, V3F_UP, 0 );
-		}
+		const ChitContext* context = Context();
+		BattleMechanics::MeleeAttack( context->engine, parentChit, item );
+		context->engine->particleSystem->EmitPD( ISC::meleeImpact, pos, V3F_UP, 0 );
 	}
 	else {
 		super::OnChitMsg( chit, msg );

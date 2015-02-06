@@ -76,11 +76,7 @@ class ChitMsg
 public:
 	enum {
 		//                          Broadcast?
-		CHIT_DESTROYED_START,	//	Yes		sender: health. *starts* the countdown sequence.
-								//			After this components start going away - the best msg to listen for if 
-								//			GetItem() still needs to work.
-		CHIT_DESTROYED_TICK,	//			dataF = fraction
-		CHIT_DESTROYED_END,		//	Yes		sender: health. ends the sequence, next step is the chit delete
+		CHIT_DESTROYED,			//	Yes		sender: health. Chit was destroyed / derezzed. Not shutdown.
 		CHIT_DAMAGE,			//	Yes		sender: chitBag, ptr=&ChitDamageInfo
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		//			AI message: a lead unit is telling other units to herd to a different sector.
@@ -194,15 +190,6 @@ public:
 	int timeToTick;		// time until next tick needed: set by DoTick() call
 	int timeSince;		// time since the last tick
 
-	// ---------- Data Binding --------- //
-	// For components: there is a lot
-	// of cross-component chatter to get to
-	// shared data. Experimenting with moving
-	// it here. This is shared among the 
-	// components, but private to the world.
-	U32 Destroyed() const	{ return destroyed; }
-	void SetDestroyed(const HealthComponent*, U32 v) { destroyed = v;  }
-
 	const grinliz::Vector3F& Position() const			{ return position; }
 
 	void SetPosition(const grinliz::Vector3F& value);
@@ -217,7 +204,6 @@ public:
 	void SetPosRot(const grinliz::Vector3F& pos, const grinliz::Quaternion& q);
 
 private:
-	U32		destroyed;
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;

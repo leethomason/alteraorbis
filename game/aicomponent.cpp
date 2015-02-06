@@ -117,7 +117,6 @@ bool FEFilter(Chit* parentChit, int id) {
 		}
 		Chit* chit = context->chitBag->GetChit(id);
 		if (!chit) return false;
-		if (chit->Destroyed()) return false;
 
 		float range2 = (chit->Position() - parentChit->Position()).LengthSquared();
 
@@ -1054,7 +1053,8 @@ bool AIComponent::RampageDone(const ComponentSet& thisComp)
 
 void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 {
-	if ( thisComp.move->IsMoving() )
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+	if (pmc && pmc->IsMoving())
 		return;
 
 	// Where are we, and where to next?
@@ -1070,6 +1070,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		currentAction = NO_ACTION;
 		return;
 	}
+
+	// FIXME how to handle buildings?
 
 	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
 		this->Target(next, false);
@@ -2608,7 +2610,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Is there food to eat?
-	if (!thisComp.chit->Destroyed() && thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
+	if (thisComp.item->HPFraction() < EAT_WILD_FRUIT) {
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(thisComp.chit->Position());
 		CChitArray arr;

@@ -383,8 +383,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Chit* gold = (Chit*)msg.Ptr();
 		GoldCrystalFilter filter;
 		if (    filter.Accept( gold )		// it really is gold/crystal
-			 && gold->GetItem()				// it has an item component
-			 && !parentChit->Destroyed() )	// this item is alive
+			 && gold->GetItem()	)			// it has an item component
 		{
 			mainItem->wallet.Deposit(gold->GetWallet(), gold->GetWallet()->Gold(), gold->GetWallet()->Crystal());
 			// Need to delete the gold, else it will track to us again!
@@ -395,7 +394,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DESTROYED_START)
+	else if (msg.ID() == ChitMsg::CHIT_DESTROYED)
 	{
 		// Exploding!
 		if (mainItem->flags & GameItem::EXPLODES) {
@@ -424,13 +423,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		   of the item. All the dates get inferredd from that.
 		*/
 		NewsDestroy(mainItem);
-	}
-	else if (msg.ID() > ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END) {
-		// Note the _START is processed above.
-		// However, it's possible gold still gets added. But at the END
-		// the chit is in tear-down and the gold/items are gone.
-		// Use the intermediate time to put
-		// gold and items on the ground. This is something of a hack.
 
 		// Drop our wallet on the ground or send to the Reserve?
 		// MOBs drop items, as does anything with sub-items

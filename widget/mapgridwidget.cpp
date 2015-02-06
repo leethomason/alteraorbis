@@ -23,15 +23,17 @@ void MapGridWidget::Init(Gamui* gamui2D)
 		image[i].Init(gamui2D, RenderAtom(), true);
 	}
 
-	image[FACE_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[FACE_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[FACE_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
-	image[GOLD_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 0);
+	int layer = Gamui::LEVEL_FOREGROUND + 0;
+	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
+	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
+	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
+	image[CIV_TECH_IMAGE].SetLevel(layer);
 
-	image[MOB_COUNT_IMAGE_0].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[MOB_COUNT_IMAGE_1].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[MOB_COUNT_IMAGE_2].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
-	image[CIV_TECH_IMAGE].SetLevel(Gamui::LEVEL_FOREGROUND + 1);
+	layer = Gamui::LEVEL_FOREGROUND + 1;
+	image[FACE_IMAGE_0].SetLevel(layer);
+	image[FACE_IMAGE_1].SetLevel(layer);
+	image[FACE_IMAGE_2].SetLevel(layer);
+	image[GOLD_IMAGE].SetLevel(layer);
 }
 
 
@@ -238,12 +240,14 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
 
-	if (coreScript && home) {
+	if (coreScript && home && coreScript->InUse() && home->InUse()) {
 		RenderAtom atom;
 		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
 
 		if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
 		else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
 		else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+
+		image[DIPLOMACY_IMAGE].SetAtom(atom);
 	}
 }

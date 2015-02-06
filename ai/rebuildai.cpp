@@ -51,7 +51,7 @@ void RebuildAIComponent::Serialize(XStream* xs)
 
 void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (   msg.ID() == ChitMsg::CHIT_DESTROYED_START 
+	if (   msg.ID() == ChitMsg::CHIT_DESTROYED 
 		&& (chit != ParentChit())
 		&& ToSector(chit->Position()) == ToSector(ParentChit()->Position())
 		&& chit->Team() == this->ParentChit()->Team())

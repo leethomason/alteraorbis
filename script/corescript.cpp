@@ -216,7 +216,7 @@ void CoreScript::OnRemove()
 void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
 		while (!citizens.Empty()) {
 			int citizenID = citizens.Pop();
 			Chit* citizen = Context()->chitBag->GetChit(citizenID);
@@ -304,7 +304,7 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 	if (arr) {
 		for (int i = 0; i < squads[id].Size(); ++i) {
 			Chit* c = Context()->chitBag->GetChit(squads[id][i]);
-			if (c && !c->Destroyed()) {
+			if (c) {
 				arr->Push(c);
 			}
 		}
@@ -394,7 +394,7 @@ int CoreScript::Citizens(CChitArray* arr)
 	while (i < citizens.Size()) {
 		int id = citizens[i];
 		Chit* chit = Context()->chitBag->GetChit(id);
-		if (chit && !chit->Destroyed()) {
+		if (chit) {
 			if (arr) arr->Push(chit);
 			++i;
 		}

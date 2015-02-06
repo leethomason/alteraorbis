@@ -509,7 +509,7 @@ bool DomainAI::ClearRoadsAndPorches()
 int DomainAI::DoTick(U32 delta)
 {
 	PROFILE_FUNC();
-	if (!parentChit->GetItem() || parentChit->Destroyed() ) 
+	if (!parentChit->GetItem()) 
 		return ticker.Next();
 
 	if (ticker.Delta(delta)) {
@@ -620,6 +620,7 @@ void DomainAI::DoBuild()
 			
 			if (arr[BuildScript::TEMPLE] < 1 && BuildBuilding(BuildScript::TEMPLE)) break;
 			if (arr[BuildScript::KIOSK] < 2 && BuildBuilding(BuildScript::KIOSK)) break;
+			if (BuildRoad()) break;	// will return true until all roads are built. must have roads to get to kiosk
 		}
 		if (eff >= 2 && nElixir > 4 && arr[BuildScript::TEMPLE] ) {
 			if (arr[BuildScript::BAR] < 2 && BuildBuilding(BuildScript::BAR)) break;
@@ -628,7 +629,6 @@ void DomainAI::DoBuild()
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::KIOSK] < 4 && BuildBuilding(BuildScript::KIOSK)) break;
 			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
-			if (BuildRoad()) break;	// will return true until all roads are built.
 		}
 	} while (false);
 }
@@ -666,7 +666,7 @@ int DeityDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (!parentChit->Destroyed() && item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
+	if (item->wallet.Gold() < 100 && ReserveBank::GetWallet()->Gold() > 100) {
 		item->wallet.Deposit(ReserveBank::GetWallet(), 100);
 	}
 
@@ -738,7 +738,7 @@ int TrollDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
-	if (!parentChit->Destroyed() && item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
+	if (item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
 		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
 	}
 

@@ -76,7 +76,7 @@ x clean up portrait colors
 x font default settings. (ascent=1 - where to code??) move font to .dat?
 	x tweak ascent / descent? (Or is that a layout bug?)
 x mouse wheel support
-- de-saturate colors correctly: 
+x de-saturate colors correctly: 
 	x world grid changes
 	- plant changes
 - Spatial change
@@ -91,6 +91,10 @@ x mouse wheel support
 - tune mouse wheel with real mouse
 - hide abandom domain somewhere...
 - console, show tax paid
+- particle effects for visitors
+- rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
+- still losing money! single delete? move render component to new "statue" chit?
+- perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
 
 - deal with fruit overflow
 	- medkit manufacture?

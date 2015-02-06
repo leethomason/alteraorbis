@@ -58,19 +58,9 @@ private:
 	grinliz::Rectangle2F GridBounds2(int x, int y, bool gutter);
 	grinliz::Vector2F ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
 	void DrawMap();
-	/*
-	struct MCount {
-		MCount() : count(0) {}
-		MCount(const grinliz::IString& istr) : name(istr), count(0) {}
 
-		bool operator==(const MCount& rhs) const { return name == rhs.name; }
-
-		grinliz::IString name;
-		int				 count;
-	};
-	*/
-	enum {	MAP2_RAD	= 2,
-			MAP2_SIZE	= 5,
+	enum {	MAP2_RAD	= 1,
+			MAP2_SIZE	= 3,
 			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE,
 			MAX_COL		= 3,
 			MAX_FACE	= MAP2_SIZE2 * MAX_COL * 2
@@ -86,15 +76,14 @@ private:
 	gamui::PushButton	gridTravel, viewButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
-	gamui::Image		motherCore;
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
 	gamui::Image		travelMark;
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
-	enum {WHITE_CANVAS, RED_CANVAS, YELLOW_CANVAS, GREEN_CANVAS, NUM_CANVAS};
-	gamui::Canvas		webCanvas[NUM_CANVAS];
+	gamui::Image		diplomacy[NUM_SECTORS*NUM_SECTORS];
+	gamui::Canvas		webCanvas;
 
 	MapGridWidget		gridWidget[MAP2_SIZE2];
 };
