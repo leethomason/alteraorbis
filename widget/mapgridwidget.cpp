@@ -24,15 +24,15 @@ void MapGridWidget::Init(Gamui* gamui2D)
 	}
 
 	int layer = Gamui::LEVEL_FOREGROUND + 0;
-	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
-	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
-	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
-	image[CIV_TECH_IMAGE].SetLevel(layer);
-
-	layer = Gamui::LEVEL_FOREGROUND + 1;
 	image[FACE_IMAGE_0].SetLevel(layer);
 	image[FACE_IMAGE_1].SetLevel(layer);
 	image[FACE_IMAGE_2].SetLevel(layer);
+	image[CIV_TECH_IMAGE].SetLevel(layer);
+
+	layer = Gamui::LEVEL_FOREGROUND + 1;
+	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
+	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
+	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
 	image[GOLD_IMAGE].SetLevel(layer);
 }
 
@@ -102,7 +102,7 @@ void MapGridWidget::DoLayout()
 		float fy = compact ? y : y + dh;
 		image[FACE_IMAGE_0 + i].SetSize(dw * MULT, dh * MULT);
 		image[FACE_IMAGE_0 + i].SetCenterPos(x + dw * float(i) + dw * 0.5f, fy + dh * 0.5f);
-		image[MOB_COUNT_IMAGE_0 + i].SetPos(x + dw*float(i), fy);
+		image[MOB_COUNT_IMAGE_0 + i].SetPos(x + dw*float(i), fy + dh * 0.2f);
 	}
 
 	float fy = compact ? y + dh : y + dh * 2.0f;
