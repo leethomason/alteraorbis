@@ -748,7 +748,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		// Visitors at a kiosk.
 		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 		Vector2I sector = ToSector(pos2i);
-		Chit* chit = this->Context()->chitBag->QueryPorch(pos2i, 0);
+		Chit* chit = this->Context()->chitBag->QueryPorch(pos2i);
 		CoreScript* cs = CoreScript::GetCore(sector);
 
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
@@ -1409,7 +1409,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
-	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i, 0 );
+	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i);
 	if ( kiosk && kiosk->GetItem()->IName() == ISC::kiosk ) {
 		// all good
 	}
@@ -2485,7 +2485,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 {
 	// Is there work to do?		
-	Vector2I sector = ToWorld2I(thisComp.chit->Position());
+	Vector2I sector = ToSector(thisComp.chit->Position());
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	const ChitContext* context = Context();
 

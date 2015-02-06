@@ -1604,7 +1604,7 @@ void GameScene::DoTick( U32 delta )
 
 	bool useBuildingVisible = false;
 	if ( AvatarSelected() ) {
-		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()), 0);
+		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()));
 		if ( building ) {
 			IString name = building->GetItem()->IName();
 			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {

@@ -83,6 +83,8 @@ void LumosChitBag::Serialize( XStream* xs )
 
 void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
+	if (x == 0 && y == 0) return; // sentinel
+
 	int sx = x / SECTOR_SIZE;
 	int sy = y / SECTOR_SIZE;
 	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
@@ -96,6 +98,8 @@ void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 
 void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
+	if (x == 0 && y == 0) return; // sentinel
+
 	int sx = x / SECTOR_SIZE;
 	int sy = y / SECTOR_SIZE;
 	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
@@ -257,7 +261,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetBuilding(size, porch != 0, circuit);
-	msc->SetBlocks(true);
+	msc->SetBlocks(true);		// fixme: should get looked up in ItemDef
 	chit->Add(msc);
 	MapSpatialComponent::SetMapPosition(chit, pos.x, pos.y);
 
@@ -568,14 +572,11 @@ Chit* LumosChitBag::QueryBuilding( const IString& name, const grinliz::Rectangle
 }
 
 
-Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos, int *type )
+Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
 {
-	if (type) *type = 0;
-
 	Vector2I sector = ToSector(pos);
 	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->PorchPos().Contains( pos )) {
-			if (type) *type = it->PorchType();
 			return it->ParentChit();
 		}
 	}

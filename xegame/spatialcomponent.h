@@ -36,8 +36,6 @@ class SpatialComponent : public Component
 private:
 	typedef Component super;
 public:
-	SpatialComponent() {
-	}
 
 	virtual const char* Name() const { return "SpatialComponent"; }
 	virtual SpatialComponent*		ToSpatialComponent()			{ return this; }
@@ -82,6 +80,7 @@ public:
 	virtual grinliz::Rectangle2I Bounds() const		{ grinliz::Rectangle2I b; b.min = b.max = GetPosition2DI(); return b; }
 #endif
 protected:
+	SpatialComponent() {}
 };
 
 

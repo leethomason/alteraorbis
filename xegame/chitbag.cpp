@@ -402,6 +402,7 @@ int MultiFilter::Type()
 void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
+	if (x == 0 && y == 0) return;	// sentinel
 	//GLOUTPUT(("Add %x at %d,%d\n", chit, x, y));
 
 	U32 index = HashIndex(x, y);
@@ -413,6 +414,8 @@ void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
+	if (x == 0 && y == 0) return;	// sentinel
+
 	//GLOUTPUT(("Rmv %x at %d,%d\n", chit, x, y));
 
 	U32 index = HashIndex(x, y);

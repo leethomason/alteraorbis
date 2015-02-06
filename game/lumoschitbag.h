@@ -281,7 +281,7 @@ public:
 	Census census;
 
 	// Query the porch at the location.
-	Chit* QueryPorch( const grinliz::Vector2I& pos, int* type );
+	Chit* QueryPorch(const grinliz::Vector2I& pos);
 
 	// Query the first building in the bounds.
 	// If !name.empty, filters for that type.

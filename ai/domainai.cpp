@@ -319,7 +319,7 @@ bool DomainAI::BuildBuilding(int id)
 							okay = false;
 							break;
 						}
-						GLASSERT(!Context()->chitBag->QueryPorch(it.Pos(), 0));
+						GLASSERT(!Context()->chitBag->QueryPorch(it.Pos()));
 					}
 				}
 			}

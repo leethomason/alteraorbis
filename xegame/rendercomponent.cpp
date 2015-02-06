@@ -119,6 +119,7 @@ void RenderComponent::OnAdd( Chit* chit, bool init )
 			model[i]->Modify();
 		}
 	}
+	SyncToSpatial();
 }
 
 

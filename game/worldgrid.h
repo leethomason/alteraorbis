@@ -144,8 +144,9 @@ public:
 
 	enum {
 		NUM_PAVE = 4,	// including 0, which is "no pavement"
+		BASE_PORCH = 1,
+		PORCH_UNREACHABLE = 7,
 		NUM_PORCH = 8,	// 0: no porch, 1: basic porch, --,-,0,+,++,unreachable
-		PORCH_UNREACHABLE = 7
 	};
 	int Land() const { return land; }
 

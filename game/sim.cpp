@@ -91,6 +91,7 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 Sim::~Sim()
 {
 	delete context.circuitSim;
+	context.circuitSim = 0;
 	delete plantScript;
 	delete visitors;
 	delete weather;
@@ -99,8 +100,11 @@ Sim::~Sim()
 	context.worldMap->AttachHistory(0);
 	context.chitBag->RemoveListener(this);
 	delete context.chitBag;
+	context.chitBag = 0;
 	delete context.engine;
+	context.engine = 0;
 	delete context.worldMap;
+	context.worldMap = 0;
 	delete itemDB;
 }
 
@@ -858,7 +862,7 @@ void Sim::UseBuilding()
 	Vector2I pos2i = ToWorld2I(player->Position());
 	Vector2I sector = ToSector( pos2i );
 
-	Chit* building = context.chitBag->QueryPorch( pos2i,0 );
+	Chit* building = context.chitBag->QueryPorch( pos2i );
 	if ( building && building->GetItem() ) {
 		IString name = building->GetItem()->IName();
 		ItemComponent* ic = player->GetItemComponent();

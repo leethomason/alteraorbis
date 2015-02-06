@@ -204,10 +204,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 int EvalBuildingScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
-		//MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
-		//if (msc) {
-		//	msc->UpdatePorch(false);
-		//}
+		// Regular update to change the porch.
 		parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
 	}
 	return timer.Next();

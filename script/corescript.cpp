@@ -852,9 +852,10 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
-		//MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-		//GLASSERT(ms);
-		//ms->SetMode(GRID_IN_USE);
+		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+		GLASSERT(ms);
+		ms->SetBlocks(false);
+		
 		CoreScript* cs = new CoreScript();
 		chit->Add(cs);
 

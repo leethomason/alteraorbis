@@ -69,8 +69,8 @@ Chit::~Chit()
 
 void Chit::Free()
 {
-	if (!position.IsZero()) {
-		Context()->chitBag->RemoveFromSpatialHash( this, (int)position.x, (int)position.z );
+	if (chitBag) {
+		chitBag->RemoveFromSpatialHash(this, (int)position.x, (int)position.z);
 	}
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) {
@@ -117,6 +117,11 @@ void Chit::Serialize(XStream* xs)
 		}
 	}
 	XarcClose( xs );
+
+	if (xs->Loading()) {
+		GLASSERT(chitBag);
+		chitBag->AddToSpatialHash(this, (int)position.x, (int)position.z);
+	}
 }
 
 
@@ -298,11 +303,12 @@ void Chit::OnChitEvent( const ChitEvent& event )
 
 void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
+	GLASSERT(chitBag);
 	switch (msg.ID()) {
 		case ChitMsg::CHIT_DESTROYED_START:
 		case ChitMsg::CHIT_DESTROYED_END:
 		case ChitMsg::CHIT_DAMAGE:
-		Context()->chitBag->SendMessage(this, msg);
+		chitBag->SendMessage(this, msg);
 		break;
 
 		default:
@@ -349,7 +355,8 @@ Wallet* Chit::GetWallet()
 
 bool Chit::PlayerControlled() const
 {
-	return Context()->chitBag->GetAvatar() == this;
+	GLASSERT(chitBag);
+	return static_cast<LumosChitBag*>(chitBag)->GetAvatar() == this;
 }
 
 
@@ -358,7 +365,8 @@ void Chit::QueueDelete()
 	if (GetItem() && GameItem::trackWallet) {
 		GLASSERT(GetItem()->wallet.IsEmpty());
 	}
-	Context()->chitBag->QueueDelete( this );
+	GLASSERT(chitBag);
+	chitBag->QueueDelete( this );
 }
 
 
@@ -402,14 +410,10 @@ void Chit::SetPosition(const grinliz::Vector3F& newPosition)
 	Vector2I oldWorld = ToWorld2I(position);
 	Vector2I newWorld = ToWorld2I(newPosition);
 
-	if (position.IsZero()) {
-		// The first time added to the hash!
-		GLASSERT(!ToWorld2I(newPosition).IsZero());
-		Context()->chitBag->AddToSpatialHash( this, (int)newPosition.x, (int)newPosition.z );
-	}
-	else if (oldWorld != newWorld) {
+	if (oldWorld != newWorld) {
 		// update an existing hash.
-		Context()->chitBag->UpdateSpatialHash(this, oldWorld.x, oldWorld.y, newWorld.x, newWorld.y);
+		GLASSERT(chitBag);
+		chitBag->UpdateSpatialHash(this, oldWorld.x, oldWorld.y, newWorld.x, newWorld.y);
 	}
 
 	if (position != newPosition) {

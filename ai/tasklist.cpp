@@ -315,7 +315,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_USE_BUILDING:
 		{
-			Chit* building = chitBag->QueryPorch(pos2i, 0);
+			Chit* building = chitBag->QueryPorch(pos2i);
 			if (building) {
 				IString buildingName = building->GetItem()->IName();
 
