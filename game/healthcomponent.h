@@ -42,12 +42,8 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->AppendFormat( "[Health] " ); }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual int DoTick( U32 delta );
-	float DestroyedFraction() const;
 
 private:
-	// There is debugging code in chit.cpp that hardcodes the '800'
-	enum { COUNTDOWN = 800 };
-	void DeltaHealth();
 };
 
 

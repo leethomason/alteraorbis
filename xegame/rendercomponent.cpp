@@ -691,15 +691,13 @@ void RenderComponent::DebugStr( GLString* str )
 void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	const ChitContext* context = Context();
-	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
-		// Don't self delete.
-
+	if ( msg.ID() == ChitMsg::CHIT_DESTROYED ) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F DOWN = { 0, -1, 0 };
 		static const Vector3F RIGHT = { 1, 0, 0 };
 		context->engine->particleSystem->EmitPD( ISC::derez, model[0]->AABB().Center(), UP, 0 );
-		//context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, 0 );
 	}
+	/*
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;
 		for( int i=0; i<NUM_MODELS; ++i ) {
@@ -710,6 +708,7 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_END ) {
 	}
+	*/
 	else {
 		super::OnChitMsg( chit, msg );
 	}

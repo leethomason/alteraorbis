@@ -54,9 +54,6 @@ void Component::EndSerialize( XStream* xs )
 
 void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START && (chit == this->ParentChit())) {
-		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
-	}
 }
 
 
