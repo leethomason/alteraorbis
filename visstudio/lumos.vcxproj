@@ -132,6 +132,7 @@
     <ClCompile Include="..\game\healthcomponent.cpp" />
     <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
+    <ClCompile Include="..\game\lumosmath.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\news.cpp" />
     <ClCompile Include="..\game\newsconsole.cpp" />

@@ -343,7 +343,7 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 		if (wg.Plant()) {
 			return false;
 		}
-		if (context->chitBag->QueryRemovable(item.pos)) {
+		if (context->chitBag->QueryBuilding(IString(), item.pos, 0)) {
 			return false; // need to clear building
 		}
 		if (wg.RockHeight() || wg.Pave() || wg.Circuit()) {

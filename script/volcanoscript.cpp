@@ -37,17 +37,9 @@ void VolcanoScript::Serialize( XStream* xs )
 
 int VolcanoScript::DoTick( U32 delta )
 {
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	WorldMap* worldMap = Context()->worldMap;
 
-	Vector2I pos2i = { 0,  0 };
-	GLASSERT( sc );
-	if ( sc ) {
-		pos2i = sc->GetPosition2DI();
-	}
-	else {
-		parentChit->QueueDelete();
-	}
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
 
 	int n = spreadTicker.Delta(delta);
 	for (int i = 0; i<n; ++i) {

@@ -120,7 +120,7 @@ bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 		}
 		int n = socialTicker.Delta( time );
 		for( int i=0; i<n; ++i ) {
-			SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
+			SocialPulse( thisComp, ToWorld2F(thisComp.chit->Position()));
 		}
 		return true;
 	}
@@ -142,10 +142,10 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 	LumosChitBag* chitBag = chit->Context()->chitBag;
 	Task* task = &taskList[0];
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
+	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 	Vector2I sector = ToSector(pos2i);
+	Vector2F taskPos2 = ToWorld2F(task->pos2i);
+	Vector3F taskPos3 = ToWorld3F(task->pos2i);
 	Rectangle2I innerBounds = InnerSectorBounds(sector);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
@@ -186,11 +186,11 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					context->engine->particleSystem->EmitPD(ISC::construction, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_USE_BUILDING) {
-					Vector3F pos = thisComp.spatial->GetPosition();
+					Vector3F pos = thisComp.chit->Position();
 					context->engine->particleSystem->EmitPD(ISC::useBuilding, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_REPAIR_BUILDING) {
-					Vector3F pos = thisComp.spatial->GetPosition();
+					Vector3F pos = thisComp.chit->Position();
 					context->engine->particleSystem->EmitPD(ISC::repair, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 			}
@@ -201,7 +201,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 		{
 			Chit* building = chitBag->GetChit(task->data);
 			if (building) {
-				MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 				if (msc) {
 					Rectangle2I b = msc->Bounds();
 					b.Outset(1);
@@ -237,7 +237,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
 				context->circuitSim->EtchLines(innerBounds);
 
-				Chit* found = chitBag->QueryRemovable(task->pos2i);
+				Chit* found = chitBag->QueryBuilding(IString(), task->pos2i, 0);
 				if (found) {
 					found->DeRez();
 				}
@@ -278,7 +278,8 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 						building->GetWallet()->Deposit(&controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
-						building->GetSpatialComponent()->SetYRotation(float(task->data));
+						Quaternion q = Quaternion::MakeYRotation(float(task->data));
+						building->SetRotation(q);
 					}
 					Remove();
 				}
@@ -298,8 +299,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 			int chitID = task->data;
 			Chit* itemChit = chitBag->GetChit(chitID);
 			if (itemChit
-				&& itemChit->GetSpatialComponent()
-				&& (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
+				&& (ToWorld2F(itemChit->Position()) - ToWorld2F(thisComp.chit->Position())).Length() <= PICKUP_RANGE
 				&& itemChit->GetItemComponent()->NumItems() == 1)	// doesn't have sub-items / intrinsic
 			{
 				if (thisComp.itemComponent->CanAddToInventory()) {
@@ -315,7 +315,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_USE_BUILDING:
 		{
-			Chit* building = chitBag->QueryPorch(pos2i, 0);
+			Chit* building = chitBag->QueryPorch(pos2i);
 			if (building) {
 				IString buildingName = building->GetItem()->IName();
 
@@ -414,7 +414,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
 {
 	LumosChitBag* chitBag	= thisComp.chit->Context()->chitBag;
-	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
+	Vector2I pos2i			= ToWorld2I(thisComp.chit->Position());
 	Vector2I sector			= ToSector( pos2i );
 	CoreScript* coreScript  = CoreScript::GetCore(sector);
 	Chit* controller		= coreScript->ParentChit();
@@ -549,7 +549,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	// if that happens. We can come back later.
 
 	const GameItem* ranged = 0, *melee = 0, *shield = 0;
-	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+	Vector2I sector = ToSector(thisComp.chit->Position());
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
@@ -684,14 +684,14 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
 		thisComp.item->historyDB.Increment("Crafted");
 
-		Vector2I sector = thisComp.spatial->GetPosition2DI();
+		Vector2I sector = ToSector(thisComp.chit->Position());
 		GLOUTPUT(("'%s' forged the item '%s' at sector=%x,%x\n",
 			thisComp.item->BestName(),
 			item->BestName(),
 			sector.x, sector.y));
 
 		item->SetSignificant(thisComp.chit->Context()->chitBag->GetNewsHistory(), 
-							 thisComp.spatial->GetPosition2D(),
+							 ToWorld2F(thisComp.chit->Position()),
 							 NewsEvent::FORGED, NewsEvent::UN_FORGED, thisComp.chit);
 		return true;
 	}

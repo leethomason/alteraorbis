@@ -37,8 +37,7 @@ ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 {
 	idPool = 0;
 	bagTime = 0;
-	memset( mapSpatialHash, 0, sizeof(*mapSpatialHash)*SIZE2 );
-	memset( mobSpatialHash, 0, sizeof(*mobSpatialHash)*SIZE2 );
+	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE2 );
 	memRoot = 0;
 	activeCamera = 0;
 	newsHistory = new NewsHistory(this);
@@ -277,6 +276,16 @@ void ChitBag::ProcessDeleteList()
 }
 
 
+void ChitBag::PushCurrentNews(const CurrentNews& news)
+{
+	if (currentNews.Size() > 40) {
+		currentNews.PopFront();
+	}
+	currentNews.Push(news);
+}
+
+
+
 void ChitBag::DoTick( U32 delta )
 {
 	PROFILE_FUNC();
@@ -403,12 +412,10 @@ int MultiFilter::Type()
 void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
-	GLASSERT(chit->GetSpatialComponent());
+	if (x == 0 && y == 0) return;	// sentinel
+	//GLOUTPUT(("Add %x at %d,%d\n", chit, x, y));
 
-	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
 	U32 index = HashIndex(x, y);
-	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
-
 	chit->next = spatialHash[index];
 	spatialHash[index] = chit;
 }
@@ -417,12 +424,11 @@ void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);
-	GLASSERT(chit->GetSpatialComponent());
+	if (x == 0 && y == 0) return;	// sentinel
 
-	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
+	//GLOUTPUT(("Rmv %x at %d,%d\n", chit, x, y));
+
 	U32 index = HashIndex(x, y);
-	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
-
 	Chit* prev = 0;
 	for (Chit* it = spatialHash[index]; it; prev = it, it = it->next) {
 		if (it == chit) {
@@ -451,44 +457,37 @@ void ChitBag::UpdateSpatialHash(Chit* c, int x0, int y0, int x1, int y1)
 }
 
 
-void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
-								const grinliz::Rectangle2F& rf, 
-								const Chit* ignore,
-								IChitAccept* accept )
+void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
+							   const grinliz::Rectangle2F& rf,
+							   const Chit* ignore,
+							   IChitAccept* accept)
 {
 	//PROFILE_FUNC();
-	GLASSERT( accept );
+	GLASSERT(accept);
 	Rectangle2I r;
-	r.Set( (int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y );
+	r.Set((int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y);
 	Rectangle2I bounds;
 	bounds.Set(0, 0, MAX_MAP_SIZE - 1, MAX_MAP_SIZE - 1);
 	r.DoIntersection(bounds);
 
 	array->Clear();
 
-	for( int pass=0; pass<2; ++pass ) {
-		// Filter on MAP or MOB.
-		if ( (1<<pass) & accept->Type() ) {
-			Chit** spatialHash = (pass == 0) ? mapSpatialHash : mobSpatialHash;
+	U32 i0 = r.min.x >> SHIFT;
+	U32 j0 = r.min.y >> SHIFT;
+	U32 i1 = r.max.x >> SHIFT;
+	U32 j1 = r.max.y >> SHIFT;
 
-			U32 i0 = r.min.x >> SHIFT;
-			U32 j0 = r.min.y >> SHIFT;
-			U32 i1 = r.max.x >> SHIFT;
-			U32 j1 = r.max.y >> SHIFT;
+	for (U32 j = j0; j <= j1; ++j) {
+		for (U32 i = i0; i <= i1; ++i) {
+			U32 index = j*SIZE + i;
+			//bool inside = i > i0 && i <i1 && j > j0 && j < j1; // doesn't help
 
-			for (U32 j = j0; j <= j1; ++j) {
-				for (U32 i = i0; i <= i1; ++i) {
-					U32 index = j*SIZE + i;
-					//bool inside = i > i0 && i <i1 && j > j0 && j < j1; // doesn't help
-
-					for (Chit* it = spatialHash[index]; it; it = it->next) {
-						if (it != ignore) {
-							const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
-							if (rf.Contains(pos.x, pos.z)) {
-								if (accept->Accept(it)) {
-									array->Push(it);
-								}
-							}
+			for (Chit* it = spatialHash[index]; it; it = it->next) {
+				if (it != ignore) {
+					const Vector3F& pos = it->Position();
+					if (rf.Contains(pos.x, pos.z)) {
+						if (accept->Accept(it)) {
+							array->Push(it);
 						}
 					}
 				}

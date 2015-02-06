@@ -135,13 +135,10 @@ int DebugStateComponent::DoTick( U32 delta )
 	shieldBar.SetVisible( true );
 	healthBar.SetVisible( true );
 
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	if (sc) {
-		Vector2F pos = sc->GetPosition2D();
-		ammoBar.SetPos(	 pos.x-0.5f, pos.y);
-		shieldBar.SetPos(pos.x-0.5f, pos.y+0.2f);
-		healthBar.SetPos(pos.x-0.5f, pos.y+0.4f);
-	}
+	Vector2F pos = ToWorld2F(parentChit->Position());
+	ammoBar.SetPos(	 pos.x-0.5f, pos.y);
+	shieldBar.SetPos(pos.x-0.5f, pos.y+0.2f);
+	healthBar.SetPos(pos.x-0.5f, pos.y+0.4f);
 
 	return VERY_LONG_TICK;
 }

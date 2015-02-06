@@ -40,7 +40,7 @@ int GuardScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
 		// Check for enemies.
-		Vector2I pos2i = parentChit->GetSpatialComponent()->GetPosition2DI();
+		Vector2I pos2i = ToWorld2I(parentChit->Position());
 		Vector2I sector = ToSector(pos2i);
 		Rectangle2I innerSector = InnerSectorBounds(sector);
 

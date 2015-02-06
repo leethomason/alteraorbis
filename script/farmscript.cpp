@@ -94,7 +94,7 @@ void FarmScript::ComputeFarmBound()
 	int r = FARM_GROW_RAD;
 	for (int i = 0; i < array.Size(); ++i) {
 		Chit* chit = array[i];
-		Vector2I q2i = chit->GetSpatialComponent()->GetPosition2DI();
+		Vector2I q2i = ToWorld2I(chit->Position());
 
 		int d = Max(abs(q2i.x - pos2i.x), abs(q2i.y - pos2i.y));
 		// 5->2, 4->1 3->1 2->0

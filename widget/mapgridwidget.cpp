@@ -121,7 +121,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	Clear();
 	if (!coreScript) return;
 
-	Vector2I sector = coreScript->ParentChit()->GetSpatialComponent()->GetSector();
+	Vector2I sector = ToSector(coreScript->ParentChit()->Position());
 	const SectorData& sd = context->worldMap->GetSectorData( sector );
 
 	// ---- Text at top. ----

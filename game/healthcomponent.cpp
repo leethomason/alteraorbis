@@ -56,13 +56,12 @@ int HealthComponent::DoTick(U32 delta)
 	if (item) {
 		if (item->hp == 0) {
 			if (parentChit->GetSpatialComponent()) {
-
 				// Audio.
 				if (XenoAudio::Instance()) {
 					MOBIshFilter mobIsh;
 					BuildingFilter bulding;
 					if (mobIsh.Accept(parentChit) || bulding.Accept(parentChit)) {
-						XenoAudio::Instance()->PlayVariation(ISC::derezWAV, parentChit->random.Rand(), &parentChit->GetSpatialComponent()->GetPosition());
+						XenoAudio::Instance()->PlayVariation(ISC::derezWAV, parentChit->random.Rand(), &parentChit->Position());
 					}
 				}
 
@@ -78,14 +77,13 @@ int HealthComponent::DoTick(U32 delta)
 						Chit* chit = Context()->chitBag->NewChit();
 
 						Context()->chitBag->AddItem("tombstone", chit, Context()->engine, 0, 0, asset);
-						chit->Add(new SpatialComponent());
 						chit->Add(new RenderComponent(asset));
 						chit->Add(new CountDownScript(30 * 1000));
 
-						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
-						float r = parentChit->GetSpatialComponent()->GetYRotation();
+						Vector3F pos = parentChit->Position();
+						float r = YRotation(parentChit->Rotation());
 						pos.y = 0;
-						chit->GetSpatialComponent()->SetPosYRot(pos, r);
+						chit->SetPosRot(pos, Quaternion::MakeYRotation(r));
 
 						GameItem* tombItem = chit->GetItem();
 						GLASSERT(item->Team() != 0);	// how would a neutral create a tombstone??

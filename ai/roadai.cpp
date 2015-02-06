@@ -217,7 +217,7 @@ bool RoadAI::IsOnRoad(const grinliz::Rectangle2I& bounds, bool _porch, int rotat
 bool RoadAI::IsOnRoad(MapSpatialComponent* msc, bool farm)
 {
 	Rectangle2I bounds = msc->Bounds();
-	int rotation = LRint(msc->GetYRotation());
+	int rotation = LRint(YRotation(msc->ParentChit()->Rotation()));
 	return IsOnRoad(bounds, msc->HasPorch(), rotation, farm);
 }
 

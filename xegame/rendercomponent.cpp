@@ -119,6 +119,7 @@ void RenderComponent::OnAdd( Chit* chit, bool init )
 			model[i]->Modify();
 		}
 	}
+	SyncToSpatial();
 }
 
 
@@ -149,20 +150,16 @@ void RenderComponent::OnRemove()
 }
 
 
-SpatialComponent* RenderComponent::SyncToSpatial()
+void RenderComponent::SyncToSpatial()
 {
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if ( spatial ) {
-		model[0]->SetPos( spatial->GetPosition() );
-		model[0]->SetRotation( spatial->GetRotation() );
-	}
+	model[0]->SetPos(parentChit->Position());
+	model[0]->SetRotation(parentChit->Rotation());
 
 	const GameItem* item = parentChit->GetItem();
-	if ( item ) {
-		if ( item->flags & GameItem::CLICK_THROUGH )
-			model[0]->SetFlag( MODEL_CLICK_THROUGH );
+	if (item) {
+		if (item->flags & GameItem::CLICK_THROUGH)
+			model[0]->SetFlag(MODEL_CLICK_THROUGH);
 	}
-	return spatial;
 }
 
 
@@ -321,10 +318,8 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 	int tick = VERY_LONG_TICK;
 
-	SpatialComponent* spatial = SyncToSpatial();
-
 	// Animate the primary model.
-	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
+	if ( model[0] && model[0]->GetAnimationResource() ) {
 		tick = 0;	
 
 		// Update to the current, correct animation if we are
@@ -621,7 +616,6 @@ bool RenderComponent::HasMetaData( int id )
 bool RenderComponent::GetMetaData( int id, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
-		SyncToSpatial();
 		model[0]->CalcMetaData( id, xform );
 		return true;
 	}
@@ -691,24 +685,15 @@ void RenderComponent::DebugStr( GLString* str )
 void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	const ChitContext* context = Context();
-	if ( msg.ID() == ChitMsg::CHIT_DESTROYED ) {
+	if (msg.ID() == ChitMsg::CHIT_POS_CHANGE) {
+		SyncToSpatial();
+	}
+	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED ) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F DOWN = { 0, -1, 0 };
 		static const Vector3F RIGHT = { 1, 0, 0 };
 		context->engine->particleSystem->EmitPD( ISC::derez, model[0]->AABB().Center(), UP, 0 );
 	}
-	/*
-	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
-		float f = msg.dataF;
-		for( int i=0; i<NUM_MODELS; ++i ) {
-			if ( model[i] ) {
-				model[i]->SetFadeFX( f );
-			}
-		}
-	}
-	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_END ) {
-	}
-	*/
 	else {
 		super::OnChitMsg( chit, msg );
 	}

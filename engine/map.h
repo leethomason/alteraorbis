@@ -37,11 +37,10 @@ class Model;
 // Allows the Map to call out for the state of locations.
 // The tricky bit is to remember to call the pather->Reset()
 // if the isBlocked changes.
-class IMapGridUse
+class IMapGridBlocked
 {
 public:
-	// Mask of: GRID_IN_USE, GRID_BLOCKED
-	virtual int MapGridUse( int x, int y ) = 0;
+	virtual bool MapGridBlocked( int x, int y ) = 0;
 };
 
 

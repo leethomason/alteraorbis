@@ -147,10 +147,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Vector3F delta = { 14.0f, 14.0f, 14.0f };
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
 	if (GetPlayerChit()) {
-		target = GetPlayerChit()->GetSpatialComponent()->GetPosition();
+		target = GetPlayerChit()->Position();
 	}
 	else if (GetHomeCore()) {
-		target = GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
+		target = GetHomeCore()->ParentChit()->Position();
 	}
 	sim->GetEngine()->CameraLookAt(target + delta, target);
 	sim->GetChitBag()->AddListener(this);
@@ -620,10 +620,13 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 			if (d.y > 0)	rotation = 0;
 			else			rotation = 180.0f;
 		}
-		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
-		if (msc) {
-			msc->SetYRotation(rotation);
-		}
+		//MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+		//if (msc) {
+		//	msc->SetYRotation(rotation);
+		//}
+		Quaternion q;
+		q.FromAxisAngle(V3F_UP, rotation);
+		building->SetRotation(q);
 	}
 }
 
@@ -650,11 +653,12 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 
 			if (chit) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-				if (msc ) { //&& msc->Building()) {
-					float r = msc->GetYRotation();
+				if (msc ) {
+					float r = YRotation(chit->Rotation());
 					r += 90.0f;
 					r = NormalizeAngleDegrees(r);
-					msc->SetYRotation(r);
+					Quaternion q = Quaternion::MakeYRotation(r);
+					chit->SetRotation(q);
 				}
 			}
 			else if (circuit) {
@@ -681,7 +685,7 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 	if (slot == -1) {
 		// Local control.
 		Vector2I sector = ToSector(pos2i);
-		Vector2I coreSector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+		Vector2I coreSector = ToSector(cs->ParentChit()->Position());
 		if (sector == coreSector) {
 			cs->ToggleFlag(pos2i);
 		}
@@ -807,8 +811,8 @@ void GameScene::DoCameraHome()
 	CoreScript* coreScript = GetHomeCore();
 	if (coreScript) {
 		Chit* chit = coreScript->ParentChit();
-		if (chit && chit->GetSpatialComponent()) {
-			Vector3F lookAt = chit->GetSpatialComponent()->GetPosition();
+		if (chit ) {
+			Vector3F lookAt = chit->Position();
 			sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.z);
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 			cc->SetTrack(0);
@@ -824,7 +828,7 @@ void GameScene::DoAvatarButton()
 	if (AvatarSelected() && CameraTrackingAvatar()) {
 		// Teleport.
 		if (coreScript && GetPlayerChit()) {
-			GetPlayerChit()->GetSpatialComponent()->Teleport(coreScript->ParentChit()->GetSpatialComponent()->GetPosition());
+			SpatialComponent::Teleport(GetPlayerChit(), coreScript->ParentChit()->Position());
 		}
 	}
 	else {
@@ -899,7 +903,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if (coreChit->GetItem()->wallet.Gold() >= WORKER_BOT_COST) {
 				ReserveBank::GetWallet()->Deposit(coreChit->GetWallet(), WORKER_BOT_COST);
 				int team = coreChit->GetItem()->Team();
-				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
+				sim->GetChitBag()->NewWorkerChit(coreChit->Position(), team);
 			}
 		}
 	}
@@ -1010,20 +1014,19 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
-			NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-			const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+			auto& current = sim->GetChitBag()->GetCurrentNews();
 
 			int index = current.Size() - 1 - i;
 			if (index >= 0) {
-				const NewsEvent& ne = current[index];
+				const ChitBag::CurrentNews& ne = current[index];
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				//if (cc && ne.FirstChitID()) {
-				//	cc->SetTrack(ne.FirstChitID());
-				//}
-				//else {
-					sim->GetEngine()->CameraLookAt(ne.Pos().x, ne.Pos().y);
+				if (cc && ne.chitID) {
+					cc->SetTrack(ne.chitID);
+				}
+				else {
+					sim->GetEngine()->CameraLookAt(ne.pos.x, ne.pos.y);
 					if (cc) cc->SetTrack(0);
-				//}
+				}
 			}
 		}
 	}
@@ -1065,7 +1068,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 		AIComponent* ai = chit->GetAIComponent();
 		GridMoveComponent* gridMove = GET_SUB_COMPONENT(chit, MoveComponent, GridMoveComponent);
 
-		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+		Vector2F pos = ToWorld2F(chit->Position());
 		// Is this grid travel or normal travel?
 		Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
 		Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
@@ -1155,7 +1158,7 @@ void GameScene::HandleHotKey( int mask )
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
-				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				Vector2I sector = ToSector(cs->ParentChit()->Position());
 				int team = Team::GenTeam(TEAM_HOUSE);
 				cs = CoreScript::CreateCore(sector, team, sim->Context());
 				cs->ParentChit()->Add(new HumanDomainAI());
@@ -1390,7 +1393,7 @@ void GameScene::SetPickupButtons()
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
 		static const float LOOT_RAD = 10.0f;
-		Vector2F pos = player->GetSpatialComponent()->GetPosition2D();
+		Vector2F pos = ToWorld2F(player->Position());
 
 		sim->GetChitBag()->QuerySpatialHash( &chitQuery, 
 											 pos, LOOT_RAD,
@@ -1400,7 +1403,7 @@ void GameScene::SetPickupButtons()
 		pickupData.Clear();
 		for( int i=0; i<chitQuery.Size(); i++ ) {
 			float cost = 0;
-			bool hasPath = sim->GetWorldMap()->CalcPath( pos, chitQuery[i]->GetSpatialComponent()->GetPosition2D(),
+			bool hasPath = sim->GetWorldMap()->CalcPath( pos, ToWorld2F(chitQuery[i]->Position()),
 														 0, &cost, false );
 			if ( hasPath ) {
 				PickupData pd = { chitQuery[i]->ID(), cost };
@@ -1440,13 +1443,12 @@ void GameScene::DoTick( U32 delta )
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-		const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+		const auto& current = sim->GetChitBag()->GetCurrentNews();
 
 		int index = current.Size() - 1 - i;
 		if ( index >= 0 ) {
-			const NewsEvent& ne = current[index];
-			IString name = ne.GetWhat();
+			const ChitBag::CurrentNews& ne = current[index];
+			IString name = ne.name;
 			newsButton[i].SetText( name.c_str() );
 			newsButton[i].SetEnabled( true );
 		}
@@ -1491,7 +1493,7 @@ void GameScene::DoTick( U32 delta )
 		double sum[ai::Needs::NUM_NEEDS+1] = { 0 };
 		bool critical[ai::Needs::NUM_NEEDS+1] = { 0 };
 		int nActive = 0;
-		Vector2I sector = homeCoreScript->ParentChit()->GetSpatialComponent()->GetSector();
+		Vector2I sector = ToSector(homeCoreScript->ParentChit()->Position());
 
 		CChitArray citizens;
 		homeCoreScript->Citizens(&citizens);
@@ -1499,7 +1501,7 @@ void GameScene::DoTick( U32 delta )
 		if (citizens.Size()) {
 			for (int i = 0; i < citizens.Size(); i++) {
 				Chit* chit = citizens[i];
-				if (chit && chit != playerChit && chit->GetSpatialComponent()->GetSector() == sector && chit->GetAIComponent()) {
+				if (chit && chit != playerChit && ToSector(chit->Position()) == sector && chit->GetAIComponent()) {
 					++nActive;
 					const ai::Needs& needs = chit->GetAIComponent()->GetNeeds();
 					for (int k = 0; k < ai::Needs::NUM_NEEDS; ++k) {
@@ -1600,7 +1602,7 @@ void GameScene::DoTick( U32 delta )
 
 	bool useBuildingVisible = false;
 	if ( AvatarSelected() ) {
-		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
+		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()));
 		if ( building ) {
 			IString name = building->GetItem()->IName();
 			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
@@ -1638,7 +1640,7 @@ void GameScene::OpenEndGame()
 	GLASSERT(cs);
 	if (!cs) return;
 
-	Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetSector());
+	Vector2I sector = ToSector(cs->ParentChit()->Position());
 	const SectorData& sd = sim->GetWorldMap()->GetSectorData(sector);
 	endGameWidget.SetData(sim->GetChitBag()->GetNewsHistory(),
 						  this,
@@ -1664,11 +1666,11 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		if (filter.Accept(chit)) {
 			if (chit->GetComponent("CoreScript")) {
 				coreWarningTimer = 6000;
-				coreWarningPos = chit->GetSpatialComponent()->GetPosition2D();
+				coreWarningPos = ToWorld2F(chit->Position());
 			}
 			else {
 				domainWarningTimer = 6000;
-				domainWarningPos = chit->GetSpatialComponent()->GetPosition2D();
+				domainWarningPos = ToWorld2F(chit->Position());
 			}
 		}
 	}
@@ -1819,8 +1821,8 @@ void GameScene::DrawDebugText()
 	Vector3F at = { 0, 0, 0 };
 	WorldMap* worldMap = sim->GetWorldMap();
 
-	if ( chit && chit->GetSpatialComponent() ) {
-		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
+	if ( chit  ) {
+		const Vector3F& v = chit->Position();
 		at = v;
 		ufoText->Draw( x, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
 			           v.x, v.y, v.z,
@@ -1950,7 +1952,7 @@ grinliz::Vector2I GameScene::GetHomeSector()
 	else {
 		CoreScript* cs = CoreScript::GetCore(attached);
 		if (cs) {
-			return cs->ParentChit()->GetSpatialComponent()->GetSector();
+			return ToSector(cs->ParentChit()->Position());
 		}
 	}
 	Vector2I z = { 0, 0 };

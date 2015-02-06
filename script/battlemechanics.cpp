@@ -64,27 +64,27 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 		return false;
 
 	// Buildings are a special challenge.
-	MapSpatialComponent* msc = targetComp.spatial->ToMapSpatialComponent();
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(targetComp.chit, SpatialComponent, MapSpatialComponent);
 	if (msc) {
 		Rectangle2I bounds = msc->Bounds();
 		Rectangle2F aabb;
 		aabb.Set(float(bounds.min.x), float(bounds.min.y),
 			     float(bounds.max.x + 1), float(bounds.max.y + 1));
 		Vector2F nearest = { 0, 0 };
-		const float range = PointAABBDistance(srcComp.spatial->GetPosition2D(), aabb, &nearest);
+		const float range = PointAABBDistance(ToWorld2F(srcComp.chit->Position()), aabb, &nearest);
 
 		return range < MELEE_RANGE;
 	}
 
 	// Check range up front and early out.
-	const float range = ( targetComp.spatial->GetPosition2D() - srcComp.spatial->GetPosition2D() ).Length();
+	const float range = ( targetComp.chit->Position() - srcComp.chit->Position() ).Length();
 	if ( range > MELEE_RANGE )
 		return false;
 
-	int test = IntersectRayCircle( targetComp.spatial->GetPosition2D(),
+	int test = IntersectRayCircle( ToWorld2F(targetComp.chit->Position()),
 								   targetComp.render->RadiusOfBase(),
-								   srcComp.spatial->GetPosition2D(),
-								   srcComp.spatial->GetHeading2D() );
+								   ToWorld2F(srcComp.chit->Position()),
+								   srcComp.chit->Heading2D() );
 
 	bool intersect = ( test == INTERSECT || test == INSIDE );
 	return intersect;
@@ -104,7 +104,7 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 	Rectangle2F aabb;
 	aabb.Set( (float)mapPos.x, (float)mapPos.y, (float)(mapPos.x+1), (float)(mapPos.y+1) );
 	Vector2F nearest = { 0, 0 };
-	const float range = PointAABBDistance( srcComp.spatial->GetPosition2D(), aabb, &nearest );
+	const float range = PointAABBDistance( ToWorld2F(srcComp.chit->Position()), aabb, &nearest );
 
 	return range < MELEE_RANGE;
 }
@@ -123,9 +123,8 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 	// with a spatial component is tracked by the 
 	// chitBag, so it's a very handy query.
 
-	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
-	Vector2F srcHeading = src->GetSpatialComponent()->GetHeading2D();
-	srcHeading.Normalize();
+	Vector2F srcPos = ToWorld2F(src->Position());
+	Vector2F srcHeading = src->Heading2D();
 
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
@@ -143,7 +142,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 	info.awardXP  = true;
 	info.isMelee  = true;
 	info.isExplosion = false;
-	info.originOfImpact = src->GetSpatialComponent()->GetPosition();
+	info.originOfImpact = src->Position();
 	BattleFilter filter;
 	bool impact = false;
 
@@ -167,7 +166,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 			if ( targetHealth && targetComp.okay ) {
 				target->SetTickNeeded();	// Fire up tick to handle health effects over time
 
-				Vector2F toTarget = targetComp.spatial->GetPosition2D() - srcPos;
+				Vector2F toTarget = ToWorld2F(targetComp.chit->Position()) - srcPos;
 				toTarget.Normalize();
 				float dot = DotProduct(toTarget, srcHeading);
 				float scale = 0.5f + 0.5f*dot;
@@ -213,7 +212,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 	if (impact && XenoAudio::Instance()) {
 		IString impactSound = weapon->keyValues.GetIString("impactSound");
 		if (!impactSound.empty()) {
-			Vector3F pos3 = src->GetSpatialComponent()->GetPosition();
+			Vector3F pos3 = src->Position();
 			XenoAudio::Instance()->PlayVariation(impactSound, src->random.Rand(), &pos3 );
 		}
 	}
@@ -420,12 +419,9 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, float 
 	if ( target->GetRenderComponent() ) {
 		target->GetRenderComponent()->CalcTarget( &t );
 	}
-	else if ( target->GetSpatialComponent() ) {
-		t = target->GetSpatialComponent()->GetPosition();
-		t.y += 0.5f;
-	}
 	else {
-		GLASSERT( 0 );
+		t = target->Position();
+		t.y += 0.5f;
 	}
 
 	if ( target->GetMoveComponent() ) {
@@ -443,12 +439,9 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, float 
 		else if ( rc ) {
 			rc->CalcTarget( &trigger );
 		}
-		else if ( origin->GetSpatialComponent() ) {
-			trigger = origin->GetSpatialComponent()->GetPosition();
-			trigger.y += 0.5f;
-		}
 		else {
-			GLASSERT( 0 );
+			trigger = origin->Position();
+			trigger.y += 0.5f;
 		}
 	}
 	if ( p0 ) {

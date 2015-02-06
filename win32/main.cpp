@@ -399,7 +399,7 @@ int main(int argc, char **argv)
 				case SDL_MOUSEWHEEL:
 				{
 					if (event.wheel.y) {
-						float deltaZoom = 0.01f * float(event.wheel.y);
+						float deltaZoom = -0.1f * float(event.wheel.y);
 						GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
 					}
 				}

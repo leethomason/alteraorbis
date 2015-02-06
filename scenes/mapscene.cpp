@@ -258,7 +258,7 @@ void MapScene::DrawMap()
 	Vector2F playerPos = { 0, 0 };
 	Chit* player = data->player;
 	if ( player ) {
-		playerPos = player->GetSpatialComponent()->GetPosition2D();
+		playerPos = ToWorld2F(player->Position());
 	}
 
 	const float dx = mapImage.Width() / float(NUM_SECTORS);

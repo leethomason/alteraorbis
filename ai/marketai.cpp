@@ -82,7 +82,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				// if there is one, else the reserve bank.
 				const ChitContext* context = buyer->ParentChit()->Context();
 				if (context && context->chitBag) {
-					Vector2I sector = buyer->ParentChit()->GetSpatialComponent()->GetSector();
+					Vector2I sector = ToSector(buyer->ParentChit()->Position());
 					Chit* exchange = context->chitBag->FindBuilding(ISC::exchange, sector, 0, 0, 0, 0);
 					Chit* vault = context->chitBag->FindBuilding(ISC::vault, sector, 0, 0, 0, 0);
 
@@ -105,12 +105,8 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 			buyer->AddToInventory(gi);
 			seller->GetItem()->wallet.Deposit(&buyer->GetItem()->wallet, cost);
 
-			Vector2F pos = { 0, 0 };
-			Vector2I sector = { 0, 0 };
-			if (seller->ParentChit()->GetSpatialComponent()) {
-				pos = seller->ParentChit()->GetSpatialComponent()->GetPosition2D();
-				sector = ToSector(seller->ParentChit()->GetSpatialComponent()->GetPosition2DI());
-			}
+			Vector2F pos = ToWorld2F(seller->ParentChit()->Position());
+			Vector2I sector = ToSector(seller->ParentChit()->Position());
 			GLOUTPUT(("'%s' sold to '%s' the item '%s' for %d Au at sector=%c%d\n",
 				seller->ParentChit()->GetItem()->BestName(),
 				buyer->ParentChit()->GetItem()->BestName(),

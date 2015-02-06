@@ -52,6 +52,10 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	timeToTick = 0;
 	timeSince = 0;
 	playerControlled = false;
+
+	position.Zero();
+	static const grinliz::Vector3F UP = { 0, 1, 0 };
+	rotation.FromAxisAngle( UP, 0 );
 }
 
 
@@ -63,6 +67,9 @@ Chit::~Chit()
 
 void Chit::Free()
 {
+	if (chitBag) {
+		chitBag->RemoveFromSpatialHash(this, (int)position.x, (int)position.z);
+	}
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) {
 			slot[i]->OnRemove();
@@ -73,17 +80,18 @@ void Chit::Free()
 	id = 0;
 	next = 0;
 	chitBag = 0;
-//	listeners.Clear();
+	position.Zero();
 }
 
 
 void Chit::Serialize(XStream* xs)
-
 {
 	XarcOpen( xs, "Chit" );
 	XARC_SER( xs, id );
 	XARC_SER( xs, timeSince );
 	XARC_SER_DEF( xs, playerControlled, false );
+	XARC_SER(xs, position);
+	XARC_SER(xs, rotation);
 
 	if ( xs->Saving() ) {
 		for( int i=0; i<NUM_SLOTS; ++i ) {
@@ -104,6 +112,11 @@ void Chit::Serialize(XStream* xs)
 		}
 	}
 	XarcClose( xs );
+
+	if (xs->Loading()) {
+		GLASSERT(chitBag);
+		chitBag->AddToSpatialHash(this, (int)position.x, (int)position.z);
+	}
 }
 
 
@@ -285,10 +298,11 @@ void Chit::OnChitEvent( const ChitEvent& event )
 
 void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
+	GLASSERT(chitBag);
 	switch (msg.ID()) {
 		case ChitMsg::CHIT_DESTROYED:
 		case ChitMsg::CHIT_DAMAGE:
-		Context()->chitBag->SendMessage(this, msg);
+		chitBag->SendMessage(this, msg);
 		break;
 
 		default:
@@ -335,7 +349,8 @@ Wallet* Chit::GetWallet()
 
 bool Chit::PlayerControlled() const
 {
-	return Context()->chitBag->GetAvatar() == this;
+	GLASSERT(chitBag);
+	return static_cast<LumosChitBag*>(chitBag)->GetAvatar() == this;
 }
 
 
@@ -344,7 +359,8 @@ void Chit::QueueDelete()
 	if (GetItem() && GameItem::trackWallet) {
 		GLASSERT(GetItem()->wallet.IsEmpty());
 	}
-	Context()->chitBag->QueueDelete( this );
+	GLASSERT(chitBag);
+	chitBag->QueueDelete( this );
 }
 
 
@@ -379,6 +395,73 @@ void Chit::DebugStr( GLString* str )
 }
 
 
+void Chit::SetPosition(const grinliz::Vector3F& newPosition)
+{
+	static bool checkRecursion = false;
+	GLASSERT(checkRecursion == false);		// don't call setPosition in setPosition!
+	checkRecursion = true;
+
+	Vector2I oldWorld = ToWorld2I(position);
+	Vector2I newWorld = ToWorld2I(newPosition);
+
+	if (oldWorld != newWorld) {
+		// update an existing hash.
+		GLASSERT(chitBag);
+		chitBag->UpdateSpatialHash(this, oldWorld.x, oldWorld.y, newWorld.x, newWorld.y);
+	}
+
+	if (position != newPosition) {
+		position = newPosition;
+		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		SetTickNeeded();
+	}
+	checkRecursion = false;
+}
+
+
+void Chit::SetRotation(const grinliz::Quaternion& value)
+{
+	if (value != rotation) {
+		rotation = value;
+		SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		SetTickNeeded();
+	}
+}
+
+
+void Chit::SetPosRot(const grinliz::Vector3F& p, const grinliz::Quaternion& q)
+{
+	if (p != position) {
+		// Then can optimize rotation, since the position will call
+		// the updates and send messages.
+		rotation = q;
+		SetPosition(p);
+	}
+	else {
+		SetRotation(q);
+		SetPosition(p);
+	}
+}
+
+
+Vector3F Chit::Heading() const
+{
+	Matrix4 r;
+	rotation.ToMatrix( &r );
+	Vector3F v = r * V3F_OUT;
+	return v;
+}
+
+
+Vector2F Chit::Heading2D() const
+{
+	Vector3F h = Heading();
+	Vector2F norm = { h.x, h.z };
+	norm.Normalize();
+	return norm;	
+}
+
+
 int Chit::Team() const
 {
 	const GameItem* item = GetItem();
@@ -401,10 +484,6 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 	if ( _chit ) {
 		chit = _chit;
 		int error = 0;
-		if ( bits & Chit::SPATIAL_BIT ) {
-			spatial = chit->GetSpatialComponent();
-			if ( !spatial ) ++error;
-		}
 		if ( bits & Chit::AI_BIT ) {
 			ai = chit->GetAIComponent();
 			if ( !ai ) ++error;
@@ -457,21 +536,9 @@ void ComponentSet::Zero()
 {
 	okay = false;
 	chit = 0;
-	spatial = 0;
 	move = 0;
 	itemComponent = 0;
 	item = 0;
 	render = 0;
 	ai = 0;
-}
-
-
-bool InSameSector(Chit* a, Chit* b)
-{
-	SpatialComponent* sca = a->GetSpatialComponent();
-	SpatialComponent* scb = b->GetSpatialComponent();
-	if (sca && scb) {
-		return sca->GetSector() == scb->GetSector();
-	}
-	return false;
 }

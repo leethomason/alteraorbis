@@ -109,9 +109,9 @@ int CameraComponent::DoTick(U32 delta)
 		case TRACK:
 		{
 			Chit* chit = Context()->chitBag->GetChit(targetChitID);
-			if (chit && chit->GetSpatialComponent()) {
+			if (chit) {
 
-				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
+				Vector3F pos = chit->Position();
 				pos.y = 0;
 
 				// Scoot the camera to always focus on the target. Removes

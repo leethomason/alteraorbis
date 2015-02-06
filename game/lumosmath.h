@@ -5,6 +5,7 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glgeometry.h"
 #include "gamelimits.h"
 
 inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
@@ -79,6 +80,10 @@ inline grinliz::Vector2I ToSector(const grinliz::Vector2F& pos2) {
 	return ToSector(v);
 }
 
+inline grinliz::Vector2I ToSector(const grinliz::Vector3F& pos3) {
+	grinliz::Vector2I v = ToWorld2I(pos3);
+	return ToSector(v);
+}
 
 inline grinliz::Rectangle2I SectorBounds( const grinliz::Vector2I& sector ) {
 	grinliz::Rectangle2I r;
@@ -129,6 +134,8 @@ inline grinliz::Vector2I RotateWorldVec(const grinliz::Vector2I& vec)
 	grinliz::Vector2I r = { vec.y, -vec.x };
 	return r;
 }
+
+float YRotation(const grinliz::Quaternion& quat);
 
 // Convert 3-18 (actually 1-20) to 0.4->2.0
 // 10.5 is normal -> 1.0, how to map? The highest shouldn't be 20x the lowest, probably.
