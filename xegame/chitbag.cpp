@@ -41,6 +41,7 @@ ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 	memRoot = 0;
 	activeCamera = 0;
 	newsHistory = new NewsHistory(this);
+	areaOfInterest.Set(0, 0, 0, 0, 0, 0);
 }
 
 
@@ -293,6 +294,7 @@ void ChitBag::DoTick( U32 delta )
 	nTicked = 0;
 
 	newsHistory->DoTick(delta);
+	bool useAOI = areaOfInterest.Volume() > 0;
 
 	// Events.
 	// Ticks.
@@ -315,12 +317,20 @@ void ChitBag::DoTick( U32 delta )
 		for( int j=0; j<BLOCK_SIZE; ++j ) {
 			Chit* c = block + j;
 			int id = c->ID();
-			if ( id && id != activeCamera ) {
-				
-				c->timeToTick -= delta;
-				c->timeSince  += delta;
+			if (id && id != activeCamera) {
 
-				if ( c->timeToTick <= 0 ) {
+				c->timeToTick -= delta;
+				c->timeSince += delta;
+
+				if (useAOI) {
+					if (!areaOfInterest.Contains(c->Position())) {
+						if (c->timeSince < MAX_FRAME_TIME){
+							continue;
+						}
+					}
+				}
+
+				if (c->timeToTick <= 0) {
 					++nTicked;
 					c->DoTick();
 					GLASSERT( c->timeToTick >= 0 );

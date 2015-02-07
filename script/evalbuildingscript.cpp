@@ -23,10 +23,7 @@ void EvalBuildingScript::Serialize(XStream* xs)
 void EvalBuildingScript::OnAdd(Chit* chit, bool init)
 {
 	super::OnAdd(chit, init);
-	if (init) {
-		// Use this opportunity to spread timers out.
-		timer.Randomize(parentChit->ID());
-	}
+	timer.SetPeriod(2000 + parentChit->random.Rand(1000));
 }
 
 
@@ -206,6 +203,7 @@ int EvalBuildingScript::DoTick(U32 delta)
 	if (timer.Delta(delta)) {
 		// Regular update to change the porch.
 		parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
+		//timer.SetTime(timer.Period() + parentChit->random.Rand(1000));	// space these out. cause framerate hitch
 	}
 	return timer.Next();
 }

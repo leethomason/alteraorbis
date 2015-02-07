@@ -130,6 +130,8 @@ public:
 
 	virtual void Serialize( XStream* xs );
 
+	void SetAreaOfInterest(const grinliz::Rectangle3F& aoi) { areaOfInterest = aoi; }
+
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.
 	Bolt* NewBolt();
@@ -265,6 +267,7 @@ private:
 	int nTicked;
 	int activeCamera;
 	NewsHistory* newsHistory;
+	grinliz::Rectangle3F areaOfInterest;
 
 	struct CompID { 
 		int chitID;

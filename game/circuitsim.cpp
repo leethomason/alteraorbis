@@ -15,6 +15,8 @@
 #include "../xegame/game.h"
 #include "../audio/xenoaudio.h"
 
+#include "../Shiny/include/Shiny.h"
+
 using namespace grinliz;
 
 static const float ELECTRON_SPEED = DEFAULT_MOVE_SPEED * 6.0f;
@@ -393,6 +395,7 @@ void CircuitSim::EtchLines(const grinliz::Vector2I& sector)
 
 void CircuitSim::EtchLines( const grinliz::Rectangle2I& bounds)
 {
+	PROFILE_FUNC();
 #define IS_EMITTER(c) (c == CIRCUIT_SWITCH || c == CIRCUIT_DETECT_ENEMY)
 
 	// Clear out the existing etching and find all the emitters.

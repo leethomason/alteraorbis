@@ -410,8 +410,6 @@ int CoreScript::Citizens(CChitArray* arr)
 	// This is annoying: seeing if cranking down the spawn rate and not
 	// destroying the sleep tube achieves success.
 	// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos2 = sc->GetPosition2D();
 		Vector2I sector = ToSector( ToWorld2I( pos2 ));

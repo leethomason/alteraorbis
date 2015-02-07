@@ -282,7 +282,7 @@ bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHe
 
 bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* heading )
 {
-	//PROFILE_FUNC();
+	PROFILE_FUNC();
 
 	float speed		= Speed();
 	float dt		= float(_dt)*0.001f;

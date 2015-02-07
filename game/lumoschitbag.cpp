@@ -537,7 +537,7 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 	// 1x1 buildings.
 	for( int i=0; i<array.Size(); ++i ) {
 		// We are casting a wide net to get buildings.
-		if (array[i]->GetSpatialComponent()->Bounds().Contains(pos2i)) {
+		if (array[i]->Bounds().Contains(pos2i)) {
 			found = array[i];
 			break;
 		}

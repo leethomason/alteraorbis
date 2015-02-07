@@ -52,8 +52,6 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	for (; currentNews < history->NumNews(); ++currentNews) {
 		const NewsEvent& ne = history->News(currentNews);
 		Vector2I sector = ne.Sector();
-		//Chit* chit = chitBag->GetChit(ne.FirstChitID());
-		//SpatialComponent* sc = chit ? chit->GetSpatialComponent() : 0;
 		Vector2F pos2 = ne.Pos();
 
 		str = "";

@@ -154,6 +154,7 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 
 /*static*/ void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chitBag, CircuitSim* ciruitSim, const Rectangle2I& rect)
 {
+	bool circuitChange = false;
 	for (Rectangle2IIterator it(rect); !it.Done(); it.Next()) {
 		int porchType = 0;
 		Chit* porchChit = chitBag->QueryPorch(it.Pos());
@@ -176,12 +177,20 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 			}
 		}
 
+		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos());
 		if (circuit) {
-			worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, LRint(yRotation / 90.0f));
+			int r = LRint(yRotation / 90.0f);
+			if (wg.CircuitRot() != r) {
+				worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, r );
+				circuitChange = true;
+			}
 		}
-		worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
+		if (circuit != wg.Circuit()) {
+			circuitChange = true;
+			worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
+		}
 	}
-	if (ciruitSim) {
+	if (ciruitSim && circuitChange) {
 		ciruitSim->EtchLines(ToSector(rect.min));
 	}
 }

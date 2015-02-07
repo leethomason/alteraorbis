@@ -138,7 +138,6 @@ void ItemComponent::NameItem(GameItem* item)
 			// An item that wasn't significant is now significant.
 			// In practice, this means adding tracking for lesser mobs.
 			if ( item->keyValues.GetIString( "mob" ) == "lesser" ) {
-				SpatialComponent* sc = parentChit->GetSpatialComponent();
 				if ( sc ) {
 					NewsEvent news( NewsEvent::LESSER_MOB_NAMED, sc->GetPosition2D(), item, parentChit ); 
 					// Should not have been already added.

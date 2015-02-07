@@ -485,9 +485,22 @@ Texture* Sim::GetMiniMapTexture()
 void Sim::DoTick( U32 delta )
 {
 	cachedWebAge += delta;
+
 	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
 	context.circuitSim->DoTick(delta);
+
+	Vector3F center = V3F_ZERO;
+	context.engine->CameraLookingAt(&center);
+	Rectangle3F aoi;
+	aoi.min.x = center.x - EL_FAR;
+	aoi.min.y = -10.0f;
+	aoi.min.z = center.z - EL_FAR;
+	aoi.max.x = center.x + EL_FAR;
+	aoi.max.y = 100.0f;
+	aoi.max.z = center.z + EL_FAR;
+	context.chitBag->SetAreaOfInterest(aoi);
+
 	context.chitBag->DoTick( delta );
 
 	// From the CHIT_DESTROYED_START we have a list of
@@ -693,7 +706,7 @@ void Sim::Draw3D( U32 deltaTime )
 		CompositingShader debug( BLEND_NORMAL );
 		debug.SetColor( 1, 1, 1, 0.5f );
 		CChitArray arr;
-		context.chitBag->FindBuilding(	ISC::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
+		context.chitBag->FindBuilding(	ISC::vault, ToSector( player->GetPosition2DI() ),
 								0, LumosChitBag::NEAREST, &arr );
 		for( int i=0; i<arr.Size(); ++i ) {
 			Rectangle2I p = GET_SUB_COMPONENT( arr[i], SpatialComponent, MapSpatialComponent )->PorchPos();

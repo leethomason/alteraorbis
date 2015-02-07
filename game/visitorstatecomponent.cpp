@@ -94,7 +94,6 @@ int VisitorStateComponent::DoTick( U32 delta )
 		}
 	}
 
-	if (parentChit->GetSpatialComponent()) {
 		Vector2F pos2 = parentChit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		//for (int i = 0; i < VisitorData::NUM_VISITS; ++i) {
 			want.SetPos(pos2.x + 0.50f, pos2.y);

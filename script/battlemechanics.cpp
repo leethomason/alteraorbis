@@ -525,7 +525,7 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 
 		// Check that the explosion doesn't go through walls, in a general quasi accurate way
 		// This doesn't work either - stops short of an unpathable target.
-		//Vector2F chit2 = chit->GetSpatialComponent()->GetPosition2D();
+		//Vector2F chit2 = chit->GetPosition2D();
 		//if ( worldMap && !worldMap->HasStraightPath( origin2, chit2 )) {
 		//	continue;
 		//}

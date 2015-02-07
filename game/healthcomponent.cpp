@@ -55,41 +55,39 @@ int HealthComponent::DoTick(U32 delta)
 	}
 	if (item) {
 		if (item->hp == 0) {
-			if (parentChit->GetSpatialComponent()) {
-				// Audio.
-				if (XenoAudio::Instance()) {
-					MOBIshFilter mobIsh;
-					BuildingFilter bulding;
-					if (mobIsh.Accept(parentChit) || bulding.Accept(parentChit)) {
-						XenoAudio::Instance()->PlayVariation(ISC::derezWAV, parentChit->random.Rand(), &parentChit->Position());
-					}
+			// Audio.
+			if (XenoAudio::Instance()) {
+				MOBIshFilter mobIsh;
+				BuildingFilter bulding;
+				if (mobIsh.Accept(parentChit) || bulding.Accept(parentChit)) {
+					XenoAudio::Instance()->PlayVariation(ISC::derezWAV, parentChit->random.Rand(), &parentChit->Position());
 				}
+			}
 
-				// Tombstone
-				IString mob = item->keyValues.GetIString("mob");
-				if (!mob.empty()) {
-					const char* asset = 0;
-					if (mob == ISC::lesser) asset = "tombstoneLesser";
-					else if (mob == ISC::greater) asset = "tombstoneGreater";
-					else if (mob == ISC::denizen) asset = "tombstoneDenizen";
+			// Tombstone
+			IString mob = item->keyValues.GetIString("mob");
+			if (!mob.empty()) {
+				const char* asset = 0;
+				if (mob == ISC::lesser) asset = "tombstoneLesser";
+				else if (mob == ISC::greater) asset = "tombstoneGreater";
+				else if (mob == ISC::denizen) asset = "tombstoneDenizen";
 
-					if (asset) {
-						Chit* chit = Context()->chitBag->NewChit();
+				if (asset) {
+					Chit* chit = Context()->chitBag->NewChit();
 
-						Context()->chitBag->AddItem("tombstone", chit, Context()->engine, 0, 0, asset);
-						chit->Add(new RenderComponent(asset));
-						chit->Add(new CountDownScript(30 * 1000));
+					Context()->chitBag->AddItem("tombstone", chit, Context()->engine, 0, 0, asset);
+					chit->Add(new RenderComponent(asset));
+					chit->Add(new CountDownScript(30 * 1000));
 
-						Vector3F pos = parentChit->Position();
-						float r = YRotation(parentChit->Rotation());
-						pos.y = 0;
-						chit->SetPosRot(pos, Quaternion::MakeYRotation(r));
+					Vector3F pos = parentChit->Position();
+					float r = YRotation(parentChit->Rotation());
+					pos.y = 0;
+					chit->SetPosRot(pos, Quaternion::MakeYRotation(r));
 
-						GameItem* tombItem = chit->GetItem();
-						GLASSERT(item->Team() != 0);	// how would a neutral create a tombstone??
-						tombItem->keyValues.Set("tomb_team", item->Team());
-						tombItem->keyValues.Set("tomb_mob", mob);
-					}
+					GameItem* tombItem = chit->GetItem();
+					GLASSERT(item->Team() != 0);	// how would a neutral create a tombstone??
+					tombItem->keyValues.Set("tomb_team", item->Team());
+					tombItem->keyValues.Set("tomb_mob", mob);
 				}
 			}
 			parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_DESTROYED), this);

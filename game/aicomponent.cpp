@@ -387,8 +387,8 @@ public:
 		// This has a nasty rounding bug
 		// where 2 "close" things would always evaluate "less than" and
 		// the sort flips endlessly.
-		return ( v0->GetSpatialComponent()->GetPosition() - origin ).LengthSquared() <
-			   ( v1->GetSpatialComponent()->GetPosition() - origin ).LengthSquared();
+		return ( v0->GetPosition() - origin ).LengthSquared() <
+			   ( v1->GetPosition() - origin ).LengthSquared();
 #endif
 
 		Vector3F p0 = v0->Position() - origin;

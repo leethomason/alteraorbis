@@ -1129,7 +1129,7 @@ void GameScene::HandleHotKey( int mask )
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
-				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				Vector2I sector = cs->ParentChit()->GetSector();
 				int team = Team::GenTeam(TEAM_GOB);
 				cs = sim->CreateCore(sector, team);
 				cs->ParentChit()->Add(new GobDomainAI());
@@ -1141,7 +1141,7 @@ void GameScene::HandleHotKey( int mask )
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
-				Vector2I sector = cs->ParentChit()->GetSpatialComponent()->GetSector();
+				Vector2I sector = cs->ParentChit()->GetSector();
 				int team = Team::GenTeam(TEAM_KAMAKIRI);
 				cs = CoreScript::CreateCore(sector, team, sim->Context());
 				cs->ParentChit()->Add(new KamakiriDomainAI());
@@ -1183,7 +1183,7 @@ void GameScene::HandleHotKey( int mask )
 			if (truulga) {
 				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 				cc->SetTrack(0);
-				Vector2F lookat = truulga->GetSpatialComponent()->GetPosition2D();
+				Vector2F lookat = truulga->etPosition2D();
 				sim->GetEngine()->CameraLookAt(lookat.x, lookat.y);
 			}
 		}
@@ -1206,7 +1206,7 @@ void GameScene::HandleHotKey( int mask )
 #endif
 #if 0	// Summon Greaters
 		if (playerChit) {
-			sim->GetChitBag()->AddSummoning(playerChit->GetSpatialComponent()->GetSector(), LumosChitBag::SUMMON_TECH);
+			sim->GetChitBag()->AddSummoning(playerChit->GetSector(), LumosChitBag::SUMMON_TECH);
 		}
 #endif
 #endif	// DEBUG
@@ -1317,7 +1317,6 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 			PathMoveComponent* pmc = GET_SUB_COMPONENT(arr[i], MoveComponent, PathMoveComponent);
 			if (pmc) {
 				pmc->Stop();
-				SpatialComponent* sc = arr[i]->GetSpatialComponent();
 				GLASSERT(sc);
 				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
 				

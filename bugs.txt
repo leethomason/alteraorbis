@@ -95,7 +95,11 @@ x de-saturate colors correctly:
 - rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - still losing money! single delete? move render component to new "statue" chit?
 - perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
+x evalbuildingscript
+	x regular hitch
+- tombstones aren't getting created
 
+- evalBuildingScript too slow
 - deal with fruit overflow
 	- medkit manufacture?
 - check gobman that is House denizen healing

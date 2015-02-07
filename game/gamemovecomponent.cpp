@@ -53,7 +53,6 @@ int GameMoveComponent::DoTick(U32 delta)
 
 void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 {
-	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	RenderComponent* render = parentChit->GetRenderComponent();

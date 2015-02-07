@@ -111,7 +111,6 @@ void VolcanoScript::OnRemove()
 	// is to track each volcano, not let them overlap,
 	// and check against the magma.
 	const ChitContext* context = scriptContext->chitBag->GetContext();
-	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	WorldMap* worldMap = context->worldMap;
 
 	Vector2I pos2i = sc->GetPosition2DI();
