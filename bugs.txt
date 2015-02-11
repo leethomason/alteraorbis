@@ -94,10 +94,12 @@ x particle effects for visitors
 x console, show tax paid
 x restrict # domains - overwhelming
 x gobman statues
-- improve map icon art (from GT)
+x improve map icon art (from GT)
+- spawn lesser mobs sooner
+- mouse scroll direction
+
 - clean up mother-core image
 - tune mouse wheel with real mouse
-
 - rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - hide abandom domain somewhere...
 - evalBuildingScript too slow

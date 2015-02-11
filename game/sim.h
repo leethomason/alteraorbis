@@ -54,7 +54,7 @@ public:
 	Sim( LumosGame* game );
 	~Sim();
 
-	void DoTick( U32 deltaTime );
+	void DoTick( U32 deltaTime, bool useAreaOfInterest=true );
 	void Draw3D( U32 deltaTime );
 	void DrawDebugText();
 

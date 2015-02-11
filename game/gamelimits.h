@@ -63,9 +63,9 @@ static const int TYPICAL_PLANTS		= 50 * 1000;
 static const int GOLD_PER_DENIZEN  = 100;
 static const int GOLD_PER_LESSER   =  10;
 static const int GOLD_PER_GREATER  = 100;
-static const int ALL_GOLD =   TYPICAL_DENIZENS * GOLD_PER_DENIZEN
+static const int ALL_GOLD =	(TYPICAL_DENIZENS * GOLD_PER_DENIZEN
 							+ TYPICAL_LESSER * GOLD_PER_LESSER
-							+ TYPICAL_GREATER * GOLD_PER_GREATER;
+							+ TYPICAL_GREATER * GOLD_PER_GREATER) * 3 / 2;
 
 // Values to prevent huge accumulation in one very lucky MOB.
 static const int MAX_LESSER_GOLD	= 100;

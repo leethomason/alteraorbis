@@ -185,6 +185,7 @@
   <GameItem name="gobmanStatue"
         resource="gobmanStatue"
         flags="CLICK_THROUGH"
+        procedural="team"
         mass="100"
         baseHP="150"
         cost="30"

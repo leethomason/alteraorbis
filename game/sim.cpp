@@ -482,7 +482,7 @@ Texture* Sim::GetMiniMapTexture()
 }
 
 
-void Sim::DoTick( U32 delta )
+void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 {
 	cachedWebAge += delta;
 
@@ -490,16 +490,18 @@ void Sim::DoTick( U32 delta )
 	plantScript->DoTick(delta);
 	context.circuitSim->DoTick(delta);
 
-	Vector3F center = V3F_ZERO;
-	context.engine->CameraLookingAt(&center);
-	Rectangle3F aoi;
-	aoi.min.x = center.x - EL_FAR;
-	aoi.min.y = -10.0f;
-	aoi.min.z = center.z - EL_FAR;
-	aoi.max.x = center.x + EL_FAR;
-	aoi.max.y = 100.0f;
-	aoi.max.z = center.z + EL_FAR;
-	context.chitBag->SetAreaOfInterest(aoi);
+	if (useAreaOfInterest) {
+		Vector3F center = V3F_ZERO;
+		context.engine->CameraLookingAt(&center);
+		Rectangle3F aoi;
+		aoi.min.x = center.x - EL_FAR;
+		aoi.min.y = -10.0f;
+		aoi.min.z = center.z - EL_FAR;
+		aoi.max.x = center.x + EL_FAR;
+		aoi.max.y = 100.0f;
+		aoi.max.z = center.z + EL_FAR;
+		context.chitBag->SetAreaOfInterest(aoi);
+	}
 
 	context.chitBag->DoTick( delta );
 

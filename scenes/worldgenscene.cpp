@@ -369,7 +369,7 @@ void WorldGenScene::DoTick(U32 delta)
 			clock_t start = clock();
 			while (clock() - start < 100) {
 				for (int i = 0; i < 10; ++i) {
-					sim->DoTick(100);
+					sim->DoTick(100, false);
 					newsConsole.DoTick(100, 0);
 				}
 			}
