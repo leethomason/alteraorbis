@@ -56,6 +56,7 @@ public:
 	static grinliz::IString teleport;
 	static grinliz::IString construction;
 	static grinliz::IString useBuilding;
+	static grinliz::IString useKiosk;
 	static grinliz::IString repair;
 
 	static grinliz::IString human;

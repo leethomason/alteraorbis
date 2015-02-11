@@ -53,7 +53,7 @@ int GameMoveComponent::DoTick(U32 delta)
 
 void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 {
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 
 	RenderComponent* render = parentChit->GetRenderComponent();
 	GLASSERT( render );
@@ -83,13 +83,10 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
 	*/
 
-	static const int N = 9;
-	WorldGrid wg[N];
 	Vector2I pos2i = ToWorld2I(*pos);
-	Vector2I dir[N];
 
-	Context()->worldMap->GetWorldGrid(pos2i, wg, N, dir);
-	if (!wg[0].IsFluid()) {
+	const WorldGrid wg = Context()->worldMap->GetWorldGrid(pos2i);
+	if (!wg.IsFluid()) {
 		return false;
 	}
 
@@ -116,7 +113,7 @@ bool GameMoveComponent::ApplyFluid(U32 delta, grinliz::Vector3F* pos, bool* floa
 	ItemComponent* ic = parentChit->GetItemComponent();
 	if (rc && ic && ic->GetItem()->flags & GameItem::FLOAT) {
 		h = rc->MainResource()->AABB().SizeY();
-		if (wg[0].FluidHeight() > h*0.5f) {
+		if (wg.FluidHeight() > h*0.5f) {
 			*floating = true;
 		}
 	}

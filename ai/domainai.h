@@ -140,6 +140,7 @@ public:
 
 	// Uses default.
 	//virtual void DoBuild();
+	virtual bool DoSpecialBuild(int stage);
 
 private:
 };

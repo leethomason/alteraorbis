@@ -603,7 +603,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
 				thisComp.itemComponent,		// seller
-				0,							// no sales tax when selling to the market.
+				salesTax,					// more of a transaction bonus...
 				true);
 
 			if (sold)

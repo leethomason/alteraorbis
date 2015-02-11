@@ -47,6 +47,13 @@ public:
 	const grinliz::CDynArray<MOBItem>& MOBItems() const { return mobItems; }
 	const grinliz::CDynArray<MOBItem>& CoreItems() const { return coreItems; }
 
+	int NumCoresInUse() const {
+		int count = 0;
+		for (int i = 0; i<coreItems.Size(); ++i) {
+			count += coreItems[i].count;
+		}
+		return count;
+	}
 	int wildFruit;
 
 private:

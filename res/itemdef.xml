@@ -182,6 +182,15 @@
         size="1"
         />
 
+  <GameItem name="gobmanStatue"
+        resource="gobmanStatue"
+        flags="CLICK_THROUGH"
+        mass="100"
+        baseHP="150"
+        cost="30"
+        size="1"
+        />
+
   <GameItem name="trollBrazier"
         resource="trollBrazier"
         flags="CLICK_THROUGH"

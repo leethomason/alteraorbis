@@ -265,6 +265,7 @@ private:
 	int idPool;
 	U32 bagTime;
 	int nTicked;
+	int frame;
 	int activeCamera;
 	NewsHistory* newsHistory;
 	grinliz::Rectangle3F areaOfInterest;

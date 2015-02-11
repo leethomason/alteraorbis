@@ -36,6 +36,7 @@ using namespace tinyxml2;
 ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 {
 	idPool = 0;
+	frame = 0;
 	bagTime = 0;
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE2 );
 	memRoot = 0;
@@ -292,6 +293,7 @@ void ChitBag::DoTick( U32 delta )
 	PROFILE_FUNC();
 	bagTime += delta;
 	nTicked = 0;
+	frame++;
 
 	newsHistory->DoTick(delta);
 	bool useAOI = areaOfInterest.Volume() > 0;
@@ -323,10 +325,13 @@ void ChitBag::DoTick( U32 delta )
 				c->timeSince += delta;
 
 				if (useAOI) {
-					if (!areaOfInterest.Contains(c->Position())) {
-						if (c->timeSince < MAX_FRAME_TIME){
-							continue;
-						}
+					// The big challenged is "clumping", where 2000 chits get
+					// processed one frame, and then 500 the next. Tried
+					// different time strategies and don't yet have a fix.
+					// However using IDs and just processing alternating
+					// halves outside the AOI seems to be very stable. 
+					if (((id + frame) & 1) && !areaOfInterest.Contains(c->Position())) {
+						continue;
 					}
 				}
 

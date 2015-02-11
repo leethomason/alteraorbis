@@ -59,8 +59,8 @@ private:
 	grinliz::Vector2F ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
 	void DrawMap();
 
-	enum {	MAP2_RAD	= 1,
-			MAP2_SIZE	= 3,
+	enum {	MAP2_RAD	= 2,
+			MAP2_SIZE	= MAP2_RAD*2+1,
 			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE,
 			MAX_COL		= 3,
 			MAX_FACE	= MAP2_SIZE2 * MAX_COL * 2

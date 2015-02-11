@@ -46,6 +46,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "TrollStatue", "trollStatue", 6 },
 	{ "TrollBrazier", "trollBrazier", 6 },
 	{ "KamakirianStatue", "kamaStatue", 6 },
+	{ "GobmanStatue", "gobmanStatue", 6 },
 };
 
 	//{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },

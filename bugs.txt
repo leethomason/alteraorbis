@@ -78,27 +78,28 @@ x font default settings. (ascent=1 - where to code??) move font to .dat?
 x mouse wheel support
 x de-saturate colors correctly: 
 	x world grid changes
-	- plant changes
-- Spatial change
+	x plant changes
+x Spatial change
 	x scan code for GetSpatialComponent
 	x ComponentSet.spatial is all wrong
 	x check for recursive setPosition
 	x fix render component to not have sync	
-	- optimize for AreaOfInterest
-- gobman statues
-- improve map icon art
-- clean up mother-core image
-- tune mouse wheel with real mouse
-- hide abandom domain somewhere...
-- console, show tax paid
-- particle effects for visitors
-- rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
-- still losing money! single delete? move render component to new "statue" chit?
-- perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
+	x optimize for AreaOfInterest
+x still losing money! single delete? move render component to new "statue" chit?
+x perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
 x evalbuildingscript
 	x regular hitch
-- tombstones aren't getting created
+x tombstones aren't getting created
+x particle effects for visitors
+x console, show tax paid
+x restrict # domains - overwhelming
+x gobman statues
+- improve map icon art (from GT)
+- clean up mother-core image
+- tune mouse wheel with real mouse
 
+- rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
+- hide abandom domain somewhere...
 - evalBuildingScript too slow
 - deal with fruit overflow
 	- medkit manufacture?

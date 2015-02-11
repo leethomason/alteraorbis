@@ -862,6 +862,28 @@ void GobDomainAI::OnRemove()
 }
 
 
+bool GobDomainAI::DoSpecialBuild(int stage)
+{
+	if (stage == AFTER_BAR) {
+		Vector2I sector = { 0, 0 };
+		CoreScript* cs = 0;
+		WorkQueue* workQueue = 0;
+		int pave = 0;
+		if (!Preamble(&sector, &cs, &workQueue, &pave))
+			return false;
+
+		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+		Rectangle2I sectorBounds = SectorBounds(sector);
+		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
+
+		if (arr[BuildScript::GOBMAN_STATUE] < 2) {
+			return BuildBuilding(BuildScript::GOBMAN_STATUE);
+		}
+	}
+	return false;
+}
+
+
 KamakiriDomainAI::KamakiriDomainAI()
 {
 

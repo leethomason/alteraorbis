@@ -41,7 +41,7 @@ static const int VALUE_OF_NAMING	= 100;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
 static const int FARM_GROW_RAD		= 2;	// grid squares affected by farm. total region 5x5
 static const int TECH_MAX			= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
-static const int MAX_WILD_FRUIT		= 600;
+static const int MAX_WILD_FRUIT		= 300;
 
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.
@@ -53,7 +53,8 @@ static const int TEMPLES_REPELS_GREATER = 1;
 static const float TECH_ATTRACTS_GREATER = 3.2f;
 
 // General guidelines to the # of things in the world.
-static const int TYPICAL_DOMAINS	= 100;
+static const int TYPICAL_DOMAINS	= 120;
+static const int TYPICAL_AI_DOMAINS = 40;
 static const int TYPICAL_DENIZENS	= 800;
 static const int TYPICAL_LESSER		= 1500;
 static const int TYPICAL_GREATER	= 10;						// These guys get overwhelming fast - they can clear a domain.
@@ -72,7 +73,7 @@ static const int MAX_GREATER_GOLD	= 1000;
 static const int MAX_LESSER_MOB_CRYSTAL = 4;
 static const int MAX_GREATER_MOB_CRYSTAL = 12;
 
-static const int ALL_CRYSTAL_GREEN  = TYPICAL_DOMAINS * 10;
+static const int ALL_CRYSTAL_GREEN  = TYPICAL_DOMAINS * 15;		// was 10, seemed stressed.
 static const int ALL_CRYSTAL_RED    = TYPICAL_DOMAINS * 4;
 static const int ALL_CRYSTAL_BLUE   = TYPICAL_DOMAINS * 2;
 static const int ALL_CRYSTAL_VIOLET = TYPICAL_DOMAINS / 2;
@@ -133,7 +134,7 @@ static const float CHANCE_FIRE_HIGH		= 0.80f;
 static const float CHANCE_FIRE_OUT		= 0.10f;
 static const float CHANCE_FIRE_SPREAD	= 0.40f;	// once it starts spreading, self reinforcing. 0.20 too low.
 
-static const float SALES_TAX = 0.15f;
+static const float SALES_TAX = 0.25f;
 static const int   WORKER_BOT_COST = 20;
 static const int   MAX_WORKER_BOTS = 4;
 

@@ -631,16 +631,16 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 		if (processIndex >= MAP2) processIndex = 0;
 		const int index = processIndex;
 
-		// This can be out of bounds - everything is water outside of Bounds()
-		WorldGrid* wg = &grid[index];
-		if (!wg->IsLand()) continue;
-
 		const int y = (index >> EL_MAP_Y_SHIFT);
 		const int x = (index & EL_MAP_X_MASK);
 		const Vector2I pos2i = { x, y };
 		const Vector3I pos3i = { x, 0, y };
 
 		if (!b.Contains(pos2i)) continue;
+
+		// This can be out of bounds - everything is water outside of Bounds()
+		WorldGrid* wg = &grid[index];
+		if (!wg->IsLand()) continue;
 
 		// FIXME: filter on Plant, Magma, Lava...more ??
 

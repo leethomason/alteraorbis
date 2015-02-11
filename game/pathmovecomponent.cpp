@@ -162,7 +162,7 @@ bool PathMoveComponent::NeedComputeDest()
 
 void PathMoveComponent::ComputeDest()
 {
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
 		return;
@@ -282,7 +282,7 @@ bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHe
 
 bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* heading )
 {
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 
 	float speed		= Speed();
 	float dt		= float(_dt)*0.001f;
@@ -348,7 +348,7 @@ bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* headin
 
 void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading )
 {
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 
 	static const float PATH_AVOID_DISTANCE = MAX_BASE_RADIUS*2.0f;
 

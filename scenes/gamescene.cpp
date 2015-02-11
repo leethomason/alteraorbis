@@ -1833,8 +1833,10 @@ void GameScene::DrawDebugText()
 	}
 
 	const Wallet& w = ReserveBank::Instance()->wallet;
-	ufoText->Draw( x, y,	"ticks=%d/%d Reserve Au=%d G=%d R=%d B=%d V=%d", 
-							chitBag->NumTicked(), chitBag->NumChits(),
+	double fractionTicked = 0;
+	if (chitBag->NumChits()) fractionTicked = double(chitBag->NumTicked()) / double(chitBag->NumChits());
+	ufoText->Draw( x, y,	"ticks=%02d%% (%d) Reserve Au=%d G=%d R=%d B=%d V=%d", 
+							LRint(fractionTicked*100.0), chitBag->NumChits(),
 							w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3) ); 
 	y += 16;
 

@@ -34,6 +34,7 @@ IString IStringConst::sparkPowerUp;
 IString IStringConst::teleport;
 IString IStringConst::construction;
 IString IStringConst::useBuilding;
+IString IStringConst::useKiosk;
 IString IStringConst::repair;
 IString IStringConst::human;
 IString IStringConst::humanFemale;
@@ -151,6 +152,7 @@ void IStringConst::Init()
 	teleport = StringPool::Intern( "teleport", true );
 	construction = StringPool::Intern( "construction", true );
 	useBuilding = StringPool::Intern( "useBuilding", true );
+	useKiosk = StringPool::Intern( "useKiosk", true );
 	repair = StringPool::Intern( "repair", true );
 	human = StringPool::Intern( "human", true );
 	humanFemale = StringPool::Intern( "humanFemale", true );

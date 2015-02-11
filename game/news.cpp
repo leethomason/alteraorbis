@@ -229,7 +229,13 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		break;
 
 		case PURCHASED:
-		str->Format("%.2f: %s purchased %s at %s.", age, firstName.c_str(), secondName.c_str(), domain.c_str());
+		if (second) {
+			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, firstName.c_str(), secondName.c_str(), domain.c_str(),
+						second->GetValue(), int(float(second->GetValue() * SALES_TAX)));
+		}
+		else {
+			str->Format("%.2f: %s purchased %s at %s.", age, firstName.c_str(), secondName.c_str(), domain.c_str());
+		}
 		break;
 
 		case STARVATION:

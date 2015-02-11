@@ -154,8 +154,6 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
 	XARC_SER(xs, lastTargetID);
-//	XARC_SER_DEF( xs, targetDesc.id, 0 );
-//	XARC_SER( xs, targetDesc.mapPos );
 	XARC_SER_DEF( xs, focus, 0 );
 	XARC_SER_DEF( xs, wanderTime, 0 );
 	XARC_SER( xs, rethink );
@@ -701,58 +699,17 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 	int tick = 400;
 	const ChitContext* context = Context();
 
-#if 0
-	// Plant eater
-	if (	!thisComp.move->IsMoving()    
-		 && (item->hp < totalHP ))  
-	{
-		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
-			// Are we on a plant?
-			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-			// Note that currently only support eating stage 0-1 plants.
-			if (wg.Plant() && !wg.BlockingPlant()) {
-				// We are standing on a plant.
-				float hp = Travel( EAT_HP_PER_SEC, time );
-				ChitMsg heal( ChitMsg::CHIT_HEAL );
-				heal.dataF = hp * EAT_HP_HEAL_MULT;
-
-				if ( debugLog ) {
-					GLOUTPUT(( "ID=%d Eating plants itemHp=%.1f total=%.1f hp=%.1f\n", thisComp.chit->ID(),
-						item->hp, item->TotalHP(), hp ));
-				}
-
-				DamageDesc dd( hp, 0 );
-				Context()->worldMap->VoxelHit(pos2i, dd);
-				parentChit->SendMessage( heal, this );
-				return true;
-			}
-		}
-		if ( itemFlags & GameItem::AI_HEAL_AT_CORE ) {
-			// Are we on a core?
-			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-			Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-			const SectorData& sd = context->worldMap->GetSectorData( sector );
-			if ( sd.core == pos2i ) {
-				ChitMsg heal( ChitMsg::CHIT_HEAL );
-				heal.dataF = Travel( CORE_HP_PER_SEC, time );
-				parentChit->SendMessage( heal, this );
-				return true;
-			}
-		}
-	}
-#endif	
 	if (visitorIndex >= 0 && !thisComp.move->IsMoving())
 	{
 		// Visitors at a kiosk.
 		Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
 		Vector2I sector = ToSector(pos2i);
-		Chit* chit = this->Context()->chitBag->QueryPorch(pos2i);
+		Chit* kioskChit = this->Context()->chitBag->QueryPorch(pos2i);
 		CoreScript* cs = CoreScript::GetCore(sector);
 
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 
-		if (chit && chit->GetItem()->IName() == ISC::kiosk) {
+		if (kioskChit && kioskChit->GetItem()->IName() == ISC::kiosk) {
 			vd->kioskTime += time;
 			if (vd->kioskTime > VisitorData::KIOSK_TIME) {
 				vd->visited.Push(sector);
@@ -760,8 +717,24 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 				thisComp.render->AddDeco("techxfer", STD_DECO);
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
+
+#if 1			// experimental: visitors add Au & Crystal
+				// FIXME: where does the Au and Crystal go?
+				// Exchange? Denizens?
+				ReserveBank* bank = ReserveBank::Instance();
+				if (bank->wallet.Gold()) {
+					thisComp.item->wallet.Deposit(&bank->wallet, 1);
+				}
+				if (parentChit->random.Rand(10) == 0) {
+					if (bank->wallet.Crystal(0)) {
+						const int GREEN[NUM_CRYSTAL_TYPES] = { 1, 0, 0, 0 };
+						thisComp.item->wallet.Deposit(&bank->wallet, 0, GREEN);
+					}
+				}
+#endif
 				return false;
 			}
+			Context()->engine->particleSystem->EmitPD(ISC::useKiosk, thisComp.chit->Position(), V3F_UP, time);
 			// else keep standing.
 			return true;
 		}
@@ -1493,29 +1466,6 @@ bool AIComponent::ThinkWanderEat(const ComponentSet& thisComp)
 }
 
 
-#if 0
-bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
-{
-	// Core healer
-	if (    (thisComp.item->flags & GameItem::AI_HEAL_AT_CORE) 
-		 && (thisComp.item->hp < double(thisComp.item->TotalHP()) * 0.8 )) 
-	{
-		const ChitContext* context = Context();
-
-		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
-		const SectorData& sd = context->worldMap->GetSectorData( sector );
-		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
-			if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
-				this->Move( ToWorld2F( sd.core ), false );
-				return true;
-			}
-		}
-	}
-	return false;
-}
-#endif
-
-
 Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter )
 {
 	Vector2I v = { 0, 0 };
@@ -2171,15 +2121,14 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		int r = parentChit->random.Rand(4);
 
-		// FIXME: the greater logic doesn't even seem to get used.
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
-							&& itemFlags & GameItem::AI_SECTOR_HERD
+							&& (itemFlags & GameItem::AI_SECTOR_HERD)
 							&& (friendList2.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
 							&& (thisComp.chit->random.Rand(WANDER_ODDS) == 0)
 							&& (CoreScript::GetCoreFromTeam(thisComp.chit->Team()) == 0);
 		bool sectorWander =		pmc
-							&& itemFlags & GameItem::AI_SECTOR_WANDER
+							&& (itemFlags & GameItem::AI_SECTOR_WANDER)
 							&& thisComp.item
 							&& thisComp.item->HPFraction() > 0.80f
 							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0)
@@ -2647,8 +2596,9 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Domain Takeover.
-	if (thisComp.item->MOB() == ISC::denizen
+	if (   thisComp.item->MOB() == ISC::denizen
 		&& Team::IsRogue(thisComp.chit->Team())
+		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS
 		&& Team::IsDefault(thisComp.item->IName(), thisComp.chit->Team()))
 	{
 		// FIXME: refactor this to somewhere. Part of CoreScript?
