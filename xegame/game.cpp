@@ -91,7 +91,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	AnimationResourceManager::Create();
 
 	GLString settingsPath;
-	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &settingsPath );
+	GetSystemPath(GAME_SAVE_DIR, "settings2.xml", &settingsPath );
 	SettingsManager::Create(settingsPath.c_str());
 	SettingsManager* settings = SettingsManager::Instance();
 	debugUI = settings->DebugUI();

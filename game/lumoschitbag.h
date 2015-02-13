@@ -200,7 +200,7 @@ public:
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
 	void RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y );
 
-	enum {
+	enum class EFindMode{
 		NEAREST,
 		RANDOM_NEAR
 	};
@@ -208,7 +208,7 @@ public:
 	Chit* FindBuilding( const grinliz::IString& name,		// particular building, or emtpy to match all
 						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
-						int flags,
+						EFindMode mode,
 						grinliz::CDynArray<Chit*>* arr,		// optional; all the matches
 						IChitAccept* filter );				// optional; run this filter first
 
@@ -216,7 +216,7 @@ public:
 	Chit* FindBuildingCC(const grinliz::IString& name,		// particular building, or emtpy to match all
 						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
-						int flags,
+						EFindMode flags,
 						CChitArray* arr,					// optional; the matches that fit
 						IChitAccept* filter);				// optional; run this filter first
 

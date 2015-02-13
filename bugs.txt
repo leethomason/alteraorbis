@@ -95,8 +95,10 @@ x console, show tax paid
 x restrict # domains - overwhelming
 x gobman statues
 x improve map icon art (from GT)
-- spawn lesser mobs sooner
-- mouse scroll direction
+x spawn lesser mobs sooner
+x check that kiosks only work with temples
+x mouse scroll direction
+x fix civ-tech
 
 - clean up mother-core image
 - tune mouse wheel with real mouse

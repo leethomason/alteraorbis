@@ -58,7 +58,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 
 		switch (ne.What()) {
 			case NewsEvent::DENIZEN_CREATED:
-			case NewsEvent::ROQUE_DENIZEN_JOINS_TEAM:
+			case NewsEvent::ROGUE_DENIZEN_JOINS_TEAM:
 			if (homeCore && homeCore->IsCitizenItemID(ne.FirstItemID())) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");

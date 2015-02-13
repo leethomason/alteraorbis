@@ -352,8 +352,8 @@ bool CoreScript::IsCitizen( int id )
 bool CoreScript::IsCitizenItemID(int id)
 {
 	for (int i = 0; i < citizens.Size(); ++i) {
-		int id = citizens[i];
-		Chit* chit = Context()->chitBag->GetChit(id);
+		int citizenID = citizens[i];
+		Chit* chit = Context()->chitBag->GetChit(citizenID);
 		if (chit && chit->GetItemID() == id) {
 			return true;
 		}
@@ -507,8 +507,8 @@ bool CoreScript::RecruitNeutral()
 				this->AddCitizen( chit );
 				GLASSERT(chit->GetItem()->Significant());
 
-				NewsEvent news(NewsEvent::ROQUE_DENIZEN_JOINS_TEAM, ToWorld2F(parentChit->Position()),
-							   parentChit->GetItemID(), 0, parentChit->Team());
+				NewsEvent news(NewsEvent::ROGUE_DENIZEN_JOINS_TEAM, ToWorld2F(chit->Position()),
+							   chit->GetItemID(), 0, chit->Team());
 							   
 				Context()->chitBag->GetNewsHistory()->Add(news);
 				return true;
@@ -574,7 +574,7 @@ int CoreScript::MaxCitizens(int nTemples)
 int CoreScript::NumTemples()
 {
 	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, 0, &chitArr, 0 );
+	Context()->chitBag->FindBuildingCC( ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, 0 );
 	int nTemples = chitArr.Size();
 	return nTemples;
 }
@@ -585,7 +585,7 @@ int CoreScript::MaxCitizens()
 	int team = parentChit->Team();
 
 	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, 0, &chitArr, 0 );
+	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, 0 );
 	int nBeds = chitArr.Size();
 	int nTemples = NumTemples();
 
@@ -724,8 +724,9 @@ float CoreScript::CivTech()
 void CoreScript::UpdateScore(int n)
 {
 	if (n) {
-		double score = CivTech() * double(n) * double(scoreTicker.Period() / (10.0*1000.0));
-		achievement.civTechScore += Min(1, (int)LRint(score));
+		// Tuned - somewhat sleazily - that basic 4 unit, 0 temple is one point.
+		double score = CivTech() * double(n) * double(scoreTicker.Period()) * 0.002;
+		achievement.civTechScore += Min(1, int(score));
 		// Push this to the GameItem, so it can be recorded in the history + census.
 		GameItem* gi = ParentChit()->GetItem();
 		if (gi) {
@@ -747,7 +748,7 @@ int CoreScript::MaxTech()
 {
 	Vector2I sector = ToSector(parentChit->Position());
 	CChitArray chitArr;
-	Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, 0, &chitArr, 0);
+	Context()->chitBag->FindBuildingCC(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, 0);
 	return Min(chitArr.Size() + 1, TECH_MAX);	// get one power for core
 }
 
@@ -1130,7 +1131,7 @@ void CoreScript::DoStrategicTick()
 		}
 		else {
 			BuildingWithPorchFilter filter;
-			Chit* building = Context()->chitBag->FindBuilding(IString(), targetSector, &targetCorePos2, LumosChitBag::RANDOM_NEAR, 0, &filter);
+			Chit* building = Context()->chitBag->FindBuilding(IString(), targetSector, &targetCorePos2, LumosChitBag::EFindMode::RANDOM_NEAR, 0, &filter);
 			if (building) {
 				pos = ToWorld2I(building->Position());
 			}

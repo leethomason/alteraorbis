@@ -33,32 +33,36 @@ public:
 	static void Create( const char* savepath );
 	static void Destroy();
 
-	bool AudioOn() const				{ return audioOn != 0; }
 	void SetAudioOn( bool value );
-	bool DebugGLCalls() const			{ return debugGLCalls; }
-	bool DebugUI() const				{ return debugUI;  }
-	bool DebugFPS() const				{ return debugFPS; }
-	float SpawnDate() const				{ return spawnDate; }
-	float WorldGenDone() const			{ return worldGenDone; }
+
+	bool AudioOn() const;
+	float SpawnDate() const;
+	float WorldGenDone() const;
+
+	bool DebugGLCalls() const;
+	bool DebugUI() const;
+	bool DebugFPS() const;
 
 protected:
 	SettingsManager( const char* path );
 	virtual ~SettingsManager()	{ instance = 0; }
 	
-	void Load();
-	void Save();
-
-	virtual void ReadAttributes( const tinyxml2::XMLElement* element );
+	template<typename T>
+	T Read(const char* parent, const char* name, T defaultValue) const {
+		T value = defaultValue;
+		const tinyxml2::XMLElement* ele = tinyxml2::XMLConstHandle(xmlDoc)
+			.FirstChildElement("Settings")
+			.FirstChildElement(parent)
+			.ToElement();
+		if (ele) {
+			ele->QueryAttribute(name, &value);
+		}
+		return value;
+	}
 
 private:
 	static SettingsManager* instance;
-
-	bool audioOn;
-	bool debugGLCalls;
-	bool debugUI;
-	bool debugFPS;
-	float spawnDate;	// would like to be 0.20, but in interest of performance, 0.90 is used. On a debug 0.98 may be correct.
-	float worldGenDone;
+	tinyxml2::XMLDocument xmlDoc;
 	grinliz::GLString path;
 };
 

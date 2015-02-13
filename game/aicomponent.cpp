@@ -719,16 +719,22 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 				currentAction = NO_ACTION;	// done here - move on!
 
 #if 1			// experimental: visitors add Au & Crystal
-				// FIXME: where does the Au and Crystal go?
-				// Exchange? Denizens?
+				// Au, when collected, goes to the core.
+				// Crystal, when collected, goes to the Exchange.
 				ReserveBank* bank = ReserveBank::Instance();
-				if (bank->wallet.Gold()) {
-					thisComp.item->wallet.Deposit(&bank->wallet, 1);
+				if (bank->wallet.Gold() && cs->ParentChit()->GetWallet()) {
+					cs->ParentChit()->GetWallet()->Deposit(&bank->wallet, 1);
 				}
 				if (parentChit->random.Rand(10) == 0) {
 					if (bank->wallet.Crystal(0)) {
-						const int GREEN[NUM_CRYSTAL_TYPES] = { 1, 0, 0, 0 };
-						thisComp.item->wallet.Deposit(&bank->wallet, 0, GREEN);
+						Chit* exchange = Context()->chitBag->FindBuilding(ISC::exchange, sector, nullptr, LumosChitBag::EFindMode::NEAREST, 0, 0);
+						if (exchange) {
+							const int GREEN[NUM_CRYSTAL_TYPES] = { 1, 0, 0, 0 };
+							exchange->GetItem()->wallet.Deposit(&bank->wallet, 0, GREEN);
+							if (exchange->GetRenderComponent()) {
+								exchange->GetRenderComponent()->AddDeco("loot", STD_DECO);
+							}
+						}
 					}
 				}
 #endif
@@ -1410,16 +1416,13 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	}
 	else {
 		// Find a kiosk.
+		Chit* temple = Context()->chitBag->FindBuilding(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
 		Chit* kiosk = Context()->chitBag->FindBuilding(	ISC::kiosk,
 														sector,
 														&ToWorld2F(thisComp.chit->Position()),
-														LumosChitBag::RANDOM_NEAR, 0, 0 );
+														LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
 
-		if ( !kiosk ) {
-			// Done here.
-			vd->visited.Push(sector);
-		}
-		else {
+		if ( kiosk && temple) {
 			MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
 			GLASSERT( msc );
 			Rectangle2I porch = msc->PorchPos();
@@ -1432,6 +1435,9 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				// Can't path!
 				vd->visited.Push(sector);
 			}
+		}
+		else {
+			vd->visited.Push(sector);
 		}
 	}
 	if ( disconnect ) {
@@ -1503,7 +1509,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 
 	ItemNameFilter filter(ISC::guardpost, IChitAccept::MAP);
-	Context()->chitBag->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
+	Context()->chitBag->FindBuilding( IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter );
 
 	if ( chitArr.Empty() ) return false;
 
@@ -1601,7 +1607,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 		CChitArray buildingArr;
 		chitBag->FindBuildingCC(pass == 0 ? ISC::farm : ISC::distillery,
 								ToSector(ToWorld2I(pos2)),
-								0, 0, &buildingArr, 0);
+								0, LumosChitBag::EFindMode::NEAREST, &buildingArr, 0);
 
 		for (int i = 0; i < buildingArr.Size(); ++i) {
 			Chit* farmChit = buildingArr[i];
@@ -1793,7 +1799,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			Chit* vault = Context()->chitBag->FindBuilding(	ISC::vault, 
 															sector, 
 															&ToWorld2F(thisComp.chit->Position()),
-															LumosChitBag::RANDOM_NEAR, 0, 0 );
+															LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
@@ -1823,7 +1829,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 				Vector2I sector = ToSector(thisComp.chit->Position());
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
 																  &ToWorld2F(thisComp.chit->Position()),
-																  LumosChitBag::RANDOM_NEAR, 0, 0);
+																  LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
 				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 					GLASSERT(msc);
@@ -1861,7 +1867,7 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 	Chit* building = Context()->chitBag->FindBuilding(IString(),
 		sector,
 		&ToWorld2F(thisComp.chit->Position()),
-		LumosChitBag::RANDOM_NEAR, 0, &filter);
+		LumosChitBag::EFindMode::RANDOM_NEAR, 0, &filter);
 
 	if (!building) return false;
 
@@ -1915,7 +1921,7 @@ bool AIComponent::ThinkNeeds(const ComponentSet& thisComp)
 	if (Team::GetRelationship(parentChit, coreScript->ParentChit()) == RELATE_ENEMY) return false;
 
 	BuildingFilter filter;
-	Context()->chitBag->FindBuilding(IString(), sector, 0, 0, &chitArr, &filter);
+	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
 	BuildScript			buildScript;
 	int					bestIndex = -1;
@@ -2251,9 +2257,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		// Prefer the current target & focused target.
 		if (targetID == lastTargetID) q *= 2.0f;
 		if (k == 0 && focus == FOCUS_TARGET) q *= 20;
-		// Prefer MOBs over buildings
-		if (!enemyChit) q *= 0.5f;
-		
+
+		// Prefer MOBs over buildings or terrain targets.
+		if ((nMeleeEnemies || nRangedEnemies) && (!enemyChit || buildingFilter.Accept(enemyChit))) {
+			q *= 0.1f;
+		}
 		if (debugLog) {
 			GLOUTPUT(("  id=%d rng=%.1f ", targetID, range));
 		}

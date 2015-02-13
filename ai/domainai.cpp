@@ -752,7 +752,7 @@ int TrollDomainAI::DoTick(U32 delta)
 		// if has cap, make an item
 		// add the item, transfer from reserve bank
 		Vector2F pos = ToWorld2F(parentChit->Position());
-		Chit* market = Context()->chitBag->FindBuilding(ISC::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0);
+		Chit* market = Context()->chitBag->FindBuilding(ISC::market, sector, &pos, LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
 		if (market && market->GetItemComponent() && market->GetItemComponent()->CanAddToInventory()) {
 
 			int group = 0, id = 0;

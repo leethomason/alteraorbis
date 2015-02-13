@@ -203,7 +203,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		*str = "";
 		break;
 
-		case ROQUE_DENIZEN_JOINS_TEAM:
+		case ROGUE_DENIZEN_JOINS_TEAM:
 		str->Format("%.2f: Denizen %s joins %s at %s.", age, firstName.c_str(), teamName.safe_str(), domain.c_str());
 		break;
 
@@ -231,7 +231,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		case PURCHASED:
 		if (second) {
 			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, firstName.c_str(), secondName.c_str(), domain.c_str(),
-						second->GetValue(), int(float(second->GetValue() * SALES_TAX)));
+						first->GetValue(), int(float(first->GetValue() * SALES_TAX)));
 		}
 		else {
 			str->Format("%.2f: %s purchased %s at %s.", age, firstName.c_str(), secondName.c_str(), domain.c_str());

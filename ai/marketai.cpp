@@ -83,8 +83,8 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				const ChitContext* context = buyer->ParentChit()->Context();
 				if (context && context->chitBag) {
 					Vector2I sector = ToSector(buyer->ParentChit()->Position());
-					Chit* exchange = context->chitBag->FindBuilding(ISC::exchange, sector, 0, 0, 0, 0);
-					Chit* vault = context->chitBag->FindBuilding(ISC::vault, sector, 0, 0, 0, 0);
+					Chit* exchange = context->chitBag->FindBuilding(ISC::exchange, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
+					Chit* vault = context->chitBag->FindBuilding(ISC::vault, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
 
 					if (exchange && exchange->GetWallet()) {
 						exchange->GetWallet()->Deposit(&sold->wallet, sold->wallet);

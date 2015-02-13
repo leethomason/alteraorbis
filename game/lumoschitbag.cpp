@@ -150,7 +150,7 @@ void LumosChitBag::BuildingCounts(const Vector2I& sector, int* counts, int n)
 Chit* LumosChitBag::FindBuildingCC(const grinliz::IString& name,		// particular building, or emtpy to match all
 									const grinliz::Vector2I& sector,	// sector to query
 									const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
-									int flags,
+									LumosChitBag::EFindMode flags,
 									CChitArray* arr,					// optional; the matches that fit
 									IChitAccept* filter)				// optional; run this filter first
 {
@@ -168,7 +168,7 @@ Chit* LumosChitBag::FindBuildingCC(const grinliz::IString& name,		// particular 
 Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name, 
 									const grinliz::Vector2I& sector, 
 									const grinliz::Vector2F* pos, 
-									int flags,
+									LumosChitBag::EFindMode flags,
 									CDynArray<Chit*>* arr,
 									IChitAccept* filter )
 {
@@ -199,7 +199,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 
 	// NEAREST scans and finds the closest one.
 	// RANDOM_NEAR chooses one at random, but weighted by the (inverse) of the distance
-	if ( flags == NEAREST ) {
+	if ( flags == EFindMode::NEAREST ) {
 		float closest = ( ToWorld2F(match[0]->Position()) - *pos ).LengthSquared();
 		int   ci = 0;
 		for( int i=1; i<match.Size(); ++i ) {
@@ -211,7 +211,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 		}
 		return match[ci];
 	}
-	if ( flags == RANDOM_NEAR ) {
+	if ( flags == EFindMode::RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
 			float len = ( ToWorld2F(match[i]->Position()) - *pos ).Length();
 			if (len < 1) len = 1;

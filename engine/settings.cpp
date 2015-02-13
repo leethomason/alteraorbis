@@ -27,7 +27,6 @@ void SettingsManager::Create( const char* savepath )
 {
 	GLASSERT( instance == 0 );
 	instance = new SettingsManager( savepath );
-	instance->Load();
 	SetCheckGLError(instance->DebugGLCalls());
 	GLOUTPUT_REL(("Checking GL Errors=%s\n", instance->DebugGLCalls() ? "true" : "false"));
 }
@@ -43,92 +42,71 @@ SettingsManager::SettingsManager( const char* savepath )
 {
 	GLASSERT( instance == 0 );
 	instance = this;
-
 	path = savepath;
 
-	// Set defaults.
+	xmlDoc.LoadFile(path.safe_str());
+	if (xmlDoc.Error()) {
+		const char* str0 = xmlDoc.GetErrorStr1();
+		const char* str1 = xmlDoc.GetErrorStr2();
+		GLOUTPUT_REL(("XML error: %s  %s\n"));
+
+		xmlDoc.Clear();
+
+		tinyxml2::XMLNode* ele = xmlDoc.InsertEndChild(xmlDoc.NewElement("Settings"));
+		ele->InsertEndChild(xmlDoc.NewElement("Game"));
+		ele->InsertEndChild(xmlDoc.NewElement("Debug"));
+	}
+
+/*	// Set defaults.
 	audioOn = true;
 	debugGLCalls = false;
 	debugUI = false;
 	debugFPS = false;
 	spawnDate = 0.90f;
 	worldGenDone = 1.0f;
+*/
 }
-
-
-void SettingsManager::Load()
-{
-	// Parse actuals.
-	XMLDocument doc;
-	doc.LoadFile(path.c_str());
-	if ( !doc.Error() ) {
-		const XMLElement* root = doc.RootElement();
-		if ( root ) {
-			ReadAttributes( root );
-		}
-	}
-	else {
-		const char* str0 = doc.GetErrorStr1();
-		const char* str1 = doc.GetErrorStr2();
-		GLOUTPUT(("XML error: %s  %s\n"));
-	}
-}
-
 
 
 void SettingsManager::SetAudioOn( bool value )
 {
-	if ( audioOn != value ) {
-		audioOn = value;
-		Save();
+	if ( AudioOn() != value ) {
+		XMLElement* ele = XMLHandle(xmlDoc).FirstChildElement("Settings").FirstChildElement("Game").ToElement();
+		if (ele) {
+			ele->SetAttribute("audioOn", value);
+			xmlDoc.SaveFile(path.safe_str());
+		}
 	}
 }
 
-
-void SettingsManager::Save()
+bool SettingsManager::AudioOn() const
 {
-	GLString path;
-	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &path);
-
-	FILE* fp = fopen( path.c_str(), "w" );
-	if ( fp ) {
-		XMLPrinter printer( fp );
-	
-		printer.OpenElement( "Settings" );
-		
-		printer.OpenElement("Game");
-		printer.PushAttribute("audioOn", audioOn);
-		printer.PushAttribute("spawnDate", spawnDate);
-		printer.PushAttribute("worldGenDone", worldGenDone);
-		printer.CloseElement();
-
-		printer.OpenElement("Debug");
-		printer.PushAttribute("debugGLCalls", debugGLCalls);
-		printer.PushAttribute("debugUI", debugUI);
-		printer.PushAttribute("debugFPS", debugFPS);
-		printer.CloseElement();
-
-		printer.CloseElement();
-		fclose( fp );
-	}
+	return Read("Game", "audioOn", true);
 }
 
 
-void SettingsManager::ReadAttributes( const XMLElement* root )
+float SettingsManager::SpawnDate() const
 {
-	// Actuals:
-	if (root) {
-		const XMLElement* gameElement = root->FirstChildElement("Game");
-		if (gameElement) {
-			gameElement->QueryAttribute("audioOn", &audioOn);
-			gameElement->QueryAttribute("spawnDate", &spawnDate);
-			gameElement->QueryAttribute("worldGenDone", &worldGenDone);
-		}
-		const XMLElement* debugElement = root->FirstChildElement("Debug");
-		if (debugElement) {
-			debugElement->QueryAttribute("debugGLCalls", &debugGLCalls);
-			debugElement->QueryAttribute("debugUI", &debugUI);
-			debugElement->QueryAttribute("debugFPS", &debugFPS);
-		}
-	}
+	return Read("Game", "spawDate", 0.5f);
+}
+
+float SettingsManager::WorldGenDone() const
+{
+	return Read("Game", "worldGenDone", 1.0f);
+}
+
+
+bool SettingsManager::DebugGLCalls() const
+{
+	return Read("Debug", "debugGLCalls", false);
+}
+
+bool SettingsManager::DebugUI() const
+{
+	return Read("Debug", "debugUI", false);
+}
+
+bool SettingsManager::DebugFPS() const
+{
+	return Read("Debug", "debugFPS", false);
 }
