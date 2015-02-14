@@ -79,6 +79,11 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 		const Census::MOBItem& item = domains[i];
 		simStr.AppendFormat("%s\t%d\n", item.name.safe_str(), item.count);
 	}
+	simStr.append("\n\nReserve Bank\n\n");
+	const Wallet& reserveWallet = *ReserveBank::Instance()->GetWallet();
+	simStr.AppendFormat("Au\t%d\nGreen\t%d\nRed\t%d\nBlue\t%d\nViolet\t%d\n", reserveWallet.Gold(), reserveWallet.Crystal(1), reserveWallet.Crystal(1), reserveWallet.Crystal(2), reserveWallet.Crystal(3));
+
+
 	simStr.append("\n\n");
 
 	censusData.SetText(simStr.safe_str());

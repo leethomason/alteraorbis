@@ -99,6 +99,7 @@ x spawn lesser mobs sooner
 x check that kiosks only work with temples
 x mouse scroll direction
 x fix civ-tech
+- expose reserve bank in release
 
 - clean up mother-core image
 - tune mouse wheel with real mouse

@@ -19,6 +19,7 @@
 #include "../game/sim.h"
 #include "../game/worldinfo.h"
 #include "../game/reservebank.h"
+#include "../game/healthcomponent.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -838,6 +839,12 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		// QueueDelete is safer, but all kinds of asserts fire (correctly)
 		// if 2 cores are in the same place. This may cause an issue
 		// if CreateCore is called during the DoTick()
+		// Setting the hp to 0 and then calling DoTick()
+		// is a sleazy trick to clean up.
+		core->GetItem()->hp = 0;
+		if (core->GetHealthComponent()) {
+			core->GetHealthComponent()->DoTick(1);
+		}
 		context->chitBag->DeleteChit(core);
 	}
 

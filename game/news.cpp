@@ -230,11 +230,11 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 
 		case PURCHASED:
 		if (second) {
-			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, firstName.c_str(), secondName.c_str(), domain.c_str(),
+			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, secondName.c_str(), firstName.c_str(), domain.c_str(),
 						first->GetValue(), int(float(first->GetValue() * SALES_TAX)));
 		}
 		else {
-			str->Format("%.2f: %s purchased %s at %s.", age, firstName.c_str(), secondName.c_str(), domain.c_str());
+			str->Format("%.2f: %s purchased %s at %s.", age, secondName.c_str(), firstName.c_str(), domain.c_str());
 		}
 		break;
 
