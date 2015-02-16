@@ -122,16 +122,19 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
 
-- Beta3c
-	x resize
-	x test world->ui
-	x why is the font texture getting re-created all the time?
-	x overlays
-	x top bugs
-	x strategic game improvementns
+- Beta3d
+	- Documentation
+	- Long game: 
+		- squad control
+		- greater motion
+		- diplomacy
+		- circuits
+	- New promo assets
+	- IndieDB
+	- Android
 
 - World Gen
-	- less techy, more interesting world gen
+	x less techy, more interesting world gen
 	- use some of the time and space to introduce and explain the game
 	x text report on events as they happen (greater MOBS getting named, major fires, major waterfalls)
 	- text report on major battles
@@ -151,21 +154,21 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	x proper game start: location, selection of team color, icons
 	x turret
 	x team colors
-	- battle flags
-    - time scale culling
+	x battle flags
+    x time scale culling
 	x vault:
 		x item limit
 	x what to do with full vaults?
-	- marking build zones
-		- dragging, rows
-		- top view?
+	x marking build zones
+		x dragging, rows
+		x top view?
 		x auto-clear vegetation
 
 - Adventure
-	- control
-		- space bar to pause
-		- tab to toggle weapons
-		- pause button
+	x control
+		x space bar to pause
+		d tab to toggle weapons
+		x pause button
 	- balance battles
 	- real health bars & check visibility
 	- exploring
@@ -217,6 +220,10 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 ** Art **
 
 - Dragon
+	- concept
+	- model 
+	- animation
+- Kilotrilo
 	- concept
 	- model 
 	- animation
@@ -280,6 +287,13 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta3c
+	x resize
+	x test world->ui
+	x why is the font texture getting re-created all the time?
+	x overlays
+	x top bugs
+	x strategic game improvementns
 x portrait and suit colors not matching
 x suit colors are the same
 x remove kiosk types
