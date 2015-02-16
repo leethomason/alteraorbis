@@ -89,8 +89,8 @@ static const double	NEED_CRITICAL				= 0.1;
 static const int	BUILD_TIME					= 1000;
 static const int	REPAIR_TIME					= 4000;
 
-const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "battle" };
-const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
+const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
+const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 Vector2I ToWG(int id) {
 	Vector2I v = { 0, 0 };
@@ -129,9 +129,9 @@ bool FEFilter(Chit* parentChit, int id) {
 
 AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 {
-	currentAction = 0;
+	currentAction = AIAction::NO_ACTION;
 	focus = 0;
-	aiMode = NORMAL_MODE;
+	aiMode = AIMode::NORMAL_MODE;
 	wanderTime = 0;
 	rethink = 0;
 	fullSectorAware = false;
@@ -151,8 +151,14 @@ AIComponent::~AIComponent()
 void AIComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	XARC_SER( xs, aiMode );
-	XARC_SER( xs, currentAction );
+
+	int aiModeI = int(aiMode);
+	int currentActionI = int(currentAction);
+	XARC_SER_KEY( xs, "aiMode", aiModeI );
+	XARC_SER_KEY(xs, "currentAction", currentActionI);
+	aiMode = AIMode(aiModeI);
+	currentAction = AIAction(currentActionI);
+
 	XARC_SER(xs, lastTargetID);
 	XARC_SER_DEF( xs, focus, 0 );
 	XARC_SER_DEF( xs, wanderTime, 0 );
@@ -433,22 +439,22 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( !pmc || pmc->ForceCountHigh() || pmc->Stopped() ) {
-		currentAction = NO_ACTION;
+		currentAction = AIAction::NO_ACTION;
 		return;
 	}
 
 	// Generally speaking, moving is done by the PathMoveComponent. When
 	// not in battle, this is essentially "do nothing." If in battle mode,
 	// we look for opportunity fire and such.
-	if ( aiMode != BATTLE_MODE ) {
+	if ( aiMode != AIMode::BATTLE_MODE ) {
 		// Check for motion done, stuck, etc.
 		if ( pmc->Stopped() || pmc->ForceCountHigh() ) {
-			currentAction = NO_ACTION;
+			currentAction = AIAction::NO_ACTION;
 			return;
 		}
-		if (aiMode == RAMPAGE_MODE && RampageDone(thisComp)) {
-			aiMode = NORMAL_MODE;
-			currentAction = NO_ACTION;
+		if (aiMode == AIMode::RAMPAGE_MODE && RampageDone(thisComp)) {
+			aiMode = AIMode::NORMAL_MODE;
+			currentAction = AIAction::NO_ACTION;
 			return;
 		}
 		// Reloading is always a good background task.
@@ -598,7 +604,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		else {
 			weapon->Reload( parentChit );
 			// Out of ammo - do something else.
-			currentAction = NO_ACTION;
+			currentAction = AIAction::NO_ACTION;
 		}
 	}
 }
@@ -615,7 +621,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 	const ChitContext* context = Context();
 	if ( !weapon ) {
-		currentAction = NO_ACTION;
+		currentAction = AIAction::NO_ACTION;
 		return;
 	}
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
@@ -680,7 +686,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 			}
 		}
 		else {
-			currentAction = NO_ACTION;
+			currentAction = AIAction::NO_ACTION;
 			return;
 		}
 	}
@@ -709,14 +715,14 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 
-		if (kioskChit && kioskChit->GetItem()->IName() == ISC::kiosk) {
+		if (cs && kioskChit && kioskChit->GetItem()->IName() == ISC::kiosk) {
 			vd->kioskTime += time;
 			if (vd->kioskTime > VisitorData::KIOSK_TIME) {
 				vd->visited.Push(sector);
 				cs->AddTech();
 				thisComp.render->AddDeco("techxfer", STD_DECO);
 				vd->kioskTime = 0;
-				currentAction = NO_ACTION;	// done here - move on!
+				currentAction = AIAction::NO_ACTION;	// done here - move on!
 
 #if 1			// experimental: visitors add Au & Crystal
 				// Au, when collected, goes to the core.
@@ -746,7 +752,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		}
 		else {
 			// Oops...
-			currentAction = NO_ACTION;
+			currentAction = AIAction::NO_ACTION;
 			return false;
 		}
 	}
@@ -780,9 +786,9 @@ void AIComponent::Think(const ComponentSet& thisComp)
 	}
 
 	switch (aiMode) {
-		case NORMAL_MODE:		ThinkNormal(thisComp);	break;
-		case BATTLE_MODE:		ThinkBattle(thisComp);	break;
-		case RAMPAGE_MODE:		ThinkRampage(thisComp);	break;
+		case AIMode::NORMAL_MODE:		ThinkNormal(thisComp);	break;
+		case AIMode::BATTLE_MODE:		ThinkBattle(thisComp);	break;
+		case AIMode::RAMPAGE_MODE:		ThinkRampage(thisComp);	break;
 	}
 }
 
@@ -819,7 +825,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 			// Local path to remote dst
 			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
 			pmc->QueueDest( dest2, 0, &sp );
-			currentAction = MOVE;
+			currentAction = AIAction::MOVE;
 			focus = focused ? FOCUS_MOVE : 0;
 			rethink = 0;
 			return true;
@@ -831,12 +837,12 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 
 void AIComponent::Stand()
 {
-	if ( aiMode != BATTLE_MODE ) {
+	if ( aiMode != AIMode::BATTLE_MODE ) {
 		PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			pmc->Stop();
 		}
-		currentAction = STAND;
+		currentAction = AIAction::STAND;
 		rethink = 0;
 	}
 }
@@ -854,7 +860,7 @@ void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vecto
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
 		pmc->QueueDest( dest, normal );
-		currentAction = MOVE;
+		currentAction = AIAction::MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 		rethink = 0;
 	}
@@ -890,8 +896,8 @@ void AIComponent::Target(const Vector2I& pos, bool focused)
 
 void AIComponent::Target( int id, bool focused )
 {
-	if ( aiMode != BATTLE_MODE ) {
-		aiMode = BATTLE_MODE;
+	if ( aiMode != AIMode::BATTLE_MODE ) {
+		aiMode = AIMode::BATTLE_MODE;
 		if ( parentChit->GetRenderComponent() ) {
 			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
 		}
@@ -944,10 +950,16 @@ void AIComponent::Rampage( int dest )
 		Chit::ITEM_BIT |
 		ComponentSet::IS_ALIVE |
 		ComponentSet::NOT_IN_IMPACT);
-	GLASSERT(thisComp.okay && !RampageDone(thisComp));
 
-	aiMode = RAMPAGE_MODE; 
-	currentAction = NO_ACTION;
+	GLASSERT(!RampageDone(thisComp));
+	if (!thisComp.okay || RampageDone(thisComp)) {
+		aiMode = AIMode::NORMAL_MODE;
+		currentAction = AIAction::NO_ACTION;
+		return;
+	}
+
+	aiMode = AIMode::RAMPAGE_MODE; 
+	currentAction = AIAction::NO_ACTION;
 
 	ChitBag::CurrentNews news = { StringPool::Intern("Rampage"), ToWorld2F(parentChit->Position()), parentChit->ID() };
 	Context()->chitBag->PushCurrentNews(news);
@@ -1045,8 +1057,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
 
 	if ( RampageDone(thisComp)) {
-		aiMode = NORMAL_MODE;
-		currentAction = NO_ACTION;
+		aiMode = AIMode::NORMAL_MODE;
+		currentAction = AIAction::NO_ACTION;
 		return;
 	}
 
@@ -1054,7 +1066,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 
 	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
 		this->Target(next, false);
-		currentAction = MELEE;
+		currentAction = AIAction::MELEE;
 
 		const GameItem* melee = thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
 		GLASSERT(melee);
@@ -1063,8 +1075,8 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		this->Move( ToWorld2F( next ), false );
 	}
 	else {
-		aiMode = NORMAL_MODE;
-		currentAction = NO_ACTION;
+		aiMode = AIMode::NORMAL_MODE;
+		currentAction = AIAction::NO_ACTION;
 	}
 }
 
@@ -1412,7 +1424,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		}
 	}
 	else if ( pmc->Stopped() && kiosk ) {
-		currentAction = STAND;
+		currentAction = AIAction::STAND;
 	}
 	else {
 		// Find a kiosk.
@@ -2121,7 +2133,7 @@ void AIComponent::ThinkNormal( const ComponentSet& thisComp )
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( parentChit->PlayerControlled() ) {
-			currentAction = WANDER;
+			currentAction = AIAction::WANDER;
 			return;
 		}
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
@@ -2171,7 +2183,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( !pmc ) {
-		currentAction = NO_ACTION;
+		currentAction = AIAction::NO_ACTION;
 		return;
 	}
 	const Vector3F pos = thisComp.chit->Position();
@@ -2245,7 +2257,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
 		bool			enemyMoving = (enemyChit && enemyChit->GetMoveComponent()) ? enemyChit->GetMoveComponent()->IsMoving() : false;
 
-		GLASSERT(FEFilter<RELATE_FRIEND>(parentChit, targetID) == true);
+		// FIXME: fires every so often. system seems to recover. problem?
+		// GLASSERT(FEFilter<RELATE_FRIEND>(parentChit, targetID) == true);
 
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
@@ -2293,7 +2306,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				// This needs tuning.
 				// If the unit has been shooting, time to do something else.
 				// Stand around and shoot battles are boring and look crazy.
-				if ( currentAction == SHOOT ) {
+				if ( currentAction == AIAction::SHOOT ) {
 					u *= 0.8f;	// 0.5f;
 				} 
 
@@ -2378,7 +2391,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		case OPTION_MELEE:
 		{
-			currentAction = MELEE;
+			currentAction = AIAction::MELEE;
 			int idx = enemyList2.Find(target[OPTION_MELEE]);
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
@@ -2391,7 +2404,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_SHOOT:
 		{
 			pmc->Stop();
-			currentAction = SHOOT;
+			currentAction = AIAction::SHOOT;
 			int idx = enemyList2.Find(target[OPTION_SHOOT]);
 			GLASSERT(idx >= 0);
 			if (idx >= 0) {
@@ -2419,10 +2432,10 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	// And finally, do a swap if needed!
 	// This logic is minimal: what about the other states?
-	if (currentAction == MELEE) {
+	if (currentAction == AIAction::MELEE) {
 		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_MELEE);
 	}
-	else if (currentAction == SHOOT) {
+	else if (currentAction == AIAction::SHOOT) {
 		thisComp.itemComponent->SelectWeapon(ItemComponent::SELECT_RANGED);
 	}
 }
@@ -2586,7 +2599,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Pick up stuff in battle
-	if (aiMode == BATTLE_MODE && (thisComp.item->flags & GameItem::AI_USES_BUILDINGS)) {
+	if (aiMode == AIMode::BATTLE_MODE && (thisComp.item->flags & GameItem::AI_USES_BUILDINGS)) {
 		if (thisComp.okay) {
 			LootFilter filter;
 			CChitArray arr;
@@ -2649,7 +2662,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 	}
 
 	// Check for morale-changing items (tombstones, at this writing.)
-	if ( aiMode == NORMAL_MODE ) {
+	if (aiMode == AIMode::NORMAL_MODE) {
 		if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
 			RenderComponent* rc = parentChit->GetRenderComponent();
 			Vector2F center = ToWorld2F( thisComp.chit->Position() );	// center of the grid.
@@ -2806,7 +2819,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 //	wanderTime += deltaTime;
-	int oldAction = currentAction;
+	AIAction oldAction = currentAction;
 
 	ChitBag* chitBag = this->Context()->chitBag;
 	const ChitContext* context = Context();
@@ -2825,12 +2838,12 @@ int AIComponent::DoTick( U32 deltaTime )
 		bool goesToBattle = (thisComp.item->IName() != ISC::worker)
 			|| (cs && cs->Citizens(0) <= 4);
 
-		if (    aiMode != BATTLE_MODE 
+		if (    aiMode != AIMode::BATTLE_MODE 
 			 && goesToBattle
 			 && enemyList2.Size() ) 
 		{
-			aiMode = BATTLE_MODE;
-			currentAction = 0;
+			aiMode = AIMode::BATTLE_MODE;
+			currentAction = AIAction::NO_ACTION;
 			taskList.Clear();
 
 			if ( debugLog ) {
@@ -2847,9 +2860,9 @@ int AIComponent::DoTick( U32 deltaTime )
 				}
 			}
 		}
-		else if ( aiMode == BATTLE_MODE && enemyList2.Empty() ) {
-			aiMode = NORMAL_MODE;
-			currentAction = 0;
+		else if ( aiMode == AIMode::BATTLE_MODE && enemyList2.Empty() ) {
+			aiMode = AIMode::NORMAL_MODE;
+			currentAction = AIAction::NO_ACTION;
 			if ( debugLog ) {
 				GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
 			}
@@ -2882,7 +2895,7 @@ int AIComponent::DoTick( U32 deltaTime )
 				static const double LOW_MORALE = 0.25;
 
 				if (AtFriendlyOrNeutralCore()) {
-					needs.DoTick(needsTicker.Period(), aiMode == BATTLE_MODE, false, &thisComp.item->GetPersonality());
+					needs.DoTick(needsTicker.Period(), aiMode == AIMode::BATTLE_MODE, false, &thisComp.item->GetPersonality());
 
 					if (thisComp.chit->PlayerControlled()) {
 						needs.SetFull();
@@ -2913,7 +2926,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	// Is there work to do?
-	if (    aiMode == NORMAL_MODE 
+	if (aiMode == AIMode::NORMAL_MODE
 		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
 		 && taskList.Empty() ) 
 	{
@@ -2921,22 +2934,24 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	int RETHINK = 2000;
-	if (aiMode == BATTLE_MODE) {
+	if (aiMode == AIMode::BATTLE_MODE) {
 		RETHINK = 1000;	// so we aren't runnig past targets and such.
 		// And also check for losing our target.
 		if (enemyList2.Size() && (lastTargetID != enemyList2[0])) {
-			if (debugLog) GLOUTPUT(("BTL retarget.\n"));
+			if (debugLog) {
+				GLOUTPUT(("BTL retarget.\n"));
+			}
 			rethink += RETHINK;
 		}
 	}
 
-	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
+	if (aiMode == AIMode::NORMAL_MODE && !taskList.Empty()) {
 		FlushTaskList( thisComp, deltaTime );
 		if ( taskList.Empty() ) {
 			rethink = 0;
 		}
 	}
-	else if ( !currentAction || (rethink > RETHINK ) ) {
+	else if ( (currentAction==AIAction::NO_ACTION) || (rethink > RETHINK ) ) {
 		Think( thisComp );
 		rethink = 0;
 	}
@@ -2944,26 +2959,26 @@ int AIComponent::DoTick( U32 deltaTime )
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
 	switch( currentAction ) {
-		case MOVE:		
+		case AIAction::MOVE:		
 			DoMove( thisComp );
 			break;
-		case MELEE:		
+		case AIAction::MELEE:
 			DoMelee( thisComp );	
 			break;
-		case SHOOT:		
+		case AIAction::SHOOT:
 			DoShoot( thisComp );
 			break;
-		case STAND:
+		case AIAction::STAND:
 			if ( taskList.Empty() ) {				// If there is a tasklist, it will manage standing and re-thinking.
 				DoStand( thisComp, deltaTime );		// We aren't doing the tasklist stand, so do the component stand
 				rethink += deltaTime;
 			}
 			break;
 
-		case NO_ACTION:
+		case AIAction::NO_ACTION:
 			break;
 
-		case WANDER:
+		case AIAction::WANDER:
 			{
 				PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 				if ( pmc && !pmc->Stopped() && !pmc->ForceCountHigh() ) {
@@ -2971,33 +2986,33 @@ int AIComponent::DoTick( U32 deltaTime )
 				}
 				else {
 					// not actually wandering
-					currentAction = STAND;
+					currentAction = AIAction::STAND;
 				}
 			}
 			break;
 
 		default:
 			GLASSERT( 0 );
-			currentAction = 0;
+			currentAction = AIAction::NO_ACTION;
 			break;
 	}
 
 	if ( debugLog && (currentAction != oldAction) ) {
-		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
+		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)] ));
 	}
 
 	// Without this rethink ticker melee fighters run past
 	// each other and all kinds of other silliness.
-	if (aiMode == BATTLE_MODE) {
+	if (aiMode == AIMode::BATTLE_MODE) {
 		rethink += deltaTime;
 	}
-	return (currentAction != NO_ACTION) ? GetThinkTime() : 0;
+	return (currentAction != AIAction::NO_ACTION) ? GetThinkTime() : 0;
 }
 
 
 void AIComponent::DebugStr( grinliz::GLString* str )
 {
-	str->AppendFormat( "[AI] %s %s ", MODE_NAMES[aiMode], ACTION_NAMES[currentAction] );
+	str->AppendFormat( "[AI] %s %s ", MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)] );
 }
 
 
@@ -3030,8 +3045,8 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
-		if (currentAction != WANDER) {
-			currentAction = NO_ACTION;
+		if (currentAction != AIAction::WANDER) {
+			currentAction = AIAction::NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
 
@@ -3040,7 +3055,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
 		destinationBlocked++;
 
-		if (aiMode == BATTLE_MODE) {
+		if (aiMode == AIMode::BATTLE_MODE) {
 			// We are stuck in battle - attack something! Keeps everyone from just
 			// standing around wishing they could fight. Try to target anything
 			// adjacent. If that fails, walk towards the core.
@@ -3052,15 +3067,15 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		}
 		else {
 			focus = 0;
-			currentAction = NO_ACTION;
+			currentAction = AIAction::NO_ACTION;
 			parentChit->SetTickNeeded();
 
 
 			// Generally not what we expected.
 			// Do a re-think.get
 			// Never expect move troubles in rampage mode.
-			if (aiMode != BATTLE_MODE) {
-				aiMode = NORMAL_MODE;
+			if (aiMode != AIMode::BATTLE_MODE) {
+				aiMode = AIMode::NORMAL_MODE;
 			}
 			taskList.Clear();
 			{
@@ -3101,8 +3116,8 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		break;
 
 		case ChitMsg::WORKQUEUE_UPDATE:
-		if (aiMode == NORMAL_MODE && currentAction == WANDER) {
-			currentAction = NO_ACTION;
+		if (aiMode == AIMode::NORMAL_MODE && currentAction == AIAction::WANDER) {
+			currentAction = AIAction::NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
 		break;

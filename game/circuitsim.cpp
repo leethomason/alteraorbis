@@ -133,9 +133,12 @@ void CircuitSim::DoTick(U32 delta)
 		bool electronDone = false;
 
 		Vector2I sector = ToSector(pe->pos);
+		Chit* fab = chitBag->FindBuilding(ISC::circuitFab, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
+
 		int sectorIndex = sector.y*NUM_SECTORS + sector.x;
 		ePerSector[sectorIndex] += 1;
-		if (ePerSector[sectorIndex] > 10) {
+
+		if (ePerSector[sectorIndex] > 10 || !fab) {
 			// Very easy to create infinite loops, infinite
 			// generators, etc. Even good reason to do so.
 			electronDone = true;

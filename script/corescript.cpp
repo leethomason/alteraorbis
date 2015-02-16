@@ -279,7 +279,7 @@ void CoreScript::AssignToSquads()
 		return scoreA > scoreB;
 	});
 
-	while (nSquaddies < nExpected) {
+	for (int n = nExpected - nSquaddies; n > 0; --n) {
 		for (int i = 0; i < MAX_SQUADS; ++i) {
 			if (squads[i].Size() < SQUAD_SIZE
 				&& GetWaypoint(i).IsZero())			// don't add to a squad while it's in use!

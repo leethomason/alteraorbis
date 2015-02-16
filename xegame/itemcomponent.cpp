@@ -419,7 +419,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		   events.
 
 		   The NewsHistory is the series of events, including the creation and destruction
-		   of the item. All the dates get inferredd from that.
+		   of the item. All the dates get inferred from that.
 		*/
 		NewsDestroy(mainItem);
 

@@ -20,34 +20,54 @@ Dungeon-Keeperish / Dwarf Fortressy sort of game set in a
 Star Wars-ian & Tron-esqe world. It keeps changing and 
 developing.
 
-Altera Orbis is in Beta, and will be until it's ready;
-thanks for playing and checking the game out. Feedback
-on the forums is appreciated!
+Altera Orbis is in long term playable Beta. The game is playable, the game 
+mechanics are in place, and there is a lot to do and explore. But it keeps
+changing and growing. Thanks for playing and checking the game out. 
+Feedback on the forums is appreciated!
 
 
-Changes in Beta3b
-----------------
-- Other human denizens can now create domains.
-- Squads! You can have and control up to 4 squards, each with 4 units.
-- UI improvements
-- Enemy / Neutral / Friend display on map
-- AIs now build kiosks for visitors
-- 3+ temples no longer summon cyclops. (Although cyclops are still attracted if they are close.)
-- Human gender is now properly accounted for.
-- More plants seeded in world generation.
-- Improvements on the "which building should I use" AI.
+Changes in Beta3c
+-----------------
+- Fixed 100+ bugs!
+- 'space bar' now pauses. You can issue move or attack commands
+  to the avatar while paused.
+- There are no longer different types of kiosks. (That game mechanic
+  wasn't fun.) Now you just build a 'kiosk', although there are
+  4 different variations of the art.
+- You can now abandon a domain if you want to start fresh.
+  The button is in the lower right if you select "Build"
+- New art icons from ShroomArts!
+- Color changes for visual clarity. 
+  Special thanks for ShroomArts for suggesting color changes.
+- Freetype is now the text renderer. Text is much cleaner at 
+  all sizes, especially small sizes.
+- Map view is re-written:
+	- you can see the entire web, and the Visitor paths emanating
+	  from MotherCore
+	- you now get much more information about the strength,
+	  wealth, CivTech, and monsters in the domains
+- World Generation shows more information about what is going on.
+  It also is taking longer to run; more detail is computed.
+- All creatures now eat fruit to heal. Fruit spawns in "wild" domains.
+  Healing by other methods (eating plants and hanging out at cores)
+  has been removed.
 
 FAQ
 ---
 Why do denizens just stand there or get stuck?
 
-	Make sure you don't have a portch that isn't accessible. They may be 
+	Make sure you don't have a porch that isn't accessible. They may be 
 	trying to get to a facility and can't.
 
 Why is everyone carrying fruit?
 
 	You don't have a distillery, or the distillery can't keep up
 	with production. Build another distillery.
+
+Why is a strange blocky flag thing on my core?
+
+	That is a squad destination flag. (Your own look the same.)
+	Someone is attacking you.
 
 
 Controls
@@ -58,6 +78,7 @@ Controls
 'End' key centers the camera on your avatar; if already centered, the
   end key teleports the avatar home.
 'Escape' key backs out of the menus back to 'view' mode.
+'Space' pauses the game.
 
 Left-click moves the avatar, selects things, builds.
 Left-click & drag builds lots of pavement or ice at once, or clears an area.
@@ -88,9 +109,11 @@ safely install over old game installations.
 Important Notes
 ---------------
 
-1. Save game compatibility in only with the release #. Beta1a to Beta1d can use
-   the same save files, but Beta1 and Beta2 do not. Old games will be 
-   automatically ignored.
+1. I try to keep save game compatibility in major release #s. (So Beta2a-2c
+   all have compatible save games.) This hasn't gone so well with Beta3.
+   The game won't let you load an incompatible save file; so if the only
+   option is "Generate World" when you upgrade...that really is the only 
+   option.
 2. The game is intended to run on a tablet (Windows tablets only at this point) 
    but touch controls aren't implemented yet. Although the new control scheme 
    is intended to make touch as seamless as possible.

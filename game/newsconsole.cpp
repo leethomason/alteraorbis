@@ -59,7 +59,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 		switch (ne.What()) {
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::ROGUE_DENIZEN_JOINS_TEAM:
-			if (homeCore && homeCore->IsCitizenItemID(ne.FirstItemID())) {
+			if (homeCore && (homeCore->ParentChit()->Team() == ne.Team())) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
@@ -69,7 +69,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::STARVATION:
 			case NewsEvent::BLOOD_RAGE:
 			case NewsEvent::VISION_QUEST:
-			if (homeCore && homeCore->IsCitizenItemID(ne.FirstItemID())) {
+			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team()))) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("warning");
 			}
@@ -78,7 +78,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::FORGED:
 			case NewsEvent::UN_FORGED:
 			case NewsEvent::PURCHASED:
-			if ((homeCore && homeCore->IsCitizenItemID(ne.FirstItemID()))
+			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team()))
 				|| sector == homeSector)
 			{
 				ne.Console(&str, chitBag, 0);

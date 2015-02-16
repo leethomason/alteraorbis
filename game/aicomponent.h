@@ -69,7 +69,7 @@ public:
 	void Pickup( Chit* item );
 	void Stand();
 	void Rampage( int dest );
-	bool Rampaging() const { return aiMode == RAMPAGE_MODE;  }
+	bool Rampaging() const { return aiMode == AIMode::RAMPAGE_MODE;  }
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
@@ -97,7 +97,7 @@ public:
 
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
-	enum {
+	enum class AIMode {
 		NORMAL_MODE,
 		RAMPAGE_MODE,		// a MOB that gets stuck can 'rampage', which means cutting a path through the world.
 		BATTLE_MODE,
@@ -105,7 +105,7 @@ public:
 	};
 
 	// Secondary AI modes.
-	enum {
+	enum class AIAction {
 		NO_ACTION,
 		MOVE,			// Movement, will reload and run&gun if possible.
 		MELEE,			// Go to the target and hit it. Melee charge.
@@ -193,8 +193,8 @@ private:
 		FOCUS_TARGET
 	};
 
-	int					aiMode;
-	int					currentAction;
+	AIMode				aiMode;
+	AIAction			currentAction;
 	int					focus;
 	int					lastTargetID;
 	CTicker				feTicker;
@@ -210,8 +210,8 @@ private:
 	ai::Needs			needs;
 	grinliz::Vector2I	lastGrid;	// the environment affects morale and needs - but only check on new grids.
 
-	static const char*	MODE_NAMES[NUM_MODES];
-	static const char*	ACTION_NAMES[NUM_ACTIONS];
+	static const char*	MODE_NAMES[int(AIMode::NUM_MODES)];
+	static const char*	ACTION_NAMES[int(AIAction::NUM_ACTIONS)];
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
 	grinliz::CArray<int, MAX_TRACK> friendList2;

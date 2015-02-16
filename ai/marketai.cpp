@@ -74,7 +74,6 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 		if (doTrade) {
 			if (!buyer->CanAddToInventory()) {
 				const GameItem* sell = buyer->ItemToSell();
-				GLASSERT(sell);
 				if (!sell) return 0;
 				GameItem* sold = buyer->RemoveFromInventory(sell);
 

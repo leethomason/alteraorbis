@@ -256,8 +256,16 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	rootItem.keyValues.Get(ISC::porch, &porch);
 	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
 
-	// FIXME: remove this check, because fluid can trigger?
-	GLASSERT(context->worldMap->IsPassable(pos.x, pos.y));
+	// Should be pre-cleared. But recover from weird situations by clearing.
+	// Note that water is a real problem.
+	Rectangle2I r;
+	r.Set(pos.x, pos.y, pos.x + size - 1, pos.y + size - 1);
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		const WorldGrid& wg = context->worldMap->GetWorldGrid(it.Pos());
+		GLASSERT(wg.IsLand());
+		context->worldMap->SetRock(it.Pos().x, it.Pos().y, 0, false, 0);
+		context->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
+	}
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetBuilding(size, porch != 0, circuit);

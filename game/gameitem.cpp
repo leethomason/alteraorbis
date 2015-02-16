@@ -853,7 +853,7 @@ IString GameItem::ITitle() const
 void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator)
 {
 	// Mark this item as important with a destroyMsg:
-	keyValues.Set("destroyMsg", destructionMsg);
+	keyValues.Set(ISC::destroyMsg, destructionMsg);
 
 	if (creator && team == 0) {
 		team = creator->Team();

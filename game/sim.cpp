@@ -278,7 +278,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->Team() != TEAM_NEUTRAL) {
 				int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
 				Chit* deleter = context.chitBag->GetChit(deleterID);
-				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID(), chit->Team());
+				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0, chit->Team());
 				context.chitBag->GetNewsHistory()->Add(news);
 			}
 		}
@@ -312,8 +312,11 @@ void Sim::SpawnDenizens()
 		if (sp.IsValid()) {
 			static const int NSPAWN = 4;
 			static const int NUM = 3;
+
+			// Kamakiri tend to be very successful when paired whith green mantis.
+			// was: float odds[NUM] = { 100.f, 80.f, 80.f };
+			float odds[NUM] = { 100.f, 50.f, 80.f };
 			IString denizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
-			float odds[NUM] = { 100.f, 80.f, 80.f };
 
 			const Census& census = context.chitBag->census;
 			const grinliz::CDynArray<Census::MOBItem>& items = census.MOBItems();

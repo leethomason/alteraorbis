@@ -1,107 +1,3 @@
-x portrait and suit colors not matching
-x suit colors are the same
-x remove kiosk types
-x use only one type of kiosk
-x overloading of kiosks near core. One kind of kiosk??
-x remove itemID in census (in release mode?)
-x rings change design when selecting options
-x [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
-x fix "long frame time" bug
-x [Reenen] Abandon domain
-x avatar ids are weird: track through the core, so that if we lose the core, Avatar is gone?
-x console: Foo is taken over by Foo for House-1(core)
-x pause
-x engine time independent of pause
-x simplify fluidx
-x refactor GameScene
-	x factor gamescene ui code
-	x restore worker count
-	x canTeleport
-	x return build id
-	x workerbot -> utility
-x goblins wandering around claimed core
-x should buy weapons more aggressively
-x increase drive to make weapons
-x *still* not enough forging
-x lots more forging needs to happen!
-x market use not correct
-x 'escape' should clear build mark
-x getting hit should cause awareness
-x [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
-x deity -> MotherCore
-x proper font
-	x interface: select filename
-	x tweak spacing
-	x tweak height
-x domains always deleted by "unknown"
-x improve hinting of text?
-x glow is broken (actually it glows, just not brighter. screwed up saturation?? turned out to be depth buffers in the blur generation)
-x [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
-x citizen death delays re-spawn
-x don't get stuck in battle mode: if can't move, attack something
-x more aggressively pick up weapons in battle
-x console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
-t warnings of “core attack” not in place
-t console messages...unreliable. some not getting through. market buy/sells
-x player console messages 3 lines long
-x visitors don't visit (until they do...)
-x still attacking neutral cores...
-x when a building checks connection to core, it should check that the core is still its team
-x [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
-x improved strategic view
-	x mark mother core at center
-	x line thickness to show visitor distribution
-	x all MOBs to center line
-	x show civtech
-	x show wealth
-	x show mil strength
-	x reserve diplomacy slot
-	x compact mode, worldgen
-t news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
-t weapons, on destruction, should drop crystal
-t buildings, on destruction, should drop items (market, vault, etc.)
-x task serialization
-x build tasks aren't getting serialized correctly. wrong rotation?
-x fix worldgen news console height
-x title screen colors
-x enemy face shows morale and not level
-x [Reenen] Cyclops heal at rocks. Resolve: all fruit
-x fruit & food
-	x cyclops should eat rock to heal. (Or everyone to fruit?)
-	x GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
-x write the list to improve icons
-x fruit logic: clean up to remove wild vs. domestic logic?
-x new art from GT
-x clean up portrait colors
-x font default settings. (ascent=1 - where to code??) move font to .dat?
-	x tweak ascent / descent? (Or is that a layout bug?)
-x mouse wheel support
-x de-saturate colors correctly: 
-	x world grid changes
-	x plant changes
-x Spatial change
-	x scan code for GetSpatialComponent
-	x ComponentSet.spatial is all wrong
-	x check for recursive setPosition
-	x fix render component to not have sync	
-	x optimize for AreaOfInterest
-x still losing money! single delete? move render component to new "statue" chit?
-x perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
-x evalbuildingscript
-	x regular hitch
-x tombstones aren't getting created
-x particle effects for visitors
-x console, show tax paid
-x restrict # domains - overwhelming
-x gobman statues
-x improve map icon art (from GT)
-x spawn lesser mobs sooner
-x check that kiosks only work with temples
-x mouse scroll direction
-x fix civ-tech
-- expose reserve bank in release
-
-- clean up mother-core image
 - tune mouse wheel with real mouse
 - rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - hide abandom domain somewhere...
@@ -231,8 +127,8 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	x test world->ui
 	x why is the font texture getting re-created all the time?
 	x overlays
-	- top bugs
-	- strategic game improvementns
+	x top bugs
+	x strategic game improvementns
 
 - World Gen
 	- less techy, more interesting world gen
@@ -330,8 +226,7 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 x more natural skin tones
 
 ** Releasing **
-- set version
-- set/check file version
+- set version: both version name and file version
 - update README.txt
 - update title screen text
 - build release/debug
@@ -385,6 +280,109 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x portrait and suit colors not matching
+x suit colors are the same
+x remove kiosk types
+x use only one type of kiosk
+x overloading of kiosks near core. One kind of kiosk??
+x remove itemID in census (in release mode?)
+x rings change design when selecting options
+x [Reenen] Rings doesn't get any extra damage or anything from guards, triads, blades, fire, shock etc
+x fix "long frame time" bug
+x [Reenen] Abandon domain
+x avatar ids are weird: track through the core, so that if we lose the core, Avatar is gone?
+x console: Foo is taken over by Foo for House-1(core)
+x pause
+x engine time independent of pause
+x simplify fluidx
+x refactor GameScene
+	x factor gamescene ui code
+	x restore worker count
+	x canTeleport
+	x return build id
+	x workerbot -> utility
+x goblins wandering around claimed core
+x should buy weapons more aggressively
+x increase drive to make weapons
+x *still* not enough forging
+x lots more forging needs to happen!
+x market use not correct
+x 'escape' should clear build mark
+x getting hit should cause awareness
+x [Reenen] There is a bug I think where the cyclops sometimes doesn't see you, and you can see him. Even though he takes damage he just stands there.  This is not true for the majority of the cases, but I've seen it happen quite a few times.
+x deity -> MotherCore
+x proper font
+	x interface: select filename
+	x tweak spacing
+	x tweak height
+x domains always deleted by "unknown"
+x improve hinting of text?
+x glow is broken (actually it glows, just not brighter. screwed up saturation?? turned out to be depth buffers in the blur generation)
+x [Reenen] The ranged cyclopses are really dangerous, but if your gun is sufficient, and your shield can tank a few shots you can whittle them down by going in and out of line of sight, and perhaps going out of the domain.  [b]I don't think they regen[/b] or it's really, really slow
+x citizen death delays re-spawn
+x don't get stuck in battle mode: if can't move, attack something
+x more aggressively pick up weapons in battle
+x console: "initialized" duplicated by "take over". And "taken over" is poor phrasing.
+t warnings of “core attack” not in place
+t console messages...unreliable. some not getting through. market buy/sells
+x player console messages 3 lines long
+x visitors don't visit (until they do...)
+x still attacking neutral cores...
+x when a building checks connection to core, it should check that the core is still its team
+x [Reenen] When I grid-travel, and I click on a new location (sometimes I see interesting stuff while traveling), it doesn't cancel the grid travel, but the indicater of where I am goes haywire.
+x improved strategic view
+	x mark mother core at center
+	x line thickness to show visitor distribution
+	x all MOBs to center line
+	x show civtech
+	x show wealth
+	x show mil strength
+	x reserve diplomacy slot
+	x compact mode, worldgen
+t news/console: no domain /fallen, delete message? Seems to show. Needs better message. (Domain ranking.)
+t weapons, on destruction, should drop crystal
+t buildings, on destruction, should drop items (market, vault, etc.)
+x task serialization
+x build tasks aren't getting serialized correctly. wrong rotation?
+x fix worldgen news console height
+x title screen colors
+x enemy face shows morale and not level
+x [Reenen] Cyclops heal at rocks. Resolve: all fruit
+x fruit & food
+	x cyclops should eat rock to heal. (Or everyone to fruit?)
+	x GT: randomly create fruit in new domains (heal non rock/plant eaters? switch from plant eating.)
+x write the list to improve icons
+x fruit logic: clean up to remove wild vs. domestic logic?
+x new art from GT
+x clean up portrait colors
+x font default settings. (ascent=1 - where to code??) move font to .dat?
+	x tweak ascent / descent? (Or is that a layout bug?)
+x mouse wheel support
+x de-saturate colors correctly: 
+	x world grid changes
+	x plant changes
+x Spatial change
+	x scan code for GetSpatialComponent
+	x ComponentSet.spatial is all wrong
+	x check for recursive setPosition
+	x fix render component to not have sync	
+	x optimize for AreaOfInterest
+x still losing money! single delete? move render component to new "statue" chit?
+x perf affecting desktop now. move SpatialComponent -> Chit. Only have MapSpatial as subclass?
+x evalbuildingscript
+	x regular hitch
+x tombstones aren't getting created
+x particle effects for visitors
+x console, show tax paid
+x restrict # domains - overwhelming
+x gobman statues
+x improve map icon art (from GT)
+x spawn lesser mobs sooner
+x check that kiosks only work with temples
+x mouse scroll direction
+x fix civ-tech
+x expose reserve bank in release
+x clean up mother-core image
 x shock-fire too subtle. And fast rising.
 x DoShoot without weapon. Mantis in DoShoot state. Has no ranged weapon. 2 items in array.
 x clean up UI layout

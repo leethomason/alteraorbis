@@ -66,6 +66,8 @@ public:
 	int	FirstItemID() const		{ return firstItemID; }
 	int SecondItemID() const	{ return secondItemID; }
 
+	int Team() const			{ return team; }
+
 	static grinliz::IString IDToName( int id, bool shortName );
 
 private:
