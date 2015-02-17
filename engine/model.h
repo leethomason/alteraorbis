@@ -406,7 +406,6 @@ public:
 	const ModelResource* GetResource() const	{ return resource; }
 	bool Sentinel()	const						{ return resource==0 && tree==0; }
 
-	Model* next0;			// used by the Engine sub-sorting
 	Chit*  userData;		// really should be void* - but types are nice.
 
 	const grinliz::Matrix4& XForm() const;

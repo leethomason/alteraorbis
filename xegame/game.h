@@ -22,7 +22,6 @@
 
 #include "../engine/surface.h"
 #include "../engine/texture.h"
-#include "../engine/model.h"
 #include "../engine/uirendering.h"
 #include "../engine/screenport.h"
 
@@ -46,6 +45,8 @@ class Research;
 class ItemDefDB;
 class LumosGame;
 class XenoAudio;
+class ModelLoader;
+class Model;
 
 enum SavePathMode {
 	SAVEPATH_READ,
@@ -173,7 +174,6 @@ protected:
 	void LoadTextures();
 	void LoadModels();
 	void LoadModel( const char* name );
-	//void LoadAtoms();
 	void LoadPalettes();
 
 	int tapMod;
