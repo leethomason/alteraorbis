@@ -1,3 +1,8 @@
+- regen for items (guns, shields)
+- info on attack flags: who is attacking me??
+- world gen shouldn't create bad files:
+	- partial creation
+	- delete files on cancel
 - tune mouse wheel with real mouse
 - rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - hide abandom domain somewhere...

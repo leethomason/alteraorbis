@@ -452,7 +452,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 			currentAction = AIAction::NO_ACTION;
 			return;
 		}
-		if (aiMode == AIMode::RAMPAGE_MODE && RampageDone(thisComp)) {
+		if (aiMode == AIMode::RAMPAGE_MODE && RampageDone()) {
 			aiMode = AIMode::NORMAL_MODE;
 			currentAction = AIAction::NO_ACTION;
 			return;
@@ -945,14 +945,8 @@ void AIComponent::Rampage( int dest )
 { 
 	rampageTarget = dest;
 
-	ComponentSet thisComp(parentChit, Chit::RENDER_BIT |
-		Chit::SPATIAL_BIT |
-		Chit::ITEM_BIT |
-		ComponentSet::IS_ALIVE |
-		ComponentSet::NOT_IN_IMPACT);
-
-	GLASSERT(!RampageDone(thisComp));
-	if (!thisComp.okay || RampageDone(thisComp)) {
+	GLASSERT(!RampageDone());
+	if (RampageDone()) {
 		aiMode = AIMode::NORMAL_MODE;
 		currentAction = AIAction::NO_ACTION;
 		return;
@@ -1019,10 +1013,10 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 }
 
 
-bool AIComponent::RampageDone(const ComponentSet& thisComp)
+bool AIComponent::RampageDone()
 {
 	const ChitContext* context = Context();
-	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	const SectorData& sd = context->worldMap->GetSectorData(ToSector(pos2i));
 	Rectangle2I dest;
 
@@ -1056,7 +1050,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
 	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
 
-	if ( RampageDone(thisComp)) {
+	if ( RampageDone()) {
 		aiMode = AIMode::NORMAL_MODE;
 		currentAction = AIAction::NO_ACTION;
 		return;

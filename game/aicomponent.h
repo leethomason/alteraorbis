@@ -143,7 +143,7 @@ private:
 	bool ThinkFlag(const ComponentSet& thisComp);
 	bool ThinkWaypoints(const ComponentSet& thisComp);
 
-	bool RampageDone(const ComponentSet& thisComp);
+	bool RampageDone();
 	void DoMoraleZero(const ComponentSet& thisComp);
 	bool TravelHome(const ComponentSet& thisComp, bool focus);
 	void WorkQueueToTask(  const ComponentSet& thisComp );			// turn a work item into a task

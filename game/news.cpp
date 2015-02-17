@@ -229,7 +229,7 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 		break;
 
 		case PURCHASED:
-		if (second) {
+		if (first) {
 			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, secondName.c_str(), firstName.c_str(), domain.c_str(),
 						first->GetValue(), int(float(first->GetValue() * SALES_TAX)));
 		}

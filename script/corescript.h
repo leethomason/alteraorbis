@@ -166,7 +166,6 @@ private:
 	void DoStrategicTick();
 
 	WorkQueue*	workQueue;
-	int			team;			// cache so we can update if it changes
 	grinliz::Vector2I sector;
 
 	CTicker		aiTicker;		// use to update the core info, every couple of seconds.

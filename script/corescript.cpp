@@ -89,7 +89,6 @@ void CoreAchievement::Serialize(XStream* xs)
 
 CoreScript::CoreScript() 
 	: spawnTick( 20*1000 ), 
-	  team( 0 ),
 	  workQueue( 0 ),
 	  aiTicker(2000),
 	  scoreTicker(10*1000),
@@ -522,8 +521,8 @@ bool CoreScript::RecruitNeutral()
 
 int CoreScript::DoTick(U32 delta)
 {
-	if ( parentChit->Team() != team ) {
-		team = parentChit->Team();
+	{
+		int team = parentChit->Team();
 		ProcRenderInfo info;
 		AssignProcedural(parentChit->GetItem(), &info);
 		parentChit->GetRenderComponent()->SetProcedural( 0, info );
@@ -596,27 +595,27 @@ int CoreScript::MaxCitizens()
 
 
 
-void CoreScript::DoTickInUse( int delta, int nSpawnTicks )
+void CoreScript::DoTickInUse(int delta, int nSpawnTicks)
 {
 	tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
 	int maxTech = MaxTech();
 	tech = Clamp(tech, 0.0, double(maxTech) - 0.01);
 
-	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
-	GLASSERT( ms );
+	MapSpatialComponent* ms = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
+	GLASSERT(ms);
 	Vector2I pos2i = ms->MapPosition();
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	Vector2I sector = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 
-	if ( nSpawnTicks ) {
+	if (nSpawnTicks && Team::Group(parentChit->Team())) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
 		int nCitizens = this->Citizens(0);
 		int maxCitizens = this->MaxCitizens();
 
-		if ( nCitizens < maxCitizens ) {
+		if (nCitizens < maxCitizens) {
 			if (!RecruitNeutral()) {
-				Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
-				this->AddCitizen( chit );
+				Chit* chit = Context()->chitBag->NewDenizen(pos2i, parentChit->Team());
+				this->AddCitizen(chit);
 			}
 		}
 	}
