@@ -222,7 +222,7 @@ public:
 	virtual void PrepGrid( const SpaceTree* spaceTree );
 
 	// 3D voxels
-	virtual void PrepVoxels(const SpaceTree*, Model** root, const grinliz::Plane* planes6);
+	virtual void PrepVoxels(const SpaceTree*, grinliz::CDynArray<Model*>* models, const grinliz::Plane* planes6);
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
@@ -417,7 +417,7 @@ private:
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	void PushVoxel( int id, float x, float y, float h, const float* walls );
 	Vertex* PushVoxelQuad( int id, const grinliz::Vector3F& normal );
-	void PushTree(Model** root, int x, int y, int type0Based, int stage, float hpFraction);
+	Model* PushTree(int x, int y, int type0Based, int stage, float hpFraction);
 
 	int IntersectPlantAtVoxel( const grinliz::Vector3I& voxel,
 		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);

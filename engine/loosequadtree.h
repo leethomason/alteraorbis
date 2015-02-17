@@ -51,10 +51,11 @@ public:
 	// Returns all the models in the planes.
 	// Limits to BOTH planes and rectangle. Only one
 	// needs to be specified.
-	Model* Query( const grinliz::Plane* planes, int nPlanes, 
-				  const grinliz::Rectangle3F* rectangle,
-				  bool includeShadow,
-				  int requiredFlags, int excludedFlags );
+	void Query( grinliz::CDynArray<Model*>* models,
+				const grinliz::Plane* planes, int nPlanes, 
+				const grinliz::Rectangle3F* rectangle,
+				bool includeShadow,
+				int requiredFlags, int excludedFlags );
 
 	// Returns all the valid areas from the last query. (used by voxel engine.)
 	const grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES>& Zones() const	{ return zones; }
@@ -133,7 +134,14 @@ private:
 	}
 
 	void InitNode();
-	void QueryPlanesRec( const grinliz::Plane* planes, int nPlanes, const grinliz::Rectangle3F* rect, bool includeShadow, int intersection, const Node* node, U32 positive );
+	void QueryPlanesRec(grinliz::CDynArray<Model*>* models,
+						const grinliz::Plane* planes,
+						int nPlanes,
+						const grinliz::Rectangle3F* rect,
+						bool includeShadow,
+						int intersection,
+						const Node* node,
+						U32 positive);
 
 	grinliz::Rectangle3F treeBounds;
 	Model* modelRoot;
@@ -145,7 +153,6 @@ private:
 	int nodesVisited;
 	int planesComputed;
 	int spheresComputed;
-	int modelsFound;
 
 	int requiredFlags;
 	int excludedFlags;
@@ -155,6 +162,8 @@ private:
 	Node* GetNode( int depth, int x, int z ); 
 	Node nodeArr[NUM_NODES];
 	grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES> zones;
+
+	grinliz::CDynArray<Model*> queryCache;
 };
 
 #endif // LOOSEQUADTREE_INCLUDED

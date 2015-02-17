@@ -1313,7 +1313,10 @@ void WorldMap::PrintStateInfo( void* state )
 }
 
 int WorldMap::IntersectPlantAtVoxel(const grinliz::Vector3I& voxel,
-	const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at)
+									const grinliz::Vector3F& origin, 
+									const grinliz::Vector3F& dir, 
+									float length, 
+									grinliz::Vector3F* at)
 {
 	int index = INDEX(voxel.x, voxel.z);
 	const WorldGrid& wg = grid[index];
@@ -1325,8 +1328,7 @@ int WorldMap::IntersectPlantAtVoxel(const grinliz::Vector3I& voxel,
 	// so the nTrees doesn't matter.
 	nTrees = 0;
 	// Create the tree we need for testing.
-	PushTree(0, voxel.x, voxel.z, wg.Plant() - 1, wg.PlantStage(), 1.0f);
-	Model* m = treePool[0];
+	Model* m = PushTree(voxel.x, voxel.z, wg.Plant() - 1, wg.PlantStage(), 1.0f);
 
 	int result = m->IntersectRay(true, origin, dir, at);
 	if (result == INTERSECT) {
@@ -1961,7 +1963,7 @@ float WorldMap::IndexToRotation360(int index)
 }
 
 
-void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, float hpFraction)
+Model* WorldMap::PushTree(int x, int y, int type0Based, int stage, float hpFraction)
 {
 	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < 4);
@@ -1981,11 +1983,7 @@ void WorldMap::PushTree(Model** root, int x, int y, int type0Based, int stage, f
 	m->SetPosAndYRotation(pos, rot);
 	m->SetSaturation(hpFraction * PLANT_SATURATION);
 
-	// Don't get a root if we are being used for hit testing.
-	if (root) {
-		m->next = *root;
-		*root = m;
-	}
+	return m;
 }
 
 
@@ -2181,7 +2179,7 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 }
 
 
-void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const grinliz::Plane* planes6)
+void WorldMap::PrepVoxels(const SpaceTree* spaceTree, grinliz::CDynArray<Model*>* models, const grinliz::Plane* planes6)
 {
 	//GRINLIZ_PERFTRACK
 	//PROFILE_FUNC();
@@ -2240,7 +2238,8 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, Model** modelRoot, const g
 						}
 					}
 					if (accept) {
-						PushTree(modelRoot, x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
+						Model* m = PushTree(x, y, wg.Plant() - 1, wg.PlantStage(), fraction);
+						models->Push(m);
 
 						Vector3F pos3f = { float(x)+0.5f, 0, float(y) + 0.5f };
 						if (wg.PlantOnFire()) {

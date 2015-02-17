@@ -240,25 +240,23 @@ void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node
 #endif
 
 
-Model* SpaceTree::Query( const Plane* planes, int nPlanes, const Rectangle3F* clipRect, bool includeShadow, int required, int excluded )
+void SpaceTree::Query(grinliz::CDynArray<Model*>* models, const Plane* planes, int nPlanes, const Rectangle3F* clipRect, bool includeShadow, int required, int excluded)
 {
 	modelRoot = 0;
 	nodesVisited = 0;
 	planesComputed = 0;
 	spheresComputed = 0;
-	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
 	zones.Clear();
 
 #ifdef DEBUG
-	for( int i=0; i<NUM_NODES; ++i ) {
+	for (int i = 0; i < NUM_NODES; ++i) {
 		nodeArr[i].hit = 0;
 	}
 #endif
 
-	QueryPlanesRec( planes, nPlanes, clipRect, includeShadow, grinliz::INTERSECT, &nodeArr[0], 0 );
-	return modelRoot;
+	QueryPlanesRec(models, planes, nPlanes, clipRect, includeShadow, grinliz::INTERSECT, &nodeArr[0], 0);
 }
 
 
@@ -319,139 +317,135 @@ void SpaceTree::Dump( Node* node )
 #endif
 
 
-void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, 
-								const Rectangle3F* clipRect, 
-								bool includeShadow,
-								int intersection, const Node* node, U32 positive )
+void SpaceTree::QueryPlanesRec(grinliz::CDynArray<Model*>* models,
+							   const Plane* planes, int nPlanes,
+							   const Rectangle3F* clipRect,
+							   bool includeShadow,
+							   int intersection, const Node* node, U32 positive)
 {
-	#define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
-	const int allPositive = (1<<nPlanes)-1;
+#define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
+	const int allPositive = (1 << nPlanes) - 1;
 
-	if ( intersection == grinliz::POSITIVE ) 
+	if (intersection == grinliz::POSITIVE)
 	{
 		// we are fully inside, and don't need to check.
 		++nodesVisited;
 	}
-	else if ( intersection == grinliz::INTERSECT ) 
+	else if (intersection == grinliz::INTERSECT)
 	{
 		const Rectangle3F& aabb = node->aabb;
 
-		if ( clipRect ) {
-			if ( !clipRect->Intersect( aabb )) {
+		if (clipRect) {
+			if (!clipRect->Intersect(aabb)) {
 				intersection = grinliz::NEGATIVE;
 			}
-			else if ( nPlanes == 0 && clipRect->Contains( aabb )) {
+			else if (nPlanes == 0 && clipRect->Contains(aabb)) {
 				intersection = grinliz::POSITIVE;
 			}
 		}
-		if ( nPlanes && intersection == grinliz::INTERSECT ) {
-			for( int i=0; i<nPlanes; ++i ) {
+		if (nPlanes && intersection == grinliz::INTERSECT) {
+			for (int i = 0; i < nPlanes; ++i) {
 				// Assume positive bit is set, check if not. Once we go POSITIVE, we don't need 
 				// to check the sub-nodes. They will still be POSITIVE. Saves about 1/2 the Plane
 				// and Sphere checks.
 				//
 				int comp = grinliz::POSITIVE;
-				if ( IS_POSITIVE( positive, i ) == 0 ) {
-					comp = ComparePlaneAABB( planes[i], aabb );
+				if (IS_POSITIVE(positive, i) == 0) {
+					comp = ComparePlaneAABB(planes[i], aabb);
 					++planesComputed;
 				}
 
 				// If the aabb is negative of any plane, it is culled.
-				if ( comp == grinliz::NEGATIVE ) {
+				if (comp == grinliz::NEGATIVE) {
 					intersection = grinliz::NEGATIVE;
 					break;
 				}
-				else if ( comp == grinliz::POSITIVE ) {
+				else if (comp == grinliz::POSITIVE) {
 					// If the aabb intersects the plane, the result is subtle:
 					// intersecting a plane doesn't meen it is in the frustrum. 
 					// The intersection of the aabb and the plane is often 
 					// completely outside the frustum.
 
 					// If the aabb is positive of ALL the planes then we are in good shape.
-					positive |= (1<<i);
+					positive |= (1 << i);
 				}
 			}
-			if ( positive == allPositive ) {
+			if (positive == allPositive) {
 				// All positive is quick:
 				intersection = grinliz::POSITIVE;
 			}
 		}
 		++nodesVisited;
 	}
-	if ( intersection != grinliz::NEGATIVE ) 
+	if (intersection != grinliz::NEGATIVE)
 	{
-		if ( node->depth == DEPTH-1 ) {
+		if (node->depth == DEPTH - 1) {
 			// Write the data for the voxel test. It
 			// needs a record of all the nodes in view.
 			Rectangle2I voxel;
 			voxel.min = voxel.max = node->origin;
-			int c = ( size >> (node->depth));
-			voxel.max.x += c-1;
-			voxel.max.y += c-1;
-			zones.Push( voxel );
+			int c = (size >> (node->depth));
+			voxel.max.x += c - 1;
+			voxel.max.y += c - 1;
+			zones.Push(voxel);
 		}
 
 #ifdef DEBUG
-		if ( intersection == grinliz::INTERSECT )
+		if (intersection == grinliz::INTERSECT)
 			node->hit = 1;
-		else if ( intersection == grinliz::POSITIVE )
+		else if (intersection == grinliz::POSITIVE)
 			node->hit = 2;
 #endif
 		const int _requiredFlags = requiredFlags;
 		const int _excludedFlags = excludedFlags;
 
-		for( Item* item=node->root; item; item=item->next ) 
+		for (Item* item = node->root; item; item = item->next)
 		{
 			Model* m = &item->model;
 			const int flags = m->Flags();
 
-			if (    ( (_requiredFlags & flags) == _requiredFlags)
-				 && ( (_excludedFlags & flags) == 0 ) )
-			{	
+			if (((_requiredFlags & flags) == _requiredFlags)
+				&& ((_excludedFlags & flags) == 0))
+			{
 				//GLOUTPUT(( "%*s[%d] Testing: 0x%x %s", node->depth, " ", node->depth, (int)m, m->GetResource()->header.name.c_str() ));
-				if ( intersection == grinliz::INTERSECT ) {
+				if (intersection == grinliz::INTERSECT) {
 					Rectangle3F aabb = m->AABB();
-					if ( includeShadow && m->CastsShadow() ) {
-						ExpandForLight( &aabb );
+					if (includeShadow && m->CastsShadow()) {
+						ExpandForLight(&aabb);
 					}
 					int compare = grinliz::INTERSECT;
 
-					for( int k=0; k<nPlanes; ++k ) {
+					for (int k = 0; k < nPlanes; ++k) {
 						// Since the bounding sphere is in the AABB, we
 						// can check for the positive plane again.
-						if ( IS_POSITIVE( positive, k ) == 0 ) {
-							compare = ComparePlaneAABB( planes[k], aabb );
+						if (IS_POSITIVE(positive, k) == 0) {
+							compare = ComparePlaneAABB(planes[k], aabb);
 							++spheresComputed;
-							if ( compare == grinliz::NEGATIVE ) {
+							if (compare == grinliz::NEGATIVE) {
 								break;
 							}
 						}
 					}
-					if ( compare == grinliz::NEGATIVE ) {
+					if (compare == grinliz::NEGATIVE) {
 						//GLOUTPUT(( "...NEGATIVE\n" ));
 						continue;
 					}
 				}
 				//GLOUTPUT(( "...yes\n" ));
-				
-				m->next = modelRoot;
-				modelRoot = m;
-				++modelsFound;
+				models->Push(m);
 			}
 		}
-		
-		if ( node->child[0] )  {
+
+		if (node->child[0])  {
 			// We could, in theory, early out using the number of models. But this makes the
 			// zones for the voxel system super-big, which is a big problem.
-			for( int i=0; i<4; ++i ) {
-				QueryPlanesRec( planes, nPlanes, clipRect, includeShadow, intersection, node->child[i], positive );
+			for (int i = 0; i < 4; ++i) {
+				QueryPlanesRec(models, planes, nPlanes, clipRect, includeShadow, intersection, node->child[i], positive);
 			}
 		}
 	}
-	#undef IS_POSITIVE
+#undef IS_POSITIVE
 }
-
-
 
 
 Model* SpaceTree::QueryRay( const Vector3F& _origin, 
@@ -464,7 +458,6 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	//GLOUTPUT(( "query ray\n" ));
 	modelRoot = 0;
 	nodesVisited = 0;
-	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
 
@@ -496,7 +489,8 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	Rectangle3F pathBounds = rayBounds;
 	pathBounds.DoIntersection( worldBounds );
 
-	Model* modelRoot = Query( 0, 0, &pathBounds, false, required, excluded );
+	queryCache.Clear();
+	Query( &queryCache, 0, 0, &pathBounds, false, required, excluded );
 
 	// We now have a batch of models. Are any of them a hit??
 	GLASSERT( testType == TEST_HIT_AABB || testType == TEST_TRI );
@@ -506,7 +500,8 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	Vector3F testInt;
 	float t;
 
-	for( Model* root=modelRoot; root; root=root->next ) {
+	for (int i = 0; i < queryCache.Size(); ++i) {
+		Model* root = queryCache[i];
 
 		if ( Ignore( root, ignore ) )
 			continue;

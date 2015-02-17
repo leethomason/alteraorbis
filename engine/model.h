@@ -406,7 +406,6 @@ public:
 	const ModelResource* GetResource() const	{ return resource; }
 	bool Sentinel()	const						{ return resource==0 && tree==0; }
 
-	Model* next;			// used by the SpaceTree query
 	Model* next0;			// used by the Engine sub-sorting
 	Chit*  userData;		// really should be void* - but types are nice.
 
@@ -457,7 +456,6 @@ private:
 	grinliz::Vector4F	control;
 	ModelAuxBone* auxBone;
 	ModelAuxTex*  auxTex;
-
 
 	mutable bool xformValid;
 	mutable bool invValid;

@@ -163,14 +163,12 @@ void NavTest2Scene::DrawDebugText()
 	if ( debugRay.direction.x ) {
 		Model* root = context.engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 32;
-		for ( ; root; root=root->next ) {
-			Chit* chit = root->userData;
-			if ( chit ) {
-				GLString str;
-				chit->DebugStr( &str );
-				ufoText->Draw( 0, y, "%s", str.c_str() );
-				y += 16;
-			}
+		Chit* chit = root ? root->userData : 0;
+		if ( chit ) {
+			GLString str;
+			chit->DebugStr( &str );
+			ufoText->Draw( 0, y, "%s", str.c_str() );
+			y += 16;
 		}
 	}
 }

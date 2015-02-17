@@ -242,12 +242,14 @@ Texture* Engine::GetMiniMapTexture()
 }
 
 
-void Engine::QueueSet(	EngineShaders* engineShaders, Model* root, 
+void Engine::QueueSet(	EngineShaders* engineShaders, 
+					    const CDynArray<Model*>& models,
 						int requiredModelFlag, int excludedModelFlag,						
 						int requiredShaderFlag, int excludedShaderFlag )
 {
 	renderQueue->Clear();
-	for( Model* model=root; model; model=model->next ) {
+	for (int i = 0; i < models.Size(); ++i) {
+		Model* model = models[i];
 		int flag = model->Flags();
 		if (    (( requiredModelFlag & flag ) == requiredModelFlag )
 			 && (( excludedModelFlag & flag ) == 0 ) )
@@ -311,11 +313,13 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	CalcFrustumPlanes(planes);
 
 	// Get the working set of models.
-	Model* modelRoot = spaceTree->Query(planes, 6, 0, true, 0, Model::MODEL_INVISIBLE);
+	modelCache.Clear();
+	spaceTree->Query(&modelCache, planes, 6, 0, true, 0, Model::MODEL_INVISIBLE);
 
 	// Track the UI relevant ones:
 	trackedModels.Clear();
-	for( Model* m=modelRoot; m; m=m->next ) {
+	for (int i = 0; i < modelCache.Size(); ++i) {
+		Model* m = modelCache[i];
 		if (m->Flags() & Model::MODEL_UI_TRACK) {
 			trackedModels.Push(m);
 		}
@@ -323,7 +327,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 	if ( map && (stages & STAGE_VOXEL) ) {
 		ENGINE_DETAILED_PROFILE(MapPrep);
-		map->PrepVoxels(spaceTree, &modelRoot, planes);
+		map->PrepVoxels(spaceTree, &modelCache, planes);
 		map->PrepGrid( spaceTree );
 	}
 	
@@ -373,7 +377,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 			// Replace all kinds of lighting with emissive:
 			engineShaders.PushAll(emEx);
-			QueueSet(&engineShaders, modelRoot, 0, 0, 0, 0);
+			QueueSet(&engineShaders, modelCache, 0, 0, 0, 0);
 
 			int dc = device->DrawCalls();
 			if (map) map->Submit(&emEx);
@@ -406,7 +410,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 			shadowShader.SetColorWrite( false );
 
 			engineShaders.PushAll( shadowShader );
-			QueueSet( &engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
+			QueueSet( &engineShaders, modelCache, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
 
 			Matrix4 shadowMatrix;
 			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
@@ -445,7 +449,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 			state.SetShaderFlag( ShaderManager::SATURATION );
 			map->DrawVoxels( &state, 0 );
 		}
-		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
+		QueueSet( &engineShaders, modelCache, 0, 0, 0, 0  );
 		{
 			modelDrawCalls[MODELS] = device->DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );

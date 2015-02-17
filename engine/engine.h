@@ -207,7 +207,8 @@ private:
 	void CalcCameraRotation( grinliz::Matrix4* );
 
 	void Blur();
-	void QueueSet(	EngineShaders* engineShaders, Model* root, 
+	void QueueSet(	EngineShaders* engineShaders, 
+					const grinliz::CDynArray<Model*>& models,
 					int requiredModelFlag,  int excludedModelFlag,
 					int requiredShaderFlag, int excludedShaderFlag );
 
@@ -226,6 +227,7 @@ private:
 	RenderTarget* renderTarget[RT_COUNT];
 
 	grinliz::CDynArray<const Model*> trackedModels;
+	grinliz::CDynArray<Model*> modelCache;
 	UIRenderer uiRenderer;
 };
 
