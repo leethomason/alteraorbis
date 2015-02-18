@@ -545,8 +545,8 @@
         hardpoint="trigger"
         meleeDamage="16"
         shieldBoost="1.0"
-        hpRegen="1.0"
         mass="2"
+        hpRegen="1.0"
         baseHP="15"
         sound="ringWAV"
         >
@@ -558,6 +558,7 @@
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        hpRegen="1.0"
         baseHP="10"
         accuracy="0.6"
         cooldown="700"
@@ -566,7 +567,6 @@
         rangedDamage="15"
         procedural="gun"
         nameGen="vikingMale"
-        hpRegen="1.0"
         sound="pistolWAV"
         >
   </RangedWeapon>
@@ -577,6 +577,7 @@
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        hpRegen="1.0"
         baseHP="10"
         accuracy="0.8"
         cooldown="500"
@@ -585,7 +586,6 @@
         rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
-        hpRegen="1.0"
         sound="blasterWAV"
         >
   </RangedWeapon>
@@ -596,6 +596,7 @@
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="2.0"
+        hpRegen="1.0"
         baseHP="10"
         accuracy="0.8"
         cooldown="300"
@@ -604,7 +605,6 @@
         rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
-        hpRegen="1.0"
         sound="pulseWAV"
         >
   </RangedWeapon>
@@ -615,6 +615,7 @@
         flags="RANGED_WEAPON CLICK_THROUGH FLOAT"
         hardpoint="trigger"
         mass="1.5"
+        hpRegen="1.0"
         baseHP="10"
         accuracy="1.4"
         cooldown="800"
@@ -623,7 +624,6 @@
         rangedDamage="18"
         procedural="gun"
         nameGen="vikingMale"
-        hpRegen="1.0"
         sound="beamgunWAV"
         >
   </RangedWeapon>

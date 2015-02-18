@@ -99,7 +99,6 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	LoadTextures();
 	modelLoader = new ModelLoader();
 	LoadModels();
-	//LoadAtoms();
 	LoadPalettes();
 	AnimationResourceManager::Instance()->Load( database0 );
 

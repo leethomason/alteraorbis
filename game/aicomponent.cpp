@@ -1357,7 +1357,9 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 
 		// Trolls herd *all the time*
 		if ( thisComp.item->IName() != ISC::troll ) {
-			ChitBag::CurrentNews news = { StringPool::Intern("SectorHerd"), ToWorld2F(parentChit->Position()), parentChit->ID() };
+			CStr<32> str;
+			str.Format("%s\nSectorHerd", thisComp.item->Name());
+			ChitBag::CurrentNews news = { StringPool::Intern(str.c_str()), ToWorld2F(parentChit->Position()), parentChit->ID() };
 			Context()->chitBag->PushCurrentNews(news);
 		}
 

@@ -486,7 +486,6 @@ int ItemComponent::ProcessEffect(int delta)
 	if (pos2i.IsZero()) return VERY_LONG_TICK;	// if we are at origin, not really for processing.
 
 	GameItem* mainItem = itemArr[0];
-	Shield* shield = this->GetShield();
 
 	// Look around at map, weather, etc. and sum up
 	// the chances of fire, shock, & water
@@ -555,15 +554,18 @@ int ItemComponent::ProcessEffect(int delta)
 	float cS = (shock * (water + 1.0f)) * chanceShock;
 
 	// Shields offer a lot of environmental protection.
-	if (shield) {
-		if (shield->Active()) {
-			cF = 0;
-			cS = 0;
+	if (cF > 0 || cS > 0) {
+		Shield* shield = this->GetShield();
+		if (shield) {
+			if (shield->Active()) {
+				cF = 0;
+				cS = 0;
+			}
+			if (shield->flags & GameItem::EFFECT_FIRE)
+				cF *= 0.5f;	// even if shield depleted!
+			if (shield->flags & GameItem::EFFECT_SHOCK)
+				cS *= 0.5f;
 		}
-		if (shield->flags & GameItem::EFFECT_FIRE)
-			cF *= 0.5f;	// even if shield depleted!
-		if (shield->flags & GameItem::EFFECT_SHOCK)
-			cS *= 0.5f;
 	}
 
 	if (cF > 0 || cS > 0) {

@@ -88,9 +88,7 @@ private:
 	}
 
 	struct Node;
-#ifdef DEBUG
 	void Dump( Node* node );
-#endif
 
 	struct Item {
 		Model model;	// Must be first! Gets cast back to Item in destructor. When a model gets allocated,
@@ -110,10 +108,6 @@ private:
 		Item* root;
 		Node* parent;
 		Node* child[4];
-
-#ifdef DEBUG
-		mutable int hit;
-#endif
 
 		void Add( Item* item );
 		void Remove( Item* item );
@@ -143,6 +137,8 @@ private:
 						const Node* node,
 						U32 positive);
 
+	Node* GetNode( int depth, int x, int z );
+
 	grinliz::Rectangle3F treeBounds;
 	Model* modelRoot;
 	int size;
@@ -152,18 +148,16 @@ private:
 
 	int nodesVisited;
 	int planesComputed;
-	int spheresComputed;
 
 	int requiredFlags;
 	int excludedFlags;
 
 	grinliz::MemoryPool modelPool;
 
-	Node* GetNode( int depth, int x, int z ); 
-	Node nodeArr[NUM_NODES];
 	grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES> zones;
-
 	grinliz::CDynArray<Model*> queryCache;
+
+	Node nodeArr[NUM_NODES];
 };
 
 #endif // LOOSEQUADTREE_INCLUDED

@@ -120,8 +120,11 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->hitBounds.max.Set( ave, res->header.bounds.max.y, ave );
 
 	{ 
-		// Calc the invariant bounds, in the 2D plane. Won't be correct for some rotations around X or Z
-		// Surround the bounds with a circle. Use the circle to create new bounds
+		// Calc the invariant bounds, in the 2D plane.
+		// Basically take advantage that all rotations are around Y.
+		// At some point should switch to invariant sphere.
+		// Also, the origin of all objects are at 0,0, so I can
+		// simplify the length computation.
 		const Rectangle3F& bnd = res->header.bounds;
 		Vector2F a = { bnd.min.x, bnd.min.z };
 		Vector2F b = { bnd.min.x, bnd.max.z };
@@ -130,17 +133,10 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		float rad2 = Max( a.LengthSquared(), b.LengthSquared(), c.LengthSquared(), d.LengthSquared() );
 		float rad = sqrtf( rad2 );
 
-		res->invariantBounds.min.Set( -rad, res->header.bounds.min.y, -rad );
+		res->invariantBounds.min.Set( -rad, 0, -rad );
 		res->invariantBounds.max.Set( rad, res->header.bounds.max.y, rad );
 	}
 
-	/*
-	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		if ( !res->header.modelBoneName[i].empty() ) {
-			GLOUTPUT(( "Model %s bone %d=%s\n", res->header.name.c_str(), i, res->header.modelBoneName[i].c_str() ));
-		}
-	}
-	*/
 	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
 		const gamedb::Item* groupItem = item->Child( i );

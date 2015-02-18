@@ -1,4 +1,5 @@
-- regen for items (guns, shields)
+x regen for items (guns, shields)
+- face is glowing in asset preview
 - info on attack flags: who is attacking me??
 - world gen shouldn't create bad files:
 	- partial creation
@@ -128,13 +129,13 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - tune EmitterGenerator - meander length
 
 - Beta3d
-	- Documentation
+	x Documentation
 	- Long game: 
 		- squad control
 		- greater motion
 		- diplomacy
 		- circuits
-	- New promo assets
+	x New promo assets
 	- IndieDB
 	- Android
 

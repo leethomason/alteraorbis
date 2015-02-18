@@ -45,6 +45,10 @@ SpaceTree::SpaceTree( float yMin, float yMax, int _size )
 
 SpaceTree::~SpaceTree()
 {
+	for (int i = 0; i < NUM_NODES; ++i) {
+		GLASSERT(nodeArr[i].root == 0);
+		GLASSERT(nodeArr[i].nModels == 0);
+	}
 	GLASSERT( modelPool.Empty() );
 }
 
@@ -147,14 +151,15 @@ void SpaceTree::Update( Model* model )
 	item->node = 0;
 
 	// Since the tree is somewhat modified from the ideal, start with the 
-	// most idea node and work up. Note that everything fits at the top node.
+	// most ideal node and work up. Note that everything fits at the top node.
 	int depth = DEPTH-1;
 	Node* node = 0;
 	
 	bounds.DoIntersection( treeBounds );
 
-	int x = (int)bounds.min.x;
-	int z = (int)bounds.min.z;
+	Vector3F c = bounds.Center();
+	int x = LRint(c.x);
+	int z = LRint(c.z);
 
 	while( depth > 0 ) {
 		node = GetNode( depth, x, z );
@@ -191,70 +196,14 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 	return result;
 }
 
-
-#if 0
-Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded )
-{
-	Rectangle3F bounds;
-	bounds.Set( rect.min.x, treeBounds.min.y, rect.min.y, 
-		        rect.max.x, treeBounds.max.y, rect.max.y );
-
-	modelRoot = 0;
-	nodesVisited = 0;
-	modelsFound = 0;
-	requiredFlags = required;
-	excludedFlags = excluded;
-	QueryRectRec( bounds, nodeArr );
-
-	return modelRoot;
-}
-
-
-void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node )
-{
-	if ( node->aabb.Intersect( rect ) ) {
-		for( Item* item=node->root; item; item=item->next ) 
-		{
-			Model* m = &item->model;
-			const int flags = m->Flags();
-
-			if (    ( (requiredFlags & flags) == requiredFlags)
-				 && ( (excludedFlags & flags) == 0 ) )
-			{	
-				const Rectangle3F& aabb = m->AABB();
-				if ( aabb.Intersect( rect ) ) {
-					m->next = modelRoot;
-					modelRoot = m;
-					++modelsFound;
-				}
-			}
-		}
-		if ( node->child[0] )  {
-			for( int i=0; i<4; ++i ) {
-				if ( node->child[i]->nModels )
-					QueryRectRec( rect, node->child[i] );
-			}
-		}
-	}
-}
-#endif
-
-
 void SpaceTree::Query(grinliz::CDynArray<Model*>* models, const Plane* planes, int nPlanes, const Rectangle3F* clipRect, bool includeShadow, int required, int excluded)
 {
 	modelRoot = 0;
 	nodesVisited = 0;
 	planesComputed = 0;
-	spheresComputed = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
 	zones.Clear();
-
-#ifdef DEBUG
-	for (int i = 0; i < NUM_NODES; ++i) {
-		nodeArr[i].hit = 0;
-	}
-#endif
 
 	QueryPlanesRec(models, planes, nPlanes, clipRect, includeShadow, grinliz::INTERSECT, &nodeArr[0], 0);
 }
@@ -390,12 +339,6 @@ void SpaceTree::QueryPlanesRec(grinliz::CDynArray<Model*>* models,
 			zones.Push(voxel);
 		}
 
-#ifdef DEBUG
-		if (intersection == grinliz::INTERSECT)
-			node->hit = 1;
-		else if (intersection == grinliz::POSITIVE)
-			node->hit = 2;
-#endif
 		const int _requiredFlags = requiredFlags;
 		const int _excludedFlags = excludedFlags;
 
@@ -420,7 +363,6 @@ void SpaceTree::QueryPlanesRec(grinliz::CDynArray<Model*>* models,
 						// can check for the positive plane again.
 						if (IS_POSITIVE(positive, k) == 0) {
 							compare = ComparePlaneAABB(planes[k], aabb);
-							++spheresComputed;
 							if (compare == grinliz::NEGATIVE) {
 								break;
 							}
