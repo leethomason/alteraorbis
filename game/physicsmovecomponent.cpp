@@ -68,59 +68,58 @@ bool PhysicsMoveComponent::IsMoving() const
 }
 
 
-int PhysicsMoveComponent::DoTick( U32 delta )
+int PhysicsMoveComponent::DoTick(U32 delta)
 {
 	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
-	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT );
-	if (thisComp.okay) {
-		Vector3F pos = thisComp.chit->Position();
-		float rot = YRotation(thisComp.chit->Rotation());
 
-		float dtime = (float)delta * 0.001f;
-		Vector3F travel = velocity * dtime;
-		float tRot = rotation * dtime;
-		pos += travel;
-		rot += tRot;
+	Vector3F pos = parentChit->Position();
+	float rot = YRotation(parentChit->Rotation());
 
-		// Did we hit the ground?
-		if ( pos.y < 0 ) {
-			pos.y = 0;
-			if ( travel.y < 0 ) {
-				travel.y = -travel.y;
-			}
-			static const float scale = 0.5f;
-			velocity = velocity * scale;
-			rotation = rotation * scale;
+	float dtime = (float)delta * 0.001f;
+	Vector3F travel = velocity * dtime;
+	float tRot = rotation * dtime;
+	pos += travel;
+	rot += tRot;
+
+	// Did we hit the ground?
+	if (pos.y < 0) {
+		pos.y = 0;
+		if (travel.y < 0) {
+			travel.y = -travel.y;
 		}
-
-		static const float VDONE = 0.1f;
-		static const float RDONE = 10.0f;
-		static const float GRAVITY = 10.0f*METERS_PER_GRID;
-		static const float EPS = 0.01f;
-
-		if (    pos.y < EPS 
-			 && velocity.XZ().LengthSquared() < (VDONE*VDONE)
-			 && rotation < RDONE ) 
-		{
-			velocity.Zero();
-			pos.y = 0;
-			rotation = 0;
-		}
-		else {
-			float grav = GRAVITY * dtime;
-			velocity.y -= grav;
-		}
-
-		// FIXME: rebound off blocks?
-		Vector2F pos2 = { pos.x, pos.z };
-		ApplyBlocks( &pos2, 0 );
-		pos.XZ( pos2 );
-		Quaternion q = Quaternion::MakeYRotation(rot);
-		thisComp.chit->SetPosRot( pos, q );
+		static const float scale = 0.5f;
+		velocity = velocity * scale;
+		rotation = rotation * scale;
 	}
+
+	static const float VDONE = 0.1f;
+	static const float RDONE = 10.0f;
+	static const float GRAVITY = 10.0f*METERS_PER_GRID;
+	static const float EPS = 0.01f;
+
+	if (pos.y < EPS
+		&& velocity.XZ().LengthSquared() < (VDONE*VDONE)
+		&& rotation < RDONE)
+	{
+		velocity.Zero();
+		pos.y = 0;
+		rotation = 0;
+	}
+	else {
+		float grav = GRAVITY * dtime;
+		velocity.y -= grav;
+	}
+
+	// FIXME: rebound off blocks?
+	Vector2F pos2 = { pos.x, pos.z };
+	ApplyBlocks(&pos2, 0);
+	pos.XZ(pos2);
+	Quaternion q = Quaternion::MakeYRotation(rot);
+	parentChit->SetPosRot(pos, q);
+
 	bool isMoving = IsMoving();
 
-	if ( !isMoving && parentChit->StackedMoveComponent() ) {
+	if (!isMoving && parentChit->StackedMoveComponent()) {
 		Context()->chitBag->QueueRemoveAndDeleteComponent(this);
 	}
 	return isMoving ? 0 : VERY_LONG_TICK;

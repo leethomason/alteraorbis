@@ -8,7 +8,6 @@
 class Chit;
 class WorldMap;
 class Engine;
-struct ComponentSet;
 class ChitBag;
 struct ChitContext;
 
@@ -116,11 +115,12 @@ public:
 class TaskList
 {
 public:
-	TaskList()	: context(0), socialTicker(2000) {}
+	TaskList()	: chit(0), context(0), socialTicker(2000) {}
 	~TaskList()	{ Clear();  }
 
-	void Init(const ChitContext* c) {
-		context = c;
+	void Init(Chit* chit, const ChitContext* c) {
+		this->chit = chit;
+		this->context = c;
 	}
 
 	void Serialize( XStream* xs );
@@ -146,19 +146,20 @@ public:
 	const grinliz::IString* BuildingsUsed() const { return buildingsUsed; }
 
 private:
-	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
+	void UseBuilding(Chit* building, const grinliz::IString& buildingName );
 
-	void GoShopping(const ComponentSet& thisComp, Chit* market);
-	void GoExchange(const ComponentSet& thisComp, Chit* market);
-	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
-	bool DoStanding( const ComponentSet& thisComp, int time );
+	void GoShopping(Chit* market);
+	void GoExchange(Chit* market);
+	bool UseFactory(Chit* factory, int tech );
+	bool DoStanding(int time );
 
 	// chat, basically, between denizens
-	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
+	void SocialPulse(const grinliz::Vector2F& origin );
 
 	// Remove the 1st task.
 	void Remove();
 
+	Chit* chit;
 	const ChitContext* context;
 	grinliz::IString	buildingsUsed[NUM_BUILDING_USED];
 	CTicker				socialTicker;

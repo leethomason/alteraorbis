@@ -57,34 +57,31 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									Chit* target )
 {
-	ComponentSet srcComp(   src,     Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-	ComponentSet targetComp( target, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-
-	if ( !srcComp.okay || !targetComp.okay )
-		return false;
-
 	// Buildings are a special challenge.
-	MapSpatialComponent* msc = GET_SUB_COMPONENT(targetComp.chit, SpatialComponent, MapSpatialComponent);
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(target, SpatialComponent, MapSpatialComponent);
 	if (msc) {
 		Rectangle2I bounds = msc->Bounds();
 		Rectangle2F aabb;
 		aabb.Set(float(bounds.min.x), float(bounds.min.y),
 			     float(bounds.max.x + 1), float(bounds.max.y + 1));
 		Vector2F nearest = { 0, 0 };
-		const float range = PointAABBDistance(ToWorld2F(srcComp.chit->Position()), aabb, &nearest);
+		const float range = PointAABBDistance(ToWorld2F(src->Position()), aabb, &nearest);
 
 		return range < MELEE_RANGE;
 	}
 
 	// Check range up front and early out.
-	const float range = ( targetComp.chit->Position() - srcComp.chit->Position() ).Length();
+	const float range = ( target->Position() - src->Position() ).Length();
 	if ( range > MELEE_RANGE )
 		return false;
 
-	int test = IntersectRayCircle( ToWorld2F(targetComp.chit->Position()),
-								   targetComp.render->RadiusOfBase(),
-								   ToWorld2F(srcComp.chit->Position()),
-								   srcComp.chit->Heading2D() );
+	RenderComponent* targetRC = target->GetRenderComponent();
+	if (!targetRC) return false;
+
+	int test = IntersectRayCircle( ToWorld2F(target->Position()),
+								   targetRC->RadiusOfBase(),
+								   ToWorld2F(src->Position()),
+								   src->Heading2D() );
 
 	bool intersect = ( test == INTERSECT || test == INSIDE );
 	return intersect;
@@ -95,16 +92,11 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									const Vector2I& mapPos )
 {
-	ComponentSet srcComp( src, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-
-	if ( !srcComp.okay  )
-		return false;
-
 	// Check range up front and early out.
 	Rectangle2F aabb;
 	aabb.Set( (float)mapPos.x, (float)mapPos.y, (float)(mapPos.x+1), (float)(mapPos.y+1) );
 	Vector2F nearest = { 0, 0 };
-	const float range = PointAABBDistance( ToWorld2F(srcComp.chit->Position()), aabb, &nearest );
+	const float range = PointAABBDistance( ToWorld2F(src->Position()), aabb, &nearest );
 
 	return range < MELEE_RANGE;
 }
@@ -161,12 +153,11 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 
 		if ( InMeleeZone( engine, src, target )) {
 			HealthComponent* targetHealth = target->GetHealthComponent();
-			ComponentSet targetComp( target, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
 
-			if ( targetHealth && targetComp.okay ) {
+			if ( targetHealth ) {
 				target->SetTickNeeded();	// Fire up tick to handle health effects over time
 
-				Vector2F toTarget = ToWorld2F(targetComp.chit->Position()) - srcPos;
+				Vector2F toTarget = ToWorld2F(target->Position()) - srcPos;
 				toTarget.Normalize();
 				float dot = DotProduct(toTarget, srcHeading);
 				float scale = 0.5f + 0.5f*dot;

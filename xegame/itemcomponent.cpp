@@ -616,23 +616,20 @@ void ItemComponent::DoSlowTick()
 {
 	GameItem* mainItem = itemArr[0];
 
-	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
-		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
-		if ( thisComp.okay ) {
-			CChitArray arr;
+	if (mainItem->flags & GameItem::GOLD_PICKUP) {
+		CChitArray arr;
 
-			Vector2F pos = ToWorld2F(parentChit->Position());
-			GoldCrystalFilter goldCrystalFilter;
-			Context()->chitBag->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
-			for( int i=0; i<arr.Size(); ++i ) {
-				Chit* gold = arr[i];
-				GLASSERT( parentChit != gold );
-				TrackingMoveComponent* tc = GET_SUB_COMPONENT( gold, MoveComponent, TrackingMoveComponent );
-				if ( !tc ) {
-					tc = new TrackingMoveComponent();
-					tc->SetTarget( parentChit->ID() );
-					gold->Add( tc );
-				}
+		Vector2F pos = ToWorld2F(parentChit->Position());
+		GoldCrystalFilter goldCrystalFilter;
+		Context()->chitBag->QuerySpatialHash(&arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter);
+		for (int i = 0; i < arr.Size(); ++i) {
+			Chit* gold = arr[i];
+			GLASSERT(parentChit != gold);
+			TrackingMoveComponent* tc = GET_SUB_COMPONENT(gold, MoveComponent, TrackingMoveComponent);
+			if (!tc) {
+				tc = new TrackingMoveComponent();
+				tc->SetTarget(parentChit->ID());
+				gold->Add(tc);
 			}
 		}
 	}
@@ -758,24 +755,20 @@ void ItemComponent::OnRemove()
 }
 
 
-bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
+bool ItemComponent::EmitEffect(const GameItem& it, U32 delta)
 {
 	const ChitContext* context = Context();
 	ParticleSystem* ps = context->engine->particleSystem;
 	bool emitted = false;
 
-	ComponentSet compSet( parentChit, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
-
-	if ( compSet.okay ) {
-		if ( it.fireTime > 0 ) {
-			ps->EmitPD( ISC::fire, compSet.chit->Position(), V3F_UP, delta );
-			ps->EmitPD( ISC::smoke, compSet.chit->Position(), V3F_UP, delta );
-			emitted = true;
-		}
-		if ( it.shockTime > 0 ) {
-			ps->EmitPD( ISC::shock, compSet.chit->Position(), V3F_UP, delta );
-			emitted = true;
-		}
+	if (it.fireTime > 0) {
+		ps->EmitPD(ISC::fire, parentChit->Position(), V3F_UP, delta);
+		ps->EmitPD(ISC::smoke, parentChit->Position(), V3F_UP, delta);
+		emitted = true;
+	}
+	if (it.shockTime > 0) {
+		ps->EmitPD(ISC::shock, parentChit->Position(), V3F_UP, delta);
+		emitted = true;
 	}
 	return emitted;
 }

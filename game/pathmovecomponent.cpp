@@ -163,13 +163,9 @@ bool PathMoveComponent::NeedComputeDest()
 void PathMoveComponent::ComputeDest()
 {
 	//PROFILE_FUNC();
-	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-	if ( !thisComp.okay )
-		return;
-	
 	const ChitContext* context = Context();
 
-	const Vector2F& posVec = ToWorld2F(thisComp.chit->Position());
+	const Vector2F& posVec = ToWorld2F(parentChit->Position());
 	bool sameSector = true;
 	if ( context->worldMap->UsingSectors() ) {
 		Vector2I v0 = SectorData::SectorID( posVec.x, posVec.y );
@@ -193,7 +189,7 @@ void PathMoveComponent::ComputeDest()
 	pathPos = 0;
 
 	// Make sure the 'dest' is actually a point we can get to.
-	float radius = thisComp.render->RadiusOfBase();
+	float radius = parentChit->GetRenderComponent() ? parentChit->GetRenderComponent()->RadiusOfBase() : MAX_BASE_RADIUS;
 	Vector2F d = dest.pos;
 	if ( context->worldMap->ApplyBlockEffect( d, radius, WorldMap::BT_PASSABLE, &dest.pos ) ) {
 #ifdef DEBUG_PMC

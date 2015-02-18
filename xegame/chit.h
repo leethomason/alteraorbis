@@ -243,26 +243,4 @@ private:
 };
 
 
-struct ComponentSet
-{
-	enum {
-		IS_ALIVE		= (1<<30),
-		NOT_IN_IMPACT	= (1<<29),
-	};
-
-	ComponentSet( Chit* chit, int bits );
-	void Zero();
-
-	bool	okay;
-	Chit*	chit;
-	bool	alive;
-
-	MoveComponent*		move;
-	ItemComponent*		itemComponent;
-	GameItem*			item;
-	RenderComponent*	render;
-	AIComponent*		ai;
-};
-
-
 #endif // XENOENGINE_CHIT_INCLUDED

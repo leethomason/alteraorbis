@@ -124,35 +124,35 @@ private:
 	void Target( int id, bool focused );
 	// Process the lists, makes sure they only include valid targets.
 	void ProcessFriendEnemyLists(bool tick);
-	Chit* Closest( const ComponentSet& thisComp, Chit* arr[], int n, 
+	Chit* Closest( Chit* arr[], int n, 
 				   grinliz::Vector2F* pos, float* distance );
 
 	// Compute the line of site
-	bool LineOfSight( const ComponentSet& thisComp, Chit* target, const RangedWeapon* weapon );
-	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
+	bool LineOfSight(Chit* target, const RangedWeapon* weapon );
+	bool LineOfSight(const grinliz::Vector2I& voxel );
 
-	void Think( const ComponentSet& thisComp );	// Choose a new action.
-	void ThinkNormal( const ComponentSet& thisComp );
-	void ThinkBattle( const ComponentSet& thisComp );
-	void ThinkVisitor( const ComponentSet& thisComp );
-	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
-	bool ThinkHungry( const ComponentSet& thisComp );
-	bool ThinkFruitCollect( const ComponentSet& thisComp );
-	bool ThinkDelivery( const ComponentSet& thisComp );
-	bool ThinkRepair(const ComponentSet& thisComp);
-	bool ThinkFlag(const ComponentSet& thisComp);
-	bool ThinkWaypoints(const ComponentSet& thisComp);
+	void Think();	// Choose a new action.
+	void ThinkNormal();
+	void ThinkBattle();
+	void ThinkVisitor();
+	void ThinkRampage();	// process the rampage action
+	bool ThinkHungry();
+	bool ThinkFruitCollect();
+	bool ThinkDelivery();
+	bool ThinkRepair();
+	bool ThinkFlag();
+	bool ThinkWaypoints();
 
 	bool RampageDone();
-	void DoMoraleZero(const ComponentSet& thisComp);
-	bool TravelHome(const ComponentSet& thisComp, bool focus);
-	void WorkQueueToTask(  const ComponentSet& thisComp );			// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp, U32 delta );	// moves tasks along, mark tasks completed, do special actions
+	void DoMoraleZero();
+	bool TravelHome(bool focus);
+	void WorkQueueToTask();			// turn a work item into a task
+	void FlushTaskList(U32 delta );	// moves tasks along, mark tasks completed, do special actions
 
 	bool AtHomeCore();
 	bool AtFriendlyOrNeutralCore();
 
-	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp );
+	grinliz::Vector2F GetWanderOrigin();
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
 	void FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest, grinliz::CArray<Chit*, 32 >* arr, bool* nearPath );
@@ -162,30 +162,30 @@ private:
 	grinliz::Vector3F EnemyPos(int id, bool target);
 
 	// Returns true if this action was actually taken.
-	bool ThinkWanderEat( const ComponentSet& thisComp );
-	bool ThinkCriticalShopping( const ComponentSet& thisComp );
-	bool ThinkNeeds( const ComponentSet& thisComp );
-	bool ThinkLoot( const ComponentSet& thisComp );
-	bool ThinkDoRampage( const ComponentSet& thisComp );	// whether this MOB should rampage
-	bool ThinkGuard( const ComponentSet& thisComp );
+	bool ThinkWanderEat();
+	bool ThinkCriticalShopping();
+	bool ThinkNeeds();
+	bool ThinkLoot();
+	bool ThinkDoRampage();	// whether this MOB should rampage
+	bool ThinkGuard();
 
 	// What happens when no other move is working.
-	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
+	grinliz::Vector2F ThinkWanderRandom();
 	// pseudo-flocking
-	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
+	grinliz::Vector2F ThinkWanderFlock();
 	// creepy circle pacing
-	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
+	grinliz::Vector2F ThinkWanderCircle();
 
 	grinliz::Vector2I RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter );
 
-	void DoMelee(const ComponentSet& thisComp);
-	void DoShoot(const ComponentSet& thisComp);
-	void DoMove(const ComponentSet& thisComp);
-	bool DoStand(const ComponentSet& thisComp, U32 since);	// return true if doing something
-	bool SectorHerd(const ComponentSet& thisComp, bool focus);	// "upper" function: look for dest, etc.
-	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const grinliz::Vector2I& sector);	// lower function: go
-	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
-	void EnterNewGrid(const ComponentSet& thisComp);
+	void DoMelee();
+	void DoShoot();
+	void DoMove();
+	bool DoStand(U32 since);	// return true if doing something
+	bool SectorHerd(bool focus);	// "upper" function: look for dest, etc.
+	bool DoSectorHerd(bool focus, const grinliz::Vector2I& sector);	// lower function: go
+	bool DoSectorHerd(bool focus, const SectorPort& sectorPort);	// lower function: go
+	void EnterNewGrid();
 
 	enum { 
 		FOCUS_NONE,

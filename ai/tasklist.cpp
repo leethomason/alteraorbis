@@ -110,17 +110,17 @@ void TaskList::Serialize( XStream* xs )
 }
 
 
-bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
+bool TaskList::DoStanding(int time)
 {
-	if ( taskList.Empty() ) return false;
-	if ( Standing() ) {
+	if (taskList.Empty()) return false;
+	if (Standing()) {
 		taskList[0].timer -= time;
-		if ( taskList[0].timer <= 0 ) {
+		if (taskList[0].timer <= 0) {
 			Remove();
 		}
-		int n = socialTicker.Delta( time );
-		for( int i=0; i<n; ++i ) {
-			SocialPulse( thisComp, ToWorld2F(thisComp.chit->Position()));
+		int n = socialTicker.Delta(time);
+		for (int i = 0; i < n; ++i) {
+			SocialPulse(ToWorld2F(chit->Position()));
 		}
 		return true;
 	}
@@ -132,17 +132,16 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 {
 	if (taskList.Empty()) return;
 
-	ComponentSet thisComp(chit, Chit::MOVE_BIT | Chit::SPATIAL_BIT | Chit::AI_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE);
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 
-	if (!pmc || !thisComp.okay) {
+	if (!pmc || !chit->GetAIComponent()) {
 		Clear();
 		return;
 	}
 
 	LumosChitBag* chitBag = chit->Context()->chitBag;
 	Task* task = &taskList[0];
-	Vector2I pos2i = ToWorld2I(thisComp.chit->Position());
+	Vector2I pos2i = ToWorld2I(chit->Position());
 	Vector2I sector = ToSector(pos2i);
 	Vector2F taskPos2 = ToWorld2F(task->pos2i);
 	Vector3F taskPos3 = ToWorld3F(task->pos2i);
@@ -155,7 +154,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 		if (task->timer == 0) {
 			// Need to start the move.
 			Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-			thisComp.ai->Move(dest, false);
+			chit->GetAIComponent()->Move(dest, false);
 			task->timer = delta;
 		}
 		else if (pmc->Stopped()) {
@@ -175,8 +174,8 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_STAND:
 		if (pmc->Stopped()) {
-			thisComp.ai->Stand();
-			DoStanding(thisComp, delta);
+			chit->GetAIComponent()->Stand();
+			DoStanding(delta);
 
 			if (taskList.Size() >= 2) {
 				int action = taskList[1].action;
@@ -186,11 +185,11 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					context->engine->particleSystem->EmitPD(ISC::construction, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_USE_BUILDING) {
-					Vector3F pos = thisComp.chit->Position();
+					Vector3F pos = chit->Position();
 					context->engine->particleSystem->EmitPD(ISC::useBuilding, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 				else if (action == Task::TASK_REPAIR_BUILDING) {
-					Vector3F pos = thisComp.chit->Position();
+					Vector3F pos = chit->Position();
 					context->engine->particleSystem->EmitPD(ISC::repair, pos, V3F_UP, 30);	// FIXME: standard delta constant					
 				}
 			}
@@ -206,13 +205,13 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					Rectangle2I b = msc->Bounds();
 					b.Outset(1);
 					if (b.Contains(pos2i)) {
-						ComponentSet comp(building, ComponentSet::IS_ALIVE | Chit::ITEM_BIT);
-						if (comp.okay) {
-							comp.item->hp = double(comp.item->TotalHP());
-							RenderComponent* rc = building->GetRenderComponent();
-							if (rc) {
-								rc->AddDeco("repair", STD_DECO);
-							}
+						GameItem* item = building->GetItem();
+						if (item) {
+							item->hp = double(item->TotalHP());
+						}
+						RenderComponent* rc = building->GetRenderComponent();
+						if (rc) {
+							rc->AddDeco("repair", STD_DECO);
 						}
 					}
 				}
@@ -299,10 +298,10 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 			int chitID = task->data;
 			Chit* itemChit = chitBag->GetChit(chitID);
 			if (itemChit
-				&& (ToWorld2F(itemChit->Position()) - ToWorld2F(thisComp.chit->Position())).Length() <= PICKUP_RANGE
+				&& (ToWorld2F(itemChit->Position()) - ToWorld2F(chit->Position())).Length() <= PICKUP_RANGE
 				&& itemChit->GetItemComponent()->NumItems() == 1)	// doesn't have sub-items / intrinsic
 			{
-				if (thisComp.itemComponent->CanAddToInventory()) {
+				if (chit->GetItemComponent() && chit->GetItemComponent()->CanAddToInventory()) {
 					ItemComponent* ic = itemChit->GetItemComponent();
 					itemChit->Remove(ic);
 					chit->GetItemComponent()->AddToInventory(ic);
@@ -323,7 +322,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					// Not sure how this happened. But do nothing.
 				}
 				else {
-					UseBuilding(thisComp, building, buildingName);
+					UseBuilding(building, buildingName);
 					for (int i = 1; i < NUM_BUILDING_USED; ++i) {
 						buildingsUsed[i] = buildingsUsed[i - 1];
 					}
@@ -357,13 +356,16 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 }
 
 
-void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin )
+void TaskList::SocialPulse(const Vector2F& origin )
 {
-	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+	const GameItem* gameItem = chit->GetItem();
+	if (!gameItem) return;
+
+	if ( !(gameItem->flags & GameItem::AI_USES_BUILDINGS )) {
 		return;
 	}
 
-	LumosChitBag* chitBag	= thisComp.chit->Context()->chitBag;
+	LumosChitBag* chitBag	= chit->Context()->chitBag;
 	CChitArray arr;
 	
 	MOBKeyFilter mobFilter;
@@ -396,7 +398,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	Vector3<double> needs = { 0, 0, 0 };
 
 	for( int i=0; i<arr.Size(); ++i ) {
-		const Personality& personality = thisComp.item->GetPersonality();
+		const Personality& personality = gameItem->GetPersonality();
 		double social = double(arr.Size()) * 0.10;
 		if (personality.Introvert()) {
 			social *= 0.5;	// introverts get less reward from social interaction (go build stuff)
@@ -404,58 +406,60 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 		needs.X(Needs::FUN) += social;
 
 		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( needs );
-		if ( thisComp.chit->GetRenderComponent() ) {
-			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
+		if ( chit->GetRenderComponent() ) {
+			chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
 		}
 	}
 }
 
 
-void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
+void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 {
-	LumosChitBag* chitBag	= thisComp.chit->Context()->chitBag;
-	Vector2I pos2i			= ToWorld2I(thisComp.chit->Position());
-	Vector2I sector			= ToSector( pos2i );
-	CoreScript* coreScript  = CoreScript::GetCore(sector);
-	Chit* controller		= coreScript->ParentChit();
-	ItemComponent* ic		= building->GetItemComponent();
+	LumosChitBag* chitBag = chit->Context()->chitBag;
+	Vector2I pos2i = ToWorld2I(chit->Position());
+	Vector2I sector = ToSector(pos2i);
+	CoreScript* coreScript = CoreScript::GetCore(sector);
+	Chit* controller = coreScript->ParentChit();
+	ItemComponent* ic = building->GetItemComponent();
+
+	if (!chit->GetItem()) return;
 
 	// Working buildings. (Not need based.)
-	if ( buildingName == ISC::vault ) {
+	if (buildingName == ISC::vault) {
 		GameItem* vaultItem = building->GetItem();
-		GLASSERT( vaultItem );
+		GLASSERT(vaultItem);
 		GLASSERT(building->GetWallet());
-		building->GetWallet()->Deposit(&thisComp.item->wallet, thisComp.item->wallet);
+		building->GetWallet()->Deposit(&chit->GetItem()->wallet, chit->GetItem()->wallet);
 
 		// Put everything in the vault.
 		ItemComponent* vaultIC = building->GetItemComponent();
-		vaultIC->TransferInventory( thisComp.itemComponent, true, IString() );
+		vaultIC->TransferInventory(chit->GetItemComponent(), true, IString());
 
 		// Move gold & crystal to the owner.
-		if ( controller && controller->GetItemComponent() ) {
+		if (controller && controller->GetItemComponent()) {
 			controller->GetWallet()->Deposit(&vaultItem->wallet, vaultItem->wallet);
 		}
 		building->SetTickNeeded();
 		return;
 	}
-	if ( buildingName == ISC::distillery ) {
-		GLASSERT( ic );
-		ic->TransferInventory( thisComp.itemComponent, false, ISC::fruit );
+	if (buildingName == ISC::distillery) {
+		GLASSERT(ic);
+		ic->TransferInventory(chit->GetItemComponent(), false, ISC::fruit);
 		building->SetTickNeeded();
 		return;
 	}
 	if (buildingName == ISC::bar) {
-		int nTransfer = ic->TransferInventory( thisComp.itemComponent, false, ISC::elixir );
+		int nTransfer = ic->TransferInventory(chit->GetItemComponent(), false, ISC::elixir);
 		building->SetTickNeeded();
 		if (nTransfer) {
 			return;	// only return on transfer. else use the bar!
 		}
 	}
 
-	if (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) {
+	if (chit->GetItem()->flags & GameItem::AI_USES_BUILDINGS) {
 		// Need based.
 		bool functional = false;
-		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, thisComp.chit, &functional);
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, chit, &functional);
 		if (buildingNeeds.IsZero()) {
 			// doesn't have what is needed, etc.
 			return;
@@ -464,19 +468,21 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		int nElixir = ic->NumCarriedItems(ISC::elixir);
 
 		if (buildingName == ISC::market) {
-			GoShopping(thisComp, building);
+			GoShopping(building);
 		}
 		else if (buildingName == ISC::exchange) {
-			GoExchange(thisComp, building);
+			GoExchange(building);
 		}
 		else if (buildingName == ISC::factory) {
-			UseFactory(thisComp, building, int(coreScript->GetTech()));
+			UseFactory(building, int(coreScript->GetTech()));
 		}
 		else if (buildingName == ISC::bed) {
 			// Also heal.
-			thisComp.item->hp += buildingNeeds.X(Needs::ENERGY) * thisComp.item->TotalHP();
-			if (thisComp.item->hp > thisComp.item->TotalHP()) {
-				thisComp.item->hp = thisComp.item->TotalHP();
+			GameItem* item = chit->GetItem();
+			GLASSERT(item);
+			item->hp += buildingNeeds.X(Needs::ENERGY) * item->TotalHP();
+			if (item->hp > item->TotalHP()) {
+				item->hp = item->TotalHP();
 			}
 		}
 		else if (buildingName == ISC::bar) {
@@ -488,14 +494,19 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 				delete item;
 			}
 		}
-		thisComp.ai->GetNeedsMutable()->Add(buildingNeeds);
+		if (chit->GetAIComponent()) {
+			chit->GetAIComponent()->GetNeedsMutable()->Add(buildingNeeds);
+		}
 	}
 }
 
 
-void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
+void TaskList::GoExchange(Chit* exchange)
 {
-	const Personality& personality = thisComp.item->GetPersonality();
+	GameItem* gameItem = chit->GetItem();
+	if (!gameItem) return;
+
+	const Personality& personality = gameItem->GetPersonality();
 	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
 	bool usedExchange = false;
 	ReserveBank* bank = ReserveBank::Instance();
@@ -505,14 +516,14 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 		int value = 0;
 		int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-			value += thisComp.item->wallet.Crystal(type) * crystalValue[type];
-			crystal[type] = thisComp.item->wallet.Crystal(type);
+			value += gameItem->wallet.Crystal(type) * crystalValue[type];
+			crystal[type] = gameItem->wallet.Crystal(type);
 		}
 		if (value) {
 			// Move money from the bank.
 			// Move crystal to the exchange.
-			thisComp.item->wallet.Deposit(&bank->wallet, value);
-			exchange->GetWallet()->Deposit(&thisComp.item->wallet, 0, crystal);
+			gameItem->wallet.Deposit(&bank->wallet, value);
+			exchange->GetWallet()->Deposit(&gameItem->wallet, 0, crystal);
 			usedExchange = true;
 		}
 	}
@@ -520,20 +531,20 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 		const int nPass = (personality.Crafting() == Personality::LIKES) ? 3 : 1;
 		for (int pass = 0; pass < nPass; ++pass) {
 			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
-				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= thisComp.item->wallet.Gold()) {
+				if (exchange->GetWallet()->Crystal(type) && crystalValue[type] <= gameItem->wallet.Gold()) {
 					// Money to bank.
 					// Crystal from exchange.
 					int crystal[NUM_CRYSTAL_TYPES] = { 0 };
 					crystal[type] = 1;
-					bank->wallet.Deposit(&thisComp.item->wallet, crystalValue[type]);
-					thisComp.item->wallet.Deposit(exchange->GetWallet(), 0, crystal);
+					bank->wallet.Deposit(&gameItem->wallet, crystalValue[type]);
+					gameItem->wallet.Deposit(exchange->GetWallet(), 0, crystal);
 					usedExchange = true;
 				}
 			}
 		}
 	}
 	if (usedExchange) {
-		RenderComponent* rc = thisComp.chit->GetRenderComponent();
+		RenderComponent* rc = chit->GetRenderComponent();
 		if (rc) {
 			rc->AddDeco("loot");
 		}
@@ -541,7 +552,7 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 }
 
 
-void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
+void TaskList::GoShopping(Chit* market)
 {
 	// Try to keep this as simple as possible.
 	// Still complex. Purchasing stuff can invalidate
@@ -549,7 +560,7 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	// if that happens. We can come back later.
 
 	const GameItem* ranged = 0, *melee = 0, *shield = 0;
-	Vector2I sector = ToSector(thisComp.chit->Position());
+	Vector2I sector = ToSector(chit->Position());
 	CoreScript* cs = CoreScript::GetCore(sector);
 	Wallet* salesTax = (cs && cs->ParentChit()->GetItem()) ? &cs->ParentChit()->GetItem()->wallet : 0;
 
@@ -558,12 +569,13 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 
 	MarketAI marketAI( market );
 
-	// Should be sorted, but just in case:
-//	thisComp.itemComponent->SortInventory();
-//	market->GetItemComponent()->SortInventory();
+	ItemComponent* thisIC = chit->GetItemComponent();
+	if (!thisIC) return;
+	GameItem* gameItem = chit->GetItem();
+	GLASSERT(gameItem);
 
-	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-		const GameItem* gi = thisComp.itemComponent->GetItem( i );
+	for( int i=1; i<thisIC->NumItems(); ++i ) {
+		const GameItem* gi = thisIC->GetItem( i );
 		if ( gi && !gi->Intrinsic() ) {
 			if ( !ranged && gi->ToRangedWeapon()) {
 				ranged = gi;
@@ -581,13 +593,13 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	bool boughtStuff = false;
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
-		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.Gold(), 1 );
+		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( gameItem->wallet.Gold(), 1 );
 		if ( i == 1 && !shield )
-			purchase = marketAI.HasShield( thisComp.item->wallet.Gold(), 1 );
-		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.Gold(), 1 );
+			purchase = marketAI.HasShield( gameItem->wallet.Gold(), 1 );
+		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  gameItem->wallet.Gold(), 1 );
 		if ( purchase ) {
 			MarketAI::Transact(	purchase,
-								thisComp.itemComponent,
+								thisIC,
 								market->GetItemComponent(),
 								salesTax,
 								true );
@@ -598,11 +610,11 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	if (!boughtStuff) {
 		// Sell the extras.
 		const GameItem* itemToSell = 0;
-		while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
+		while ((itemToSell = thisIC->ItemToSell()) != 0) {
 			int value = itemToSell->GetValue();
 			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
-				thisComp.itemComponent,		// seller
+				thisIC,		// seller
 				salesTax,					// more of a transaction bonus...
 				true);
 
@@ -618,13 +630,13 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 		// by a non-critical. Also, personality probably should factor in to purchasing decisions.
 		for (int i = 0; i < 3; ++i) {
 			const GameItem* purchase = 0;
-			if (i == 0 && ranged) purchase = marketAI.HasRanged(thisComp.item->wallet.Gold(), ranged->GetValue() * 2);
-			if (i == 1 && shield) purchase = marketAI.HasShield(thisComp.item->wallet.Gold(), shield->GetValue() * 2);
-			if (i == 2 && melee)  purchase = marketAI.HasMelee(thisComp.item->wallet.Gold(), melee->GetValue() * 2);
+			if (i == 0 && ranged) purchase = marketAI.HasRanged(gameItem->wallet.Gold(), ranged->GetValue() * 2);
+			if (i == 1 && shield) purchase = marketAI.HasShield(gameItem->wallet.Gold(), shield->GetValue() * 2);
+			if (i == 2 && melee)  purchase = marketAI.HasMelee(gameItem->wallet.Gold(), melee->GetValue() * 2);
 			if (purchase) {
 
 				MarketAI::Transact(purchase,
-					thisComp.itemComponent,
+					thisIC,
 					market->GetItemComponent(),
 					salesTax,
 					true);
@@ -635,18 +647,20 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 }
 
 
-bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech )
+bool TaskList::UseFactory( Chit* factory, int tech )
 {
-	if ( !thisComp.itemComponent->CanAddToInventory() ) {
-		return false;
-	}
+	ItemComponent* thisIC = chit->GetItemComponent();
+	if (!thisIC) return false;
+	if (!thisIC->CanAddToInventory()) return false;
+	GameItem* gameItem = chit->GetItem();
+	GLASSERT(gameItem);
 
-	RangedWeapon* ranged = thisComp.itemComponent->GetRangedWeapon(0);
-	MeleeWeapon* melee = thisComp.itemComponent->GetMeleeWeapon();
-	Shield* shield = thisComp.itemComponent->GetShield();
+	RangedWeapon* ranged = thisIC->GetRangedWeapon(0);
+	MeleeWeapon* melee = thisIC->GetMeleeWeapon();
+	Shield* shield = thisIC->GetShield();
 
 	int itemType = 0;
-	Random& random = thisComp.chit->random;
+	Random& random = chit->random;
 
 	if ( !ranged )		itemType = ForgeScript::GUN;
 	else if ( !shield ) itemType = ForgeScript::SHIELD;
@@ -655,11 +669,11 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		itemType = random.Rand( ForgeScript::NUM_ITEM_TYPES );
 	}
 
-	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
-	int level = thisComp.item->Traits().Level();
+	int seed = chit->ID() ^ gameItem->Traits().Experience();
+	int level = gameItem->Traits().Level();
 	TransactAmt cost;
 	int partsMask = 0xffffffff;
-	int team = Team::Group(thisComp.chit->Team());
+	int team = Team::Group(chit->Team());
 	int subItem = -1;
 	const char* altRes = "";
 
@@ -673,26 +687,29 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	}
 
 	// FIXME: the parts mask (0xff) is set for denizen domains.
-	GameItem* item = ForgeScript::DoForge(itemType, subItem, thisComp.item->wallet, &cost, 0xffffffff, 0xffffffff, tech, level, seed, thisComp.chit->Team());
+	GameItem* item = ForgeScript::DoForge(itemType, subItem, 
+										  gameItem->wallet, &cost, 
+										  0xffffffff, 0xffffffff, 
+										  tech, level, seed, chit->Team());
 	if (item) {
 		if (team == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
 			item->SetResource("kamabeamgun");
 		}
 
-		item->wallet.Deposit(&thisComp.item->wallet, cost);
-		thisComp.itemComponent->AddToInventory(item);
-		thisComp.itemComponent->AddCraftXP(cost.NumCrystals());
-		thisComp.item->historyDB.Increment("Crafted");
+		item->wallet.Deposit(&gameItem->wallet, cost);
+		thisIC->AddToInventory(item);
+		thisIC->AddCraftXP(cost.NumCrystals());
+		gameItem->historyDB.Increment("Crafted");
 
-		Vector2I sector = ToSector(thisComp.chit->Position());
+		Vector2I sector = ToSector(chit->Position());
 		GLOUTPUT(("'%s' forged the item '%s' at sector=%x,%x\n",
-			thisComp.item->BestName(),
+			gameItem->BestName(),
 			item->BestName(),
 			sector.x, sector.y));
 
-		item->SetSignificant(thisComp.chit->Context()->chitBag->GetNewsHistory(), 
-							 ToWorld2F(thisComp.chit->Position()),
-							 NewsEvent::FORGED, NewsEvent::UN_FORGED, thisComp.chit);
+		item->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
+							 ToWorld2F(chit->Position()),
+							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
 		return true;
 	}
 	return false;
