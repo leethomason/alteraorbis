@@ -85,15 +85,10 @@ public:
 		this->name = name;
 	}
 
-	~QuickProfile()	{ 
-		U64 endTime = FastTime();	
-		double delta = ((double)(endTime-startTime)/(double)(1000*1000));
-		if ( delta < 10 ) {
-			GLOUTPUT_REL(( "%s %.2f MClocks\n", name, delta ));
-		}
-		else {
-			GLOUTPUT_REL(( "%s %.1f MClocks\n", name, delta ));
-		}
+	~QuickProfile()	{
+		U64 endTime = FastTime();
+		double delta = (double)(endTime - startTime);
+		GLOUTPUT_REL(("%s %f Clocks\n", name, delta));
 	}
 
 private:

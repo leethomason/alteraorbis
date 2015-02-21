@@ -25,7 +25,7 @@
 static const float	MAX_BASE_RADIUS = 0.4f;
 
 // What is the maximum map size? Used to allocate
-// the spatial cache.
+// the spatial cache. Power of 2, of course.
 static const int	MAX_MAP_SIZE = 1024;
 
 static const U32	CROSS_FADE_TIME = 300;		// time to blend animations

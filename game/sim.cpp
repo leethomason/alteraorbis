@@ -57,7 +57,7 @@ Sim* StackedSingleton<Sim>::instance			= 0;
 Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10 * 1000), visitorClock(4*1000)
 {
 	context.game = g;
-	spawnEnabled = true;
+	spawnEnabled = 0xff;
 	Screenport* port = context.game->GetScreenportMutable();
 	const gamedb::Reader* database = context.game->GetDatabase();
 	cachedWebAge = VERY_LONG_TICK;
@@ -292,6 +292,9 @@ void Sim::SpawnDenizens()
 	// when there are few Kamakiri domains. But probably need logic
 	// to account for both #of Denizens, and Denizens in domains.
 
+	if (!(SpawnEnabled() & SPAWN_DENIZENS))
+		return;
+
 	int greater = 0, lesser = 0, denizen = 0;
 	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
 
@@ -374,6 +377,9 @@ void Sim::SpawnDenizens()
 
 void Sim::SpawnGreater()
 {
+	if (!(SpawnEnabled() & SPAWN_GREATER))
+		return;
+
 	int lesser = 0, greater = 0, denizen = 0;
 	context.chitBag->census.NumByType(&lesser, &greater, &denizen);
 	if (greater < TYPICAL_GREATER) {

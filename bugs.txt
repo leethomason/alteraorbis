@@ -1,3 +1,14 @@
+x fast world-gen
+	x refactor; 78-80 ms. Threads all slower. Too many small jobs.
+	x traditional optimization during thread work
+- GT: humans change color as they walk
+- GT: avatar name/portrait mis-match
+
+- GT: food as medkit
+- GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
+- GT: suggestion - pick up and use food as medkit
+- GT: suggestion - add popup advisor when the game starts (welcome to altera, altera is a, you are a, your aim is to, some story or lore  and ask if people want detailed tutorial popus with pause (step by step, click menu to build this because xxx) or make do with the tiny "live" advisor on the ui
+
 x regen for items (guns, shields)
 - face is glowing in asset preview
 - info on attack flags: who is attacking me??

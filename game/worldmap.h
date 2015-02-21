@@ -35,6 +35,7 @@
 
 #include "../tinyxml2/tinyxml2.h"
 
+class ThreadPool;
 class Texture;
 class WorldInfo;
 class Model;
@@ -351,12 +352,6 @@ private:
 							grinliz::Vector2F* bestEnd,
 							float* totalCost );
 
-	// Find a path to 'end' or beside 'end'
-//	bool CalcWorkPath(	const grinliz::Vector2F& start, 
-//						const grinliz::Vector2F& end, 
-//						grinliz::Vector2F* bestEnd,
-//						float* totalCost );
-
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector
 	//					line segments.
@@ -421,8 +416,15 @@ private:
 
 	int IntersectPlantAtVoxel( const grinliz::Vector3I& voxel,
 		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);
-	void ProcessEffect(ChitBag* chitBag, int delta);	// on slow tick
 	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
+
+	static const int NJOBS = 4;
+	struct EffectRecord {
+		grinliz::Vector2I pos;
+		int	effect;
+	};
+	void ProcessEffect(ChitBag* chitBag, int delta);
+	static int ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, int n, WorldMap* thisMap );
 
 	Engine*						engine;
 	IMapGridBlocked*			iMapGridUse;
@@ -463,12 +465,17 @@ private:
 	CTicker							fluidTicker;
 	int								fluidSector;
 
+	ThreadPool*						threadPool;
+
 	// List of interesting things that need to be processed each frame.
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
+	grinliz::CDynArray< EffectRecord > effectCache;
+#ifdef WORLDMAP_THREADS
+	grinliz::CDynArray< EffectRecord > subEffectCache[NJOBS];
+#endif
 
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
-
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
 
 	// Big memory: the actual map.

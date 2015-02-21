@@ -127,6 +127,13 @@ void WorldGenScene::DeActivate()
 void WorldGenScene::ItemTapped(const gamui::UIItem* item)
 {
 	if (item == &okay) {
+		// SIM_START saves the map. Need to get past that.
+		if (genState.mode > GenState::SIM_START) {
+			const char* datPath = game->GamePath("map", 0, "dat");
+			const char* gamePath = game->GamePath("game", 0, "dat");
+
+			sim->Save(datPath, gamePath);
+		}
 		if (genState.mode == GenState::GEN_NOTES) {
 			genState.mode = GenState::WORLDGEN;
 			okay.SetEnabled(false);
@@ -226,14 +233,17 @@ void WorldGenScene::DoTick(U32 delta)
 			cancel.SetEnabled(true);
 
 			headerText.SetText("Welcome to world generation!\n\n"
-							   "This process will take a few minutes (grab some water "
-							   "or coffee) while the world is generated. This will delete any game in progress. Once generated, "
-							   "the world persists and you can play a game, with time passing and domains rising and falling, for "
-							   "as long as you wish.\n\n"
-							   "World generation plays the 1st Age: The Age of Fire, from date 0.00 to 1.00.\n\n"
+							   "This will delete any game in progress.\n\n"
+							   "World Generation creates the terrain and simulates the 1st Age, the Age of Fire. You can press "
+							   "'okay' any time after 20% into the 1st Age to save and start. The world will be new and "
+							   "largely empty. Or grab some water or coffee while the world is filled with events, "
+							   "monsters, and domain cores.\n\n"
+							   
+							   "Once generated, the world persists and you can play a game, with time passing "
+							   "and domains rising and falling, for as long as you wish.\n\n"
 							   "Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
-							   "destroying land. There are few monsters during the Age of Fire, so at the end of world generation "
-							   "rock will dominate the landscape. Over time, the forces of motion and rock will balance.\n\n"
+							   "destroying land. Over time, the forces of motion and rock will balance. Domain construction "
+							   "will create silica (manufactured rock), pave, and buildings that will dot the langscape.\n\n"
 							   "Tap 'okay' to generate or world or 'cancel' to return to title.");
 		}
 		break;
@@ -357,7 +367,7 @@ void WorldGenScene::DoTick(U32 delta)
 			const char* datPath = game->GamePath("map", 0, "dat");
 			sim->Load(datPath, 0);
 
-			sim->EnableSpawn(false);
+			sim->EnableSpawn(0);
 			sim->SeedPlants();
 			genState.mode = GenState::SIM_TICK;
 			newsConsole.AttachChitBag(sim->GetChitBag());
@@ -434,10 +444,16 @@ void WorldGenScene::DoTick(U32 delta)
 				}
 			}
 
-
-			if (age > SettingsManager::Instance()->SpawnDate()) {
-				sim->EnableSpawn(true);
+			int spawn = 0;
+			if (age > SettingsManager::Instance()->DenizenDate()) {
+				spawn |= Sim::SPAWN_DENIZENS;
 			}
+			if (age > SettingsManager::Instance()->SpawnDate()) {
+				spawn |= Sim::SPAWN_LESSER;
+				spawn |= Sim::SPAWN_GREATER;
+			}
+			sim->EnableSpawn(spawn);
+			okay.SetEnabled(spawn != 0);
 
 			// Have to wait until the first age so that
 			// volcanoes don't eat your domain.
@@ -449,11 +465,6 @@ void WorldGenScene::DoTick(U32 delta)
 
 		case GenState::SIM_DONE:
 		{
-			const char* datPath = game->GamePath("map", 0, "dat");
-			const char* gamePath = game->GamePath("game", 0, "dat");
-
-			sim->Save(datPath, gamePath);
-
 			genState.mode = GenState::DONE;
 			simStr.AppendFormat("\n\nDONE!");
 			footerText.SetText("DONE");
@@ -464,7 +475,6 @@ void WorldGenScene::DoTick(U32 delta)
 		case GenState::DONE:
 		{
 			XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
-			okay.SetEnabled(true);
 		}
 		break;
 

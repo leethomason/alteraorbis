@@ -149,12 +149,12 @@ public:
 									int required, int exclude, const Model* const * ignore );
 
 	enum {
-		NEAR,
-		FAR,
-		LEFT,
-		RIGHT,
-		BOTTOM,
-		TOP
+		PLANE_NEAR,
+		PLANE_FAR,
+		PLANE_LEFT,
+		PLANE_RIGHT,
+		PLANE_BOTTOM,
+		PLANE_TOP
 	};
 	void CalcFrustumPlanes( grinliz::Plane* planes );
 

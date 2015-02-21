@@ -636,7 +636,8 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	if ( nSpawnTicks && lesserPossible)
 	{
 #if SPAWN_MOBS > 0
-		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
+		int spawnEnabled = Context()->chitBag->GetSim()->SpawnEnabled() & Sim::SPAWN_LESSER;
+		if (Context()->chitBag->GetSim() && spawnEnabled) {
 			// spawn stuff.
 
 			// 0->NUM_SECTORS

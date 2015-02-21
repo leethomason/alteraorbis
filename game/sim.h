@@ -73,8 +73,13 @@ public:
 	double AgeD() const;
 	float  AgeF() const;
 
-	bool SpawnEnabled() const			{ return spawnEnabled; }
-	void EnableSpawn(bool enable)		{ spawnEnabled = enable;  }
+	enum {
+		SPAWN_DENIZENS = 0x01,
+		SPAWN_LESSER = 0x02,
+		SPAWN_GREATER = 0x04,
+	};
+	int SpawnEnabled() const			{ return spawnEnabled; }
+	void EnableSpawn(int enable)		{ spawnEnabled = enable;  }
 
 	// Set all rock to the nominal values
 	void SetAllRock();
@@ -124,7 +129,7 @@ private:
 			spawnClock,
 			visitorClock;
 	int currentVisitor;
-	bool spawnEnabled;
+	int spawnEnabled;
 
 	int cachedWebAge;
 	Web web;

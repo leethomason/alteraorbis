@@ -25,6 +25,10 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
 #include "../Shiny/include/Shiny.h"
+#ifdef WORLDMAP_THREADS
+#include "../threadpool/ThreadPool.h"
+#endif
+#include "../grinliz/glperformance.h"
 
 #include "../xarchive/glstreamer.h"
 #include "../shared/lodepng.h"
@@ -131,6 +135,11 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 	magmaGrids.Reserve(1000);
 	treePool.Reserve(1000);
 
+	threadPool = 0;
+#ifdef WORLDMAP_THREADS
+	threadPool = new ThreadPool(4);
+#endif
+
 	memset(grid, 0, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
@@ -159,6 +168,10 @@ WorldMap::~WorldMap()
 
 	delete voxelVertexVBO;
 	delete gridVertexVBO;
+
+#ifdef WORLDMAP_THREADS
+	delete threadPool;
+#endif
 }
 
 
@@ -175,17 +188,6 @@ void WorldMap::FreeVBOs()
 	gridVertexVBO = 0;
 }
 
-
-/*
-void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name)
-{
-	SectorData* data = worldInfo->SectorDataMemMutable();
-	GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS);
-	GLASSERT(sector.y >= 0 && sector.y < NUM_SECTORS);
-	GLASSERT(!name.empty());
-	data[sector.y*NUM_SECTORS + sector.x].name = name;
-}
-*/
 
 const SectorData& WorldMap::GetSectorData( int x, int y ) const
 {
@@ -600,6 +602,55 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 }
 
 
+int WorldMap::ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, int nGrid, WorldMap* thisMap)
+{
+	static const int MAP2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
+	Rectangle2I b = thisMap->Bounds();
+	b.Outset(-1);
+
+	for (int i = 0; i < nGrid; ++i) {
+		const int index = (start + i) & (MAP2 - 1);
+		WorldGrid* wg = &thisMap->grid[index];
+		if (!wg->IsLand()) continue;
+
+		const int y = (index >> EL_MAP_Y_SHIFT);
+		const int x = (index & EL_MAP_X_MASK);
+		const Vector2I pos2i = { x, y };
+
+		if (!b.Contains(pos2i)) continue;
+
+		// flammability is reflected in the chance
+		// of it catching fire; once on fire, everything
+		// has the same chance of the fire going out.
+
+		if (wg->PlantOnFire()) {
+			bool underWater = wg->FluidHeight() && (wg->FluidType() == WorldGrid::FLUID_WATER);
+			if (underWater || (thisMap->random.Uniform() < CHANCE_FIRE_OUT)) {
+				wg->SetPlantOnFire(false);
+			}
+		}
+		if (wg->PlantOnShock() && thisMap->random.Uniform() < CHANCE_FIRE_OUT) {
+			wg->SetPlantOnShock(false);
+		}
+
+		int effect = 0;
+		if (wg->Plant()) {
+			if (wg->PlantOnFire())  effect |= GameItem::EFFECT_FIRE;
+			if (wg->PlantOnShock()) effect |= GameItem::EFFECT_SHOCK;
+		}
+
+		if (wg->Magma() || (wg->IsFluid() && wg->FluidType() == WorldGrid::FLUID_LAVA)) {
+			effect |= GameItem::EFFECT_FIRE;
+		}
+
+		if (effect) {
+			EffectRecord r = { pos2i, effect };
+			effects->Push(r);
+		}
+	}
+	return nGrid;
+}
+
 /*
 	2 systems in place:
 	1. The worldmap voxel system (WorldMap::ProcessEffect())
@@ -613,6 +664,7 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 {
 	PROFILE_FUNC();
+//	QuickProfile("ProcessEffect");
 	// We need process at a steady rate so that
 	// the time between ticks is constant.
 	// This is performance regressive, so something
@@ -623,75 +675,62 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 	const float DAMAGE = EFFECT_DAMAGE_PER_SEC * float(DELTA) / float(1000);
 
 	int nGrid = N_PER_MSEC * delta;
-	Rectangle2I b = Bounds();
-	b.Outset(-1);
+	effectCache.Clear();
 
-	while (nGrid--) {
-		processIndex++;
-		if (processIndex >= MAP2) processIndex = 0;
-		const int index = processIndex;
-
-		const int y = (index >> EL_MAP_Y_SHIFT);
-		const int x = (index & EL_MAP_X_MASK);
-		const Vector2I pos2i = { x, y };
-		const Vector3I pos3i = { x, 0, y };
-
-		if (!b.Contains(pos2i)) continue;
-
-		// This can be out of bounds - everything is water outside of Bounds()
-		WorldGrid* wg = &grid[index];
-		if (!wg->IsLand()) continue;
-
-		// FIXME: filter on Plant, Magma, Lava...more ??
-
-		// flammability is reflected in the chance
-		// of it catching fire; once on fire, everything
-		// has the same chance of the fire going out.
-		bool underWater = wg->FluidHeight() && (wg->FluidType() == WorldGrid::FLUID_WATER);
-
-		if (wg->PlantOnFire() && (random.Uniform() < CHANCE_FIRE_OUT || underWater)) {
-			wg->SetPlantOnFire(false);
+#if WORLDMAP_THREADS
+	{
+	    std::future<int> results[NJOBS];
+		int n = nGrid / NJOBS;
+		static const int OFFSET = MAP2 / NJOBS;
+		
+		for (int i = 0; i < NJOBS; ++i) {
+			subEffectCache[i].Clear();
+			results[i] = threadPool->enqueue(WorldMap::ScanEffects, &subEffectCache[i], processIndex + i*OFFSET, n, this);
 		}
-		if (wg->PlantOnShock() && random.Uniform() < CHANCE_FIRE_OUT) {
-			wg->SetPlantOnShock(false);
-		}
-
-		int effect = 0;
-		if (wg->Plant()) {
-			if (wg->PlantOnFire())  effect |= GameItem::EFFECT_FIRE;
-			if (wg->PlantOnShock()) effect |= GameItem::EFFECT_SHOCK;
-			if (effect) {
-				DamageDesc dd(DAMAGE, effect);
-				this->VoxelHit(pos3i, dd);
+		for (int i = 0; i < NJOBS; ++i) {
+			results[i].get();
+			for (int k = 0; k < subEffectCache[i].Size(); ++k) {
+				effectCache.Push(subEffectCache[i][k]);
 			}
 		}
+		processIndex = (processIndex + n) % MAP2;
+	}
+#else
+	ScanEffects(&effectCache, processIndex, nGrid, this);
+	processIndex = (processIndex + nGrid) % MAP2;
+#endif
 
-		if (wg->Magma() || (wg->IsFluid() && wg->FluidType() == WorldGrid::FLUID_LAVA)) {
-			effect |= GameItem::EFFECT_FIRE;
+	for (int i = 0; i < effectCache.Size(); ++i) {
+		const int effect = effectCache[i].effect;
+		const Vector2I pos2i = effectCache[i].pos;
+
+		// Hit the voxel we are on:
+		{
+			DamageDesc dd(DAMAGE, effect);
+			const Vector3I pos3i = { pos2i.x, 0, pos2i.y };
+			this->VoxelHit(pos3i, dd);
 		}
 
-		if (effect) {
-			// Finally, spread!
-			static const int N = 8;
-			static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
+		// Finally, spread!
+		static const int N = 8;
+		static const Vector2I delta[N] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
 
-			for (int j = 0; j < N; ++j) {
-				Vector2I v2 = pos2i + delta[j];
-				Vector3I v3 = { v2.x, 0, v2.y };
-				int ia = INDEX(v2);
-				if (grid[ia].Plant()) {
-					if (random.Uniform() < CHANCE_FIRE_SPREAD) {
-						DamageDesc dd(0, effect);
-						this->VoxelHit(v3, dd);
-					}
+		for (int j = 0; j < N; ++j) {
+			Vector2I v2 = pos2i + delta[j];
+			Vector3I v3 = { v2.x, 0, v2.y };
+			int ia = INDEX(v2);
+			if (grid[ia].Plant()) {
+				if (random.Uniform() < CHANCE_FIRE_SPREAD) {
+					DamageDesc dd(0, effect);
+					this->VoxelHit(v3, dd);
 				}
 			}
-			// Make sure MOBs look around to ProcessEffects().
-			// They aren't damaged directly, they scan the area 
-			// around them.
-			Vector2F origin = ToWorld2F(pos2i);
-			chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 		}
+		// Make sure MOBs look around to ProcessEffects().
+		// They aren't damaged directly, they scan the area 
+		// around them.
+		Vector2F origin = ToWorld2F(pos2i);
+		chitBag->SetTickNeeded(origin, EFFECT_RADIUS);
 	}
 }
 

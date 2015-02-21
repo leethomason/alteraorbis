@@ -675,9 +675,9 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 	planes[5].d   = ( m.x[3+12] - m.x[2+12] );
 	planes[5].Normalize();
 
-	GLASSERT( DotProduct( planes[LEFT].n, planes[RIGHT].n ) < 0.0f );
-	GLASSERT( DotProduct( planes[TOP].n, planes[BOTTOM].n ) < 0.0f );
-	GLASSERT( DotProduct( planes[NEAR].n, planes[FAR].n ) < 0.0f );
+	GLASSERT( DotProduct( planes[PLANE_LEFT].n, planes[PLANE_RIGHT].n ) < 0.0f );
+	GLASSERT( DotProduct( planes[PLANE_TOP].n, planes[PLANE_BOTTOM].n ) < 0.0f );
+	GLASSERT( DotProduct( planes[PLANE_NEAR].n, planes[PLANE_FAR].n ) < 0.0f );
 }
 
 

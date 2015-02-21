@@ -36,6 +36,7 @@ public:
 	void SetAudioOn( bool value );
 
 	bool AudioOn() const;
+	float DenizenDate() const;
 	float SpawnDate() const;
 	float WorldGenDone() const;
 

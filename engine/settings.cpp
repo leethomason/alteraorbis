@@ -84,6 +84,10 @@ bool SettingsManager::AudioOn() const
 	return Read("Game", "audioOn", true);
 }
 
+float SettingsManager::DenizenDate() const
+{
+	return Read("Game", "spawDate", 0.2f);
+}
 
 float SettingsManager::SpawnDate() const
 {
