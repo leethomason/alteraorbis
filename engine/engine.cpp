@@ -86,15 +86,11 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	FontSingleton* bridge = FontSingleton::Instance();
 	overlay.SetText(bridge->TextAtom(false), bridge->TextAtom(true), FontSingleton::Instance());
 	overlay.SetPixelSnap(false);
-
-	PushInstance( this );
 }
 
 
 Engine::~Engine()
 {
-	PopInstance( this );
-
 	delete particleSystem;
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;

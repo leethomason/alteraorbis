@@ -206,7 +206,7 @@ void Scene::MoveImpl(float dx, float dy, Engine* engine)
 
 void Scene::HandleHotKey( int value )
 {
-	Engine* engine = Engine::Instance();	// can be null
+	Engine* engine = GetEngine();
 	int stage = 0;
 
 	if ( value == GAME_HK_TOGGLE_GLOW ) {

@@ -126,6 +126,8 @@ public:
 	void InitStd(gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel);
 	void PositionStd(gamui::PushButton* okay, gamui::PushButton* cancel);
 
+	virtual Engine* GetEngine() { return nullptr; }
+
 protected:
 
 	// Utility function for standard output:

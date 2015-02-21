@@ -69,6 +69,7 @@ public:
 
 	void Save();
 	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
+	virtual Engine* GetEngine();
 
 private:
 	void Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world);

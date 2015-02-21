@@ -84,8 +84,7 @@ public:
 			- background plane can be multi-pass, checked against stencil		
 */
 
-class Engine :	public IDeviceLossHandler,
-				public StackedSingleton< Engine >
+class Engine :	public IDeviceLossHandler
 {
 public:
 	Engine( Screenport* screenport, const gamedb::Reader* database, Map* map );

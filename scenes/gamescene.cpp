@@ -274,6 +274,12 @@ void GameScene::SetBars( Chit* chit, bool isAvatar )
 }
 
 
+Engine* GameScene::GetEngine()
+{
+	return sim->GetEngine();
+}
+
+
 void GameScene::Save()
 {
 	const char* datPath = game->GamePath( "map", 0, "dat" );
