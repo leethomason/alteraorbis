@@ -37,7 +37,7 @@ namespace grinliz {
 class MemoryPool
 {
   public:
-	MemoryPool( const char* _name, unsigned objectSize, unsigned blockSize = 4096, bool warnOnGrowth=false );
+	MemoryPool( const char* _name, unsigned objectSize, unsigned blockSize = 16*1024, bool warnOnGrowth=false );
 	~MemoryPool();
 
 	void* Alloc();

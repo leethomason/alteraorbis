@@ -236,14 +236,14 @@ void WorldGenScene::DoTick(U32 delta)
 							   "This will delete any game in progress.\n\n"
 							   "World Generation creates the terrain and simulates the 1st Age, the Age of Fire. You can press "
 							   "'okay' any time after 20% into the 1st Age to save and start. The world will be new and "
-							   "largely empty. Or grab some water or coffee while the world is filled with events, "
+							   "largely empty. Or grab some water or coffee while the 1st Age passes. The world will fill with events, "
 							   "monsters, and domain cores.\n\n"
 							   
 							   "Once generated, the world persists and you can play a game, with time passing "
 							   "and domains rising and falling, for as long as you wish.\n\n"
 							   "Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
-							   "destroying land. Over time, the forces of motion and rock will balance. Domain construction "
-							   "will create silica (manufactured rock), pave, and buildings that will dot the langscape.\n\n"
+							   "destroying land. Over time, the forces of motion and rock will balance. Domain creation and destruction "
+							   "will create silica, pave, and buildings that will dot the langscape.\n\n"
 							   "Tap 'okay' to generate or world or 'cancel' to return to title.");
 		}
 		break;

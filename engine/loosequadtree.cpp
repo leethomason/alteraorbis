@@ -32,7 +32,7 @@ static const int MODEL_BLOCK = 10*1000;
 */
 
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
-	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), MODEL_BLOCK*sizeof( Item ), false )
+	:	modelPool( "SpaceTreeModelPool", sizeof( Item ))
 {
 	GLASSERT( _size >> (DEPTH-1) );
 	size = _size;
