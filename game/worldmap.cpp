@@ -2007,16 +2007,16 @@ Model* WorldMap::PushTree(int x, int y, int type0Based, int stage, float hpFract
 	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < 4);
 
+	const ModelResource* res = PlantScript::PlantRes( type0Based, stage );
+	GLASSERT(res);
+
 	if (treePool.Size() == nTrees) {
-		treePool.Push(new Model());
+		treePool.Push(new Model(res, engine->GetSpaceTree()));
 	}
 	Model* m = treePool[nTrees];
 	nTrees++;
 
-	m->Free();
-	const ModelResource* res = PlantScript::PlantRes( type0Based, stage );
-	GLASSERT(res);
-	m->Init(res, 0);
+	m->SetResource(res);
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
 	float rot = IndexToRotation360(INDEX(x, y));
 	m->SetPosAndYRotation(pos, rot);

@@ -100,7 +100,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 ForgeScene::~ForgeScene()
 {
 	delete item;
-	engine->FreeModel( model );
+	delete model;
 	delete engine;
 }
 
@@ -214,8 +214,8 @@ void ForgeScene::SetModel( bool randomTraits )
 
 	ProcRenderInfo info;
 	if ( item ) {
-		engine->FreeModel( model );
-		model = engine->AllocModel( item->ResourceName() );
+		delete model;
+		model = new Model( item->ResourceName(), engine->GetSpaceTree() );
 		model->SetPos( 0, 0, 0 );
 
 		// Rotate the shield to face the camera.

@@ -177,14 +177,14 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	aiTicker.Randomize(parentChit->random.Rand());
 
 	for (int i = 0; i < flags.Size(); ++i) {
-		Model* m = Context()->engine->AllocModel("flag");
+		Model* m = new Model("flag", Context()->engine->GetSpaceTree());
 		m->SetPos(ToWorld3F(flags[i].pos));
 		flags[i].model = m;
 	}
 	for (int i = 0; i < MAX_SQUADS; ++i) {
 		waypointFlags[i] = 0;
 		if (!waypoints[i].Empty()) {
-			waypointFlags[i] = Context()->engine->AllocModel("flag");
+			waypointFlags[i] = new Model("flag", Context()->engine->GetSpaceTree());
 			waypointFlags[i]->SetPos(ToWorld3F(waypoints[i].Last()));
 		}
 	}
@@ -201,11 +201,11 @@ void CoreScript::OnRemove()
 	workQueue = 0;
 
 	for (int i = 0; i < flags.Size(); ++i) {
-		Context()->engine->FreeModel(flags[i].model);
+		delete flags[i].model;
 		flags[i].model = 0;
 	}
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		Context()->engine->FreeModel(waypointFlags[i]);
+		delete waypointFlags[i];
 		waypointFlags[i] = 0;
 	}
 
@@ -242,7 +242,8 @@ void CoreScript::AssignToSquads()
 			// Flush out dead squads so they don't have 
 			// control flags laying around.
 			waypoints[i].Clear();
-			Context()->engine->FreeModel(waypointFlags[i]);
+			delete waypointFlags[i];
+			waypointFlags[i] = 0;
 		}
 	}
 	int nSquaddies = 0;
@@ -428,7 +429,7 @@ void CoreScript::AddFlag(const Vector2I& pos)
 {
 	Flag f = { pos, 0 };
 	if (flags.Find(f) < 0) {
-		f.model = Context()->engine->AllocModel("flag");
+		f.model = new Model("flag", Context()->engine->GetSpaceTree());
 		f.model->SetPos(ToWorld3F(pos));
 		flags.Push(f);
 	}
@@ -451,7 +452,8 @@ void CoreScript::RemoveFlag(const Vector2I& pos)
 	Flag f = { pos, 0 };
 	int i = flags.Find(f);
 	if (i >= 0) {
-		Context()->engine->FreeModel(flags[i].model);
+		delete flags[i].model;
+		flags[i].model = 0;
 		flags.Remove(i);
 	}
 }
@@ -550,7 +552,7 @@ int CoreScript::DoTick(U32 delta)
 	for (int i = 0; i < MAX_SQUADS; ++i) {
 		if (squads[i].Empty()) {
 			waypoints[i].Clear();
-			Context()->engine->FreeModel(waypointFlags[i]);
+			delete waypointFlags[i];
 			waypointFlags[i] = 0;
 		}
 	}
@@ -948,7 +950,7 @@ void CoreScript::PopWaypoint(int squadID)
 	GLOUTPUT(("Waypoint popped. %d:%d,%d %d remain.\n", squadID, waypoints[squadID][0].x, waypoints[squadID][0].y, waypoints[squadID].Size()-1));
 	waypoints[squadID].Remove(0);
 	if (waypoints[squadID].Empty()) {
-		Context()->engine->FreeModel(waypointFlags[squadID]);
+		delete waypointFlags[squadID];
 		waypointFlags[squadID] = 0;
 	}
 }
@@ -959,7 +961,7 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
 	if (dest.IsZero()) {
 		waypoints[squadID].Clear();
-		Context()->engine->FreeModel(waypointFlags[squadID]);
+		delete waypointFlags[squadID];
 		waypointFlags[squadID] = 0;
 		return;
 	}
@@ -1012,7 +1014,7 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 	waypoints[squadID].Push(dest);
 
 	if (!waypointFlags[squadID]) {
-		waypointFlags[squadID] = Context()->engine->AllocModel("flag");
+		waypointFlags[squadID] = new Model("flag", Context()->engine->GetSpaceTree());
 	}
 	waypointFlags[squadID]->SetPos(ToWorld3F(waypoints[squadID].Last()));
 }

@@ -60,8 +60,8 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 LivePreviewScene::~LivePreviewScene()
 {
 	Map* map = engine->GetMap();
-	for( int i=0; i<NUM_MODEL; ++i ) 
-		engine->FreeModel( model[i] );
+	for (int i = 0; i < NUM_MODEL; ++i)
+		delete model[i];
 	delete engine;
 	delete map;
 }
@@ -119,11 +119,11 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		if ( model[i] ) {
-			engine->FreeModel( model[i] );
+			delete model[i];
 			model[i] = 0;
 		}
 
-		model[i] = engine->AllocModel( modelResource );
+		model[i] = new Model( modelResource, engine->GetSpaceTree() );
 		int row = i / COLS;
 		int col = i - row*COLS;
 		float x = START_X + float(col);
@@ -173,11 +173,11 @@ void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		if ( model[i] ) {
-			engine->FreeModel( model[i] );
+			delete model[i];
 			model[i] = 0;
 		}
 
-		model[i] = engine->AllocModel( modelResource );
+		model[i] = new Model( modelResource, engine->GetSpaceTree() );
 		int row = i / COLS;
 		int col = i - row*COLS;
 		float x = float(col) * DELTA;

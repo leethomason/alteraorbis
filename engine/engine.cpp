@@ -206,32 +206,6 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 }
 
 
-
-Model* Engine::AllocModel( const char* name )
-{
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
-	GLASSERT( res );
-	GLASSERT( spaceTree );
-	return spaceTree->AllocModel( res );
-}
-
-
-Model* Engine::AllocModel( const ModelResource* resource )
-{
-	GLASSERT( resource );
-	GLASSERT( spaceTree );
-	return spaceTree->AllocModel( resource );
-}
-
-
-void Engine::FreeModel(Model* model)
-{
-	if ( model ) {
-		spaceTree->FreeModel( model );
-	}
-}
-
-
 Texture* Engine::GetMiniMapTexture()
 {
 	return TextureManager::Instance()->GetTexture( "miniMap" );

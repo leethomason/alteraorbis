@@ -80,7 +80,7 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 RenderTestScene::~RenderTestScene()
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		engine->FreeModel( model[i] );
+		delete model[i];
 	}
 	delete testMap;
 	delete engine;
@@ -107,13 +107,13 @@ void RenderTestScene::SetupTest()
 	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
 	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
 
-	for( int i=0; i<NUM_MODELS/2; ++i ) {
-		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
-		model[i]->SetPos( 1, 0, (float)i );
-		model[i]->SetYRotation( (float)(i*30) );
+	for (int i = 0; i < NUM_MODELS / 2; ++i) {
+		model[i] = new Model(i < 3 ? res0 : res1, engine->GetSpaceTree());
+		model[i]->SetPos(1, 0, (float)i);
+		model[i]->SetYRotation((float)(i * 30));
 	}
 	for( int i=NUM_MODELS/2; i<NUM_MODELS; ++i ) {
-		model[i] = engine->AllocModel( (i-NUM_MODELS/2)<3 ? res0 : res1 );
+		model[i] = new Model((i-NUM_MODELS/2)<3 ? res0 : res1, engine->GetSpaceTree() );
 		model[i]->SetPos( 2, 0, (float)(i-NUM_MODELS/2) );
 		model[i]->SetYRotation( (float)(i*30) );
 		model[i]->SetAnimation( ANIM_WALK, 1000, true ); 

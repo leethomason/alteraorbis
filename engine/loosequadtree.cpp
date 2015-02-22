@@ -120,8 +120,10 @@ void SpaceTree::Update( Model* model )
 	if (model->spaceTreeNode) {
 		Node* node = (Node*)model->spaceTreeNode;
 		node->Remove(model);
-		model->spaceTreeNode = 0;
 	}
+	GLASSERT(model->spaceTreeNext == 0);
+	GLASSERT(model->spaceTreePrev == 0);
+	GLASSERT(model->spaceTreeNode == 0);
 
 	// Since the tree is somewhat modified from the ideal, start with the 
 	// most ideal node and work up. Note that everything fits at the top node.
@@ -138,13 +140,12 @@ void SpaceTree::Update( Model* model )
 		node = GetNode( depth, x, z );
 		if ( node->aabb.Contains( bounds ) ) {
 			// fits.
-			model->spaceTreeNode = node;
 			break;
 		}
 		--depth;
 	}
-	if (!model->spaceTreeNode) {
-		model->spaceTreeNode = nodeArr;	// shove at root
+	if (depth == 0) {
+		node = nodeArr;	// everything fits at the root.
 	}
 	node->Add(model);
 }
@@ -186,7 +187,7 @@ void SpaceTree::Node::Add(Model* model)
 {
 	GLASSERT(model->spaceTreeNext == 0);
 	GLASSERT(model->spaceTreePrev == 0);
-	GLASSERT(model->spaceTreeNode == this);
+	GLASSERT(model->spaceTreeNode == 0);
 
 	if (root) {
 		root->spaceTreePrev = model;
@@ -200,17 +201,19 @@ void SpaceTree::Node::Add(Model* model)
 }
 
 
-void SpaceTree::Node::Remove( Item* item ) 
+void SpaceTree::Node::Remove( Model* model ) 
 {
-	if ( root == item )
-		root = item->next;
-	if ( item->prev )
-		item->prev->next = item->next;
-	if ( item->next )
-		item->next->prev = item->prev;
+	GLASSERT(model->spaceTreeNode == this);
+	if (root == model)
+		root = model->spaceTreeNext;
+	if ( model->spaceTreePrev )
+		model->spaceTreePrev->spaceTreeNext = model->spaceTreeNext;
+	if ( model->spaceTreeNext )
+		model->spaceTreeNext->spaceTreePrev = model->spaceTreePrev;
 
-	item->next = 0;
-	item->prev = 0;
+	model->spaceTreeNode = 0;
+	model->spaceTreeNext = 0;
+	model->spaceTreePrev = 0;
 
 	for( Node* it=this; it; it=it->parent )
 		it->nModels--;
@@ -315,9 +318,8 @@ void SpaceTree::QueryPlanesRec(grinliz::CDynArray<Model*>* models,
 		const int _requiredFlags = requiredFlags;
 		const int _excludedFlags = excludedFlags;
 
-		for (Item* item = node->root; item; item = item->next)
+		for (Model* m = node->root; m; m = m->spaceTreeNext)
 		{
-			Model* m = &item->model;
 			const int flags = m->Flags();
 
 			if (((_requiredFlags & flags) == _requiredFlags)

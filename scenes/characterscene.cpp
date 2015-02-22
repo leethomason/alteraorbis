@@ -111,7 +111,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 
 CharacterScene::~CharacterScene()
 {
-	engine->FreeModel( model );
+	delete model;
 	delete engine;
 }
 
@@ -308,10 +308,10 @@ void CharacterScene::SetButtonText(const GameItem* select)
 		// This doesn't work because we actually want to trigger off the item id.
 		//if ( model && !StrEqual( model->GetResource()->Name(), down->ResourceName() )) {
 			
-		engine->FreeModel( model );
+		delete model;
 		model = 0;
 		if ( !model ) {
-			model = engine->AllocModel( down->ResourceName() );
+			model = new Model( down->ResourceName(), engine->GetSpaceTree() );
 			model->SetPos( 0,0,0 );
 			if (down->IName() == ISC::shield) {
 				Quaternion q;
