@@ -3,6 +3,7 @@
 #include "lumosgame.h"
 #include "lumoschitbag.h"
 #include "gameitem.h"
+#include "worldinfo.h"
 
 #include "../engine/engine.h"
 
@@ -267,6 +268,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(action);
 	int size = buildData.size;
+	const SectorData& sectorData = worldMap->GetSectorData(ToSector(pos2i));
 
 	if (available.Gold() < buildData.cost) {
 		return false;
@@ -281,6 +283,13 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			if (!worldMap->IsLand(x, y)) {
 				++water;
 			}
+			// HACK: treat cores as water.
+			// Can't touch them.
+			if (sectorData.core.x == x && sectorData.core.y == y) {
+				++water;
+			}
+
+
 			Vector2I v = { x, y };
 			const WorldGrid& wg = worldMap->GetWorldGrid(x, y);
 

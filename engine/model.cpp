@@ -324,6 +324,16 @@ void Model::SetResource(const ModelResource* res)
 }
 
 
+void Model::Attach(SpaceTree* t)
+{
+	GLASSERT(tree == 0 || tree == t);
+	if (!tree) {
+		tree = t;
+		t->Update(this);
+	}
+	tree = t;
+}
+
 void Model::Serialize( XStream* xs)
 {
 	XarcOpen( xs, "Model" );

@@ -237,7 +237,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				context->circuitSim->EtchLines(innerBounds);
 
 				Chit* found = chitBag->QueryBuilding(IString(), task->pos2i, 0);
-				if (found) {
+				if (found && (found->GetItem()->IName() != ISC::core)) {
 					found->DeRez();
 				}
 				Remove();

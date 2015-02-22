@@ -6,6 +6,7 @@ x regen for items (guns, shields)
 x world gen shouldn't create bad files:
 	x partial creation
 	x delete files on cancel
+x GT: can clear own core
 - GT: humans change color as they walk
 
 - GT: food as medkit

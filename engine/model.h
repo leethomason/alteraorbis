@@ -255,10 +255,7 @@ public:
 	Model(const char* resName, SpaceTree* tree);
 	~Model();
 
-	void Attach(SpaceTree* t) {
-		GLASSERT(tree == 0 || tree == t);
-		tree = t;
-	}
+	void Attach(SpaceTree* t); 
 	void Serialize( XStream* xs);
 	void SetResource(const ModelResource* res);
 
