@@ -17,8 +17,8 @@
 #include "map.h"
 #include "gpustatemanager.h"
 
-//#include "../grinliz/glperformance.h"
 #include "../grinliz/glutil.h"
+#include "model.h"
 
 using namespace grinliz;
 
@@ -32,7 +32,6 @@ static const int MODEL_BLOCK = 10*1000;
 */
 
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
-	:	modelPool( "SpaceTreeModelPool", sizeof( Item ))
 {
 	GLASSERT( _size >> (DEPTH-1) );
 	size = _size;
@@ -49,7 +48,6 @@ SpaceTree::~SpaceTree()
 		GLASSERT(nodeArr[i].root == 0);
 		GLASSERT(nodeArr[i].nModels == 0);
 	}
-	GLASSERT( modelPool.Empty() );
 }
 
 
@@ -98,35 +96,6 @@ void SpaceTree::InitNode()
 }
 
 
-Model* SpaceTree::AllocModel( const ModelResource* resource )
-{
-	GLASSERT( resource );
-	Item* item = (Item*) modelPool.Alloc();
-
-	item->node = 0;
-	item->next = 0;	// very important to clear pointers before Init() - which will cause Link to occur.
-	item->prev = 0;
-	item->model.Init( resource, this );
-
-	return &item->model;
-}
-
-
-void SpaceTree::FreeModel(Model* model)
-{
-	if ( model == 0 )
-		return;
-
-	Item* item = (Item*)model;	// cast depends on model being first in the structure.
-
-	GLASSERT( item->node );
-	item->node->Remove( item );
-	item->model.Free();
-	modelPool.Free( item );
-}
-
-
-
 void SpaceTree::SetLightDir( const Vector3F& light )
 {
 	GLASSERT( light.y > 0 );
@@ -139,16 +108,20 @@ void SpaceTree::SetLightDir( const Vector3F& light )
 
 void SpaceTree::Update( Model* model )
 {
-	// Unlink if currently in tree.
-	Item* item = (Item*)model;	// cast depends on model being first in the structure.
+	GLASSERT(model->spaceTree == 0 || model->spaceTree == this);
+	if (!model->spaceTree) {
+		model->spaceTree = this;
+	}
 
 	// This call is very expensive. 3ms (approx bounds) to 20ms in debug mode.
 	//Rectangle3F bounds = model->AABB();
 	Rectangle3F bounds = model->GetInvariantAABB( lightXPerY, lightZPerY );
 
-	if ( item->node ) 
-		item->node->Remove( item );
-	item->node = 0;
+	if (model->spaceTreeNode) {
+		Node* node = (Node*)model->spaceTreeNode;
+		node->Remove(model);
+		model->spaceTreeNode = 0;
+	}
 
 	// Since the tree is somewhat modified from the ideal, start with the 
 	// most ideal node and work up. Note that everything fits at the top node.
@@ -165,15 +138,15 @@ void SpaceTree::Update( Model* model )
 		node = GetNode( depth, x, z );
 		if ( node->aabb.Contains( bounds ) ) {
 			// fits.
-			item->node = node;
+			model->spaceTreeNode = node;
 			break;
 		}
 		--depth;
 	}
-	if ( !item->node ) {
-		item->node = nodeArr;	// shove at root
+	if (!model->spaceTreeNode) {
+		model->spaceTreeNode = nodeArr;	// shove at root
 	}
-	item->node->Add( item );
+	node->Add(model);
 }
 
 
@@ -209,20 +182,20 @@ void SpaceTree::Query(grinliz::CDynArray<Model*>* models, const Plane* planes, i
 }
 
 
-void SpaceTree::Node::Add( Item* item ) 
+void SpaceTree::Node::Add(Model* model)
 {
-	GLASSERT( item->next == 0 );
-	GLASSERT( item->prev == 0 );
-	GLASSERT( item->node == this );
+	GLASSERT(model->spaceTreeNext == 0);
+	GLASSERT(model->spaceTreePrev == 0);
+	GLASSERT(model->spaceTreeNode == this);
 
-	if ( root ) { 
-		root->prev = item;
+	if (root) {
+		root->spaceTreePrev = model;
 	}
-	item->next = root;
-	item->prev = 0;
-	root = item;
+	model->spaceTreeNext = root;
+	model->spaceTreePrev = 0;
+	root = model;
 
-	for( Node* it=this; it; it=it->parent )
+	for (Node* it = this; it; it = it->parent)
 		it->nModels++;
 }
 

@@ -213,9 +213,6 @@ public:
 		return modelResArr.Mem();
 	}
 
-	grinliz::MemoryPoolT< ModelAuxBone > modelAuxBonePool;
-	grinliz::MemoryPoolT< ModelAuxTex > modelAuxTexPool;
-
 private:
 	enum { 
 		MAX_MODELS = 200	// just pointers
@@ -246,14 +243,17 @@ private:
 
 class Model
 {
+	friend class SpaceTree;
+	void* spaceTree;
+	void* spaceTreeNode;
+	Model* spaceTreeNext;
+	Model* spaceTreePrev;
+
 public:
-	Model();
+	Model(const ModelResource* resource);
 	~Model();
 
-	void Init( const ModelResource* resource, SpaceTree* tree );
-	void Free();
-
-	void Serialize( XStream* xs, SpaceTree* tree );
+	void Serialize( XStream* xs);
 
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
@@ -420,8 +420,6 @@ private:
 	const grinliz::Matrix4& InvXForm() const;
 
 	void CalcAnimation();
-	//void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
-	//void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;
 	const ModelResource* resource;

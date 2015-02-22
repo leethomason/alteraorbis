@@ -218,37 +218,25 @@ void ModelLoader::LoadAtom( const gamedb::Item* item, int i, ModelResource* res 
 }
 
 
-Model::Model()		
+Model::Model(const ModelResource* resource)		
 {	
-	// WARNING: in the normal case, the constructor isn't called. Models usually come from a pool!
-	// new/delete and Init/Free are both valid uses.
-	Init( 0, 0 ); 
-}
-
-Model::~Model()	
-{	
-	// WARNING: in the normal case, the destructor isn't called. Models usually come from a pool!
-	// new/delete and Init/Free are both valid uses.
-	Free();
-}
-
-
-void Model::Init( const ModelResource* resource, SpaceTree* tree )
-{
-	this->resource = resource; 
-	this->tree = tree;
+	this->spaceTreeNode = 0;
+	this->spaceTreeNext = 0;
+	this->spaceTreePrev = 0;
+	this->resource = resource;
+	this->tree = 0;
 	this->auxBone = 0;
 	this->auxTex = 0;
 
-	color.Set(1,1,1,1);
-	boneFilter.Set(0,0,0,0);
-	control.Set( 1, 1, 1, 1 );
+	color.Set(1, 1, 1, 1);
+	boneFilter.Set(0, 0, 0, 0);
+	control.Set(1, 1, 1, 1);
 
 	if (resource) {
 		animationResource = AnimationResourceManager::Instance()->GetResource(resource->header.animation.c_str());
 		if (animationResource) {	// Match the IDs.
 			if (!auxBone) {
-				auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
+				auxBone = new ModelAuxBone();
 			}
 			int type = 0;
 			// Find a sequence.
@@ -270,16 +258,16 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 		}
 	}
 	debugScale = 1.0f;
-	pos.Set( 0, 0, 0 );
+	pos.Set(0, 0, 0);
 	rot.Zero();
 	Modify();
 
-	if ( tree ) {
-		tree->Update( this );
+	if (tree) {
+		tree->Update(this);
 	}
 
 	flags = 0;
-	if ( resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW ) ) {
+	if (resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW)) {
 		flags |= MODEL_NO_SHADOW;
 	}
 	userData = 0;
@@ -303,17 +291,17 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	}
 }
 
-
-void Model::Free()
-{
-	ModelResourceManager::Instance()->modelAuxBonePool.Delete(auxBone);
-	ModelResourceManager::Instance()->modelAuxTexPool.Delete(auxTex);
-	auxBone = 0;
-	auxTex = 0;
+Model::~Model()	
+{	
+	GLASSERT(this->spaceTreeNode == 0);
+	GLASSERT(this->spaceTreeNext == 0);
+	GLASSERT(this->spaceTreePrev == 0);
+	delete auxBone;
+	delete auxTex;
 }
 
 
-void Model::Serialize( XStream* xs, SpaceTree* tree )
+void Model::Serialize( XStream* xs)
 {
 	XarcOpen( xs, "Model" );
 
@@ -375,14 +363,14 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		}
 		if (hasAuxBone) {
 			load->OpenElement();	// aux
-			if (!auxBone ) auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
+			if (!auxBone) auxBone = new ModelAuxBone();
 			XARC_SER_ARR(xs, auxBone->animToModelMap, EL_MAX_BONES);
 			XARC_SER_ARR(xs, auxBone->boneMats[0].x, EL_MAX_BONES * 16);
 			load->CloseElement();
 		}
 		if (hasAuxTex) {
 			load->OpenElement();
-			if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+			if (!auxTex) auxTex = new ModelAuxTex();
 			XARC_SER(xs, auxTex->texture0XForm);
 			XARC_SER(xs, auxTex->texture0Clip);
 			XARC_SER(xs, auxTex->texture0ColorMap);
@@ -467,7 +455,7 @@ void Model::SetTextureXForm( float a, float d, float tx, float ty )
 {
 	if ( a != 1 || d != 1 || tx != 0 || ty != 0 ) {
 		SetFlag( MODEL_TEXTURE0_XFORM );
-		if ( !auxTex ) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		if (!auxTex) auxTex = new ModelAuxTex();
 		auxTex->texture0XForm.Set( a, d, tx, ty );
 	}
 	else {
@@ -480,7 +468,7 @@ void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
 {
 	if ( x0 != 0 || y0 != 0 || x1 != 1 || y1 != 1 ) {
 		SetFlag( MODEL_TEXTURE0_CLIP );
-		if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		if (!auxTex) auxTex = new ModelAuxTex();
 		auxTex->texture0Clip.Set(x0, y0, x1, y1);
 	}
 	else {
@@ -493,7 +481,7 @@ void Model::SetColorMap( const grinliz::Matrix4& mat )
 {
 	if ( !mat.IsIdentity() ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
-		if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		if (!auxTex) auxTex = new ModelAuxTex();
 		auxTex->texture0ColorMap = mat;
 	}
 	else {
@@ -512,7 +500,7 @@ void Model::SetColorMap( const Vector4F& red, const Vector4F& green, const Vecto
 
 	if ( !m.IsIdentity() ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
-		if ( !auxTex ) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		if (!auxTex) auxTex = new ModelAuxTex();
 		auxTex->texture0ColorMap = m;
 	}
 	else {
@@ -803,7 +791,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 
 			if ( HasAnimation() ) {
 				GLASSERT(auxBone);
-				if (!auxBone) auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
+				if (!auxBone) auxBone = new ModelAuxBone();
 				CalcAnimation(); 
 				modelAuxBone = auxBone;
 			}
@@ -813,7 +801,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				  || (flags & MODEL_TEXTURE0_XFORM) )
 			{
 				GLASSERT(auxTex);
-				if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+				if (!auxTex) auxTex = new ModelAuxTex();
 				modelAuxTex = auxTex;
 			}
 
@@ -991,9 +979,7 @@ const ModelResource* ModelResourceManager::GetModelResource( const char* name, b
 
 ModelResourceManager* ModelResourceManager::instance = 0;
 
-ModelResourceManager::ModelResourceManager() : 
-	modelAuxBonePool( "modelAuxBonePool" ),
-	modelAuxTexPool("modelAuxTexPool")
+ModelResourceManager::ModelResourceManager() 
 {
 }
 	
@@ -1011,3 +997,5 @@ void ModelResourceManager::DeviceLoss()
 		modelResArr[i]->DeviceLoss();
 
 }
+
+

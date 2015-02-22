@@ -17,9 +17,11 @@
 #define LOOSEQUADTREE_INCLUDED
 
 #include "enginelimits.h"
-#include "model.h"
-#include "../grinliz/glmemorypool.h"
+#include "../grinliz/glvector.h"
+#include "../grinliz/glcontainer.h"
+#include "../grinliz/glgeometry.h"
 
+class Model;
 
 /*
 	A tree for culling models. Used to be
@@ -42,9 +44,6 @@ public:
 
 	void SetLightDir( const grinliz::Vector3F& light );
 	
-	Model* AllocModel( const ModelResource* );	// Allocates a model in this tree
-	void   FreeModel( Model* );
-
 	// Called whenever a model moves. (Usually called automatically be the model.)
 	void   Update( Model* );
 
@@ -74,6 +73,24 @@ public:
 	void Dump() { Dump( nodeArr ); }
 #endif
 
+	struct Node
+	{
+		grinliz::Rectangle3F aabb;	// for testing
+		grinliz::Vector2I origin;	// for voxels
+
+		int depth;
+		int nModels;
+		Model* root;
+		Node* parent;
+		Node* child[4];
+
+		void Add(Model* m);
+		void Remove(Model* m);
+#ifdef DEBUG
+		void Dump();
+#endif
+	};
+
 private:
 	void ExpandForLight( grinliz::Rectangle3F* r ) {
 		if ( lightXPerY > 0 )
@@ -87,34 +104,7 @@ private:
 			r->min.z += lightXPerY * r->max.y;
 	}
 
-	struct Node;
 	void Dump( Node* node );
-
-	struct Item {
-		Model model;	// Must be first! Gets cast back to Item in destructor. When a model gets allocated,
-						// this is where the memory for it is stored.
-		Node* node;
-		Item* next;		// used in the node list.
-		Item* prev;
-	};
-
-	struct Node
-	{
-		grinliz::Rectangle3F aabb;	// for testing
-		grinliz::Vector2I origin;	// for voxels
-
-		int depth;
-		int nModels;
-		Item* root;
-		Node* parent;
-		Node* child[4];
-
-		void Add( Item* item );
-		void Remove( Item* item );
-#ifdef DEBUG
-		void Dump();
-#endif
-	};
 
 	bool Ignore( const Model* m, const Model* const * ignore ) {
 		if ( ignore ) {
@@ -151,8 +141,6 @@ private:
 
 	int requiredFlags;
 	int excludedFlags;
-
-	grinliz::MemoryPool modelPool;
 
 	grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES> zones;
 	grinliz::CDynArray<Model*> queryCache;

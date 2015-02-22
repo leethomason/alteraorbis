@@ -72,9 +72,6 @@ const ModelResource* RenderComponent::MainResource() const
 
 void RenderComponent::Serialize( XStream* xs )
 {
-	// Can't get context: order is Serialize() then Add()
-	Engine* engine = Engine::Instance();
-
 	//const ChitContext* context = this->Context();
 	BeginSerialize( xs, "RenderComponent" );
 
