@@ -39,12 +39,12 @@ DebugPathComponent::~DebugPathComponent()
 }
 
 
-void DebugPathComponent::OnAdd( Chit* chit, bool init )
+void DebugPathComponent::OnAdd(Chit* chit, bool init)
 {
-	super::OnAdd( chit, init );
+	super::OnAdd(chit, init);
 	const ChitContext* context = Context();
-	model = context->engine->AllocModel( resource );
-	model->SetFlag( Model::MODEL_NO_SHADOW );
+	model = new Model(resource, Context()->engine->GetSpaceTree());
+	model->SetFlag(Model::MODEL_NO_SHADOW);
 }
 
 
@@ -54,10 +54,8 @@ void DebugPathComponent::OnRemove()
 	const ChitContext* context = Context();
 
 	super::OnRemove();
-	if ( model ) {
-		context->engine->FreeModel( model );
-		model = 0;
-	}
+	delete model;
+	model = 0;
 }
 
 

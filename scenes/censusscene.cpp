@@ -265,7 +265,7 @@ void CensusScene::SetItem(int i, const char* prefix, const ItemHistory& itemHist
 	if (chit) {
 		Vector2I sector = ToSector(chit->Position());
 
-		WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
+		WorldMap* map = chitBag->Context()->worldMap;
 		const SectorData& sd = map->GetSectorData(sector);
 		str.AppendFormat("at %s", sd.name.safe_str());
 	}

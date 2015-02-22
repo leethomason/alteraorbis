@@ -250,10 +250,17 @@ class Model
 	Model* spaceTreePrev;
 
 public:
-	Model(const ModelResource* resource);
+	// If spacetree is null, need to Attach
+	Model(const ModelResource* resource, SpaceTree* tree);
+	Model(const char* resName, SpaceTree* tree);
 	~Model();
 
+	void Attach(SpaceTree* t) {
+		GLASSERT(tree == 0);
+		tree = t;
+	}
 	void Serialize( XStream* xs);
+	void SetResource(const ModelResource* res);
 
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
@@ -417,8 +424,8 @@ public:
 	}
 
 private:
+	void Init(const ModelResource* res, SpaceTree* tree);
 	const grinliz::Matrix4& InvXForm() const;
-
 	void CalcAnimation();
 
 	SpaceTree* tree;

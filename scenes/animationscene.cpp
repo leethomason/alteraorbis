@@ -123,9 +123,8 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 
 	const ModelResource* plateRes = ModelResourceManager::Instance()->GetModelResource("timingPlate");
 	for (int i = 0; i < NUM_PLATES; ++i) {
-		plate[i] = engine->AllocModel(plateRes);
+		plate[i] = new Model(plateRes, engine->GetSpaceTree());
 		plate[i]->SetPos(1, 0, float(i));
-//		plate[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 
 	triggerModel = 0;
@@ -140,14 +139,12 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 AnimationScene::~AnimationScene()
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		engine->FreeModel( model[i] );
+		delete model[i];
 	}
 	for (int i = 0; i < NUM_PLATES; ++i) {
-		engine->FreeModel(plate[i]);
+		delete plate[i];
 	}
-	if ( triggerModel ) {
-		engine->FreeModel( triggerModel );
-	}
+	delete triggerModel;
 	delete engine;
 }
 
@@ -193,10 +190,8 @@ void AnimationScene::LoadModel()
 	bool colorMap = res->atom[0].texture->ColorMap();
 
 	for( int j=0; j<NUM_MODELS; ++j ) {
-		if ( model[j] ) {
-			engine->FreeModel( model[j] );
-		}
-		model[j] = engine->AllocModel( res );
+		delete model[j];
+		model[j] = new Model( res, engine->GetSpaceTree() );
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 
 		if ( colorMap ) {
@@ -415,7 +410,8 @@ void AnimationScene::DoTick( U32 deltaTime )
 
 		if ( triggerToggle[PARTICLE].Down() ) {
 			engine->particleSystem->EmitPD( StringPool::Intern("spell"), p, UP, 0 ); 
-			if ( triggerModel ) { engine->FreeModel( triggerModel ); triggerModel = 0;	}
+			delete triggerModel;
+			triggerModel = 0;
 		}
 		else {
 			const ModelResource* res = 0;
@@ -423,12 +419,12 @@ void AnimationScene::DoTick( U32 deltaTime )
 			else if ( triggerToggle[RING].Down() )			{ res = ModelResourceManager::Instance()->GetModelResource( "ring" ); }
 
 			if ( triggerModel && triggerModel->GetResource() != res ) {
-				engine->FreeModel( triggerModel );
+				delete triggerModel;
 				triggerModel = 0;
 			}
 
 			if( res && !triggerModel ) {
-				triggerModel = engine->AllocModel( res );
+				triggerModel = new Model(res, engine->GetSpaceTree());
 			}
 
 			if ( triggerModel ) {
@@ -439,7 +435,8 @@ void AnimationScene::DoTick( U32 deltaTime )
 		}
 	}
 	else {
-		if ( triggerModel ) { engine->FreeModel( triggerModel ); triggerModel = 0;	}
+		delete triggerModel;
+		triggerModel = 0;
 	}
 }
 

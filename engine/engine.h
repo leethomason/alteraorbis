@@ -120,10 +120,6 @@ public:
 	void CameraLookAt( const grinliz::Vector3F& camera, const grinliz::Vector3F& target );
 	void CameraLookAt( float x, float z );
 
-	Model* AllocModel( const ModelResource* );
-	Model* AllocModel( const char* );
-	void FreeModel(Model*);
-
 	Map* GetMap()						{ return map; }
 	Texture* GetMiniMapTexture();
 

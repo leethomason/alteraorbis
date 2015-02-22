@@ -70,34 +70,34 @@ const ModelResource* RenderComponent::MainResource() const
 }
 
 
-void RenderComponent::Serialize( XStream* xs )
+void RenderComponent::Serialize(XStream* xs)
 {
 	//const ChitContext* context = this->Context();
-	BeginSerialize( xs, "RenderComponent" );
+	BeginSerialize(xs, "RenderComponent");
 
-	XarcOpen( xs, "models" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
-		XarcOpen( xs, "models" );
+	XarcOpen(xs, "models");
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		XarcOpen(xs, "models");
 		IString asset = model[i] ? model[i]->GetResource()->IName() : IString();
-		XARC_SER( xs, asset );
+		XARC_SER(xs, asset);
 
-		if ( xs->Loading() ) {
-			if ( !asset.empty() ) {
-				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset.c_str() );
-				model[i] = engine->AllocModel( res );
-				model[i]->Serialize( xs, engine->GetSpaceTree() );
+		if (xs->Loading()) {
+			if (!asset.empty()) {
+				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource(asset.c_str());
+				model[i] = new Model(res, 0);
+				model[i]->Serialize(xs);
 			}
 		}
 		else {
-			if ( model[i] ) {
-				model[i]->Serialize( xs, engine->GetSpaceTree() );
+			if (model[i]) {
+				model[i]->Serialize(xs);
 			}
 		}
-		XarcClose( xs );
+		XarcClose(xs);
 	}
-	XarcClose( xs );
+	XarcClose(xs);
 
-	EndSerialize( xs );
+	EndSerialize(xs);
 }
 
 
@@ -106,12 +106,13 @@ void RenderComponent::OnAdd( Chit* chit, bool init )
 	Component::OnAdd( chit, init );
 	const ChitContext* context = Context();
 
-	if ( !model[0] ) {
-		model[0] = context->engine->AllocModel( mainAsset.c_str() );
+	if (!model[0]) {
+		model[0] = new Model(mainAsset.c_str(), Context()->engine->GetSpaceTree());
 	}
 
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
+			model[i]->Attach(Context()->engine->GetSpaceTree());
 			model[i]->userData = parentChit;
 			model[i]->Modify();
 		}
@@ -126,12 +127,12 @@ void RenderComponent::OnRemove()
 	Component::OnRemove();
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
-			context->engine->FreeModel( model[i] );
+			delete model[i];
 			model[i] = 0;
 		}
 	}
 	if ( groundMark ) {
-		context->engine->FreeModel( groundMark );
+		delete groundMark;
 		groundMark = 0;
 	}
 
@@ -250,14 +251,14 @@ bool RenderComponent::Attach( int metaData, const char* asset )
 
 	const ChitContext* context = Context();
 	if ( model[metaData] ) {
-		context->engine->FreeModel( model[metaData] );
+		delete model[metaData];
 		model[metaData] = 0;
 	}
 
 	if (asset && *asset) {
 		// If we are already added (model[0] exists) add the attachments.
 		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource(asset);
-		model[metaData] = context->engine->AllocModel(res);
+		model[metaData] = new Model(res, context->engine->GetSpaceTree());
 		model[metaData]->userData = parentChit;
 	}
 	return true;
@@ -302,7 +303,7 @@ void RenderComponent::Detach( int metaData )
 	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
 	if ( model[metaData] ) {
 		const ChitContext* context = Context();
-		context->engine->FreeModel( model[metaData] );
+		delete model[metaData];
 	}
 	model[metaData] = 0;
 }
@@ -541,11 +542,11 @@ void RenderComponent::SetGroundMark( const char* asset )
 {
 	const ChitContext* context = Context();
 	if ( groundMark ) {
-		context->engine->FreeModel( groundMark );
+		delete groundMark;
 		groundMark = 0;
 	}
 	if ( asset && *asset ) {
-		groundMark = context->engine->AllocModel( "iconPlate" );
+		groundMark = new Model("iconPlate", context->engine->GetSpaceTree() );
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;
 		groundMark->SetPos( pos );	

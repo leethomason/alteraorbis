@@ -218,13 +218,25 @@ void ModelLoader::LoadAtom( const gamedb::Item* item, int i, ModelResource* res 
 }
 
 
-Model::Model(const ModelResource* resource)		
+Model::Model(const ModelResource* resource, SpaceTree* st) 
+{
+	Init(resource, st);
+}
+
+Model::Model(const char* name, SpaceTree* st)
+{
+	const ModelResource* resource = ModelResourceManager::Instance()->GetModelResource(name);
+	Init(resource, st);
+}
+
+void Model::Init(const ModelResource* resource, SpaceTree* st)		
 {	
+	this->spaceTree = 0;
 	this->spaceTreeNode = 0;
 	this->spaceTreeNext = 0;
 	this->spaceTreePrev = 0;
 	this->resource = resource;
-	this->tree = 0;
+	this->tree = st;
 	this->auxBone = 0;
 	this->auxTex = 0;
 
@@ -298,6 +310,13 @@ Model::~Model()
 	GLASSERT(this->spaceTreePrev == 0);
 	delete auxBone;
 	delete auxTex;
+}
+
+
+void Model::SetResource(const ModelResource* res)
+{
+	this->resource = res;
+	Modify();
 }
 
 
@@ -395,6 +414,7 @@ void Model::SetPosAndYRotation( const grinliz::Vector3F& pos, float r )
 		this->pos = pos;
 		this->rot = q;
 		Modify();
+		GLASSERT(tree);
 		if ( tree ) {
 			tree->Update( this );
 		}
@@ -412,6 +432,7 @@ void Model::SetTransform( const grinliz::Matrix4& tr )
 		pos = v;
 		rot = q;
 		Modify();
+		GLASSERT(tree);
 		if ( tree ) {
 			tree->Update( this );
 		}
@@ -424,6 +445,7 @@ void Model::SetPos( const grinliz::Vector3F& pos )
 	if ( pos != this->pos ) {
 		Modify();
 		this->pos = pos;	
+		GLASSERT(tree);
 		if ( tree ) {
 			tree->Update( this ); 
 		}
@@ -444,7 +466,8 @@ void Model::SetRotation( const Quaternion& q )
 {
 	if ( q != rot ) {
 		Modify();
-		this->rot = q;		
+		this->rot = q;	
+		GLASSERT(tree);
 		if ( tree )
 			tree->Update( this );	// call because bound computation changes with rotation
 	}

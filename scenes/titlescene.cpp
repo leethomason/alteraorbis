@@ -102,13 +102,14 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 	engine->lighting.direction.Set(0.3f, 1, 1);
 	engine->lighting.direction.Normalize();
+	SpaceTree* tree = engine->GetSpaceTree();
 
-	model[TROLL]		= engine->AllocModel("troll");
-	model[MANTIS]		= engine->AllocModel("mantis");
-	model[HUMAN_MALE]	= engine->AllocModel("humanMale");
-	model[HUMAN_FEMALE] = engine->AllocModel("humanFemale");
-	model[RED_MANTIS]	= engine->AllocModel("redmantis");
-	model[CYCLOPS]		= engine->AllocModel("cyclops");
+	model[TROLL]		= new Model("troll", tree);
+	model[MANTIS]		= new Model("mantis", tree);
+	model[HUMAN_MALE]	= new Model("humanMale", tree);
+	model[HUMAN_FEMALE] = new Model("humanFemale", tree);
+	model[RED_MANTIS]	= new Model("redmantis", tree);
+	model[CYCLOPS]		= new Model("cyclops", tree);
 	//temple				= engine->AllocModel("pyramid0");
 
 	Vector3F forward = { 0, 0, 1 };
@@ -173,10 +174,9 @@ Color4F TitleScene::ClearColor()
 void TitleScene::DeleteEngine()
 {
 	for (int i = 0; i < NUM_MODELS; ++i) {
-		engine->FreeModel(model[i]);
+		delete model[i];
 		model[i] = 0;
 	}
-//	engine->FreeModel(temple);
 	delete engine;
 	delete testMap;
 

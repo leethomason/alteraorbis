@@ -71,7 +71,7 @@ ColorTestScene::ColorTestScene( LumosGame* game) : Scene( game ), lumosGame( gam
 ColorTestScene::~ColorTestScene()
 {
 	for (int i = 0; i < NUM_MODELS; ++i) {
-		engine->FreeModel(model[i]);
+		delete model[i];
 	}
 
 	delete testMap;
@@ -101,26 +101,27 @@ void ColorTestScene::Resize()
 
 void ColorTestScene::SetupTest()
 {
-	model[HUMAN_MODEL] = engine->AllocModel("humanMale");
+	SpaceTree* tree = engine->GetSpaceTree();
+	model[HUMAN_MODEL] = new Model("humanMale", tree);
 	model[HUMAN_MODEL]->SetPos(1, 0, 1);
 
-	model[TEMPLE_MODEL] = engine->AllocModel("pyramid0");
+	model[TEMPLE_MODEL] = new Model("pyramid0", tree);
 	model[TEMPLE_MODEL]->SetPos(2.5f, 0, 1);
 
-	model[SLEEPTUBE_MODEL] = engine->AllocModel("sleep");
+	model[SLEEPTUBE_MODEL] = new Model("sleep", tree);
 	model[SLEEPTUBE_MODEL]->SetPos(4.0f, 0, 1);
 
-	model[CORE_MODEL] = engine->AllocModel("core");
+	model[CORE_MODEL] = new Model("core", tree);
 	model[CORE_MODEL]->SetPos(5.5f, 0, 1);
 
 	for (int i = RING_0_MODEL; i <= RING_1_MODEL; ++i) {
-		model[i] = engine->AllocModel("ring");
+		model[i] = new Model("ring", tree);
 		model[i]->SetPos(0.8f + 0.4f*float(i-RING_0_MODEL), 0.5f, 2.0f);
 		model[i]->SetYRotation(90.0f);
 	}
 
 	for (int i = PISTOL_MODEL; i <= BEAMGUN_MODEL; ++i) {
-		model[i] = engine->AllocModel(GUN_NAME[i - PISTOL_MODEL]);
+		model[i] = new Model(GUN_NAME[i - PISTOL_MODEL], tree);
 		model[i]->SetPos(0.5f + 0.4f*float(i - PISTOL_MODEL), 0.5f, 2.8f);
 		model[i]->SetYRotation(90.0f);
 	}

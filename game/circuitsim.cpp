@@ -51,7 +51,7 @@ CircuitSim::CircuitSim(WorldMap* p_worldMap, Engine* p_engine, LumosChitBag* p_c
 CircuitSim::~CircuitSim()
 {
 	for (int i = 0; i < electrons.Size(); ++i) {
-		engine->FreeModel(electrons[i].model);
+		delete electrons[i].model;
 	}
 	electrons.Clear();
 }
@@ -98,7 +98,7 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 
 void CircuitSim::CreateElectron(const grinliz::Vector2I& pos, int rot4, int charge)
 {
-	Model* model = engine->AllocModel( charge ? "charge" : "spark");
+	Model* model = new Model( charge ? "charge" : "spark", engine->GetSpaceTree());
 	Vector2F start = ToWorld2F(pos);
 	model->SetPos(ToWorld3F(pos));
 
@@ -190,7 +190,8 @@ void CircuitSim::DoTick(U32 delta)
 			}
 		}
 		if (electronDone) {
-			engine->FreeModel(pe->model);
+			delete pe->model;
+			pe->model = 0;
 			// just don't push back to the 'electrons' array to delete it.
 		}
 		else {
@@ -199,8 +200,8 @@ void CircuitSim::DoTick(U32 delta)
 
 			const char* resName = pe->charge ? "charge" : "spark";
 			if (!pe->model || !StrEqual(pe->model->GetResource()->Name(), resName)) {
-				engine->FreeModel(pe->model);
-				pe->model = engine->AllocModel(resName);
+				delete pe->model;
+				pe->model = new Model(resName, engine->GetSpaceTree());
 			}
 
 			ParticleDef pd = engine->particleSystem->GetPD(ISC::electron);

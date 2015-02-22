@@ -179,9 +179,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 GameScene::~GameScene()
 {
 	delete menu;
-	if ( selectionModel ) {
-		sim->GetEngine()->FreeModel( selectionModel );
-	}
+	delete selectionModel;
 	delete sim;
 	delete adviser;
 }
@@ -389,16 +387,14 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	if ( *name ) {
 		// Make the model current.
 		if ( !selectionModel || !StrEqual( selectionModel->GetResource()->Name(), name )) {
-			if ( selectionModel ) {
-				engine->FreeModel( selectionModel );
-			}
-			selectionModel = engine->AllocModel( name );
+			delete selectionModel;
+			selectionModel = new Model(name, engine->GetSpaceTree());
 			GLASSERT( selectionModel );
 		}
 	}
 	else {
 		if ( selectionModel ) {
-			engine->FreeModel( selectionModel );
+			delete selectionModel;
 			selectionModel = 0;
 		}
 	}
