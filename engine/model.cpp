@@ -305,6 +305,10 @@ void Model::Init(const ModelResource* resource, SpaceTree* st)
 
 Model::~Model()	
 {	
+	if (this->spaceTreeNode) {
+		SpaceTree::Node* node = (SpaceTree::Node*)this->spaceTreeNode;
+		node->Remove(this);
+	}
 	GLASSERT(this->spaceTreeNode == 0);
 	GLASSERT(this->spaceTreeNext == 0);
 	GLASSERT(this->spaceTreePrev == 0);

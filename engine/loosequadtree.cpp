@@ -192,6 +192,7 @@ void SpaceTree::Node::Add(Model* model)
 	if (root) {
 		root->spaceTreePrev = model;
 	}
+	model->spaceTreeNode = this;
 	model->spaceTreeNext = root;
 	model->spaceTreePrev = 0;
 	root = model;

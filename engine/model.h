@@ -241,7 +241,7 @@ private:
 };
 
 
-class Model
+class Model final
 {
 	friend class SpaceTree;
 	void* spaceTree;
@@ -256,7 +256,7 @@ public:
 	~Model();
 
 	void Attach(SpaceTree* t) {
-		GLASSERT(tree == 0);
+		GLASSERT(tree == 0 || tree == t);
 		tree = t;
 	}
 	void Serialize( XStream* xs);
