@@ -136,13 +136,14 @@ void MapSpatialComponent::SyncWithSpatial()
 int MapSpatialComponent::DoTick(U32 delta)
 {
 	if (glow != glowTarget) {
-		glow = TravelTo(1.0f, delta, glow, glowTarget);
+		glow = TravelTo(0.7f, delta, glow, glowTarget);
 	}
 	if (parentChit->GetItem() && parentChit->GetItem()->IName() == ISC::core) {
 		glow = glowTarget = 1;
 	}
 
-	if (parentChit->GetRenderComponent()) {
+	RenderComponent* rc = parentChit->GetRenderComponent();
+	if (rc) {
 		const GameItem* gameItem = parentChit->GetItem();
 		if (gameItem && gameItem->keyValues.GetIString(ISC::procedural) == ISC::team) {
 
@@ -152,7 +153,8 @@ int MapSpatialComponent::DoTick(U32 delta)
 			info.color.m41 *= glow;
 			info.color.m42 *= glow;
 			info.color.m43 *= glow;
-			parentChit->GetRenderComponent()->SetProcedural(0, info);
+			rc->SetProcedural(0, info);
+			rc->SetSaturation(0.5f + 0.5f*glow);
 		}
 	}
 	return VERY_LONG_TICK;
