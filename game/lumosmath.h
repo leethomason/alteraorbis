@@ -168,6 +168,19 @@ inline float Travel(float rate, float secTime) {
 	return rate * secTime;
 }
 
+inline float TravelTo(float rate, U32 msecTime, float current, float dest)
+{
+	if (current < dest) {
+		current += Travel(rate, msecTime);
+		if (current > dest) current = dest;
+	}
+	else if (current > dest) {
+		current -= Travel(rate, msecTime);
+		if (current < dest) current = dest;
+	}
+	return current;
+}
+
 inline grinliz::Vector2F RandomInRect(const grinliz::Rectangle2I& r, grinliz::Random* random) {
 	grinliz::Rectangle2F rect2f = ToWorld(r);
 	grinliz::Vector2F v = { rect2f.min.x + random->Uniform()*rect2f.Width(), 

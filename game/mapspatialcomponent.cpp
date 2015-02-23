@@ -21,6 +21,9 @@
 #include "../xegame/chit.h"
 #include "../script/evalbuildingscript.h"
 #include "../game/circuitsim.h"
+#include "../script/procedural.h"
+#include "../xegame/rendercomponent.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 
@@ -31,6 +34,8 @@ MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 	blocks = false;
 	hasPorch = 0;
 	hasCircuit = 0;
+	glow = 1;
+	glowTarget = 1;
 	bounds.Zero();
 }
 
@@ -82,8 +87,9 @@ void MapSpatialComponent::SyncWithSpatial()
 	Context()->worldMap->UpdateBlock(bounds);
 
 	// Compute a new porch type:
+	EvalBuildingScript* ebs = 0;
 	if (hasPorch) {
-		EvalBuildingScript* ebs = (EvalBuildingScript*)parentChit->GetComponent("EvalBuildingScript");
+		ebs = (EvalBuildingScript*)parentChit->GetComponent("EvalBuildingScript");
 		const GameItem* item = parentChit->GetItem();
 		hasPorch = WorldGrid::BASE_PORCH;
 		if (ebs && item) {
@@ -102,6 +108,17 @@ void MapSpatialComponent::SyncWithSpatial()
 				hasPorch = WorldGrid::PORCH_UNREACHABLE;
 			}
 		}
+
+	}
+	CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2I(pos)));
+	if (cs && cs->InUse()) {
+		glowTarget = 1;
+		if (ebs) {
+			glowTarget = ebs->Reachable() ? 1.0f : 0.0f;
+		}
+	}
+	else {
+		glowTarget = 0;
 	}
 
 	// And the porches / circuits: (rotation doesn't change bounds);
@@ -115,6 +132,31 @@ void MapSpatialComponent::SyncWithSpatial()
 	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, outset);
 }
 
+
+int MapSpatialComponent::DoTick(U32 delta)
+{
+	if (glow != glowTarget) {
+		glow = TravelTo(1.0f, delta, glow, glowTarget);
+	}
+	if (parentChit->GetItem() && parentChit->GetItem()->IName() == ISC::core) {
+		glow = glowTarget = 1;
+	}
+
+	if (parentChit->GetRenderComponent()) {
+		const GameItem* gameItem = parentChit->GetItem();
+		if (gameItem && gameItem->keyValues.GetIString(ISC::procedural) == ISC::team) {
+
+			int team = parentChit->Team();
+			ProcRenderInfo info;
+			AssignProcedural(parentChit->GetItem(), &info);
+			info.color.m41 *= glow;
+			info.color.m42 *= glow;
+			info.color.m43 *= glow;
+			parentChit->GetRenderComponent()->SetProcedural(0, info);
+		}
+	}
+	return VERY_LONG_TICK;
+}
 
 void MapSpatialComponent::SetMapPosition( Chit* chit, int x, int y )
 {
@@ -222,14 +264,16 @@ void MapSpatialComponent::OnRemove()
 }
 
 
-void MapSpatialComponent::Serialize( XStream* xs )
+void MapSpatialComponent::Serialize(XStream* xs)
 {
-	this->BeginSerialize( xs, "MapSpatialComponent" );
-	XARC_SER( xs, size );
-	XARC_SER( xs, blocks );
-	XARC_SER( xs, hasPorch );
-	XARC_SER(xs,  hasCircuit);
-	this->EndSerialize( xs );
+	this->BeginSerialize(xs, "MapSpatialComponent");
+	XARC_SER(xs, size);
+	XARC_SER(xs, blocks);
+	XARC_SER(xs, hasPorch);
+	XARC_SER(xs, hasCircuit);
+	XARC_SER(xs, glow);
+	XARC_SER(xs, glowTarget);
+	this->EndSerialize(xs);
 }
 
 

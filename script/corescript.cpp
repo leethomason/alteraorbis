@@ -523,13 +523,6 @@ bool CoreScript::RecruitNeutral()
 
 int CoreScript::DoTick(U32 delta)
 {
-	{
-		int team = parentChit->Team();
-		ProcRenderInfo info;
-		AssignProcedural(parentChit->GetItem(), &info);
-		parentChit->GetRenderComponent()->SetProcedural( 0, info );
-	}
-
 	int nScoreTicks = scoreTicker.Delta(delta);
 	int nAITicks = aiTicker.Delta(delta);
 

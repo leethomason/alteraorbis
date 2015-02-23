@@ -38,6 +38,7 @@ public:
 	virtual void OnRemove();
 	virtual void Serialize( XStream* xs );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual int DoTick(U32 time);
 
 	void SetBuilding( int size, bool hasPorch, int circuit );
 	int Size() const								{ return size; }
@@ -72,6 +73,8 @@ private:
 	bool					blocks;
 	int						hasPorch;	// if a building, does it have a porch?
 	int						hasCircuit;	
+	float					glowTarget;
+	float					glow;
 	grinliz::Rectangle2I	bounds;
 };
 
