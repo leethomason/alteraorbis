@@ -243,7 +243,7 @@ void WorldGenScene::DoTick(U32 delta)
 							   "and domains rising and falling, for as long as you wish.\n\n"
 							   "Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
 							   "destroying land. Over time, the forces of motion and rock will balance. Domain creation and destruction "
-							   "will create silica, pave, and buildings that will dot the langscape.\n\n"
+							   "will create silica, pave, and buildings that will dot the landscape.\n\n"
 							   "Tap 'okay' to generate or world or 'cancel' to return to title.");
 		}
 		break;

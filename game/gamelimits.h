@@ -99,8 +99,6 @@ static const U32 AGE_IN_MSEC		= MINUTES_IN_AGE * 60 * 1000;
 static const float MIN_EFFECTIVE_RANGE	= 2.0f;
 static const float MAX_EFFECTIVE_RANGE	= 25.0f;	
 
-static const int MODEL_USER				= (1<<16);				// from model.h
-static const int MODEL_CLICK_THROUGH	= (MODEL_USER<<1);
 static const int INVERTORY_SLOTS		= 15;
 
 static const int MAX_SQUADS				= 4;

@@ -332,6 +332,7 @@ void Model::Attach(SpaceTree* t)
 		t->Update(this);
 	}
 	tree = t;
+	Modify();
 }
 
 void Model::Serialize( XStream* xs)

@@ -114,7 +114,6 @@ void RenderComponent::OnAdd( Chit* chit, bool init )
 		if ( model[i] ) {
 			model[i]->Attach(Context()->engine->GetSpaceTree());
 			model[i]->userData = parentChit;
-			model[i]->Modify();
 		}
 	}
 	SyncToSpatial();
@@ -156,7 +155,7 @@ void RenderComponent::SyncToSpatial()
 	const GameItem* item = parentChit->GetItem();
 	if (item) {
 		if (item->flags & GameItem::CLICK_THROUGH)
-			model[0]->SetFlag(MODEL_CLICK_THROUGH);
+			model[0]->SetFlag(Model::MODEL_CLICK_THROUGH);
 	}
 }
 
@@ -551,7 +550,7 @@ void RenderComponent::SetGroundMark( const char* asset )
 		pos.y = 0.01f;
 		groundMark->SetPos( pos );	
 		groundMark->userData = parentChit;
-		groundMark->SetFlag( MODEL_CLICK_THROUGH );
+		groundMark->SetFlag( Model::MODEL_CLICK_THROUGH );
 
 		Texture* texture = groundMark->GetResource()->atom[0].texture;
 		Texture::TableEntry te;

@@ -2014,9 +2014,11 @@ Model* WorldMap::PushTree(int x, int y, int type0Based, int stage, float hpFract
 		treePool.Push(new Model(res, engine->GetSpaceTree()));
 	}
 	Model* m = treePool[nTrees];
+	m->ClearFlag(Model::MODEL_INVISIBLE);
 	nTrees++;
 
 	m->SetResource(res);
+	m->SetFlag(Model::MODEL_CLICK_THROUGH);
 	Vector3F pos = { float(x) + 0.5f, 0, float(y) + 0.5f };
 	float rot = IndexToRotation360(INDEX(x, y));
 	m->SetPosAndYRotation(pos, rot);
@@ -2342,6 +2344,9 @@ void WorldMap::PrepVoxels(const SpaceTree* spaceTree, grinliz::CDynArray<Model*>
 				}
 			}
 		}
+	}
+	for (int i = nTrees; i < treePool.Size(); ++i) {
+		treePool[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 	voxelVertexVBO->Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
 	nVoxels = voxelBuffer.Size() / 4;
