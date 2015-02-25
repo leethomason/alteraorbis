@@ -1606,6 +1606,12 @@ void GameScene::DoTick( U32 delta )
 				   citizens.Size(), CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
+	else {
+		str.Format("Date %.2f\n%s",
+			sim->AgeF(),
+			sd.name.safe_str());
+		dateLabel.SetText(str.c_str());
+	}
 
 	pausedLabel.SetVisible(paused);
 	str.Clear();
