@@ -165,6 +165,7 @@ private:
 	Shader* active;
 	grinliz::CDynArray<int> activeStreams;
 	U32 totalCompileTime;
+	U32 vertexArrayID;
 
 	void LoadProgram( const char* name, grinliz::GLString *store );
 	Shader* CreateProgram( int flag );

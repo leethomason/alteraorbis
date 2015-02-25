@@ -102,6 +102,9 @@ ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 	U32 hash = hash0 ^ hash1 ^ hash2 ^ hash3 ^ hash4;
 
 	hashStr.Format( "%x", hash );
+
+	glGenVertexArrays(1, &vertexArrayID);
+	glBindVertexArray(vertexArrayID);
 }
 
 
@@ -112,6 +115,7 @@ ShaderManager::~ShaderManager()
 			DeleteProgram( &shaderArr[i] );
 		}
 	}
+	glDeleteVertexArrays(1, &vertexArrayID);
 }
 
 
@@ -177,6 +181,7 @@ void ShaderManager::ClearStream()
 
 void ShaderManager::SetStreamData( int id, int size, int type, int stride, const void* data )
 {
+	CHECK_GL_ERROR;
 	int loc = active->GetAttributeLocation( id );
 	GLASSERT( loc >= 0 );
 	if ( gDebugging ) {
@@ -185,7 +190,9 @@ void ShaderManager::SetStreamData( int id, int size, int type, int stride, const
 			GLASSERT( activeStreams[i] != loc );
 		}
 	}
+	CHECK_GL_ERROR;
 	glVertexAttribPointer( loc, size, type, 0, stride, data );
+	CHECK_GL_ERROR;
 	glEnableVertexAttribArray(loc);
 	CHECK_GL_ERROR;
 

@@ -177,6 +177,7 @@ int main(int argc, char **argv)
 	}
 
 	CHECK_GL_ERROR;
+	glewExperimental = GL_TRUE;
 	int r = glewInit();
 	GLASSERT(r == GL_NO_ERROR);
 

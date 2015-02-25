@@ -55,6 +55,7 @@
 	#error Undefined platform
 #endif
 
+#ifdef DEBUG
 #define CHECK_GL_ERROR	{	if ( gDebugging ) {									\
 								GLenum error = glGetError();					\
 								if ( error  != GL_NO_ERROR ) {					\
@@ -64,6 +65,8 @@
 								}												\
 							}													\
 						}
-
+#else
+#define CHECK_GL_ERROR
+#endif
 
 #endif // UFOATTACK_PLATFORMGL_INCLUDED

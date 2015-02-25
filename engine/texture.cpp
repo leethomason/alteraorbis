@@ -390,9 +390,9 @@ void Texture::Upload( const void* pixels, int size )
 	CHECK_GL_ERROR;
 
 	if ( !(flags & PARAM_LINEAR) ) {
-		if ( !(flags & PARAM_SOFTWARE_MIP) ) {
+		if (!(flags & PARAM_SOFTWARE_MIP)) {
 #ifdef GEN_MIP
-			glGenerateMipmap( GL_TEXTURE_2D );
+			glGenerateMipmap(GL_TEXTURE_2D);
 #endif
 		}
 		else {
