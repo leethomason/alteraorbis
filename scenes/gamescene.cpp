@@ -43,6 +43,8 @@
 #include "../ai/rebuildai.h"
 #include "../ai/domainai.h"
 
+#include "../widget/tutorialwidget.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -68,6 +70,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	mapDragStart.Zero();
 	lumosGame = game;
 	adviser = new Adviser();
+	tutorial = new TutorialWidget();
 	InitStd( &gamui2D, &okay, 0 );
 
 	sim = new Sim( lumosGame );
@@ -81,7 +84,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	minimap.SetCapturesTap( true );
 
 	atlasButton.Init(&gamui2D, game->GetButtonLook(0));
-	atlasButton.SetText("Atlas");
+	atlasButton.SetText("Map");
 
 	atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
@@ -172,7 +175,63 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	domainWarningIcon.SetText("WARNING: Domain under attack.");
 
 	adviser->Attach(&helpText, &helpImage);
+	tutorial->Init(&gamui2D, game->GetButtonLook(0), layout);
 
+	{
+		tutorial->Add(0,
+					  "Welcome to Altera, Domain Core. I am your Adviser. Mother Core has opened Her eyes and Her breath has "
+					  "awoken our world. Many creatures, denizens, monsters, flora, and fauna seek to live or rule here. "
+					  "Our goal is survive and prosper.");
+		tutorial->Add(0, 
+					  "As the domain core, it is your responsibility to construct buildings, defenses, manage the economy, "
+					  "and direct our squads. You are given direct control of one unit, the Avatar.\n\n"
+					  "The Avatar can explore and battle, but also craft weapons (at a Forge), use a Market, Exchange, "
+					  "and Vault.\n\n"
+					  "All the other denizens of your domain move of their own accord." );
+
+		// View, Build, Control
+		// Date/Location/Population
+		// Map
+		// Average
+		// Tech
+		// Money/Crystal
+		// Census
+		// Adviser
+
+		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_VIEW], 
+					  "View Mode allows you to control the Avatar, follow your denizens, and look around the world.");
+		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_BUILD], 
+					  "In Build Mode you can construct buildings and defenses.");
+		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_CONTROL], 
+					  "Once our domain is populous, Control Mode gives an overview of our denizens, and allows you to send squads to attack and explore.");
+		tutorial->Add(&dateLabel, 
+					  "General information: the current date, the domain you are viewing, and the population (current/max) of our domain.");
+		tutorial->Add(&minimap, 
+					  "Tapping on the map lets you view anywhere in the world. The button below opens the map screen "
+					  "to see a strategic view and the current Web.");
+		tutorial->Add(&summaryBars, 
+					  "Every unit (except the Avatar) has a need for food, energy, and fun provided by buildings of the domain. "
+					  "Getting these needs met (or not), as well as other events effects the unit's morale. "
+					  "Selecting a particular unit will show his/her/its need bar. "
+					  "The average need and morale for your denizens is shown here. If a bar turns red, "
+					  "one or more of your denizens has a critical need.\n\n"
+					  "If you units morale goes to zero, they can delete or go mad." );
+		tutorial->Add(&techLabel, 
+					  "The current technology level of your domain. More tech has many advantages, including "
+					  "more efficient buildings and better weapons. Visitors bring tech, and Temples and Kiosks bring visitors. "
+					  "(I will advise you to build Temples and Kiosks when the time comes.)");
+		tutorial->Add(&moneyWidget, 
+					  "The wealth of our domain core. Au is used to purchase buildings. Crystal (green, red, blue, violet) "
+					  "is used to construct items. Your Avatar contributes all the Au and Crystal he/she/it finds to the Core." );
+		tutorial->Add(&censusButton, 
+					  "The census provides a high level count of world population and notable monsters and items. "
+					  "It can also be used as a research tool to find important or powerful items." );
+		tutorial->Add(nullptr, 
+					  "This world persists will automatically save when you exit.\n\n"
+					  "Good luck. I will provide ongoing advice. Long may our domain stand.");
+	}
+	tutorial->ShowTutorial();
+	tutorial->SetVisible(!sim->GetChitBag()->GetHomeCore());
 }
 
 
@@ -182,6 +241,7 @@ GameScene::~GameScene()
 	delete selectionModel;
 	delete sim;
 	delete adviser;
+	delete tutorial;
 }
 
 
@@ -853,6 +913,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	// Doesn't do any logic; does change the state.
 	menu->ItemTapped(item);
+	tutorial->ItemTapped(item);
 
 	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
 		startGameWidget.ItemTapped(item);
@@ -915,6 +976,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if (item == &abandonConfirmButton) {
 		OpenEndGame();
 		sim->GetChitBag()->SetHomeTeam(TEAM_HOUSE);
+		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+		if (cc) cc->SetTrack(0);
+		targetFaceWidget.SetFace(&uiRenderer, 0);
 		endTimer = 1;	// open immediate
 	}
 	else if ( item == faceWidget.GetButton() ) {
@@ -1574,6 +1638,9 @@ void GameScene::DoTick( U32 delta )
 		str.Format("Tech %.2f / %d", tech, maxTech);
 		techLabel.SetText(str.c_str());
 	}
+	else {
+		techLabel.SetText("Tech 0 / 0");
+	}
 
 	CheckGameStage(delta);
 	int nWorkers = 0;
@@ -1706,7 +1773,7 @@ void GameScene::CheckGameStage(U32 delta)
 			endTimer = 0;
 		}
 	}
-	else if (!cs && !startVisible && !endVisible) {
+	else if (!cs && !startVisible && !endVisible && !tutorial->Visible()) {
 		// Try to find a suitable starting location.
 		Rectangle2I b;
 		Random random;

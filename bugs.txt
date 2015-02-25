@@ -4,7 +4,7 @@
 - GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: suggestion - pick up and use food as medkit
 - GT: suggestion - add popup advisor when the game starts (welcome to altera, altera is a, you are a, your aim is to, some story or lore  and ask if people want detailed tutorial popus with pause (step by step, click menu to build this because xxx) or make do with the tiny "live" advisor on the ui
-- GT: use color/glow to show building control / ownership / working (2/20/2015)
+x GT: use color/glow to show building control / ownership / working (2/20/2015)
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
 - GT: tutorial improvements (2/20/2015)
@@ -135,7 +135,7 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
 
-- Beta3d
+- Beta3_
 	x Documentation
 	- Long game: 
 		- squad control
@@ -144,6 +144,10 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 		- circuits
 	x New promo assets
 	- IndieDB
+		- Tutorial?
+		- Mac?
+		- Linux?
+		- Android?
 	- Android
 
 - World Gen

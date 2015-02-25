@@ -199,6 +199,7 @@
     <ClCompile Include="..\widget\mapgridwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
     <ClCompile Include="..\widget\startwidget.cpp" />
+    <ClCompile Include="..\widget\tutorialwidget.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
@@ -341,6 +342,7 @@
     <ClInclude Include="..\widget\mapgridwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
     <ClInclude Include="..\widget\startwidget.h" />
+    <ClInclude Include="..\widget\tutorialwidget.h" />
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />
     <ClInclude Include="..\win32\wglew.h" />

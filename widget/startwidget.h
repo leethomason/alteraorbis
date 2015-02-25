@@ -48,8 +48,6 @@ private:
 	gamui::LayoutCalculator calculator;
 	gamui::Image		background;
 	gamui::TextLabel	topLabel, bodyLabel, countLabel;
-	//gamui::Image		primaryColor, secondaryColor;
-	//gamui::PushButton	prevColor, nextColor;
 	gamui::PushButton	prevDomain, nextDomain;
 	gamui::PushButton	okay;
 

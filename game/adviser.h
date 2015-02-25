@@ -12,6 +12,7 @@ public:
 
 	void Attach(gamui::TextLabel *text, gamui::Image* image);
 	void DoTick(int time, CoreScript* cs, int nWorkers, const int* buildCounts, int nBuildCounts);
+	gamui::Image* Image() { return image; }
 
 private:
 	enum {

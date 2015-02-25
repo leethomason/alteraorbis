@@ -39,6 +39,7 @@ class Chit;
 class GameItem;
 class Adviser;
 class GameSceneMenu;
+class TutorialWidget;
 
 class GameScene : public Scene,
 				  public IChitListener
@@ -151,6 +152,7 @@ private:
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
 	Adviser*			adviser;
+	TutorialWidget*		tutorial;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;

@@ -433,6 +433,9 @@
     <ClCompile Include="..\game\lumosmath.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\tutorialwidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -862,6 +865,9 @@
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\widget\mapgridwidget.h">
+      <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\tutorialwidget.h">
       <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>

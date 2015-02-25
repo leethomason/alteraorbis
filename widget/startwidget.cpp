@@ -69,19 +69,9 @@ void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCal
 	topLabel.SetText("MotherCore has granted you access to a neutral domain core. Choose wisely.");
 	countLabel.SetText("1/1");
 
-	/*
-	primaryColor.Init(gamui, LumosGame::CalcPaletteAtom(1, 1), true);
-	secondaryColor.Init(gamui, LumosGame::CalcPaletteAtom(1, 1), true);
-
-	prevColor.Init(gamui, look);
-	nextColor.Init(gamui, look);
-	*/
 	prevDomain.Init(gamui, look);
 	nextDomain.Init(gamui, look);
-	/*
-	prevColor.SetText("<");
-	nextColor.SetText(">");
-	*/
+
 	prevDomain.SetText("<");
 	nextDomain.SetText(">");
 
@@ -149,12 +139,6 @@ void StartGameWidget::SetPos(float x, float y)
 
 	calculator.PosAbs(&topLabel, 0, 0);
 
-	/*
-	calculator.PosAbs(&prevColor, 0, 1);
-	calculator.PosAbs(&primaryColor, 1, 1);
-	calculator.PosAbs(&secondaryColor, 2, 1);
-	calculator.PosAbs(&nextColor, 3, 1);
-	*/
 	calculator.PosAbs(&bodyLabel, 0, 1);
 	
 	// hack to drop the bottom a bit.
