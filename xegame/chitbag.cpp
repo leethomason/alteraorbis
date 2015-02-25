@@ -337,6 +337,10 @@ void ChitBag::DoTick( U32 delta )
 
 				if (c->timeToTick <= 0) {
 					++nTicked;
+					// Performance note: disabling the DoTick drops the 
+					// time of this function to 0.3ms, about 1% of the
+					// time. So the memory walk and blocks are fast.
+					// It's all in the DoTick() itself.
 					c->DoTick();
 					GLASSERT( c->timeToTick >= 0 );
 				}
