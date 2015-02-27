@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2000-2007 Lee Thomason (www.grinninglizard.com)
+Copyright (c) 2000-2015 Lee Thomason (www.grinninglizard.com)
 Grinning Lizard Utilities.
 
 This software is provided 'as-is', without any express or implied 
@@ -67,6 +67,16 @@ class Matrix4
 	void Set( int row, int col, float v )	{	x[INDEX(row,col)] = v; }
 	float& m( int row, int col )			{	return x[INDEX(row,col)]; }
 	float m(int row, int col ) const		{	return x[INDEX(row,col)]; }
+	float& X(int index)						{
+		GLASSERT(index >= 0 && index < 16);
+		return x[index];
+	}
+	float X(int index) const 	{
+		GLASSERT(index >= 0 && index < 16);
+		return x[index];
+	}
+	const float* Mem() const { return x; }
+	float* Mem() { return x; }
 
 	/// Set the translation terms
 	void SetTranslation( float _x, float _y, float _z )		{	x[12] = _x;	x[13] = _y;	x[14] = _z;	}
@@ -81,6 +91,7 @@ class Matrix4
 	void SetZRotation( float thetaDegree );
 	/// Concatenate a rotation in.
 	void ConcatRotation( float thetaDegree, int axis );
+	void ConcatTranslation(const Vector3F& t);
 
 	/// Get the rotation around the X(0), Y(1), or Z(2) axis
 	float CalcRotationAroundAxis( int axis ) const;
@@ -219,7 +230,6 @@ class Matrix4
 	friend void MultMatrix4( const Matrix4& a, const Vector4F& b, Vector4F* c );
 	friend void MultMatrix4( const Matrix4& m, const Rectangle3<float>& in, Rectangle3<float>* out );
 	
-	#ifdef DEBUG
 	void Dump( const char* name=0 ) const
 	{
 		const char* empty = "";
@@ -236,28 +246,9 @@ class Matrix4
 				  x[2], x[6], x[10], x[14], 
 				  x[3], x[7], x[11], x[15] ));
 	}
-	#endif
-	
-#ifdef _MSC_VER
-#pragma warning ( push )
-#pragma warning ( disable : 4201 )	// un-named union.
-#endif
-	// Row-Column notation is backwards from x,y regrettably. Very
-	// confusing. Just uses array. Increment by one moves down to the next
-	// row, so that the next columnt is at +4.
-	union
-	{
-		float x[16];
-		struct
-		{
-			// row-column
-			float m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44;
-		};
-	};
-#ifdef _MSC_VER
-#pragma warning ( pop )
-#endif
 
+	static void Test();
+	
 	friend Matrix4 operator*( const Matrix4& a, const Matrix4& b )
 	{	
 		Matrix4 result;
@@ -284,6 +275,33 @@ class Matrix4
 				return false;
 		return true;
 	}
+
+private:
+	enum {
+		T_TERM = 0x01,
+		R_TERM = 0x02,
+		P_TERM = 0x04
+	};
+
+#ifdef _MSC_VER
+#pragma warning ( push )
+#pragma warning ( disable : 4201 )	// un-named union.
+#endif
+	// Row-Column notation is backwards from x,y regrettably. Very
+	// confusing. Just uses array. Increment by one moves down to the next
+	// row, so that the next columnt is at +4.
+	union
+	{
+		float x[16];
+		struct
+		{
+			// row-column
+			float m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44;
+		};
+	};
+#ifdef _MSC_VER
+#pragma warning ( pop )
+#endif
 };
 
 
@@ -304,28 +322,7 @@ void LookAt( bool cameraFlipBug,
 	Note the target parameter is the last parameter, although it is more
 	comfortable expressed: C = AB
 */
-inline void MultMatrix4( const Matrix4& a, const Matrix4& b, Matrix4* c )
-{
-	// This does not support the target being one of the sources.
-	GLASSERT( c != &a && c != &b && &a != &b );
-	float* dst = c->x;
-
-	// The counters are rows and columns of 'c'
-	for( int j=0; j<4; ++j ) 
-	{
-		for( int i=0; i<4; ++i ) 
-		{
-			// for c:
-			//	j increments the row
-			//	i increments the column
-			*dst++	=   a.x[i+0]  * b.x[j*4+0] 
-					  + a.x[i+4]  * b.x[j*4+1] 
-					  + a.x[i+8]  * b.x[j*4+2] 
-					  + a.x[i+12] * b.x[j*4+3];
-		}
-	}
-}
-
+void MultMatrix4( const Matrix4& a, const Matrix4& b, Matrix4* c );
 
 /** out = Mv. Multiply a vector by a matrix. A vector is a column in column-major form.
 	w is the v.w term. If 1.0 (default) transformation as point. If 0.0 transform

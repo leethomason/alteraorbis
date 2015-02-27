@@ -723,7 +723,7 @@ bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v )
 		v.SetIdentity();
 		return true;
 	}
-	return XarcGetArr( xs, key, v.x, 16 );
+	return XarcGetArr( xs, key, v.Mem(), 16 );
 }
 
 
@@ -734,6 +734,6 @@ void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )
 		XarcSetArr( xs, key, identity, 1 );
 	}
 	else {
-		XarcSetArr( xs, key, v.x, 16 );
+		XarcSetArr( xs, key, v.Mem(), 16 );
 	}
 }

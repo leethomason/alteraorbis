@@ -74,7 +74,7 @@ inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Vector4F
 inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Quaternion& q )		{ item->SetFloatArray( key, &q.x, 4 );}
 inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Rectangle2I& rect ) { item->SetIntArray( key, &rect.min.x, 4 );}
 inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Rectangle3F& rect ) { item->SetFloatArray( key, &rect.min.x, 6 );}
-inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Matrix4& mat )		{ item->SetFloatArray( key, mat.x, 16 ); }
+inline void DBSet( gamedb::WItem* item, const char* key, const grinliz::Matrix4& mat )		{ item->SetFloatArray( key, mat.Mem(), 16 ); }
 
 inline void DBRead( const gamedb::Item* item, const char* key, int &value )					{ value = item->GetInt( key ); }
 inline void DBRead( const gamedb::Item* item, const char* key, unsigned &value )			{ value = (unsigned)item->GetInt( key ); }
@@ -87,7 +87,7 @@ inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Vector4F
 inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Quaternion& q )		{ item->GetFloatArray( key, 4, &q.x );}
 inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Rectangle2I& rect ) { item->GetIntArray( key, 4, &rect.min.x );}
 inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Rectangle3F& rect ) { item->GetFloatArray( key, 6, &rect.min.x );}
-inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Matrix4& mat )		{ item->GetFloatArray( key, 16, mat.x ); }
+inline void DBRead( const gamedb::Item* item, const char* key, grinliz::Matrix4& mat )		{ item->GetFloatArray( key, 16, mat.Mem() ); }
 
 #define DB_SET( item, name ) DBSet( item, #name, name );
 #define DB_READ( witem, name ) DBRead( witem, #name, name );

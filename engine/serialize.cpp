@@ -208,7 +208,7 @@ void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Matrix4& m
 	for( int i=0; i<16; ++i ) {
 		CStr<10> str;
 		str.Format( "x%0d", i );
-		printer->PushAttribute( str.c_str(), mat.x[i] );
+		printer->PushAttribute( str.c_str(), mat.X(i) );
 	}
 	printer->CloseElement();
 }
@@ -351,7 +351,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 			for( int i=0; i<16; ++i ) {
 				CStr<10> str;
 				str.Format( "x%0d", i );
-				element->QueryFloatAttribute( str.c_str(), &m.x[i] );
+				element->QueryFloatAttribute( str.c_str(), &m.X(i) );
 			}
 		}
 	}

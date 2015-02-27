@@ -344,6 +344,12 @@ struct Vector3
 		return grinliz::Length( a.x-b.x, a.y-b.y, a.z-b.z );
 	}
 
+	static void Lerp(const Vector3<T>& a, const Vector3<T>& b, T fraction, Vector3<T>* out) {
+		out->x = grinliz::Lerp(a.x, b.x, fraction);
+		out->y = grinliz::Lerp(a.y, b.y, fraction);
+		out->z = grinliz::Lerp(a.z, b.z, fraction);
+	}
+
 	#ifdef DEBUG
 	void Dump( const char* name ) const
 	{

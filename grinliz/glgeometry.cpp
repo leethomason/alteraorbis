@@ -668,29 +668,30 @@ void grinliz::TessellateCube(	const Vector3F& center,
 #endif
 
 
-const void Quaternion::ToMatrix( Matrix4* mat ) const
+const void Quaternion::ToMatrix( Matrix4* _mat ) const
 {
 	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
+	Matrix4& mat = *_mat;
 
-	mat->x[0] = 1.0f-2.0f*(y*y + z*z);
-	mat->x[1] = 2.0f*(x*y + z*w);
-	mat->x[2] = 2.0f*(x*z - y*w);
-	mat->x[3] = 0.0f;
-
-	mat->x[4] = 2.0f*(x*y - z*w);
-	mat->x[5] = 1.0f-2.0f*(x*x + z*z);
-	mat->x[6] = 2.0f*(y*z + x*w);
-	mat->x[7] = 0.0f;
-
-	mat->x[8]  = 2.0f*(x*z + y*w);
-	mat->x[9]  = 2.0f*(y*z - x*w);
-	mat->x[10] = 1.0f-2.0f*(x*x + y*y);
-	mat->x[11] = 0.0f;
-
-	mat->x[12] = 0.0f;
-	mat->x[13] = 0.0f;
-	mat->x[14] = 0.0f;
-	mat->x[15] = 1.0f;
+	mat.X(0) = 1.0f-2.0f*(y*y + z*z);
+	mat.X(1) = 2.0f*(x*y + z*w);
+	mat.X(2) = 2.0f*(x*z - y*w);
+	mat.X(3) = 0.0f;
+	   
+	mat.X(4) = 2.0f*(x*y - z*w);
+	mat.X(5) = 1.0f-2.0f*(x*x + z*z);
+	mat.X(6) = 2.0f*(y*z + x*w);
+	mat.X(7) = 0.0f;
+	   
+	mat.X(8)  = 2.0f*(x*z + y*w);
+	mat.X(9)  = 2.0f*(y*z - x*w);
+	mat.X(10) = 1.0f-2.0f*(x*x + y*y);
+	mat.X(11) = 0.0f;
+	   
+	mat.X(12) = 0.0f;
+	mat.X(13) = 0.0f;
+	mat.X(14) = 0.0f;
+	mat.X(15) = 1.0f;
 
 	//GLASSERT( mat->IsRotation() );
 }

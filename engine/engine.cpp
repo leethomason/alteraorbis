@@ -604,45 +604,45 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 
 	// Left
 	// -(m3 + m0) * (x,y,z,0) = 0
-	planes[0].n.x = ( m.x[3+0]  + m.x[0+0] );
-	planes[0].n.y = ( m.x[3+4]  + m.x[0+4] );
-	planes[0].n.z = ( m.x[3+8]  + m.x[0+8] );
-	planes[0].d   = ( m.x[3+12] + m.x[0+12] );
+	planes[0].n.x = ( m.X(3+0)  + m.X(0+0) );
+	planes[0].n.y = ( m.X(3+4)  + m.X(0+4) );
+	planes[0].n.z = ( m.X(3+8)  + m.X(0+8) );
+	planes[0].d   = ( m.X(3+12) + m.X(0+12) );
 	planes[0].Normalize();
 
 	// right
-	planes[1].n.x = ( m.x[3+0]  - m.x[0+0] );
-	planes[1].n.y = ( m.x[3+4]  - m.x[0+4] );
-	planes[1].n.z = ( m.x[3+8]  - m.x[0+8] );
-	planes[1].d   = ( m.x[3+12] - m.x[0+12] );
+	planes[1].n.x = ( m.X(3+0)  - m.X(0+0) );
+	planes[1].n.y = ( m.X(3+4)  - m.X(0+4) );
+	planes[1].n.z = ( m.X(3+8)  - m.X(0+8) );
+	planes[1].d   = ( m.X(3+12) - m.X(0+12) );
 	planes[1].Normalize();
 
 	// bottom
-	planes[2].n.x = ( m.x[3+0]  + m.x[1+0] );
-	planes[2].n.y = ( m.x[3+4]  + m.x[1+4] );
-	planes[2].n.z = ( m.x[3+8]  + m.x[1+8] );
-	planes[2].d   = ( m.x[3+12] + m.x[1+12] );
+	planes[2].n.x = ( m.X(3+0)  + m.X(1+0) );
+	planes[2].n.y = ( m.X(3+4)  + m.X(1+4) );
+	planes[2].n.z = ( m.X(3+8)  + m.X(1+8) );
+	planes[2].d   = ( m.X(3+12) + m.X(1+12) );
 	planes[2].Normalize();
 
 	// top
-	planes[3].n.x = ( m.x[3+0]  - m.x[1+0] );
-	planes[3].n.y = ( m.x[3+4]  - m.x[1+4] );
-	planes[3].n.z = ( m.x[3+8]  - m.x[1+8] );
-	planes[3].d   = ( m.x[3+12] - m.x[1+12] );
+	planes[3].n.x = ( m.X(3+0)  - m.X(1+0) );
+	planes[3].n.y = ( m.X(3+4)  - m.X(1+4) );
+	planes[3].n.z = ( m.X(3+8)  - m.X(1+8) );
+	planes[3].d   = ( m.X(3+12) - m.X(1+12) );
 	planes[3].Normalize();
 
 	// near
-	planes[4].n.x = ( m.x[3+0]  + m.x[2+0] );
-	planes[4].n.y = ( m.x[3+4]  + m.x[2+4] );
-	planes[4].n.z = ( m.x[3+8]  + m.x[2+8] );
-	planes[4].d   = ( m.x[3+12] + m.x[2+12] );
+	planes[4].n.x = ( m.X(3+0)  + m.X(2+0) );
+	planes[4].n.y = ( m.X(3+4)  + m.X(2+4) );
+	planes[4].n.z = ( m.X(3+8)  + m.X(2+8) );
+	planes[4].d   = ( m.X(3+12) + m.X(2+12) );
 	planes[4].Normalize();
 
 	// far
-	planes[5].n.x = ( m.x[3+0]  - m.x[2+0] );
-	planes[5].n.y = ( m.x[3+4]  - m.x[2+4] );
-	planes[5].n.z = ( m.x[3+8]  - m.x[2+8] );
-	planes[5].d   = ( m.x[3+12] - m.x[2+12] );
+	planes[5].n.x = ( m.X(3+0)  - m.X(2+0) );
+	planes[5].n.y = ( m.X(3+4)  - m.X(2+4) );
+	planes[5].n.z = ( m.X(3+8)  - m.X(2+8) );
+	planes[5].d   = ( m.X(3+12) - m.X(2+12) );
 	planes[5].Normalize();
 
 	GLASSERT( DotProduct( planes[PLANE_LEFT].n, planes[PLANE_RIGHT].n ) < 0.0f );

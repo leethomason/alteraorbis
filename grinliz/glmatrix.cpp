@@ -28,46 +28,100 @@ distribution.
 
 using namespace grinliz;
 
-void grinliz::SinCosDegree( float degreeTheta, float* sinTheta, float* cosTheta )
+void grinliz::SinCosDegree(float degreeTheta, float* sinTheta, float* cosTheta)
 {
-	degreeTheta = NormalizeAngleDegrees( degreeTheta );
+	degreeTheta = NormalizeAngleDegrees(degreeTheta);
 
-	if ( degreeTheta == 0.0f ) {
+	if (degreeTheta == 0.0f) {
 		*sinTheta = 0.0f;
 		*cosTheta = 1.0f;
 	}
-	else if ( degreeTheta == 90.0f ) {
+	else if (degreeTheta == 90.0f) {
 		*sinTheta = 1.0f;
 		*cosTheta = 0.0f;
 	}
-	else if ( degreeTheta == 180.0f ) {
+	else if (degreeTheta == 180.0f) {
 		*sinTheta = 0.0f;
 		*cosTheta = -1.0f;
 	}
-	else if ( degreeTheta == 270.0f ) {
+	else if (degreeTheta == 270.0f) {
 		*sinTheta = -1.0f;
 		*cosTheta = 0.0f;
 	}
 	else {
-		float radian = ToRadian( degreeTheta );
-		*sinTheta = sinf( radian );
-		*cosTheta = cosf( radian );	
+		float radian = ToRadian(degreeTheta);
+		*sinTheta = sinf(radian);
+		*cosTheta = cosf(radian);
 	}
-	
+
 }
 
 
-void Matrix4::ConcatRotation( float thetaDegree, int axis )
+void Matrix4::ConcatRotation(float thetaDegree, int axis)
 {
 	Matrix4 r;
-	switch ( axis ) {
-		case 0:	r.SetXRotation( thetaDegree );	break;
-		case 1:	r.SetYRotation( thetaDegree );	break;
-		case 2:	r.SetZRotation( thetaDegree );	break;
+	switch (axis) {
+		case 0:	r.SetXRotation(thetaDegree);	break;
+		case 1:	r.SetYRotation(thetaDegree);	break;
+		case 2:	r.SetZRotation(thetaDegree);	break;
 		default:
-			GLASSERT( 0 );
+		GLASSERT(0);
 	}
 	*this = (*this) * r;
+}
+
+/*
+	RRRT
+	RRRT
+	RRRT
+	PPPP
+	*/
+
+#define A_HAS_T(x) x
+#define A_HAS_R0(x) x
+#define A_HAS_R1(x) x
+#define A_HAS_P0(x) x
+#define A_HAS_P1(x) x
+#define B_HAS_T(x) x
+#define B_HAS_R0(x) x
+#define B_HAS_R1(x) x
+#define B_HAS_P0(x) x
+#define B_HAS_P1(x) x
+
+#define MAT_MULT_4 \
+	c->x[0] = A_HAS_R1(a.x[0]) * B_HAS_R1(b.x[0]) + A_HAS_R0(a.x[4]) * B_HAS_R0(b.x[1]) + A_HAS_R0(a.x[8])  * B_HAS_R0(b.x[2]) + A_HAS_T(a.x[12])  * B_HAS_P0(b.x[3]); \
+	c->x[1] = A_HAS_R0(a.x[1]) * B_HAS_R1(b.x[0]) + A_HAS_R1(a.x[5]) * B_HAS_R0(b.x[1]) + A_HAS_R0(a.x[9])  * B_HAS_R0(b.x[2]) + A_HAS_T(a.x[13])  * B_HAS_P0(b.x[3]); \
+	c->x[2] = A_HAS_R0(a.x[2]) * B_HAS_R1(b.x[0]) + A_HAS_R0(a.x[6]) * B_HAS_R0(b.x[1]) + A_HAS_R1(a.x[10]) * B_HAS_R0(b.x[2]) + A_HAS_T(a.x[14])  * B_HAS_P0(b.x[3]); \
+	c->x[3] = A_HAS_P0(a.x[3]) * B_HAS_R1(b.x[0]) + A_HAS_P0(a.x[7]) * B_HAS_R0(b.x[1]) + A_HAS_P0(a.x[11]) * B_HAS_R0(b.x[2]) + A_HAS_P1(a.x[15]) * B_HAS_P0(b.x[3]); \
+\
+	c->x[4] = A_HAS_R1(a.x[0]) * B_HAS_R0(b.x[4]) + A_HAS_R0(a.x[4]) * B_HAS_R1(b.x[5]) + A_HAS_R0(a.x[8])  * B_HAS_R0(b.x[6]) + A_HAS_T(a.x[12])  * B_HAS_P0(b.x[7]); \
+	c->x[5] = A_HAS_R0(a.x[1]) * B_HAS_R0(b.x[4]) + A_HAS_R1(a.x[5]) * B_HAS_R1(b.x[5]) + A_HAS_R0(a.x[9])  * B_HAS_R0(b.x[6]) + A_HAS_T(a.x[13])  * B_HAS_P0(b.x[7]); \
+	c->x[6] = A_HAS_R0(a.x[2]) * B_HAS_R0(b.x[4]) + A_HAS_R0(a.x[6]) * B_HAS_R1(b.x[5]) + A_HAS_R1(a.x[10]) * B_HAS_R0(b.x[6]) + A_HAS_T(a.x[14])  * B_HAS_P0(b.x[7]); \
+	c->x[7] = A_HAS_P0(a.x[3]) * B_HAS_R0(b.x[4]) + A_HAS_P0(a.x[7]) * B_HAS_R1(b.x[5]) + A_HAS_P0(a.x[11]) * B_HAS_R0(b.x[6]) + A_HAS_P1(a.x[15]) * B_HAS_P0(b.x[7]); \
+\
+	c->x[8]  = A_HAS_R1(a.x[0]) * B_HAS_R0(b.x[8]) + A_HAS_R0(a.x[4]) * B_HAS_R0(b.x[9]) + A_HAS_R0(a.x[8])  * B_HAS_R1(b.x[10]) + A_HAS_T(a.x[12])  * B_HAS_P0(b.x[11]); \
+	c->x[9]  = A_HAS_R0(a.x[1]) * B_HAS_R0(b.x[8]) + A_HAS_R1(a.x[5]) * B_HAS_R0(b.x[9]) + A_HAS_R0(a.x[9])  * B_HAS_R1(b.x[10]) + A_HAS_T(a.x[13])  * B_HAS_P0(b.x[11]); \
+	c->x[10] = A_HAS_R0(a.x[2]) * B_HAS_R0(b.x[8]) + A_HAS_R0(a.x[6]) * B_HAS_R0(b.x[9]) + A_HAS_R1(a.x[10]) * B_HAS_R1(b.x[10]) + A_HAS_T(a.x[14])  * B_HAS_P0(b.x[11]); \
+	c->x[11] = A_HAS_P0(a.x[3]) * B_HAS_R0(b.x[8]) + A_HAS_P0(a.x[7]) * B_HAS_R0(b.x[9]) + A_HAS_P0(a.x[11]) * B_HAS_R1(b.x[10]) + A_HAS_P1(a.x[15]) * B_HAS_P0(b.x[11]); \
+\
+	c->x[12] = A_HAS_R1(a.x[0]) * B_HAS_T(b.x[12]) + A_HAS_R0(a.x[4]) * B_HAS_T(b.x[13]) + A_HAS_R0(a.x[8])  * B_HAS_T(b.x[14]) + A_HAS_T(a.x[12])  * B_HAS_P1(b.x[15]); \
+	c->x[13] = A_HAS_R0(a.x[1]) * B_HAS_T(b.x[12]) + A_HAS_R1(a.x[5]) * B_HAS_T(b.x[13]) + A_HAS_R0(a.x[9])  * B_HAS_T(b.x[14]) + A_HAS_T(a.x[13])  * B_HAS_P1(b.x[15]); \
+	c->x[14] = A_HAS_R0(a.x[2]) * B_HAS_T(b.x[12]) + A_HAS_R0(a.x[6]) * B_HAS_T(b.x[13]) + A_HAS_R1(a.x[10]) * B_HAS_T(b.x[14]) + A_HAS_T(a.x[14])  * B_HAS_P1(b.x[15]); \
+	c->x[15] = A_HAS_P0(a.x[3]) * B_HAS_T(b.x[12]) + A_HAS_P0(a.x[7]) * B_HAS_T(b.x[13]) + A_HAS_P0(a.x[11]) * B_HAS_T(b.x[14]) + A_HAS_P1(a.x[15]) * B_HAS_P1(b.x[15]); 
+
+
+void grinliz::MultMatrix4(const Matrix4& a, const Matrix4& b, Matrix4* c)
+{
+	GLASSERT(c != &a && c != &b && &a != &b);
+	MAT_MULT_4;
+}
+
+void Matrix4::ConcatTranslation(const Vector3F& t)
+{
+	Matrix4 a = *this;
+	Matrix4 b;
+	b.SetTranslation(t);
+	*this = a * b;
 }
 
 
@@ -352,13 +406,6 @@ void Matrix4::Invert( Matrix4* inverse ) const
 	Adjoint( inverse );
 	float d = Determinant();
 	inverse->ApplyScalar( 1.0f / d );
-
-	#ifdef DEBUG
-	Matrix4 result;
-	Matrix4 identity;
-	MultMatrix4( *this, *inverse, &result );
-	GLASSERT( Equal( identity, result, 0.001f ) );
-	#endif
 }
 
 
@@ -380,13 +427,6 @@ void Matrix4::InvertRotationMat( Matrix4* inverse ) const
 	inverse->m14 = -DotProduct( *u, *t );
 	inverse->m24 = -DotProduct( *v, *t );
 	inverse->m34 = -DotProduct( *w, *t );
-
-	#ifdef DEBUG
-	Matrix4 result;
-	Matrix4 identity;
-	MultMatrix4( *this, *inverse, &result );
-	GLASSERT( Equal( identity, result, 0.001f ) );
-	#endif
 }
 
 
@@ -495,8 +535,8 @@ void grinliz::MultMatrix4( const Matrix4& m, const Rectangle3F& in, Rectangle3F*
 {
 	// http://www.gamedev.net/topic/349370-transform-aabb-from-local-to-world-space-for-frustum-culling/
 
-	out->Set( m.x[12], m.x[13], m.x[14],
-		      m.x[12], m.x[13], m.x[14] );
+	out->Set( m.X(12), m.X(13), m.X(14),
+		      m.X(12), m.X(13), m.X(14) );
 
 	for( int i=0; i<3; ++i ) {
 		for( int j=0; j<3; ++j ) {
@@ -512,25 +552,6 @@ void grinliz::MultMatrix4( const Matrix4& m, const Rectangle3F& in, Rectangle3F*
 			}
 		}
 	}
-#if 0
-	// TEST
-	Vector3F q;
-	Vector3F p = m * in.min;
-
-	Rectangle3F test;
-	test.min = p;
-	test.max = p;
-
-	for( int i=1; i<8; ++i ) {
-		q.Set(	(i&1) ? in.max.x : in.min.x,
-				(i&2) ? in.max.y : in.min.y,
-				(i&4) ? in.max.z : in.min.z );
-		p = m * q;
-		test.DoUnion( p );
-	}
-
-	GLASSERT( Equal( test, *out, 0.01f ));
-#endif
 }
 
 
@@ -544,3 +565,38 @@ void Matrix2::SetRotation( float degrees )
 	c = si;
 	d = co;
 }
+
+
+void Matrix4::Test()
+{
+	const Matrix4 identity;
+
+	Matrix4 t, r;
+	Vector3F vt = { 1, 2, 3 };
+	t.SetTranslation(1, 2, 3);
+	r.SetZRotation(90.0f);
+
+	Matrix4 m0, m1, m2;
+	m0 = r * t;
+	MultMatrix4(r, t, &m1);
+	
+	m2 = r;
+	m2.ConcatTranslation(vt);
+
+	GLASSERT(Equal(m0, m1));
+	GLASSERT(Equal(m0, m2));
+
+	Matrix4 m0Inv;
+	m0.Invert(&m0Inv);
+	Matrix4 ident0 = m0 * m0Inv;
+	GLASSERT(Equal(ident0, identity));
+
+	Matrix4 rInv;
+	r.InvertRotationMat(&rInv);
+	Matrix4 ident1 = r * rInv;
+	GLASSERT(Equal(ident1, identity));
+
+	GLOUTPUT(("Matrix test complete.\n"));
+
+}
+

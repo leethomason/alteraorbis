@@ -401,18 +401,22 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		Vector3F	positionA, positionB, position;
 		Quaternion	rotationA, rotationB, rotation;
 
-		for( int k=0; k<3; ++k ) {
-			positionA.X(k) = Lerp( boneDataA.bone[i].position[frameA0].X(k), 
-								   boneDataA.bone[i].position[frameA1].X(k), 
-								   fractionA );
-			if ( hasFade ) {
-				positionB.X(k) = Lerp( boneDataB.bone[i].position[frameB0].X(k), 
-									   boneDataB.bone[i].position[frameB1].X(k), 
-									   fractionB );
-				position.X(k) = Lerp( positionA.X(k), positionB.X(k), crossFraction );
-			}
+		Vector3F::Lerp(boneDataA.bone[i].position[frameA0],
+					   boneDataA.bone[i].position[frameA1],
+					   fractionA,
+					   &positionA);
+
+		if (hasFade) {
+			Vector3F::Lerp(boneDataB.bone[i].position[frameB0],
+						   boneDataB.bone[i].position[frameB1],
+						   fractionB,
+						   &positionB);
+			Vector3F::Lerp(positionA,
+						   positionB,
+						   crossFraction,
+						   &position);
 		}
-		if ( !hasFade ) {
+		else {
 			position = positionA;
 		}
 
@@ -439,8 +443,7 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		// then out transformed place. It is pure translation
 		// which is very nice.
 
-		Matrix4 inv;
-		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
+		Vector3F inv = (-boneDataA.bone[i].refConcat );	// very easy inverse xform
 
 		Matrix4		m;
 		Vector3F	t;
@@ -461,13 +464,13 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 
 		int parentIndex = boneDataA.bone[i].parent; 
 		if ( parentIndex >= 0 ) {
-			output[i] = concat[parentIndex] * m * inv;
 			concat[i] = concat[parentIndex] * m;
 		}
 		else {
-			output[i] = m * inv;
 			concat[i] = m;
 		}
+		output[i] = concat[i];
+		output[i].ConcatTranslation(inv);
 	}
 }
 

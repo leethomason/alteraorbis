@@ -69,6 +69,10 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	CHECK_GL_ERROR;
 	IStringConst::Init();
 
+#ifdef DEBUG
+	Matrix4::Test();
+#endif
+
 	scenePopQueued = false;
 	surface.Set( TEX_RGBA16, 256, 256 );
 

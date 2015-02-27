@@ -216,7 +216,7 @@ void ShaderManager::SetUniform( int id, const grinliz::Matrix4& value )
 	if ( loc < 0 ) {
 		GLOUTPUT_REL(( "SetUniform failed. id=%d.\n", id ));
 	}
-	glUniformMatrix4fv( loc, 1, false, value.x );
+	glUniformMatrix4fv( loc, 1, false, value.Mem() );
 	CHECK_GL_ERROR;
 }
 
@@ -247,7 +247,7 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* 
 	GLASSERT( mat );
 	int loc = active->GetUniformLocation( id );
 	GLASSERT( loc >= 0 );
-	glUniformMatrix4fv( loc, count, false, mat->x );
+	glUniformMatrix4fv( loc, count, false, mat->Mem() );
 	CHECK_GL_ERROR;
 }
 

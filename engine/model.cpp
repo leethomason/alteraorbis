@@ -372,7 +372,7 @@ void Model::Serialize( XStream* xs)
 		if ( auxBone ) {
 			save->OpenElement( "auxBone" );
 			XARC_SER_ARR(xs, auxBone->animToModelMap, EL_MAX_BONES);
-			XARC_SER_ARR(xs, auxBone->boneMats[0].x, EL_MAX_BONES * 16);
+			XARC_SER_ARR(xs, auxBone->boneMats[0].Mem(), EL_MAX_BONES * 16);
 			save->CloseElement();
 		}
 		if (auxTex) {
@@ -399,7 +399,7 @@ void Model::Serialize( XStream* xs)
 			load->OpenElement();	// aux
 			if (!auxBone) auxBone = new ModelAuxBone();
 			XARC_SER_ARR(xs, auxBone->animToModelMap, EL_MAX_BONES);
-			XARC_SER_ARR(xs, auxBone->boneMats[0].x, EL_MAX_BONES * 16);
+			XARC_SER_ARR(xs, auxBone->boneMats[0].Mem(), EL_MAX_BONES * 16);
 			load->CloseElement();
 		}
 		if (hasAuxTex) {
@@ -906,11 +906,12 @@ const grinliz::Matrix4& Model::XForm() const
 const grinliz::Matrix4& Model::InvXForm() const
 {
 	if ( !invValid ) {
+		// FIXME: use inverse?
 		const Matrix4& xform = XForm();
 
-		const Vector3F& u = *((const Vector3F*)&xform.x[0]);
-		const Vector3F& v = *((const Vector3F*)&xform.x[4]);
-		const Vector3F& w = *((const Vector3F*)&xform.x[8]);
+		const Vector3F u = xform.Col(0);
+		const Vector3F v = xform.Col(1);
+		const Vector3F w = xform.Col(2);
 
 		_invXForm.m11 = u.x;	_invXForm.m12 = u.y;	_invXForm.m13 = u.z;	_invXForm.m14 = -DotProduct( u, pos );
 		_invXForm.m21 = v.x;	_invXForm.m22 = v.y;	_invXForm.m23 = v.z;	_invXForm.m24 = -DotProduct( v, pos );
