@@ -131,6 +131,22 @@ struct GPUStream {
 	bool HasColor() const		{ return nColor > 0; }
 };
 
+struct GPUControlParam
+{
+	GPUControlParam() : fade(1), saturation(1), emissive(1), _pad1(1)	{}
+	const grinliz::Vector4F* Mem() const { return reinterpret_cast<const grinliz::Vector4F*>(&fade); }
+	void Init() { fade = saturation = emissive = _pad1; }
+	// For serialization:
+	void Set(const grinliz::Vector4F c) {
+		fade = c.x;
+		saturation = c.y;
+		emissive = c.z;
+		_pad1 = c.w;
+	}
+
+	// Really a vec4 under the hood. Must be 4 floats.
+	float fade, saturation, emissive, _pad1;
+};
 
 /* Class that actually contains the pointers, buffers, and uniforms for rendering.
 */
@@ -152,11 +168,12 @@ struct GPUStreamData
 	U32					vertexBuffer;
 	U32					indexBuffer;
 
-	Texture*			texture0;
+	Texture*			texture0;			// NOT instanced.
+
 	grinliz::Matrix4*	matrix;
 	grinliz::Vector4F*	colorParam;
 	grinliz::Vector4F*	boneFilter;
-	grinliz::Vector4F*  controlParam;
+	GPUControlParam*	controlParam;
 	grinliz::Vector4F*	texture0XForm;
 	grinliz::Vector4F*	texture0Clip;
 	grinliz::Matrix4*	texture0ColorMap;	// 3 vec4 per instance
@@ -325,7 +342,7 @@ private:
 	GPUIndexBuffer*		quadIndexBuffer;
 
 	grinliz::Matrix4	identity[EL_MAX_INSTANCE];
-	grinliz::Vector4F	defaultControl[EL_MAX_INSTANCE];
+	GPUControlParam		defaultControl[EL_MAX_INSTANCE];
 };
 
 /* WARNING: this gets copied around, and slices.

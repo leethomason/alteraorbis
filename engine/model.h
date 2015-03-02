@@ -365,8 +365,8 @@ public:
 	void SetColorMap( const grinliz::Matrix4& mat );
 
 	// 1.0 is normal color
-	void SetFadeFX( float v )						{ control.x = v; }
-	void SetSaturation( float v )					{ control.y = v; }
+	void SetFadeFX( float v )						{ control.fade = v; }
+	void SetSaturation( float v )					{ control.saturation = v; }
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
@@ -453,7 +453,7 @@ private:
 
 	grinliz::Vector4F	color;
 	grinliz::Vector4F	boneFilter;
-	grinliz::Vector4F	control;
+	GPUControlParam	control;
 	ModelAuxBone* auxBone;
 	ModelAuxTex*  auxTex;
 

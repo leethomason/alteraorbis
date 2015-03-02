@@ -57,7 +57,7 @@ void RenderQueue::Add(	Model* model,
 						const GPUState& state,
 						const Vector4F& color,
 						const Vector4F& filter,
-						const Vector4F& control,
+						const GPUControlParam& control,
 						const ModelAuxBone* auxBone,
 						const ModelAuxTex* auxTex)
 {
@@ -108,7 +108,7 @@ void RenderQueue::Submit(	int modelRequired,
 	Matrix4		instanceMatrix[EL_MAX_INSTANCE];
 	Vector4F	instanceColorParam[EL_MAX_INSTANCE];
 	Vector4F	instanceBoneFilter[EL_MAX_INSTANCE];
-	Vector4F	instanceControlParam[EL_MAX_INSTANCE];
+	GPUControlParam	instanceControlParam[EL_MAX_INSTANCE];
 	Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
 	Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
 	Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];

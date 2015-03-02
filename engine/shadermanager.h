@@ -46,7 +46,7 @@ public:
 	ShaderManager();
 	~ShaderManager();
 
-	static ShaderManager* Instance() { if ( !instance ) instance = new ShaderManager(); return instance; }
+	static ShaderManager* Instance();
 
 	enum {				
 		// Texture state.

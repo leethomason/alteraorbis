@@ -50,7 +50,7 @@ public:
 				const GPUState& state,
 				const grinliz::Vector4F& color,
 				const grinliz::Vector4F& filter,
-				const grinliz::Vector4F& control,
+				const GPUControlParam& control,
 				const ModelAuxBone* auxBone,
 				const ModelAuxTex* auxTex);
 
@@ -70,7 +70,7 @@ private:
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		color;			// per instance data (vec4)
 		grinliz::Vector4F		boneFilter;		// per instance filter
-		grinliz::Vector4F		control;		// per instance data 
+		GPUControlParam			control;		// per instance data 
 		const ModelAuxBone*		auxBone;
 		const ModelAuxTex*		auxTex;
 

@@ -198,7 +198,9 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.texture0 = (Texture*)textureHandle;
 	data.indexBuffer  = ibo->ID();
 	data.vertexBuffer = vbo->ID();
-	Vector4F control = { 1, 0, 1, 1 };
+	//Vector4F control = { 1, 0, 1, 1 };
+	GPUControlParam control;
+	control.saturation = 0;
 
 	int rs = (int)renderState;
 	if (rs == RENDERSTATE_UI_GRAYSCALE_OPAQUE) {

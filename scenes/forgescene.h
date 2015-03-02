@@ -40,7 +40,6 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 	virtual void Draw3D( U32 delatTime );
-	virtual grinliz::Color4F ClearColor();
 
 private:
 	enum {

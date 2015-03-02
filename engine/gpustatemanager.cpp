@@ -259,13 +259,12 @@ int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPU
 		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, nInstance, &data.texture0ColorMap[start] );
 	}
 
-	if ( defaultControl[0].x != 1.0f ) {
-		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
-			defaultControl[i].Set( 1, 1, 1, 1 );
-		}
+	for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
+		defaultControl[i].Init();
 	}
-	shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, nInstance, 
-		                      data.controlParam ? &data.controlParam[start] : defaultControl );
+	shadman->SetUniformArray(ShaderManager::U_CONTROL_PARAM_ARR, nInstance,
+		data.controlParam ? data.controlParam[start].Mem() 
+							: defaultControl[0].Mem());
 
 	// Texture0
 	glActiveTexture( GL_TEXTURE0 );

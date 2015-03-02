@@ -285,13 +285,6 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 }
 
 
-grinliz::Color4F ForgeScene::ClearColor()
-{
-	Color4F c = game->GetPalette()->Get4F(0, 5);
-	return c;
-}
-
-
 void ForgeScene::Draw3D( U32 deltaTime )
 {
 	// we use our own screenport

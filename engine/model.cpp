@@ -242,7 +242,7 @@ void Model::Init(const ModelResource* resource, SpaceTree* st)
 
 	color.Set(1, 1, 1, 1);
 	boneFilter.Set(0, 0, 0, 0);
-	control.Set(1, 1, 1, 1);
+	control.Init();
 
 	if (resource) {
 		animationResource = AnimationResourceManager::Instance()->GetResource(resource->header.animation.c_str());
@@ -356,7 +356,9 @@ void Model::Serialize( XStream* xs)
 	XARC_SER( xs, rot );
 	XARC_SER_DEF( xs, color, WHITE );
 	XARC_SER( xs, boneFilter );
-	XARC_SER_DEF( xs, control, ONE );
+	Vector4F c = *control.Mem();
+	XARC_SER_KEY( xs, "control", c );
+	control.Set(c);
 
 	bool hasAuxBone = auxBone != 0;
 	bool hasAuxTex = auxTex != 0;
@@ -809,7 +811,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			if ( (flags & MODEL_TEXTURE0_COLORMAP) && t->ColorMap() )	
 				mod |= ShaderManager::TEXTURE0_COLORMAP;
 
-			if ( control.y != 1 ) {
+			if ( control.saturation != 1 ) {
 				mod |= ShaderManager::SATURATION;
 			}
 			// For 32 bit textures, the alpha channel is
@@ -820,7 +822,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			// for emmissive, where the default is wrong.
 			// Better solution: only 32 bit textures?
 			//					emmissive is sign flipped?
-			control.z = t->Alpha() ? 1.0f : 0.0f;
+			control.emissive = t->Alpha() ? 1.0f : 0.0f;
 
 			GPUState state;
 			engineShaders->GetState( base, mod, &state );

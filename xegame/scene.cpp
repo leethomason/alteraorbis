@@ -126,6 +126,17 @@ ModelVoxel Scene::ModelAtMouse( const grinliz::Vector2F& view,
 }
 
 
+grinliz::Color4F Scene::ClearColor()
+{
+	const Game::Palette* pal = Game::GetMainPalette();
+	Color4F c = pal->Get4F(0, 4);
+	c.x *= 0.25f;
+	c.y *= 0.25f;
+	c.z *= 0.25f;
+	return c;
+}
+
+
 bool Scene::Process3DTap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine)
 {
 	Ray ray;

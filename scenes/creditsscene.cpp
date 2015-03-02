@@ -68,9 +68,4 @@ void CreditsScene::ItemTapped(const gamui::UIItem* item)
 }
 
 
-grinliz::Color4F CreditsScene::ClearColor()
-{
-	const Game::Palette* palette = game->GetPalette();
-	return palette->Get4F(0, 5);
-}
 

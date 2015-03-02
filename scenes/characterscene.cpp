@@ -183,13 +183,6 @@ void CharacterScene::Resize()
 }
 
 
-grinliz::Color4F CharacterScene::ClearColor()
-{
-	Color4F c = game->GetPalette()->Get4F(0, 5);
-	return c;
-}
-
-
 void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 {
 	if ( !item )

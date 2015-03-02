@@ -41,7 +41,6 @@ public:
 	virtual void Draw3D(U32 deltaTime);
 	virtual void HandleHotKey(int value);
 	virtual void DoTick(U32 delta);
-	virtual grinliz::Color4F ClearColor();
 
 private:
 	void SetAudioButton();

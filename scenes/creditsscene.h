@@ -20,7 +20,6 @@ public:
 		ProcessTap(action, screen, world);
 	}
 	virtual void ItemTapped(const gamui::UIItem* item);
-	virtual grinliz::Color4F ClearColor();
 
 private:
 	gamui::PushButton okay;

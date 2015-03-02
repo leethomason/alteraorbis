@@ -120,6 +120,10 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	for (int i = 0; i < NUM_MODELS; ++i) {
 		Vector3F v = { 30.5f, 0, 39.5f };
 		v = v + float(i) * across;
+
+		//if (i == CYCLOPS) {
+		//	v = v - forward;
+		//}
 		if (i < HUMAN_MALE)	{
 			v = v + float(i)*forward;
 			model[i]->SetYRotation(ANGLE);
@@ -164,13 +168,6 @@ TitleScene::~TitleScene()
 }
 
 
-Color4F TitleScene::ClearColor()
-{
-	const Game::Palette* palette = game->GetPalette();
-	return palette->Get4F(0, 5);
-}
-
-
 void TitleScene::DeleteEngine()
 {
 	for (int i = 0; i < NUM_MODELS; ++i) {
@@ -200,13 +197,14 @@ void TitleScene::Resize()
 	background.SetPos( 0, 0 );
 
 	float aspect = gamui2D.AspectRatio();
+	float factor = 0.4;
 	if ( aspect >= 0.5f ) {
-		background.SetSize(gamui2D.Width(), gamui2D.Width()*0.5f);
+		background.SetSize(gamui2D.Width()*factor, gamui2D.Width()*0.5f*factor);
 	}
 	else {
-		background.SetSize( gamui2D.Height()*2.0f, gamui2D.Height() );
+		background.SetSize(gamui2D.Height()*2.0f*factor, gamui2D.Height()*factor);
 	}
-	background.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f);
+	background.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f*factor);
 
 	bool visible = game->GetDebugUI();
 	LayoutCalculator layout = DefaultLayout();

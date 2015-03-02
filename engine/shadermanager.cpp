@@ -102,9 +102,7 @@ ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 	U32 hash = hash0 ^ hash1 ^ hash2 ^ hash3 ^ hash4;
 
 	hashStr.Format( "%x", hash );
-
-	glGenVertexArrays(1, &vertexArrayID);
-	glBindVertexArray(vertexArrayID);
+	vertexArrayID = 0;
 }
 
 
@@ -115,7 +113,20 @@ ShaderManager::~ShaderManager()
 			DeleteProgram( &shaderArr[i] );
 		}
 	}
-	glDeleteVertexArrays(1, &vertexArrayID);
+	if (vertexArrayID) {
+		//glDeleteVertexArrays(1, &vertexArrayID);
+	}
+}
+
+
+ShaderManager* ShaderManager::Instance() 
+{ 
+	if (!instance) instance = new ShaderManager(); 
+	if (instance->vertexArrayID == 0) {
+		//glGenVertexArrays(1, &instance->vertexArrayID);
+		//glBindVertexArray(instance->vertexArrayID);
+	}
+	return instance; 
 }
 
 
@@ -148,6 +159,10 @@ void ShaderManager::DeviceLoss()
 
 	for( int i=0; i<deviceLossHandlers.Size(); ++i ) {
 		deviceLossHandlers[i]->DeviceLoss();
+	}
+	if (vertexArrayID) {
+		//glDeleteVertexArrays(1, &vertexArrayID);
+		vertexArrayID = 0;
 	}
 }
 

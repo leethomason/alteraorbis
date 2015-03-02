@@ -84,7 +84,6 @@ public:
 
 	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 delatTime );
-	virtual grinliz::Color4F ClearColor();
 
 private:
 	void SetButtonText(const GameItem* selectThis);

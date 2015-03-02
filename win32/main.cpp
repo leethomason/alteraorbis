@@ -107,6 +107,7 @@ int main(int argc, char **argv)
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
+#ifdef DEBUG
 #if 0	// I was hoping to get to Angle on intel - may still be able to. But
 	// as is this gets HW mode, which crashes in a function that should
 	// be supported. The Intel drivers are so terrible. As of this writing,
@@ -129,6 +130,7 @@ int main(int argc, char **argv)
 	// has instancing, and modern shader syntax
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
 #endif
 
 	if (multisample) {

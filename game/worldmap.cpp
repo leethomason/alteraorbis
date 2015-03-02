@@ -1988,7 +1988,9 @@ void WorldMap::Submit( GPUState* shader )
 	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
 	// no fix, saturation, emmissive
-	Vector4F control	= { 1, Saturation()*GRID_SATURATION, 1, 1 };
+	//Vector4F control	= { 1, Saturation()*GRID_SATURATION, 1, 1 };
+	GPUControlParam	control;
+	control.saturation = Saturation()*GRID_SATURATION;
 	data.controlParam	= &control;
 
 	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
@@ -2368,7 +2370,9 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 	}
 
 	// no fix, saturation, emmissive
-	Vector4F control = { 1, Saturation() * GRID_SATURATION, 1, 1 };
+	//Vector4F control = { 1, Saturation() * GRID_SATURATION, 1, 1 };
+	GPUControlParam control;
+	control.saturation = Saturation() * GRID_SATURATION;
 
 	GPUStreamData data;
 	data.vertexBuffer	= voxelVertexVBO->ID();
