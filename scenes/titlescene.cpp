@@ -197,7 +197,7 @@ void TitleScene::Resize()
 	background.SetPos( 0, 0 );
 
 	float aspect = gamui2D.AspectRatio();
-	float factor = 0.4;
+	float factor = 0.5;
 	if ( aspect >= 0.5f ) {
 		background.SetSize(gamui2D.Width()*factor, gamui2D.Width()*0.5f*factor);
 	}
