@@ -867,8 +867,20 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 			context->chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());
-		}
 
+			// Make all buildings to be this team.
+			CDynArray<Chit*> buildings;
+			Vector2I sector = ToSector(chit->Position());
+			context->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &buildings, 0);
+			
+			for (int i = 0; i < buildings.Size(); ++i) {
+			//for (Chit* c : buildings) {
+				Chit* c = buildings[i];
+				if (c->GetItem() && c->GetItem()->IName() != ISC::core) {
+					c->GetItem()->SetTeam(team);
+				}
+			}
+		}
 		return cs;
 	}
 	return 0;

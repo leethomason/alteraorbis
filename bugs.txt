@@ -8,6 +8,7 @@ x GT: tutorial improvements (2/20/2015)
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
+- GT: how many structures of each type?
 
 - face is glowing in asset preview
 - info on attack flags: who is attacking me??

@@ -1000,8 +1000,11 @@ void GameItem::SetChaos()
 
 void GameItem::SetTeam(int newTeam)
 {
-	GLASSERT(IsDenizen());
-	GLASSERT((newTeam == team) || Team::ID(team) == 0);
-	GLASSERT(Team::ID(newTeam) != 0);
+	GLASSERT(IName() != ISC::core);
+	if (IsDenizen()) {
+		GLASSERT(IsDenizen());
+		GLASSERT((newTeam == team) || Team::ID(team) == 0);
+		GLASSERT(Team::ID(newTeam) != 0);
+	}
 	team = newTeam;
 }

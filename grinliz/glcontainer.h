@@ -187,6 +187,24 @@ public:
 	static void DoRemove(T& v) { delete v; }
 };
 
+/*
+template<class T, class S>
+class Iter {
+public:
+	Iter(T& _arr, int _pos) : arr(_arr), pos(_pos) {}
+	bool operator!=(const Iter& other) { return pos != other.pos; }
+	const Iter& operator++() {
+		++pos;
+		return *this;
+	}
+
+	S& operator*() const { return arr[pos]; }
+
+private:
+	T& arr;
+	int pos;
+};
+*/ 
 
 /*	A dynamic array class that supports C++ classes.
 	Carefully manages construct / destruct.
@@ -213,8 +231,15 @@ public:
 		GLASSERT( nAlloc == 0 );
 	}
 
+//	typedef Iter<CDynArray<T, SEM, KCOMPARE>, T> CDynArrayIter;
+//	CDynArrayIter begin() { return CDynArrayIter(this, 0); }
+//	CDynArrayIter end() { return CDynArrayIter(this, Size()); }
+
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
+
+
+
 	bool operator==(const CDynArray<T, SEM, KCOMPARE>& rhs) const {
 		bool match = false;
 		if (this->Size() == rhs.Size()) {
@@ -439,6 +464,13 @@ public:
 	}
 };
 
+
+/*template < class T, class SEM, class KCOMPARE >
+T& CDynArrayIter<T, SEM, KCOMPARE>::operator* () const
+{
+	return arr[pos];
+}
+*/
 
 /* A fixed array class for any type.
    Supports copy construction, proper destruction, etc.
