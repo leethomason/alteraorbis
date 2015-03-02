@@ -4,6 +4,7 @@
 - update title screen text
 - build assets
 - debug test:
+	- long play if possible
 	- matrix debugging on
 	- resize screen
 	- max screen
@@ -11,6 +12,8 @@
 	- small domain
 	- generate world
 	- small domain
+	- map
+	- census
 - release test
 	- play a bit more
 - run buildrelease.bat

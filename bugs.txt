@@ -11,6 +11,7 @@ x GT: buildings should change to team color when domain controlled
 - GT: player portrait size should match enemy portrait size (2/20/2015)
 - GT: how many structures of each type?
 
+- icons instead of m/r in control screen
 - face is glowing in asset preview
 - info on attack flags: who is attacking me??
 - tune mouse wheel with real mouse
@@ -143,12 +144,14 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 		- squad control
 		- greater travel
 		- diplomacy
-		- circuits
 	x New promo assets
 	- IndieDB
 		x Tutorial
 		- assets
+
+- Beta3+
 	- Android
+	- circuits
 
 - World Gen
 	x less techy, more interesting world gen
@@ -248,25 +251,6 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - wilder, more digital face colors
 - filter face colors to matching effect
 x more natural skin tones
-
-** Releasing **
-- set version: both version name and file version
-- update README.txt
-- update title screen text
-- debug test:
-	- matrix debugging on
-	- resize screen
-	- max screen
-	- check load file (or not)
-	- small domain
-	- generate world
-	- small domain
-- build release/debug
-- build assets
-- run buildrelease.bat
-- build installer
-- test
-- update wiki
 
 --- Links --- 
 http://weloveiconfonts.com/ : entypo
