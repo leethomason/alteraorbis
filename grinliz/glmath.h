@@ -70,12 +70,12 @@ inline int NormalizeAngleDegrees( int alpha ) {
 
 
 /** A loose equality check. */
-inline bool Equal( float x, float y, float epsilon )
+inline bool Equal( float x, float y, float epsilon=0.001f )
 {
 	return fabsf( x - y ) <= epsilon;
 }
 
-inline bool Equal( double x, double y, double epsilon )
+inline bool Equal( double x, double y, double epsilon=0.001f )
 {
 	return fabs( x - y ) <= epsilon;
 }

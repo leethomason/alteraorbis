@@ -295,7 +295,7 @@ struct Vector3
 		return ( grinliz::Equal( x, b.x, epsilon ) && grinliz::Equal( y, b.y, epsilon ) && grinliz::Equal( z, b.z, epsilon ) );
 	}
 
-	friend bool Equal( const Vector3<T>& a, const Vector3<T>& b, T epsilon )  {
+	friend bool Equal( const Vector3<T>& a, const Vector3<T>& b, T epsilon=0.001f )  {
 		return ( grinliz::Equal( a.x, b.x, epsilon ) && grinliz::Equal( a.y, b.y, epsilon ) && grinliz::Equal( a.z, b.z, epsilon ) );
 	}
 

@@ -534,7 +534,8 @@ void Model::SetColorMap( const Vector4F& red, const Vector4F& green, const Vecto
 	m.SetCol(0, red);
 	m.SetCol(1, green);
 	m.SetCol(2, blue);
-	m.m44 = alpha;
+//	m.m44 = alpha;
+	m.X(Matrix4::M44) = alpha;
 
 	if ( !m.IsIdentity() ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
@@ -906,18 +907,8 @@ const grinliz::Matrix4& Model::XForm() const
 const grinliz::Matrix4& Model::InvXForm() const
 {
 	if ( !invValid ) {
-		// FIXME: use inverse?
 		const Matrix4& xform = XForm();
-
-		const Vector3F u = xform.Col(0);
-		const Vector3F v = xform.Col(1);
-		const Vector3F w = xform.Col(2);
-
-		_invXForm.m11 = u.x;	_invXForm.m12 = u.y;	_invXForm.m13 = u.z;	_invXForm.m14 = -DotProduct( u, pos );
-		_invXForm.m21 = v.x;	_invXForm.m22 = v.y;	_invXForm.m23 = v.z;	_invXForm.m24 = -DotProduct( v, pos );
-		_invXForm.m31 = w.x;	_invXForm.m32 = w.y;	_invXForm.m33 = w.z;	_invXForm.m34 = -DotProduct( w, pos );
-		_invXForm.m41 = 0;		_invXForm.m42 = 0;		_invXForm.m43 = 0;		_invXForm.m44 = 1;
-
+		xform.Invert(&_invXForm);
 		invValid = true;
 	}
 	return _invXForm;

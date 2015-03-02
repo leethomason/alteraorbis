@@ -32,6 +32,10 @@ distribution.
 #include "glrectangle.h"
 #include <memory.h>
 
+#ifdef DEBUG
+//#define MAT_DEBUG_DEEP
+#endif
+
 namespace grinliz {
 
 /** A 3D homogenous matrix. Although the bottom row is typically 0,0,0,1 this
@@ -49,26 +53,42 @@ class Matrix4
 {
   public:
 	enum { COMPONENTS = 4 };
+	enum {
+		T_TERM = 0x01,
+		R_TERM = 0x02,
+		P_TERM = 0x04,
+
+		UNKNOWN_TYPE = 0xff,
+		IDENTITY_TYPE = 0
+	};
+	enum {
+		M11, M21, M31, M41, 
+		M12, M22, M32, M42,
+		M13, M23, M33, M43,
+		M14, M24, M34, M44
+	};
 
 	inline static int INDEX( int row, int col ) {	GLASSERT( row >= 0 && row < 4 );
 													GLASSERT( col >= 0 && col < 4 );
 													return col*4+row; }
 
 	/// Construct an identity matrix
-	Matrix4()								{	SetIdentity();	}
-	Matrix4( const Matrix4& rhs )			{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
-	void operator=( const Matrix4& rhs )	{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+	Matrix4()							{ type = IDENTITY_TYPE;  SetIdentity(); }
+	Matrix4(const Matrix4& rhs)			{ type = rhs.type; for (int i = 0; i < COMPONENTS*COMPONENTS; ++i) x[i] = rhs.x[i]; }
+	void operator=(const Matrix4& rhs)	{ type = rhs.type; for (int i = 0; i < COMPONENTS*COMPONENTS; ++i) x[i] = rhs.x[i]; }
 
 	/// Set the matrix to identity
 	void SetIdentity()		{	x[0] = x[5] = x[10] = x[15] = 1.0f;
 								x[1] = x[2] = x[3] = x[4] = x[6] = x[7] = x[8] = x[9] = x[11] = x[12] = x[13] = x[14] = 0.0f; 
+								type = IDENTITY_TYPE;
 							}
 
-	void Set( int row, int col, float v )	{	x[INDEX(row,col)] = v; }
-	float& m( int row, int col )			{	return x[INDEX(row,col)]; }
+	void Set(int row, int col, float v)		{ x[INDEX(row, col)] = v; type = UNKNOWN_TYPE; }
+	float& m(int row, int col)				{ return x[INDEX(row, col)]; type = UNKNOWN_TYPE; }
 	float m(int row, int col ) const		{	return x[INDEX(row,col)]; }
 	float& X(int index)						{
 		GLASSERT(index >= 0 && index < 16);
+		type = UNKNOWN_TYPE;
 		return x[index];
 	}
 	float X(int index) const 	{
@@ -76,12 +96,12 @@ class Matrix4
 		return x[index];
 	}
 	const float* Mem() const { return x; }
-	float* Mem() { return x; }
+	float* Mem() { type = UNKNOWN_TYPE;  return x; }
 
 	/// Set the translation terms
-	void SetTranslation( float _x, float _y, float _z )		{	x[12] = _x;	x[13] = _y;	x[14] = _z;	}
+	void SetTranslation(float _x, float _y, float _z)		{ GLASSERT(IsIdentity()); type = UNKNOWN_TYPE; x[12] = _x;	x[13] = _y;	x[14] = _z; }
 	/// Set the translation terms
-	void SetTranslation( const Vector3F& vec )				{   x[12] = vec.x;	x[13] = vec.y;	x[14] = vec.z;	}
+	void SetTranslation(const Vector3F& vec)				{ GLASSERT(IsIdentity()); type = UNKNOWN_TYPE; x[12] = vec.x;	x[13] = vec.y;	x[14] = vec.z; }
 
 	/// Set the rotation terms
 	void SetXRotation( float thetaDegree );
@@ -97,7 +117,7 @@ class Matrix4
 	float CalcRotationAroundAxis( int axis ) const;
 
 	/// Set the scale terms
-	void SetScale( float scale )	{ x[0] = x[5] = x[10] = scale; }
+	void SetScale(float scale)	{ GLASSERT(IsIdentity()); type = UNKNOWN_TYPE; x[0] = x[5] = x[10] = scale; }
 
 	/// Set the matrix from an axis-angle representation
 	void SetAxisAngle( const Vector3F& axis, float angle );
@@ -109,26 +129,11 @@ class Matrix4
 
 	void StripTrans()		{	x[12] = x[13] = x[14] = 0.0f;
 								x[15] = 1.0f;
+								type = UNKNOWN_TYPE;
 							}
 
 	/// Is this probably a rotation matrix?
 	bool IsRotation() const;
-
-	bool operator==( const Matrix4& rhs ) const	{ 
-		for( int i=0; i<16; ++i )
-			if ( x[i] != rhs.x[i] )
-				return false;
-		return true;
-	}
-
-	bool operator!=( const Matrix4& rhs ) const	{ 
-		int match = 0;
-		for( int i=0; i<16; ++i )
-			if ( x[i] == rhs.x[i] )
-				++match;
-		if ( match == 16 ) return false;
-		return true;
-	}
 
 	/// Return a row of the matrix
 	Vector3F Row( int i ) const	{
@@ -146,6 +151,7 @@ class Matrix4
 		x[INDEX(i,1)] = v.y;
 		x[INDEX(i,2)] = v.z;
 		x[INDEX(i,3)] = v.w;
+		type = UNKNOWN_TYPE;
 	}
 
 	void SetRow( int i, float _x, float y, float z, float w ) {
@@ -153,6 +159,7 @@ class Matrix4
 		x[INDEX(i,1)] = y;
 		x[INDEX(i,2)] = z;
 		x[INDEX(i,3)] = w;
+		type = UNKNOWN_TYPE;
 	}
 
 	void SetCol( int i, const Vector4F& v ) {
@@ -160,6 +167,7 @@ class Matrix4
 		x[INDEX(1,i)] = v.y;
 		x[INDEX(2,i)] = v.z;
 		x[INDEX(3,i)] = v.w;
+		type = UNKNOWN_TYPE;
 	}
 
 	void SetCol( int i, float _x, float y, float z, float w ) {
@@ -167,6 +175,7 @@ class Matrix4
 		x[INDEX(1,i)] = y;
 		x[INDEX(2,i)] = z;
 		x[INDEX(3,i)] = w;
+		type = UNKNOWN_TYPE;
 	}
 
 	/// Transpose 
@@ -204,25 +213,12 @@ class Matrix4
 	void ApplyScalar( float v ) {
 		for( int i=0; i<16; ++i )
 			x[i] *= v;
+		type = UNKNOWN_TYPE;
 	}
 
 
 	bool IsIdentity() const {
-		return    x[0] == 1.0f && x[5] == 1.0f && x[10] == 1.0f && x[15] == 1.0f
-			   && x[1] == 0 && x[2] == 0 && x[3] == 0 && x[4] == 0
-			   && x[6] == 0 && x[7] == 0 && x[8] == 0 && x[9] == 0
-			   && x[11] == 0 && x[12] == 0 && x[13] == 0 && x[14] == 0;
-	}
-
-	// Assumes this is a homogenous matrix.
-	bool IsTranslationOnly() const {
-		if ( x[0] == 1.0f && x[5] == 1.0f && x[10] == 1.0f ) {
-			if (    x[4] == 0.0f && x[8] == 0.0f && x[9] == 0.0f 
-			     && x[1] == 0.0f && x[2] == 0.0f && x[6] == 0.0f ) {
-				return true;
-			}
-		}
-		return false;
+		return type == IDENTITY_TYPE;
 	}
 
 	friend void MultMatrix4( const Matrix4& a, const Matrix4& b, Matrix4* c );
@@ -275,33 +271,22 @@ class Matrix4
 				return false;
 		return true;
 	}
+	int GetType() const;
 
 private:
-	enum {
-		T_TERM = 0x01,
-		R_TERM = 0x02,
-		P_TERM = 0x04
-	};
+	bool operator==(const Matrix4& rhs) const;
+	bool operator!=(const Matrix4& rhs) const;
+	static void MultMatrix4Expanded( const Matrix4& a, const Matrix4& b, Matrix4* c );
 
-#ifdef _MSC_VER
-#pragma warning ( push )
-#pragma warning ( disable : 4201 )	// un-named union.
-#endif
+	bool HasTTerm() const;
+	bool HasRTerm() const;
+	bool HasPTerm() const;
+
 	// Row-Column notation is backwards from x,y regrettably. Very
 	// confusing. Just uses array. Increment by one moves down to the next
 	// row, so that the next columnt is at +4.
-	union
-	{
-		float x[16];
-		struct
-		{
-			// row-column
-			float m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44;
-		};
-	};
-#ifdef _MSC_VER
-#pragma warning ( pop )
-#endif
+	float x[16];
+	mutable int type;
 };
 
 

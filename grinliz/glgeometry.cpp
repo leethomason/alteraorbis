@@ -701,45 +701,36 @@ void Quaternion::FromRotationMatrix( const Matrix4& m )
 {
 	//GLASSERT( m.IsRotation() );
 
-    float trace = m.m11 + m.m22 + m.m33;
+    float trace = m.X(Matrix4::M11) + m.X(Matrix4::M22) + m.X(Matrix4::M33);
 
     if ( trace > 0.0f )
     {
 		float s = sqrtf(trace + 1.0f) * 2.0f;
 		w = 0.25f * s;
-		x = ( m.m32 - m.m23 ) / s;
-		y = ( m.m13 - m.m31 ) / s;
-		z = ( m.m21 - m.m12 ) / s;
+		x = ( m.X(Matrix4::M32) - m.X(Matrix4::M23) ) / s;
+		y = ( m.X(Matrix4::M13) - m.X(Matrix4::M31) ) / s;
+		z = ( m.X(Matrix4::M21) - m.X(Matrix4::M12) ) / s;
 	}
-	else if ( ( m.m11 > m.m22 ) && (m.m11 > m.m33) ) {
-		float S = sqrtf(1.0f + m.m11 - m.m22 - m.m33) * 2.0f; 
-		w = (m.m32 - m.m23) / S;
+	else if ( ( m.X(Matrix4::M11) > m.X(Matrix4::M22) ) && (m.X(Matrix4::M11) > m.X(Matrix4::M33)) ) {
+		float S = sqrtf(1.0f + m.X(Matrix4::M11) - m.X(Matrix4::M22) - m.X(Matrix4::M33)) * 2.0f; 
+		w = (m.X(Matrix4::M32) - m.X(Matrix4::M23)) / S;
 		x = 0.25f * S;
-		y = (m.m12 + m.m21) / S; 
-		z = (m.m13 + m.m31) / S; 
-	} else if (m.m22 > m.m33) { 
-		float S = sqrtf(1.0f + m.m22 - m.m11 - m.m33) * 2.0f;
-		w = (m.m13 - m.m31) / S;
-		x = (m.m12 + m.m21) / S; 
+		y = (m.X(Matrix4::M12) + m.X(Matrix4::M21)) / S; 
+		z = (m.X(Matrix4::M13) + m.X(Matrix4::M31)) / S; 
+	} else if (m.X(Matrix4::M22) > m.X(Matrix4::M33)) { 
+		float S = sqrtf(1.0f + m.X(Matrix4::M22) - m.X(Matrix4::M11) - m.X(Matrix4::M33)) * 2.0f;
+		w = (m.X(Matrix4::M13) - m.X(Matrix4::M31)) / S;
+		x = (m.X(Matrix4::M12) + m.X(Matrix4::M21)) / S; 
 		y = 0.25f * S;
-		z = (m.m23 + m.m32) / S; 
+		z = (m.X(Matrix4::M23) + m.X(Matrix4::M32)) / S; 
 	} else { 
-		float S = sqrtf(1.0f + m.m33 - m.m11 - m.m22) * 2.0f;
-		w = (m.m21 - m.m12) / S;
-		x = (m.m13 + m.m31) / S;
-		y = (m.m23 + m.m32) / S;
+		float S = sqrtf(1.0f + m.X(Matrix4::M33) - m.X(Matrix4::M11) - m.X(Matrix4::M22)) * 2.0f;
+		w = (m.X(Matrix4::M21) - m.X(Matrix4::M12)) / S;
+		x = (m.X(Matrix4::M13) + m.X(Matrix4::M31)) / S;
+		y = (m.X(Matrix4::M23) + m.X(Matrix4::M32)) / S;
 		z = 0.25f * S;
 	}
 	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
-#ifdef DEBUG
-	Matrix4 t;
-	this->ToMatrix( &t );
-	if( !Equal( t, m )) {
-		m.Dump( "in" );	GLOUTPUT(( "\n" ));
-		t.Dump( "out" ); GLOUTPUT(( "\n" ));
-		GLASSERT( 0 );
-	}
-#endif
 }
 
 
@@ -852,7 +843,7 @@ void Quaternion::SLERP( const Quaternion& start, const Quaternion& end, float t,
 }
 
 
-void Quaternion::Decompose( const Matrix4& tr, Vector3F* pos,  Quaternion* rot )
+void Quaternion::Decompose(const Matrix4& tr, Vector3F* pos, Quaternion* rot)
 {
 	// Once again: Diana Gruber "The Mathematics of the 3D Rotation Matrix" to the rescue.
 	// "just multiply the transform matrix by the transpose of the rotation matrix to get the translation matrix"
@@ -860,45 +851,45 @@ void Quaternion::Decompose( const Matrix4& tr, Vector3F* pos,  Quaternion* rot )
 	// all use the opposite convention. Hmm.
 
 	Matrix4 r = tr;
-	r.m14 = 0;
-	r.m24 = 0;
-	r.m34 = 0;
-	r.m44 = 1;
-	rot->FromRotationMatrix( r );
-
-	/*
-	Matrix4 rTranspose;
-	r.Transpose( &rTranspose );
-
-	Matrix4 t = tr * rTranspose;
-	pos.Set( t.m14, t.m24, t.m34 );
-	*/
-	pos->Set( tr.m14, tr.m24, tr.m34 );
-
-#ifdef DEBUG
-	Matrix4 rmat, tmat;
-	rot->ToMatrix( &rmat );
-	tmat.SetTranslation( *pos );
-	GLASSERT( Equal( tmat*rmat, tr ));
-#endif
+	r.SetCol(3, 0, 0, 0, 1);
+	//	r.m14 = 0;
+	//	r.m24 = 0;
+	//	r.m34 = 0;
+	//	r.m44 = 1;
+	rot->FromRotationMatrix(r);
+	pos->Set(tr.X(Matrix4::M14), tr.X(Matrix4::M24), tr.X(Matrix4::M34));
 }
 
 
 void Quaternion::Test()
 {
-	// Testing
-	Quaternion q;
-	Vector3F X_AXIS = { 1,0,0 };
-	q.FromAxisAngle( X_AXIS, 90 );
+	const Vector3F Y = { 0, 1, 0 };
+	Quaternion a = Quaternion::MakeYRotation(45.0f);
+	Quaternion b, q;
+	b.FromAxisAngle(Y, 45.0);
+
+	Quaternion::Multiply(a, b, &q);
+
+	Matrix4 m90;
+	m90.SetYRotation(90.0f);
+	
 	Matrix4 m;
-	q.ToMatrix( &m );
+	q.ToMatrix(&m);
 
-	Vector3F test = { 1, 0.5, 0.2 };
-	Vector3F prime = m * test;
+	GLASSERT(Equal(m, m90));
 
-	GLASSERT( Equal( prime.x, 1.0f, 0.01f ));
-	GLASSERT( Equal( prime.y, -0.2f, 0.01f ));
-	GLASSERT( Equal( prime.z, 0.5f, 0.01f ));
+	b.FromAxisAngle(Y, 30.0f);
+	Vector3F axis;
+	float angle;
+	b.ToAxisAngle(&axis, &angle);
+	GLASSERT(Equal(axis, Y));
+	GLASSERT(Equal(angle, 30.0f));
+
+	q.FromRotationMatrix(m90);
+	q.ToMatrix(&m);
+	GLASSERT(Equal(m90, m));
+
+	GLOUTPUT(("Quaternion test complete.\n"));
 }
 
 

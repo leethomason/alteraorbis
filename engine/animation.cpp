@@ -392,10 +392,10 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 	const BoneData& boneDataA = sequence[typeA].boneData;
 	const BoneData& boneDataB = sequence[typeB].boneData;
 
-	for( int i=0; i<EL_MAX_BONES; ++i ) {
+	for (int i = 0; i < EL_MAX_BONES; ++i) {
 		output[i].SetIdentity();
 
-		if ( boneDataA.bone[i].name.empty() )
+		if (boneDataA.bone[i].name.empty())
 			continue;
 
 		Vector3F	positionA, positionB, position;
@@ -420,30 +420,32 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 			position = positionA;
 		}
 
-		if ( hasFade ) {
-			Quaternion::SLERP( boneDataA.bone[i].rotation[frameA0],
-							   boneDataA.bone[i].rotation[frameA1],
-							   fractionA,
-							   &rotationA );
-			Quaternion::SLERP( boneDataB.bone[i].rotation[frameB0],
-							   boneDataB.bone[i].rotation[frameB1],
-							   fractionB,
-							   &rotationB );
-			Quaternion::SLERP( rotationA, rotationB, crossFraction, &rotation );
+		if (hasFade) {
+			Quaternion::SLERP(boneDataA.bone[i].rotation[frameA0],
+							  boneDataA.bone[i].rotation[frameA1],
+							  fractionA,
+							  &rotationA);
+			Quaternion::SLERP(boneDataB.bone[i].rotation[frameB0],
+							  boneDataB.bone[i].rotation[frameB1],
+							  fractionB,
+							  &rotationB);
+			Quaternion::SLERP(rotationA, rotationB, crossFraction, &rotation);
 		}
 		else {
-			Quaternion::SLERP( boneDataA.bone[i].rotation[frameA0],
-							   boneDataA.bone[i].rotation[frameA1],
-							   fractionA,
-							   &rotation );
+			Quaternion::SLERP(boneDataA.bone[i].rotation[frameA0],
+							  boneDataA.bone[i].rotation[frameA1],
+							  fractionA,
+							  &rotation);
 		}
-			
+
 
 		// The 'inv' takes the transform back to the origin
 		// then out transformed place. It is pure translation
 		// which is very nice.
 
-		Vector3F inv = (-boneDataA.bone[i].refConcat );	// very easy inverse xform
+		//Vector3F inv = (-boneDataA.bone[i].refConcat);	// very easy inverse xform
+		Matrix4 inv;
+		inv.SetTranslation(-boneDataA.bone[i].refConcat);
 
 		Matrix4		m;
 		Vector3F	t;
@@ -453,24 +455,24 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		// and sometimes it is not. So use the position if specified,
 		// else use the reference position.
 		static const Vector3F ZERO = { 0, 0, 0 };
-		if ( position.Equal( ZERO, 0.0001f )) {
+		if (position.Equal(ZERO, 0.0001f)) {
 			t = boneDataA.bone[i].refPos;
 		}
 		else {
 			t = position;
 		}
-		rotation.ToMatrix( &m );
-		m.SetCol( 3, t.x, t.y, t.z, 1 );
+		rotation.ToMatrix(&m);
+		m.SetCol(3, t.x, t.y, t.z, 1);
 
-		int parentIndex = boneDataA.bone[i].parent; 
-		if ( parentIndex >= 0 ) {
+		int parentIndex = boneDataA.bone[i].parent;
+		if (parentIndex >= 0) {
+			output[i] = concat[parentIndex] * m * inv;
 			concat[i] = concat[parentIndex] * m;
 		}
 		else {
+			output[i] = m * inv;
 			concat[i] = m;
 		}
-		output[i] = concat[i];
-		output[i].ConcatTranslation(inv);
 	}
 }
 

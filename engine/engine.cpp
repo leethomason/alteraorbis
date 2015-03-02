@@ -383,9 +383,11 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 			QueueSet( &engineShaders, modelCache, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
 
 			Matrix4 shadowMatrix;
-			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
-			shadowMatrix.m22 = 0.0f;
-			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
+			shadowMatrix.SetCol(1,
+								-lighting.direction.x / lighting.direction.y,
+								0.0f,
+								-lighting.direction.z / lighting.direction.y,
+								0);
 
 			{
 				modelDrawCalls[SHADOW] = device->DrawCalls();

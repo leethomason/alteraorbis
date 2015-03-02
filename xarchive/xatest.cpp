@@ -45,7 +45,7 @@ void MetaData( XStream* xs )
 	GLASSERT( k == 3 );
 	GLASSERT( s == "istring" );
 	GLASSERT( iMat.IsIdentity() );
-	GLASSERT( tMat.m14 == 2.0f );
+	GLASSERT( tMat.X(Matrix4::M14) == 2.0f );
 
 	int     iArr[] = { 1, -1000 };
 	float   jArr[] = { 2, -2000.0f };

@@ -166,6 +166,7 @@ private:
 	grinliz::CDynArray<int> activeStreams;
 	U32 totalCompileTime;
 	U32 vertexArrayID;
+	grinliz::CDynArray<float> matrixCache;
 
 	void LoadProgram( const char* name, grinliz::GLString *store );
 	Shader* CreateProgram( int flag );

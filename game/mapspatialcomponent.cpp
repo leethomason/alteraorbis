@@ -150,9 +150,12 @@ int MapSpatialComponent::DoTick(U32 delta)
 			int team = parentChit->Team();
 			ProcRenderInfo info;
 			AssignProcedural(parentChit->GetItem(), &info);
-			info.color.m41 *= glow;
-			info.color.m42 *= glow;
-			info.color.m43 *= glow;
+//			info.color.m41 *= glow;
+//			info.color.m42 *= glow;
+//			info.color.m43 *= glow;
+			info.color.X(Matrix4::M41) *= glow;
+			info.color.X(Matrix4::M42) *= glow;
+			info.color.X(Matrix4::M43) *= glow;
 			rc->SetProcedural(0, info);
 			rc->SetSaturation(0.5f + 0.5f*glow);
 		}

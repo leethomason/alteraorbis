@@ -160,10 +160,11 @@ void HumanGen::AssignFace( ProcRenderInfo* info )
 	info->color.SetCol( 2, vcol[2] );
 
 	// Alpha information solely from the alpha channel.
-	info->color.m41 = 0;
-	info->color.m42 = 0;
-	info->color.m43 = 0;
-	info->color.m44 = 1;
+	//info->color.m41 = 0;
+	//info->color.m42 = 0;
+	//info->color.m43 = 0;
+	//info->color.m44 = 1;
+	info->color.SetRow(3, 0, 0, 0, 1);
 }
 
 
@@ -195,10 +196,11 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 	info->color.SetCol( 2, vcol[2] );
 
 	// alpha interpreted as emissive; comes from color2
-	info->color.m41 = 0;
-	info->color.m42 = 0;
-	info->color.m43 = 0;
-	info->color.m44 = 1;
+	info->color.SetRow(3, 0, 0, 0, 1);
+//	info->color.m41 = 0;
+//	info->color.m42 = 0;
+//	info->color.m43 = 0;
+//	info->color.m44 = 1;
 }
 
 
@@ -306,7 +308,8 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 	for( int i=0; i<3; ++i ) {
 		info->color.SetCol( i, c[i] );
 	}
-	info->color.m44 = 0;
+	//info->color.m44 = 0;
+	info->color.X(Matrix4::M44) = 0;
 
 	Texture* texture = TextureManager::Instance()->GetTexture( "ringAtlas" );
 	GLASSERT( texture );
@@ -353,7 +356,8 @@ void WeaponGen::AssignShield( ProcRenderInfo* info )
 	info->color.SetCol( 2, v[CONTRAST] );
 	// Effect: inner
 	info->color.SetCol( 1, v[EFFECT] );
-	info->color.m44 = 0;
+	//info->color.m44 = 0;
+	info->color.X(Matrix4::M44) = 0;
 
 	Texture* texture = TextureManager::Instance()->GetTexture( "structure" );
 	GLASSERT( texture );
@@ -373,7 +377,8 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 	for( int i=0; i<3; ++i ) {
 		info->color.SetCol( i, c[i] );
 	}
-	info->color.m44 = 0;
+	info->color.X(Matrix4::M44) = 0;
+//	info->color.m44 = 0;
 
 	Texture* texture = TextureManager::Instance()->GetTexture( "structure" );
 	GLASSERT( texture );
@@ -565,7 +570,8 @@ void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
 	info->color.SetCol( 0, base );
 	info->color.SetCol( 1, contrast );
 	info->color.SetCol( 2, glow );
-	info->color.m44 = 0;
+	info->color.X(Matrix4::M44) = 0;
+//	info->color.m44 = 0;
 }
 
 

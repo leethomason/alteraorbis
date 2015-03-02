@@ -70,6 +70,60 @@ void Matrix4::ConcatRotation(float thetaDegree, int axis)
 	*this = (*this) * r;
 }
 
+
+bool Matrix4::HasTTerm() const
+{
+	if (x[M14] || x[M24] || x[M34])
+		return true;
+	return false;
+}
+
+
+bool Matrix4::HasRTerm() const
+{
+	if (   x[M11] == 1 && x[M22] == 1 && x[M33] == 1
+		&& x[M12] == 0 && x[M13] == 0 && x[M23] == 0
+		&& x[M21] == 0 && x[M31] == 0 && x[M32] == 0) 
+	{
+		return false;
+	}
+	return true;
+}
+
+
+bool Matrix4::HasPTerm() const
+{
+	if (x[M41] == 0 && x[M42] == 0 && x[M43] == 0 && x[M44] == 1)
+		return false;
+	return true;
+}
+
+
+int Matrix4::GetType() const
+{
+	if (type == UNKNOWN_TYPE) {
+		type = 0;
+		if (HasTTerm())
+			type |= T_TERM;
+		if (HasRTerm())
+			type |= R_TERM;
+		if (HasPTerm())
+			type |= P_TERM;
+	}
+#ifdef MAT_DEBUG_DEEP
+	int debugType = 0;
+	if (HasTTerm())
+		debugType |= T_TERM;
+	if (HasRTerm())
+		debugType |= R_TERM;
+	if (HasPTerm())
+		debugType |= P_TERM;
+	GLASSERT(debugType == type);
+#endif
+	return type;
+}
+
+
 /*
 	RRRT
 	RRRT
@@ -109,11 +163,127 @@ void Matrix4::ConcatRotation(float thetaDegree, int axis)
 	c->x[14] = A_HAS_R0(a.x[2]) * B_HAS_T(b.x[12]) + A_HAS_R0(a.x[6]) * B_HAS_T(b.x[13]) + A_HAS_R1(a.x[10]) * B_HAS_T(b.x[14]) + A_HAS_T(a.x[14])  * B_HAS_P1(b.x[15]); \
 	c->x[15] = A_HAS_P0(a.x[3]) * B_HAS_T(b.x[12]) + A_HAS_P0(a.x[7]) * B_HAS_T(b.x[13]) + A_HAS_P0(a.x[11]) * B_HAS_T(b.x[14]) + A_HAS_P1(a.x[15]) * B_HAS_P1(b.x[15]); 
 
+void Matrix4::MultMatrix4Expanded(const Matrix4& a, const Matrix4& b, Matrix4* c)
+{
+	// This does not support the target being one of the sources.
+	GLASSERT(c != &a && c != &b && &a != &b);
+	float* dst = c->x;
+
+	// The counters are rows and columns of 'c'
+	for (int j = 0; j < 4; ++j)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			// for c:
+			//      j increments the row
+			//      i increments the column
+			*dst++ = a.x[i + 0] * b.x[j * 4 + 0]
+				+ a.x[i + 4] * b.x[j * 4 + 1]
+				+ a.x[i + 8] * b.x[j * 4 + 2]
+				+ a.x[i + 12] * b.x[j * 4 + 3];
+		}
+	}
+}
+
 
 void grinliz::MultMatrix4(const Matrix4& a, const Matrix4& b, Matrix4* c)
 {
 	GLASSERT(c != &a && c != &b && &a != &b);
-	MAT_MULT_4;
+
+	int aType = a.GetType();
+	int bType = b.GetType();
+
+	if (aType == Matrix4::IDENTITY_TYPE) {
+		*c = b;
+	}
+	else if (bType == Matrix4::IDENTITY_TYPE) {
+		*c = a;
+	}
+	else if (aType == Matrix4::T_TERM && b.type == Matrix4::T_TERM) {
+		// Both translation
+#undef A_HAS_T
+#undef A_HAS_R0
+#undef A_HAS_R1
+#undef A_HAS_P0
+#undef A_HAS_P1
+#undef B_HAS_T
+#undef B_HAS_R0
+#undef B_HAS_R1
+#undef B_HAS_P0
+#undef B_HAS_P1
+
+#define A_HAS_T(x)  x
+#define A_HAS_R0(x) 0
+#define A_HAS_R1(x) 1
+#define A_HAS_P0(x) 0
+#define A_HAS_P1(x) 1
+#define B_HAS_T(x)  x
+#define B_HAS_R0(x) 0
+#define B_HAS_R1(x) 1
+#define B_HAS_P0(x) 0
+#define B_HAS_P1(x) 1
+			MAT_MULT_4;
+			c->type = Matrix4::UNKNOWN_TYPE;
+	}
+	else if ( ((aType & Matrix4::P_TERM) == 0) && ((bType & Matrix4::P_TERM) == 0)) {
+		// Both NOT perspective
+#undef A_HAS_T
+#undef A_HAS_R0
+#undef A_HAS_R1
+#undef A_HAS_P0
+#undef A_HAS_P1
+#undef B_HAS_T
+#undef B_HAS_R0
+#undef B_HAS_R1
+#undef B_HAS_P0
+#undef B_HAS_P1
+
+#define A_HAS_T(x)  x
+#define A_HAS_R0(x) x
+#define A_HAS_R1(x) x
+#define A_HAS_P0(x) 0
+#define A_HAS_P1(x) 1
+#define B_HAS_T(x)  x
+#define B_HAS_R0(x) x
+#define B_HAS_R1(x) x
+#define B_HAS_P0(x) 0
+#define B_HAS_P1(x) 1
+			MAT_MULT_4;
+			c->type = Matrix4::UNKNOWN_TYPE;
+	}
+	else {
+#undef A_HAS_T
+#undef A_HAS_R0
+#undef A_HAS_R1
+#undef A_HAS_P0
+#undef A_HAS_P1
+#undef B_HAS_T
+#undef B_HAS_R0
+#undef B_HAS_R1
+#undef B_HAS_P0
+#undef B_HAS_P1
+
+#define A_HAS_T(x)  x
+#define A_HAS_R0(x) x
+#define A_HAS_R1(x) x
+#define A_HAS_P0(x) x
+#define A_HAS_P1(x) x
+#define B_HAS_T(x)  x
+#define B_HAS_R0(x) x
+#define B_HAS_R1(x) x
+#define B_HAS_P0(x) x
+#define B_HAS_P1(x) x
+			MAT_MULT_4;
+			c->type = Matrix4::UNKNOWN_TYPE;
+	}
+
+#ifdef MAT_DEBUG_DEEP
+	c->GetType();	// double check
+
+	Matrix4 altC;
+	Matrix4::MultMatrix4Expanded(a, b, &altC);
+	GLASSERT(Equal(altC, *c));
+#endif
 }
 
 void Matrix4::ConcatTranslation(const Vector3F& t)
@@ -149,6 +319,8 @@ void Matrix4::SetXRotation( float theta )
 	x[12] = 0.0f;
 	x[13] = 0.0f;
 	x[14] = 0.0f;
+
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -176,6 +348,8 @@ void Matrix4::SetYRotation( float theta )
 	x[12] = 0.0f;
 	x[13] = 0.0f;
 	x[14] = 0.0f;
+
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 void Matrix4::SetZRotation( float theta )
@@ -202,6 +376,8 @@ void Matrix4::SetZRotation( float theta )
 	x[12] = 0.0f;
 	x[13] = 0.0f;
 	x[14] = 0.0f;
+
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -248,6 +424,8 @@ void Matrix4::SetAxisAngle( const Vector3F& axis, float angle )
 
 	x[12] = x[13] = x[14] = 0.0f;
 	x[15] = 1.0f;
+
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -272,6 +450,7 @@ void Matrix4::SetFrustum( float left, float right, float bottom, float top, floa
 		Set( 2, 0, 0 );		Set( 2, 1, 0 );		Set( 2, 2, c );		Set( 2, 3, d );
 		Set( 3, 0, 0 );		Set( 3, 1, 0 );		Set( 3, 2, -1.0f );	Set( 3, 3, 0 );
 	}
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -302,6 +481,7 @@ void Matrix4::SetOrtho( float left, float right, float bottom, float top, float 
 	else {
 		GLASSERT( 0 );
 	}
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -349,6 +529,7 @@ void Matrix4::Transpose()
 			this->x[INDEX(c,r)] = m.x[INDEX(r,c)];
         }
     }
+	type = Matrix4::UNKNOWN_TYPE;
 }
 
 
@@ -360,35 +541,18 @@ float Matrix4::Determinant() const
 	//	41 42 43 44
 
 	// Old school. Derived from Graphics Gems 1
-	return m11 * Determinant3x3(	m22, m23, m24, 
-									m32, m33, m34, 
-									m42, m43, m44 ) -
-		   m12 * Determinant3x3(	m21, m23, m24, 
-									m31, m33, m34, 
-									m41, m43, m44 ) +
-		   m13 * Determinant3x3(	m21, m22, m24,
-									m31, m32, m34, 
-									m41, m42, m44 ) -
-		   m14 * Determinant3x3(	m21, m22, m23, 
-									m31, m32, m33, 
-									m41, m42, m43 );
-
-	/*
-    // The determinant is the dot product of:
-	// the first row and the first row of cofactors
-	// which is the first col of the adjoint matrix
-	Matrix4 cofactor;
-	Cofactor( &cofactor );
-	Vector3F rowOfCofactor, rowOfThis;
-	Row( 0, &rowOfThis );
-
-	float det = 0.0f;
-	for( int c=0; c<4; ++c ) {
-		cofactor.Row( c, &rowOfCofactor );
-		det += DotProduct( rowOfCofactor, rowOfThis );
-	}
-	return det;
-	*/
+	return x[M11] * Determinant3x3(	x[M22], x[M23], x[M24], 
+									x[M32], x[M33], x[M34], 
+									x[M42], x[M43], x[M44] ) -
+		   x[M12] * Determinant3x3(	x[M21], x[M23], x[M24], 
+									x[M31], x[M33], x[M34], 
+									x[M41], x[M43], x[M44] ) +
+		   x[M13] * Determinant3x3(	x[M21], x[M22], x[M24],
+									x[M31], x[M32], x[M34], 
+									x[M41], x[M42], x[M44] ) -
+		   x[M14] * Determinant3x3(	x[M21], x[M22], x[M23], 
+									x[M31], x[M32], x[M33], 
+									x[M41], x[M42], x[M43] );
 }
 
 
@@ -397,15 +561,23 @@ void Matrix4::Adjoint( Matrix4* adjoint ) const
 	Matrix4 cofactor;
 	Cofactor( &cofactor );
 	cofactor.Transpose( adjoint );
+	adjoint->type = UNKNOWN_TYPE;
 }
 
 
 void Matrix4::Invert( Matrix4* inverse ) const
 {
-	// The inverse is the adjoint / determinant of adjoint
-	Adjoint( inverse );
-	float d = Determinant();
-	inverse->ApplyScalar( 1.0f / d );
+	GetType();
+	if (type == R_TERM) {
+		InvertRotationMat(inverse);
+	}
+	else {
+		// The inverse is the adjoint / determinant of adjoint
+		Adjoint(inverse);
+		float d = Determinant();
+		inverse->ApplyScalar(1.0f / d);
+		inverse->type = UNKNOWN_TYPE;
+	}
 }
 
 
@@ -415,18 +587,19 @@ void Matrix4::InvertRotationMat( Matrix4* inverse ) const
 	*inverse = *this;
 
 	// Transpose the rotation terms.
-	Swap( &inverse->m12, &inverse->m21 );
-	Swap( &inverse->m13, &inverse->m31 );
-	Swap( &inverse->m23, &inverse->m32 );
+	Swap( &inverse->x[M12], &inverse->x[M21] );
+	Swap( &inverse->x[M13], &inverse->x[M31] );
+	Swap( &inverse->x[M23], &inverse->x[M32] );
 
 	const Vector3F* u = (const Vector3F*)(&x[0]);
 	const Vector3F* v = (const Vector3F*)(&x[4]);
 	const Vector3F* w = (const Vector3F*)(&x[8]);
 	const Vector3F* t = (const Vector3F*)(&x[12]);
 
-	inverse->m14 = -DotProduct( *u, *t );
-	inverse->m24 = -DotProduct( *v, *t );
-	inverse->m34 = -DotProduct( *w, *t );
+	inverse->x[M14] = -DotProduct( *u, *t );
+	inverse->x[M24] = -DotProduct( *v, *t );
+	inverse->x[M34] = -DotProduct( *w, *t );
+	inverse->type = UNKNOWN_TYPE;
 }
 
 
@@ -442,6 +615,7 @@ void Matrix4::Cofactor( Matrix4* cofactor ) const
         }
         i = -i;
     }
+	cofactor->type = UNKNOWN_TYPE;
 }
 
 
@@ -571,30 +745,47 @@ void Matrix4::Test()
 {
 	const Matrix4 identity;
 
-	Matrix4 t, r;
-	Vector3F vt = { 1, 2, 3 };
-	t.SetTranslation(1, 2, 3);
-	r.SetZRotation(90.0f);
+	{
+		// Simple transformation tests.
+		Matrix4 t, r;
+		Vector3F v = { 1, 0, 0 };
+		Vector3F vt = { 0, 1, 1 };
+		t.SetTranslation(vt);
+		r.SetZRotation(45.0f);
 
-	Matrix4 m0, m1, m2;
-	m0 = r * t;
-	MultMatrix4(r, t, &m1);
-	
-	m2 = r;
-	m2.ConcatTranslation(vt);
+		Vector3F vPrime = t * v;
+		Vector3F answer = { 1, 1, 1 };
+		GLASSERT(Equal(vPrime, answer));
 
-	GLASSERT(Equal(m0, m1));
-	GLASSERT(Equal(m0, m2));
+		vPrime = r * v;
+		answer.Set(0.70711f, 0.70711f, 0);
+		GLASSERT(Equal(vPrime, answer));
 
-	Matrix4 m0Inv;
-	m0.Invert(&m0Inv);
-	Matrix4 ident0 = m0 * m0Inv;
-	GLASSERT(Equal(ident0, identity));
+		Matrix4 m0, m1, m2;
+		m0 = r * t;
+		MultMatrix4(r, t, &m1);
 
-	Matrix4 rInv;
-	r.InvertRotationMat(&rInv);
-	Matrix4 ident1 = r * rInv;
-	GLASSERT(Equal(ident1, identity));
+		m2 = r;
+
+		m2.ConcatTranslation(vt);
+
+		GLASSERT(Equal(m0, m1));
+		GLASSERT(Equal(m0, m2));
+
+		vPrime = m0 * v;
+		answer.Set(0, 1.4142, 1);
+		GLASSERT(Equal(vPrime, answer));
+
+		Matrix4 m0Inv;
+		m0.Invert(&m0Inv);
+		Matrix4 ident0 = m0 * m0Inv;
+		GLASSERT(Equal(ident0, identity));
+
+		Matrix4 rInv;
+		r.InvertRotationMat(&rInv);
+		Matrix4 ident1 = r * rInv;
+		GLASSERT(Equal(ident1, identity));
+	}
 
 	GLOUTPUT(("Matrix test complete.\n"));
 

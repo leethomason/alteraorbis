@@ -139,15 +139,13 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	x Documentation
 	- Long game: 
 		- squad control
-		- greater motion
+		- greater travel
 		- diplomacy
 		- circuits
 	x New promo assets
 	- IndieDB
-		- Tutorial?
-		- Mac?
-		- Linux?
-		- Android?
+		x Tutorial
+		- assets
 	- Android
 
 - World Gen

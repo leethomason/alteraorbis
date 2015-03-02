@@ -241,13 +241,19 @@ void ShaderManager::SetUniform( int id, const grinliz::Vector3F& value )
 }
 
 
-void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* mat )
+void ShaderManager::SetUniformArray(int id, int count, const grinliz::Matrix4* mat)
 {
+	matrixCache.Clear();
+	for (int i = 0; i < count; ++i) {
+		float* mem = matrixCache.PushArr(16);
+		memcpy(mem, mat[i].Mem(), sizeof(float) * 16);
+	}
+
 	CHECK_GL_ERROR;
-	GLASSERT( mat );
-	int loc = active->GetUniformLocation( id );
-	GLASSERT( loc >= 0 );
-	glUniformMatrix4fv( loc, count, false, mat->Mem() );
+	GLASSERT(mat);
+	int loc = active->GetUniformLocation(id);
+	GLASSERT(loc >= 0);
+	glUniformMatrix4fv(loc, count, false, matrixCache.Mem());
 	CHECK_GL_ERROR;
 }
 
