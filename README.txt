@@ -52,8 +52,9 @@ Changes in Beta3c
   Healing by other methods (eating plants and hanging out at cores)
   has been removed.
 
-Changes in Beta3d-3f
+Changes in Beta3d+
 --------------------
+- intro tutorial
 - faster world gen; let world gen be stopped early
 - can no longer delete your own core
 - bug fixes
