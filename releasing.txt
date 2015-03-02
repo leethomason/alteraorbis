@@ -1,0 +1,19 @@
+** Releasing **
+- set version: both version name and file version
+- update README.txt
+- update title screen text
+- build assets
+- debug test:
+	- matrix debugging on
+	- resize screen
+	- max screen
+	- check load file (or not)
+	- small domain
+	- generate world
+	- small domain
+- release test
+	- play a bit more
+- run buildrelease.bat
+- build installer
+- test installation
+- update wiki

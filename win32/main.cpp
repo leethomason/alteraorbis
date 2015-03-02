@@ -233,8 +233,8 @@ int main(int argc, char **argv)
 				{
 					case SDL_SCANCODE_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
 					case SDL_SCANCODE_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
-					case SDL_SCANCODE_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
-					case SDL_SCANCODE_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
+					case SDL_SCANCODE_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);		break;
+					case SDL_SCANCODE_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);		break;
 					default:
 					break;
 				}
@@ -271,25 +271,25 @@ int main(int argc, char **argv)
 						case SDL_SCANCODE_END:	GameHotKey(game, GAME_HK_CAMERA_AVATAR);		break;
 
 							//case SDLK_a: reserved
-						case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
-						case SDL_SCANCODE_C:	GameHotKey(game, GAME_HK_ATTACH_CORE);	break;
+						case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);			break;
+						case SDL_SCANCODE_C:	GameHotKey(game, GAME_HK_ATTACH_CORE);			break;
 							//case SDLK_d: reserved
-						case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
-						case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
-						case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
-						case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);			break;
-						case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
-						case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
+						case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);			break;
+						case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);		break;
+						case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);		break;
+						case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);					break;
+						case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);			break;
+						case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);			break;
 							//case SDLK_s: reserved
-						case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
-						case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
+						case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);			break;
+						case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);			break;
 							//case SDLK_w: reserved
 
-						case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
-						case SDL_SCANCODE_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
-						case SDL_SCANCODE_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
-						case SDL_SCANCODE_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
-						case SDL_SCANCODE_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
+						case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);			break;
+						case SDL_SCANCODE_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);		break;
+						case SDL_SCANCODE_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);			break;
+						case SDL_SCANCODE_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);		break;
+						case SDL_SCANCODE_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);			break;
 
 						case SDL_SCANCODE_F3:
 						GameDoTick(game, SDL_GetTicks());

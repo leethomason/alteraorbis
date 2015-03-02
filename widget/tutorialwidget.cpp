@@ -30,7 +30,7 @@ void TutorialWidget::Init(gamui::Gamui* gamui, const gamui::ButtonLook& look, co
 	next.SetText("Next");
 	done.SetText("Close");
 
-	canvas.Init(gamui, LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY));
+	canvas.Init(gamui, LumosGame::CalcPaletteAtom(1, PAL_TANGERINE));
 	canvas.SetLevel(gamui::Gamui::LEVEL_TEXT - 1);
 
 	DoLayout();

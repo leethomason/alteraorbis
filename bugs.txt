@@ -2,6 +2,7 @@ x GT: suggestion - add popup advisor when the game starts (welcome to altera, al
 x GT: use color/glow to show building control / ownership / working (2/20/2015)
 d GT: humans change color as they walk. unfixable driver issue? no system repros. did improve 3.2 & 3.3 context support.
 x GT: tutorial improvements (2/20/2015)
+x GT: buildings should change to team color when domain controlled
 
 - GT: food as medkit
 - GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
@@ -94,8 +95,8 @@ x remove grid64 BS for proper optimization
 	- Troll distribution
 	- Troll gun distribution
 - fix world get layout / text / debugging display	
-- remove sleep tube cap?
-- remove disabled building choices?
+x remove sleep tube cap?
+x remove disabled building choices?
 - optimize hit testing (and correct for xform)	
 - test destination marks
 - test squad motion in general
@@ -252,6 +253,14 @@ x more natural skin tones
 - set version: both version name and file version
 - update README.txt
 - update title screen text
+- debug test:
+	- matrix debugging on
+	- resize screen
+	- max screen
+	- check load file (or not)
+	- small domain
+	- generate world
+	- small domain
 - build release/debug
 - build assets
 - run buildrelease.bat
