@@ -1095,6 +1095,24 @@ bool FruitElixirFilter::Accept(Chit* chit)
 }
 
 
+bool WeaponFilter::Accept(Chit* chit)
+{
+	const GameItem* item = chit->GetItem();
+	if (item) {
+		IString istr = item->IName();
+		if (istr == ISC::shield
+			|| istr == ISC::ring
+			|| istr == ISC::pistol
+			|| istr == ISC::blaster
+			|| istr == ISC::pulse
+			|| istr == ISC::beamgun) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 								Vector3F dir,
 								int effectFlags,

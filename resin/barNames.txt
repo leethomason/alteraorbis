@@ -9,8 +9,10 @@ The Analog
 Electric
 The Blazing
 The De-Rezzed
+The Deleted
 Flickering
 Neon
+The Gold
 
 1
 Ring
@@ -23,4 +25,6 @@ Arachnoid
 Mantis
 Grid
 Blaster
+Trilobyte
+
 

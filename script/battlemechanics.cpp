@@ -136,6 +136,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 	info.isExplosion = false;
 	info.originOfImpact = src->Position();
 	BattleFilter filter;
+	WeaponFilter weaponFilter;
 	bool impact = false;
 
 	// Check for chit impacts.
@@ -149,6 +150,13 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 			if ( Team::GetRelationship( src, target ) == RELATE_FRIEND ) {
 				continue;
 			}
+		}
+
+		// Also, don't melee hit weapons. I can't imagine this
+		// is the intent and the weapon toll is massive. Ranged
+		// and explosive still take out weapons.
+		if (weaponFilter.Accept(target)) {
+			continue;
 		}
 
 		if ( InMeleeZone( engine, src, target )) {
