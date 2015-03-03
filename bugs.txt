@@ -142,6 +142,7 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	x Documentation
 	- Long game: 
 		- squad control
+			- flags reflect squads
 		- greater travel
 		- diplomacy
 	x New promo assets

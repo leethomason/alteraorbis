@@ -192,7 +192,6 @@ void GameSceneMenu::ItemTapped(const gamui::UIItem* item)
 			avatarUnit.SetVisible(uiMode == UI_VIEW);
 			nextUnit.SetVisible(uiMode == UI_VIEW);
 			useBuildingButton.SetVisible(uiMode == UI_VIEW && useBuilding);
-			//tabBar0.SetVisible(uiMode != UI_CONTROL);
 			tabBar0.SetVisible(false);
 			tabBar1.SetVisible(false);
 			createWorkerButton.SetVisible(uiMode == UI_BUILD);

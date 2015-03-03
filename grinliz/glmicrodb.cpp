@@ -7,7 +7,7 @@ using namespace grinliz;
 const MicroDB::Entry* MicroDB::Find( const IString& key ) const
 {
 	for( int i=0; i<dataArr.Size(); ++i ) {
-		if ( dataArr[i].key == key.c_str() ) {
+		if ( dataArr[i].key == key ) {
 			return &dataArr[i];
 		}
 	}
@@ -18,7 +18,7 @@ const MicroDB::Entry* MicroDB::Find( const IString& key ) const
 MicroDB::Entry* MicroDB::FindOrCreate( const IString& key )
 {
 	for( int i=0; i<dataArr.Size(); ++i ) {
-		if ( dataArr[i].key == key.c_str() ) {
+		if ( dataArr[i].key == key ) {
 			return &dataArr[i];
 		}
 	}
