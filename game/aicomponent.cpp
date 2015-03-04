@@ -1753,7 +1753,7 @@ bool AIComponent::ThinkFlag()
 	if (   homeCoreScript->IsCitizen(parentChit->ID())
 		&& ( homeCoreSector == sector))
 	{
-		Vector2I flag = homeCoreScript->GetFlag();
+		Vector2I flag = homeCoreScript->GetAvailableFlag();
 		if (!flag.IsZero()) {
 			if (!homeCoreScript->HasTask(flag)) {
 				taskList.Push(Task::MoveTask(flag));
