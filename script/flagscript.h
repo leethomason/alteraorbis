@@ -36,6 +36,7 @@ public:
 
 private:
 	CTicker timer;
+	bool colorsSet;
 	grinliz::Vector2I sector;
 	int squadID;
 };

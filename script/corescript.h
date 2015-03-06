@@ -91,7 +91,7 @@ public:
 	// 0-3, -1 if not in squad
 	int SquadID(int id);
 	int Squaddies(int squadID, CChitArray* arr);
-	bool IsSquaddieOnMission(int chitID);
+	bool IsSquaddieOnMission(int chitID, int* squadID);
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();

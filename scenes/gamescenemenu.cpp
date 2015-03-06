@@ -93,6 +93,7 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	}
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
 		squadBar[i].Init(gamui2D);
+		squadBar[i].hitBounds.SetCapturesTap(true);
 	}
 
 	// Fake a tap to initialize.
@@ -338,6 +339,7 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 			ItemComponent* itemComponent = citizens[i]->GetItemComponent();
 			squadBar[index].Set(itemComponent);
 			squadBar[index].SetVisible(true);
+			squadBar[index].userItemID = citizens[i]->ID();
 			inUse[index] = true;
 		}
 	}
@@ -345,6 +347,7 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
 		if (!inUse[i]) {
 			squadBar[i].SetVisible(false);
+			squadBar[i].userItemID = 0;
 		}
 	}
 
@@ -353,6 +356,7 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 		static const char* NAME[MAX_SQUADS] = { "Alpha", "Beta", "Delta", "Omega" };
 		// Ready, Resting, On Route
 		Vector2I waypoint = { 0, 0 };
+		Vector2I sector = { 0, 0 };
 		CChitArray squaddies;
 		if (cs) {
 			waypoint = cs->GetWaypoint(i);
@@ -363,12 +367,18 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 			if (squaddies[k]->GetAIComponent()) {
 				totalMorale += squaddies[k]->GetAIComponent()->GetNeeds().Morale();
 			}
+			if (sector.IsZero()) {
+				sector = ToSector(squaddies[k]->Position());
+			}
 		}
 		double moraleAve = squaddies.Size() ? (totalMorale / double(squaddies.Size())) : 0;
 
 		CStr<32> str = NAME[i];
 		if (squaddies.Size() && !waypoint.IsZero()) {
 			str.Format("%s\nRoute %c%d", NAME[i], 'A' + (waypoint.x / SECTOR_SIZE), 1 + (waypoint.y / SECTOR_SIZE));
+		}
+		else if (squaddies.Size() && !sector.IsZero() && sector != ToSector(cs->ParentChit()->Position())) {
+			str.Format("%s\nAt %c%d", NAME[i], 'A' + sector.x, 1 + sector.y);
 		}
 		else if (squaddies.Size() && moraleAve > 0.95) {
 			str.Format("%s\nReady", NAME[i]);

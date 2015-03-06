@@ -298,10 +298,13 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 }
 
 
-bool CoreScript::IsSquaddieOnMission(int chitID)
+bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID)
 {
 	for (int i = 0; i < MAX_SQUADS; ++i) {
 		if (squads[i].Find(chitID) >= 0) {
+			if (squadID) {
+				*squadID = i;
+			}
 			return !waypoints[i].Empty();
 		}
 	}
@@ -942,7 +945,7 @@ void CoreScript::PopWaypoint(int squadID)
 void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 {
 	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
-	if (dest.IsZero()) {
+	if (dest.IsZero() || (waypoints[squadID].Find(dest) >= 0)) {
 		waypoints[squadID].Clear();
 		return;
 	}
@@ -1001,7 +1004,7 @@ void CoreScript::NewWaypointChits(int id)
 {
 	for (int i = 0; i < waypoints[id].Size(); ++i) {
 		Vector2I v = waypoints[id][i];
-		Chit* chit = new Chit();
+		Chit* chit = Context()->chitBag->NewChit();
 		chit->Add(new RenderComponent("flag"));
 		FlagScript* flagScript = new FlagScript();
 		flagScript->Attach(ToSector(parentChit->Position()), id);
@@ -1065,7 +1068,7 @@ void CoreScript::DoStrategicTick()
 		bool okay = true;
 		for (int k = 0; okay && k < squaddies.Size(); ++k) {
 			Chit* chit = squaddies[k];
-			if (this->IsSquaddieOnMission(chit->ID())) {
+			if (this->IsSquaddieOnMission(chit->ID(), nullptr)) {
 				okay = false;
 				break;
 			}

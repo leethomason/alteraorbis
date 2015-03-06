@@ -11,7 +11,11 @@ x GT: buildings should change to team color when domain controlled
 - GT: player portrait size should match enemy portrait size (2/20/2015)
 - GT: how many structures of each type?
 
-- icons instead of m/r in control screen
+x icons instead of m/r in control screen
+- autosave
+- flags 
+	- stay with squad (if not at home)
+	- clicking any flag should reset that squad
 - face is glowing in asset preview
 - info on attack flags: who is attacking me??
 - tune mouse wheel with real mouse

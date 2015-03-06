@@ -1119,6 +1119,17 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		if (item == &menu->squadBar[i].hitBounds) {
+			int id = menu->squadBar[i].userItemID;
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			if (cc && id) {
+				chitTracking = id;
+				cc->SetTrack(id);
+			}
+		}
+	}
+
 	if ( !dest.IsZero() ) {
 		DoDestTapped( dest );
 	}

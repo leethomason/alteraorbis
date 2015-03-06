@@ -1155,7 +1155,8 @@ Vector2F AIComponent::ThinkWanderRandom(  )
 }
 
 
-Vector2F AIComponent::ThinkWanderFlock()
+// Lots of things herd wander, including denizens.
+Vector2F AIComponent::ThinkWanderHerd()
 {
 	Vector2F origin = ToWorld2F(parentChit->Position());
 	const GameItem* gameItem = parentChit->GetItem();
@@ -1163,22 +1164,38 @@ Vector2F AIComponent::ThinkWanderFlock()
 
 	static const int NPLANTS = 4;
 	static const float TOO_CLOSE = 2.0f;
-
 	// +1 for origin, +4 for plants
 	CArray<Vector2F, MAX_TRACK + 1 + NPLANTS> pos;
-	for (int i = 0; i < friendList2.Size(); ++i) {
-		Chit* c = parentChit->Context()->chitBag->GetChit(friendList2[i]);
-		if (c) {
-			Vector2F v = ToWorld2F(c->Position());
-			pos.Push(v);
+	GLASSERT(MAX_TRACK >= SQUAD_SIZE);
+
+	int squadID = 0;
+	CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
+	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID)) {
+		// Friends are other squaddies.
+		CChitArray arr;
+		myCore->Squaddies(squadID, &arr);
+		for (int i = 0; i < arr.Size(); ++i) {
+			pos.Push(ToWorld2F(arr[i]->Position()));
 		}
 	}
-	// Only consider the wander origin for workers.
-	if (gameItem->flags & GameItem::AI_DOES_WORK) {
-		pos.Push(GetWanderOrigin());	// the origin is a friend.
+	else {
+		// Friends are in the friends list.
+		for (int i = 0; i < friendList2.Size(); ++i) {
+			Chit* c = parentChit->Context()->chitBag->GetChit(friendList2[i]);
+			if (c) {
+				pos.Push(ToWorld2F(c->Position()));
+			}
+		}
 	}
 
-	// And plants are friends.
+	// For a worker, add in the wander origin.
+	if (gameItem->flags & GameItem::AI_DOES_WORK) {
+		pos.Push(GetWanderOrigin());
+	}
+
+	// And plants are friends. This was originally in place
+	// because some MOBs healed at plants. No longer the
+	// case. But interesting randomizer, so left in place.
 	Rectangle2I r;
 	r.min = r.max = ToWorld2I(origin);
 	r.Outset(int(PLANT_AWARE));
@@ -2199,13 +2216,13 @@ void AIComponent::ThinkNormal(  )
 				return;
 		}
 		else if ( wanderFlags == 0 || r == 0 ) {
-			dest = ThinkWanderRandom(  );
+			dest = ThinkWanderRandom();
 		}
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
-			dest = ThinkWanderFlock(  );
+			dest = ThinkWanderHerd();
 		}
 		else if ( wanderFlags == GameItem::AI_WANDER_CIRCLE ) {
-			dest = ThinkWanderCircle(  );
+			dest = ThinkWanderCircle();
 		}
 	}
 	if ( !dest.IsZero() ) {
@@ -2772,7 +2789,7 @@ bool AIComponent::AtWaypoint()
 
 	Vector2F dest2 = ToWorld2F(waypoint);
 
-	static const float DEST_RANGE = 1.0f;
+	static const float DEST_RANGE = 1.5f;
 	Vector2F pos2 = ToWorld2F(ParentChit()->Position());
 	float len = (dest2 - pos2).Length();
 	return len < DEST_RANGE;
@@ -2927,7 +2944,7 @@ int AIComponent::DoTick( U32 deltaTime )
 			// Squaddies, on missions, don't have needs. Keeps them 
 			// from running off or falling apart in the middle.
 			// But for the other denizens:
-			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID())) {
+			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID(), 0)) {
 				static const double LOW_MORALE = 0.25;
 
 				if (AtFriendlyOrNeutralCore()) {

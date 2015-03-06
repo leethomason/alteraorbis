@@ -12,7 +12,7 @@ class ItemComponent;
 class HPBar : public gamui::DigitalBar
 {
 public:
-	HPBar()	{}
+	HPBar() : userItemID(0)	{}
 	~HPBar()	{}
 
 	void Init(gamui::Gamui* gamui);
@@ -20,6 +20,9 @@ public:
 	void Set(ItemComponent* ic);
 
 	virtual bool DoLayout();
+
+	gamui::Image hitBounds;
+	int userItemID;
 
 private:
 	gamui::Image meleeIcon;

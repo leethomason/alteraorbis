@@ -23,6 +23,7 @@
 #include "../script/evalbuildingscript.h"
 #include "../script/guardscript.h"
 #include "../script/batterycomponent.h"
+#include "../script/flagscript.h"
 
 #include "../ai/rebuildai.h"
 #include "../ai/domainai.h"
@@ -123,6 +124,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	}
 	else if (name == "HumanDomainAI") {
 		return new HumanDomainAI();
+	}
+	else if (name == "FlagScript") {
+		return new FlagScript();
 	}
 
 
