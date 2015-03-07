@@ -885,6 +885,8 @@ const grinliz::Rectangle3F& Model::AABB() const
 
 const grinliz::Matrix4& Model::XForm() const
 {
+	GLASSERT(userData != (Chit*)0xfeeefeee);
+	GLASSERT(debugScale > 0);
 	if ( !xformValid ) {
 		Matrix4 t;
 		t.SetTranslation( pos );

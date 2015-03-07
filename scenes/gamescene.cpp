@@ -396,7 +396,8 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 {
 	// --- Info and debugging info. ---
 	Vector3F at = { 0, 0, 0 };
-	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, Model::MODEL_CLICK_THROUGH, 0, &at );
+
 	MoveModel( mv.model ? mv.model->userData : 0 );
 
 	if ( mv.model && mv.model->userData ) {

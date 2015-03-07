@@ -15,11 +15,11 @@ x icons instead of m/r in control screen
 x flags 
 	x stay with squad (if not at home)
 	x clicking any flag should reset that squad
+x info on attack flags: who is attacking me??
 - crash in Model::userData = 0xffeefffee
 - autosave
 - selection and face isn't consistent
 - face is glowing in asset preview
-- info on attack flags: who is attacking me??
 - tune mouse wheel with real mouse
 - rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - hide abandom domain somewhere...

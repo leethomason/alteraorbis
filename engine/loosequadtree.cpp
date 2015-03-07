@@ -172,7 +172,6 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 
 void SpaceTree::Query(grinliz::CDynArray<Model*>* models, const Plane* planes, int nPlanes, const Rectangle3F* clipRect, bool includeShadow, int required, int excluded)
 {
-	modelRoot = 0;
 	nodesVisited = 0;
 	planesComputed = 0;
 	requiredFlags = required;
@@ -374,7 +373,6 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 							Vector3F* intersection ) 
 {
 	//GLOUTPUT(( "query ray\n" ));
-	modelRoot = 0;
 	nodesVisited = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;

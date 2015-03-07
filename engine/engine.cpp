@@ -688,6 +688,7 @@ ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
 	}
 	Model* m = IntersectModel( origin, dir, length, testMethod, required, exclude, ignore, &modelVoxel.at );
 	if ( m ) {
+		m->AABB();	// does nothing except check for valid memory pointer
 		// Clear the voxel! can only have one state.
 		modelVoxel.model = m;
 		modelVoxel.voxel.Set( -1, -1, -1 );
