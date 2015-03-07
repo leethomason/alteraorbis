@@ -181,6 +181,7 @@
     <ClCompile Include="..\script\distilleryscript.cpp" />
     <ClCompile Include="..\script\evalbuildingscript.cpp" />
     <ClCompile Include="..\script\farmscript.cpp" />
+    <ClCompile Include="..\script\flagscript.cpp" />
     <ClCompile Include="..\script\forgescript.cpp" />
     <ClCompile Include="..\script\guardscript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
@@ -323,6 +324,7 @@
     <ClInclude Include="..\script\distilleryscript.h" />
     <ClInclude Include="..\script\evalbuildingscript.h" />
     <ClInclude Include="..\script\farmscript.h" />
+    <ClInclude Include="..\script\flagscript.h" />
     <ClInclude Include="..\script\forgescript.h" />
     <ClInclude Include="..\script\guardscript.h" />
     <ClInclude Include="..\script\itemscript.h" />

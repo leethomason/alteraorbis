@@ -33,7 +33,7 @@ distribution.
 #include <memory.h>
 
 #ifdef DEBUG
-#define MAT_DEBUG_DEEP
+//#define MAT_DEBUG_DEEP
 #endif
 
 namespace grinliz {

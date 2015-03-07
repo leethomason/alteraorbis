@@ -130,7 +130,6 @@ private:
 	Node* GetNode( int depth, int x, int z );
 
 	grinliz::Rectangle3F treeBounds;
-	Model* modelRoot;
 	int size;
 
 	float lightXPerY;

@@ -17,6 +17,7 @@ void HPBar::Init(Gamui* gamui)
 
 	rangedIcon.Init(gamui, nullAtom, true);
 	meleeIcon.Init(gamui, nullAtom, true);
+	hitBounds.Init(gamui, nullAtom, false);
 
 	orange.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
 	red.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
@@ -87,13 +88,17 @@ bool HPBar::DoLayout()
 
 	meleeIcon.SetPos(this->X(), this->Y());
 	rangedIcon.SetPos(this->X() + this->Width() - size, this->Y());
+
+	hitBounds.SetSize(this->Width(), this->Height());
+	hitBounds.SetPos(this->X(), this->Y());
 	return false;
 }
 
 
-void HPBar::SetVisible(bool visible)
+void HPBar::SetVisible(bool v)
 {
-	DigitalBar::SetVisible(visible);
-	meleeIcon.SetVisible(visible);
-	rangedIcon.SetVisible(visible);
+	DigitalBar::SetVisible(v);
+	meleeIcon.SetVisible(v);
+	rangedIcon.SetVisible(v);
+	hitBounds.SetVisible(v);
 }

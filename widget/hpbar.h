@@ -12,15 +12,18 @@ class ItemComponent;
 class HPBar : public gamui::DigitalBar
 {
 public:
-	HPBar()	{}
+	HPBar() : userItemID(0)	{}
 	~HPBar()	{}
 
 	void Init(gamui::Gamui* gamui);
 	void Set(const GameItem* item, const MeleeWeapon* melee, const RangedWeapon* ranged, const Shield* shield, const char* optionalName);
 	void Set(ItemComponent* ic);
+	virtual void SetVisible(bool v);
 
 	virtual bool DoLayout();
-	virtual void SetVisible(bool visible);
+
+	gamui::Image hitBounds;
+	int userItemID;
 
 private:
 	gamui::Image meleeIcon;

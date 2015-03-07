@@ -89,6 +89,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 
 //	RenderAtom mc = LumosGame::CalcUIIconAtom("motherCore");
 //	motherCore.Init(&gamui2D, mc, true);
+
+	RenderAtom unitAtom = LumosGame::CalcUIIconAtom("unitMarker");
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		unitMarker[i].Init(&gamui2D, unitAtom, true);
+	}
 }
 
 
@@ -321,6 +326,22 @@ void MapScene::DrawMap()
 	}
 
 	CoreScript* homeCore = context->chitBag->GetHomeCore();
+	CChitArray citizens;
+	if (homeCore) {
+		homeCore->Citizens(&citizens);
+	}
+	for (int i = 0; i < MAX_CITIZENS; ++i) {
+		if (i < citizens.Size()) {
+			Vector2F cPos = ToWorld2F(citizens[i]->Position());
+			Vector2F pos = ToUI(0, cPos, mapBounds, 0);
+			unitMarker[i].SetSize(8, 8);
+			unitMarker[i].SetCenterPos(pos.x, pos.y);
+			unitMarker[i].SetVisible(true);
+		}
+		else {
+			unitMarker[i].SetVisible(false);
+		}
+	}
 
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {

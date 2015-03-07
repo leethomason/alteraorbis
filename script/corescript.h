@@ -91,7 +91,7 @@ public:
 	// 0-3, -1 if not in squad
 	int SquadID(int id);
 	int Squaddies(int squadID, CChitArray* arr);
-	bool IsSquaddieOnMission(int chitID);
+	bool IsSquaddieOnMission(int chitID, int* squadID);
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();
@@ -109,7 +109,9 @@ public:
 	void AddFlag(const grinliz::Vector2I& pos);
 	void RemoveFlag(const grinliz::Vector2I& pos);
 	void ToggleFlag(const grinliz::Vector2I& pos);
-	grinliz::Vector2I GetFlag();
+	// Get a flag in the CoreScript's sector that is
+	// not yet in the list.
+	grinliz::Vector2I GetAvailableFlag();
 
 	/*	Waypoints are destinations that may involve
 		grid travel. Waypoints are assigned to 
@@ -117,8 +119,12 @@ public:
 		can be coordinated.
 	*/
 	void SetWaypoints(int squadID, const grinliz::Vector2I& dest);
-	grinliz::Vector2I GetWaypoint(int squadID);	// gets the next waypoint
+	grinliz::Vector2I GetWaypoint(int squadID);	// gets the current waypoint
 	grinliz::Vector2I GetLastWaypoint(int squadID);
+	const grinliz::CDynArray<grinliz::Vector2I>& GetWaypoints(int squadID) const {
+		GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+		return waypoints[squadID];
+	}
 	void PopWaypoint(int squadID);
 
 	bool InUse() const;
@@ -164,6 +170,7 @@ private:
 	void DoTickInUse(int delta, int nSpawnTicks);
 	void AssignToSquads();
 	void DoStrategicTick();
+	void NewWaypointChits(int squadID);
 
 	WorkQueue*	workQueue;
 	grinliz::Vector2I sector;
@@ -195,7 +202,6 @@ private:
 	grinliz::CDynArray< Flag > flags;
 
 	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_SQUADS];
-	Model* waypointFlags[MAX_SQUADS];
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 	static grinliz::HashTable<int, int>* teamToCoreInfo;

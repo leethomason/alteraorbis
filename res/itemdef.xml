@@ -15,7 +15,7 @@
         nameGen="humanFemaleNames"
         cooldown="1500"
         baseHP="60"
-	      mass ="55">
+        mass ="55">
     <intrinsics>
       <MeleeWeapon 
             name="hand"

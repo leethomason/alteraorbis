@@ -140,8 +140,8 @@ private:
 	bool ThinkFruitCollect();
 	bool ThinkDelivery();
 	bool ThinkRepair();
-	bool ThinkFlag();
-	bool ThinkWaypoints();
+	bool ThinkFlag();			// same domain "local" flags
+	bool ThinkWaypoints();		// squad motion
 
 	bool RampageDone();
 	void DoMoraleZero();
@@ -172,7 +172,7 @@ private:
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom();
 	// pseudo-flocking
-	grinliz::Vector2F ThinkWanderFlock();
+	grinliz::Vector2F ThinkWanderHerd();
 	// creepy circle pacing
 	grinliz::Vector2F ThinkWanderCircle();
 

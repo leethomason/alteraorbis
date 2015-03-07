@@ -436,6 +436,9 @@
     <ClCompile Include="..\widget\tutorialwidget.cpp">
       <Filter>Source Files\widget</Filter>
     </ClCompile>
+    <ClCompile Include="..\script\flagscript.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -869,6 +872,9 @@
     </ClInclude>
     <ClInclude Include="..\widget\tutorialwidget.h">
       <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\flagscript.h">
+      <Filter>Source Files\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
