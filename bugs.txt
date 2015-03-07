@@ -16,7 +16,9 @@ x flags
 	x stay with squad (if not at home)
 	x clicking any flag should reset that squad
 x info on attack flags: who is attacking me??
-- crash in Model::userData = 0xffeefffee
+x crash in Model::userData = 0xffeefffee
+x expand strategic attack bounds
+- optimize debug
 - autosave
 - selection and face isn't consistent
 - face is glowing in asset preview
