@@ -84,6 +84,7 @@ private:
 	gamui::Image		selectionMark;
 	gamui::Image		diplomacy[NUM_SECTORS*NUM_SECTORS];
 	gamui::Canvas		webCanvas;
+	gamui::Image		unitMarker[MAX_CITIZENS];
 
 	MapGridWidget		gridWidget[MAP2_SIZE2];
 };

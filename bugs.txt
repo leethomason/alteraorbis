@@ -12,10 +12,12 @@ x GT: buildings should change to team color when domain controlled
 - GT: how many structures of each type?
 
 x icons instead of m/r in control screen
+x flags 
+	x stay with squad (if not at home)
+	x clicking any flag should reset that squad
+- crash in Model::userData = 0xffeefffee
 - autosave
-- flags 
-	- stay with squad (if not at home)
-	- clicking any flag should reset that squad
+- selection and face isn't consistent
 - face is glowing in asset preview
 - info on attack flags: who is attacking me??
 - tune mouse wheel with real mouse

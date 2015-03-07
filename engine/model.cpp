@@ -239,6 +239,7 @@ void Model::Init(const ModelResource* resource, SpaceTree* st)
 	this->tree = st;
 	this->auxBone = 0;
 	this->auxTex = 0;
+	this->userData = 0;
 
 	color.Set(1, 1, 1, 1);
 	boneFilter.Set(0, 0, 0, 0);
@@ -282,7 +283,6 @@ void Model::Init(const ModelResource* resource, SpaceTree* st)
 	if (resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW)) {
 		flags |= MODEL_NO_SHADOW;
 	}
-	userData = 0;
 
 	animationRate = 1.0f;
 

@@ -18,6 +18,7 @@ public:
 	void Init(gamui::Gamui* gamui);
 	void Set(const GameItem* item, const MeleeWeapon* melee, const RangedWeapon* ranged, const Shield* shield, const char* optionalName);
 	void Set(ItemComponent* ic);
+	virtual void SetVisible(bool v);
 
 	virtual bool DoLayout();
 

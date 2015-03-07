@@ -95,3 +95,11 @@ bool HPBar::DoLayout()
 }
 
 
+void HPBar::SetVisible(bool v)
+{
+	DigitalBar::SetVisible(v);
+	meleeIcon.SetVisible(v);
+	rangedIcon.SetVisible(v);
+	hitBounds.SetVisible(v);
+}
+

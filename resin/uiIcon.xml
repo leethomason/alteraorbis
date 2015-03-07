@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
-<!-- $TexturePacker:SmartUpdate:0f94f39a1622a82c80fee6deb8da3894:383b08bb7add149bc0a111c7da2b9680:a9e19751b3f8c9bc07e3fe3c406e40d4$ -->
+<!-- $TexturePacker:SmartUpdate:d86f4b51e01bfaafe040807f6868001b:21c67040360827d93487abfa74be55a6:a9e19751b3f8c9bc07e3fe3c406e40d4$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -22,7 +22,7 @@ r => 'y' only set if sprite is rotated
     <sprite n="au" x="679" y="1387" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="au1" x="754" y="1787" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="au2" x="890" y="1787" w="128" h="128" pX="0.5" pY="0.5"/>
-    <sprite n="au3" x="1026" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="au3" x="1042" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="au4" x="821" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="audioOff" x="751" y="528" w="62" h="57" pX="0.5" pY="0.5"/>
     <sprite n="audioOn" x="1974" y="0" w="68" h="62" pX="0.5" pY="0.5"/>
@@ -37,10 +37,10 @@ r => 'y' only set if sprite is rotated
     <sprite n="civtech2" x="1810" y="264" w="143" h="143" pX="0.5" pY="0.5"/>
     <sprite n="civtech3" x="1810" y="415" w="143" h="143" pX="0.5" pY="0.5"/>
     <sprite n="civtech4" x="528" y="1387" w="143" h="143" pX="0.5" pY="0.5"/>
-    <sprite n="crystalBlue" x="1162" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
-    <sprite n="crystalGreen" x="1298" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
-    <sprite n="crystalRed" x="1434" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
-    <sprite n="crystalViolet" x="1570" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="crystalBlue" x="1178" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="crystalGreen" x="1314" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="crystalRed" x="1450" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="crystalViolet" x="1586" y="528" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="cyclops" x="0" y="1056" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="cyclops_sil" x="0" y="1320" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="default" x="1961" y="378" w="64" h="64" pX="0.5" pY="0.5"/>
@@ -51,7 +51,8 @@ r => 'y' only set if sprite is rotated
     <sprite n="friend" x="264" y="0" w="92" h="92" pX="0.5" pY="0.5"/>
     <sprite n="gobman" x="654" y="0" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="gobman_sil" x="918" y="0" w="256" h="256" pX="0.5" pY="0.5"/>
-    <sprite n="greeninfo" x="1706" y="566" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="greeninfo" x="1722" y="566" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="human.bak" x="1961" y="522" w="64" h="64" pX="0.5" pY="0.5"/>
     <sprite n="human" x="264" y="1612" w="217" h="220" pX="0.5" pY="0.5"/>
     <sprite n="humanFemale" x="1182" y="0" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="humanMale" x="1446" y="0" w="256" h="256" pX="0.5" pY="0.5"/>
@@ -61,21 +62,21 @@ r => 'y' only set if sprite is rotated
     <sprite n="leaf" x="1961" y="286" w="84" h="84" pX="0.5" pY="0.5"/>
     <sprite n="mantis" x="264" y="556" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="mantis_sil" x="264" y="820" w="256" h="256" pX="0.5" pY="0.5"/>
-    <sprite n="mapSelection" x="1842" y="594" w="128" h="128" pX="0.5" pY="0.5"/>
+    <sprite n="mapSelection" x="1858" y="594" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="motherCore" x="264" y="1084" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="neutral" x="264" y="100" w="92" h="92" pX="0.5" pY="0.5"/>
     <sprite n="num1" x="208" y="1848" w="174" h="172" pX="0.5" pY="0.5"/>
     <sprite n="num2" x="390" y="1840" w="174" h="172" pX="0.5" pY="0.5"/>
     <sprite n="num3" x="572" y="1840" w="174" h="172" pX="0.5" pY="0.5"/>
     <sprite n="num4" x="528" y="264" w="174" h="172" pX="0.5" pY="0.5"/>
-    <sprite n="okay" x="1961" y="522" w="64" h="64" pX="0.5" pY="0.5"/>
-    <sprite n="omegaMark" x="528" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
-    <sprite n="pistol" x="600" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
-    <sprite n="pulse" x="672" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="okay" x="528" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="omegaMark" x="600" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="pistol" x="672" y="1538" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="pulse" x="754" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
     <sprite n="redMantis" x="264" y="1348" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="redMantis_sil" x="754" y="264" w="256" h="256" pX="0.5" pY="0.5"/>
-    <sprite n="ring" x="754" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
-    <sprite n="shield" x="826" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="ring" x="826" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
+    <sprite n="shield" x="898" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
     <sprite n="shockCyclops" x="1018" y="264" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="shockCyclops_sil" x="1282" y="264" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="tabBar" x="1546" y="264" w="256" h="256" pX="0.5" pY="0.5"/>
@@ -83,6 +84,7 @@ r => 'y' only set if sprite is rotated
     <sprite n="trilobyte_sil" x="528" y="859" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="troll" x="528" y="1123" w="256" h="256" pX="0.5" pY="0.5"/>
     <sprite n="troll_sil" x="744" y="1523" w="256" h="256" pX="0.5" pY="0.5"/>
+    <sprite n="unitMarker" x="970" y="1923" w="64" h="64" pX="0.5" pY="0.5"/>
     <sprite n="warning" x="792" y="730" w="128" h="128" pX="0.5" pY="0.5"/>
     <sprite n="yellowwarning" x="792" y="866" w="128" h="128" pX="0.5" pY="0.5"/>
 </TextureAtlas>
