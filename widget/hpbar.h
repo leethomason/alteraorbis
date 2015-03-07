@@ -20,6 +20,7 @@ public:
 	void Set(ItemComponent* ic);
 
 	virtual bool DoLayout();
+	virtual void SetVisible(bool visible);
 
 private:
 	gamui::Image meleeIcon;
