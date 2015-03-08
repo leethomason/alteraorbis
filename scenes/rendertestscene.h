@@ -46,6 +46,9 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Zoom( int style, float normal );
 	virtual void Rotate( float degrees );
+	virtual void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);
+	virtual void MoveCamera(float dx, float dy);
+
 	virtual void HandleHotKey( int mask );
 
 	virtual void Draw3D( U32 deltaTime );

@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 	GLASSERT((linked.major == compiled.major && linked.minor == compiled.minor));
 
 	// SDL initialization steps.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0)
 	{
 		fprintf(stderr, "SDL initialization failed: %s\n", SDL_GetError());
 		exit(1);
@@ -212,6 +212,13 @@ int main(int argc, char **argv)
 
 	int modKeys = SDL_GetModState();
 	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
+
+	int value = GetSystemMetrics(SM_DIGITIZER);
+	if (value & NID_INTEGRATED_TOUCH) GLOUTPUT(("NID_INTEGRATED_TOUCH\n"));
+	if (value & NID_MULTI_INPUT) GLOUTPUT(("NID_MULTI_INPUT\n"));
+	if (value & NID_READY) GLOUTPUT(("NID_READY\n"));
+
+	grinliz::Vector2F multiTouchStart = { 0, 0 };
 
 	// ---- Main Loop --- //
 	while (!done) {
@@ -407,6 +414,55 @@ int main(int argc, char **argv)
 					}
 				}
 				break;
+
+				/*
+				case SDL_FINGERDOWN:
+				case SDL_FINGERUP:
+				case SDL_FINGERMOTION:
+				{
+					GLOUTPUT(("TouchFingerEvent\n"));
+				}
+				break;
+				*/
+
+				case SDL_FINGERUP:
+				{
+					const SDL_TouchFingerEvent* tfe = &event.tfinger;
+					int nFingers = SDL_GetNumTouchFingers(tfe->touchId);
+					if (nFingers < 2 && !multiTouchStart.IsZero()) {
+						GLOUTPUT(("2 finger STOP.\n"));
+						GameCameraPan(game, GAME_PAN_END, 
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						multiTouchStart.Zero();
+					}
+				}
+				break;
+
+				case SDL_MULTIGESTURE:
+				{
+					const SDL_MultiGestureEvent* mge = &event.mgesture;
+					int nFingers = SDL_GetNumTouchFingers(mge->touchId);
+					if (nFingers > 1 && multiTouchStart.IsZero()) {
+						GLOUTPUT(("2 finger START.\n"));
+						multiTouchStart.Set(mge->x, mge->y);
+						GameCameraPan(game, GAME_PAN_START,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+					}
+					else if (!multiTouchStart.IsZero()) {
+						multiTouchStart.Set(mge->x, mge->y);
+						GameCameraPan(game, GAME_PAN_MOVE,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+					}
+					//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));
+				}
+				break;
+
+				case SDL_DOLLARGESTURE:
+				{
+					GLOUTPUT(("DollarGestureEvent\n"));
+				}
+				break;
+
 
 				case SDL_QUIT:
 				{
