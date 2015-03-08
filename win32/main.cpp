@@ -431,8 +431,8 @@ int main(int argc, char **argv)
 					int nFingers = SDL_GetNumTouchFingers(tfe->touchId);
 					if (nFingers < 2 && !multiTouchStart.IsZero()) {
 						GLOUTPUT(("2 finger STOP.\n"));
-						GameCameraPan(game, GAME_PAN_END, 
-									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						//GameCameraPan(game, GAME_PAN_END, 
+						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 						multiTouchStart.Zero();
 					}
 				}
@@ -445,15 +445,25 @@ int main(int argc, char **argv)
 					if (nFingers > 1 && multiTouchStart.IsZero()) {
 						GLOUTPUT(("2 finger START.\n"));
 						multiTouchStart.Set(mge->x, mge->y);
-						GameCameraPan(game, GAME_PAN_START,
-									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						//GameCameraPan(game, GAME_PAN_START,
+						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
 					else if (!multiTouchStart.IsZero()) {
+						GameCameraPan(game, GAME_PAN_START,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 						multiTouchStart.Set(mge->x, mge->y);
 						GameCameraPan(game, GAME_PAN_MOVE,
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						GameCameraPan(game, GAME_PAN_END,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						//GameCameraPan(game, GAME_PAN_MOVE,
+						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
-					//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));
+					if (nFingers == 2) {
+						GameZoom(game, GAME_ZOOM_DISTANCE, -mge->dDist * 10.f);
+						GameCameraRotate(game, -mge->dTheta * 100.0f);
+						//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));
+					}
 				}
 				break;
 
