@@ -415,24 +415,12 @@ int main(int argc, char **argv)
 				}
 				break;
 
-				/*
-				case SDL_FINGERDOWN:
-				case SDL_FINGERUP:
-				case SDL_FINGERMOTION:
-				{
-					GLOUTPUT(("TouchFingerEvent\n"));
-				}
-				break;
-				*/
-
 				case SDL_FINGERUP:
 				{
 					const SDL_TouchFingerEvent* tfe = &event.tfinger;
 					int nFingers = SDL_GetNumTouchFingers(tfe->touchId);
 					if (nFingers < 2 && !multiTouchStart.IsZero()) {
-						GLOUTPUT(("2 finger STOP.\n"));
-						//GameCameraPan(game, GAME_PAN_END, 
-						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						GLOUTPUT(("2 finger END.\n"));
 						multiTouchStart.Zero();
 					}
 				}
@@ -445,10 +433,10 @@ int main(int argc, char **argv)
 					if (nFingers > 1 && multiTouchStart.IsZero()) {
 						GLOUTPUT(("2 finger START.\n"));
 						multiTouchStart.Set(mge->x, mge->y);
-						//GameCameraPan(game, GAME_PAN_START,
-						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
 					else if (!multiTouchStart.IsZero()) {
+						// The Pan interacts badly with zoom and rotated. So instead of a continuous,
+						// multi-event action do a bunch of "mini pans".
 						GameCameraPan(game, GAME_PAN_START,
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 						multiTouchStart.Set(mge->x, mge->y);
@@ -456,8 +444,6 @@ int main(int argc, char **argv)
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 						GameCameraPan(game, GAME_PAN_END,
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
-						//GameCameraPan(game, GAME_PAN_MOVE,
-						//			  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
 					if (nFingers == 2) {
 						GameZoom(game, GAME_ZOOM_DISTANCE, -mge->dDist * 10.f);

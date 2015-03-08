@@ -11,6 +11,12 @@ x GT: buildings should change to team color when domain controlled
 - GT: player portrait size should match enemy portrait size (2/20/2015)
 - GT: how many structures of each type?
 
+- touch support
+	- no pause (space)
+	- no view change (tab)
+	- single finger view drag?
+	- build reticule is useless & incorrect
+
 x icons instead of m/r in control screen
 x flags 
 	x stay with squad (if not at home)
