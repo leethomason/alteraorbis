@@ -78,17 +78,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		gridWidget[i].Init(&gamui2D);
 	}
 
-	//for (int i = 0; i < NUM_CANVAS; ++i) {
-	//	static const int PAL[NUM_CANVAS] = { PAL_GRAY, PAL_RED, PAL_TANGERINE, PAL_GREEN };
-	//	RenderAtom webAtom = LumosGame::CalcPaletteAtom(PAL[i] * 2, PAL[i]);
-	//	webAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
-	//	webCanvas[i].Init(&gamui2D, webAtom);
-	//}
 	webCanvas.Init(&gamui2D, LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY));
 	webCanvas.SetLevel(Gamui::LEVEL_ICON);
-
-//	RenderAtom mc = LumosGame::CalcUIIconAtom("motherCore");
-//	motherCore.Init(&gamui2D, mc, true);
 
 	RenderAtom unitAtom = LumosGame::CalcUIIconAtom("unitMarker");
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
@@ -169,7 +160,6 @@ void MapScene::Resize()
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 
 	webCanvas.SetPos(mapImage.X(), mapImage.Y());
-//	motherCore.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 
 	DrawMap();
 }
@@ -362,6 +352,10 @@ void MapScene::DrawMap()
 
 			if (core && core->InUse() && core->ParentChit()->Team() == Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE)) {
 				atom = LumosGame::CalcUIIconAtom("motherCore");
+				diplomacy[j*NUM_SECTORS + i].SetSize(scale, scale);
+			}
+			else if (core && core->InUse() && Team::Group(core->ParentChit()->Team()) == TEAM_TROLL) {
+				atom = LumosGame::CalcUIIconAtom("truulgacore");
 				diplomacy[j*NUM_SECTORS + i].SetSize(scale, scale);
 			}
 

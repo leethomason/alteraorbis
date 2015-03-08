@@ -26,8 +26,8 @@ changing and growing. Thanks for playing and checking the game out.
 Feedback on the forums is appreciated!
 
 
-Changes in Beta3c
------------------
+Changes in Beta3c+
+------------------
 - Fixed 100+ bugs!
 - 'space bar' now pauses. You can issue move or attack commands
   to the avatar while paused.

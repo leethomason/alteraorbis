@@ -16,6 +16,7 @@
 	- census
 - release test
 	- play a bit more
+	- run through test scenes
 - run buildrelease.bat
 - build installer
 - test installation
