@@ -89,7 +89,7 @@ public:
 	Chit* PrimeCitizen();
 
 	// 0-3, -1 if not in squad
-	int SquadID(int id);
+	int SquadID(int chitID);
 	int Squaddies(int squadID, CChitArray* arr);
 	bool IsSquaddieOnMission(int chitID, int* squadID);
 
@@ -118,9 +118,9 @@ public:
 		a particular squad, and movement 
 		can be coordinated.
 	*/
-	void SetWaypoints(int squadID, const grinliz::Vector2I& dest);
-	grinliz::Vector2I GetWaypoint(int squadID);	// gets the current waypoint
-	grinliz::Vector2I GetLastWaypoint(int squadID);
+	void				SetWaypoints(int squadID, const grinliz::Vector2I& dest);
+	grinliz::Vector2I	GetWaypoint(int squadID);	// gets the current waypoint
+	grinliz::Vector2I	GetLastWaypoint(int squadID);
 	const grinliz::CDynArray<grinliz::Vector2I>& GetWaypoints(int squadID) const {
 		GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
 		return waypoints[squadID];
@@ -171,6 +171,7 @@ private:
 	void AssignToSquads();
 	void DoStrategicTick();
 	void NewWaypointChits(int squadID);
+	Chit* CitizenFilter(int id);
 
 	WorkQueue*	workQueue;
 	grinliz::Vector2I sector;
