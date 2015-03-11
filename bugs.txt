@@ -23,6 +23,8 @@ x flags
 x info on attack flags: who is attacking me??
 x crash in Model::userData = 0xffeefffee
 x expand strategic attack bounds
+
+- attack focus needs tweaking. attack ground needs tweaking.
 - optimize debug
 - autosave
 - selection and face isn't consistent
@@ -89,15 +91,16 @@ x add target portrait
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 x remove grid64 BS for proper optimization
-- control flag art
+x control flag art
 - rebalance denizen spawning
 - visitors should wander around before leaving in a "useless" domain.
-- Visitor trails on map
+x Visitor trails on map
+- visitor percentages?
 - Limit squad control to "power radius"
 - Switch to tech tree model for visitors? Do they bring gems??
 - AI adventures
 - squad adventure mode?
-- AI take over mode?
+x AI take over mode?
 - control should show weapon ownership
 - retest truulga item generation
 - denizen red on red color scheme way too much
