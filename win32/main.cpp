@@ -207,6 +207,7 @@ int main(int argc, char **argv)
 
 	int zoomX = 0;
 	int zoomY = 0;
+	bool fingersClose = true;
 
 	void* game = NewGame(screenWidth, screenHeight, 0);
 
@@ -431,7 +432,15 @@ int main(int argc, char **argv)
 					const SDL_MultiGestureEvent* mge = &event.mgesture;
 					int nFingers = SDL_GetNumTouchFingers(mge->touchId);
 					if (nFingers > 1 && multiTouchStart.IsZero()) {
-						GLOUTPUT(("2 finger START.\n"));
+						SDL_Finger* finger0 = SDL_GetTouchFinger(mge->touchId, 0);
+						SDL_Finger* finger1 = SDL_GetTouchFinger(mge->touchId, 1);
+						fingersClose = true;
+						if (finger0 && finger1) {
+							grinliz::Vector2F d = { finger1->x - finger0->x, finger1->y - finger0->y };
+							fingersClose = d.Length() < 0.10f;
+						}
+
+						GLOUTPUT(("2 finger START %s.\n", fingersClose ? "CLOSE" : "FAR" ));
 						multiTouchStart.Set(mge->x, mge->y);
 					}
 					else if (!multiTouchStart.IsZero()) {
@@ -445,7 +454,7 @@ int main(int argc, char **argv)
 						GameCameraPan(game, GAME_PAN_END,
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
-					if (nFingers == 2) {
+					if (nFingers == 2 && !fingersClose) {
 						GameZoom(game, GAME_ZOOM_DISTANCE, -mge->dDist * 10.f);
 						GameCameraRotate(game, -mge->dTheta * 100.0f);
 						//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));

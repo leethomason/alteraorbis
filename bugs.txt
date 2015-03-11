@@ -1,11 +1,13 @@
 - touch support
-	- 1 finger pan
+	x 2 finger pan
 	x 2 finger drag / pan / rotate
-	- no pause (space)
-	- no view change (tab)
-	- single finger view drag?
+	x single finger view drag?
+	x no pause (space)
+	x no view change (tab)
 	- build reticule is useless & incorrect
-	- shoot at location
+	- shoot at location (long press?)
+	- build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
+	- build rotation?
 
 - GT: food as medkit
 - GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
@@ -206,6 +208,13 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	- exploring
 	    - xp for exploring!!
 	    - "domain theme" when you arrive
+- Ships
+	- speeders
+	- fighters
+	- carriers
+	- microfighter style construction
+	- rethink grid travel for ships
+	- design sharing?
 
 - TBD
 	- monster ecology

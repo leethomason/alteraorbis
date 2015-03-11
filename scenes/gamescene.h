@@ -89,7 +89,7 @@ private:
 	void ForceHerd(const grinliz::Vector2I& sector);
 	bool AvatarSelected();
 	bool CameraTrackingAvatar();
-	bool DragAtom(gamui::RenderAtom* atom);
+	bool DragBuildArea(gamui::RenderAtom* atom);
 	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
@@ -99,6 +99,7 @@ private:
 
 	void DoCameraHome();
 	void DoAvatarButton();
+	void DoCameraToggle();
 
 	Chit* GetPlayerChit();	// wraps up the call to account for being attached to any domain.
 	int GetPlayerChitID();
@@ -130,6 +131,14 @@ private:
 		bool operator<( const PickupData& rhs ) const { return distance < rhs.distance; }
 	};
 
+	enum class EDragMode
+	{
+		NONE,
+		ROTATION,
+		BUILD_AREA,
+		PAN
+	};
+
 	// returns the name from the build button
 	grinliz::IString StructureInfo( int buildButtonIndex, int* size );
 
@@ -147,10 +156,10 @@ private:
 	grinliz::Vector2F	coreWarningPos, domainWarningPos;
 	int					poolView;
 	float				savedCameraHeight;
-	bool				dragBuildingRotation;
+	EDragMode			dragMode;
 	grinliz::Quaternion	savedCameraRotation;
 	grinliz::Vector2F	mapDragStart;
-	grinliz::Vector2F	tapView;
+	grinliz::Vector2F	tapView, tapDown;
 	Adviser*			adviser;
 	TutorialWidget*		tutorial;
 
@@ -161,7 +170,7 @@ private:
 	gamui::PushButton	okay;
 	gamui::PushButton	saveButton;
 	gamui::PushButton	allRockButton;
-	gamui::PushButton	censusButton;
+	gamui::PushButton	censusButton, viewButton, pauseButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
