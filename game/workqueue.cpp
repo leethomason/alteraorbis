@@ -35,6 +35,7 @@ WorkQueue::~WorkQueue()
 	GLASSERT( parentChit );
 	for (int i = 0; i < queue.Size(); ++i) {
 		delete queue[i].image;
+		delete queue[i].porchImage;
 	}
 }
 
@@ -67,23 +68,38 @@ void WorkQueue::AddImage( QueueItem* item )
 	GLASSERT( parentChit );
 
 	RenderAtom atom;
+	RenderAtom porchAtom;
 	if (item->buildScriptID == BuildScript::CLEAR) {
 		atom = LumosGame::CalcIconAtom("delete");
 	}
 	else {
 		atom = LumosGame::CalcIconAtom("build");
+		if (buildData.porch) {
+			item->porchImage = new gamui::Image();
+			porchAtom = LumosGame::CalcIconAtom("porch");
+		}
 	}
 	item->image->Init(&parentChit->Context()->worldMap->overlay1, atom, false);
 	item->image->SetPos((float)item->pos.x, (float)item->pos.y);
 	item->image->SetSize((float)size, (float)size);
 	item->image->SetVisible(true);
+	
+	if (item->porchImage) { 
+		item->porchImage->Init(&parentChit->Context()->worldMap->overlay1, porchAtom, false);
+		Vector2I pos = item->pos + WorldRotationToNormal(0);
+		item->porchImage->SetPos((float)pos.x, (float)pos.y);
+		item->porchImage->SetSize(1, 1);	// fixme
+		item->porchImage->SetVisible(true);
+	}
 }
 
 
 void WorkQueue::RemoveImage( QueueItem* item )
 {
 	delete item->image;
+	delete item->porchImage;
 	item->image = 0;
+	item->porchImage = 0;
 }
 
 
@@ -176,10 +192,10 @@ bool WorkQueue::HasAssignedJob() const
 	return false;
 }
 
-bool WorkQueue::HasJobAt(const Vector2I& v) {
+const WorkQueue::QueueItem* WorkQueue::HasJobAt(const Vector2I& v) {
 	for (int i = 0; i < queue.Size(); ++i) {
 		if (queue[i].pos == v) {
-			return true;
+			return &queue[i];
 		}
 	}
 	return false;

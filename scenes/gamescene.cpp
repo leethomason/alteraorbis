@@ -58,7 +58,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
-	selectionModel = 0;
+//	selectionModel = 0;
 	chitTracking = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
@@ -242,7 +242,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 GameScene::~GameScene()
 {
 	delete menu;
-	delete selectionModel;
+//	delete selectionModel;
 	delete sim;
 	delete adviser;
 	delete tutorial;
@@ -412,10 +412,11 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	}
 	voxelInfoID = ToWorld2I(at);
 
-	SetSelectionModel( view );
+//	SetSelectionModel( view );
 }
 
 
+/*
 void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 {
 	Vector3F at = { 0, 0, 0 };
@@ -479,7 +480,7 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 		selectionModel->SetColor(color);
 	}
 }
-
+*/
 
 void GameScene::ClearTargetFlags()
 {
@@ -658,6 +659,22 @@ bool GameScene::DragBuildArea(gamui::RenderAtom* atom)
 	return false;
 }
 
+bool GameScene::StartDragBuildLocation(const Vector2I& at, WorkItem* workItem)
+{
+	CoreScript* coreScript = GetHomeCore();
+	if (coreScript) {
+		WorkQueue* wq = coreScript->GetWorkQueue();
+		GLASSERT(wq);
+		const WorkQueue::QueueItem* item = wq->HasJobAt(at);
+		if (item && item->buildScriptID >= BuildScript::PAVE) {
+			item->GetWorkItem(workItem);
+			wq->Remove(at);
+			return true;
+		}
+	}
+	return false;
+}
+
 
 bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
 {
@@ -816,6 +833,9 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			if (DragBuildArea(&atom)) {
 				dragMode = EDragMode::BUILD_AREA;
 			}
+			else if (StartDragBuildLocation(ToWorld2I(at), &dragWorkItem)) {
+				dragMode = EDragMode::BUILD_MOVE;
+			}
 			else if (DragRotate(ToWorld2I(at))) {
 				dragMode = EDragMode::ROTATION;
 			}
@@ -850,6 +870,15 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 					++count;
 				}
 			}
+			else if (dragMode == EDragMode::BUILD_MOVE) {
+				Vector2I pos = ToWorld2I(at);
+				BuildScript buildScript;
+				const BuildData& buildData = buildScript.GetData(dragWorkItem.buildScriptID);
+				buildMark[0].SetPos((float)pos.x, (float)pos.y);
+				buildMark[0].SetSize((float)buildData.size, (float)buildData.size);
+				buildMark[0].SetVisible(true);
+				buildMark[0].SetAtom(LumosGame::CalcIconAtom("build"));
+			}
 			else if (dragMode == EDragMode::PAN) {
 				//Process3DTap(GAME_PAN_MOVE, view, world, sim->GetEngine());
 			}
@@ -868,7 +897,18 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 					BuildAction(it.Pos());
 				}
 			}
+			else if (dragMode == EDragMode::BUILD_MOVE) {
+				Vector2I pos = ToWorld2I(at);
+				buildMark[0].SetVisible(false);
+				CoreScript* cs = GetHomeCore();
+				if (cs) {
+					WorkQueue* workQueue = cs->GetWorkQueue();
+					workQueue->AddAction(pos, dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
+				}
+			}
 			else if (dragMode == EDragMode::PAN) {
+				// FIXME: is it possible to filter out at a higher level?
+				// Filters out 2 finger drags.
 				if ((tapDown - view).Length() < 10.0f) {	// magic tap accuracy...
 					Tap3D(view, world);
 				}
@@ -1122,7 +1162,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	SetSelectionModel(tapView);
+//	SetSelectionModel(tapView);
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
@@ -1225,7 +1265,7 @@ void GameScene::HandleHotKey( int mask )
 {
 	if (mask == GAME_HK_ESCAPE) {
 		menu->DoEscape(false);
-		SetSelectionModel(tapView);
+//		SetSelectionModel(tapView);
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();

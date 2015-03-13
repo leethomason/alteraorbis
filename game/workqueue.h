@@ -31,6 +31,14 @@ class Engine;
 class Wallet;
 class Chit;
 
+struct WorkItem
+{
+	grinliz::Vector2I pos;
+	int buildScriptID;
+	float rotation;
+	int variation;
+};
+
 
 /*
 	WorkQueue is higher level than the Task.
@@ -44,7 +52,7 @@ public:
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
-		QueueItem() : buildScriptID(0), assigned(0), image(0), rotation(0), variation(0) { pos.Zero(); }
+		QueueItem() : buildScriptID(0), assigned(0), image(0), porchImage(0), rotation(0), variation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
 
@@ -54,9 +62,17 @@ public:
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;		// id of worker assigned this task.			
-		gamui::Image		*image;			// map work location
+		gamui::Image*		image;			// map work location
+		gamui::Image*		porchImage;
 		float				rotation;
 		int					variation;		// which PAVE
+
+		void GetWorkItem(WorkItem* item) const {
+			item->buildScriptID = buildScriptID;
+			item->pos = pos;
+			item->rotation = rotation;
+			item->variation = variation;
+		}
 	};
 
 	void Serialize( XStream* xs );
@@ -66,7 +82,7 @@ public:
 
 	bool HasJob() const				{ return !queue.Empty(); }
 	bool HasAssignedJob() const;
-	bool HasJobAt(const grinliz::Vector2I& v);
+	const QueueItem* HasJobAt(const grinliz::Vector2I& v);
 	
 	// Manages which chits are doing a job:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

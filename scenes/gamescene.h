@@ -20,9 +20,11 @@
 #include "../xegame/chitevent.h"
 #include "../xegame/chit.h"
 
+#include "../game/newsconsole.h"
+#include "../game/workqueue.h"
+
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
-#include "../game/newsconsole.h"
 #include "../widget/startwidget.h"
 #include "../widget/endwidget.h"
 #include "../widget/barstack.h"
@@ -80,7 +82,6 @@ private:
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
-	void SetSelectionModel( const grinliz::Vector2F& view );
 	void SetBars(Chit* chit, bool isAvatar);
 
 	void SetPickupButtons();	// if the avatar can pick things up
@@ -90,6 +91,7 @@ private:
 	bool AvatarSelected();
 	bool CameraTrackingAvatar();
 	bool DragBuildArea(gamui::RenderAtom* atom);
+	bool StartDragBuildLocation(const grinliz::Vector2I& at, WorkItem* workItem );
 	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
@@ -136,6 +138,7 @@ private:
 		NONE,
 		ROTATION,
 		BUILD_AREA,
+		BUILD_MOVE,
 		PAN
 	};
 
@@ -157,6 +160,7 @@ private:
 	int					poolView;
 	float				savedCameraHeight;
 	EDragMode			dragMode;
+	WorkItem			dragWorkItem;
 	grinliz::Quaternion	savedCameraRotation;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView, tapDown;
@@ -164,7 +168,7 @@ private:
 	TutorialWidget*		tutorial;
 
 	// Shows what is being built or removed.
-	Model*				selectionModel;
+	//Model*				selectionModel;
 	GameSceneMenu*		menu;
 
 	gamui::PushButton	okay;
