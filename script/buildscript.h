@@ -25,6 +25,9 @@ struct BuildData
 
 	enum {ZONE_NONE, ZONE_INDUSTRIAL, ZONE_NATURAL};
 	int					zone;
+
+	static grinliz::Rectangle2I Bounds(int size, const grinliz::Vector2I& pos);
+	static grinliz::Rectangle2I PorchBounds(int size, const grinliz::Vector2I& pos, int rot0_3);
 };
 
 

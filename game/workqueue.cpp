@@ -194,7 +194,17 @@ bool WorkQueue::HasAssignedJob() const
 
 const WorkQueue::QueueItem* WorkQueue::HasJobAt(const Vector2I& v) {
 	for (int i = 0; i < queue.Size(); ++i) {
-		if (queue[i].pos == v) {
+		if (queue[i].Bounds().Contains(v)) {
+			return &queue[i];
+		}
+	}
+	return false;
+}
+
+
+const WorkQueue::QueueItem* WorkQueue::HasPorchAt(const Vector2I& v) {
+	for (int i = 0; i < queue.Size(); ++i) {
+		if (queue[i].PorchBounds().Contains(v)){
 			return &queue[i];
 		}
 	}
@@ -455,17 +465,18 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 
 Rectangle2I WorkQueue::QueueItem::Bounds() const
 {
-	Rectangle2I r;
-	r.min = pos;
-
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(buildScriptID);
-	int size = buildData.size;
+	return BuildData::Bounds(buildData.size, pos);
+}
 
-	r.max.x = r.min.x + size - 1;
-	r.max.y = r.min.y + size - 1;
 
-	return r;
+Rectangle2I WorkQueue::QueueItem::PorchBounds() const
+{
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData(buildScriptID);
+	int rot0_3 = LRint(NormalizeAngleDegrees(rotation) / 90.0f);
+	return BuildData::PorchBounds(buildData.size, pos, rot0_3);
 }
 
 

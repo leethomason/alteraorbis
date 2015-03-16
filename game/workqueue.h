@@ -58,6 +58,7 @@ public:
 
 		// Accounts for the size of the structure.
 		grinliz::Rectangle2I Bounds() const;
+		grinliz::Rectangle2I PorchBounds() const;
 
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
@@ -83,6 +84,7 @@ public:
 	bool HasJob() const				{ return !queue.Empty(); }
 	bool HasAssignedJob() const;
 	const QueueItem* HasJobAt(const grinliz::Vector2I& v);
+	const QueueItem* HasPorchAt(const grinliz::Vector2I& v);
 	
 	// Manages which chits are doing a job:
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

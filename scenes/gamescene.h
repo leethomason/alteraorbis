@@ -91,10 +91,13 @@ private:
 	bool AvatarSelected();
 	bool CameraTrackingAvatar();
 	bool DragBuildArea(gamui::RenderAtom* atom);
-	bool StartDragBuildLocation(const grinliz::Vector2I& at, WorkItem* workItem );
+	bool StartDragPlanLocation(const grinliz::Vector2I& at, WorkItem* workItem);
+	bool StartDragPlanRotation(const grinliz::Vector2I& at, WorkItem* workITem);
 	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
+	void DragRotatePlan(const grinliz::Vector2F& drag, WorkItem* workItem);
+	void DrawBuildMarks(const WorkItem& workItem);
 	void ControlTap(int slot, const grinliz::Vector2I& pos);
 	void SetSquadDisplay(bool squadVisible);
 	void OpenEndGame();
@@ -136,9 +139,10 @@ private:
 	enum class EDragMode
 	{
 		NONE,
-		ROTATION,
-		BUILD_AREA,
-		BUILD_MOVE,
+		BUILDING_ROTATION,
+		PLAN_AREA,
+		PLAN_MOVE,
+		PLAN_ROTATION,
 		PAN
 	};
 

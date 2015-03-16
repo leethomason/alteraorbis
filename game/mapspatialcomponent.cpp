@@ -24,6 +24,7 @@
 #include "../script/procedural.h"
 #include "../xegame/rendercomponent.h"
 #include "../script/corescript.h"
+#include "../script/buildscript.h"
 
 using namespace grinliz;
 
@@ -296,6 +297,9 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 
 Rectangle2I MapSpatialComponent::CalcPorchPos(const Vector2I& pos, int size, float rotation)
 {
+	int rot0_3 = LRint(NormalizeAngleDegrees(rotation) / 90.0f);
+	return BuildData::PorchBounds(size, pos, rot0_3);
+	/*
 	Rectangle2I b;
 	b.min = b.max = pos;
 	b.max.x += (size - 1);
@@ -313,4 +317,5 @@ Rectangle2I MapSpatialComponent::CalcPorchPos(const Vector2I& pos, int size, flo
 	}
 
 	return v;
+	*/
 }

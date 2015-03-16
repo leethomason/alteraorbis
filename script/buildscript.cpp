@@ -122,3 +122,32 @@ const BuildData& BuildScript::GetData( int i )
 }
 
 
+Rectangle2I BuildData::Bounds(int size, const Vector2I& pos)
+{
+	Rectangle2I r;
+	r.min = pos;
+	r.max.x = r.min.x + size - 1;
+	r.max.y = r.min.y + size - 1;
+	return r;
+}
+
+
+Rectangle2I BuildData::PorchBounds(int size, const Vector2I& pos, int r)
+{
+	Rectangle2I b;
+	b.min = b.max = pos;
+	b.max.x += (size - 1);
+	b.max.y += (size - 1);
+
+	Rectangle2I v = b;
+
+	switch (r) {
+		case 0:		v.min.y = v.max.y = b.max.y + 1;	break;
+		case 1:		v.min.x = v.max.x = b.max.x + 1;	break;
+		case 2:		v.min.y = v.max.y = b.min.y - 1;	break;
+		case 3:		v.min.x = v.max.x = b.min.x - 1;	break;
+		default:	GLASSERT(0);	break;
+	}
+
+	return v;
+}
