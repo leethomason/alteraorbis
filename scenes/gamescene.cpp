@@ -731,13 +731,13 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 
 void GameScene::DragRotatePlan(const grinliz::Vector2F& drag, WorkItem* workItem)
 {
-	Vector2I dragStart = ToWorld2I(mapDragStart);
-	Vector2I dragEnd = ToWorld2I(drag);
+	Vector2F dragStart = ToWorld2F(workItem->pos);	// mapDragStart;
+	Vector2F dragEnd = drag;
 
 	if (dragStart != dragEnd) {
-		Vector2I d = dragEnd - dragStart;
+		Vector2F d = dragEnd - dragStart;
 		float rotation = 0;
-		if (abs(d.x) > abs(d.y)) {
+		if (fabs(d.x) > fabs(d.y)) {
 			if (d.x > 0)	rotation = 90.0f;
 			else			rotation = 270.0f;
 		}
@@ -754,24 +754,9 @@ void GameScene::DrawBuildMarks(const WorkItem& workItem)
 {
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(workItem.buildScriptID);
-	Vector2I pos = workItem.pos;
-	buildMark[0].SetPos((float)pos.x, (float)pos.y);
-	buildMark[0].SetSize((float)buildData.size, (float)buildData.size);
-	buildMark[0].SetVisible(true);
-	buildMark[0].SetAtom(LumosGame::CalcIconAtom("build"));
-
-	int i = 1;
-	Rectangle2I porchBounds = BuildData::PorchBounds(buildData.size, pos, LRint(NormalizeAngleDegrees(workItem.rotation) / 90.0f));
-	if (!porchBounds.min.IsZero()) {
-		for (Rectangle2IIterator it(porchBounds); !it.Done(); it.Next()) {
-
-			buildMark[i].SetPos(float(it.Pos().x), float(it.Pos().y));
-			buildMark[i].SetSize(1, 1);
-			buildMark[i].SetVisible(true);
-			buildMark[i].SetAtom(LumosGame::CalcIconAtom("porch"));
-			i++;
-		}
-	}
+	BuildData::DrawBounds(BuildData::Bounds(buildData.size, workItem.pos), 
+						  buildData.PorchBounds(buildData.size, workItem.pos, LRint(NormalizeAngleDegrees(workItem.rotation)/90.0f)), 
+						  buildMark);
 }
 
 
@@ -894,9 +879,11 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			}
 			else if (StartDragPlanLocation(ToWorld2I(at), &dragWorkItem)) {
 				dragMode = EDragMode::PLAN_MOVE;
+				DrawBuildMarks(dragWorkItem);
 			}
 			else if (StartDragPlanRotation(ToWorld2I(at), &dragWorkItem)) {
 				dragMode = EDragMode::PLAN_ROTATION;
+				DrawBuildMarks(dragWorkItem);
 			}
 			else if (DragRotate(ToWorld2I(at))) {
 				dragMode = EDragMode::BUILDING_ROTATION;
@@ -969,7 +956,7 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 				CoreScript* cs = GetHomeCore();
 				if (cs) {
 					WorkQueue* workQueue = cs->GetWorkQueue();
-					workQueue->AddAction(ToWorld2I(at), dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
+					workQueue->AddAction(dragWorkItem.pos, dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
 				}
 			}
 			else if (dragMode == EDragMode::PAN) {

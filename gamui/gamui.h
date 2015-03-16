@@ -585,6 +585,7 @@ public:
 	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex ) = 0;
 
 	virtual void Clear()	{ m_gamui = 0; }
+	bool Initialized() const { return m_gamui != 0; }
 
 	// internal
 	void SetSuperItem( ToggleButton* tb ) { m_superItem = tb; }

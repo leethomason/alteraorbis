@@ -1,6 +1,7 @@
 #include "buildscript.h"
 #include "itemscript.h"
 #include "../game/circuitsim.h"
+#include "../game/lumosgame.h"
 
 #include "../grinliz/glstringutil.h"
 
@@ -134,11 +135,7 @@ Rectangle2I BuildData::Bounds(int size, const Vector2I& pos)
 
 Rectangle2I BuildData::PorchBounds(int size, const Vector2I& pos, int r)
 {
-	Rectangle2I b;
-	b.min = b.max = pos;
-	b.max.x += (size - 1);
-	b.max.y += (size - 1);
-
+	Rectangle2I b = Bounds(size, pos);
 	Rectangle2I v = b;
 
 	switch (r) {
@@ -150,4 +147,26 @@ Rectangle2I BuildData::PorchBounds(int size, const Vector2I& pos, int r)
 	}
 
 	return v;
+}
+
+
+int BuildData::DrawBounds(const grinliz::Rectangle2I& bounds, const grinliz::Rectangle2I& porchBounds,
+						  gamui::Image* image)
+{
+	image[0].SetPos((float)bounds.min.x, (float)bounds.min.y);
+	image[0].SetSize((float)bounds.Width(), (float)bounds.Height());
+	image[0].SetVisible(true);
+	image[0].SetAtom(LumosGame::CalcIconAtom("build"));
+
+	int i = 1;
+	if (!porchBounds.min.IsZero()) {
+		for (Rectangle2IIterator it(porchBounds); !it.Done(); it.Next()) {
+			image[i].SetPos(float(it.Pos().x), float(it.Pos().y));
+			image[i].SetSize(1, 1);
+			image[i].SetVisible(true);
+			image[i].SetAtom(LumosGame::CalcIconAtom("porch"));
+			i++;
+		}
+	}
+	return i;
 }

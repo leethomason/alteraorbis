@@ -34,8 +34,7 @@ WorkQueue::~WorkQueue()
 {
 	GLASSERT( parentChit );
 	for (int i = 0; i < queue.Size(); ++i) {
-		delete queue[i].image;
-		delete queue[i].porchImage;
+		delete[] queue[i].image;
 	}
 }
 
@@ -58,12 +57,15 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 
 void WorkQueue::AddImage( QueueItem* item )
 {
-	GLASSERT(item->image == 0);
-	item->image = new gamui::Image();
-
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(item->buildScriptID);
 	int size = buildData.size;
+
+	GLASSERT(!item->image);
+	item->image = new gamui::Image[3];
+	for (int i = 0; i < 3; ++i) {
+		item->image[i].Init(&parentChit->Context()->worldMap->overlay1, RenderAtom(), false);
+	}
 
 	GLASSERT( parentChit );
 
@@ -71,35 +73,21 @@ void WorkQueue::AddImage( QueueItem* item )
 	RenderAtom porchAtom;
 	if (item->buildScriptID == BuildScript::CLEAR) {
 		atom = LumosGame::CalcIconAtom("delete");
+		item->image[0].SetAtom(atom);
+		item->image[0].SetPos((float)item->pos.x, (float)item->pos.y);
+		item->image[0].SetSize((float)size, (float)size);
+		item->image[0].SetVisible(true);
 	}
 	else {
-		atom = LumosGame::CalcIconAtom("build");
-		if (buildData.porch) {
-			item->porchImage = new gamui::Image();
-			porchAtom = LumosGame::CalcIconAtom("porch");
-		}
-	}
-	item->image->Init(&parentChit->Context()->worldMap->overlay1, atom, false);
-	item->image->SetPos((float)item->pos.x, (float)item->pos.y);
-	item->image->SetSize((float)size, (float)size);
-	item->image->SetVisible(true);
-	
-	if (item->porchImage) { 
-		item->porchImage->Init(&parentChit->Context()->worldMap->overlay1, porchAtom, false);
-		Vector2I pos = item->pos + WorldRotationToNormal(0);
-		item->porchImage->SetPos((float)pos.x, (float)pos.y);
-		item->porchImage->SetSize(1, 1);	// fixme
-		item->porchImage->SetVisible(true);
+		BuildData::DrawBounds(item->Bounds(), item->PorchBounds(), item->image);
 	}
 }
 
 
 void WorkQueue::RemoveImage( QueueItem* item )
 {
-	delete item->image;
-	delete item->porchImage;
+	delete [] item->image;
 	item->image = 0;
-	item->porchImage = 0;
 }
 
 
@@ -451,6 +439,17 @@ void WorkQueue::DoTick()
 }
 
 
+WorkQueue::QueueItem::QueueItem()
+{
+	buildScriptID = 0;
+	pos.Zero();
+	assigned = 0;
+	rotation = 0;
+	variation = 0;
+	image = 0;
+}
+
+
 void WorkQueue::QueueItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "QueueItem" );
@@ -494,9 +493,7 @@ void WorkQueue::InitSector( Chit* _parent, const grinliz::Vector2I& _sector )
 	parentChit = _parent; 
 	sector = _sector; 
 	for( int i=0; i<queue.Size(); ++i ) {
-		if ( !queue[i].image ) {
-			AddImage( &queue[i] );
-		}
+		AddImage( &queue[i] );
 	}
 }
 

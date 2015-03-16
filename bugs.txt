@@ -4,13 +4,13 @@
 	x single finger view drag?
 	x no pause (space)
 	x no view change (tab)
-	- build reticule is useless & incorrect
+	x build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
+	x build rotation?
+	- build reticule is useless & incorrect. detect mouse mode and re-enable.
 	- shoot at location (long press?)
-	- build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
-	- build rotation?
 
+x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: food as medkit
-- GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)

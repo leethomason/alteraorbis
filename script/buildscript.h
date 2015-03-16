@@ -4,6 +4,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../ai/aineeds.h"
 #include "../game/circuitsim.h"
+#include "../gamui/gamui.h"
 
 struct BuildData
 {
@@ -28,6 +29,8 @@ struct BuildData
 
 	static grinliz::Rectangle2I Bounds(int size, const grinliz::Vector2I& pos);
 	static grinliz::Rectangle2I PorchBounds(int size, const grinliz::Vector2I& pos, int rot0_3);
+	static int DrawBounds(const grinliz::Rectangle2I& bounds, const grinliz::Rectangle2I& porchBounds,
+						  gamui::Image* imageArr);
 };
 
 

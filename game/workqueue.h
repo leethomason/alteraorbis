@@ -51,9 +51,9 @@ public:
 	WorkQueue();
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
-	struct QueueItem {
-		QueueItem() : buildScriptID(0), assigned(0), image(0), porchImage(0), rotation(0), variation(0) { pos.Zero(); }
 
+	struct QueueItem {
+		QueueItem();
 		void Serialize( XStream* xs );
 
 		// Accounts for the size of the structure.
@@ -63,8 +63,7 @@ public:
 		int					buildScriptID;	// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;		// id of worker assigned this task.			
-		gamui::Image*		image;			// map work location
-		gamui::Image*		porchImage;
+		gamui::Image*		image;			// map work location. Array of 3 for plan rendering.
 		float				rotation;
 		int					variation;		// which PAVE
 
