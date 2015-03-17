@@ -101,6 +101,7 @@ private:
 	void ControlTap(int slot, const grinliz::Vector2I& pos);
 	void SetSquadDisplay(bool squadVisible);
 	void OpenEndGame();
+	void SetSelectionModel(const grinliz::Vector2F& view);
 
 	void DoCameraHome();
 	void DoAvatarButton();
@@ -172,7 +173,7 @@ private:
 	TutorialWidget*		tutorial;
 
 	// Shows what is being built or removed.
-	//Model*				selectionModel;
+	Model*				selectionModel;
 	GameSceneMenu*		menu;
 
 	gamui::PushButton	okay;

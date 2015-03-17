@@ -818,6 +818,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const ChitContext* context = Context();
+
 	if ( pmc ) {
 		// Read our destination port information:
 		const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
@@ -862,6 +863,17 @@ void AIComponent::Pickup( Chit* item )
 
 void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vector2F* normal )
 {
+	// A focus move removes a focused world target. This keeps the 
+	// unit from obsessing over a world target, no matter where
+	// it is moved. There seems to be a bug where the target
+	// can be multiply entered. *sigh* Troubling architecture
+	// for the enemy list.
+	if (focused && enemyList2.Size() && enemyList2[0] < 0) {
+		enemyList2.Filter(0, [](int, int id) {
+			return id > 0;
+		});
+	}
+
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
 		pmc->QueueDest( dest, normal );

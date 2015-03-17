@@ -62,12 +62,18 @@ bool fullscreen = false;
 int restoreWidth = SCREEN_WIDTH;
 int restoreHeight = SCREEN_HEIGHT;
 bool cameraIso = true;
+bool hasMouse = false;
 
 int nModDB = 0;
 grinliz::GLString* databases[GAME_MAX_MOD_DATABASES];	
 
 void ScreenCapture();
 void PostCurrentGame();
+
+bool PlatformHasMouseSupport() {
+	return hasMouse;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -220,6 +226,7 @@ int main(int argc, char **argv)
 	if (value & NID_READY) GLOUTPUT(("NID_READY\n"));
 
 	grinliz::Vector2F multiTouchStart = { 0, 0 };
+	int mouseMoveCount = 0;
 
 	// ---- Main Loop --- //
 	while (!done) {
@@ -392,6 +399,7 @@ int main(int argc, char **argv)
 
 					if (state & SDL_BUTTON(1)) {
 						GameTap(game, GAME_TAP_MOVE, x, y, mod);
+						mouseMoveCount = 0;
 					}
 					else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
 						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
@@ -403,6 +411,14 @@ int main(int argc, char **argv)
 					}
 					else if (((state & SDL_BUTTON(1)) == 0)) {
 						GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
+						mouseMoveCount++;
+						if (mouseMoveCount == 5) {
+							if (!hasMouse) {
+								GLOUTPUT(("Mouse supported.\n"));
+								GLOUTPUT_REL(("Mouse supported.\n"));
+							}
+							hasMouse = true;	// filter out OS stuff. make sure we get a decent number before going "mouse on"
+						}
 					}
 				}
 				break;

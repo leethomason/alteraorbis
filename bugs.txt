@@ -6,8 +6,10 @@
 	x no view change (tab)
 	x build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
 	x build rotation?
-	- build reticule is useless & incorrect. detect mouse mode and re-enable.
-	- shoot at location (long press?)
+	x build reticule is useless & incorrect. detect mouse mode and re-enable.
+	x shoot at location (long press?)
+	- correct porch icon for building
+	- uniform clear and build markers
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: food as medkit

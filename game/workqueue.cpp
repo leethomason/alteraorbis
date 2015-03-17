@@ -474,8 +474,11 @@ Rectangle2I WorkQueue::QueueItem::PorchBounds() const
 {
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData(buildScriptID);
-	int rot0_3 = LRint(NormalizeAngleDegrees(rotation) / 90.0f);
-	return BuildData::PorchBounds(buildData.size, pos, rot0_3);
+	if (buildData.porch) {
+		int rot0_3 = LRint(NormalizeAngleDegrees(rotation) / 90.0f);
+		return BuildData::PorchBounds(buildData.size, pos, rot0_3);
+	}
+	return Rectangle2I();
 }
 
 

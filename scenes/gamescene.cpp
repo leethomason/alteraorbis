@@ -58,7 +58,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
-//	selectionModel = 0;
+	selectionModel = 0;
 	chitTracking = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
@@ -242,7 +242,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 GameScene::~GameScene()
 {
 	delete menu;
-//	delete selectionModel;
+	delete selectionModel;
 	delete sim;
 	delete adviser;
 	delete tutorial;
@@ -412,11 +412,10 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	}
 	voxelInfoID = ToWorld2I(at);
 
-//	SetSelectionModel( view );
+	SetSelectionModel( view );
 }
 
 
-/*
 void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 {
 	Vector3F at = { 0, 0, 0 };
@@ -430,16 +429,10 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	const char* name = "";
 
 	int buildActive = menu->BuildActive();
-	if (buildActive) {
-		if (buildActive == BuildScript::CLEAR
-			|| buildActive == BuildScript::CANCEL)
+	if (buildActive && PlatformHasMouseSupport() ) {
+		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
-			const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(pos2i.x, pos2i.y);
-			switch (wg.Height()) {
-				case 3:	name = "clearMarker3";	break;
-				case 2:	name = "clearMarker2";	break;
-				default:	name = "clearMarker1";	break;
-			}
+			name = "clearMarker1";
 		}
 		else {
 			BuildScript buildScript;
@@ -480,7 +473,7 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 		selectionModel->SetColor(color);
 	}
 }
-*/
+
 
 void GameScene::ClearTargetFlags()
 {
@@ -597,6 +590,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	ModelVoxel mv = ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, Model::MODEL_CLICK_THROUGH, nullptr, &plane);
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
 	if (!map->Bounds().Contains(plane2i)) return;
+	const WorldGrid& worldGrid = map->GetWorldGrid(plane2i);
 
 	BuildAction(plane2i);
 	int uiMode = menu->UIMode();
@@ -620,15 +614,12 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		return;
 	}
 
-	if ((game->GetTapMod() & GAME_TAP_MOD_SHIFT) && mv.Hit()) {
+	if (worldGrid.PlantStage() >= 2 || worldGrid.RockHeight()) {
 		if (AvatarSelected()) {
 			// clicked on a rock. Melt away!
 			Chit* player = GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				if (mv.ModelHit())
-					player->GetAIComponent()->Target(mv.model->userData, false);
-				else
-					player->GetAIComponent()->Target(ToWorld2I(mv.voxel), false);
+				player->GetAIComponent()->Target(plane2i, false);
 				return;
 			}
 		}
@@ -928,7 +919,7 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 				DrawBuildMarks(dragWorkItem);
 			}
 			else if (dragMode == EDragMode::PAN) {
-				//Process3DTap(GAME_PAN_MOVE, view, world, sim->GetEngine());
+				// Do nothing.
 			}
 		}
 		else if (action == GAME_TAP_UP) {
@@ -961,11 +952,10 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			}
 			else if (dragMode == EDragMode::PAN) {
 				// FIXME: is it possible to filter out at a higher level?
-				// Filters out 2 finger drags.
+				// Check if the pan isn't a pan (actually a 2 finger drag) and do something.
 				if ((tapDown - view).Length() < 10.0f) {	// magic tap accuracy...
 					Tap3D(view, world);
 				}
-				//Process3DTap(GAME_PAN_END, view, world, sim->GetEngine());
 			}
 			dragMode = EDragMode::NONE;
 		}
@@ -1215,7 +1205,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-//	SetSelectionModel(tapView);
+	SetSelectionModel(tapView);
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
@@ -1318,7 +1308,7 @@ void GameScene::HandleHotKey( int mask )
 {
 	if (mask == GAME_HK_ESCAPE) {
 		menu->DoEscape(false);
-//		SetSelectionModel(tapView);
+		SetSelectionModel(tapView);
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();
