@@ -8,8 +8,8 @@
 	x build rotation?
 	x build reticule is useless & incorrect. detect mouse mode and re-enable.
 	x shoot at location (long press?)
-	- correct porch icon for building
-	- uniform clear and build markers
+	- art: correct porch icon for building
+	- art: uniform clear and build markers
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: food as medkit
