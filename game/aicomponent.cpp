@@ -2249,10 +2249,10 @@ void AIComponent::ThinkNormal(  )
 }
 
 
-void AIComponent::ThinkBattle(  )
+void AIComponent::ThinkBattle()
 {
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc ) {
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+	if (!pmc) {
 		currentAction = AIAction::NO_ACTION;
 		return;
 	}
@@ -2262,10 +2262,10 @@ void AIComponent::ThinkBattle(  )
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
-	
+
 	// Use the current or reserve - switch out later if we need to.
 	const RangedWeapon* rangedWeapon = thisIC->QuerySelectRanged();
-	const MeleeWeapon*  meleeWeapon  = thisIC->QuerySelectMelee();
+	const MeleeWeapon*  meleeWeapon = thisIC->QuerySelectMelee();
 
 	enum {
 		OPTION_NONE,			// Stand around
@@ -2275,8 +2275,8 @@ void AIComponent::ThinkBattle(  )
 		NUM_OPTIONS
 	};
 
-	float utility[NUM_OPTIONS] = { 0,0,0,0 };
-	int   target[NUM_OPTIONS]  = { 0,0,0,0 };
+	float utility[NUM_OPTIONS] = { 0, 0, 0, 0 };
+	int   target[NUM_OPTIONS] = { 0, 0, 0, 0 };
 
 	// Moves are always to the target location, since intermediate location could
 	// cause very strange pathing. Time is set to when to "rethink". If we are moving
@@ -2295,17 +2295,17 @@ void AIComponent::ThinkBattle(  )
 	int nMeleeEnemies = 0;	// number of enemies that could be pounding at me
 
 	// Count melee and ranged enemies.
-	for( int k=0; k<enemyList2.Size(); ++k ) {
-		Chit* chit = Context()->chitBag->GetChit( enemyList2[k] );
-		if ( chit ) {
+	for (int k = 0; k < enemyList2.Size(); ++k) {
+		Chit* chit = Context()->chitBag->GetChit(enemyList2[k]);
+		if (chit) {
 			ItemComponent* ic = chit->GetItemComponent();
-			if ( ic ) {
-				if ( ic->GetRangedWeapon(0) ) {
+			if (ic) {
+				if (ic->GetRangedWeapon(0)) {
 					++nRangedEnemies;
 				}
 				static const float MELEE_ZONE = (MELEE_RANGE + 0.5f) * (MELEE_RANGE + 0.5f);
-				if ( ic->GetMeleeWeapon() &&
-					( pos2 - ToWorld2F(chit->Position()) ).LengthSquared() <= MELEE_ZONE )
+				if (ic->GetMeleeWeapon() &&
+					(pos2 - ToWorld2F(chit->Position())).LengthSquared() <= MELEE_ZONE)
 				{
 					++nMeleeEnemies;
 				}
@@ -2315,7 +2315,7 @@ void AIComponent::ThinkBattle(  )
 
 	BuildingFilter buildingFilter;
 
-	for( int k=0; k<enemyList2.Size(); ++k ) {
+	for (int k = 0; k < enemyList2.Size(); ++k) {
 		const ChitContext* context = Context();
 		int targetID = enemyList2[k];
 
@@ -2323,18 +2323,18 @@ void AIComponent::ThinkBattle(  )
 		Vector2I voxelTarget = ToWG(targetID);					// zero if there isn't a voxel target
 
 		const Vector3F	enemyPos = EnemyPos(targetID, true);
-		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
-		const Vector2I  enemyPos2I		= ToWorld2I(enemyPos2);
-		float			range			= (enemyPos - pos).Length();
-		Vector3F		toEnemy			= (enemyPos - pos);
-		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
+		const Vector2F	enemyPos2 = { enemyPos.x, enemyPos.z };
+		const Vector2I  enemyPos2I = ToWorld2I(enemyPos2);
+		float			range = (enemyPos - pos).Length();
+		Vector3F		toEnemy = (enemyPos - pos);
+		Vector2F		normalToEnemy = { toEnemy.x, toEnemy.z };
 		bool			enemyMoving = (enemyChit && enemyChit->GetMoveComponent()) ? enemyChit->GetMoveComponent()->IsMoving() : false;
 
 		// FIXME: fires every so often. system seems to recover. problem?
 		// GLASSERT(FEFilter<RELATE_FRIEND>(parentChit, targetID) == true);
 
 		normalToEnemy.Normalize();
-		float dot = DotProduct( normalToEnemy, heading );
+		float dot = DotProduct(normalToEnemy, heading);
 
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
@@ -2353,39 +2353,39 @@ void AIComponent::ThinkBattle(  )
 		}
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
-		if ( rangedWeapon ) {
-			float radAt1 = BattleMechanics::ComputeRadAt1(	parentChit->GetItem(),
-															rangedWeapon,
-															false,	// SHOOT implies stopping.
-															enemyMoving );
-			
-			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
+		if (rangedWeapon) {
+			float radAt1 = BattleMechanics::ComputeRadAt1(parentChit->GetItem(),
+														  rangedWeapon,
+														  false,	// SHOOT implies stopping.
+														  enemyMoving);
+
+			float effectiveRange = BattleMechanics::EffectiveRange(radAt1);
 
 			// 1.5f gives spacing for bolt to start.
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
-			if (    range > 1.5f 
-				 && (    ( rangedWeapon->HasRound() && !rangedWeapon->Reloading() )		// we have ammod
-				      || ( nRangedEnemies == 0 && range > 2.0f )))	// we have a gun and they don't
+			if (range > 1.5f
+				&& ((rangedWeapon->HasRound() && !rangedWeapon->Reloading())		// we have ammod
+				|| (nRangedEnemies == 0 && range > 2.0f)))	// we have a gun and they don't
 			{
-				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
+				float u = 1.0f - (range - effectiveRange) / effectiveRange;
 				u = Clamp(u, 0.0f, 2.0f);	// just to keep the point blank shooting down.
 				u *= q;
 
 				// If we have melee targets, focus in on those.
-				if ( nMeleeEnemies) {
+				if (nMeleeEnemies) {
 					u *= 0.1f;
 				}
 				// This needs tuning.
 				// If the unit has been shooting, time to do something else.
 				// Stand around and shoot battles are boring and look crazy.
-				if ( currentAction == AIAction::SHOOT ) {
+				if (currentAction == AIAction::SHOOT) {
 					u *= 0.8f;	// 0.5f;
-				} 
+				}
 
 				// Don't blow ourself up:
-				if ( rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE ) {
-					if ( range < EXPLOSIVE_RANGE * 2.0f ) {
+				if (rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE) {
+					if (range < EXPLOSIVE_RANGE * 2.0f) {
 						u *= 0.1f;	// blowing ourseves up is bad.
 					}
 				}
@@ -2397,23 +2397,23 @@ void AIComponent::ThinkBattle(  )
 				if (debugLog) {
 					GLOUTPUT(("r=%.1f ", u));
 				}
-						
+
 				if (u > utility[OPTION_SHOOT] && lineOfSight) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = targetID;
 				}
 			}
 			// Move to the effective range?
-			float u = ( range - effectiveRange ) / effectiveRange;
+			float u = (range - effectiveRange) / effectiveRange;
 			u *= q;
-			if ( !rangedWeapon->CanShoot() ) {
+			if (!rangedWeapon->CanShoot()) {
 				// Moving to effective range is less interesting if the gun isn't ready.
 				u *= 0.5f;
 			}
 			if (debugLog) {
 				GLOUTPUT(("mtr(r)=%.1f ", u));
 			}
-			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
+			if (u > utility[OPTION_MOVE_TO_RANGE]) {
 				utility[OPTION_MOVE_TO_RANGE] = u;
 				target[OPTION_MOVE_TO_RANGE] = targetID;
 			}
@@ -2442,7 +2442,7 @@ void AIComponent::ThinkBattle(  )
 	int index = ArrayFindMax(utility, NUM_OPTIONS, (int)0, [](int, float f) { return f; });
 
 	// Translate to action system:
-	switch ( index ) {
+	switch (index) {
 		case OPTION_NONE:
 		{
 			pmc->Stop();
@@ -2473,7 +2473,7 @@ void AIComponent::ThinkBattle(  )
 			}
 		}
 		break;
-		
+
 		case OPTION_SHOOT:
 		{
 			pmc->Stop();
@@ -2488,7 +2488,7 @@ void AIComponent::ThinkBattle(  )
 		break;
 
 		default:
-			GLASSERT( 0 );
+		GLASSERT(0);
 	};
 
 	if (debugLog) {

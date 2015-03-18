@@ -48,6 +48,8 @@ x expand strategic attack bounds
 - switch to war mode
 - bar-market-forge need to look more distinct
 - should be able to browse units in character screen
+- AIComponent::LineOfSight() uses TEST_HIT_AABB which is very big. (And creates annoying bugs,
+  where should be shooting, but isn't.) Speed up TEST_HIT_TRI and use that?
 
 - why are the dry lands relatively empty of plants?
 - weapon assert on start
