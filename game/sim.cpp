@@ -79,7 +79,7 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	avatarTimer = 0;
 	currentVisitor = 0;
 
-	context.circuitSim = new CircuitSim(context.worldMap, context.engine, context.chitBag);
+	context.circuitSim = new CircuitSim(&context);
 
 	random.SetSeedFromTime();
 	plantScript = new PlantScript(context.chitBag->Context());

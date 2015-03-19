@@ -234,7 +234,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
 
 				context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
-				context->circuitSim->EtchLines(innerBounds);
 
 				Chit* found = chitBag->QueryBuilding(IString(), task->pos2i, 0);
 				if (found && (found->GetItem()->IName() != ISC::core)) {
@@ -267,7 +266,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					}
 					else if (buildData.circuit) {
 						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
-						context->circuitSim->EtchLines(innerBounds);
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the

@@ -808,7 +808,6 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 			}
 			else if (circuit) {
 				sim->GetWorldMap()->SetCircuitRotation(pos2i.x, pos2i.y, sim->GetWorldMap()->CircuitRotation(pos2i.x, pos2i.y) + 1);
-				sim->GetChitBag()->Context()->circuitSim->EtchLines(ToSector(pos2i));
 			}
 		}
 		else {

@@ -238,9 +238,6 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 			worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
 		}
 	}
-	if (ciruitSim && circuitChange) {
-		ciruitSim->EtchLines(ToSector(rect.min));
-	}
 }
 
 

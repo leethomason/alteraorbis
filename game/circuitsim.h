@@ -7,6 +7,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glrectangle.h"
+#include "../gamui/gamui.h"
 #include "../xegame/chit.h"
 
 class WorldMap;
@@ -14,6 +15,7 @@ class Engine;
 class Model;
 class LumosChitBag;
 class XStream;
+struct ChitContext;
 
 // WARNING: partial duplicate in BuildScript.h
 // WARNING: partial duplicate in FluidTestScene.h
@@ -45,7 +47,7 @@ enum {
 class CircuitSim
 {
 public:
-	CircuitSim(WorldMap* worldMap, Engine* engine, LumosChitBag* chitBag);
+	CircuitSim(const ChitContext* context);
 	~CircuitSim();
 
 	void Serialize(XStream* xs);
@@ -54,48 +56,26 @@ public:
 	void TriggerDetector(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
 
-	static int NameToID(grinliz::IString name);
-
-	void EtchLines(const grinliz::Vector2I& sector);
-	void EtchLines(const grinliz::Rectangle2I& bounds);
+	void DrawGroups(const grinliz::Vector2I& sector, gamui::Canvas* canvas);
 
 private:
+	const ChitContext* context;
 
-	int LocalDir(int dir, int circuitDir) {
-		return (dir - circuitDir + 4) & 3;
-	}
-
-	struct Electron {
-		int charge;	// 0: spark, 1: charge
-		int dir;
-		float t;
-		grinliz::Vector2I pos;
-		Model* model;		// not serialized (on demand)
-
-		void Serialize(XStream* xs);
+	enum {
+		POWER_GROUP,
+		SENSOR_GROUP,
+		DEVICE_GROUP,
+		
+		NUM_GROUPS
 	};
 
-	void CreateElectron(const grinliz::Vector2I& pos, int dir4, int charge);
-	// Returns 'true' if the original charge/spark is consumed.
-	bool ElectronArrives(Electron*);
-	void EmitSparkExplosion(const grinliz::Vector2F& pos);
-	void Explosion(const grinliz::Vector2I& pos, int charge, bool circuitDestroyed);
-	void ApplyPowerUp(const grinliz::Vector2I& pos, int charge);
-
-	WorldMap* worldMap;
-	Engine* engine;
-	LumosChitBag* chitBag;
-
-	struct Spawn {
-		Spawn(const grinliz::Vector2I& _pos, int _dir) : pos(_pos), dir(_dir) {}
-		grinliz::Vector2I pos;
-		int dir;
+	struct Group {
+		grinliz::Rectangle2I bounds;
+		grinliz::CDynArray<int> idArr;
 	};
 
-	grinliz::CDynArray< Electron > electrons;	// sparks and charges
-	grinliz::CDynArray< Electron > electronsCopy;	// sparks and charges
-	grinliz::CDynArray< grinliz::Vector2I > emitters;
-	grinliz::CDynArray< Spawn > spawn;
+	grinliz::CDynArray<Group> groups[NUM_GROUPS];
+	grinliz::CDynArray<Chit*> queryArr;
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

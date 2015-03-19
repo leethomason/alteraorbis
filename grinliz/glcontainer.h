@@ -231,9 +231,10 @@ public:
 		GLASSERT( nAlloc == 0 );
 	}
 
-//	typedef Iter<CDynArray<T, SEM, KCOMPARE>, T> CDynArrayIter;
-//	CDynArrayIter begin() { return CDynArrayIter(this, 0); }
-//	CDynArrayIter end() { return CDynArrayIter(this, Size()); }
+	T* begin() { return mem; }
+	const T* begin() const { return mem; }
+	T* end() { return mem + size; }
+	const T* end() const { return mem + size; }
 
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
@@ -477,19 +478,24 @@ T& CDynArrayIter<T, SEM, KCOMPARE>::operator* () const
    Does keep the objects around, until entire CArray is destroyed,
 
  */
-template < class T, int CAPACITY >
+template < class T, int CAPACITY, int SIZE=0 >
 class CArray
 {
 public:
 	typedef T ElementType;
 
 	// construction
-	CArray() : size( 0 )	{}
+	CArray() : size(SIZE)	{ GLASSERT(SIZE <= CAPACITY); }
 	~CArray()				{}
 
 	// operations
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
+
+	T* begin() { return mem; }
+	const T* begin() const { return mem; }
+	T* end() { return mem + size; }
+	const T* end() const { return mem + size; }
 
 	// Push on
 	void Push( const T& t ) {

@@ -254,7 +254,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	rootItem.keyValues.Get(ISC::size, &size);
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
-	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
+	const int circuit = 0;
+//	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
 
 	// Should be pre-cleared. But recover from weird situations by clearing.
 	// Note that water is a real problem.

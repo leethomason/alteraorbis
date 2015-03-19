@@ -26,7 +26,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.chitBag = new LumosChitBag( context, 0 );
 	context.worldMap->AttachEngine(context.engine, context.chitBag);
 
-	context.circuitSim = new CircuitSim(context.worldMap, context.engine, 0);
+	context.circuitSim = new CircuitSim(&context);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
@@ -123,7 +123,6 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			if (buildButton[BUTTON_ROTATE].Down()) {
 				int rot = context.worldMap->CircuitRotation(pos2i.x, pos2i.y);
 				context.worldMap->SetCircuitRotation(pos2i.x, pos2i.y, rot+1);
-				context.circuitSim->EtchLines(context.worldMap->Bounds());
 			}
 			else if (wg.Circuit() == CIRCUIT_SWITCH) {
 				context.circuitSim->TriggerSwitch(pos2i);
@@ -136,7 +135,6 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					if (buildButton[i].Down()) {
 						int circuit = i - BUTTON_SWITCH + 1;
 						context.worldMap->SetCircuit(pos2i.x, pos2i.y, circuit);
-						context.circuitSim->EtchLines(context.worldMap->Bounds());
 					}
 				}
 				if (buildButton[BUTTON_ROCK0].Down()) {
