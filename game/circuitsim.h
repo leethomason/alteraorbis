@@ -71,11 +71,13 @@ private:
 
 	struct Group {
 		grinliz::Rectangle2I bounds;
-		grinliz::CDynArray<int> idArr;
+		grinliz::CArray<int, 16> idArr;
 	};
 
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Chit*> queryArr;
+
+	gamui::Canvas canvas;
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

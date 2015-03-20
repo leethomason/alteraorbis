@@ -405,7 +405,6 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 #else
 		map->Draw3D( lighted, STENCIL_OFF, true );
 #endif
-
 		map->DrawOverlay(0);
 #endif
 	}

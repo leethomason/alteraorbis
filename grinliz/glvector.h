@@ -175,6 +175,19 @@ struct Vector2
 		x = b;
 		y = -a;
 	}
+
+	bool Adjacent(const Vector2<T>& rhs, bool includeDiagonals) {
+		int dx = abs(T(rhs.x - x));
+		int dy = abs(T(rhs.y - y));
+
+		if (dx == 0 && dy == 0)
+			return false;
+
+		if (includeDiagonals) {
+			return dx <= 1 && dy <= 1;
+		}
+		return (dx + dy) == 1;
+	}
 };
 
 typedef Vector2< int > Vector2I;

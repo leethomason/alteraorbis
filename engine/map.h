@@ -101,6 +101,7 @@ public:
 		return v; 
 	}
 
+	gamui::Gamui overlayM1;
 	gamui::Gamui overlay0;	// overlay map, under models
 	gamui::Gamui overlay1;	// overlay map, over models
 

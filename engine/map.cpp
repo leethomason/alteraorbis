@@ -51,6 +51,7 @@ Map::Map(int w, int h)
 	saturation = 1.0f;
 
 	gamui::RenderAtom nullAtom;
+	overlayM1.Init(this);
 	overlay0.Init(this);
 	overlay1.Init(this);
 
