@@ -719,6 +719,7 @@ public:
 	void Clear();
 	void DrawLine(float x0, float y0, float x1, float y1, float thickness);
 	void DrawRectangle(float x, float y, float w, float h);
+	void DrawRectangleOutline(float x, float y, float w, float h, float thickness, float arc);
 
 	void SetAtom(const RenderAtom& atom)								{ m_atom = atom; Modify(); }
 	virtual const RenderAtom& GetRenderAtom() const						{ return m_atom; }
@@ -732,19 +733,27 @@ public:
 	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 
 private:
+	void PushRectangle(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf, 
+					   float x0, float y0, float x1, float y1);
+	void PushArc(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf,
+				 float x, float y, float angle0, float angle1, float rad, float width);
+
 	enum {
-		LINE, RECTANGLE
+		LINE, RECTANGLE, RECTANGLE_OUTLINE
 	};
 	struct Cmd {
 		int type;
 		float x0, y0;
 		union {
-			float x1, w;
+			float x1;
+			float w;
 		};
 		union {
-			float y1, h;
+			float y1;
+			float h;
 		};
 		float thickness;
+		float arc;
 	};
 	RenderAtom m_atom;
 	PODArray<Cmd> m_cmds;

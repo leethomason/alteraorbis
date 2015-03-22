@@ -246,6 +246,8 @@ int main( int argc, char **argv )
 	RenderAtom textAtomD = textAtom;
 	textAtomD.renderState = (const void*) RENDERSTATE_TEXT_DISABLED;
 
+	RenderAtom whiteAtom((const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.1f, 0.4f, 0.2f, 0.45f);
+
 	// 100x100
 	RenderAtom imageAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.5f, 0.5f, 228.f/256.f, 28.f/256.f );
 
@@ -339,6 +341,11 @@ int main( int argc, char **argv )
 	image3.SetPos( 200, 200 );
 	image3.SetSize( 125, 125 );
 	image3.SetSlice( true );
+
+	Canvas canvas;
+	canvas.Init(&gamui, whiteAtom);
+	canvas.SetPos(500, 0);
+	canvas.DrawRectangleOutline(10, 10, 80, 80, 4, 10);
 
 	// 50x50
 	RenderAtom up( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 1, (52.f/256.f), (204.f/256.f) );

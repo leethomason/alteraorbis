@@ -548,6 +548,14 @@ void Canvas::DrawRectangle(float x, float y, float w, float h)
 }
 
 
+void Canvas::DrawRectangleOutline(float x, float y, float w, float h, float thickness, float arc)
+{
+	Cmd cmd = { RECTANGLE_OUTLINE, x, y, w, h, thickness, arc };
+	m_cmds.Push(cmd);
+	Modify();
+}
+
+
 void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	if ( m_atom.textureHandle == 0 ) {
@@ -582,17 +590,35 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 
 			case RECTANGLE:
 			{
-				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
 
 				float x0 = cmd.x0;
 				float x1 = cmd.x0 + cmd.w;
 				float y0 = cmd.y0;
 				float y1 = cmd.y0 + cmd.h;
 
-				vertex[0].Set(X() + x0, Y() + y0, m_atom.tx0, m_atom.ty0);
-				vertex[1].Set(X() + x0, Y() + y1, m_atom.tx0, m_atom.ty0);
-				vertex[2].Set(X() + x1, Y() + y1, m_atom.tx1, m_atom.ty1);
-				vertex[3].Set(X() + x1, Y() + y0, m_atom.tx1, m_atom.ty1);
+				PushRectangle(indexBuf, vertexBuf, x0, y0, x1, y1);
+			}
+			break;
+
+			case RECTANGLE_OUTLINE:
+			{
+				float h = cmd.thickness * 0.5f;
+				// Lines:
+				// left
+				PushRectangle(indexBuf, vertexBuf, cmd.x0 - h, cmd.y0 + cmd.arc, cmd.x0 + h, cmd.y1 - cmd.arc);
+				// top
+				PushRectangle(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y1 - h, cmd.x1 - cmd.arc, cmd.y1 + h);
+				// right
+				PushRectangle(indexBuf, vertexBuf, cmd.x1 - h, cmd.y0 + cmd.arc, cmd.x1 + h, cmd.y1 - cmd.arc);
+				// bottom
+				PushRectangle(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y0 - h, cmd.x1 - cmd.arc, cmd.y0 + h);
+				
+				// Arcs:
+				PushArc(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y0 + cmd.arc, 180, 270, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y1 - cmd.arc, 90, 180, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, cmd.x1 - cmd.arc, cmd.y1 - cmd.arc, 0, 90, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, cmd.x1 - cmd.arc, cmd.y0 + cmd.arc, 270, 360, cmd.arc, cmd.thickness);
+
 			}
 			break;
 		}
@@ -600,6 +626,48 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 	m_gamui->TransformVirtualToPhysical(vertexBuf->Mem() + startVertex, vertexBuf->Size() - startVertex);
 }
 
+
+void Canvas::PushRectangle(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf, float x0, float y0, float x1, float y1)
+{
+	Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+	vertex[0].Set(X() + x0, Y() + y0, m_atom.tx0, m_atom.ty0);
+	vertex[1].Set(X() + x0, Y() + y1, m_atom.tx0, m_atom.ty0);
+	vertex[2].Set(X() + x1, Y() + y1, m_atom.tx1, m_atom.ty1);
+	vertex[3].Set(X() + x1, Y() + y0, m_atom.tx1, m_atom.ty1);
+}
+
+
+void Canvas::PushArc(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf,
+					 float x, float y, float angle0, float angle1, float rad, float w)
+{
+	static const int STEPS = 5;
+	static const int SEGMENTS = STEPS + 1;
+
+	float x0[SEGMENTS];
+	float y0[SEGMENTS];
+	float x1[SEGMENTS];
+	float y1[SEGMENTS];
+
+	for (int i = 0; i <= STEPS; ++i) {
+		float theta = angle0 + (angle1 - angle0)*float(i) / float(STEPS);
+
+		float c = cos(theta * PI / 180.f);
+		float s = sin(theta * PI / 180.f);
+
+		x0[i] = x + c * (rad - w*0.5f);
+		y0[i] = y + s * (rad - w*0.5f);
+		x1[i] = x + c * (rad + w*0.5f);
+		y1[i] = y + s * (rad + w*0.5f);
+	}
+
+	for (int i = 0; i < STEPS; ++i) {
+		Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
+		vertex[0].Set(X() + x0[i],   Y() + y0[i],   m_atom.tx0, m_atom.ty0);
+		vertex[1].Set(X() + x0[i+1], Y() + y0[i+1], m_atom.tx0, m_atom.ty0);
+		vertex[2].Set(X() + x1[i+1], Y() + y1[i+1], m_atom.tx1, m_atom.ty1);
+		vertex[3].Set(X() + x1[i],   Y() + y1[i],   m_atom.tx1, m_atom.ty1);
+	}
+}
 
 
 TiledImageBase::TiledImageBase() : UIItem( Gamui::LEVEL_BACKGROUND ),
