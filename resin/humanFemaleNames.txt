@@ -50,6 +50,7 @@ Quyra
 Rava
 Reava
 River
+Scala
 Scully
 Serenity
 Serence
@@ -65,6 +66,5 @@ Trillian
 Trillis
 Uhura
 Verice
+Verite
 Zoe
-
-

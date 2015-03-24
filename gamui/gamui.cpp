@@ -31,6 +31,7 @@ using namespace gamui;
 using namespace std;
 
 static const float PI = 3.1415926535897932384626433832795f;
+static const double PId = 3.1415926535897932384626433832795;
 
 RenderAtom Gamui::m_nullAtom;
 
@@ -534,7 +535,7 @@ void Canvas::Clear()
 
 void Canvas::DrawLine(float x0, float y0, float x1, float y1, float thick)
 {
-	Cmd cmd = { LINE, x0, y0, x1, y1, thick };
+	Cmd cmd = { LINE, x0, y0, x1 - x0, y1 - y0, thick };
 	m_cmds.Push(cmd);
 	Modify();
 }
@@ -572,8 +573,8 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 			{
 				Gamui::Vertex* vertex = PushQuad(indexBuf, vertexBuf);
 				float half = cmd.thickness * 0.5f;
-				float nX = cmd.x1 - cmd.x0;
-				float nY = cmd.y1 - cmd.y0;
+				float nX = cmd.w;
+				float nY = cmd.h;
 				float len = sqrt(nX*nX + nY*nY);
 				nX /= len;
 				nY /= len;
@@ -581,20 +582,20 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 				float rX = nY * half;
 				float rY = -nX * half;
 
-				vertex[0].Set(X() + cmd.x0 + rX, Y() + cmd.y0 + rY, m_atom.tx0, m_atom.ty0);
-				vertex[1].Set(X() + cmd.x0 - rX, Y() + cmd.y0 - rY, m_atom.tx0, m_atom.ty0);
-				vertex[2].Set(X() + cmd.x1 - rX, Y() + cmd.y1 - rY, m_atom.tx1, m_atom.ty1);
-				vertex[3].Set(X() + cmd.x1 + rX, Y() + cmd.y1 + rY, m_atom.tx1, m_atom.ty1);
+				vertex[0].Set(X() + cmd.x + rX, Y() + cmd.y + rY, m_atom.tx0, m_atom.ty0);
+				vertex[1].Set(X() + cmd.x - rX, Y() + cmd.y - rY, m_atom.tx0, m_atom.ty0);
+				vertex[2].Set(X() + cmd.x + cmd.w - rX, Y() + cmd.y + cmd.h - rY, m_atom.tx1, m_atom.ty1);
+				vertex[3].Set(X() + cmd.x + cmd.w,		Y() + cmd.y + cmd.h + rY, m_atom.tx1, m_atom.ty1);
 			}
 			break;
 
 			case RECTANGLE:
 			{
 
-				float x0 = cmd.x0;
-				float x1 = cmd.x0 + cmd.w;
-				float y0 = cmd.y0;
-				float y1 = cmd.y0 + cmd.h;
+				float x0 = cmd.x;
+				float x1 = cmd.x + cmd.w;
+				float y0 = cmd.y;
+				float y1 = cmd.y + cmd.h;
 
 				PushRectangle(indexBuf, vertexBuf, x0, y0, x1, y1);
 			}
@@ -603,21 +604,26 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 			case RECTANGLE_OUTLINE:
 			{
 				float h = cmd.thickness * 0.5f;
+				float x0 = cmd.x;
+				float x1 = cmd.x + cmd.w;
+				float y0 = cmd.y;
+				float y1 = cmd.y + cmd.h;
+
 				// Lines:
 				// left
-				PushRectangle(indexBuf, vertexBuf, cmd.x0 - h, cmd.y0 + cmd.arc, cmd.x0 + h, cmd.y1 - cmd.arc);
+				PushRectangle(indexBuf, vertexBuf, x0 - h, y0 + cmd.arc, x0 + h, y1 - cmd.arc);
 				// top
-				PushRectangle(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y1 - h, cmd.x1 - cmd.arc, cmd.y1 + h);
+				PushRectangle(indexBuf, vertexBuf, x0 + cmd.arc, y1 - h, x1 - cmd.arc, y1 + h);
 				// right
-				PushRectangle(indexBuf, vertexBuf, cmd.x1 - h, cmd.y0 + cmd.arc, cmd.x1 + h, cmd.y1 - cmd.arc);
+				PushRectangle(indexBuf, vertexBuf, x1 - h, y0 + cmd.arc, x1 + h, y1 - cmd.arc);
 				// bottom
-				PushRectangle(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y0 - h, cmd.x1 - cmd.arc, cmd.y0 + h);
+				PushRectangle(indexBuf, vertexBuf, x0 + cmd.arc, y0 - h, x1 - cmd.arc, y0 + h);
 				
 				// Arcs:
-				PushArc(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y0 + cmd.arc, 180, 270, cmd.arc, cmd.thickness);
-				PushArc(indexBuf, vertexBuf, cmd.x0 + cmd.arc, cmd.y1 - cmd.arc, 90, 180, cmd.arc, cmd.thickness);
-				PushArc(indexBuf, vertexBuf, cmd.x1 - cmd.arc, cmd.y1 - cmd.arc, 0, 90, cmd.arc, cmd.thickness);
-				PushArc(indexBuf, vertexBuf, cmd.x1 - cmd.arc, cmd.y0 + cmd.arc, 270, 360, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, x0 + cmd.arc, y0 + cmd.arc, 180, 270, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, x0 + cmd.arc, y1 - cmd.arc, 90, 180, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, x1 - cmd.arc, y1 - cmd.arc, 0, 90, cmd.arc, cmd.thickness);
+				PushArc(indexBuf, vertexBuf, x1 - cmd.arc, y0 + cmd.arc, 270, 360, cmd.arc, cmd.thickness);
 
 			}
 			break;
@@ -649,15 +655,15 @@ void Canvas::PushArc(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *
 	float y1[SEGMENTS];
 
 	for (int i = 0; i <= STEPS; ++i) {
-		float theta = angle0 + (angle1 - angle0)*float(i) / float(STEPS);
+		double theta = angle0 + (angle1 - angle0)*double(i) / double(STEPS);
 
-		float c = cos(theta * PI / 180.f);
-		float s = sin(theta * PI / 180.f);
+		double c = cos(theta * PId / 180);
+		double s = sin(theta * PId / 180);
 
-		x0[i] = x + c * (rad - w*0.5f);
-		y0[i] = y + s * (rad - w*0.5f);
-		x1[i] = x + c * (rad + w*0.5f);
-		y1[i] = y + s * (rad + w*0.5f);
+		x0[i] = float(x + c * (rad - w*0.5));
+		y0[i] = float(y + s * (rad - w*0.5));
+		x1[i] = float(x + c * (rad + w*0.5));
+		y1[i] = float(y + s * (rad + w*0.5));
 	}
 
 	for (int i = 0; i < STEPS; ++i) {

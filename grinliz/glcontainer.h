@@ -186,25 +186,7 @@ public:
 	template <class T>
 	static void DoRemove(T& v) { delete v; }
 };
-
-/*
-template<class T, class S>
-class Iter {
-public:
-	Iter(T& _arr, int _pos) : arr(_arr), pos(_pos) {}
-	bool operator!=(const Iter& other) { return pos != other.pos; }
-	const Iter& operator++() {
-		++pos;
-		return *this;
-	}
-
-	S& operator*() const { return arr[pos]; }
-
-private:
-	T& arr;
-	int pos;
-};
-*/ 
+ 
 
 /*	A dynamic array class that supports C++ classes.
 	Carefully manages construct / destruct.
@@ -238,8 +220,6 @@ public:
 
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
-
-
 
 	bool operator==(const CDynArray<T, SEM, KCOMPARE>& rhs) const {
 		bool match = false;
@@ -466,26 +446,19 @@ public:
 };
 
 
-/*template < class T, class SEM, class KCOMPARE >
-T& CDynArrayIter<T, SEM, KCOMPARE>::operator* () const
-{
-	return arr[pos];
-}
-*/
-
 /* A fixed array class for any type.
    Supports copy construction, proper destruction, etc.
    Does keep the objects around, until entire CArray is destroyed,
 
  */
-template < class T, int CAPACITY, int SIZE=0 >
+template < class T, int CAPACITY, int INIT_SIZE=0 >
 class CArray
 {
 public:
 	typedef T ElementType;
 
 	// construction
-	CArray() : size(SIZE)	{ GLASSERT(SIZE <= CAPACITY); }
+	CArray() : size(INIT_SIZE)	{ GLASSERT(INIT_SIZE <= CAPACITY); }
 	~CArray()				{}
 
 	// operations
@@ -502,6 +475,14 @@ public:
 		GLASSERT( size < CAPACITY );
 		if (size < CAPACITY) 
 			mem[size++] = t;
+	}
+
+	bool PushIfCap(const T& t) {
+		if (size < CAPACITY) {
+			mem[size++] = t;
+			return true;
+		}
+		return false;
 	}
 
 	void Insert(int index, const T& t) {
@@ -621,7 +602,7 @@ public:
 	HashTable() : nBuckets(0), nItems(0), nDeleted(0), reallocating(false), buckets(0) {}
 	~HashTable() 
 	{ 
-		RemoveAll();
+		Clear();
 		delete [] buckets;
 	}
 
@@ -673,7 +654,7 @@ public:
 		return buckets[index].value;
 	}
 
-	void RemoveAll() {
+	void Clear() {
 		for( int i=0; i<nBuckets; ++i ) {
 			if ( buckets[i].state == IN_USE ) {
 				SEM::DoRemove( buckets[i].value );

@@ -334,7 +334,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	if (action == BuildScript::CLEAR) {
 		if ((removable + building) == 0) {
 			// nothing to clear. (unless paved or circuit)
-			return wg.Pave() || wg.Circuit();
+			return wg.Pave() != 0;
 		}
 	}
 	else {
@@ -358,18 +358,14 @@ bool WorkQueue::TaskIsComplete(const WorkQueue::QueueItem& item)
 		return true;	
 	}
 
-	if (BuildScript::IsCircuit(item.buildScriptID)) {
-		GLASSERT(buildData.circuit);
-		return (wg.Circuit() == buildData.circuit);
-	}
-	else if (BuildScript::IsClear(item.buildScriptID)) {
+	if (BuildScript::IsClear(item.buildScriptID)) {
 		if (wg.Plant()) {
 			return false;
 		}
 		if (context->chitBag->QueryBuilding(IString(), item.pos, 0)) {
 			return false; // need to clear building
 		}
-		if (wg.RockHeight() || wg.Pave() || wg.Circuit()) {
+		if (wg.RockHeight() || wg.Pave()) {
 			return false; // need to clear rock or pave
 		}
 		return true;

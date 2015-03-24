@@ -64,6 +64,9 @@ public:
 	// 'pos' in minimum coordinates, size=1 or 2, rotation 0-270
 	static grinliz::Rectangle2I CalcPorchPos(const grinliz::Vector2I& pos, int size, float rotation);
 
+	bool NeedsCorePower() const { return needsCorePower; }
+	void SetNeedsCorePower(bool v) { needsCorePower = v; }
+
 private:
 	void SyncWithSpatial();
 	//void UpdatePorch(bool clearPorch);
@@ -75,6 +78,7 @@ private:
 	int						hasCircuit;	
 	float					glowTarget;
 	float					glow;
+	bool					needsCorePower;
 	grinliz::Rectangle2I	bounds;
 };
 

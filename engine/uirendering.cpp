@@ -198,7 +198,6 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.texture0 = (Texture*)textureHandle;
 	data.indexBuffer  = ibo->ID();
 	data.vertexBuffer = vbo->ID();
-	//Vector4F control = { 1, 0, 1, 1 };
 	GPUControlParam control;
 	control.saturation = 0;
 
@@ -213,9 +212,9 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 		data.texture0Clip = uvClip + id;
 		data.texture0ColorMap = colorXForm + id;
 	}
+	GLASSERT(count < 16000);	// should be fine, sanity check. think there is a hard cutoff for 16bit vertices
 	GPUDevice::Instance()->Draw( shader, stream, data, start, count, 1 );
 }
-
 
 
 void UIRenderer::SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, RenderAtom* atom )
@@ -227,40 +226,6 @@ void UIRenderer::SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, i
 	atom->ty1 = (float)(h-y0) / (float)h;
 }
 
-
-
-
-//void UIRenderer::GamuiGlyph( int c, int c1, float height, IGamuiText::GlyphMetrics* metric )
-//{
-//	UFOText::Instance()->Metrics( c, c1, height, metric );
-//}
-
-
-/*void UIRenderer::LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float _x, float _y, float vSpace, const Screenport& port )
-{
-	float w = items->Width();
-	float h = items->Height()*(float)nItems + vSpace*(float)(nItems-1);
-	float x = _x;
-	float y = _y - h*0.5f;
-
-	if ( x < port.UIBoundsClipped3D().min.x ) {
-		x = port.UIBoundsClipped3D().min.x;
-	}
-	else if ( x+w >= port.UIBoundsClipped3D().max.x ) {
-		x = port.UIBoundsClipped3D().max.x - w;
-	}
-	if ( y < port.UIBoundsClipped3D().min.y ) {
-		y = port.UIBoundsClipped3D().min.y;
-	}
-	else if ( y+h >= port.UIBoundsClipped3D().max.y ) {
-		y = port.UIBoundsClipped3D().max.y - h;
-	}
-	for( int i=0; i<nItems; ++i ) {
-		gamui::UIItem* item = (UIItem*)((U8*)items + stride*i);
-		item->SetPos( x, y + items->Height()*(float)i + vSpace*(float)i );
-	}
-}
-*/
 
 void DecoEffect::Play( int startPauseTime, bool invisibleWhenDone )	
 {

@@ -176,7 +176,9 @@ struct Vector2
 		y = -a;
 	}
 
-	bool Adjacent(const Vector2<T>& rhs, bool includeDiagonals) {
+	// Assuming 'this' and 'rhs' are points, are they
+	// adjacent points? (One unit apart.)
+	bool IsAdjacent(const Vector2<T>& rhs, bool includeDiagonals) const {
 		int dx = abs(T(rhs.x - x));
 		int dy = abs(T(rhs.y - y));
 
@@ -187,6 +189,13 @@ struct Vector2
 			return dx <= 1 && dy <= 1;
 		}
 		return (dx + dy) == 1;
+	}
+
+	// Assuming 'this' is a point, get the adjacent ones.
+	Vector2<T> Adjacent(int which) const {
+		GLASSERT(which >= 0 && which < 4);
+		static const Vector2I delta[4] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+		return *this + delta[which];
 	}
 };
 

@@ -13,7 +13,6 @@ struct BuildData
 	int					group;
 	const char*			desc;				// what does this do?
 	const char*			requirementDesc;	// what requirements are needed to build this?
-	int					circuit;
 
 	int					cost;
 	int					size;			// 1 or 2
@@ -63,21 +62,9 @@ public:
 
 		KIOSK,
 
-		// Trickiness:
-		// CIRCUIT_NONE isn't used for building, so CIRCUIT_START maps to CIRCUIT_SWITCH
-		// The TRANSISTORS are duplicates in the UI.
-		// Easier - if dangerous - to duplicate.
 		CIRCUITFAB,
 		BATTERY,
 		TURRET,
-		BUILD_CIRCUIT_SWITCH,
-		//BUILD_CIRCUIT_ZAPPER,	// disabled for now. turrets mostly cover this
-		BUILD_CIRCUIT_BEND,
-		BUILD_CIRCUTI_FORK_2,
-		BUILD_CIRCUIT_ICE,
-		BUILD_CIRCUIT_STOP,
-		BUILD_CIRCUIT_DETECT_ENEMY,
-		BUILD_CIRCUIT_TRANSISTOR,
 
 		NUM_PLAYER_OPTIONS,
 
@@ -98,12 +85,6 @@ public:
 		END_CIRCUITS = NUM_PLAYER_OPTIONS,
 	};
 
-	static bool IsCircuit(int action) {
-		if (action >= BUILD_CIRCUIT_SWITCH && action < END_CIRCUITS && action != BATTERY) {
-			return true;
-		}
-		return false;
-	}
 	static bool IsBuild( int action ) { return action >= PAVE; }
 	static bool IsClear( int action ) { return action == CLEAR; }
 

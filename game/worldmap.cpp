@@ -2114,19 +2114,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 							layer = EMITTER + 1;	// lava
 					}
 					else if ( layer == WorldGrid::LAND ) {
-						if (wg.Circuit()) {
-							int circuit = wg.Circuit();
-							layer = CIRCUIT + circuit - 1;
-							rotation = wg.CircuitRot();
-							if (circuit >= CIRCUIT_LINE_NS_GREEN && circuit <= CIRCUIT_LINE_CROSS_PAVE) {
-								int pave = wg.Pave();
-								if (pave && circuit < CIRCUIT_LINE_NS_PAVE)
-									layer += 3;
-								else if (!pave && circuit >= CIRCUIT_LINE_NS_PAVE)
-									layer -= 3;
-							}
-						}
-						else if (wg.Porch()) {
+						if (wg.Porch()) {
 							layer = PORCH + wg.Porch() - 1;
 						}
 						else if (wg.Pave()) {

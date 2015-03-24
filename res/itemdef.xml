@@ -270,6 +270,48 @@
         cost="40"
         zone="industrial" />
 
+  <GameItem name="switchOn"
+        resource="switchOn"
+        porch="1"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="100"
+        cost="40"
+        zone="industrial" />
+
+  <GameItem name="switchOff"
+        resource="switchOff"
+        porch="1"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="100"
+        cost="40"
+        zone="industrial" />
+
+  <GameItem name="gate"
+        resource="gate"
+        flags="IMMUNE_FIRE IMMUNE_SHOCK"
+        porch="0"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="100"
+        cost="40"
+        zone="industrial" />
+
+  <GameItem name="detector"
+        resource="detector"
+        flags="IMMUNE_FIRE IMMUNE_SHOCK"
+        porch="0"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="100"
+        cost="40"
+        zone="industrial" />
+
   <GameItem name="circuitFab"
         resource="circuitFab"
         flags="DAMAGE_UNDER_WATER"

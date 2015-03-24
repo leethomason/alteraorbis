@@ -8,6 +8,7 @@
 #include "../game/circuitsim.h"
 #include "../engine/text.h"
 #include "../game/fluidsim.h"
+#include "../game/mapspatialcomponent.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -33,8 +34,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	context.engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", "Green", "Violet", "Mantis",
-											 "Switch", "Battery", "Zapper", "Bend", "Fork2", "Silica", "Stop", "Detector", "Transistor", "Rotate" };
+	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", 
+											 "Switch On", "Switch Off", "Temple", "Gate", "Detector", "Delete", "Rotate" };
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -63,11 +64,16 @@ void FluidTestScene::Resize()
 {
 	PositionStd(&okay, 0);
 	LayoutCalculator layout = DefaultLayout();
+
+	int x = 0;
+	int y = 0;
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
-		if (i < NUM_BUILD_BUTTONS)
-			layout.PosAbs(&buildButton[i], i, -3);
-		else
-			layout.PosAbs(&buildButton[i], i - NUM_BUILD_BUTTONS, -2);
+		layout.PosAbs(&buildButton[i], x, -3+y);
+		++x;
+		if (x == 10) {
+			x = 0;
+			++y;
+		}
 	}
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&loadButton, 2, -1);
@@ -118,56 +124,83 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 	if (result == INTERSECT) {
 		Vector2I pos2i = ToWorld2I(at);
 		if (context.worldMap->Bounds().Contains(pos2i)) {
+			int id = -1;
+			for (int i = 0; i < NUM_BUTTONS; ++i) {
+				if (buildButton[i].Down()) {
+					id = i;
+					break;
+				}
+			}
+			if (id >= 0) {
+				Chit* chit = 0;
+				switch (id) {
+					case BUTTON_ROCK0:
+					case BUTTON_ROCK1:
+					case BUTTON_ROCK2:
+					case BUTTON_ROCK3:
+					context.worldMap->SetRock(pos2i.x, pos2i.y, id - BUTTON_ROCK0, false, WorldGrid::ROCK);
+					break;
 
-			const WorldGrid& wg = context.worldMap->GetWorldGrid(pos2i);
-			if (buildButton[BUTTON_ROTATE].Down()) {
-				int rot = context.worldMap->CircuitRotation(pos2i.x, pos2i.y);
-				context.worldMap->SetCircuitRotation(pos2i.x, pos2i.y, rot+1);
-			}
-			else if (wg.Circuit() == CIRCUIT_SWITCH) {
-				context.circuitSim->TriggerSwitch(pos2i);
-			}
-			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY ) {
-				context.circuitSim->TriggerDetector(pos2i);
-			}
-			else {
-				for (int i = BUTTON_SWITCH; i < NUM_BUTTONS; ++i) {
-					if (buildButton[i].Down()) {
-						int circuit = i - BUTTON_SWITCH + 1;
-						context.worldMap->SetCircuit(pos2i.x, pos2i.y, circuit);
-					}
-				}
-				if (buildButton[BUTTON_ROCK0].Down()) {
-					context.worldMap->SetRock(pos2i.x, pos2i.y, 0, false, WorldGrid::ROCK);
-				}
-				else if (buildButton[BUTTON_ROCK1].Down()) {
-					context.worldMap->SetRock(pos2i.x, pos2i.y, 1, false, WorldGrid::ROCK);
-				}
-				else if (buildButton[BUTTON_ROCK2].Down()) {
-					context.worldMap->SetRock(pos2i.x, pos2i.y, 2, false, WorldGrid::ROCK);
-				}
-				else if (buildButton[BUTTON_ROCK3].Down()) {
-					context.worldMap->SetRock(pos2i.x, pos2i.y, 3, false, WorldGrid::ROCK);
-				}
-				else if (buildButton[BUTTON_EMITTER].Down()) {
+					case BUTTON_EMITTER:
 					context.worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_WATER);
-				}
-				else if (buildButton[BUTTON_LAVA_EMITTER].Down()) {
+					break;
+
+					case BUTTON_LAVA_EMITTER:
 					context.worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
+					break;
+
+					case BUTTON_SWITCH_ON:
+					chit = context.chitBag->NewBuilding(pos2i, "switchOn", TEAM_HOUSE);
+					break;
+
+					case BUTTON_SWITCH_OFF:
+					chit = context.chitBag->NewBuilding(pos2i, "switchOn", TEAM_HOUSE);
+					break;
+
+					case BUTTON_TEMPLE:
+					chit = context.chitBag->NewBuilding(pos2i, "temple", TEAM_HOUSE);
+					break;
+
+					case BUTTON_GATE:
+					chit = context.chitBag->NewBuilding(pos2i, "gate", TEAM_HOUSE);
+					break;
+
+					case BUTTON_DETECTOR:
+					chit = context.chitBag->NewBuilding(pos2i, "detector", TEAM_HOUSE);
+					break;
+
+					case BUTTON_DELETE:
+					{
+						Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
+						if (building) {
+							building->QueueDelete();
+						}
+					}
+					break;
+
+					case BUTTON_ROTATE:
+					{
+						Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
+						if (building) {
+							Matrix4 m;
+							building->Rotation().ToMatrix(&m);
+							float r = m.CalcRotationAroundAxis(1);
+							r = NormalizeAngleDegrees(r + 90.0f);
+							building->SetRotation(Quaternion::MakeYRotation(r));
+						}
+
+					}
+					break;
 				}
-				else if (buildButton[BUTTON_GREEN].Down()) {
-//					context.chitBag->NewCrystalChit(at, CRYSTAL_GREEN, false);
-				}
-				else if (buildButton[BUTTON_VIOLET].Down()) {
-//					context.chitBag->NewCrystalChit(at, CRYSTAL_VIOLET, false);
-				}
-				else if (buildButton[BUTTON_MANTIS].Down()) {
-					context.chitBag->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+				if (chit) {
+					MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+					if (msc) msc->SetNeedsCorePower(false);
 				}
 			}
 		}
 	}
 }
+
 
 
 void FluidTestScene::ItemTapped(const gamui::UIItem* item)

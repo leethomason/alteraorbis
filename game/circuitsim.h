@@ -17,31 +17,13 @@ class LumosChitBag;
 class XStream;
 struct ChitContext;
 
-// WARNING: partial duplicate in BuildScript.h
-// WARNING: partial duplicate in FluidTestScene.h
-// WARNING: also need to add rendering in the WorldMap.cpp
-enum {
-	CIRCUIT_NONE,
-	CIRCUIT_SWITCH,
-	CIRCUIT_BATTERY,
-	CIRCUIT_POWER_UP,
-	CIRCUIT_BEND,
-	CIRCUIT_FORK_2,
-	CIRCUIT_ICE,
-	CIRCUIT_STOP,
-	CIRCUIT_DETECT_ENEMY,
-	CIRCUIT_TRANSISTOR_A,	// needs to be last of the regular circuits: some special code that there is one transistor in 2 states.
-	CIRCUIT_TRANSISTOR_B,
-	CIRCUIT_LINE_NS_GREEN,
-	CIRCUIT_LINE_EW_GREEN,
-	CIRCUIT_LINE_CROSS_GREEN,
-	CIRCUIT_LINE_NS_PAVE,
-	CIRCUIT_LINE_EW_PAVE,
-	CIRCUIT_LINE_CROSS_PAVE,
-
-	CIRCUIT_LINE_START = CIRCUIT_LINE_NS_GREEN,
-	CIRCUIT_LINE_END = CIRCUIT_LINE_CROSS_PAVE+1
-};
+/*
+	on switch
+	off switch
+	temple (battery)
+	gate / silica creator (how to do this???)
+	enemy detector
+*/
 
 
 class CircuitSim
@@ -59,6 +41,21 @@ public:
 	void DrawGroups(const grinliz::Vector2I& sector, gamui::Canvas* canvas);
 
 private:
+
+	struct Group {
+		grinliz::Rectangle2I bounds;
+		grinliz::CArray<int, 16> idArr;
+	};
+	class CompValueVector2I {
+	public:
+		template <class T>
+		static U32 Hash( const T& v)					{ return v.y*16000 + v.x; }
+		template <class T>
+		static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
+	};
+
+	void FillGroup(Group* g, const grinliz::Vector2I& pos, Chit* chit);
+
 	const ChitContext* context;
 
 	enum {
@@ -69,13 +66,9 @@ private:
 		NUM_GROUPS
 	};
 
-	struct Group {
-		grinliz::Rectangle2I bounds;
-		grinliz::CArray<int, 16> idArr;
-	};
-
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Chit*> queryArr;
+	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
 
 	gamui::Canvas canvas;
 };

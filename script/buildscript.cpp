@@ -35,13 +35,6 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
 	{ "Battery", "power",			5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
 	{ "Turret", "turret",			5, "Fires weapon when charge applied.", "Requires a Circuit Fab" },
-	{ "Switch", "",					5, "Creates a spark when triggered.", "Requires a Circuit Fab", CIRCUIT_SWITCH },
-	{ "Bend", "",					5, "Routes electrons.", "Requires a Circuit Fab", CIRCUIT_BEND },
-	{ "Split", "",					5, "Splits electrons.", "Requires a Circuit Fab", CIRCUIT_FORK_2 },
-	{ "Silica\nGate", "",			5, "Uses a charge to create or destroy Silica.", "Requires a Circuit Fab", CIRCUIT_ICE },
-	{ "Stop", "",					5, "Absorbs a charge or spark.", "Requires a Circuit Fab", CIRCUIT_STOP },
-	{ "Detector", "",				5, "Sparks for enemies of any mass.", "Requires a Circuit Fab", CIRCUIT_DETECT_ENEMY },
-	{ "Transistor", "",				5, "Digital toggle switch.", "Requires a Circuit Fab", CIRCUIT_TRANSISTOR_A },
 
 	// Additional:
 	{ "TrollStatue", "trollStatue", 6 },
@@ -49,8 +42,6 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "KamakirianStatue", "kamaStatue", 6 },
 	{ "GobmanStatue", "gobmanStatue", 6 },
 };
-
-	//{ "Zapper", "",					5, "Converts charge to a zapping attack.", "Requires a Circuit Fab", CIRCUIT_POWER_UP },
 
 
 const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure, int *id )

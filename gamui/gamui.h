@@ -734,7 +734,7 @@ public:
 
 private:
 	void PushRectangle(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf, 
-					   float x0, float y0, float x1, float y1);
+					   float x, float y, float x1, float y1);
 	void PushArc(PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf,
 				 float x, float y, float angle0, float angle1, float rad, float width);
 
@@ -743,15 +743,7 @@ private:
 	};
 	struct Cmd {
 		int type;
-		float x0, y0;
-		union {
-			float x1;
-			float w;
-		};
-		union {
-			float y1;
-			float h;
-		};
+		float x, y, w, h;
 		float thickness;
 		float arc;
 	};

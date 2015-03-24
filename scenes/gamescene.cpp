@@ -794,7 +794,6 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 		}
 		else if (buildActive == BuildScript::ROTATE) {
 			Chit* chit = sim->GetChitBag()->QueryBuilding(IString(),pos2i, 0);
-			int circuit = sim->GetWorldMap()->Circuit(pos2i.x, pos2i.y);
 
 			if (chit) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
@@ -805,9 +804,6 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 					Quaternion q = Quaternion::MakeYRotation(r);
 					chit->SetRotation(q);
 				}
-			}
-			else if (circuit) {
-				sim->GetWorldMap()->SetCircuitRotation(pos2i.x, pos2i.y, sim->GetWorldMap()->CircuitRotation(pos2i.x, pos2i.y) + 1);
 			}
 		}
 		else {
@@ -2082,10 +2078,10 @@ void GameScene::DrawDebugText()
 		ufoText->Draw( x, y, "id=%d: %s", infoID, str.c_str() );
 		y += 16;
 	}
-	if ( !voxelInfoID.IsZero() ) {
-		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( voxelInfoID.x, voxelInfoID.y );
-		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d pave=%d circuit=%d circRot=%d", 
-					   voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Pave(), wg.Circuit(), wg.CircuitRot() );
+	if (!voxelInfoID.IsZero()) {
+		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(voxelInfoID.x, voxelInfoID.y);
+		ufoText->Draw(x, y, "voxel=%d,%d hp=%d/%d pave=%d ",
+					  voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Pave());
 		y += 16;
 	}
 }

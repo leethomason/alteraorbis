@@ -37,6 +37,7 @@ MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 	hasCircuit = 0;
 	glow = 1;
 	glowTarget = 1;
+	needsCorePower = true;
 	bounds.Zero();
 }
 
@@ -112,14 +113,21 @@ void MapSpatialComponent::SyncWithSpatial()
 
 	}
 	CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2I(pos)));
-	if (cs && cs->InUse()) {
-		glowTarget = 1;
-		if (ebs) {
-			glowTarget = ebs->Reachable() ? 1.0f : 0.0f;
+
+	if (needsCorePower) {
+		if (cs && cs->InUse()) {
+			glowTarget = 1;
+			if (ebs) {
+				glowTarget = ebs->Reachable() ? 1.0f : 0.0f;
+			}
+		}
+		else {
+			glowTarget = 0;
 		}
 	}
 	else {
-		glowTarget = 0;
+		glowTarget = 1;
+		glow = 1;
 	}
 
 	// And the porches / circuits: (rotation doesn't change bounds);
@@ -147,13 +155,9 @@ int MapSpatialComponent::DoTick(U32 delta)
 	if (rc) {
 		const GameItem* gameItem = parentChit->GetItem();
 		if (gameItem && gameItem->keyValues.GetIString(ISC::procedural) == ISC::team) {
-
 			int team = parentChit->Team();
 			ProcRenderInfo info;
 			AssignProcedural(parentChit->GetItem(), &info);
-//			info.color.m41 *= glow;
-//			info.color.m42 *= glow;
-//			info.color.m43 *= glow;
 			info.color.X(Matrix4::M41) *= glow;
 			info.color.X(Matrix4::M42) *= glow;
 			info.color.X(Matrix4::M43) *= glow;
@@ -202,7 +206,6 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 
 /*static*/ void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chitBag, CircuitSim* ciruitSim, const Rectangle2I& rect)
 {
-	bool circuitChange = false;
 	for (Rectangle2IIterator it(rect); !it.Done(); it.Next()) {
 		int porchType = 0;
 		Chit* porchChit = chitBag->QueryPorch(it.Pos());
@@ -213,29 +216,14 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 		}
 		worldMap->SetPorch(it.Pos().x, it.Pos().y, porchType);
 
-		int circuit = 0;
 		float yRotation = 0;
 
 		Chit* chit = chitBag->QueryBuilding(IString(), it.Pos(), 0);
 		if (chit) {
 			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 			if (msc) {
-				circuit = msc->CircuitType();
 				yRotation = YRotation(chit->Rotation());
 			}
-		}
-
-		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos());
-		if (circuit) {
-			int r = LRint(yRotation / 90.0f);
-			if (wg.CircuitRot() != r) {
-				worldMap->SetCircuitRotation(it.Pos().x, it.Pos().y, r );
-				circuitChange = true;
-			}
-		}
-		if (circuit != wg.Circuit()) {
-			circuitChange = true;
-			worldMap->SetCircuit(it.Pos().x, it.Pos().y, circuit);
 		}
 	}
 }
@@ -276,6 +264,7 @@ void MapSpatialComponent::Serialize(XStream* xs)
 	XARC_SER(xs, hasCircuit);
 	XARC_SER(xs, glow);
 	XARC_SER(xs, glowTarget);
+	XARC_SER(xs, needsCorePower);
 	this->EndSerialize(xs);
 }
 

@@ -233,8 +233,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 				context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 0, false, 0);
 				context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, 0);
 
-				context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, 0);
-
 				Chit* found = chitBag->QueryBuilding(IString(), task->pos2i, 0);
 				if (found && (found->GetItem()->IName() != ISC::core)) {
 					found->DeRez();
@@ -263,9 +261,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					}
 					else if (task->buildScriptID == BuildScript::PAVE) {
 						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, coreScript->GetPave());
-					}
-					else if (buildData.circuit) {
-						context->worldMap->SetCircuit(task->pos2i.x, task->pos2i.y, buildData.circuit);
 					}
 					else {
 						// Move the build cost to the building. The gold is held there until the
@@ -333,13 +328,13 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_FLAG:
 		{
-			const WorldGrid wg = context->worldMap->GetWorldGrid(pos2i);
-			if (wg.Circuit() == CIRCUIT_SWITCH) {
-				context->circuitSim->TriggerSwitch(pos2i);
-			}
-			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
-				context->circuitSim->TriggerDetector(pos2i);
-			}
+//			const WorldGrid wg = context->worldMap->GetWorldGrid(pos2i);
+//			if (wg.Circuit() == CIRCUIT_SWITCH) {
+//				context->circuitSim->TriggerSwitch(pos2i);
+//			}
+//			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
+//				context->circuitSim->TriggerDetector(pos2i);
+//			}
 			// FIXME: what about flags in other domains?
 			coreScript->RemoveFlag(pos2i);
 			Remove();

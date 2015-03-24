@@ -92,9 +92,6 @@ private:
 	unsigned plantOnFire		: 1;	// NOTE: matches the array in the FluidSim
 	unsigned plantOnShock		: 1;
 
-	unsigned circuit			: 4;
-	unsigned circuitRot			: 2;
-
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
 											 //|| (fluidHeight >= FLUID_BLOCKING) 
@@ -156,19 +153,6 @@ public:
 		GLASSERT( Land() == LAND );
 		GLASSERT( RockHeight() == 0 );
 		pave = p;
-	}
-
-	int Circuit() const { return circuit; }
-	int CircuitRot() const { return circuitRot; }
-	void SetCircuit(int id) {
-		circuit = 0;
-		if (id) {
-			circuit = id;
-			GLASSERT(circuit == id);
-		}
-	}
-	void SetCircuitRot(int rot) {
-		circuitRot = rot;
 	}
 
 	int Porch() const		{ return isPorch; }

@@ -2651,14 +2651,15 @@ void AIComponent::EnterNewGrid(  )
 
 	// Circuits.
 	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
-	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+	// FIXME: need to turn detectors back on!
+/*	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
 	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs && Team::GetRelationship(cs->ParentChit(), parentChit) == RELATE_ENEMY) {
 			Context()->circuitSim->TriggerDetector(pos2i);
 		}
 	}
-
+*/
 	// Is there food to eat?
 	if (gameItem->HPFraction() < EAT_WILD_FRUIT) {
 		FruitElixirFilter fruitFilter;

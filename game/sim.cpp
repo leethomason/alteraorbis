@@ -834,7 +834,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 	if (paveBlocks && wg.Pave()) {
 		return false;
 	}
-	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() || wg.Circuit() ) {
+	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
 		return false;
 	}
 
