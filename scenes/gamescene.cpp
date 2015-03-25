@@ -416,10 +416,10 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 }
 
 
-void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
+void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 {
 	Vector3F at = { 0, 0, 0 };
-	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
+	ModelVoxel mv = this->ModelAtMouse(view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at);
 	Vector2I pos2i = { (int)at.x, (int)at.z };
 
 	// --- Selection display. (Only in desktop interface.)
@@ -429,15 +429,15 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	const char* name = "";
 
 	int buildActive = menu->BuildActive();
-	if (buildActive && PlatformHasMouseSupport() ) {
+	if (buildActive && PlatformHasMouseSupport()) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
 			name = "clearMarker1";
 		}
-		else { 
+		else {
 			BuildScript buildScript;
-			int s = buildScript.GetData( buildActive ).size;
-			if ( s == 1 ) {
+			int s = buildScript.GetData(buildActive).size;
+			if (s == 1) {
 				name = "buildMarker1";
 			}
 			else {
@@ -446,31 +446,31 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 			}
 		}
 	}
-	if ( *name ) {
+	if (*name) {
 		// Make the model current.
-		if ( !selectionModel || !StrEqual( selectionModel->GetResource()->Name(), name )) {
+		if (!selectionModel || !StrEqual(selectionModel->GetResource()->Name(), name)) {
 			delete selectionModel;
 			selectionModel = new Model(name, engine->GetSpaceTree());
-			GLASSERT( selectionModel );
+			GLASSERT(selectionModel);
 		}
 	}
 	else {
-			delete selectionModel;
-			selectionModel = 0;
-		}
-	if ( selectionModel ) {
+		delete selectionModel;
+		selectionModel = 0;
+	}
+	if (selectionModel) {
 		// Move away from the eye so that the new color is visible.
 		Vector3F pos = at;
-		pos.x = floorf( at.x ) + size*0.5f;
-		pos.z = floorf( at.z ) + size*0.5f;
-		
+		pos.x = floorf(at.x) + size*0.5f;
+		pos.z = floorf(at.z) + size*0.5f;
+
 		Vector3F dir = pos - engine->camera.PosWC();
 		dir.Normalize();
 		pos = pos + dir*0.01f;
 
-		selectionModel->SetPos( pos );
-		Vector4F color = { 1,1,1, 0.3f };
-		selectionModel->SetColor( color );
+		selectionModel->SetPos(pos);
+		Vector4F color = { 1, 1, 1, 0.3f };
+		selectionModel->SetColor(color);
 	}
 }
 
@@ -849,7 +849,7 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 }
 
 
-void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
+void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	tapView = view;	// justs a temporary to pass through to ItemTapped()
 	bool uiHasTap = ProcessTap(action, view, world);
@@ -861,7 +861,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	RenderAtom atom;
 	if (!uiHasTap) {
 		if (action == GAME_TAP_DOWN) {
-				mapDragStart = ToWorld2F(at);
+			mapDragStart = ToWorld2F(at);
 			tapDown = view;
 
 			dragMode = EDragMode::NONE;
@@ -890,26 +890,26 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		else if (action == GAME_TAP_MOVE) {
 			if (dragMode == EDragMode::BUILDING_ROTATION) {
 				DragRotateBuilding(ToWorld2F(at));
-				}
+			}
 			else if (dragMode == EDragMode::PLAN_AREA) {
-					int count = 0;
+				int count = 0;
 				if ((ToWorld2F(at) - mapDragStart).LengthSquared() > 0.25f) {
-						Rectangle2I r;
+					Rectangle2I r;
 					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(ToWorld2F(at)));
 					DragBuildArea(&atom);
 
-						for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
-							buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
-							buildMark[count].SetSize(1.0f, 1.0f);
-							buildMark[count].SetVisible(true);
-							buildMark[count].SetAtom(atom);
-						}
-					}
-					while (count < NUM_BUILD_MARKS) {
-						buildMark[count].SetVisible(false);
-						++count;
+					for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
+						buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
+						buildMark[count].SetSize(1.0f, 1.0f);
+						buildMark[count].SetVisible(true);
+						buildMark[count].SetAtom(atom);
 					}
 				}
+				while (count < NUM_BUILD_MARKS) {
+					buildMark[count].SetVisible(false);
+					++count;
+				}
+			}
 			else if (dragMode == EDragMode::PLAN_MOVE) {
 				dragWorkItem.pos = ToWorld2I(at);
 				DrawBuildMarks(dragWorkItem);
@@ -920,8 +920,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else if (dragMode == EDragMode::PAN) {
 				// Do nothing.
-		}
 			}
+		}
 		else if (action == GAME_TAP_UP) {
 			if (dragMode == EDragMode::BUILDING_ROTATION) {
 				// Do nothing

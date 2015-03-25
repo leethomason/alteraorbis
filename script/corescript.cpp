@@ -336,7 +336,7 @@ bool CoreScript::IsCitizen( Chit* chit )
 }
 
 
-bool CoreScript::IsCitizen( int id )
+bool CoreScript::IsCitizen(int id)
 {
 	int idx = citizens.Find(id);
 	return (idx >= 0) && (CitizenFilter(id) != 0);
@@ -361,7 +361,7 @@ int CoreScript::SquadID(int chitID)
 	for (int i = 0; i < MAX_SQUADS; ++i) {
 		if (squads[i].Find(chitID) >= 0) {
 			if (IsCitizen(chitID))
-			return i;
+				return i;
 		}
 	}
 	return -1;

@@ -496,7 +496,7 @@ void WorkQueue::InitSector( Chit* _parent, const grinliz::Vector2I& _sector )
 	parentChit = _parent; 
 	sector = _sector; 
 	for( int i=0; i<queue.Size(); ++i ) {
-			AddImage( &queue[i] );
+		AddImage( &queue[i] );
 	}
 }
 

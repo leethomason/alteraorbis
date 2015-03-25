@@ -220,12 +220,11 @@ int main(int argc, char **argv)
 	int modKeys = SDL_GetModState();
 	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
 
-	/*
 	int value = GetSystemMetrics(SM_DIGITIZER);
 	if (value & NID_INTEGRATED_TOUCH) GLOUTPUT(("NID_INTEGRATED_TOUCH\n"));
 	if (value & NID_MULTI_INPUT) GLOUTPUT(("NID_MULTI_INPUT\n"));
 	if (value & NID_READY) GLOUTPUT(("NID_READY\n"));
-	*/
+
 	grinliz::Vector2F multiTouchStart = { 0, 0 };
 	int mouseMoveCount = 0;
 

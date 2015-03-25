@@ -1,11 +1,18 @@
-x GT: suggestion - add popup advisor when the game starts (welcome to altera, altera is a, you are a, your aim is to, some story or lore  and ask if people want detailed tutorial popus with pause (step by step, click menu to build this because xxx) or make do with the tiny "live" advisor on the ui
-x GT: use color/glow to show building control / ownership / working (2/20/2015)
-d GT: humans change color as they walk. unfixable driver issue? no system repros. did improve 3.2 & 3.3 context support.
-x GT: tutorial improvements (2/20/2015)
-x GT: buildings should change to team color when domain controlled
+- touch support
+	x 2 finger pan
+	x 2 finger drag / pan / rotate
+	x single finger view drag?
+	x no pause (space)
+	x no view change (tab)
+	x build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
+	x build rotation?
+	x build reticule is useless & incorrect. detect mouse mode and re-enable.
+	x shoot at location (long press?)
+	- correct porch icon for building
+	- uniform clear and build markers
 
+x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: food as medkit
-- GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
@@ -18,6 +25,8 @@ x flags
 x info on attack flags: who is attacking me??
 x crash in Model::userData = 0xffeefffee
 x expand strategic attack bounds
+
+- attack focus needs tweaking. attack ground needs tweaking.
 - optimize debug
 - autosave
 - selection and face isn't consistent
@@ -84,15 +93,16 @@ x add target portrait
 	- when does/should flick rotation work?
 	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
 x remove grid64 BS for proper optimization
-- control flag art
+x control flag art
 - rebalance denizen spawning
 - visitors should wander around before leaving in a "useless" domain.
-- Visitor trails on map
+x Visitor trails on map
+- visitor percentages?
 - Limit squad control to "power radius"
 - Switch to tech tree model for visitors? Do they bring gems??
 - AI adventures
 - squad adventure mode?
-- AI take over mode?
+x AI take over mode?
 - control should show weapon ownership
 - retest truulga item generation
 - denizen red on red color scheme way too much
@@ -203,6 +213,13 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 	- exploring
 	    - xp for exploring!!
 	    - "domain theme" when you arrive
+- Ships
+	- speeders
+	- fighters
+	- carriers
+	- microfighter style construction
+	- rethink grid travel for ships
+	- design sharing?
 
 - TBD
 	- monster ecology
@@ -305,6 +322,11 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x GT: suggestion - add popup advisor when the game starts (welcome to altera, altera is a, you are a, your aim is to, some story or lore  and ask if people want detailed tutorial popus with pause (step by step, click menu to build this because xxx) or make do with the tiny "live" advisor on the ui
+x GT: use color/glow to show building control / ownership / working (2/20/2015)
+d GT: humans change color as they walk. unfixable driver issue? no system repros. did improve 3.2 & 3.3 context support.
+x GT: tutorial improvements (2/20/2015)
+x GT: buildings should change to team color when domain controlled
 x fast world-gen
 	x refactor; 78-80 ms. Threads all slower. Too many small jobs.
 	x traditional optimization during thread work

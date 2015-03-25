@@ -118,9 +118,9 @@ public:
 		a particular squad, and movement 
 		can be coordinated.
 	*/
-	void SetWaypoints(int squadID, const grinliz::Vector2I& dest);
-	grinliz::Vector2I GetWaypoint(int squadID);	// gets the current waypoint
-	grinliz::Vector2I GetLastWaypoint(int squadID);
+	void				SetWaypoints(int squadID, const grinliz::Vector2I& dest);
+	grinliz::Vector2I	GetWaypoint(int squadID);	// gets the current waypoint
+	grinliz::Vector2I	GetLastWaypoint(int squadID);
 	const grinliz::CDynArray<grinliz::Vector2I>& GetWaypoints(int squadID) const {
 		GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
 		return waypoints[squadID];

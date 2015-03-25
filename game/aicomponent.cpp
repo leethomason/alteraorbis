@@ -818,6 +818,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const ChitContext* context = Context();
+
 	if ( pmc ) {
 		// Read our destination port information:
 		const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
