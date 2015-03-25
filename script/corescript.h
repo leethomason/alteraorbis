@@ -89,7 +89,7 @@ public:
 	Chit* PrimeCitizen();
 
 	// 0-3, -1 if not in squad
-	int SquadID(int id);
+	int SquadID(int chitID);
 	int Squaddies(int squadID, CChitArray* arr);
 	bool IsSquaddieOnMission(int chitID, int* squadID);
 
@@ -171,6 +171,7 @@ private:
 	void AssignToSquads();
 	void DoStrategicTick();
 	void NewWaypointChits(int squadID);
+	Chit* CitizenFilter(int id);
 
 	WorkQueue*	workQueue;
 	grinliz::Vector2I sector;

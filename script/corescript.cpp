@@ -300,6 +300,9 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 
 bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID)
 {
+	if (!CitizenFilter(chitID)) {
+		return false;
+	}
 	for (int i = 0; i < MAX_SQUADS; ++i) {
 		if (squads[i].Find(chitID) >= 0) {
 			if (squadID) {
@@ -314,6 +317,8 @@ bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID)
 
 void CoreScript::AddCitizen( Chit* chit )
 {
+	Citizens(0);	// Filters the current array.
+	GLASSERT(citizens.Size() < MAX_CITIZENS);
 	GLASSERT(ParentChit()->Team());
 	GLASSERT(!Team::IsRogue(ParentChit()->Team()));
 	GLASSERT( citizens.Find( chit->ID()) < 0 );
@@ -327,13 +332,14 @@ void CoreScript::AddCitizen( Chit* chit )
 
 bool CoreScript::IsCitizen( Chit* chit )
 {
-	return citizens.Find( chit->ID() ) >= 0;
+	return IsCitizen(chit->ID());
 }
 
 
 bool CoreScript::IsCitizen( int id )
 {
-	return citizens.Find( id ) >= 0;
+	int idx = citizens.Find(id);
+	return (idx >= 0) && (CitizenFilter(id) != 0);
 }
 
 
@@ -341,7 +347,7 @@ bool CoreScript::IsCitizenItemID(int id)
 {
 	for (int i = 0; i < citizens.Size(); ++i) {
 		int citizenID = citizens[i];
-		Chit* chit = Context()->chitBag->GetChit(citizenID);
+		Chit* chit = CitizenFilter(citizenID);
 		if (chit && chit->GetItemID() == id) {
 			return true;
 		}
@@ -350,10 +356,11 @@ bool CoreScript::IsCitizenItemID(int id)
 }
 
 
-int CoreScript::SquadID(int id)
+int CoreScript::SquadID(int chitID)
 {
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		if (squads[i].Find(id) >= 0) {
+		if (squads[i].Find(chitID) >= 0) {
+			if (IsCitizen(chitID))
 			return i;
 		}
 	}
@@ -365,7 +372,7 @@ Chit* CoreScript::PrimeCitizen()
 {
 	for (int i = 0; i < citizens.Size(); ++i) {
 		int id = citizens[i];
-		Chit* chit = Context()->chitBag->GetChit(id);
+		Chit* chit = CitizenFilter(id);
 		if (chit && chit->GetItem()) {
 			if (chit->GetItem()->keyValues.Has("prime")) {
 				return chit;
@@ -376,13 +383,25 @@ Chit* CoreScript::PrimeCitizen()
 }
 
 
+Chit* CoreScript::CitizenFilter(int chitID)
+{
+	Chit* chit = Context()->chitBag->GetChit(chitID);
+	if (chit && (chit->Team() == parentChit->Team())) {
+		return chit;
+	}
+	return 0;
+}
+
+
 int CoreScript::Citizens(CChitArray* arr)
 {
 	int i=0;
+	const int team = parentChit->Team();
+
 	while (i < citizens.Size()) {
 		int id = citizens[i];
-		Chit* chit = Context()->chitBag->GetChit(id);
-		if (chit) {
+		Chit* chit = CitizenFilter(id);
+		if (chit) {	// check for team change, throw out of citizens.
 			if (arr) arr->Push(chit);
 			++i;
 		}

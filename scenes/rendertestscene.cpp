@@ -196,6 +196,18 @@ void RenderTestScene::Rotate( float degrees )
 }
 
 
+void RenderTestScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Process3DTap(action, view, world, engine);
+}
+
+
+void RenderTestScene::MoveCamera(float dx, float dy)
+{
+	MoveImpl(dx, dy, engine);
+}
+
+
 void RenderTestScene::HandleHotKey( int mask )
 {
 	switch( mask ) {

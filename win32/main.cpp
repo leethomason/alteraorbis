@@ -62,12 +62,18 @@ bool fullscreen = false;
 int restoreWidth = SCREEN_WIDTH;
 int restoreHeight = SCREEN_HEIGHT;
 bool cameraIso = true;
+bool hasMouse = false;
 
 int nModDB = 0;
 grinliz::GLString* databases[GAME_MAX_MOD_DATABASES];	
 
 void ScreenCapture();
 void PostCurrentGame();
+
+bool PlatformHasMouseSupport() {
+	return hasMouse;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -93,7 +99,7 @@ int main(int argc, char **argv)
 	GLASSERT((linked.major == compiled.major && linked.minor == compiled.minor));
 
 	// SDL initialization steps.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0)
 	{
 		fprintf(stderr, "SDL initialization failed: %s\n", SDL_GetError());
 		exit(1);
@@ -207,11 +213,21 @@ int main(int argc, char **argv)
 
 	int zoomX = 0;
 	int zoomY = 0;
+	bool fingersClose = true;
 
 	void* game = NewGame(screenWidth, screenHeight, 0);
 
 	int modKeys = SDL_GetModState();
 	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
+
+	/*
+	int value = GetSystemMetrics(SM_DIGITIZER);
+	if (value & NID_INTEGRATED_TOUCH) GLOUTPUT(("NID_INTEGRATED_TOUCH\n"));
+	if (value & NID_MULTI_INPUT) GLOUTPUT(("NID_MULTI_INPUT\n"));
+	if (value & NID_READY) GLOUTPUT(("NID_READY\n"));
+	*/
+	grinliz::Vector2F multiTouchStart = { 0, 0 };
+	int mouseMoveCount = 0;
 
 	// ---- Main Loop --- //
 	while (!done) {
@@ -384,6 +400,7 @@ int main(int argc, char **argv)
 
 					if (state & SDL_BUTTON(1)) {
 						GameTap(game, GAME_TAP_MOVE, x, y, mod);
+						mouseMoveCount = 0;
 					}
 					else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
 						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
@@ -395,6 +412,14 @@ int main(int argc, char **argv)
 					}
 					else if (((state & SDL_BUTTON(1)) == 0)) {
 						GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
+						mouseMoveCount++;
+						if (mouseMoveCount == 5) {
+							if (!hasMouse) {
+								GLOUTPUT(("Mouse supported.\n"));
+								GLOUTPUT_REL(("Mouse supported.\n"));
+							}
+							hasMouse = true;	// filter out OS stuff. make sure we get a decent number before going "mouse on"
+						}
 					}
 				}
 				break;
@@ -407,6 +432,59 @@ int main(int argc, char **argv)
 					}
 				}
 				break;
+
+				case SDL_FINGERUP:
+				{
+					const SDL_TouchFingerEvent* tfe = &event.tfinger;
+					int nFingers = SDL_GetNumTouchFingers(tfe->touchId);
+					if (nFingers < 2 && !multiTouchStart.IsZero()) {
+						GLOUTPUT(("2 finger END.\n"));
+						multiTouchStart.Zero();
+					}
+				}
+				break;
+
+				case SDL_MULTIGESTURE:
+				{
+					const SDL_MultiGestureEvent* mge = &event.mgesture;
+					int nFingers = SDL_GetNumTouchFingers(mge->touchId);
+					if (nFingers > 1 && multiTouchStart.IsZero()) {
+						SDL_Finger* finger0 = SDL_GetTouchFinger(mge->touchId, 0);
+						SDL_Finger* finger1 = SDL_GetTouchFinger(mge->touchId, 1);
+						fingersClose = true;
+						if (finger0 && finger1) {
+							grinliz::Vector2F d = { finger1->x - finger0->x, finger1->y - finger0->y };
+							fingersClose = d.Length() < 0.10f;
+						}
+
+						GLOUTPUT(("2 finger START %s.\n", fingersClose ? "CLOSE" : "FAR" ));
+						multiTouchStart.Set(mge->x, mge->y);
+					}
+					else if (!multiTouchStart.IsZero()) {
+						// The Pan interacts badly with zoom and rotated. So instead of a continuous,
+						// multi-event action do a bunch of "mini pans".
+						GameCameraPan(game, GAME_PAN_START,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						multiTouchStart.Set(mge->x, mge->y);
+						GameCameraPan(game, GAME_PAN_MOVE,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+						GameCameraPan(game, GAME_PAN_END,
+									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
+					}
+					if (nFingers == 2 && !fingersClose) {
+						GameZoom(game, GAME_ZOOM_DISTANCE, -mge->dDist * 10.f);
+						GameCameraRotate(game, -mge->dTheta * 100.0f);
+						//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));
+					}
+				}
+				break;
+
+				case SDL_DOLLARGESTURE:
+				{
+					GLOUTPUT(("DollarGestureEvent\n"));
+				}
+				break;
+
 
 				case SDL_QUIT:
 				{

@@ -54,7 +54,7 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
-	dragBuildingRotation = false;
+	dragMode = EDragMode::NONE;
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
@@ -104,6 +104,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	allRockButton.SetText( "All Rock" );
 	censusButton.Init( &gamui2D, game->GetButtonLook(0) );
 	censusButton.SetText( "Census" );
+	viewButton.Init(&gamui2D, game->GetButtonLook(0));
+	viewButton.SetText("View");
+	pauseButton.Init(&gamui2D, game->GetButtonLook(0));
+	pauseButton.SetText("Pause");
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -258,6 +262,9 @@ void GameScene::Resize()
 	layout.PosAbs(&saveButton, 1, -1);
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
+
+	layout.PosAbs(&viewButton, -3, -1);
+	layout.PosAbs(&pauseButton, -2, -1);
 
 	pausedLabel.SetCenterPos(gamui2D.Width()*0.5f, gamui2D.Height()*0.5f);
 
@@ -422,16 +429,10 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	const char* name = "";
 
 	int buildActive = menu->BuildActive();
-	if ( buildActive ) {
-		if (    buildActive == BuildScript::CLEAR 
-			 || buildActive == BuildScript::CANCEL ) 
+	if (buildActive && PlatformHasMouseSupport() ) {
+		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
-			const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
-			switch ( wg.Height() ) {
-			case 3:	name = "clearMarker3";	break;
-			case 2:	name = "clearMarker2";	break;
-			default:	name = "clearMarker1";	break;
-			}
+			name = "clearMarker1";
 		}
 		else { 
 			BuildScript buildScript;
@@ -454,11 +455,9 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 		}
 	}
 	else {
-		if ( selectionModel ) {
 			delete selectionModel;
 			selectionModel = 0;
 		}
-	}
 	if ( selectionModel ) {
 		// Move away from the eye so that the new color is visible.
 		Vector3F pos = at;
@@ -591,6 +590,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	ModelVoxel mv = ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, Model::MODEL_CLICK_THROUGH, nullptr, &plane);
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
 	if (!map->Bounds().Contains(plane2i)) return;
+	const WorldGrid& worldGrid = map->GetWorldGrid(plane2i);
 
 	BuildAction(plane2i);
 	int uiMode = menu->UIMode();
@@ -614,15 +614,12 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		return;
 	}
 
-	if ((game->GetTapMod() & GAME_TAP_MOD_SHIFT) && mv.Hit()) {
+	if (worldGrid.PlantStage() >= 2 || worldGrid.RockHeight()) {
 		if (AvatarSelected()) {
 			// clicked on a rock. Melt away!
 			Chit* player = GetPlayerChit();
 			if (player && player->GetAIComponent()) {
-				if (mv.ModelHit())
-					player->GetAIComponent()->Target(mv.model->userData, false);
-				else
-					player->GetAIComponent()->Target(ToWorld2I(mv.voxel), false);
+				player->GetAIComponent()->Target(plane2i, false);
 				return;
 			}
 		}
@@ -640,7 +637,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	}
 }
 
-bool GameScene::DragAtom(gamui::RenderAtom* atom)
+bool GameScene::DragBuildArea(gamui::RenderAtom* atom)
 {
 	int buildActive = menu->BuildActive();
 	if (buildActive && buildActive <= BuildScript::ICE && buildActive != BuildScript::ROTATE) {
@@ -649,6 +646,39 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 		else
 			*atom = lumosGame->CalcIconAtom("build");
 		return true;
+	}
+	return false;
+}
+
+bool GameScene::StartDragPlanLocation(const Vector2I& at, WorkItem* workItem)
+{
+	CoreScript* coreScript = GetHomeCore();
+	if (coreScript) {
+		WorkQueue* wq = coreScript->GetWorkQueue();
+		GLASSERT(wq);
+		const WorkQueue::QueueItem* item = wq->HasJobAt(at);
+		if (item && item->buildScriptID >= BuildScript::PAVE) {
+			item->GetWorkItem(workItem);
+			wq->Remove(at);
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool GameScene::StartDragPlanRotation(const Vector2I& at, WorkItem* workItem)
+{
+	CoreScript* coreScript = GetHomeCore();
+	if (coreScript) {
+		WorkQueue* wq = coreScript->GetWorkQueue();
+		GLASSERT(wq);
+		const WorkQueue::QueueItem* item = wq->HasPorchAt(at);
+		if (item) {
+			item->GetWorkItem(workItem);
+			wq->Remove(item->pos);
+			return true;
+		}
 	}
 	return false;
 }
@@ -683,13 +713,65 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 			if (d.y > 0)	rotation = 0;
 			else			rotation = 180.0f;
 		}
-		//MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
-		//if (msc) {
-		//	msc->SetYRotation(rotation);
-		//}
 		Quaternion q;
 		q.FromAxisAngle(V3F_UP, rotation);
 		building->SetRotation(q);
+	}
+}
+
+
+void GameScene::DragRotatePlan(const grinliz::Vector2F& drag, WorkItem* workItem)
+{
+	Vector2F dragStart = ToWorld2F(workItem->pos);	// mapDragStart;
+	Vector2F dragEnd = drag;
+
+	if (dragStart != dragEnd) {
+		Vector2F d = dragEnd - dragStart;
+		float rotation = 0;
+		if (fabs(d.x) > fabs(d.y)) {
+			if (d.x > 0)	rotation = 90.0f;
+			else			rotation = 270.0f;
+		}
+		else {
+			if (d.y > 0)	rotation = 0;
+			else			rotation = 180.0f;
+		}
+		workItem->rotation = rotation;
+	}
+}
+
+
+void GameScene::DrawBuildMarks(const WorkItem& workItem)
+{
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData(workItem.buildScriptID);
+	BuildData::DrawBounds(BuildData::Bounds(buildData.size, workItem.pos), 
+						  buildData.PorchBounds(buildData.size, workItem.pos, LRint(NormalizeAngleDegrees(workItem.rotation)/90.0f)), 
+						  buildMark);
+}
+
+
+void GameScene::DoCameraToggle()
+{
+	Vector3F at = V3F_ZERO;
+	sim->GetEngine()->CameraLookingAt(&at);
+
+	// Toggle high/low.
+	Camera* camera = &sim->GetEngine()->camera;
+
+	if (camera->EyeDir3()->y < -0.90f) {
+		// currently high
+		camera->SetQuat(savedCameraRotation);
+		camera->SetPosWC(camera->PosWC().x, savedCameraHeight, camera->PosWC().z);
+		sim->GetEngine()->CameraLookAt(at.x, at.z);
+	}
+	else {
+		// currently low
+		savedCameraRotation = camera->Quat();
+		savedCameraHeight = camera->PosWC().y;
+		camera->TiltRotationToQuat(-80, 0);
+		camera->SetPosWC(camera->PosWC().x, Min(EL_CAMERA_MAX, savedCameraHeight*2.0f), camera->PosWC().z);
+		sim->GetEngine()->CameraLookAt(at.x, at.z);
 	}
 }
 
@@ -779,31 +861,42 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	RenderAtom atom;
 	if (!uiHasTap) {
 		if (action == GAME_TAP_DOWN) {
-			mapDragStart.Zero();
-			dragBuildingRotation = false;
-			if (DragAtom(&atom)) {
 				mapDragStart = ToWorld2F(at);
+			tapDown = view;
+
+			dragMode = EDragMode::NONE;
+			if (DragBuildArea(&atom)) {
+				dragMode = EDragMode::PLAN_AREA;
+			}
+			else if (StartDragPlanLocation(ToWorld2I(at), &dragWorkItem)) {
+				dragMode = EDragMode::PLAN_MOVE;
+				DrawBuildMarks(dragWorkItem);
+			}
+			else if (StartDragPlanRotation(ToWorld2I(at), &dragWorkItem)) {
+				dragMode = EDragMode::PLAN_ROTATION;
+				DrawBuildMarks(dragWorkItem);
 			}
 			else if (DragRotate(ToWorld2I(at))) {
-				dragBuildingRotation = true;
-				mapDragStart = ToWorld2F(at);
+				dragMode = EDragMode::BUILDING_ROTATION;
+			}
+			else {
+				dragMode = EDragMode::PAN;
+				// This interacts badly with the other events.
+				// Moved control to the main loop. (Which creates
+				// the 2 finger close vs. far thing.)
+				//Process3DTap(GAME_PAN_START, view, world, sim->GetEngine());
 			}
 		}
-		if (action == GAME_TAP_MOVE) {
-			if (!mapDragStart.IsZero()) {
-				Vector2F end = { at.x, at.z };
-
-				if (dragBuildingRotation) {
-					// Building rotation.
-					DragRotateBuilding(end);
+		else if (action == GAME_TAP_MOVE) {
+			if (dragMode == EDragMode::BUILDING_ROTATION) {
+				DragRotateBuilding(ToWorld2F(at));
 				}
-				else {
-					// Building placement, clear, etc.
+			else if (dragMode == EDragMode::PLAN_AREA) {
 					int count = 0;
-					if ((end - mapDragStart).LengthSquared() > 0.25f) {
+				if ((ToWorld2F(at) - mapDragStart).LengthSquared() > 0.25f) {
 						Rectangle2I r;
-						r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-						DragAtom(&atom);
+					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(ToWorld2F(at)));
+					DragBuildArea(&atom);
 
 						for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
 							buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
@@ -817,24 +910,54 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						++count;
 					}
 				}
+			else if (dragMode == EDragMode::PLAN_MOVE) {
+				dragWorkItem.pos = ToWorld2I(at);
+				DrawBuildMarks(dragWorkItem);
 			}
+			else if (dragMode == EDragMode::PLAN_ROTATION) {
+				DragRotatePlan(ToWorld2F(at), &dragWorkItem);
+				DrawBuildMarks(dragWorkItem);
+			}
+			else if (dragMode == EDragMode::PAN) {
+				// Do nothing.
 		}
-
-		if (action == GAME_TAP_UP) {
-			if (mapDragStart.IsZero()) {
-				Tap3D(view, world);
 			}
-			else if (!dragBuildingRotation) {
+		else if (action == GAME_TAP_UP) {
+			if (dragMode == EDragMode::BUILDING_ROTATION) {
+				// Do nothing
+			}
+			else if (dragMode == EDragMode::PLAN_AREA) {
 				Vector2F end = { at.x, at.z };
 				Rectangle2I r;
 				r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
-				DragAtom(&atom);
+				DragBuildArea(&atom);
 
 				for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 					BuildAction(it.Pos());
 				}
 			}
-			dragBuildingRotation = false;
+			else if (dragMode == EDragMode::PLAN_MOVE) {
+				CoreScript* cs = GetHomeCore();
+				if (cs) {
+					WorkQueue* workQueue = cs->GetWorkQueue();
+					workQueue->AddAction(ToWorld2I(at), dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
+				}
+			}
+			else if (dragMode == EDragMode::PLAN_ROTATION) {
+				CoreScript* cs = GetHomeCore();
+				if (cs) {
+					WorkQueue* workQueue = cs->GetWorkQueue();
+					workQueue->AddAction(dragWorkItem.pos, dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
+				}
+			}
+			else if (dragMode == EDragMode::PAN) {
+				// FIXME: is it possible to filter out at a higher level?
+				// Check if the pan isn't a pan (actually a 2 finger drag) and do something.
+				if ((tapDown - view).Length() < 10.0f) {	// magic tap accuracy...
+					Tap3D(view, world);
+				}
+			}
+			dragMode = EDragMode::NONE;
 		}
 	}
 	// Clear out drag indicator, if not dragging.
@@ -842,7 +965,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
 			buildMark[i].SetVisible(false);
 		}
-		mapDragStart.Zero();
 	}
 }
 
@@ -924,6 +1046,12 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if (item == &pauseButton) {
+		paused = !paused;
+	}
+	else if (item == &viewButton) {
+		DoCameraToggle();
 	}
 	else if (item == &minimap) {
 		float x = 0, y = 0;
@@ -1290,26 +1418,7 @@ void GameScene::HandleHotKey( int mask )
 #endif	// DEBUG
 	}
 	else if (mask == GAME_HK_CAMERA_TOGGLE) {
-		Vector3F at = V3F_ZERO;
-		sim->GetEngine()->CameraLookingAt(&at);
-
-		// Toggle high/low.
-		Camera* camera = &sim->GetEngine()->camera;
-
-		if (camera->EyeDir3()->y < -0.90f) {
-			// currently high
-			camera->SetQuat(savedCameraRotation);
-			camera->SetPosWC(camera->PosWC().x, savedCameraHeight, camera->PosWC().z);
-			sim->GetEngine()->CameraLookAt(at.x, at.z);
-		}
-		else {
-			// currently low
-			savedCameraRotation = camera->Quat();
-			savedCameraHeight = camera->PosWC().y;
-			camera->TiltRotationToQuat(-80, 0);
-			camera->SetPosWC(camera->PosWC().x, Min(EL_CAMERA_MAX, savedCameraHeight*2.0f), camera->PosWC().z);
-			sim->GetEngine()->CameraLookAt(at.x, at.z);
-		}
+		DoCameraToggle();
 	}
 	else if (mask == GAME_HK_ATTACH_CORE) {
 		Vector3F at = V3F_ZERO;

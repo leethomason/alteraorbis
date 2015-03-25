@@ -88,6 +88,7 @@ int GamePopSound( void* handle, int* databaseID, int* offset, int* size );	// re
 // --- Core to platform --- //
 void PathToDatabase( char* buffer, int bufferLen, int* offset, int* length );
 const char* PlatformName();
+bool PlatformHasMouseSupport();
 
 enum {
 	GAME_APP_DIR,
