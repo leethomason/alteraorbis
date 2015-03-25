@@ -38,7 +38,10 @@ public:
 	void TriggerDetector(const grinliz::Vector2I& pos);
 	void DoTick(U32 delta);
 
-	void DrawGroups(const grinliz::Vector2I& sector, gamui::Canvas* canvas);
+	bool visible;
+
+	void CalcGroups(const grinliz::Vector2I& sector);
+	void DrawGroups();
 
 private:
 
@@ -67,10 +70,10 @@ private:
 	};
 
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
-	grinliz::CDynArray<Chit*> queryArr;
+	grinliz::CDynArray<Chit*> queryArr, combinedArr;
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
 
-	gamui::Canvas canvas;
+	gamui::Canvas canvas[NUM_GROUPS];
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

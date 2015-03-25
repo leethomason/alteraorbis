@@ -143,6 +143,11 @@ public:
 	static grinliz::IString nameGen;
 	static grinliz::IString kiosk;
 
+	static grinliz::IString detector;
+	static grinliz::IString switchOn;
+	static grinliz::IString switchOff;
+	static grinliz::IString gate;
+
 	static grinliz::IString deity;
 	static grinliz::IString Truulga;
 	static grinliz::IString MotherCore;

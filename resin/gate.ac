@@ -4,7 +4,7 @@ OBJECT world
 kids 12
 OBJECT poly
 name "box"
-loc 0.132252 0.0385006 0.433952
+loc 0.109114 0.0385006 0.322117
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -62,7 +62,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.13724 0.0385006 0.411494
+loc -0.0909636 0.0385006 0.318941
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -120,7 +120,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.414218 0.0385006 0.411494
+loc -0.317809 0.0385006 0.315085
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -178,7 +178,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.39176 0.0385006 0.097087
+loc -0.318489 0.0385006 0.0932306
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -236,7 +236,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.369303 0.0385006 -0.164919
+loc -0.311457 0.0385006 -0.122499
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -294,7 +294,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.132252 0.0385006 -0.419439
+loc 0.109114 0.0385006 -0.334599
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -352,7 +352,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.107297 0.0385006 -0.434411
+loc -0.107297 0.0385006 -0.330289
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -410,7 +410,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.39176 0.0385006 -0.426925
+loc -0.318489 0.0385006 -0.334372
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -468,7 +468,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.401744 0.0385006 0.404008
+loc 0.313048 0.0385006 0.315312
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -526,7 +526,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.379286 0.0385006 0.156974
+loc 0.317584 0.0385006 0.106841
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -584,7 +584,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.379286 0.0385006 -0.12749
+loc 0.317584 0.0385006 -0.119777
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -642,7 +642,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.3718 0.0385006 -0.419439
+loc 0.317811 0.0385006 -0.342312
 texture "structure.png"
 crease 45.000000
 numvert 8

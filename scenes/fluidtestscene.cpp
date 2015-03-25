@@ -34,8 +34,12 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.engine->CameraLookAt(0, 3, 8, -45.f, -30.f);
 	context.engine->CameraLookAt(float(SECTOR_SIZE / 2), float(SECTOR_SIZE / 2));
 
-	static const char* NAME[NUM_BUTTONS] = { "Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", 
-											 "Switch On", "Switch Off", "Temple", "Gate", "Detector", "Delete", "Rotate" };
+	static const char* NAME[NUM_BUTTONS] = { 
+		"Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", 
+		"Temple", "Detector", "Switch On", "Switch Off", 
+		"Gate", "Turret",
+		"Delete", "Rotate" 
+	};
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		buildButton[i].Init(&gamui2D, game->GetButtonLook(0));
 		buildButton[i].SetText(NAME[i]);
@@ -169,6 +173,10 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					chit = context.chitBag->NewBuilding(pos2i, "detector", TEAM_HOUSE);
 					break;
 
+					case BUTTON_TURRET:
+					chit = context.chitBag->NewBuilding(pos2i, "turret", TEAM_HOUSE);
+					break;
+
 					case BUTTON_DELETE:
 					{
 						Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
@@ -243,5 +251,10 @@ void FluidTestScene::DoTick(U32 delta)
 {
 	context.worldMap->DoTick(delta, context.chitBag);
 	context.circuitSim->DoTick(delta);
+
+	static const Vector2I home = { 0, 0 };
+	context.circuitSim->CalcGroups(home);
+	context.circuitSim->DrawGroups();
+
 	context.chitBag->DoTick(delta);
 }
