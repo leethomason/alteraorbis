@@ -4,6 +4,10 @@
 #include "lumoschitbag.h"
 #include "lumosgame.h"
 #include "mapspatialcomponent.h"
+#include "gameitem.h"
+
+#include "../engine/particle.h"
+#include "../engine/engine.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -57,16 +61,43 @@ void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 
 void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 {
-	WorldMap* worldMap = context->worldMap;
-	const WorldGrid& wg = context->worldMap->grid[worldMap->INDEX(pos)];
-
-//	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY ) {
-//	}
+	Chit* building = context->chitBag->QueryBuilding(IString(), pos, 0);
+	if (building) {
+		const GameItem* item = building->GetItem();
+		if (item) {
+			if (item->IName() == ISC::detector) {
+			}
+		}
+	}
 }
 
 
 void CircuitSim::DoTick(U32 delta)
 {
+	static const float SPEED = 2.0f;
+	float travel = Travel(SPEED, delta);
+
+	for (int i = 0; i < particles.Size(); ++i) {
+		Particle& p = particles[i];
+		float len = (p.pos - p.dest).Length();
+		if (len < travel) {
+			ParticleArrived(p);
+			particles.SwapRemove(i);
+			--i;
+		}
+		else {
+			static const int NPART = 3;
+			static const float fraction = 1.0f / float(NPART);
+			Vector2F normal = p.dest - p.pos;
+			normal.Normalize();
+
+			for (int j = 0; j < NPART; ++j) {
+				Vector2F pos = p.pos + normal * (travel * float(j + 1)*fraction);
+				context->engine->particleSystem->EmitPD(ISC::electron, ToWorld3F(pos), V3F_UP, delta);
+			}
+			p.pos += normal * travel;
+		}
+	}
 }
 
 

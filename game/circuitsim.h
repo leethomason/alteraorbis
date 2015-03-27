@@ -58,6 +58,17 @@ private:
 		int type;
 	};
 
+	enum {
+		CONTROL,
+		POWER
+	};
+
+	struct Particle {
+		int type;
+		grinliz::Vector2F pos;
+		grinliz::Vector2F dest;
+	};
+
 	class CompValueVector2I {
 	public:
 		template <class T>
@@ -70,6 +81,9 @@ private:
 	// Connects groups that can be connected.
 	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, Group **groupA, Group** groupB);
 	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
+	// Run through the connections, validate they are okay, throw away the bad ones.
+	//void ValidateConnections();
+	void ParticleArrived(const Particle& p);
 
 	const ChitContext* context;
 
@@ -85,6 +99,7 @@ private:
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Connection> connections;
+	grinliz::CDynArray<Particle> particles;
 
 	gamui::Canvas canvas[NUM_GROUPS];
 };
