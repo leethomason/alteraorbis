@@ -342,7 +342,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	zone.Outset( fullSectorAware ? SECTOR_SIZE : NORMAL_AWARENESS );
 
 	if ( Context()->worldMap->UsingSectors() ) {
-		Rectangle2F rf = ToWorld( SectorData::InnerSectorBounds( center.x, center.y ));
+		Rectangle2F rf = ToWorld2F(SectorData::InnerSectorBounds(center.x, center.y));
 		zone.DoIntersection( rf );
 	}
 
@@ -1670,7 +1670,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 			GLASSERT(farmMSC);
 			if (farmMSC) {
 				Rectangle2I porch = farmMSC->PorchPos();
-				Vector2F farmLoc = ToWorld(porch).Center();
+				Vector2F farmLoc = ToWorld2F(porch).Center();
 				chitBag->QuerySpatialHash(&chitArr, farmLoc, 1.0f, 0, &filter);
 
 				for (int j = 0; j < chitArr.Size(); ++j) {
@@ -2712,7 +2712,7 @@ void AIComponent::EnterNewGrid(  )
 			Rectangle2I inner = InnerSectorBounds(sector);
 			CChitArray arr;
 			ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
-			Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), parentChit, &filter);
+			Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(inner), parentChit, &filter);
 
 			//GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
 			arr.Filter(0, [](int, Chit* ele) {

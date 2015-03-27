@@ -44,7 +44,7 @@ inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3I& pos3i ) {
 }
 
 
-inline grinliz::Rectangle2F ToWorld(const grinliz::Rectangle2I& ri)
+inline grinliz::Rectangle2F ToWorld2F(const grinliz::Rectangle2I& ri)
 {
 	grinliz::Rectangle2F r;
 	r.Set(float(ri.min.x), float(ri.min.y), float(ri.max.x + 1), float(ri.max.y + 1));
@@ -182,7 +182,7 @@ inline float TravelTo(float rate, U32 msecTime, float current, float dest)
 }
 
 inline grinliz::Vector2F RandomInRect(const grinliz::Rectangle2I& r, grinliz::Random* random) {
-	grinliz::Rectangle2F rect2f = ToWorld(r);
+	grinliz::Rectangle2F rect2f = ToWorld2F(r);
 	grinliz::Vector2F v = { rect2f.min.x + random->Uniform()*rect2f.Width(), 
 		                    rect2f.min.y + random->Uniform()*rect2f.Height() };
 	return v;

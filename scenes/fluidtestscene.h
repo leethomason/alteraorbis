@@ -60,6 +60,7 @@ private:
 
 	ChitContext	context;
 	grinliz::Vector2I hover;
+	grinliz::Vector2I dragStart;
 
 	CTicker fluidTicker;
 

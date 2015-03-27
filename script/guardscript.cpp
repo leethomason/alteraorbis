@@ -49,7 +49,7 @@ int GuardScript::DoTick(U32 delta)
 		r.Outset(RAD);
 		r.DoIntersection(innerSector);
 
-		Rectangle2F rf = ToWorld(r);
+		Rectangle2F rf = ToWorld2F(r);
 
 		CChitArray enemyArr;
 		MOBIshFilter enemyFilter;
@@ -66,7 +66,7 @@ int GuardScript::DoTick(U32 delta)
 			r.min = r.max = pos2i;
 			r.Outset(NOTIFY_RAD);
 			r.DoIntersection(innerSector);
-			rf = ToWorld(r);
+			rf = ToWorld2F(r);
 
 			CChitArray friendArr;
 			MOBIshFilter friendFilter;

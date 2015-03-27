@@ -247,6 +247,15 @@ struct Rectangle2
 		}
 	}
 
+	Vector2<T> EdgeCenter(int i) const {
+		Vector2<T> a, b, c;
+		Corner(i, &a);
+		Corner((i + 1) % 4, &b);
+		c.x = (a.x + b.x) / 2;
+		c.y = (a.y + b.y) / 2;
+		return c;
+	}
+
 
 	void Outset( T dist ) {
 		min.x -= dist;

@@ -37,7 +37,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	mapImage.SetCapturesTap( true );
 	
 	Rectangle2I sectorBounds = MapBounds2();
-	Rectangle2F map2Bounds = ToWorld(sectorBounds);
+	Rectangle2F map2Bounds = ToWorld2F(sectorBounds);
 
 	mapAtom.tx0 = map2Bounds.min.x / float(worldMap->Width());
 	mapAtom.ty0 = map2Bounds.max.y / float(worldMap->Height());
@@ -213,7 +213,7 @@ void MapScene::DrawMap()
 		int index = j * MAP2_SIZE + i;
 
 		Rectangle2I inner = sd.InnerBounds();
-		Rectangle2F innerF = ToWorld(inner);
+		Rectangle2F innerF = ToWorld2F(inner);
 		CoreScript* coreScript = CoreScript::GetCore(sector);
 
 		CStr<64> str = "";

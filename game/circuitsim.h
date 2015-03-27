@@ -43,12 +43,21 @@ public:
 	void CalcGroups(const grinliz::Vector2I& sector);
 	void DrawGroups();
 
+	void Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b);
+
 private:
 
 	struct Group {
 		grinliz::Rectangle2I bounds;
-		grinliz::CArray<int, 16> idArr;
+		grinliz::CArray<int, 16> idArr;			// FIXME: there are lots of small groups - inefficient. And buggy.
+		grinliz::CArray<int, 16> connections;	// FIXME: same as above...
 	};
+
+	struct Connection {
+		grinliz::Vector2I a, b;		// somewhere in the group bounds
+		int type;
+	};
+
 	class CompValueVector2I {
 	public:
 		template <class T>
@@ -58,6 +67,9 @@ private:
 	};
 
 	void FillGroup(Group* g, const grinliz::Vector2I& pos, Chit* chit);
+	// Connects groups that can be connected.
+	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, Group **groupA, Group** groupB);
+	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
 
 	const ChitContext* context;
 
@@ -69,9 +81,10 @@ private:
 		NUM_GROUPS
 	};
 
-	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Chit*> queryArr, combinedArr;
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
+	grinliz::CDynArray<Group> groups[NUM_GROUPS];
+	grinliz::CDynArray<Connection> connections;
 
 	gamui::Canvas canvas[NUM_GROUPS];
 };

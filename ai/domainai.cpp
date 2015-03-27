@@ -118,7 +118,7 @@ bool DomainAI::BuyWorkers()
 	// Create workers, if needed.
 	// Be aggressive; domains tend to fall 
 	// apart before getting built.
-	Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+	Rectangle2F b = ToWorld2F(InnerSectorBounds(sector));
 	CChitArray arr;
 	ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);

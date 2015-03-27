@@ -83,7 +83,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 	if (ticker.Delta(delta) && mainItem && cs) {
 
 		// Create workers, if needed.
-		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+		Rectangle2F b = ToWorld2F(InnerSectorBounds(sector));
 		CChitArray arr;
 		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);

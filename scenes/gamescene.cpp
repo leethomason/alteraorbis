@@ -1486,7 +1486,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 {
 	CDynArray<Chit*> arr;
 	MOBKeyFilter filter;
-	Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
+	Rectangle2F bounds = ToWorld2F(InnerSectorBounds(sector));
 	sim->GetChitBag()->QuerySpatialHash(&arr, bounds, 0, &filter);
 
 	for (int i = 0; i<arr.Size(); ++i) {
@@ -1772,7 +1772,7 @@ void GameScene::DoTick( U32 delta )
 		// Enforce the worker limit.
 		CStr<32> str2;
 
-		Rectangle2F b = ToWorld( InnerSectorBounds(homeSector));
+		Rectangle2F b = ToWorld2F(InnerSectorBounds(homeSector));
 		CChitArray arr;
 		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );

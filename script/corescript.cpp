@@ -502,7 +502,7 @@ bool CoreScript::RecruitNeutral()
 	MOBKeyFilter filter;
 	filter.value = ISC::denizen;
 	CChitArray arr;
-	Context()->chitBag->QuerySpatialHash(&arr, ToWorld(inner), 0, &filter);
+	Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(inner), 0, &filter);
 
 	for (int i = 0; i < arr.Size(); ++i) {
 		Chit* chit = arr[i];
@@ -828,7 +828,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 
 		// Tell all the AIs the core is going away.
 		ChitHasAIComponent filter;
-		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+		Rectangle2F b = ToWorld2F(InnerSectorBounds(sector));
 		context->chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
 		for (int i = 0; i < queryArr.Size(); ++i) {
 			queryArr[i]->GetAIComponent()->ClearTaskList();

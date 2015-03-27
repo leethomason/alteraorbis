@@ -3,6 +3,7 @@
 #include "lumosmath.h"
 #include "lumoschitbag.h"
 #include "lumosgame.h"
+#include "mapspatialcomponent.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -71,7 +72,10 @@ void CircuitSim::DoTick(U32 delta)
 
 void CircuitSim::FillGroup(Group* g, const Vector2I& pos, Chit* chit)
 {
-	g->bounds.DoUnion(pos);
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	GLASSERT(msc);
+
+	g->bounds.DoUnion(msc->Bounds());
 	g->idArr.PushIfCap(chit->ID());
 	hashTable.Remove(pos);
 	for (int i = 0; i < 4; ++i) {
@@ -112,9 +116,10 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 			}
 			else {
 				for (Chit* chit : queryArr) {
-					Vector2I pos = ToWorld2I(chit->Position());
+					MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+					GLASSERT(msc);
 					Group* g = groups[i].PushArr(1);
-					g->bounds.Set(pos.x, pos.y, pos.x, pos.y);
+					g->bounds = msc->Bounds();
 					g->idArr.Push(chit->ID());
 				}
 			}
@@ -126,7 +131,9 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 			Vector2I pos = ToWorld2I(chit->Position());
 			if (hashTable.Query(pos, 0)) {
 				Group* g = groups[i].PushArr(1);
-				g->bounds.Set(pos.x, pos.y, pos.x, pos.y);
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+				GLASSERT(msc);
+				g->bounds = msc->Bounds();
 				FillGroup(g, pos, chit);
 			}
 		}
@@ -135,13 +142,17 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 
 void CircuitSim::DrawGroups()
 {
+	static float thickness = 1.0f / 32.0f;
+	static float thicker = thickness * 2.0f;
+	static float square = thickness * 4.0f;
+	static float hSquare = square * 0.5f;
+	static float gutter = thickness;
+	static float half = thickness * 0.5f;
+	static float arc = 1.0f / 16.0f;
+
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		canvas[i].Clear();
 		for (const Group& group : groups[i]) {
-			static float thickness = 1.0f / 32.0f;
-			static float gutter = thickness;
-			static float half = thickness * 0.5f;
-			static float arc = 1.0f / 16.0f;
 
 			float x0 = float(group.bounds.min.x) + half + gutter;
 			float y0 = float(group.bounds.min.y) + half + gutter;
@@ -151,5 +162,78 @@ void CircuitSim::DrawGroups()
 			canvas[i].DrawRectangleOutline(x0, y0, x1 - x0, y1 - y0, thickness, arc);
 		}
 	}
+
+	for (const Connection& c : connections) {
+		// Groups come and go - need to find the group for the connection.
+		Group* groupA = 0;
+		Group* groupB = 0;
+		int type = 0;
+		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
+			Rectangle2F rectA = ToWorld2F(groupA->bounds);
+			Rectangle2F rectB = ToWorld2F(groupB->bounds);
+
+			Vector2F p0, p1;
+			float len = FLT_MAX;
+			for (int i = 0; i < 4; ++i) {
+				for (int j = 0; j < 4; ++j) {
+					Vector2F q0 = rectA.EdgeCenter(i);
+					Vector2F q1 = rectB.EdgeCenter(j);
+					float len2 = (q0 - q1).LengthSquared();
+					if (len2 < len) {
+						len = len2;
+						p0 = q0;
+						p1 = q1;
+					}
+				}
+			}
+			canvas[type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
+			canvas[type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
+			canvas[type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
+		}
+	}
+}
+
+
+bool CircuitSim::ConnectionValid(const Vector2I& a, const Vector2I& b, int *type, Group** groupA, Group** groupB)
+{
+	int indexA = -1, typeA = NUM_GROUPS;
+	int indexB = -1, typeB = NUM_GROUPS;
+	if (FindGroup(a, &typeA, &indexA) && FindGroup(b, &typeB, &indexB)) {
+		if (   (typeA == DEVICE_GROUP && typeB != DEVICE_GROUP)
+			|| (typeA != DEVICE_GROUP && typeB == DEVICE_GROUP)) 
+		{
+			if (type) *type = (typeA == DEVICE_GROUP) ? typeB : typeA;
+			if (groupA) *groupA = &groups[typeA][indexA];
+			if (groupB) *groupB = &groups[typeB][indexB];
+			return true;
+		}
+	}
+	return false;
+}
+
+
+void CircuitSim::Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b)
+{
+	int type = 0;
+	if (ConnectionValid(a, b, &type, 0, 0)) {
+		// If power, filter out power connection.
+		Connection c = { a, b, type };
+		connections.Push(c);
+	}
+}
+
+
+bool CircuitSim::FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index)
+{
+	for (int j = 0; j < NUM_GROUPS; ++j) {
+		for (int i = 0; i < groups[j].Size(); ++i) {
+			if (groups[j][i].bounds.Contains(pos)) {
+				if (groupType) *groupType = j;
+				if (index) *index = i;
+				return true;
+			}
+		}
+	}
+	return false;
 }
 

@@ -140,7 +140,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	// ---- Count of MOBs ---
 	Rectangle2I inner = sd.InnerBounds();
-	Rectangle2F innerF = ToWorld(inner);
+	Rectangle2F innerF = ToWorld2F(inner);
 
 	MOBKeyFilter mobFilter;
 	CChitArray query;

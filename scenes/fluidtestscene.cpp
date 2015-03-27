@@ -112,9 +112,22 @@ void FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinli
 {
 	bool uiHasTap = ProcessTap(action, view, world);
 	if (!uiHasTap) {
+		Vector3F at = { 0, 0, 0 };
+		float t = 0;
+		int result = IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
 		Process3DTap(action, view, world, context.engine);
-		if (action == GAME_TAP_UP) {
-			Tap3D(view, world);
+
+		if (action == GAME_TAP_DOWN) {
+			dragStart = ToWorld2I(at);
+		}
+		else if (action == GAME_TAP_UP) {
+			Vector2I dragEnd = ToWorld2I(at);
+			if (dragStart != dragEnd) {
+				context.circuitSim->Connect(dragStart, dragEnd);
+			}
+			else {
+				Tap3D(view, world);
+			}
 		}
 	}
 }
