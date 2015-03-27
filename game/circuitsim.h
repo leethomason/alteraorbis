@@ -58,13 +58,13 @@ private:
 		int type;
 	};
 
-	enum {
-		CONTROL,
-		POWER
+	enum class EParticleType {
+		control,
+		power
 	};
 
 	struct Particle {
-		int type;
+		EParticleType type;
 		grinliz::Vector2F pos;
 		grinliz::Vector2F dest;
 	};
@@ -81,9 +81,10 @@ private:
 	// Connects groups that can be connected.
 	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, Group **groupA, Group** groupB);
 	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
+	void FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *connections);
 	// Run through the connections, validate they are okay, throw away the bad ones.
 	//void ValidateConnections();
-	void ParticleArrived(const Particle& p);
+	void ParticleArrived(const Particle& p)	{}
 
 	const ChitContext* context;
 
@@ -95,8 +96,12 @@ private:
 		NUM_GROUPS
 	};
 
+	// cache/temporaries
 	grinliz::CDynArray<Chit*> queryArr, combinedArr;
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
+	grinliz::CDynArray<const Connection*> queryConn;
+
+	// Data
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Connection> connections;
 	grinliz::CDynArray<Particle> particles;

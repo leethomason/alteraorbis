@@ -59,6 +59,16 @@ void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 }
 
 
+void CircuitSim::FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *out)
+{
+	for (const Connection& c : connections) {
+		if (group.bounds.Contains(c.a) || group.bounds.Contains(c.b)) {
+			out->Push(&c);
+		}
+	}
+}
+
+
 void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 {
 	Chit* building = context->chitBag->QueryBuilding(IString(), pos, 0);
@@ -66,6 +76,23 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 		const GameItem* item = building->GetItem();
 		if (item) {
 			if (item->IName() == ISC::detector) {
+				int type = 0, index = 0;
+				if (FindGroup(pos, &type, &index) && type == SENSOR_GROUP) {
+					const Group& group = groups[type][index];
+					FindConnections(group, &queryConn);
+					for (const Connection* c : queryConn) {
+						Vector2I a = c->a;
+						Vector2I b = c->b;
+						if (!group.bounds.Contains(a)) {
+							Swap(&a, &b);
+						}
+
+						Vector2F start = ToWorld2F(a);
+						Vector2F end = ToWorld2F(b);
+						Particle p = { EParticleType::control, start, end };
+						particles.Push(p);
+					}
+				}
 			}
 		}
 	}

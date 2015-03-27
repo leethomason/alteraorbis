@@ -141,11 +141,23 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 	if (result == INTERSECT) {
 		Vector2I pos2i = ToWorld2I(at);
 		if (context.worldMap->Bounds().Contains(pos2i)) {
+
+			bool trigger = false;
+			if (!buildButton[BUTTON_DELETE].Down() && !buildButton[BUTTON_ROTATE].Down()) {
+				Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
+				if (building) {
+					context.circuitSim->TriggerDetector(pos2i);
+					trigger = true;
+				}
+			}
+
 			int id = -1;
-			for (int i = 0; i < NUM_BUTTONS; ++i) {
-				if (buildButton[i].Down()) {
-					id = i;
-					break;
+			if (!trigger) {
+				for (int i = 0; i < NUM_BUTTONS; ++i) {
+					if (buildButton[i].Down()) {
+						id = i;
+						break;
+					}
 				}
 			}
 			if (id >= 0) {
