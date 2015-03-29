@@ -65,9 +65,14 @@ private:
 
 	struct Particle {
 		EParticleType type;
+		int powerRequest;
+		grinliz::Vector2F origin;
 		grinliz::Vector2F pos;
 		grinliz::Vector2F dest;
+		int delay;
 	};
+
+	void NewParticle(EParticleType type, int powerRequest, const grinliz::Vector2F& origin, const grinliz::Vector2F& dest, int delay = 0);
 
 	class CompValueVector2I {
 	public:
@@ -82,9 +87,12 @@ private:
 	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, Group **groupA, Group** groupB);
 	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
 	void FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *connections);
+	grinliz::Vector2F FindPower(const Group& forGroup);
+
 	// Run through the connections, validate they are okay, throw away the bad ones.
 	//void ValidateConnections();
-	void ParticleArrived(const Particle& p)	{}
+	void ParticleArrived(const Particle& p);
+	void FireTurret(int id);
 
 	const ChitContext* context;
 
@@ -100,11 +108,13 @@ private:
 	grinliz::CDynArray<Chit*> queryArr, combinedArr;
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
 	grinliz::CDynArray<const Connection*> queryConn;
+	grinliz::CDynArray<Particle> newQueue;
 
 	// Data
 	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Connection> connections;
 	grinliz::CDynArray<Particle> particles;
+	int roundRobbin;
 
 	gamui::Canvas canvas[NUM_GROUPS];
 };

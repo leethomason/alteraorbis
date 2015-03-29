@@ -17,6 +17,7 @@
 
 #include "../script/procedural.h"
 #include "../gamui/gamui.h"
+#include "../audio/xenoaudio.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -31,10 +32,11 @@ CircuitSim::CircuitSim(const ChitContext* _context) : context(_context)
 		LumosGame::CalcPaletteAtom(PAL_GREEN * 2, PAL_GREEN), // device
 	};
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		canvas[i].Init(&context->worldMap->overlay0, groupColor[i]);
+		canvas[i].Init(&context->worldMap->overlay1, groupColor[i]);
 		canvas[i].SetLevel(-10+i);
 	}
 	visible = true;
+	roundRobbin = 0;
 }
 
 
@@ -59,11 +61,96 @@ void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 }
 
 
+void CircuitSim::NewParticle(EParticleType type, int powerRequest, const grinliz::Vector2F& origin, const grinliz::Vector2F& dest, int delay)
+{
+	Particle p = { type, powerRequest, origin, origin, dest, delay };
+	newQueue.Push(p);
+}
+
+
+Vector2F CircuitSim::FindPower(const Group& group)
+{
+	Vector2F pos = { 0, 0 };
+	for (const Connection* c = connections.begin(); c < connections.end(); ++c) {
+		if (c->type == POWER_GROUP && group.bounds.Contains(c->a))  {
+			pos = ToWorld2F(c->b);
+			break;
+		}
+		else if (c->type == POWER_GROUP && group.bounds.Contains(c->b)) {
+			pos = ToWorld2F(c->a);
+			break;
+		}
+	}
+	return pos;
+}
+
+
 void CircuitSim::FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *out)
 {
 	for (const Connection& c : connections) {
 		if (group.bounds.Contains(c.a) || group.bounds.Contains(c.b)) {
 			out->Push(&c);
+		}
+	}
+}
+
+
+void CircuitSim::FireTurret(int id)
+{
+	Chit* building = context->chitBag->GetChit(id);
+	if (!building) return;
+	if (!building->GetRenderComponent()) return;
+	if (!building->GetItem()) return;
+	if (building->GetItem()->IName() != ISC::turret) return;
+
+	Quaternion q = building->GetRenderComponent()->MainModel()->GetRotation();
+	Matrix4 rot;
+	q.ToMatrix(&rot);
+	Vector3F straight = rot * V3F_OUT;
+	RenderComponent* rc = building->GetRenderComponent();
+	Vector3F trigger = { 0, 0, 0 };
+	rc->CalcTrigger(&trigger, 0);
+
+	XenoAudio::Instance()->PlayVariation(ISC::blasterWAV, building->ID(), &trigger);
+
+	DamageDesc dd(15, GameItem::EFFECT_SHOCK);
+	context->chitBag->NewBolt(trigger, straight, dd.effects, building->ID(),
+							  dd.damage, 8.0f, false);
+}
+
+/*
+	All connections are between a Device and something; so
+	the type of connection is the not-device one. (Power or Sensor.)
+	
+	1. A sensor sends control particles to ALL attatched devices.
+	2. When a device receives a control particle, sends a control particle with N requests to ONE attatched power.
+	3. When a device receives a power particle, it activates. (round robin in group)
+	4. When a power receives a control particle, it queues N power particles.
+*/
+
+void CircuitSim::ParticleArrived(const Particle& p)
+{
+	static const int POWER_DELAY = 250;
+
+	int type = 0, index = 0;
+	if (FindGroup(ToWorld2I(p.dest), &type, &index)) {
+		const Group& group = groups[type][index];
+		if (type == DEVICE_GROUP && p.type == EParticleType::control) {
+			Vector2F power = FindPower(group);
+			if (!power.IsZero()) {
+				// request power
+				NewParticle(EParticleType::control, group.idArr.Size(), p.pos, power);
+			}
+		}
+		else if (type == DEVICE_GROUP && p.type == EParticleType::power) {
+			// activate device
+			int id = group.idArr[(roundRobbin++) % group.idArr.Size()];
+			FireTurret(id);
+		}
+		else if (type == POWER_GROUP && p.type == EParticleType::control) {
+			for (int i = 0; i < p.powerRequest; ++i) {
+				NewParticle(EParticleType::power, 0, p.dest, p.origin, POWER_DELAY*i);
+			}
 		}
 	}
 }
@@ -89,8 +176,7 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 
 						Vector2F start = ToWorld2F(a);
 						Vector2F end = ToWorld2F(b);
-						Particle p = { EParticleType::control, start, end };
-						particles.Push(p);
+						NewParticle(EParticleType::control, 0, start, end, 0);
 					}
 				}
 			}
@@ -104,8 +190,19 @@ void CircuitSim::DoTick(U32 delta)
 	static const float SPEED = 2.0f;
 	float travel = Travel(SPEED, delta);
 
+	// Once again...don't mutate the array we are iterating on. *sigh*
+	while (!newQueue.Empty()) {
+		particles.Push(newQueue.Pop());
+	}
+
 	for (int i = 0; i < particles.Size(); ++i) {
 		Particle& p = particles[i];
+		if (p.delay > 0) {
+			p.delay -= int(delta);
+			if (p.delay < 0) p.delay = 0;
+			continue;
+		}
+
 		float len = (p.pos - p.dest).Length();
 		if (len < travel) {
 			ParticleArrived(p);
@@ -120,7 +217,8 @@ void CircuitSim::DoTick(U32 delta)
 
 			for (int j = 0; j < NPART; ++j) {
 				Vector2F pos = p.pos + normal * (travel * float(j + 1)*fraction);
-				context->engine->particleSystem->EmitPD(ISC::electron, ToWorld3F(pos), V3F_UP, delta);
+				IString particle = (p.type == EParticleType::control) ? ISC::control : ISC::power;
+				context->engine->particleSystem->EmitPD(particle, ToWorld3F(pos), V3F_UP, delta);
 			}
 			p.pos += normal * travel;
 		}
@@ -227,10 +325,11 @@ void CircuitSim::DrawGroups()
 		Group* groupB = 0;
 		int type = 0;
 		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
+			Vector2F p0, p1;
+#if 0
 			Rectangle2F rectA = ToWorld2F(groupA->bounds);
 			Rectangle2F rectB = ToWorld2F(groupB->bounds);
 
-			Vector2F p0, p1;
 			float len = FLT_MAX;
 			for (int i = 0; i < 4; ++i) {
 				for (int j = 0; j < 4; ++j) {
@@ -244,6 +343,10 @@ void CircuitSim::DrawGroups()
 					}
 				}
 			}
+#else
+			p0 = ToWorld2F(c.a);
+			p1 = ToWorld2F(c.b);
+#endif
 			canvas[type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
 			canvas[type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
 			canvas[type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);

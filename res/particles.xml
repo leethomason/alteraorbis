@@ -146,7 +146,6 @@
     <colorVelocity  alpha="1.0" />
     <colorVelocity  alpha="-0.9" />
   </particle>
-
   
   <particle name="performance"
             time="continuous" size="0.1" count="1200" config="ray"
@@ -155,7 +154,6 @@
     <colorVelocity red="0" green="0" blue="0" alpha="1.5" />
     <colorVelocity red="0" green="0" blue="0" alpha="-0.5" />
   </particle>
-
 
   <particle name="derez" size="0.1" count="15" config="ray" 
             velocity="0.2" velocityFuzz="0.5" posFuzz="0.3"
@@ -171,26 +169,16 @@
     <colorVelocity red="0" green="0" blue="0" alpha="-2" />
   </particle>
 
-  <particle name="electron" size="0.2" count="1" config="hemi"
+  <particle name="power" size="0.2" count="1" config="hemi"
             velocity="0" velocityFuzz="0">
-    <color red="0" green="1" blue="0" />
+    <color palx="4" paly="2" />
     <colorVelocity red="0" green="0" blue="0" alpha="-1.8" />
   </particle>
 
-  <particle name="sparkExplosion" 
-            time="once" size="0.05" count="20" config="hemi" 
-            posFuzz="0.0" velocity="1.0" velocityFuzz="0.1" >
-    <color palx="1" paly="4" alpha="1.2" />
-    <colorVelocity alpha="-1.4" />
-  </particle>
-
-
-  <particle name="sparkPowerUp" size="0.5" count="5" config="ray"
-            velocity="1.5" velocityFuzz="0.1" posFuzz="0.1"
-            texMin="5" texMax="5"
-            alignment="y">
-    <color palx="1" paly="4" alpha="1.2" />
-    <colorVelocity alpha="-1.4" />
+  <particle name="control" size="0.2" count="1" config="hemi"
+            velocity="0" velocityFuzz="0">
+    <color palx="8" paly="4" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-1.8" />
   </particle>
 
   <particle name="smoketrail" size="0.3" count="1" config="hemi"

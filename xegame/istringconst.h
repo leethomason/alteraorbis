@@ -39,7 +39,6 @@ public:
 	static grinliz::IString boltImpact;
 	static grinliz::IString explosion;
 	static grinliz::IString smoketrail;
-	static grinliz::IString electron;
 	static grinliz::IString fallingWater;
 	static grinliz::IString fallingLava;
 	static grinliz::IString mist;
@@ -51,13 +50,13 @@ public:
 	static grinliz::IString heal;
 	static grinliz::IString constructiondone;
 	static grinliz::IString meleeImpact;
-	static grinliz::IString sparkExplosion;
-	static grinliz::IString sparkPowerUp;
 	static grinliz::IString teleport;
 	static grinliz::IString construction;
 	static grinliz::IString useBuilding;
 	static grinliz::IString useKiosk;
 	static grinliz::IString repair;
+	static grinliz::IString control;
+	static grinliz::IString power;
 
 	static grinliz::IString human;
 	static grinliz::IString humanFemale;

@@ -258,7 +258,7 @@ void FluidTestScene::MoveCamera(float dx, float dy)
 
 void FluidTestScene::Draw3D(U32 deltaTime)
 {
-	context.engine->Draw(deltaTime);
+	context.engine->Draw(deltaTime, context.chitBag->BoltMem(), context.chitBag->NumBolts());
 }
 
 
