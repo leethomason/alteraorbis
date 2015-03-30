@@ -80,7 +80,7 @@ void FarmScript::ComputeFarmBound()
 	// FffgG		If within 4.eps, may impact us.
 
 	float rad = float(FARM_GROW_RAD)*2.f + 0.1f;
-	ItemNameFilter filter(ISC::farm, IChitAccept::MAP);
+	ItemNameFilter filter(ISC::farm);
 	CChitArray array;
 	Context()->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, parentChit, &filter);
 

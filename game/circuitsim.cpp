@@ -133,19 +133,31 @@ void CircuitSim::ParticleArrived(const Particle& p)
 	static const int POWER_DELAY = 250;
 
 	int type = 0, index = 0;
+	CChitArray arr;
+
 	if (FindGroup(ToWorld2I(p.dest), &type, &index)) {
 		const Group& group = groups[type][index];
 		if (type == DEVICE_GROUP && p.type == EParticleType::control) {
 			Vector2F power = FindPower(group);
 			if (!power.IsZero()) {
 				// request power
-				NewParticle(EParticleType::control, group.idArr.Size(), p.pos, power);
+				IString powerNames[]  = { ISC::temple };
+				ItemNameFilter powerFilter(powerNames, 1);
+
+				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &powerFilter);
+				NewParticle(EParticleType::control, arr.Size(), p.pos, power);
 			}
 		}
 		else if (type == DEVICE_GROUP && p.type == EParticleType::power) {
 			// activate device
-			int id = group.idArr[(roundRobbin++) % group.idArr.Size()];
-			FireTurret(id);
+			IString deviceNames[] = { ISC::turret, ISC::gate };
+			ItemNameFilter deviceFilter(deviceNames, 2);
+
+			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
+			if (arr.Size()) {
+				int id = arr[(roundRobbin++) % arr.Size()]->ID();
+				FireTurret(id);
+			}
 		}
 		else if (type == POWER_GROUP && p.type == EParticleType::control) {
 			for (int i = 0; i < p.powerRequest; ++i) {
@@ -232,7 +244,6 @@ void CircuitSim::FillGroup(Group* g, const Vector2I& pos, Chit* chit)
 	GLASSERT(msc);
 
 	g->bounds.DoUnion(msc->Bounds());
-	g->idArr.PushIfCap(chit->ID());
 	hashTable.Remove(pos);
 	for (int i = 0; i < 4; ++i) {
 		Vector2I nextPos = pos.Adjacent(i);
@@ -257,6 +268,7 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 	const bool* doesGroup[NUM_GROUPS] = { powerGroups, sensorGroups, deviceGroups };
 
 	hashTable.Clear();
+
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		groups[i].Clear();
 		combinedArr.Clear();
@@ -276,7 +288,6 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 					GLASSERT(msc);
 					Group* g = groups[i].PushArr(1);
 					g->bounds = msc->Bounds();
-					g->idArr.Push(chit->ID());
 				}
 			}
 		}

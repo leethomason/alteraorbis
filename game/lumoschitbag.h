@@ -35,7 +35,6 @@ class BuildingFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MAP; }
 };
 
 
@@ -43,14 +42,12 @@ class BuildingRepairFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MAP; }
 };
 
 class BuildingWithPorchFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MAP; }
 };
 
 // This one is abstract - has no Type()
@@ -74,7 +71,6 @@ class MOBKeyFilter : public RelationshipFilter
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MOB; }
 		
 	grinliz::IString value;	// if null (the default) will accept any value for the "mob" key
 };
@@ -85,7 +81,6 @@ class MOBIshFilter : public RelationshipFilter
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MOB; }
 
 private:
 };
@@ -96,7 +91,6 @@ class BattleFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MOB | MAP; }
 };
 
 
@@ -104,7 +98,6 @@ class RemovableFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MAP; }
 };
 
 
@@ -112,23 +105,20 @@ class ChitHasMapSpatial : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MAP; }
 };
 
 class ItemNameFilter : public IChitAccept
 {
 public:
-	ItemNameFilter( const grinliz::IString& name, int type );
-	ItemNameFilter( const grinliz::IString* names, int n, int type );
+	ItemNameFilter( const grinliz::IString& name );
+	ItemNameFilter( const grinliz::IString* names, int n);
 
 	virtual bool Accept( Chit* chit );
-	virtual int  Type()		{ return type; } 
 
 protected:
 	ItemNameFilter();
 	const grinliz::IString* names;
 	int						count;
-	int						type;
 };
 
 class ItemFlagFilter : public IChitAccept
@@ -137,7 +127,6 @@ public:
 	ItemFlagFilter( int _required, int _excluded ) : required(_required), excluded(_excluded) {}
 
 	virtual bool Accept( Chit* chit );
-	virtual int Type() { return MAP | MOB; }
 	
 private:
 	int excluded, required;
@@ -158,7 +147,6 @@ class LootFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MOB; }
 };
 
 
@@ -169,7 +157,6 @@ private:
 	LootFilter			loot;
 public:
 	virtual bool Accept( Chit* chit ) { return gold.Accept( chit ) || loot.Accept( chit ); }
-	virtual int  Type() { return gold.Type() | loot.Type(); }
 };
 
 
@@ -177,7 +164,6 @@ class FruitElixirFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MOB; }
 };
 
 
@@ -186,7 +172,6 @@ class WeaponFilter : public IChitAccept
 {
 public:
 	virtual bool Accept(Chit* chit);
-	virtual int  Type() { return MOB; }
 };
 
 class LumosChitBag : public ChitBag,

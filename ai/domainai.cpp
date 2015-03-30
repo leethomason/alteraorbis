@@ -120,7 +120,7 @@ bool DomainAI::BuyWorkers()
 	// apart before getting built.
 	Rectangle2F b = ToWorld2F(InnerSectorBounds(sector));
 	CChitArray arr;
-	ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
+	ItemNameFilter workerFilter(ISC::worker);
 	Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 	static const int GOLD[4] = { WORKER_BOT_COST, WORKER_BOT_COST * 2, WORKER_BOT_COST*3, 1200 };
 	for (int i = 0; i < 4; ++i) {

@@ -602,7 +602,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 
 	Vector2F v2 = { pos.x, pos.z };
 
-	ItemNameFilter goldFilter( ISC::gold, IChitAccept::MOB );
+	ItemNameFilter goldFilter( ISC::gold);
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 
@@ -911,26 +911,21 @@ ItemNameFilter::ItemNameFilter()
 {
 	names = 0;
 	count  = 0;
-	type = MAP | MOB;
 }
 
 
 
-ItemNameFilter::ItemNameFilter( const grinliz::IString& istring, int t )
+ItemNameFilter::ItemNameFilter( const grinliz::IString& istring)
 {
 	names = &istring;
 	count  = 1;
-	type = t;
-	GLASSERT(t == MAP || t == MOB || t == (MAP | MOB));
 }
 
 
-ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n, int t )
+ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n)
 {
 	names = arr;
 	count  = n;
-	type = t;
-	GLASSERT(t == MAP || t == MOB || t == (MAP | MOB));
 }
 
 
@@ -957,7 +952,6 @@ GoldCrystalFilter::GoldCrystalFilter()
 	arr[4] = ISC::crystal_violet;
 	names = arr;
 	count = 5;
-	type = MOB;
 }
 
 

@@ -48,12 +48,7 @@ class CameraComponent;
 class IChitAccept
 {
 public:
-	enum {
-		MAP = 0x01,
-		MOB = 0x02
-	};
 	virtual bool Accept( Chit* chit ) = 0;
-	virtual int  Type() = 0;
 };
 
 
@@ -61,21 +56,18 @@ class ChitAcceptAll : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit )	{ return true; }
-	virtual int  Type()					{ return MAP | MOB; }
 };
 
 class ChitHasMoveComponent : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type()					{ return MOB; }
 };
 
 class ChitHasAIComponent : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type()					{ return MAP | MOB; }
 };
 
 class MultiFilter : public IChitAccept
@@ -88,7 +80,6 @@ public:
 	MultiFilter( int anyAllMatch ) : type(-1), anyAll(anyAllMatch) {}
 
 	virtual bool Accept( Chit* chit );
-	virtual int  Type();					// committed when called the first time
 
 	grinliz::CDynArray< IChitAccept* > filters;
 private:

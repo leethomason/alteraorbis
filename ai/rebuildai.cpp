@@ -85,7 +85,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 		// Create workers, if needed.
 		Rectangle2F b = ToWorld2F(InnerSectorBounds(sector));
 		CChitArray arr;
-		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
+		ItemNameFilter workerFilter(ISC::worker);
 		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &workerFilter);
 		if (arr.Empty()) {
 			if (mainItem->wallet.Gold() >= WORKER_BOT_COST) {

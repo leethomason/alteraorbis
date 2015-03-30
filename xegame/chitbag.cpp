@@ -416,18 +416,6 @@ bool MultiFilter::Accept( Chit* chit )
 }
 
 
-int MultiFilter::Type()
-{
-	if ( type == -1 ) {
-		type = 0;
-		for( int i=0; i<filters.Size(); ++i ) {
-			type |= filters[i]->Type();
-		}
-	}
-	return type;
-}
-
-
 void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 {
 	GLASSERT(chit);

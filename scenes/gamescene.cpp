@@ -1774,7 +1774,7 @@ void GameScene::DoTick( U32 delta )
 
 		Rectangle2F b = ToWorld2F(InnerSectorBounds(homeSector));
 		CChitArray arr;
-		ItemNameFilter workerFilter(ISC::worker, IChitAccept::MOB);
+		ItemNameFilter workerFilter(ISC::worker);
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
 		nWorkers = arr.Size();
 		menu->SetNumWorkers(nWorkers);

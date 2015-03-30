@@ -49,8 +49,6 @@ private:
 
 	struct Group {
 		grinliz::Rectangle2I bounds;
-		grinliz::CArray<int, 16> idArr;			// FIXME: there are lots of small groups - inefficient. And buggy.
-		grinliz::CArray<int, 16> connections;	// FIXME: same as above...
 	};
 
 	struct Connection {

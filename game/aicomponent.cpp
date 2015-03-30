@@ -351,7 +351,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 
 		MOBIshFilter mobFilter;
 		BuildingFilter buildingFilter;
-		ItemNameFilter coreFilter(ISC::core, IChitAccept::MAP);
+		ItemNameFilter coreFilter(ISC::core);
 		// Order matters: prioritize mobs, then a core, then buildings.
 		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
 
@@ -1563,7 +1563,7 @@ bool AIComponent::ThinkGuard(  )
 
 	if ( !coreScript ) return false;
 
-	ItemNameFilter filter(ISC::guardpost, IChitAccept::MAP);
+	ItemNameFilter filter(ISC::guardpost);
 	Context()->chitBag->FindBuilding( IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter );
 
 	if ( chitArr.Empty() ) return false;
@@ -2711,7 +2711,7 @@ void AIComponent::EnterNewGrid(  )
 			// Need some team. And some cash.
 			Rectangle2I inner = InnerSectorBounds(sector);
 			CChitArray arr;
-			ItemNameFilter filter(ISC::gobman, IChitAccept::MOB);
+			ItemNameFilter filter(ISC::gobman);
 			Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(inner), parentChit, &filter);
 
 			//GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
@@ -2750,7 +2750,7 @@ void AIComponent::EnterNewGrid(  )
 			LumosChitBag* chitBag = this->Context()->chitBag;
 
 			// For now, just tombstones.
-			ItemNameFilter filter(ISC::tombstone, IChitAccept::MOB);
+			ItemNameFilter filter(ISC::tombstone);
 			chitBag->QuerySpatialHash( &arr, center, 1.1f, parentChit, &filter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* chit = arr[i];
