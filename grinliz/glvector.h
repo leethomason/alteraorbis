@@ -118,6 +118,13 @@ struct Vector2
 	bool operator==( const Vector2<T>& rhs ) const	{ return (x == rhs.x) && (y == rhs.y); }
 	bool operator!=( const Vector2<T>& rhs ) const	{ return (x != rhs.x) || (y != rhs.y); }
 
+	// This is used mainly for sorting; no geometric meaning.
+	bool operator<(const Vector2<T>& rhs) const {
+		if (y < rhs.y) return true;
+		if (y > rhs.y) return false;
+		return x < rhs.x;
+	}
+
 	bool Equal( const Vector2<T>& b, T epsilon ) const {
 		return ( grinliz::Equal( x, b.x, epsilon ) && grinliz::Equal( y, b.y, epsilon ) );
 	}

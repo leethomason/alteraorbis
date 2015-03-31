@@ -46,7 +46,6 @@ public:
 	void Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b);
 
 private:
-
 	struct Group {
 		grinliz::Rectangle2I bounds;
 	};
@@ -54,6 +53,8 @@ private:
 	struct Connection {
 		grinliz::Vector2I a, b;		// somewhere in the group bounds
 		int type;
+		const void* sortA;
+		const void* sortB;
 	};
 
 	enum class EParticleType {
@@ -86,6 +87,7 @@ private:
 	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
 	void FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *connections);
 	grinliz::Vector2F FindPower(const Group& forGroup);
+	void CleanConnections();
 
 	// Run through the connections, validate they are okay, throw away the bad ones.
 	//void ValidateConnections();
@@ -104,7 +106,7 @@ private:
 
 	// cache/temporaries
 	grinliz::CDynArray<Chit*> queryArr, combinedArr;
-	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;
+	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;	// used in the fill algorithm
 	grinliz::CDynArray<const Connection*> queryConn;
 	grinliz::CDynArray<Particle> newQueue;
 

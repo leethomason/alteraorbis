@@ -63,6 +63,7 @@ void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 
 void CircuitSim::NewParticle(EParticleType type, int powerRequest, const grinliz::Vector2F& origin, const grinliz::Vector2F& dest, int delay)
 {
+	GLOUTPUT(("New particle at %f,%f\n", origin.x, origin.y));
 	Particle p = { type, powerRequest, origin, origin, dest, delay };
 	newQueue.Push(p);
 }
@@ -87,6 +88,7 @@ Vector2F CircuitSim::FindPower(const Group& group)
 
 void CircuitSim::FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *out)
 {
+	out->Clear();
 	for (const Connection& c : connections) {
 		if (group.bounds.Contains(c.a) || group.bounds.Contains(c.b)) {
 			out->Push(&c);
@@ -141,10 +143,10 @@ void CircuitSim::ParticleArrived(const Particle& p)
 			Vector2F power = FindPower(group);
 			if (!power.IsZero()) {
 				// request power
-				IString powerNames[]  = { ISC::temple };
-				ItemNameFilter powerFilter(powerNames, 1);
+				IString deviceNames[] = { ISC::turret, ISC::gate };
+				ItemNameFilter deviceFilter(deviceNames, 2);
 
-				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &powerFilter);
+				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
 				NewParticle(EParticleType::control, arr.Size(), p.pos, power);
 			}
 		}
@@ -222,7 +224,7 @@ void CircuitSim::DoTick(U32 delta)
 			--i;
 		}
 		else {
-			static const int NPART = 3;
+			static const int NPART = 2;
 			static const float fraction = 1.0f / float(NPART);
 			Vector2F normal = p.dest - p.pos;
 			normal.Normalize();
@@ -250,6 +252,42 @@ void CircuitSim::FillGroup(Group* g, const Vector2I& pos, Chit* chit)
 		Chit* nextChit = 0;
 		if (hashTable.Query(nextPos, &nextChit)) {
 			FillGroup(g, nextPos, nextChit);
+		}
+	}
+}
+
+
+void CircuitSim::CleanConnections()
+{
+	// Rules:
+	//	- only one connection between any group and another.
+	//  - only one power correction between a device and a power source
+
+	for (int i = 0; i < connections.Size(); ++i) {
+		Connection& c = connections[i];
+		int type = 0;
+		Group* groupA = 0;
+		Group* groupB = 0;
+		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
+			c.sortA = groupA;
+			c.sortB = groupB;
+			if (c.sortB < c.sortA) {
+				Swap(&c.a, &c.b);
+				Swap(&c.sortA, &c.sortB);
+			}
+		}
+		else {
+			connections.SwapRemove(i);
+			--i;
+		}
+	}
+	connections.Sort([](const Connection& a, const Connection& b) {
+		return a.sortA < b.sortA;
+	});
+	for (int i = 1; i < connections.Size(); ++i) {
+		if (connections[i - 1].sortA == connections[i].sortA && connections[i - 1].sortB == connections[i].sortB) {
+			connections.SwapRemove(i);
+			--i;
 		}
 	}
 }
@@ -305,6 +343,7 @@ void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
 			}
 		}
 	}
+	CleanConnections();
 }
 
 void CircuitSim::DrawGroups()
