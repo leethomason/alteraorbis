@@ -185,7 +185,7 @@ void MapSpatialComponent::SetMapPosition( Chit* chit, int x, int y )
 }
 
 
-void MapSpatialComponent::SetBlocks( bool value ) 
+void MapSpatialComponent::SetBlocks(bool value)
 {
 	blocks = value;	// UpdateBlock() makes callback occur - set mode first!
 	SyncWithSpatial();

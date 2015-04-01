@@ -16,8 +16,24 @@
 #include "../Shiny/include/Shiny.h"
 
 #include "../script/procedural.h"
+#include "../script/batterycomponent.h"
+
 #include "../gamui/gamui.h"
 #include "../audio/xenoaudio.h"
+
+// x temple charge
+// - switches
+// - disconnect paths
+// - test out 2 variations of traps
+// - back to lower plane for rendering
+// - update cycle: when does this all get called?
+// - don't re-render unless needed
+// - scope: sector? world??
+// - integration in main game
+// - tasks trigger switches
+// - test in-domain
+// - test that abandoned domains still work (and are aggressive, since they are neutral)
+// - sort out what can (turrets) and can't (detectors) be targeted
 
 using namespace grinliz;
 using namespace gamui;
@@ -48,16 +64,6 @@ void CircuitSim::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "CircuitSim");
 	XarcClose(xs);
-}
-
-
-void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
-{
-	WorldMap* worldMap = context->worldMap;
-	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos)];
-
-//	if (wg.Circuit() == CIRCUIT_SWITCH) {
-//	}
 }
 
 
@@ -97,27 +103,46 @@ void CircuitSim::FindConnections(const Group& group, grinliz::CDynArray<const Co
 }
 
 
-void CircuitSim::FireTurret(int id)
+void CircuitSim::DeviceOn(Chit* building)
 {
-	Chit* building = context->chitBag->GetChit(id);
 	if (!building) return;
 	if (!building->GetRenderComponent()) return;
 	if (!building->GetItem()) return;
-	if (building->GetItem()->IName() != ISC::turret) return;
+	IString buildingName = building->GetItem()->IName();
 
-	Quaternion q = building->GetRenderComponent()->MainModel()->GetRotation();
-	Matrix4 rot;
-	q.ToMatrix(&rot);
-	Vector3F straight = rot * V3F_OUT;
-	RenderComponent* rc = building->GetRenderComponent();
-	Vector3F trigger = { 0, 0, 0 };
-	rc->CalcTrigger(&trigger, 0);
+	if (buildingName == ISC::turret) {
+		Quaternion q = building->GetRenderComponent()->MainModel()->GetRotation();
+		Matrix4 rot;
+		q.ToMatrix(&rot);
+		Vector3F straight = rot * V3F_OUT;
+		RenderComponent* rc = building->GetRenderComponent();
+		Vector3F trigger = { 0, 0, 0 };
+		rc->CalcTrigger(&trigger, 0);
 
-	XenoAudio::Instance()->PlayVariation(ISC::blasterWAV, building->ID(), &trigger);
+		XenoAudio::Instance()->PlayVariation(ISC::blasterWAV, building->ID(), &trigger);
 
-	DamageDesc dd(15, GameItem::EFFECT_SHOCK);
-	context->chitBag->NewBolt(trigger, straight, dd.effects, building->ID(),
-							  dd.damage, 8.0f, false);
+		DamageDesc dd(15, GameItem::EFFECT_SHOCK);
+		context->chitBag->NewBolt(trigger, straight, dd.effects, building->ID(),
+								  dd.damage, 8.0f, false);
+	}
+	else if (buildingName == ISC::gate) {
+		Vector2I pos = ToWorld2I(building->Position());
+		context->worldMap->SetRock(pos.x, pos.y, 1, false, 0);
+	}
+}
+
+
+void CircuitSim::DeviceOff(Chit* building)
+{
+	if (!building) return;
+	if (!building->GetRenderComponent()) return;
+	if (!building->GetItem()) return;
+	IString buildingName = building->GetItem()->IName();
+
+	if (buildingName == ISC::gate) {
+		Vector2I pos = ToWorld2I(building->Position());
+		context->worldMap->SetRock(pos.x, pos.y, 0, false, 0);
+	}
 }
 
 /*
@@ -133,13 +158,12 @@ void CircuitSim::FireTurret(int id)
 void CircuitSim::ParticleArrived(const Particle& p)
 {
 	static const int POWER_DELAY = 250;
-
 	int type = 0, index = 0;
 	CChitArray arr;
 
 	if (FindGroup(ToWorld2I(p.dest), &type, &index)) {
 		const Group& group = groups[type][index];
-		if (type == DEVICE_GROUP && p.type == EParticleType::control) {
+		if (type == DEVICE_GROUP && p.type == EParticleType::controlOn) {
 			Vector2F power = FindPower(group);
 			if (!power.IsZero()) {
 				// request power
@@ -147,7 +171,15 @@ void CircuitSim::ParticleArrived(const Particle& p)
 				ItemNameFilter deviceFilter(deviceNames, 2);
 
 				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
-				NewParticle(EParticleType::control, arr.Size(), p.pos, power);
+				NewParticle(EParticleType::controlOn, arr.Size(), p.pos, power);
+			}
+		}
+		else if (type == DEVICE_GROUP && p.type == EParticleType::controlOff) {
+			// Doesn't need power for off state.
+			ItemNameFilter filter(ISC::gate);
+			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &filter);
+			for (int i = 0; i < arr.Size(); ++i) {
+				DeviceOff(arr[i]);
 			}
 		}
 		else if (type == DEVICE_GROUP && p.type == EParticleType::power) {
@@ -157,14 +189,36 @@ void CircuitSim::ParticleArrived(const Particle& p)
 
 			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
 			if (arr.Size()) {
-				int id = arr[(roundRobbin++) % arr.Size()]->ID();
-				FireTurret(id);
+				Chit* chit = arr[(roundRobbin++) % arr.Size()];
+				DeviceOn(chit);
 			}
 		}
-		else if (type == POWER_GROUP && p.type == EParticleType::control) {
-			for (int i = 0; i < p.powerRequest; ++i) {
-				NewParticle(EParticleType::power, 0, p.dest, p.origin, POWER_DELAY*i);
+		else if (type == POWER_GROUP && p.type == EParticleType::controlOn) {
+			// Power group must have power device:
+			Chit* building = context->chitBag->QueryBuilding(IString(), ToWorld2I(p.dest), 0);
+			if (building) {
+				BatteryComponent* battery = (BatteryComponent*)building->GetComponent("BatteryComponent");
+				if (battery) {
+					for (int i = 0; i < p.powerRequest && battery->UseCharge(); ++i) {
+						NewParticle(EParticleType::power, 0, p.dest, p.origin, POWER_DELAY*i);
+					}
+				}
 			}
+		}
+	}
+}
+
+
+void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
+{
+	Chit* building = context->chitBag->QueryBuilding(IString(), pos, 0);
+	if (building && building->GetItem()) {
+		IString buildingName = building->GetItem()->IName();
+		if (buildingName == ISC::switchOn) {
+			DoSensor(EParticleType::controlOn, pos);
+		}
+		else if (buildingName == ISC::switchOff) {
+			DoSensor(EParticleType::controlOff, pos);
 		}
 	}
 }
@@ -177,23 +231,29 @@ void CircuitSim::TriggerDetector(const grinliz::Vector2I& pos)
 		const GameItem* item = building->GetItem();
 		if (item) {
 			if (item->IName() == ISC::detector) {
-				int type = 0, index = 0;
-				if (FindGroup(pos, &type, &index) && type == SENSOR_GROUP) {
-					const Group& group = groups[type][index];
-					FindConnections(group, &queryConn);
-					for (const Connection* c : queryConn) {
-						Vector2I a = c->a;
-						Vector2I b = c->b;
-						if (!group.bounds.Contains(a)) {
-							Swap(&a, &b);
-						}
-
-						Vector2F start = ToWorld2F(a);
-						Vector2F end = ToWorld2F(b);
-						NewParticle(EParticleType::control, 0, start, end, 0);
-					}
-				}
+				DoSensor(EParticleType::controlOn, pos);
 			}
+		}
+	}
+}
+
+
+void CircuitSim::DoSensor(EParticleType particle, const Vector2I& pos) 
+{
+	int type = 0, index = 0;
+	if (FindGroup(pos, &type, &index) && type == SENSOR_GROUP) {
+		const Group& group = groups[type][index];
+		FindConnections(group, &queryConn);
+		for (const Connection* c : queryConn) {
+			Vector2I a = c->a;
+			Vector2I b = c->b;
+			if (!group.bounds.Contains(a)) {
+				Swap(&a, &b);
+			}
+
+			Vector2F start = ToWorld2F(a);
+			Vector2F end = ToWorld2F(b);
+			NewParticle(particle, 0, start, end, 0);
 		}
 	}
 }
@@ -231,7 +291,7 @@ void CircuitSim::DoTick(U32 delta)
 
 			for (int j = 0; j < NPART; ++j) {
 				Vector2F pos = p.pos + normal * (travel * float(j + 1)*fraction);
-				IString particle = (p.type == EParticleType::control) ? ISC::control : ISC::power;
+				IString particle = (p.type == EParticleType::power) ? ISC::power : ISC::control;
 				context->engine->particleSystem->EmitPD(particle, ToWorld3F(pos), V3F_UP, delta);
 			}
 			p.pos += normal * travel;
@@ -261,7 +321,7 @@ void CircuitSim::CleanConnections()
 {
 	// Rules:
 	//	- only one connection between any group and another.
-	//  - only one power correction between a device and a power source
+	//  - only one power correction between a device and a power source (not enforced, but particles only go to one temple.)
 
 	for (int i = 0; i < connections.Size(); ++i) {
 		Connection& c = connections[i];

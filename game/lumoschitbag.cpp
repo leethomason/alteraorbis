@@ -255,7 +255,6 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
 	const int circuit = 0;
-//	int circuit = CircuitSim::NameToID(rootItem.keyValues.GetIString(ISC::circuit));
 
 	// Should be pre-cleared. But recover from weird situations by clearing.
 	// Note that water is a real problem.
@@ -270,7 +269,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetBuilding(size, porch != 0, circuit);
-	msc->SetBlocks(true);		// fixme: should get looked up in ItemDef
+	msc->SetBlocks((rootItem.flags & GameItem::PATH_NON_BLOCKING) ? false : true);
 	chit->Add(msc);
 	MapSpatialComponent::SetMapPosition(chit, pos.x, pos.y);
 
@@ -342,7 +341,7 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetBuilding(size, false, 0);
-	msc->SetBlocks(true);
+	msc->SetBlocks((rootItem->flags & GameItem::PATH_NON_BLOCKING) ? false : true);
 	chit->Add(msc);
 	MapSpatialComponent::SetMapPosition(chit, pos.x, pos.y);
 

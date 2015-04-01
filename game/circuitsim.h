@@ -58,7 +58,8 @@ private:
 	};
 
 	enum class EParticleType {
-		control,
+		controlOn,
+		controlOff,
 		power
 	};
 
@@ -88,11 +89,13 @@ private:
 	void FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *connections);
 	grinliz::Vector2F FindPower(const Group& forGroup);
 	void CleanConnections();
+	void DoSensor(EParticleType type, const grinliz::Vector2I& pos);
 
 	// Run through the connections, validate they are okay, throw away the bad ones.
 	//void ValidateConnections();
 	void ParticleArrived(const Particle& p);
-	void FireTurret(int id);
+	void DeviceOn(Chit* chit);
+	void DeviceOff(Chit* chit);
 
 	const ChitContext* context;
 

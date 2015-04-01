@@ -9,6 +9,7 @@
 #include "../engine/text.h"
 #include "../game/fluidsim.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/gameitem.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -146,8 +147,14 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 			if (!buildButton[BUTTON_DELETE].Down() && !buildButton[BUTTON_ROTATE].Down()) {
 				Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
 				if (building) {
-					context.circuitSim->TriggerDetector(pos2i);
-					trigger = true;
+					if (building->GetItem()->IName() == ISC::detector) {
+						context.circuitSim->TriggerDetector(pos2i);
+						trigger = true;
+					}
+					else if (building->GetItem()->IName() == ISC::switchOn || building->GetItem()->IName() == ISC::switchOff) {
+						context.circuitSim->TriggerSwitch(pos2i);
+						trigger = true;
+					}
 				}
 			}
 
@@ -183,7 +190,7 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					break;
 
 					case BUTTON_SWITCH_OFF:
-					chit = context.chitBag->NewBuilding(pos2i, "switchOn", TEAM_HOUSE);
+					chit = context.chitBag->NewBuilding(pos2i, "switchOff", TEAM_HOUSE);
 					break;
 
 					case BUTTON_TEMPLE:

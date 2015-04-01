@@ -222,6 +222,7 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 		READ_FLAG(flags, f, AI_SECTOR_HERD);
 		READ_FLAG(flags, f, AI_SECTOR_WANDER);
 		READ_FLAG(flags, f, AI_USES_BUILDINGS);
+		READ_FLAG(flags, f, AI_NOT_TARGET);
 		READ_FLAG(flags, f, AI_DOES_WORK);
 		READ_FLAG(flags, f, GOLD_PICKUP);
 		READ_FLAG(flags, f, ITEM_PICKUP);
@@ -231,6 +232,7 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 		READ_FLAG(flags, f, SUBMARINE);
 		READ_FLAG(flags, f, EXPLODES);
 		READ_FLAG(flags, f, CLICK_THROUGH);
+		READ_FLAG(flags, f, PATH_NON_BLOCKING);
 	}
 	for (const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;

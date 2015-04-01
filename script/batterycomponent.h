@@ -24,7 +24,7 @@ public:
 	virtual int DoTick( U32 delta );
 
 	int Charge() const { return charge; }
-	int UseCharge();
+	bool UseCharge();
 
 private:
 	int charge;

@@ -27,15 +27,14 @@ void BatteryComponent::OnRemove()
 }
 
 
-int BatteryComponent::UseCharge()
+bool BatteryComponent::UseCharge()
 {
-	int c = charge; 
 	if (charge) {
-		charge = 0;
+		charge--;
 		ticker.Reset();
+		return true;
 	}
-	parentChit->SetTickNeeded();
-	return c; 
+	return false;
 }
 
 

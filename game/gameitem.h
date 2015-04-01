@@ -351,21 +351,23 @@ public:
 		AI_WANDER_CIRCLE	= (1<<16),		// creepy circle herding
 		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
 
-		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
-		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
-		AI_DOES_WORK		= (1<<21),
-		AI_USES_BUILDINGS	= (1<<22),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
+		AI_SECTOR_HERD		= (1<<17),		// will herd across sectors, as a group
+		AI_SECTOR_WANDER	= (1<<18),		// will wander between sectors, as an individual
+		AI_DOES_WORK		= (1<<19),
+		AI_USES_BUILDINGS	= (1<<20),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
+		AI_NOT_TARGET		= (1<<21),		// won't be targeted in battle	
 
-		GOLD_PICKUP			= (1<<23),
-		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
-		HAS_NEEDS			= (1<<25),		// ai should use needs
+		GOLD_PICKUP			= (1<<22),
+		ITEM_PICKUP			= (1<<23),		// picks up items. will use if possible.
+		HAS_NEEDS			= (1<<24),		// ai should use needs
 
-		DAMAGE_UNDER_WATER  = (1<<26),		// if set, takes damage if submerged
-		FLOAT				= (1<<27),		// floats on water and moves with the water flow
-		SUBMARINE			= (1<<28),		// isn't moved by the fluid when walking.
-		EXPLODES			= (1<<29),		// explodes when destroyed. hell yeah!
+		DAMAGE_UNDER_WATER  = (1<<25),		// if set, takes damage if submerged
+		FLOAT				= (1<<26),		// floats on water and moves with the water flow
+		SUBMARINE			= (1<<27),		// isn't moved by the fluid when walking.
+		EXPLODES			= (1<<28),		// explodes when destroyed. hell yeah!
 
-		CLICK_THROUGH		= (1<<30),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<29),		// model is created with flags to ignore world clicking
+		PATH_NON_BLOCKING   = (1<<30),		// doesn't block the pather
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.

@@ -152,7 +152,7 @@
   <GameItem name="core"
         resource="core"
         procedural="team"
-        flags="CLICK_THROUGH"
+        flags="CLICK_THROUGH PATH_NON_BLOCKING"
         baseHP="300"
         mass="100"
         />
@@ -243,20 +243,8 @@
         mass="150"
         baseHP="250"
         cost="60"
-        zone="natural" />
-
-  <GameItem name="power"
-        resource="power"
-        flags="DAMAGE_UNDER_WATER EXPLODES SHOCKABLE"
-        porch="0"
-        procedural="team"
         script="BatteryComponent"
-        circuit="battery"
-        size="1"
-        mass="150"
-        baseHP="150"
-        cost="40"
-        zone="industrial" />
+        zone="natural" />
 
   <GameItem name="turret"
         resource="turret"
@@ -292,7 +280,7 @@
 
   <GameItem name="gate"
         resource="gate"
-        flags="IMMUNE_FIRE IMMUNE_SHOCK"
+        flags="IMMUNE_FIRE IMMUNE_SHOCK PATH_NON_BLOCKING AI_NOT_TARGET"
         porch="0"
         procedural="team"
         size="1"
@@ -303,7 +291,7 @@
 
   <GameItem name="detector"
         resource="detector"
-        flags="IMMUNE_FIRE IMMUNE_SHOCK"
+        flags="IMMUNE_FIRE IMMUNE_SHOCK PATH_NON_BLOCKING AI_NOT_TARGET"
         porch="0"
         procedural="team"
         size="1"
