@@ -400,6 +400,16 @@ public:
 		return -1;
 	}
 
+	template<typename Context, typename Func>
+	void Filter(Context context, Func func) {
+		for (int i = 0; i < size; ++i) {
+			if (!func(context, mem[i])) {
+				SwapRemove(i);
+				--i;
+			}
+		}
+	}
+
 protected:
 	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
 	void operator=( const CDynArray< T, SEM >& rhs );	// hard to implement with ownership semantics

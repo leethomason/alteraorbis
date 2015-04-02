@@ -557,6 +557,19 @@ void Canvas::DrawRectangleOutline(float x, float y, float w, float h, float thic
 }
 
 
+void Canvas::CopyCmdsTo(Canvas* target)
+{
+	GAMUIASSERT(target);
+	if (!target) return;
+
+	target->m_cmds.Clear();
+	for (int i = 0; i < m_cmds.Size(); ++i) {
+		target->m_cmds.Push(m_cmds[i]);
+	}
+	target->Modify();
+}
+
+
 void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *vertexBuf )
 {
 	if ( m_atom.textureHandle == 0 ) {

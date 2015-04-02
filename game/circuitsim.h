@@ -91,8 +91,6 @@ private:
 	void CleanConnections();
 	void DoSensor(EParticleType type, const grinliz::Vector2I& pos);
 
-	// Run through the connections, validate they are okay, throw away the bad ones.
-	//void ValidateConnections();
 	void ParticleArrived(const Particle& p);
 	void DeviceOn(Chit* chit);
 	void DeviceOff(Chit* chit);
@@ -119,7 +117,7 @@ private:
 	grinliz::CDynArray<Particle> particles;
 	int roundRobbin;
 
-	gamui::Canvas canvas[NUM_GROUPS];
+	gamui::Canvas canvas[2][NUM_GROUPS];
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

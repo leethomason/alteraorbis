@@ -729,6 +729,8 @@ public:
 	virtual float Width() const											{ return DEFAULT_SIZE; }
 	virtual float Height() const										{ return DEFAULT_SIZE; }
 
+	void CopyCmdsTo(Canvas* target);
+
 	virtual bool DoLayout()												{ return true; }
 	virtual void Queue( PODArray< uint16_t > *index, PODArray< Gamui::Vertex > *vertex );
 

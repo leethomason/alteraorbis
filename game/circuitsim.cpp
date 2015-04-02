@@ -22,9 +22,10 @@
 #include "../audio/xenoaudio.h"
 
 // x temple charge
-// - switches
-// - disconnect paths
-// - test out 2 variations of traps
+// x switches
+// x disconnect paths
+// x test out 2 variations of traps
+// - drag support
 // - back to lower plane for rendering
 // - update cycle: when does this all get called?
 // - don't re-render unless needed
@@ -32,6 +33,7 @@
 // - integration in main game
 // - tasks trigger switches
 // - test in-domain
+// - speed of particles
 // - test that abandoned domains still work (and are aggressive, since they are neutral)
 // - sort out what can (turrets) and can't (detectors) be targeted
 
@@ -48,8 +50,14 @@ CircuitSim::CircuitSim(const ChitContext* _context) : context(_context)
 		LumosGame::CalcPaletteAtom(PAL_GREEN * 2, PAL_GREEN), // device
 	};
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		canvas[i].Init(&context->worldMap->overlay1, groupColor[i]);
-		canvas[i].SetLevel(-10+i);
+		RenderAtom atom = groupColor[i];
+
+		canvas[0][i].Init(&context->worldMap->overlay0, atom);
+		atom.renderState = (const void*)Map::RENDERSTATE_MAP_TRANSLUCENT;
+		canvas[1][i].Init(&context->worldMap->overlay1, atom);
+
+		canvas[0][i].SetLevel(-10 + i);
+		canvas[1][i].SetLevel(-10 + i);
 	}
 	visible = true;
 	roundRobbin = 0;
@@ -417,7 +425,7 @@ void CircuitSim::DrawGroups()
 	static float arc = 1.0f / 16.0f;
 
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		canvas[i].Clear();
+		canvas[0][i].Clear();
 		for (const Group& group : groups[i]) {
 
 			float x0 = float(group.bounds.min.x) + half + gutter;
@@ -425,7 +433,7 @@ void CircuitSim::DrawGroups()
 			float x1 = float(group.bounds.max.x + 1) - half - gutter;
 			float y1 = float(group.bounds.max.y + 1) - half - gutter;
 
-			canvas[i].DrawRectangleOutline(x0, y0, x1 - x0, y1 - y0, thickness, arc);
+			canvas[0][i].DrawRectangleOutline(x0, y0, x1 - x0, y1 - y0, thickness, arc);
 		}
 	}
 
@@ -457,10 +465,14 @@ void CircuitSim::DrawGroups()
 			p0 = ToWorld2F(c.a);
 			p1 = ToWorld2F(c.b);
 #endif
-			canvas[type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
-			canvas[type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
-			canvas[type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
+			canvas[0][type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
+			canvas[0][type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
+			canvas[0][type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
 		}
+	}
+
+	for (int i = 0; i < NUM_GROUPS; ++i) {
+		canvas[0][i].CopyCmdsTo(&canvas[1][i]);
 	}
 }
 
@@ -490,6 +502,20 @@ void CircuitSim::Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b)
 		// If power, filter out power connection.
 		Connection c = { a, b, type };
 		connections.Push(c);
+	}
+	else {
+		bool foundA = FindGroup(a, 0, 0);
+		bool foundB = FindGroup(b, 0, 0);
+		if (foundA && !foundB) {
+			connections.Filter(a, [](const Vector2I& v, const Connection& c) {
+				return c.a != v && c.b != v;
+			});
+		}
+		else if (!foundA && foundB) {
+			connections.Filter(b, [](const Vector2I& v, const Connection& c) {
+				return c.a != v && c.b != v;
+			});
+		}
 	}
 }
 
