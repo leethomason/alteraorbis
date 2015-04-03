@@ -308,6 +308,8 @@ void ItemDB::Serialize( XStream* xs )
 	XarcOpen( xs, "ItemDB" );
 	// Don't serialize 'itemMap'. It is for active
 	// game items and is created on demand.
+	// FIXME: serialize hashtable general solution?
+
 	if (xs->Saving()) {
 		int size = itemRegistry.Size();
 		XARC_SER_KEY(xs, "itemRegistry.size", size);

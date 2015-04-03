@@ -528,8 +528,10 @@ void Canvas::Init( Gamui* gamui, const RenderAtom& atom )
 
 void Canvas::Clear()
 {
-	m_cmds.Clear();
-	Modify();
+	if (m_cmds.Size()) {
+		m_cmds.Clear();
+		Modify();
+	}
 }
 
 

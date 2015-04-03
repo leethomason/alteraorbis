@@ -25,8 +25,10 @@
 // x switches
 // x disconnect paths
 // x test out 2 variations of traps
-// - drag support
-// - back to lower plane for rendering
+// x drag support
+// x back to lower plane for rendering
+// x round robbin per group, not global
+// x serialize
 // - update cycle: when does this all get called?
 // - don't re-render unless needed
 // - scope: sector? world??
@@ -40,9 +42,16 @@
 using namespace grinliz;
 using namespace gamui;
 
-CircuitSim::CircuitSim(const ChitContext* _context) : context(_context)
+CircuitSim::CircuitSim(const ChitContext* _context, const Vector2I& _sector) : context(_context), sector(_sector)
 {
 	GLASSERT(context);
+	dragStart.Zero();
+	dragCurrent.Zero();
+
+	Random random;
+	random.SetSeed(sector.x * 37 + sector.y * 41);
+	ticker.SetPeriod(2000 + random.Rand(400));
+	ticker.SetTime(ticker.Period());
 
 	RenderAtom groupColor[NUM_GROUPS] = {
 		LumosGame::CalcPaletteAtom(PAL_TANGERINE * 2, PAL_TANGERINE), // power
@@ -59,8 +68,6 @@ CircuitSim::CircuitSim(const ChitContext* _context) : context(_context)
 		canvas[0][i].SetLevel(-10 + i);
 		canvas[1][i].SetLevel(-10 + i);
 	}
-	visible = true;
-	roundRobbin = 0;
 }
 
 
@@ -68,10 +75,61 @@ CircuitSim::~CircuitSim()
 {
 }
 
+
+void CircuitSim::Connection::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "Connection");
+	XARC_SER(xs, a);
+	XARC_SER(xs, b);
+	XARC_SER(xs, type);
+	XarcClose(xs);
+}
+
+
+void CircuitSim::Particle::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "Particle");
+	XARC_SER_ENUM(xs, EParticleType, type);
+	XARC_SER(xs, powerRequest);
+	XARC_SER(xs, origin);
+	XARC_SER(xs, pos);
+	XARC_SER(xs, dest);
+	XARC_SER(xs, delay);
+	XarcClose(xs);
+}
+
+
 void CircuitSim::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "CircuitSim");
+	XARC_SER_CARRAY(xs, connections);
+	XARC_SER_CARRAY(xs, particles);
+
+	// FIXME: serialize hashtable general solution?
+
 	XarcClose(xs);
+}
+
+
+void CircuitSim::DragStart(const grinliz::Vector2F& v)
+{
+	dragStart = dragCurrent = v;
+	ticker.SetReady();
+}
+
+
+void CircuitSim::Drag(const grinliz::Vector2F& v)
+{
+	dragCurrent = v;
+	ticker.SetReady();
+}
+
+
+void CircuitSim::DragEnd(const grinliz::Vector2F& v)
+{
+	dragStart.Zero();
+	dragCurrent.Zero();
+	ticker.SetReady();
 }
 
 
@@ -197,7 +255,14 @@ void CircuitSim::ParticleArrived(const Particle& p)
 
 			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
 			if (arr.Size()) {
-				Chit* chit = arr[(roundRobbin++) % arr.Size()];
+				int value = 0;
+				if (!roundRobbin.Query(group.bounds.min, &value)) {
+					roundRobbin.Add(group.bounds.min, 0);
+				}
+				Chit* chit = arr[value % arr.Size()];
+				++value;
+				roundRobbin.Add(group.bounds.min, value);
+
 				DeviceOn(chit);
 			}
 		}
@@ -269,7 +334,12 @@ void CircuitSim::DoSensor(EParticleType particle, const Vector2I& pos)
 
 void CircuitSim::DoTick(U32 delta)
 {
-	static const float SPEED = 2.0f;
+	if (ticker.Delta(delta)) {
+		CalcGroups();
+		DrawGroups();
+	}
+
+	static const float SPEED = 4.0f;
 	float travel = Travel(SPEED, delta);
 
 	// Once again...don't mutate the array we are iterating on. *sigh*
@@ -361,14 +431,14 @@ void CircuitSim::CleanConnections()
 }
 
 
-void CircuitSim::CalcGroups(const grinliz::Vector2I& sector)
+void CircuitSim::CalcGroups()
 {
-	IString powerNames[]  = { ISC::temple, IString() };
-	bool powerGroups[] = { false, false };
-	IString sensorNames[] = { ISC::detector, ISC::switchOn, ISC::switchOff, IString() };
-	bool sensorGroups[] = { true, false, false, false };
-	IString deviceNames[] = { ISC::turret, ISC::gate, IString() };
-	bool deviceGroups[] = { true, true };
+	IString powerNames[]   = { ISC::temple, IString() };
+	bool    powerGroups[]  = { false, false };
+	IString sensorNames[]  = { ISC::detector, ISC::switchOn, ISC::switchOff, IString() };
+	bool    sensorGroups[] = { true, false, false, false };
+	IString deviceNames[]  = { ISC::turret, ISC::gate, IString() };
+	bool    deviceGroups[] = { true, true };
 
 	IString* names[NUM_GROUPS] = { powerNames, sensorNames, deviceNames };
 	const bool* doesGroup[NUM_GROUPS] = { powerGroups, sensorGroups, deviceGroups };
@@ -443,28 +513,20 @@ void CircuitSim::DrawGroups()
 		Group* groupB = 0;
 		int type = 0;
 		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
-			Vector2F p0, p1;
-#if 0
-			Rectangle2F rectA = ToWorld2F(groupA->bounds);
-			Rectangle2F rectB = ToWorld2F(groupB->bounds);
+			Vector2F p0 = ToWorld2F(c.a);
+			Vector2F p1 = ToWorld2F(c.b);
 
-			float len = FLT_MAX;
-			for (int i = 0; i < 4; ++i) {
-				for (int j = 0; j < 4; ++j) {
-					Vector2F q0 = rectA.EdgeCenter(i);
-					Vector2F q1 = rectB.EdgeCenter(j);
-					float len2 = (q0 - q1).LengthSquared();
-					if (len2 < len) {
-						len = len2;
-						p0 = q0;
-						p1 = q1;
-					}
-				}
-			}
-#else
-			p0 = ToWorld2F(c.a);
-			p1 = ToWorld2F(c.b);
-#endif
+			canvas[0][type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
+			canvas[0][type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
+			canvas[0][type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
+		}
+	}
+
+	if (!dragStart.IsZero()) {
+		int type = 0;
+		if (FindGroup(ToWorld2I(dragStart), &type, 0)) {
+			Vector2F p0 = dragStart;
+			Vector2F p1 = dragCurrent;
 			canvas[0][type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
 			canvas[0][type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
 			canvas[0][type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
@@ -517,6 +579,7 @@ void CircuitSim::Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b)
 			});
 		}
 	}
+	ticker.SetReady();
 }
 
 

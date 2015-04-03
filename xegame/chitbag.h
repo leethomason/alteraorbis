@@ -103,6 +103,8 @@ struct ChitContext
 	WorldMap*	worldMap;
 	LumosGame*	game;
 	LumosChitBag* chitBag;
+
+
 	CircuitSim*	circuitSim;
 };
 

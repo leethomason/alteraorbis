@@ -62,16 +62,15 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	const gamedb::Reader* database = context.game->GetDatabase();
 	cachedWebAge = VERY_LONG_TICK;
 
-	itemDB		= new ItemDB();
+	itemDB				= new ItemDB();
 	context.worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	context.engine		= new Engine( port, database, context.worldMap );
-	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
-	reserveBank = new ReserveBank();
-	visitors	= new Visitors();
+	weather				= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
+	reserveBank			= new ReserveBank();
+	visitors			= new Visitors();
 
 	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
-
-	context.chitBag = new LumosChitBag( context, this );
+	context.chitBag		= new LumosChitBag( context, this );
 	context.chitBag->AddListener(this);
 
 	context.worldMap->AttachEngine( context.engine, context.chitBag );

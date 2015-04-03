@@ -317,13 +317,25 @@ inline void XarcSet( XStream* xs, const char* key, const grinliz::Rectangle2I& v
 
 // Matrix
 bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v );
-void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v );
+void XarcSet(XStream* xs, const char* key, const grinliz::Matrix4& v);
 
 #define XARC_SER( stream, name ) {			\
 	if ( (stream)->Saving() )				\
 		XarcSet( stream, #name, name );		\
-	else									\
+				else									\
 		XarcGet( stream, #name, name );		\
+}
+
+#define XARC_SER_ENUM(stream, type, name) {	\
+	if ((stream)->Saving())	{				\
+		const int value = (int)name;		\
+		XarcSet( stream, #name, value );	\
+	}										\
+	else {									\
+		int value = 0;						\
+		XarcGet(stream, #name, value);		\
+		name = static_cast<type>(name);		\
+	}										\
 }
 
 #define XARC_SER_DEF( stream, name, defaultVal ) {	\

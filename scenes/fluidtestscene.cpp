@@ -28,7 +28,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	context.chitBag = new LumosChitBag( context, 0 );
 	context.worldMap->AttachEngine(context.engine, context.chitBag);
 
-	context.circuitSim = new CircuitSim(&context);
+	Vector2I sector = { 0, 0 };
+	context.circuitSim = new CircuitSim(&context, sector);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
@@ -120,9 +121,14 @@ void FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinli
 
 		if (action == GAME_TAP_DOWN) {
 			dragStart = ToWorld2I(at);
+			context.circuitSim->DragStart(ToWorld2F(at));
+		}
+		else if (action == GAME_TAP_MOVE) {
+			context.circuitSim->Drag(ToWorld2F(at));
 		}
 		else if (action == GAME_TAP_UP) {
 			Vector2I dragEnd = ToWorld2I(at);
+			context.circuitSim->DragEnd(ToWorld2F(at));
 			if (dragStart != dragEnd) {
 				context.circuitSim->Connect(dragStart, dragEnd);
 			}
@@ -283,10 +289,5 @@ void FluidTestScene::DoTick(U32 delta)
 {
 	context.worldMap->DoTick(delta, context.chitBag);
 	context.circuitSim->DoTick(delta);
-
-	static const Vector2I home = { 0, 0 };
-	context.circuitSim->CalcGroups(home);
-	context.circuitSim->DrawGroups();
-
 	context.chitBag->DoTick(delta);
 }

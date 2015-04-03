@@ -7,8 +7,10 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glrectangle.h"
+#include "../grinliz/glrandom.h"
 #include "../gamui/gamui.h"
 #include "../xegame/chit.h"
+#include "../xegame/cticker.h"
 
 class WorldMap;
 class Engine;
@@ -29,21 +31,21 @@ struct ChitContext;
 class CircuitSim
 {
 public:
-	CircuitSim(const ChitContext* context);
+	CircuitSim(const ChitContext* context, const grinliz::Vector2I& sector);
 	~CircuitSim();
 
 	void Serialize(XStream* xs);
 
 	void TriggerSwitch(const grinliz::Vector2I& pos);
 	void TriggerDetector(const grinliz::Vector2I& pos);
+
 	void DoTick(U32 delta);
 
-	bool visible;
-
-	void CalcGroups(const grinliz::Vector2I& sector);
-	void DrawGroups();
-
 	void Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b);
+
+	void DragStart(const grinliz::Vector2F& v);
+	void Drag(const grinliz::Vector2F& v);
+	void DragEnd(const grinliz::Vector2F& v);
 
 private:
 	struct Group {
@@ -55,6 +57,8 @@ private:
 		int type;
 		const void* sortA;
 		const void* sortB;
+
+		void Serialize(XStream* xs);
 	};
 
 	enum class EParticleType {
@@ -70,8 +74,12 @@ private:
 		grinliz::Vector2F pos;
 		grinliz::Vector2F dest;
 		int delay;
+
+		void Serialize(XStream* xs);
 	};
 
+	void CalcGroups();
+	void DrawGroups();
 	void NewParticle(EParticleType type, int powerRequest, const grinliz::Vector2F& origin, const grinliz::Vector2F& dest, int delay = 0);
 
 	class CompValueVector2I {
@@ -110,14 +118,18 @@ private:
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;	// used in the fill algorithm
 	grinliz::CDynArray<const Connection*> queryConn;
 	grinliz::CDynArray<Particle> newQueue;
+	grinliz::Vector2F dragStart, dragCurrent;
+	grinliz::Vector2I sector;
+	CTicker ticker;
+
+	// Data, but not serialized.
+	grinliz::CDynArray<Group> groups[NUM_GROUPS];
+	gamui::Canvas canvas[2][NUM_GROUPS];
 
 	// Data
-	grinliz::CDynArray<Group> groups[NUM_GROUPS];
 	grinliz::CDynArray<Connection> connections;
 	grinliz::CDynArray<Particle> particles;
-	int roundRobbin;
-
-	gamui::Canvas canvas[2][NUM_GROUPS];
+	grinliz::HashTable<grinliz::Vector2I, int, CompValueVector2I> roundRobbin;	// which device's turn is it to fire? 
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

@@ -40,6 +40,8 @@ public:
 
 	int Next() const { return time; }
 	void Reset() { time = period; }
+	void SetReady() { time = 0; }
+
 	void Randomize( int seed ) {
 		grinliz::Random r(seed);
 		r.Rand();
