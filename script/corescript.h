@@ -28,7 +28,7 @@ class WorkQueue;
 class LumosChitBag;
 class CoreScript;
 class Model;
-struct ChitContext;
+class ChitContext;
 
 #define CCoreArray grinliz::CArray<CoreScript*, 32 >
 

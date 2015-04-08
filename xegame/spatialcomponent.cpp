@@ -19,6 +19,7 @@
 #include "xegamelimits.h"
 #include "rendercomponent.h"
 #include "istringconst.h"
+#include "chitcontext.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"

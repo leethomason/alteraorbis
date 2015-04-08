@@ -77,7 +77,7 @@ private:
 		int y;
 	};
 	GenState genState;
-	Sim* sim;
+	Sim*				sim;
 	grinliz::GLString	simStr;
 	gamui::PushButton	okay, cancel;
 	gamui::Image		worldImage;

@@ -45,6 +45,8 @@ class SectorData;
 class DamageDesc;
 class NewsHistory;
 class GameItem;
+class ChitContext;
+class PhysicsSims;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -86,6 +88,7 @@ public:
 
 	// Call to turn on rock rendering and make map aware of "InUse"
 	void AttachEngine( Engine* engine, IMapGridBlocked* iMapInUse  );
+	void AttatchPhysics(PhysicsSims* physics);
 	void AttachHistory(NewsHistory* h) { newsHistory = h; }
 
 	// Test initiliazation:
@@ -231,19 +234,8 @@ public:
 	}
 	void VoxelHit(const grinliz::Vector3I& voxel, const DamageDesc& dd);
 
-	// returns true if settled
-	bool RunFluidSim(const grinliz::Vector2I& sector);
-	void EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine);
-	const FluidSim* GetFluidSim(const grinliz::Vector2I& sector) {
-		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS);
-		return fluidSim[sector.y*NUM_SECTORS + sector.x]; 
-	}
-	// Debugging
-	void Unsettle(const grinliz::Vector2I& sector);
-
 	// Map information, debugging of pools and waterfalls:
-	void FluidStats(int* pools, int* waterfalls);
-	grinliz::Vector2I GetPoolLocation(int index);
+	void FluidStats(PhysicsSims* context, int* pools, int* waterfalls);
 
 	// This is sort of "left over" from worldGen & rockGen. The generation step
 	// should proably place the emitters, but hard to do with the limited info there.
@@ -321,7 +313,6 @@ private:
 	} 
 
 	void Init( int w, int h );
-	void InitFluidSim();
 	void FreeVBOs();
 
 	void CalcZone( int x, int y );
@@ -416,9 +407,9 @@ private:
 
 	Engine*						engine;
 	IMapGridBlocked*			iMapGridUse;
+	PhysicsSims*				physics;
 	int							slowTick;
 	NewsHistory*				newsHistory;
-	FluidSim*					fluidSim[NUM_SECTORS*NUM_SECTORS];
 
 	WorldInfo*					worldInfo;
 	grinliz::Rectangle2I		debugRegionOverlay;
@@ -449,9 +440,6 @@ private:
 	int								nGrids;
 	int								nTrees;	// we don't necessarily use all the trees in the treePool
 	int								processIndex;
-
-	CTicker							fluidTicker;
-	int								fluidSector;
 
 	ThreadPool*						threadPool;
 

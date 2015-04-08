@@ -8,6 +8,7 @@
 #include "../engine/engine.h"
 
 #include "../xegame/istringconst.h"
+#include "../xegame/chitcontext.h"
 
 #include "../xarchive/glstreamer.h"
 

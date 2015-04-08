@@ -19,6 +19,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"

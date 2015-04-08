@@ -16,15 +16,21 @@
 #include "mapspatialcomponent.h"
 #include "worldmap.h"
 #include "lumoschitbag.h"
+
 #include "../engine/serialize.h"
+
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
-#include "../script/evalbuildingscript.h"
-#include "../game/circuitsim.h"
-#include "../script/procedural.h"
+#include "../xegame/chitcontext.h"
 #include "../xegame/rendercomponent.h"
+
+#include "../script/procedural.h"
+#include "../script/evalbuildingscript.h"
+
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
+
+#include "../game/circuitsim.h"
 
 using namespace grinliz;
 
@@ -136,9 +142,9 @@ void MapSpatialComponent::SyncWithSpatial()
 	outset.Outset(1);
 
 	if (!oldBounds.min.IsZero()) {
-		UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, oldOutset);
+		UpdateGridLayer(Context()->worldMap, Context()->chitBag, oldOutset);
 	}
-	UpdateGridLayer(Context()->worldMap, Context()->chitBag, Context()->circuitSim, outset);
+	UpdateGridLayer(Context()->worldMap, Context()->chitBag, outset);
 }
 
 
@@ -204,7 +210,7 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 }
 
 
-/*static*/ void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chitBag, CircuitSim* ciruitSim, const Rectangle2I& rect)
+/*static*/ void MapSpatialComponent::UpdateGridLayer(WorldMap* worldMap, LumosChitBag* chitBag, const Rectangle2I& rect)
 {
 	for (Rectangle2IIterator it(rect); !it.Done(); it.Next()) {
 		int porchType = 0;
@@ -242,7 +248,6 @@ void MapSpatialComponent::OnRemove()
 	
 	WorldMap* worldMap = Context()->worldMap;
 	LumosChitBag* chitBag = Context()->chitBag;
-	CircuitSim* circuitSim = Context()->circuitSim;
 
 	super::OnRemove();
 
@@ -251,7 +256,7 @@ void MapSpatialComponent::OnRemove()
 	Rectangle2I b = bounds;
 	b.Outset(1);
 	worldMap->UpdateBlock(bounds);
-	UpdateGridLayer(worldMap, chitBag, circuitSim, b);
+	UpdateGridLayer(worldMap, chitBag, b);
 }
 
 

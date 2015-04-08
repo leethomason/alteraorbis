@@ -17,6 +17,7 @@
 #include "chit.h"
 #include "chitevent.h"
 #include "chitbag.h"
+#include "chitcontext.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"

@@ -1,6 +1,7 @@
 #include "mapgridwidget.h"
 #include "../script/corescript.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 #include "../game/worldmap.h"
 #include "../game/team.h"
 #include "../game/worldinfo.h"

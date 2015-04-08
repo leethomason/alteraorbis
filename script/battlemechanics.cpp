@@ -31,6 +31,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/chitcontext.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"

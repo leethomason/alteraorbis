@@ -393,7 +393,7 @@ void WorldGenScene::DoTick(U32 delta)
 			}
 			WorldMap* swm = sim->GetWorldMap();
 			int pools = 0, waterfalls = 0;
-			swm->FluidStats(&pools, &waterfalls);
+			swm->FluidStats(sim->Context()->physicsSims, &pools, &waterfalls);
 
 			simStr.Format("Age=%.2f\n", age);
 			headerText.SetText(simStr.safe_str());

@@ -15,8 +15,9 @@
 
 #include "cameracomponent.h"
 #include "chit.h"
-#include "../game/lumoschitbag.h"
+#include "chitcontext.h"
 #include "spatialcomponent.h"
+#include "../game/lumoschitbag.h"
 #include "../game/gridmovecomponent.h"
 #include "../engine/camera.h"
 #include "../engine/engine.h"

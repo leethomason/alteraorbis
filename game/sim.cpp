@@ -42,6 +42,7 @@
 #include "lumosmath.h"
 #include "circuitsim.h"
 #include "gridmovecomponent.h"
+#include "physicssims.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -78,7 +79,8 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	avatarTimer = 0;
 	currentVisitor = 0;
 
-	context.circuitSim = new CircuitSim(&context);
+	context.physicsSims = new PhysicsSims(&context);
+	context.worldMap->AttatchPhysics(context.physicsSims);
 
 	random.SetSeedFromTime();
 	plantScript = new PlantScript(context.chitBag->Context());
@@ -89,15 +91,16 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 
 Sim::~Sim()
 {
-	delete context.circuitSim;
-	context.circuitSim = 0;
+	context.worldMap->AttatchPhysics(0);
+	context.worldMap->AttachEngine( 0, 0 );
+	context.worldMap->AttachHistory(0);
+	context.chitBag->RemoveListener(this);
+	delete context.physicsSims;
+	context.physicsSims= 0;
 	delete plantScript;
 	delete visitors;
 	delete weather;
 	delete reserveBank;
-	context.worldMap->AttachEngine( 0, 0 );
-	context.worldMap->AttachHistory(0);
-	context.chitBag->RemoveListener(this);
 	delete context.chitBag;
 	context.chitBag = 0;
 	delete context.engine;
@@ -185,7 +188,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
-			context.circuitSim->Serialize(&reader);
+			context.physicsSims->Serialize(&reader);
 			context.engine->camera.Serialize( &reader );
 			context.chitBag->Serialize( &reader );
 
@@ -222,7 +225,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			itemDB->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
-			context.circuitSim->Serialize(&writer);
+			context.physicsSims->Serialize(&writer);
 			context.engine->camera.Serialize( &writer );
 			context.chitBag->Serialize( &writer );
 
@@ -496,7 +499,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 
 	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
-	context.circuitSim->DoTick(delta);
+	context.physicsSims->DoTick(delta);
 
 	if (useAreaOfInterest) {
 		Vector3F center = V3F_ZERO;

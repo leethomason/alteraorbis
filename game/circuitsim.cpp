@@ -12,6 +12,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/chitcontext.h"
 
 #include "../Shiny/include/Shiny.h"
 
@@ -29,15 +30,15 @@
 // x back to lower plane for rendering
 // x round robbin per group, not global
 // x serialize
-// - update cycle: when does this all get called?
-// - don't re-render unless needed
-// - scope: sector? world??
+// x update cycle: when does this all get called?
+// x don't re-render unless needed
+// x scope: sector? world??
+// x speed of particles
 // - integration in main game
 // - tasks trigger switches
-// - test in-domain
-// - speed of particles
 // - test that abandoned domains still work (and are aggressive, since they are neutral)
 // - sort out what can (turrets) and can't (detectors) be targeted
+// - test in-domain
 
 using namespace grinliz;
 using namespace gamui;

@@ -24,6 +24,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../engine/loosequadtree.h"
 

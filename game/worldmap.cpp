@@ -47,6 +47,7 @@
 #include "gameitem.h"
 #include "fluidsim.h"
 #include "circuitsim.h"
+#include "physicssims.h"
 
 #include "../script/worldgen.h"
 #include "../script/procedural.h"
@@ -107,22 +108,20 @@ static const float INV_LEN_F8[8] = {
 };
 
 
-WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000)
+WorldMap::WorldMap(int width, int height) : Map(width, height)
 {
 	GLASSERT( width % ZONE_SIZE == 0 );
 	GLASSERT( height % ZONE_SIZE == 0 );
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 
 	engine = 0;
+	physics = 0;
 	currentPather = 0;
 	worldInfo = 0;
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
 	processIndex = 0;
 
-	fluidSector = 0;
-	fluidTicker.SetPeriod(600 / (NUM_SECTORS*NUM_SECTORS));
-	
 	voxelTexture = 0;
 	gridTexture = 0;
 
@@ -148,8 +147,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 		}
 	}
 
-	memset(fluidSim, 0, sizeof(FluidSim*)*NUM_SECTORS*NUM_SECTORS);
-
 	// --- self call: make sure memory allocated. ---
 	Init(width, height);
 }
@@ -157,9 +154,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height), fluidTicker(1000
 
 WorldMap::~WorldMap()
 {
-	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		delete fluidSim[i];
-	}
 	GLASSERT( engine == 0 );
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 
@@ -229,6 +223,13 @@ void WorldMap::AttachEngine( Engine* e, IMapGridBlocked* imap )
 
 	engine = e;
 	iMapGridUse = imap;
+}
+
+
+void WorldMap::AttatchPhysics(PhysicsSims* sims)
+{
+	GLASSERT(!physics || !sims || (physics == sims));
+	physics = sims;
 }
 
 
@@ -423,27 +424,6 @@ void WorldMap::DeleteAllRegions()
 }
 
 
-void WorldMap::InitFluidSim()
-{
-	Rectangle2I thisBounds = Bounds();
-
-	for (int j = 0; j < NUM_SECTORS; ++j) {
-		for (int i = 0; i < NUM_SECTORS; ++i) {
-			const int index = j*NUM_SECTORS + i;
-			delete fluidSim[index];
-			fluidSim[index] = 0;
- 
-			Rectangle2I bounds;
-			bounds.Set(i*SECTOR_SIZE, j*SECTOR_SIZE, i*SECTOR_SIZE + SECTOR_SIZE - 1, j*SECTOR_SIZE + SECTOR_SIZE - 1);
-			bounds.DoIntersection(thisBounds);
-			if (bounds.IsValid()) {
-				fluidSim[index] = new FluidSim(this, bounds);
-			}
-		}
-	}
-}
-
-
 void WorldMap::Init( int w, int h )
 {
 	// Reset the voxels
@@ -454,8 +434,6 @@ void WorldMap::Init( int w, int h )
 		AttachEngine( savedEngine, savedIMap );
 	}
 
-//	voxelInit.ClearAll();
-
 	DeleteAllRegions();
 	this->width = w;
 	this->height = h;
@@ -463,8 +441,6 @@ void WorldMap::Init( int w, int h )
 	
 	delete worldInfo;
 	worldInfo = new WorldInfo( grid, width, height );
-
-	InitFluidSim();
 }
 
 
@@ -735,82 +711,25 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 }
 
 
-void WorldMap::Unsettle(const grinliz::Vector2I& sector)
-{
-	fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
-}
-
-
-bool WorldMap::RunFluidSim(const grinliz::Vector2I& sector)
-{
-	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
-		return fluidSim[sector.y*NUM_SECTORS + sector.x]->DoStep();
-	return true;
-}
-
-
-void WorldMap::EmitFluidParticles(U32 delta, const grinliz::Vector2I& sector, Engine* engine)
-{
-	if (fluidSim[sector.y*NUM_SECTORS + sector.x])
-		fluidSim[sector.y*NUM_SECTORS + sector.x]->EmitWaterfalls(delta, engine);
-}
-
-
-void WorldMap::FluidStats(int* pools, int* waterfalls)
+void WorldMap::FluidStats(PhysicsSims* context, int* pools, int* waterfalls)
 {
 	*pools = 0;
 	*waterfalls = 0;
-	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
-		if (fluidSim[i]) {
-			*pools += fluidSim[i]->NumPools();
-			*waterfalls += fluidSim[i]->NumWaterfalls();
-		}
-	}
-}
-
-
-grinliz::Vector2I WorldMap::GetPoolLocation(int index)
-{
-	int pools = 0;
-
-	for (int i = 0; i < Square(NUM_SECTORS); ++i) {
-		for (int i = 0; i < Square(NUM_SECTORS); ++i) {
-			if (fluidSim[i]) {
-				int n = fluidSim[i]->NumPools();
-				if (pools + n > index) {
-					return fluidSim[i]->PoolLoc(index - pools);
-				}
-				pools += n;
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			Vector2I sector = { i, j };
+			FluidSim* fluidSim = context->GetFluidSim(sector);
+			if (fluidSim) {
+				*pools += fluidSim->NumPools();
+				*waterfalls += fluidSim->NumWaterfalls();
 			}
 		}
 	}
-	Vector2I v = { 0, 0 };
-	return v;
 }
-
 
 
 void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 {
-	{
-		PROFILE_BLOCK(FluidSim);
-		int n = fluidTicker.Delta(delta);
-		while (n--) {
-			if (fluidSim[fluidSector]) {
-				fluidSim[fluidSector]->DoStep();
-			}
-			fluidSector++;
-			if (fluidSector >= Square(NUM_SECTORS)) {
-				fluidSector = 0;
-			}
-		}
-	}
-
-	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		if (fluidSim[i]) {
-			fluidSim[i]->EmitWaterfalls(delta, engine);
-		}
-	}
 	ProcessEffect(chitBag, delta);
 
 	slowTick -= (int)(delta);
@@ -890,9 +809,11 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 void WorldMap::SetEmitter(int x, int y, bool on, int type) {
 	int index = INDEX(x, y);
 	grid[index].SetFluidEmitter(on, type);
-	grinliz::Vector2I sector = ToSector(x, y);
-	if (fluidSim[sector.y*NUM_SECTORS + sector.x]) {
-		fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+	if (physics) {
+		FluidSim* fluidSim = physics->GetFluidSim(ToSector(x,y));
+		if (fluidSim) {
+			fluidSim->Unsettle();
+		}
 	}
 }
 
@@ -941,13 +862,15 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetRockType( rockType );
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
 
-	if ( !was.VoxelEqual( wg )) {
-//		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
-		grid[INDEX(x,y)] = wg;
-		
-		Vector2I sector = ToSector(x, y);
-		if (fluidSim[sector.y*NUM_SECTORS + sector.x]) {
-			fluidSim[sector.y*NUM_SECTORS + sector.x]->Unsettle();
+	if (!was.VoxelEqual(wg)) {
+		//		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
+		grid[INDEX(x, y)] = wg;
+
+		if (physics) {
+			FluidSim* fluidSim = physics->GetFluidSim(ToSector(x, y));
+			if (fluidSim) {
+				fluidSim->Unsettle();
+			}
 		}
 	}
 	if ( was.IsPassable() != wg.IsPassable() ) {
@@ -2481,7 +2404,13 @@ void WorldMap::GenerateEmitters(U32 seed)
 							int area = 0;
 							int savedHeight = grid[INDEX(it.Pos())].NominalRockHeight();
 							grid[INDEX(it.Pos())].SetNominalRockHeight(0);
-							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(it.Pos(), true, fluidType > 0, &area);
+							int h = 0;
+							if (physics) {
+								FluidSim* fluidSim = physics->GetFluidSim(sector);
+								if (fluidSim) {
+									h = fluidSim->FindEmitter(it.Pos(), true, fluidType > 0, &area);
+								}
+							}
 							grid[INDEX(it.Pos())].SetNominalRockHeight(savedHeight);
 							if (h && (area > AREA)) {
 								bestPos = it.Pos();
@@ -2528,7 +2457,13 @@ void WorldMap::GenerateEmitters(U32 seed)
 								}
 							}
 							int a = 0;
-							int h = fluidSim[sector.y*NUM_SECTORS + sector.x]->FindEmitter(bestPos, true, fluidType > 0, &a);
+							int h = 0;
+							if (physics) {
+								FluidSim* fluidSim = physics->GetFluidSim(sector);
+								if (fluidSim) {
+									h = fluidSim->FindEmitter(bestPos, true, fluidType > 0, &a);
+								}
+							}
 							if (!h || a <= area) {
 								// rewind
 								for (int k = 0; k < steps.Size(); ++k) {

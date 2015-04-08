@@ -25,7 +25,7 @@
 #include "../xegame/xegamelimits.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chitbag.h"
-
+#include "../xegame/chitcontext.h"
 
 using namespace gamui;
 using namespace grinliz;

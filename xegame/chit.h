@@ -34,7 +34,7 @@ class MoveComponent;
 class ItemComponent;
 class AIComponent;
 class HealthComponent;
-struct ChitContext;
+class ChitContext;
 
 class ChitBag;
 class Chit;

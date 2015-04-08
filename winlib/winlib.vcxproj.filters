@@ -306,5 +306,8 @@
     <ClInclude Include="..\grinliz\glarrayutil.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
+    <ClInclude Include="..\grinliz\glspatialhash.h">
+      <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

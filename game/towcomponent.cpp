@@ -3,6 +3,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 
 using namespace grinliz;
 

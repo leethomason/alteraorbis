@@ -439,6 +439,12 @@
     <ClCompile Include="..\script\flagscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\chitcontext.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\physicssims.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -875,6 +881,12 @@
     </ClInclude>
     <ClInclude Include="..\script\flagscript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\chitcontext.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\physicssims.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

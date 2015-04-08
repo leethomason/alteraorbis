@@ -17,7 +17,7 @@ class Engine;
 class Model;
 class LumosChitBag;
 class XStream;
-struct ChitContext;
+class ChitContext;
 
 /*
 	on switch

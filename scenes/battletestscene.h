@@ -18,6 +18,7 @@
 
 #include "../grinliz/glrandom.h"
 #include "../xegame/scene.h"
+#include "../xegame/chitcontext.h"
 #include "../script/itemscript.h"
 #include "../game/lumoschitbag.h"
 

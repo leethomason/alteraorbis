@@ -5,6 +5,7 @@
 #include "../xegame/scene.h"
 #include "../xegame/cticker.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/chitcontext.h"
 
 class LumosGame;
 class WorldMap;

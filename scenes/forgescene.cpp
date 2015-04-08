@@ -7,6 +7,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../engine/engine.h"
 

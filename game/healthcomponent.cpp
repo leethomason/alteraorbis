@@ -22,6 +22,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/game.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../grinliz/glutil.h"
 

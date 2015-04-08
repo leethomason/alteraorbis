@@ -27,6 +27,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/componentfactory.h"
+#include "../xegame/chitcontext.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"

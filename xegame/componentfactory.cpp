@@ -2,6 +2,7 @@
 #include "itemcomponent.h"
 #include "rendercomponent.h"
 #include "cameracomponent.h"
+#include "chitcontext.h"
 
 #include "../game/pathmovecomponent.h"
 #include "../game/debugstatecomponent.h"

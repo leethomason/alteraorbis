@@ -31,14 +31,12 @@ class ItemComponent;
 class ScriptComponent;
 class AIComponent;
 class HealthComponent;
-
 class Chit;
 class ChitBag;
 class ChitEvent;
 class ChitMsg;
 class LumosChitBag;
-
-struct ChitContext;
+class ChitContext;
 
 class Component
 {

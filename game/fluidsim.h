@@ -2,8 +2,10 @@
 #define WORLDMAP_FLUID_SIM_INCLUDED
 
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glbitarray.h"
 
 class WorldMap;
+struct WorldGrid;
 
 /*
 	So many many iterations of this code.

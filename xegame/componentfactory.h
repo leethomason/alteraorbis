@@ -18,7 +18,7 @@
 
 class Component;
 class Chit;
-struct ChitContext;
+class ChitContext;
 
 class ComponentFactory {
 public:

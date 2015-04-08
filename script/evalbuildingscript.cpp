@@ -7,9 +7,11 @@
 #include "../game/worldmap.h"
 #include "../game/fluidsim.h"
 #include "../game/worldinfo.h"
+#include "../game/physicssims.h"
 #include "../grinliz/glstringutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 
 using namespace grinliz;
 
@@ -86,7 +88,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		CChitArray arr;
 		BuildingFilter buildingFilter;
-		const FluidSim* fluidSim = worldMap->GetFluidSim(sector);
+
+		const FluidSim* fluidSim = Context()->physicsSims->GetFluidSim(sector);
 		bool hasWaterfalls = fluidSim->NumWaterfalls() > 0;
 
 		LumosChitBag* chitBag = Context()->chitBag;

@@ -8,6 +8,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/chitcontext.h"
 
 using namespace grinliz;
 
@@ -39,6 +40,7 @@ void GridMoveComponent::Serialize( XStream* xs )
 {
 	if (state == TRAVELLING) {
 		if (Context() && parentChit) {
+
 			GLASSERT(Context()->worldMap->GetWorldGrid(ToWorld2I(parentChit->Position())).IsGrid());
 		}
 	}

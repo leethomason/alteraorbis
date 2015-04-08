@@ -19,6 +19,7 @@
 #include "chitevent.h"
 #include "itemcomponent.h"
 #include "istringconst.h"
+#include "chitcontext.h"
 
 #include "../engine/animation.h"
 #include "../engine/model.h"

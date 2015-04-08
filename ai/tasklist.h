@@ -9,7 +9,7 @@ class Chit;
 class WorldMap;
 class Engine;
 class ChitBag;
-struct ChitContext;
+class ChitContext;
 
 namespace ai {
 

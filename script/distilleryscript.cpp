@@ -4,6 +4,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/chitcontext.h"
 #include "../game/lumoschitbag.h"
 #include "../game/mapspatialcomponent.h"
 #include "corescript.h"

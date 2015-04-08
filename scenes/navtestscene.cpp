@@ -24,6 +24,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"

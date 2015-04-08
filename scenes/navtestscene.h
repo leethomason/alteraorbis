@@ -17,9 +17,10 @@
 #define NAVTESTSCENE_INCLUDED
 
 #include "../xegame/scene.h"
+#include "../xegame/chitcontext.h"
+#include "../xegame/chitbag.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glbitarray.h"
-#include "../xegame/chitbag.h"
 #include "../engine/map.h"
 
 class LumosGame;

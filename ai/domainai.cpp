@@ -1,25 +1,30 @@
 #include "domainai.h"
+#include "roadai.h"
+
 #include "../xegame/chit.h"
 #include "../xegame/chitbag.h"
-#include "../game/lumosgame.h"
-#include "../game/lumoschitbag.h"
-#include "../script/corescript.h"
+#include "../xegame/chitcontext.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/itemcomponent.h"
+#include "../game/mapspatialcomponent.h"
+
+#include "../game/lumosgame.h"
+#include "../game/lumoschitbag.h"
 #include "../game/gameitem.h"
 #include "../game/reservebank.h"
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
-#include "../script/buildscript.h"
 #include "../game/workqueue.h"
-#include "../xegame/itemcomponent.h"
-#include "../script/forgescript.h"
 #include "../game/team.h"
+
+#include "../script/corescript.h"
+#include "../script/buildscript.h"
+#include "../script/forgescript.h"
 #include "../script/procedural.h"
 #include "../script/farmscript.h"
-#include "../game/mapspatialcomponent.h"
+
 #include "../Shiny/include/Shiny.h"
-#include "roadai.h"
 
 using namespace grinliz;
 

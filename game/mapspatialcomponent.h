@@ -69,8 +69,7 @@ public:
 
 private:
 	void SyncWithSpatial();
-	//void UpdatePorch(bool clearPorch);
-	static void UpdateGridLayer(WorldMap* map, LumosChitBag* chitBag, CircuitSim* ciruitSim, const grinliz::Rectangle2I& rect);
+	static void UpdateGridLayer(WorldMap* map, LumosChitBag* chitBag, const grinliz::Rectangle2I& rect);
 
 	int						size;
 	bool					blocks;

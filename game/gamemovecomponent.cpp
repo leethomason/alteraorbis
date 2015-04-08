@@ -6,6 +6,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/chitcontext.h"
 
 using namespace grinliz;
 

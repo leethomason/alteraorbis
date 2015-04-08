@@ -139,6 +139,7 @@
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\personality.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
+    <ClCompile Include="..\game\physicssims.cpp" />
     <ClCompile Include="..\game\reservebank.cpp" />
     <ClCompile Include="..\game\sim.cpp" />
     <ClCompile Include="..\game\team.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\chit.cpp" />
     <ClCompile Include="..\xegame\chitbag.cpp" />
+    <ClCompile Include="..\xegame\chitcontext.cpp" />
     <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\componentfactory.cpp" />
     <ClCompile Include="..\xegame\cticker.cpp" />
@@ -277,6 +279,7 @@
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\personality.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
+    <ClInclude Include="..\game\physicssims.h" />
     <ClInclude Include="..\game\reservebank.h" />
     <ClInclude Include="..\game\sectorport.h" />
     <ClInclude Include="..\game\sim.h" />
@@ -352,6 +355,7 @@
     <ClInclude Include="..\xegame\cgame.h" />
     <ClInclude Include="..\xegame\chit.h" />
     <ClInclude Include="..\xegame\chitbag.h" />
+    <ClInclude Include="..\xegame\chitcontext.h" />
     <ClInclude Include="..\xegame\chitevent.h" />
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\componentfactory.h" />

@@ -5,7 +5,7 @@
 #include "../game/gamelimits.h"
 
 class CoreScript;
-struct ChitContext;
+class ChitContext;
 
 class MapGridWidget : public gamui::IWidget
 {

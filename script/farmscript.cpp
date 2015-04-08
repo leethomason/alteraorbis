@@ -4,6 +4,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/chitcontext.h"
 
 #include "../engine/uirendering.h"
 #include "../engine/engine.h"

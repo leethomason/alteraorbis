@@ -5,6 +5,7 @@
 #include "../game/reservebank.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 #include "../game/lumoschitbag.h"
 
 using namespace grinliz;

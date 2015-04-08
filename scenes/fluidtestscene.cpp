@@ -10,6 +10,7 @@
 #include "../game/fluidsim.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/gameitem.h"
+#include "../game/physicssims.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -27,9 +28,8 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 
 	context.chitBag = new LumosChitBag( context, 0 );
 	context.worldMap->AttachEngine(context.engine, context.chitBag);
-
-	Vector2I sector = { 0, 0 };
-	context.circuitSim = new CircuitSim(&context, sector);
+	context.physicsSims = new PhysicsSims(&context);
+	context.worldMap->AttatchPhysics(context.physicsSims);
 
 	// FIXME: the first one sets the camera height and direction to something
 	// reasonable, and the 2nd positions it. Weird behavior.
@@ -58,8 +58,9 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 
 FluidTestScene::~FluidTestScene()
 {
-	delete context.circuitSim;
 	context.worldMap->AttachEngine(0, 0);
+	context.worldMap->AttatchPhysics(0);
+	delete context.physicsSims;
 	delete context.chitBag;
 	delete context.worldMap;
 	delete context.engine;
@@ -118,19 +119,21 @@ void FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinli
 		float t = 0;
 		int result = IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
 		Process3DTap(action, view, world, context.engine);
+		Vector2I sector = { 0, 0 };
+		CircuitSim* circuitSim = context.physicsSims->GetCircuitSim(sector);
 
 		if (action == GAME_TAP_DOWN) {
 			dragStart = ToWorld2I(at);
-			context.circuitSim->DragStart(ToWorld2F(at));
+			circuitSim->DragStart(ToWorld2F(at));
 		}
 		else if (action == GAME_TAP_MOVE) {
-			context.circuitSim->Drag(ToWorld2F(at));
+			circuitSim->Drag(ToWorld2F(at));
 		}
 		else if (action == GAME_TAP_UP) {
 			Vector2I dragEnd = ToWorld2I(at);
-			context.circuitSim->DragEnd(ToWorld2F(at));
+			circuitSim->DragEnd(ToWorld2F(at));
 			if (dragStart != dragEnd) {
-				context.circuitSim->Connect(dragStart, dragEnd);
+				circuitSim->Connect(dragStart, dragEnd);
 			}
 			else {
 				Tap3D(view, world);
@@ -147,6 +150,9 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 	int result = IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
 	if (result == INTERSECT) {
 		Vector2I pos2i = ToWorld2I(at);
+		Vector2I sector = { 0, 0 };
+		CircuitSim* circuitSim = context.physicsSims->GetCircuitSim(sector);
+
 		if (context.worldMap->Bounds().Contains(pos2i)) {
 
 			bool trigger = false;
@@ -154,11 +160,11 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 				Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
 				if (building) {
 					if (building->GetItem()->IName() == ISC::detector) {
-						context.circuitSim->TriggerDetector(pos2i);
+						circuitSim->TriggerDetector(pos2i);
 						trigger = true;
 					}
 					else if (building->GetItem()->IName() == ISC::switchOn || building->GetItem()->IName() == ISC::switchOff) {
-						context.circuitSim->TriggerSwitch(pos2i);
+						circuitSim->TriggerSwitch(pos2i);
 						trigger = true;
 					}
 				}
@@ -281,13 +287,14 @@ void FluidTestScene::DrawDebugText()
 	int y = 120;
 	DrawDebugTextDrawCalls(x, y, context.engine);
 	Vector2I sector = { 0, 0 };
-	UFOText::Instance()->Draw(x, y + 16, "Settled: %s voxel=%d,%d", context.worldMap->GetFluidSim(sector)->Settled() ? "true" : "false", hover.x, hover.y);
+	UFOText::Instance()->Draw(x, y + 16, "Settled: %s voxel=%d,%d", context.physicsSims->GetFluidSim(sector)->Settled() ? "true" : "false", hover.x, hover.y);
 }
 
 
 void FluidTestScene::DoTick(U32 delta)
 {
 	context.worldMap->DoTick(delta, context.chitBag);
-	context.circuitSim->DoTick(delta);
+	Vector2I zero = { 0, 0 };
+	context.physicsSims->DoTick(delta);
 	context.chitBag->DoTick(delta);
 }

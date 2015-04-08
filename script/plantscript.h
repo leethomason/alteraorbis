@@ -21,7 +21,7 @@
 #include "../game/gamelimits.h"
 
 class WorldMap;
-struct ChitContext;
+class ChitContext;
 class GameItem;
 class ModelResource;
 

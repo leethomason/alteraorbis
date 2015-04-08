@@ -30,6 +30,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/stackedsingleton.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/chitcontext.h"
 
 #include "../engine/engine.h"
 

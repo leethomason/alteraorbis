@@ -7,6 +7,7 @@
 
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitcontext.h"
 
 #include "../script/procedural.h"
 #include "../script/battlemechanics.h"

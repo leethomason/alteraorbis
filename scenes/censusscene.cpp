@@ -3,6 +3,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/chitcontext.h"
 #include "../script/itemscript.h"
 #include "../game/lumosgame.h"
 #include "../game/reservebank.h"

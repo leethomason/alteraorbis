@@ -15,6 +15,7 @@
 
 #include "component.h"
 #include "chit.h"
+#include "chitcontext.h"
 #include "../game/lumoschitbag.h"
 #include "../grinliz/glstringutil.h"
 
