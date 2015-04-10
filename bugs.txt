@@ -13,6 +13,8 @@
 - Circuits
 	- full test including circuit types
 	- abandoned domains should be dangerous
+- show rotation mode
+- check plan and built rotation consistent
 
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
@@ -41,10 +43,10 @@ x expand strategic attack bounds
 - evalBuildingScript too slow
 - deal with fruit overflow
 	- medkit manufacture?
-- check gobman that is House denizen healing
-- unify rotation model
-- tax on buy or sell. show tax income on main screen.
-- any building attack should cause awareness in domainAI
+x check gobman that is House denizen healing
+x unify rotation model
+x tax on buy or sell. show tax income on main screen.
+x any building attack should cause awareness in domainAI
 - Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them
 - unified build marks

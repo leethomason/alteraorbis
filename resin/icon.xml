@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
-<!-- $TexturePacker:SmartUpdate:301910fb4a2233b85cad7f5775a69052:8ccf29f67deeb58766ccd277f5ebcc1d:ea6b0f4e063aa2ba40a2df8e43d4b5f4$ -->
+<!-- $TexturePacker:SmartUpdate:07477156cb13a8c06ad1477d0511d4f1:2a0ffeb2a7b6479aa2e6cf964ef19dc9:ea6b0f4e063aa2ba40a2df8e43d4b5f4$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -16,24 +16,24 @@ oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="icon.png" width="1024" height="2048">
-    <sprite n="attention" x="726" y="241" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="build" x="0" y="724" w="223" h="224" pX="0.5" pY="0.5" oX="16" oY="15" oW="256" oH="256"/>
-    <sprite n="chat" x="0" y="242" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="delete" x="239" y="724" w="223" h="224" pX="0.5" pY="0.5" oX="16" oY="15" oW="256" oH="256"/>
-    <sprite n="elixir" x="241" y="242" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="flag" x="482" y="482" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="fruit" x="723" y="482" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="happy" x="0" y="483" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="heal" x="484" y="0" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="horn" x="241" y="483" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="icon" x="715" y="964" w="89" h="41" pX="0.5" pY="0.5" oX="17" oY="46" oW="128" oH="128"/>
-    <sprite n="levelup" x="482" y="723" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="loot" x="0" y="0" w="226" h="226" pX="0.5" pY="0.5" oX="15" oY="15" oW="256" oH="256"/>
-    <sprite n="porch" x="0" y="964" w="223" h="224" pX="0.5" pY="0.5" oX="16" oY="15" oW="256" oH="256"/>
-    <sprite n="possibleTarget" x="239" y="964" w="222" h="222" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="reload" x="726" y="0" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="repair" x="484" y="241" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="sad" x="242" y="0" w="226" h="226" pX="0.5" pY="0.5" oX="15" oY="15" oW="256" oH="256"/>
-    <sprite n="target" x="477" y="964" w="222" h="222" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="techxfer" x="723" y="723" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="attention" x="506" y="242" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="build" x="482" y="724" w="223" h="224" pX="0.5" pY="0.5" oX="16" oY="15" oW="256" oH="256"/>
+    <sprite n="chat" x="0" y="262" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="delete" x="482" y="964" w="223" h="224" pX="0.5" pY="0.5" oX="16" oY="15" oW="256" oH="256"/>
+    <sprite n="elixir" x="747" y="482" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="flag" x="241" y="483" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="fruit" x="0" y="503" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="happy" x="482" y="483" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="heal" x="748" y="0" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="horn" x="723" y="723" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="icon" x="238" y="1203" w="89" h="41" pX="0.5" pY="0.5" oX="17" oY="46" oW="128" oH="128"/>
+    <sprite n="levelup" x="241" y="724" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="loot" x="264" y="0" w="226" h="226" pX="0.5" pY="0.5" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="porch" x="0" y="0" w="248" h="246" pX="0.5" pY="0.5" oX="4" oY="5" oW="256" oH="256"/>
+    <sprite n="possibleTarget" x="241" y="965" w="222" h="222" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="reload" x="748" y="241" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="repair" x="264" y="242" w="226" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="sad" x="506" y="0" w="226" h="226" pX="0.5" pY="0.5" oX="15" oY="15" oW="256" oH="256"/>
+    <sprite n="target" x="0" y="985" w="222" h="222" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="techxfer" x="0" y="744" w="225" h="225" pX="0.5" pY="0.5" oX="16" oY="16" oW="256" oH="256"/>
 </TextureAtlas>
