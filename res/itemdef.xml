@@ -286,7 +286,7 @@
         size="1"
         mass="100"
         baseHP="100"
-        cost="40"
+        cost="10"
         zone="industrial" />
 
   <GameItem name="detector"
@@ -297,7 +297,7 @@
         size="1"
         mass="100"
         baseHP="100"
-        cost="40"
+        cost="10"
         zone="industrial" />
 
   <GameItem name="circuitFab"
