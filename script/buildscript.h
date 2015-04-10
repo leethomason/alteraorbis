@@ -26,6 +26,8 @@ struct BuildData
 	enum {ZONE_NONE, ZONE_INDUSTRIAL, ZONE_NATURAL};
 	int					zone;
 
+	void LabelWithCount(int count, grinliz::CStr<64>* str) const;
+
 	static grinliz::Rectangle2I Bounds(int size, const grinliz::Vector2I& pos);
 	static grinliz::Rectangle2I PorchBounds(int size, const grinliz::Vector2I& pos, int rot0_3);
 	static int DrawBounds(const grinliz::Rectangle2I& bounds, const grinliz::Rectangle2I& porchBounds,

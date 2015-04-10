@@ -18,7 +18,7 @@ public:
 	~GameSceneMenu()	{}
 
 	void Resize(const Screenport& port, const gamui::LayoutCalculator& layout);
-	void DoTick(CoreScript* coreScript);
+	void DoTick(CoreScript* coreScript, const int *buildingCount, int nBuildingCount);
 
 	enum {
 		NUM_SQUAD_BUTTONS = MAX_SQUADS + 1,	// "local" control, plus the squads

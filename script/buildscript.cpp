@@ -163,3 +163,15 @@ int BuildData::DrawBounds(const grinliz::Rectangle2I& bounds, const grinliz::Rec
 	}
 	return i;
 }
+
+
+void BuildData::LabelWithCount(int count, grinliz::CStr<64>* str) const
+{
+	if (count) {
+		str->Format("%s (%d)", label.safe_str(), count);
+	}
+	else {
+		*str = label.safe_str();
+	}
+}
+

@@ -1652,10 +1652,13 @@ void GameScene::SetPickupButtons()
 
 void GameScene::DoTick( U32 delta )
 {
+	int buildingCounts[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
+	sim->GetChitBag()->BuildingCounts(GetHomeSector(), buildingCounts, BuildScript::NUM_PLAYER_OPTIONS);
+
 	if (!paused) {
 		sim->DoTick(delta);
 	}
-	menu->DoTick(GetHomeCore());
+	menu->DoTick(GetHomeCore(), buildingCounts, BuildScript::NUM_PLAYER_OPTIONS);
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -1748,13 +1751,10 @@ void GameScene::DoTick( U32 delta )
 			summaryBars.barArr[k+1]->SetRange(float(sum[k]));
 		}
 
-		int arr[BuildScript::NUM_PLAYER_OPTIONS] = { 0 };
-		sim->GetChitBag()->BuildingCounts(sector, arr, BuildScript::NUM_PLAYER_OPTIONS);
-
 		str.Format("Date %.2f\n%s\nPop %d/%d", 
 				   sim->AgeF(), 
 				   sd.name.safe_str(), 
-				   citizens.Size(), CoreScript::MaxCitizens(arr[BuildScript::TEMPLE]));
+				   citizens.Size(), CoreScript::MaxCitizens(buildingCounts[BuildScript::TEMPLE]));
 		dateLabel.SetText( str.c_str() );
 	}
 	else {

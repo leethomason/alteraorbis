@@ -16,11 +16,11 @@
 
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
+x GT: how many structures of each type?
 - GT: food as medkit
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
-- GT: how many structures of each type?
 
 x icons instead of m/r in control screen
 x flags 

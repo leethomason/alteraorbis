@@ -45,7 +45,7 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 		modeButton[0].AddToToggleGroup( &modeButton[i] );
 	}
 
-	BuildScript			buildScript;
+	BuildScript	buildScript;
 	for( int i=0; i<BuildScript::NUM_PLAYER_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
 
@@ -171,11 +171,20 @@ void GameSceneMenu::Resize(const Screenport& port, const gamui::LayoutCalculator
 }
 
 
-void GameSceneMenu::DoTick(CoreScript* cs)
+void GameSceneMenu::DoTick(CoreScript* cs, const int* nBuilding, int nBuildingCount)
 {
 	int uiMode = UIMode();
 	if (uiMode == UI_CONTROL) {
 		SetSquadDisplay(cs);
+	}
+
+
+	BuildScript	buildScript;
+	CStr<64> str;
+	for (int i = 0; i < BuildScript::NUM_PLAYER_OPTIONS && i < nBuildingCount; ++i) {
+		const BuildData& bd = buildScript.GetData(i);
+		bd.LabelWithCount(nBuilding[i], &str);
+		buildButton[i].SetText(str.safe_str());
 	}
 }
 
