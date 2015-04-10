@@ -10,6 +10,10 @@
 	x shoot at location (long press?)
 	- art: correct porch icon for building
 	- art: uniform clear and build markers
+- Circuits
+	- full test including circuit types
+	- abandoned domains should be dangerous
+
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 - GT: food as medkit
@@ -158,17 +162,17 @@ x DomainAI: don't clear existing pave? (Depends on AI?)
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
 
-- Beta3_
+- Long Game
 	x Documentation
-	- Long game: 
-		- squad control
-			- flags reflect squads
+	x Long game: 
+		x squad control
+			x flags reflect squads
 		- greater travel
 		- diplomacy
 	x New promo assets
-	- IndieDB
+	x IndieDB
 		x Tutorial
-		- assets
+		x assets
 
 - Beta3+
 	- Android

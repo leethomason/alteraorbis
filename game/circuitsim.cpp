@@ -22,26 +22,6 @@
 #include "../gamui/gamui.h"
 #include "../audio/xenoaudio.h"
 
-// x temple charge
-// x switches
-// x disconnect paths
-// x test out 2 variations of traps
-// x drag support
-// x back to lower plane for rendering
-// x round robbin per group, not global
-// x serialize
-// x update cycle: when does this all get called?
-// x don't re-render unless needed
-// x scope: sector? world??
-// x speed of particles
-// x integration in main game
-// x don't overlay rendering when not in circuit mode
-// x tasks trigger switches
-// x sort out what can (turrets) and can't (detectors) be targeted
-// x control flags wrong color
-// - test that abandoned domains still work (and are aggressive, since they are neutral)
-// - test in-domain
-
 using namespace grinliz;
 using namespace gamui;
 

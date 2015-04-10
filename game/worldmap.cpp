@@ -1963,9 +1963,9 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	voxelBuffer.Clear();
 
 	// HARDCODE black magic values.
-	static const float du = 0.125;
+	static const float du = 0.250;
 	static const float dv = 0.125;
-	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 2048.0)
+	#define BLACKMAG_X(x)	float( double(x*288 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.875 - double(y*288 + 16) / 2048.0)
 
 	static const Vector2F UV[] = {
@@ -1985,30 +1985,12 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
 		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter - water
 		{ BLACKMAG_X(1), BLACKMAG_Y(5) },	// emitter - lava
-		{ BLACKMAG_X(2), BLACKMAG_Y(5) },	// circuit: switch
-		{ BLACKMAG_X(0), BLACKMAG_Y(6) },	// circuit: battery
-		{ BLACKMAG_X(1), BLACKMAG_Y(6) },	// circuit: zapper		
-		{ BLACKMAG_X(3), BLACKMAG_Y(0) },	// circuit: bend		
-		{ BLACKMAG_X(6), BLACKMAG_Y(0) },	// circuit: fork2		
-		{ BLACKMAG_X(2), BLACKMAG_Y(6) },	// circuit: ice		
-		{ BLACKMAG_X(3), BLACKMAG_Y(1) },	// circuit: stop		
-		{ BLACKMAG_X(4), BLACKMAG_Y(1) },	// circuit: detect_enemy
-		{ BLACKMAG_X(4), BLACKMAG_Y(0) },	// circuit: transistor A		
-		{ BLACKMAG_X(5), BLACKMAG_Y(0) },	// circuit: transistor B	
-		{ BLACKMAG_X(5), BLACKMAG_Y(1) },	// NS line, green
-		{ BLACKMAG_X(6), BLACKMAG_Y(1) },	// EW line, green
-		{ BLACKMAG_X(3), BLACKMAG_Y(2) },	// cross line, green
-		{ BLACKMAG_X(5), BLACKMAG_Y(2) },	// NS line, pave
-		{ BLACKMAG_X(6), BLACKMAG_Y(2) },	// EW line, pave
-		{ BLACKMAG_X(4), BLACKMAG_Y(2) },	// cross line, pave
-
 	};
 	static const int NUM = GL_C_ARRAY_SIZE(UV);
 
 	static const int PORCH = 7;
 	static const int PAVE = 4;
 	static const int EMITTER = 14;
-	static const int CIRCUIT = 16;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
