@@ -84,6 +84,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
 	minimap.SetCapturesTap( true );
 
+	selectionTile.Init(&sim->Context()->worldMap->overlay1 , atom, true);
+
 	atlasButton.Init(&gamui2D, game->GetButtonLook(0));
 	atlasButton.SetText("Map");
 
@@ -428,12 +430,14 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	float size = 1.0f;
 	int height = 1;
 	const char* name = "";
+	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();
 	if (buildActive && PlatformHasMouseSupport() ) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
 			name = "clearMarker1";
+			atom = LumosGame::CalcIconAtom("delete");
 		}
 		else {
 			BuildScript buildScript;
@@ -445,8 +449,10 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 				size = 2.0f;
 				name = "buildMarker2";
 			}
+			atom = LumosGame::CalcIconAtom("build");
 		}
 	}
+#if 0
 	if (*name) {
 		// Make the model current.
 		if (!selectionModel || !StrEqual(selectionModel->GetResource()->Name(), name)) {
@@ -473,6 +479,11 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 		Vector4F color = { 1, 1, 1, 0.3f };
 		selectionModel->SetColor(color);
 	}
+#else
+	selectionTile.SetPos(floorf(at.x), floorf(at.z));
+	selectionTile.SetSize(size, size);
+	selectionTile.SetAtom(atom);
+#endif	
 }
 
 
@@ -697,6 +708,14 @@ bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
 	int uiMode = menu->UIMode();
 	if ((uiMode == GameSceneMenu::UI_BUILD) && !menu->BuildActive()) {
 		building = sim->GetChitBag()->QueryBuilding(IString(),pos2i,0);
+		if (!building) {
+			building = sim->GetChitBag()->QueryPorch(pos2i);
+			MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+			if (msc) {
+				// Adjust the drag start to be the building, not the porch:
+				mapDragStart = ToWorld2F(msc->Bounds()).Center();
+			}
+		}
 	}
 	return building != 0;
 }
@@ -707,7 +726,7 @@ void GameScene::DragRotateBuilding(const grinliz::Vector2F& drag)
 	Vector2I dragStart = ToWorld2I(mapDragStart);
 	Vector2I dragEnd = ToWorld2I(drag);
 
-	Chit* building = sim->GetChitBag()->QueryBuilding(IString(),dragStart,0);
+	Chit* building = sim->GetChitBag()->QueryBuilding(IString(), dragStart, 0);
 
 	if (building && (dragStart != dragEnd)) {
 		Vector2I d = dragEnd - dragStart;

@@ -239,7 +239,7 @@ void GameSceneMenu::ItemTapped(const gamui::UIItem* item)
 		// Set the build description.
 		int buildActive = BuildActive();
 		if (buildActive == 0) {
-			buildDescription.SetText("");
+			buildDescription.SetText("Tap and drag buildings to rotate them.");
 		}
 		else {
 			BuildScript buildScript;
@@ -424,6 +424,7 @@ void GameSceneMenu::DoEscape(bool fullEscape)
 		int buildActive = BuildActive();
 		if (buildActive) {
 			buildButton[0].SetDown();	// the no-op button. something has to be down.
+			buildDescription.SetText("Tap and drag buildings to rotate them.");
 		}
 		else {
 			uiMode[UI_VIEW].SetDown();

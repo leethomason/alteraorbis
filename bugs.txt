@@ -1,4 +1,4 @@
-- touch support
+x touch support
 	x 2 finger pan
 	x 2 finger drag / pan / rotate
 	x single finger view drag?
@@ -8,14 +8,14 @@
 	x build rotation?
 	x build reticule is useless & incorrect. detect mouse mode and re-enable.
 	x shoot at location (long press?)
-	- art: correct porch icon for building
-	- art: uniform clear and build markers
+	x art: correct porch icon for building
+	x art: uniform clear and build markers
 - Circuits
 	- full test including circuit types
 	- abandoned domains should be dangerous
-- show rotation mode
-- check plan and built rotation consistent
-
+x show rotation mode
+x check plan and built rotation consistent
+- play a game through on touch
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 x GT: how many structures of each type?
