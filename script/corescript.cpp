@@ -438,7 +438,18 @@ void CoreScript::AddFlag(const Vector2I& _pos)
 	Flag f = { pos, 0 };
 	if (flags.Find(f) < 0) {
 		Chit* chit = Context()->chitBag->NewChit();
-		chit->Add(new RenderComponent("flag"));
+		RenderComponent* rc = new RenderComponent("flag");
+		chit->Add(rc);
+		ProcRenderInfo info;
+		AssignProcedural(ISC::team,
+							false,
+							ParentChit()->GetItem()->ID(),
+							ParentChit()->Team(),
+							false,
+							0,
+							0,
+							&info);
+		rc->SetProcedural(0, info);
 		chit->SetPosition(ToWorld3F(pos));
 		f.chitID = chit->ID();
 		flags.Push(f);

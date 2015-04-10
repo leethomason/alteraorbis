@@ -38,7 +38,7 @@
 // x don't overlay rendering when not in circuit mode
 // x tasks trigger switches
 // x sort out what can (turrets) and can't (detectors) be targeted
-// - control flags wrong color
+// x control flags wrong color
 // - test that abandoned domains still work (and are aggressive, since they are neutral)
 // - test in-domain
 
