@@ -32,9 +32,11 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	// Visitor
 	{ "Kiosk", "kiosk",				4, "Attracts Visitors.", "Requires a Temple" },
 	// Circuits
-	{ "Circuit Fab", "circuitFab",	5, "Builds circuits, traps, and mechanisms.", "Requires a Forge" },
-	{ "Battery", "power",			5, "Creates a charge when triggered.", "Requires a Circuit Fab" },
-	{ "Turret", "turret",			5, "Fires weapon when charge applied.", "Requires a Circuit Fab" },
+	{ "Switch On", "switchOn",		5, "Manually turns on devices." },
+	{ "Switch Off", "switchOff",	5, "Manually turns off devices." },
+	{ "Detector", "detector",		5, "Sensor to detect enemies" },
+	{ "Turret", "turret",			5, "Fires weapon when charge applied." },
+	{ "Gate", "gate",				5, "Creates and removes silica." },
 
 	// Additional:
 	{ "TrollStatue", "trollStatue", 6 },

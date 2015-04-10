@@ -34,10 +34,12 @@
 // x don't re-render unless needed
 // x scope: sector? world??
 // x speed of particles
-// - integration in main game
-// - tasks trigger switches
+// x integration in main game
+// x don't overlay rendering when not in circuit mode
+// x tasks trigger switches
+// x sort out what can (turrets) and can't (detectors) be targeted
+// - control flags wrong color
 // - test that abandoned domains still work (and are aggressive, since they are neutral)
-// - sort out what can (turrets) and can't (detectors) be targeted
 // - test in-domain
 
 using namespace grinliz;
@@ -48,6 +50,7 @@ CircuitSim::CircuitSim(const ChitContext* _context, const Vector2I& _sector) : c
 	GLASSERT(context);
 	dragStart.Zero();
 	dragCurrent.Zero();
+	enableOverlay = false;
 
 	Random random;
 	random.SetSeed(sector.x * 37 + sector.y * 41);
@@ -103,6 +106,7 @@ void CircuitSim::Particle::Serialize(XStream* xs)
 void CircuitSim::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "CircuitSim");
+	XARC_SER(xs, enableOverlay);
 	XARC_SER_CARRAY(xs, connections);
 	XARC_SER_CARRAY(xs, particles);
 
@@ -285,14 +289,16 @@ void CircuitSim::ParticleArrived(const Particle& p)
 
 void CircuitSim::TriggerSwitch(const grinliz::Vector2I& pos)
 {
-	Chit* building = context->chitBag->QueryBuilding(IString(), pos, 0);
+	Chit* building = context->chitBag->QueryPorch(pos);
 	if (building && building->GetItem()) {
 		IString buildingName = building->GetItem()->IName();
+		Vector2I buildingPos = ToWorld2I(building->Position());
+
 		if (buildingName == ISC::switchOn) {
-			DoSensor(EParticleType::controlOn, pos);
+			DoSensor(EParticleType::controlOn, buildingPos);
 		}
 		else if (buildingName == ISC::switchOff) {
-			DoSensor(EParticleType::controlOff, pos);
+			DoSensor(EParticleType::controlOff, buildingPos);
 		}
 	}
 }
@@ -536,12 +542,15 @@ void CircuitSim::DrawGroups()
 
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		canvas[0][i].CopyCmdsTo(&canvas[1][i]);
+		canvas[1][i].SetVisible(enableOverlay);
 	}
 }
 
 
 bool CircuitSim::ConnectionValid(const Vector2I& a, const Vector2I& b, int *type, Group** groupA, Group** groupB)
 {
+	if (a == b) return false;	// can't connect to yourself.
+
 	int indexA = -1, typeA = NUM_GROUPS;
 	int indexB = -1, typeB = NUM_GROUPS;
 	if (FindGroup(a, &typeA, &indexA) && FindGroup(b, &typeB, &indexB)) {

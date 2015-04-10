@@ -47,6 +47,8 @@ public:
 	void Drag(const grinliz::Vector2F& v);
 	void DragEnd(const grinliz::Vector2F& v);
 
+	void EnableOverlay(bool enable) { enableOverlay = enable; ticker.SetReady(); }
+
 private:
 	struct Group {
 		grinliz::Rectangle2I bounds;
@@ -127,6 +129,7 @@ private:
 	gamui::Canvas canvas[2][NUM_GROUPS];
 
 	// Data
+	bool enableOverlay;
 	grinliz::CDynArray<Connection> connections;
 	grinliz::CDynArray<Particle> particles;
 	grinliz::HashTable<grinliz::Vector2I, int, CompValueVector2I> roundRobbin;	// which device's turn is it to fire? 

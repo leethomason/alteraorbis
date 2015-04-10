@@ -22,6 +22,7 @@ public:
 
 	enum {
 		NUM_SQUAD_BUTTONS = MAX_SQUADS + 1,	// "local" control, plus the squads
+		BUILD_CATEGORY_CIRCUIT = 5,
 		NUM_BUILD_CATEGORIES = 6
 	};
 
@@ -43,6 +44,7 @@ public:
 
 	void DoEscape(bool fullEscape);
 	int BuildActive() const;
+	bool CircuitMode() const;
 
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 

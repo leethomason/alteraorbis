@@ -27,6 +27,7 @@
 #include "circuitsim.h"
 #include "reservebank.h"
 #include "sim.h"	// FIXME: where shourd the Web live??
+#include "physicssims.h"
 
 // move to tasklist file
 #include "lumoschitbag.h"
@@ -361,6 +362,9 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			for (int i = 0; i < chitArr.Size(); ++i) {
 				int status = Team::GetRelationship(parentChit, chitArr[i]);
 				int id = chitArr[i]->ID();
+				if (chitArr[i]->GetItem() && (chitArr[i]->GetItem()->flags & GameItem::AI_NOT_TARGET)) {
+					continue;
+				}
 
 				if (status == RELATE_ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
 					if (   fullSectorAware 
@@ -2639,7 +2643,7 @@ void AIComponent::DoMoraleZero(  )
 }
 
 
-void AIComponent::EnterNewGrid(  )
+void AIComponent::EnterNewGrid()
 {
 	// FIXME: this function does way too much.
 
@@ -2651,15 +2655,19 @@ void AIComponent::EnterNewGrid(  )
 
 	// Circuits.
 	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
-	// FIXME: need to turn detectors back on!
-/*	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-	if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
+	{
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
-		if (cs && Team::GetRelationship(cs->ParentChit(), parentChit) == RELATE_ENEMY) {
-			Context()->circuitSim->TriggerDetector(pos2i);
+		if (cs) {
+			if (cs->InUse() && Team::GetRelationship(parentChit, cs->ParentChit()) == RELATE_ENEMY) {
+				Context()->physicsSims->GetCircuitSim(ToSector(pos2i))->TriggerDetector(pos2i);
+			}
+			else if (!cs->InUse()) {
+				Context()->physicsSims->GetCircuitSim(ToSector(pos2i))->TriggerDetector(pos2i);
+			}
 		}
 	}
-*/
+
+
 	// Is there food to eat?
 	if (gameItem->HPFraction() < EAT_WILD_FRUIT) {
 		FruitElixirFilter fruitFilter;
@@ -2696,7 +2704,7 @@ void AIComponent::EnterNewGrid(  )
 	}
 
 	// Domain Takeover.
-	if (   gameItem->MOB() == ISC::denizen
+	if (gameItem->MOB() == ISC::denizen
 		&& Team::IsRogue(parentChit->Team())
 		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS
 		&& Team::IsDefault(gameItem->IName(), parentChit->Team()))
@@ -2742,43 +2750,43 @@ void AIComponent::EnterNewGrid(  )
 
 	// Check for morale-changing items (tombstones, at this writing.)
 	if (aiMode == AIMode::NORMAL_MODE) {
-		if ( gameItem->flags & GameItem::HAS_NEEDS ) {
+		if (gameItem->flags & GameItem::HAS_NEEDS) {
 			RenderComponent* rc = parentChit->GetRenderComponent();
-			Vector2F center = ToWorld2F( parentChit->Position() );	// center of the grid.
+			Vector2F center = ToWorld2F(parentChit->Position());	// center of the grid.
 			CChitArray arr;
 			const ChitContext* context = this->Context();
 			LumosChitBag* chitBag = this->Context()->chitBag;
 
 			// For now, just tombstones.
 			ItemNameFilter filter(ISC::tombstone);
-			chitBag->QuerySpatialHash( &arr, center, 1.1f, parentChit, &filter );
-			for( int i=0; i<arr.Size(); ++i ) {
+			chitBag->QuerySpatialHash(&arr, center, 1.1f, parentChit, &filter);
+			for (int i = 0; i < arr.Size(); ++i) {
 				Chit* chit = arr[i];
 				GameItem* item = chit->GetItem();
-				GLASSERT( item );
-				IString mob = item->keyValues.GetIString( "tomb_mob" );
-				GLASSERT( !mob.empty() );
+				GLASSERT(item);
+				IString mob = item->keyValues.GetIString("tomb_mob");
+				GLASSERT(!mob.empty());
 				int team = -1;
-				item->keyValues.Get( "tomb_team", &team );
-				GLASSERT( team >= 0 );
+				item->keyValues.Get("tomb_team", &team);
+				GLASSERT(team >= 0);
 
 				double boost = 0;
-				if ( mob == ISC::lesser )			boost = 0.05;
-				else if ( mob == ISC::greater )	boost = 0.20;
-				else if ( mob == ISC::denizen )	boost = 0.10;
+				if (mob == ISC::lesser)			boost = 0.05;
+				else if (mob == ISC::greater)	boost = 0.20;
+				else if (mob == ISC::denizen)	boost = 0.10;
 
-				int relate = Team::GetRelationship( parentChit->Team(), team );
-				if ( relate == RELATE_ENEMY ) {
-					GetNeedsMutable()->AddMorale( boost );
-					if ( rc ) {
-						rc->AddDeco( "happy", STD_DECO );
+				int relate = Team::GetRelationship(parentChit->Team(), team);
+				if (relate == RELATE_ENEMY) {
+					GetNeedsMutable()->AddMorale(boost);
+					if (rc) {
+						rc->AddDeco("happy", STD_DECO);
 					}
 				}
-				else if ( relate == RELATE_FRIEND ) {
-					GetNeedsMutable()->AddMorale( -boost );
-					if ( rc ) {
-						rc->AddDeco( "sad", STD_DECO );
-					}				
+				else if (relate == RELATE_FRIEND) {
+					GetNeedsMutable()->AddMorale(-boost);
+					if (rc) {
+						rc->AddDeco("sad", STD_DECO);
+					}
 				}
 			}
 		}

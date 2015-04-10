@@ -195,7 +195,7 @@ private:
 	
 	struct Flag {
 		grinliz::Vector2I pos;
-		Model* model;				// Not serialized!
+		int chitID;
 
 		void Serialize(XStream* xs);
 		const bool operator==(const Flag& rhs) { return rhs.pos == pos; }

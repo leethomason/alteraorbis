@@ -93,6 +93,7 @@ private:
 	bool DragBuildArea(gamui::RenderAtom* atom);
 	bool StartDragPlanLocation(const grinliz::Vector2I& at, WorkItem* workItem);
 	bool StartDragPlanRotation(const grinliz::Vector2I& at, WorkItem* workITem);
+	bool StartDragCircuit(const grinliz::Vector2I& at);
 	bool DragRotate(const grinliz::Vector2I& pos2i);
 	void BuildAction(const grinliz::Vector2I& pos2i);
 	void DragRotateBuilding(const grinliz::Vector2F& drag);	// rotate based on the mapDragStart and current location
@@ -140,6 +141,7 @@ private:
 	enum class EDragMode
 	{
 		NONE,
+		CIRCUIT,
 		BUILDING_ROTATION,
 		PLAN_AREA,
 		PLAN_MOVE,

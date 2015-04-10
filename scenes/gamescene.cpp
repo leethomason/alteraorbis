@@ -28,6 +28,7 @@
 #include "../game/adviser.h"
 #include "../game/fluidsim.h"
 #include "../game/gridmovecomponent.h"
+#include "../game/physicssims.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -667,6 +668,12 @@ bool GameScene::StartDragPlanLocation(const Vector2I& at, WorkItem* workItem)
 }
 
 
+bool GameScene::StartDragCircuit(const grinliz::Vector2I& at)
+{
+	return menu->CircuitMode();
+}
+
+
 bool GameScene::StartDragPlanRotation(const Vector2I& at, WorkItem* workItem)
 {
 	CoreScript* coreScript = GetHomeCore();
@@ -846,6 +853,8 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 
 void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
+	static const float CLICK_RAD = 10.0f;
+
 	tapView = view;	// justs a temporary to pass through to ItemTapped()
 	bool uiHasTap = ProcessTap(action, view, world);
 	Engine* engine = sim->GetEngine();
@@ -860,7 +869,11 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			tapDown = view;
 
 			dragMode = EDragMode::NONE;
-			if (DragBuildArea(&atom)) {
+			if (StartDragCircuit(ToWorld2I(at))) {
+				dragMode = EDragMode::CIRCUIT;
+				sim->Context()->physicsSims->GetCircuitSim(ToSector(at))->DragStart(ToWorld2F(at));
+			}
+			else if (DragBuildArea(&atom)) {
 				dragMode = EDragMode::PLAN_AREA;
 			}
 			else if (StartDragPlanLocation(ToWorld2I(at), &dragWorkItem)) {
@@ -883,7 +896,12 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			}
 		}
 		else if (action == GAME_TAP_MOVE) {
-			if (dragMode == EDragMode::BUILDING_ROTATION) {
+			if (dragMode == EDragMode::CIRCUIT) {
+				if (ToSector(at) == ToSector(mapDragStart)) {
+					sim->Context()->physicsSims->GetCircuitSim(ToSector(at))->Drag(ToWorld2F(at));
+				}
+			}
+			else if (dragMode == EDragMode::BUILDING_ROTATION) {
 				DragRotateBuilding(ToWorld2F(at));
 			}
 			else if (dragMode == EDragMode::PLAN_AREA) {
@@ -918,7 +936,22 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			}
 		}
 		else if (action == GAME_TAP_UP) {
-			if (dragMode == EDragMode::BUILDING_ROTATION) {
+			if (dragMode == EDragMode::CIRCUIT) {
+				if (ToSector(at) == ToSector(mapDragStart)) {
+					if ((tapDown - view).Length() < CLICK_RAD) {	// magic tap accuracy...
+						Tap3D(view, world);
+					}
+					else {
+						CircuitSim* circuit = sim->Context()->physicsSims->GetCircuitSim(ToSector(at));
+						circuit->DragEnd(ToWorld2F(at));
+						circuit->Connect(ToWorld2I(mapDragStart), ToWorld2I(at));
+					}
+				}
+				else {
+					sim->Context()->physicsSims->GetCircuitSim(ToSector(at))->DragEnd(mapDragStart);
+				}
+			}
+			else if (dragMode == EDragMode::BUILDING_ROTATION) {
 				// Do nothing
 			}
 			else if (dragMode == EDragMode::PLAN_AREA) {
@@ -948,7 +981,7 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			else if (dragMode == EDragMode::PAN) {
 				// FIXME: is it possible to filter out at a higher level?
 				// Check if the pan isn't a pan (actually a 2 finger drag) and do something.
-				if ((tapDown - view).Length() < 10.0f) {	// magic tap accuracy...
+				if ((tapDown - view).Length() < CLICK_RAD) {	// magic tap accuracy...
 					Tap3D(view, world);
 				}
 			}
@@ -1032,6 +1065,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	// Doesn't do any logic; does change the state.
 	menu->ItemTapped(item);
 	tutorial->ItemTapped(item);
+
+	sim->Context()->physicsSims->GetCircuitSim(GetHomeSector())->EnableOverlay(menu->CircuitMode());
 
 	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
 		startGameWidget.ItemTapped(item);

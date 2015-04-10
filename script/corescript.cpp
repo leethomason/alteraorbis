@@ -115,6 +115,7 @@ void CoreScript::Flag::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "Flag");
 	XARC_SER(xs, pos);
+	XARC_SER(xs, chitID);
 	XarcClose(xs);
 }
 
@@ -173,12 +174,6 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	coreInfoArr[index].coreScript = this;
 
 	aiTicker.Randomize(parentChit->random.Rand());
-
-	for (int i = 0; i < flags.Size(); ++i) {
-		Model* m = new Model("flag", Context()->engine->GetSpaceTree());
-		m->SetPos(ToWorld3F(flags[i].pos));
-		flags[i].model = m;
-	}
 }
 
 
@@ -191,10 +186,6 @@ void CoreScript::OnRemove()
 	delete workQueue;
 	workQueue = 0;
 
-	for (int i = 0; i < flags.Size(); ++i) {
-		delete flags[i].model;
-		flags[i].model = 0;
-	}
 	super::OnRemove();
 }
 
@@ -431,12 +422,25 @@ int CoreScript::Citizens(CChitArray* arr)
 }
 
 
-void CoreScript::AddFlag(const Vector2I& pos)
+void CoreScript::AddFlag(const Vector2I& _pos)
 {
+	Vector2I pos = _pos;
+	// A little UI fixup: set the flag to a porch
+	// if we click on the switch.
+	Chit* building = Context()->chitBag->QueryBuilding(IString(), pos, 0);
+	if (building && (building->GetItem()->IName() == ISC::switchOn || building->GetItem()->IName() == ISC::switchOff)) {
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+		if (msc) {
+			pos = msc->PorchPos().min;
+		}
+	}
+
 	Flag f = { pos, 0 };
 	if (flags.Find(f) < 0) {
-		f.model = new Model("flag", Context()->engine->GetSpaceTree());
-		f.model->SetPos(ToWorld3F(pos));
+		Chit* chit = Context()->chitBag->NewChit();
+		chit->Add(new RenderComponent("flag"));
+		chit->SetPosition(ToWorld3F(pos));
+		f.chitID = chit->ID();
 		flags.Push(f);
 	}
 }
@@ -458,8 +462,13 @@ void CoreScript::RemoveFlag(const Vector2I& pos)
 	Flag f = { pos, 0 };
 	int i = flags.Find(f);
 	if (i >= 0) {
-		delete flags[i].model;
-		flags[i].model = 0;
+		if (flags[i].chitID) {
+			Chit* chit = Context()->chitBag->GetChit(flags[i].chitID);
+			if (chit) {
+				chit->QueueDelete();
+			}
+			flags[i].chitID = 0;
+		}
 		flags.Remove(i);
 	}
 }

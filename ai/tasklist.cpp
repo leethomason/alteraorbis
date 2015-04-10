@@ -13,6 +13,7 @@
 #include "../game/mapspatialcomponent.h"
 #include "../game/reservebank.h"
 #include "../game/circuitsim.h"
+#include "../game/physicssims.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -329,14 +330,15 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_FLAG:
 		{
-//			const WorldGrid wg = context->worldMap->GetWorldGrid(pos2i);
-//			if (wg.Circuit() == CIRCUIT_SWITCH) {
-//				context->circuitSim->TriggerSwitch(pos2i);
-//			}
-//			else if (wg.Circuit() == CIRCUIT_DETECT_ENEMY) {
-//				context->circuitSim->TriggerDetector(pos2i);
-//			}
-			// FIXME: what about flags in other domains?
+			CircuitSim* circuit = context->physicsSims->GetCircuitSim(ToSector(pos2i));
+			Chit* porch = context->chitBag->QueryPorch(pos2i);
+			Chit* building = context->chitBag->QueryBuilding(IString(), pos2i, 0);
+			if (porch && circuit) {
+				circuit->TriggerSwitch(pos2i);
+			}
+			if (building && circuit) {
+				circuit->TriggerDetector(pos2i);
+			}
 			coreScript->RemoveFlag(pos2i);
 			Remove();
 		}

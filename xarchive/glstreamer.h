@@ -366,6 +366,7 @@ void XarcSet(XStream* xs, const char* key, const grinliz::Matrix4& v);
 // Serialize a CArray or CDynArray with structures 
 // with Serialize methods.
 #define XARC_SER_CARRAY( stream, arr ) {					\
+	XarcOpen(xs, #arr);										\
 	if ( (stream)->Saving() ) {								\
 		(stream)->Saving()->Set( #arr ".size", arr.Size() );\
 	}														\
@@ -378,6 +379,7 @@ void XarcSet(XStream* xs, const char* key, const grinliz::Matrix4& v);
 	for( int _i=0; _i<arr.Size(); ++_i ) {					\
 		arr[_i].Serialize( stream );						\
 	}														\
+	XarcClose(xs);											\
 }
 
 // Serialize a CArray or CDynArray of primitives.
