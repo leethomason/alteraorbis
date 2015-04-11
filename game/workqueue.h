@@ -50,11 +50,11 @@ class WorkQueue
 public:
 	WorkQueue();
 	~WorkQueue();
-	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
+	void InitSector(Chit* _parent, const grinliz::Vector2I& _sector);
 
 	struct QueueItem {
 		QueueItem();
-		void Serialize( XStream* xs );
+		void Serialize(XStream* xs);
 
 		// Accounts for the size of the structure.
 		grinliz::Rectangle2I Bounds() const;
@@ -75,43 +75,43 @@ public:
 		}
 	};
 
-	void Serialize( XStream* xs );
+	void Serialize(XStream* xs);
 	// Manages what jobs there are to do:
 	bool AddAction(const grinliz::Vector2I& pos, int buildScriptID, float rotation, int variation);	// add an action to do
-	void Remove( const grinliz::Vector2I& pos );
+	void Remove(const grinliz::Vector2I& pos);
 
 	bool HasJob() const				{ return !queue.Empty(); }
 	bool HasAssignedJob() const;
 	const QueueItem* HasJobAt(const grinliz::Vector2I& v);
 	const QueueItem* HasPorchAt(const grinliz::Vector2I& v);
-	
+
 	// Manages which chits are doing a job:
-	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
-	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
-	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
+	const QueueItem*	Find(const grinliz::Vector2I& chitPos);	// find something to do. don't hold pointer!
+	void				Assign(int id, const QueueItem* item);	// associate this chit with a job.
+	const QueueItem*	GetJob(int chitID);						// get the current job, don't hold pointer!
 
 	void DoTick();	// mostly looks for work being complete.
-	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
+	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };
 
 	// Can this task be done at the location?
 	// Stuff moves, commands change, etc.
-	static bool TaskCanComplete(	WorldMap* worldMap, 
-									LumosChitBag* chitBag,
-									const grinliz::Vector2I& pos, 
-									int action,
-									const Wallet& availableFunds );
-	bool TaskCanComplete( const WorkQueue::QueueItem& item );
+	static bool TaskCanComplete(WorldMap* worldMap,
+		LumosChitBag* chitBag,
+		const grinliz::Vector2I& pos,
+		int action,
+		const Wallet& availableFunds);
+	bool TaskCanComplete(const WorkQueue::QueueItem& item);
 
 	bool TaskIsComplete(const WorkQueue::QueueItem& item);
 
-	static int  CalcTaskSize( const grinliz::IString& structure );
+	static int  CalcTaskSize(const grinliz::IString& structure);
 
 private:
 
-	void AddImage( QueueItem* item );
-	void RemoveImage( QueueItem* item );
-	void RemoveItem( int index );
-	void SendNotification( const grinliz::Vector2I& pos );
+	void AddImage(QueueItem* item);
+	void RemoveImage(QueueItem* item);
+	void RemoveItem(int index);
+	void SendNotification(const grinliz::Vector2I& pos);
 
 	Chit				*parentChit;
 	grinliz::Vector2I	sector;
