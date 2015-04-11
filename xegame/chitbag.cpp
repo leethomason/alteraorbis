@@ -39,7 +39,10 @@ ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 	idPool = 0;
 	frame = 0;
 	bagTime = 0;
+#ifdef USE_SPACIAL_HASH
+#else
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE2 );
+#endif
 	memRoot = 0;
 	activeCamera = 0;
 	newsHistory = new NewsHistory(this);
@@ -376,6 +379,13 @@ void ChitBag::DoTick( U32 delta )
 		GLASSERT( c && c->ParentChit() == 0 );
 		delete c;
 	}
+
+	if (debugTick.Delta(delta)) {
+		GLOUTPUT(("Spatial Hash: %d nAlloc=%d nBuck=%d probe=%d eff=%.2f den=%.2f\n",
+			spatialHash.NumItems(), spatialHash.NumAlloc(),
+			spatialHash.NumAllocated(), spatialHash.NumProbes(), spatialHash.Efficiency(), spatialHash.Density()));
+		spatialHash.ClearMetrics();
+	}
 }
 
 
@@ -423,9 +433,14 @@ void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 	if (x == 0 && y == 0) return;	// sentinel
 	//GLOUTPUT(("Add %x at %d,%d\n", chit, x, y));
 
+#ifdef USE_SPACIAL_HASH
+	Vector2I pos = { x, y };
+	spatialHash.Add(pos, chit);
+#else
 	U32 index = HashIndex(x, y);
 	chit->next = spatialHash[index];
 	spatialHash[index] = chit;
+#endif
 }
 
 
@@ -436,6 +451,10 @@ void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 
 	//GLOUTPUT(("Rmv %x at %d,%d\n", chit, x, y));
 
+#ifdef USE_SPACIAL_HASH
+	Vector2I pos = { x, y };
+	spatialHash.Remove(pos, chit);
+#else
 	U32 index = HashIndex(x, y);
 	Chit* prev = 0;
 	for (Chit* it = spatialHash[index]; it; prev = it, it = it->next) {
@@ -453,6 +472,7 @@ void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 		}
 	}
 	GLASSERT(0);
+#endif
 }
 
 
@@ -480,6 +500,21 @@ void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 
 	array->Clear();
 
+#ifdef USE_SPACIAL_HASH
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		spatialHash.Query(it.Pos(), array);
+	}
+	for (int i = 0; i < array->Size(); ++i) {
+		Chit* chit = (*array)[i];
+		if (chit != ignore && accept->Accept(chit)) {
+			// Do nothing. This is valid.
+		}
+		else {
+			array->SwapRemove(i);
+			--i;
+		}
+	}
+#else
 	U32 i0 = r.min.x >> SHIFT;
 	U32 j0 = r.min.y >> SHIFT;
 	U32 i1 = r.max.x >> SHIFT;
@@ -502,6 +537,7 @@ void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 			}
 		}
 	}
+#endif
 }
 
 

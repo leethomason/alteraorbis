@@ -47,9 +47,16 @@ public:
 				&& buckets[h].pos == pos
 				&& buckets[h].value == v)
 			{
-				buckets[h].state = DELETED;
+				// Found something to delete.
+				if (h < U32(nBuckets - 1) && buckets[h + 1].state == UNUSED) {
+					// NEXT bucket is unused, so we can just mark this unused.
+					buckets[h].state = UNUSED;
+				}
+				else {
+					++nDeleted;
+					buckets[h].state = DELETED;
+				}
 				--nItems;
-				++nDeleted;
 				return;
 			}
 			++h;
@@ -60,11 +67,12 @@ public:
 
 	int Query(const Vector2I& pos, CDynArray<V>* arr) {
 		nProbes++;
-		arr->Clear();
+		int hits = 0;
 		U32 h = Hash(pos) & (nBuckets - 1);
 		while (buckets[h].state != UNUSED) {
 			if (buckets[h].state == IN_USE && buckets[h].pos == pos) {
 				arr->Push(buckets[h].value);
+				++hits;
 			}
 			else {
 				nSteps++;
@@ -72,16 +80,20 @@ public:
 			++h;
 			if (h == nBuckets) h = 0;
 		}
-		return arr->Size();
+		return hits;
 	}
 
 	bool Empty() const { return nItems == 0; }
+	int NumAllocated() const { return nBuckets; }
+	int NumItems() const { return nItems; }
+
 	int NumProbes() const { return nProbes; }
 	int NumSteps() const { return nSteps; }
-	int NumAllocated() const { return nBuckets; }
+	int NumAlloc() const { return nAlloc;  }
 	// Lower is better, 0 is best.
 	float Efficiency() const { return float(nSteps) / float(nProbes); }
 	float Density() const { return float(nItems + nDeleted) / float(nBuckets); }
+	void ClearMetrics() { nProbes = nSteps = nAlloc = 0; }
 
 private:
 
@@ -99,6 +111,7 @@ private:
 		if ( (nItems + nDeleted + 1) >= nBuckets/2 ) {
 			GLASSERT( !reallocating );
 			reallocating = true;
+			++nAlloc;
 
 			int n = CeilPowerOf2( nItems*3 );
 			if (n < 2048) n = 2048;
@@ -140,6 +153,7 @@ private:
 	int nDeleted = 0;
 	int nProbes = 0;
 	int nSteps = 0;
+	int nAlloc = 0;
 	bool reallocating = false;
 	Bucket *buckets = nullptr;
 };

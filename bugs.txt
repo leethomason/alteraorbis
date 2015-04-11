@@ -1,3 +1,27 @@
+x namegen: re-use too common. switch to loop
+x [Reenen] Circuits are way complex... (see post)
+x [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
+x check human spawn: correctly handling male/female
+x clean up world gen layout
+x DomainAI: don't clear existing pave? (Depends on AI?)
+x interface annoyances
+	x when does/should flick rotation work?
+	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
+x remove grid64 BS for proper optimization
+x control flag art
+x Visitor trails on map
+x check gobman that is House denizen healing
+x unify rotation model
+x tax on buy or sell. show tax income on main screen.
+x any building attack should cause awareness in domainAI
+x unified build marks
+x icons instead of m/r in control screen
+x flags 
+	x stay with squad (if not at home)
+	x clicking any flag should reset that squad
+x info on attack flags: who is attacking me??
+x crash in Model::userData = 0xffeefffee
+x expand strategic attack bounds
 x touch support
 	x 2 finger pan
 	x 2 finger drag / pan / rotate
@@ -10,11 +34,12 @@ x touch support
 	x shoot at location (long press?)
 	x art: correct porch icon for building
 	x art: uniform clear and build markers
+x show rotation mode
+x check plan and built rotation consistent
+
 - Circuits
 	- full test including circuit types
 	- abandoned domains should be dangerous
-x show rotation mode
-x check plan and built rotation consistent
 - play a game through on touch
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
@@ -23,14 +48,6 @@ x GT: how many structures of each type?
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
-
-x icons instead of m/r in control screen
-x flags 
-	x stay with squad (if not at home)
-	x clicking any flag should reset that squad
-x info on attack flags: who is attacking me??
-x crash in Model::userData = 0xffeefffee
-x expand strategic attack bounds
 
 - attack focus needs tweaking. attack ground needs tweaking.
 - optimize debug
@@ -43,13 +60,8 @@ x expand strategic attack bounds
 - evalBuildingScript too slow
 - deal with fruit overflow
 	- medkit manufacture?
-x check gobman that is House denizen healing
-x unify rotation model
-x tax on buy or sell. show tax income on main screen.
-x any building attack should cause awareness in domainAI
 - Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them
-- unified build marks
 - “data” the default screen of census
 - switch to war mode
 - bar-market-forge need to look more distinct
@@ -97,14 +109,8 @@ x add target portrait
 - shock -> plasma??
 - cage trap
 - taskBeside needs to account for 2x2 buildings.
-- interface annoyances
-	- when does/should flick rotation work?
-	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
-x remove grid64 BS for proper optimization
-x control flag art
 - rebalance denizen spawning
 - visitors should wander around before leaving in a "useless" domain.
-x Visitor trails on map
 - visitor percentages?
 - Limit squad control to "power radius"
 - Switch to tech tree model for visitors? Do they bring gems??
@@ -132,16 +138,10 @@ x remove disabled building choices?
 - no construction at world center - hide grid pathing bugs
 - nerf pulse fire rate again
 - too many QCore weapons
-- [Reenen] Circuits are way complex... (see post)
-- [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
 - way too much CivTech score for just the Avatar hanging around
-x namegen: re-use too common. switch to loop
 - randomize 1st name
 - balance spawn based on # in world 
-x check human spawn: correctly handling male/female
-x clean up world gen layout
 - background for console (full, none, dynamic)
-x DomainAI: don't clear existing pave? (Depends on AI?)
 - build to an efficiency level with distilleries (1 or 2)
 - in census, cores/domains should show team
 - how many trolls visit Truulga??

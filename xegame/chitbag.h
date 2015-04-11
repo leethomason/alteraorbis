@@ -19,6 +19,9 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glspatialhash.h"
+
+#include "cticker.h"
 
 #include "../engine/enginelimits.h"
 #include "../engine/bolt.h"
@@ -32,6 +35,8 @@ class Engine;
 class ComponentFactory;
 class XStream;
 class CameraComponent;
+
+#define USE_SPACIAL_HASH
 
 #define CChitArray grinliz::CArray<Chit*, 32 >
 
@@ -270,7 +275,12 @@ private:
 	grinliz::CDynArray<Bolt>		bolts;
 	grinliz::CDynArray<CurrentNews> currentNews;
 
+#ifdef USE_SPACIAL_HASH
+	grinliz::SpatialHash<Chit*> spatialHash;
+	CTicker debugTick;
+#else
 	Chit* spatialHash[SIZE2];
+#endif
 };
 
 

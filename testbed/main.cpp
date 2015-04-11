@@ -35,6 +35,7 @@ void TestSpatialHash()
 	}
 	for (int i = 0; i < NUM; ++i) {
 		Vector2I pos = { (i*MULT) / MAP, (i*MULT) % MAP };
+		query.Clear();
 		spatial.Query(pos, &query);
 		GLASSERT(query.Size() == 3);
 		for (int j = 0; j < query.Size(); ++j) {
