@@ -41,7 +41,7 @@ x check plan and built rotation consistent
 	- full test including circuit types
 	- abandoned domains should be dangerous
 - play a game through on touch
-- spatial hash table 
+x spatial hash table 
 - world gen too slow in debug
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
