@@ -43,6 +43,7 @@ x check plan and built rotation consistent
 - play a game through on touch
 x spatial hash table 
 - world gen too slow in debug
+- 2 finger pan detection is inconsistent, depending on window size
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 x GT: how many structures of each type?
