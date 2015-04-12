@@ -381,9 +381,16 @@ void ChitBag::DoTick( U32 delta )
 	}
 
 	if (debugTick.Delta(delta)) {
-		GLOUTPUT(("Spatial Hash: %d nAlloc=%d nBuck=%d probe=%d eff=%.2f den=%.2f\n",
-			spatialHash.NumItems(), spatialHash.NumAlloc(),
-			spatialHash.NumAllocated(), spatialHash.NumProbes(), spatialHash.Efficiency(), spatialHash.Density()));
+		GLString str;
+		str.Format("Spatial Hash: %d nAlloc=%d nBuck=%d probe=%d eff=%.2f den=%.2f",
+				   spatialHash.NumItems(), spatialHash.NumAlloc(),
+				   spatialHash.NumAllocated(), spatialHash.NumProbes(), spatialHash.Efficiency(), spatialHash.Density());
+		//GLOUTPUT(("%s\n", str.safe_str()));
+		static int count = 0;
+		if (count >= 10 && count < 20) {
+			GLOUTPUT_REL(("%s\n", str.safe_str()));
+		}
+		++count;
 		spatialHash.ClearMetrics();
 	}
 }
@@ -434,7 +441,7 @@ void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
 	//GLOUTPUT(("Add %x at %d,%d\n", chit, x, y));
 
 #ifdef USE_SPACIAL_HASH
-	Vector2I pos = { x, y };
+	Vector2I pos = { x >> SHIFT, y >> SHIFT };
 	spatialHash.Add(pos, chit);
 #else
 	U32 index = HashIndex(x, y);
@@ -452,7 +459,7 @@ void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 	//GLOUTPUT(("Rmv %x at %d,%d\n", chit, x, y));
 
 #ifdef USE_SPACIAL_HASH
-	Vector2I pos = { x, y };
+	Vector2I pos = { x >> SHIFT, y >> SHIFT };
 	spatialHash.Remove(pos, chit);
 #else
 	U32 index = HashIndex(x, y);
@@ -478,7 +485,9 @@ void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
 
 void ChitBag::UpdateSpatialHash(Chit* c, int x0, int y0, int x1, int y1)
 {
-	if (x0 != x1 || y0 != y1) {
+	if (   (x0>>SHIFT) != (x1>>SHIFT) 
+		|| (y0>>SHIFT) != (y1>>SHIFT)) 
+	{
 		RemoveFromSpatialHash(c, x0, y0);
 		AddToSpatialHash(c, x1, y1);
 	}
@@ -501,8 +510,16 @@ void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 	array->Clear();
 
 #ifdef USE_SPACIAL_HASH
-	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-		spatialHash.Query(it.Pos(), array);
+	U32 i0 = r.min.x >> SHIFT;
+	U32 j0 = r.min.y >> SHIFT;
+	U32 i1 = r.max.x >> SHIFT;
+	U32 j1 = r.max.y >> SHIFT;
+
+	for (U32 j = j0; j <= j1; ++j) {
+		for (U32 i = i0; i <= i1; ++i) {
+			Vector2I pos = { i, j };
+			spatialHash.Query(pos, array);
+		}
 	}
 	for (int i = 0; i < array->Size(); ++i) {
 		Chit* chit = (*array)[i];

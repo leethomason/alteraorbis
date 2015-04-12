@@ -47,14 +47,16 @@ public:
 				&& buckets[h].pos == pos
 				&& buckets[h].value == v)
 			{
-				// Found something to delete.
-				if (h < U32(nBuckets - 1) && buckets[h + 1].state == UNUSED) {
-					// NEXT bucket is unused, so we can just mark this unused.
+				++nDeleted;
+				buckets[h].state = DELETED;
+
+				while (h > 0 && h < U32(nBuckets - 1) 
+					   && buckets[h].state == DELETED 
+					   && buckets[h + 1].state == UNUSED) 
+				{
 					buckets[h].state = UNUSED;
-				}
-				else {
-					++nDeleted;
-					buckets[h].state = DELETED;
+					--h;
+					--nDeleted;
 				}
 				--nItems;
 				return;
@@ -98,14 +100,24 @@ public:
 private:
 
 	U32 Hash(const Vector2I& v) {
+#if 0
+		// Base
 		GLASSERT(v.x >= 0 && v.y < 65536);		// will still work, but less efficient.
 		GLASSERT(v.y >= 0 && v.y < 65536);
 		U32 hash = (v.x * 58111) ^ (v.y * 47269);	// spread out over full range.
-		//U32 hash = (v.x * 4073) ^ (v.y * 10133);	// spread out over full range.
-		//hash = hash ^ (hash >> 16);					// compress the top bits into the bottom (again, assume 2^16)
-		//hash = hash % nBuckets;
 		return hash;
+#endif
+#if 1
+		// Shifter2
+		U32 x = v.x + v.y * 47269;
+		x += ( x << 10u );
+		x ^= ( x >>  6u );
+		x += ( x <<  3u );
+		x ^= ( x >> 11u );
+		return x;
+#endif
 	}
+
 
 	void EnsureCap() {
 		if ( (nItems + nDeleted + 1) >= nBuckets/2 ) {

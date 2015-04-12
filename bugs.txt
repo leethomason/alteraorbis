@@ -41,6 +41,8 @@ x check plan and built rotation consistent
 	- full test including circuit types
 	- abandoned domains should be dangerous
 - play a game through on touch
+- spatial hash table 
+- world gen too slow in debug
 
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 x GT: how many structures of each type?
@@ -1617,3 +1619,48 @@ X draw dude on map
 	X with shader
 	X clean up opengl = 2
 X convert to tinyxml2
+
+
+Base0
+Spatial Hash: 3375 nAlloc=0 nBuck=16384 probe=3520092 eff=2.00 den=0.48
+Spatial Hash: 3382 nAlloc=0 nBuck=16384 probe=3515560 eff=2.16 den=0.49
+Spatial Hash: 3380 nAlloc=1 nBuck=16384 probe=3543298 eff=1.21 den=0.23
+Base1
+Spatial Hash: 3379 nAlloc=0 nBuck=16384 probe=3626519 eff=2.02 den=0.48
+Spatial Hash: 3386 nAlloc=0 nBuck=16384 probe=3594657 eff=2.19 den=0.50
+Spatial Hash: 3382 nAlloc=1 nBuck=16384 probe=3602727 eff=0.74 den=0.24
+
+Shifter0
+Spatial Hash: 3376 nAlloc=0 nBuck=16384 probe=3558297 eff=1.92 den=0.47
+Spatial Hash: 3382 nAlloc=0 nBuck=16384 probe=3591290 eff=2.08 den=0.49
+Spatial Hash: 3379 nAlloc=1 nBuck=16384 probe=3595238 eff=1.78 den=0.21
+
+w/cleanup of deleted:
+Spatial Hash: 3388 nAlloc=0 nBuck=16384 probe=3613378 eff=1.26 den=0.34
+Spatial Hash: 3393 nAlloc=0 nBuck=16384 probe=3709901 eff=1.35 den=0.35
+Spatial Hash: 3393 nAlloc=0 nBuck=16384 probe=3606423 eff=1.43 den=0.36
+
+BaseSmall
+Spatial Hash: 3500 nAlloc=0 nBuck=16384 probe=3595504 eff=1.90 den=0.36
+Spatial Hash: 3500 nAlloc=0 nBuck=16384 probe=3740615 eff=1.97 den=0.37
+Spatial Hash: 3507 nAlloc=0 nBuck=16384 probe=3767324 eff=2.09 den=0.37
+
+Shifter0
+Spatial Hash: 3517 nAlloc=0 nBuck=16384 probe=3683144 eff=1.43 den=0.36
+Spatial Hash: 3515 nAlloc=0 nBuck=16384 probe=3623286 eff=1.51 den=0.36
+Spatial Hash: 3515 nAlloc=0 nBuck=16384 probe=3773655 eff=1.64 den=0.37
+
+Shifter1
+Spatial Hash: 3497 nAlloc=0 nBuck=16384 probe=3711359 eff=1.45 den=0.36
+Spatial Hash: 3494 nAlloc=0 nBuck=16384 probe=3643288 eff=1.51 den=0.37
+Spatial Hash: 3500 nAlloc=0 nBuck=16384 probe=3760844 eff=1.58 den=0.38
+
+Shifter2
+Spatial Hash: 3501 nAlloc=0 nBuck=16384 probe=3585307 eff=1.33 den=0.35
+Spatial Hash: 3501 nAlloc=0 nBuck=16384 probe=3695613 eff=1.44 den=0.36
+Spatial Hash: 3492 nAlloc=0 nBuck=16384 probe=3634975 eff=1.51 den=0.37
+
+SHIFT
+Spatial Hash: 3543 nAlloc=0 nBuck=16384 probe=408771 eff=1.35 den=0.25
+Spatial Hash: 3543 nAlloc=0 nBuck=16384 probe=387787 eff=1.35 den=0.25
+Spatial Hash: 3534 nAlloc=0 nBuck=16384 probe=400678 eff=1.45 den=0.26
