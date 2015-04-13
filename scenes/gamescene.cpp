@@ -710,10 +710,12 @@ bool GameScene::DragRotate(const grinliz::Vector2I& pos2i)
 		building = sim->GetChitBag()->QueryBuilding(IString(),pos2i,0);
 		if (!building) {
 			building = sim->GetChitBag()->QueryPorch(pos2i);
-			MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
-			if (msc) {
-				// Adjust the drag start to be the building, not the porch:
-				mapDragStart = ToWorld2F(msc->Bounds()).Center();
+			if (building) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+				if (msc) {
+					// Adjust the drag start to be the building, not the porch:
+					mapDragStart = ToWorld2F(msc->Bounds()).Center();
+				}
 			}
 		}
 	}

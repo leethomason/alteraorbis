@@ -495,25 +495,68 @@ void ChitBag::UpdateSpatialHash(Chit* c, int x0, int y0, int x1, int y1)
 
 
 void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
-							   const grinliz::Rectangle2F& rf,
+							   const grinliz::Rectangle2F& searchBounds,
 							   const Chit* ignore,
 							   IChitAccept* accept)
 {
-	//PROFILE_FUNC();
-	GLASSERT(accept);
-	Rectangle2I r;
-	r.Set((int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y);
-	Rectangle2I bounds;
-	bounds.Set(0, 0, MAX_MAP_SIZE - 1, MAX_MAP_SIZE - 1);
-	r.DoIntersection(bounds);
+	Rectangle2I queryBounds;
+	queryBounds.Set(int(searchBounds.min.x), int(searchBounds.min.y), int(searchBounds.max.x), int(searchBounds.max.y));
 
+	InnerQuerySpatialHash(array, queryBounds, searchBounds, ignore, accept);
+}
+
+
+void ChitBag::QuerySpatialHash(	CChitArray* arr,
+								const grinliz::Rectangle2F& r, 
+								const Chit* ignoreMe,
+								IChitAccept* accept )
+{
+	QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
+	arr->Clear();
+	for( int i=0; i<cachedQuery.Size() && arr->HasCap(); ++i ) {
+		arr->Push( cachedQuery[i] );
+	}
+}
+
+
+void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
+							   const grinliz::Rectangle2I& queryBounds,
+							   const Chit* ignoreMe,
+							   IChitAccept* filter)
+{
+	Rectangle2F searchBounds = ToWorld2F(queryBounds);
+	InnerQuerySpatialHash(array, queryBounds, searchBounds, ignoreMe, filter);
+}
+
+
+void ChitBag::QuerySpatialHash(CChitArray* arr,
+							   const grinliz::Rectangle2I& queryBounds,
+							   const Chit* ignoreMe,
+							   IChitAccept* filter)
+{
+	Rectangle2F searchBounds = ToWorld2F(queryBounds);
+	InnerQuerySpatialHash(&cachedQuery, queryBounds, searchBounds, ignoreMe, filter);
+	arr->Clear();
+	for( int i=0; i<cachedQuery.Size() && arr->HasCap(); ++i ) {
+		arr->Push( cachedQuery[i] );
+	}
+}
+
+
+void ChitBag::InnerQuerySpatialHash(grinliz::CDynArray<Chit*>* array,
+									const grinliz::Rectangle2I& queryBounds,
+									const grinliz::Rectangle2F& searchBounds,
+									const Chit* ignoreMe,
+									IChitAccept* accept)
+{
+	GLASSERT(accept);
+	GLASSERT(array);
 	array->Clear();
 
-#ifdef USE_SPACIAL_HASH
-	U32 i0 = r.min.x >> SHIFT;
-	U32 j0 = r.min.y >> SHIFT;
-	U32 i1 = r.max.x >> SHIFT;
-	U32 j1 = r.max.y >> SHIFT;
+	U32 i0 = queryBounds.min.x >> SHIFT;
+	U32 j0 = queryBounds.min.y >> SHIFT;
+	U32 i1 = queryBounds.max.x >> SHIFT;
+	U32 j1 = queryBounds.max.y >> SHIFT;
 
 	for (U32 j = j0; j <= j1; ++j) {
 		for (U32 i = i0; i <= i1; ++i) {
@@ -523,53 +566,13 @@ void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 	}
 	for (int i = 0; i < array->Size(); ++i) {
 		Chit* chit = (*array)[i];
-		if (chit != ignore && accept->Accept(chit)) {
+		if (chit != ignoreMe && searchBounds.Contains(ToWorld2F(chit->Position())) && accept->Accept(chit)) {
 			// Do nothing. This is valid.
 		}
 		else {
 			array->SwapRemove(i);
 			--i;
 		}
-	}
-#else
-	U32 i0 = r.min.x >> SHIFT;
-	U32 j0 = r.min.y >> SHIFT;
-	U32 i1 = r.max.x >> SHIFT;
-	U32 j1 = r.max.y >> SHIFT;
-
-	for (U32 j = j0; j <= j1; ++j) {
-		for (U32 i = i0; i <= i1; ++i) {
-			U32 index = j*SIZE + i;
-			//bool inside = i > i0 && i <i1 && j > j0 && j < j1; // doesn't help
-
-			for (Chit* it = spatialHash[index]; it; it = it->next) {
-				if (it != ignore) {
-					const Vector3F& pos = it->Position();
-					if (rf.Contains(pos.x, pos.z)) {
-						if (accept->Accept(it)) {
-							array->Push(it);
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
-}
-
-
-void ChitBag::QuerySpatialHash(	CChitArray* arr,
-								const grinliz::Rectangle2F& r, 
-								const Chit* ignoreMe,
-								IChitAccept* accept )
-{
-	GLASSERT( accept );
-	QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
-	arr->Clear();
-	for( int i=0; i<cachedQuery.Size(); ++i ) {
-		if ( !arr->HasCap() )
-			break;
-		arr->Push( cachedQuery[i] );
 	}
 }
 

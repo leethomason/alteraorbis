@@ -152,6 +152,17 @@ public:
 							const Chit* ignoreMe,
 							IChitAccept* filter );
 
+	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
+							const grinliz::Rectangle2I& r, 
+							const Chit* ignoreMe,
+							IChitAccept* filter );
+
+	void QuerySpatialHash(	CChitArray* arr,
+							const grinliz::Rectangle2I& r, 
+							const Chit* ignoreMe,
+							IChitAccept* filter );
+
+
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 							const grinliz::Vector2F& origin, 
 							float rad,
@@ -173,6 +184,7 @@ public:
 		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );
 		QuerySpatialHash( array, r, ignoreMe, accept );
 	}
+
 
 	// Tell all the Chits in an area to tick; event has happened
 	// and they need to look around.
@@ -229,6 +241,12 @@ protected:
 	const ChitContext& chitContext;
 
 private:
+	void InnerQuerySpatialHash(grinliz::CDynArray<Chit*>* array,
+							   const grinliz::Rectangle2I& queryBounds,
+							   const grinliz::Rectangle2F& searchBounds,
+							   const Chit* ignoreMe,
+							   IChitAccept* accept);
+
 	void ProcessDeleteList();
 
 	grinliz::CDynArray< IChitListener* > listeners;
