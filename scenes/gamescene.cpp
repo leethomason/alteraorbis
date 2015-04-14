@@ -191,19 +191,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 					  "Our goal is survive and prosper.");
 		tutorial->Add(0, 
 					  "As the domain core, it is your responsibility to construct buildings, defenses, manage the economy, "
-					  "and direct our squads. You are given direct control of one unit, the Avatar.\n\n"
+					  "and direct our squads. You are given direct control of one unit: the Avatar.\n\n"
 					  "The Avatar can explore and battle, but also craft weapons (at a Forge), use a Market, Exchange, "
 					  "and Vault.\n\n"
 					  "All the other denizens of your domain move of their own accord." );
-
-		// View, Build, Control
-		// Date/Location/Population
-		// Map
-		// Average
-		// Tech
-		// Money/Crystal
-		// Census
-		// Adviser
 
 		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_VIEW], 
 					  "View Mode allows you to control the Avatar, follow your denizens, and look around the world.");

@@ -237,6 +237,8 @@ public:
 		}
 	}
 
+	static void Test();
+
 protected:
 	const ChitContext& chitContext;
 

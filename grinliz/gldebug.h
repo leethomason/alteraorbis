@@ -48,7 +48,6 @@ void relprintf( const char* format, ... );
 		void WinDebugBreak();
 		
 		#define GLASSERT( x )		if ( !(x)) { _asm { int 3 } }
-		inline bool GL_FUNC_ASSERT(bool x)	{ GLASSERT(x); return x; }
 		#define GLOUTPUT( x )		dprintf x
 		#define GLOUTPUT_REL( x )	relprintf x
 	#elif defined (ANDROID_NDK)
@@ -69,6 +68,13 @@ void relprintf( const char* format, ... );
 	#define GLASSERT( x )
 //#define GLASSERT( x )		if ( gDebugging && (!(x))) { relprintf( "ASSERT in '%s' at %d.\n", __FILE__, __LINE__ ); relprintf( "ASSERT: %s\n", #x ); }
 #endif
+
+#define	GLTEST(x)															\
+	GLASSERT(x);															\
+	if (!(x)) {																\
+		GLOUTPUT_REL(("TEST FAIL in '%s' at %d.\n", __FILE__, __LINE__));	\
+		GLOUTPUT(("TEST FAIL in '%s' at %d.\n", __FILE__, __LINE__));		\
+	}
 
 #if defined(DEBUG)
 	

@@ -526,6 +526,11 @@ void ChitBag::QuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 {
 	Rectangle2F searchBounds = ToWorld2F(queryBounds);
 	InnerQuerySpatialHash(array, queryBounds, searchBounds, ignoreMe, filter);
+	// Need to get the edge cases correct: we need to be in
+	// the integer bounds, not floating point.
+	array->Filter(queryBounds, [](const Rectangle2I& bounds, Chit* chit) {
+		return bounds.Contains(ToWorld2I(chit->Position()));
+	});
 }
 
 
@@ -534,8 +539,7 @@ void ChitBag::QuerySpatialHash(CChitArray* arr,
 							   const Chit* ignoreMe,
 							   IChitAccept* filter)
 {
-	Rectangle2F searchBounds = ToWorld2F(queryBounds);
-	InnerQuerySpatialHash(&cachedQuery, queryBounds, searchBounds, ignoreMe, filter);
+	QuerySpatialHash(&cachedQuery, queryBounds, ignoreMe, filter);
 	arr->Clear();
 	for( int i=0; i<cachedQuery.Size() && arr->HasCap(); ++i ) {
 		arr->Push( cachedQuery[i] );
@@ -585,3 +589,49 @@ void ChitBag::SetTickNeeded(const grinliz::Rectangle2F& bounds)
 		cachedQuery[i]->SetTickNeeded();
 	}
 }
+
+
+/*static*/ void ChitBag::Test()
+{
+	ChitContext dummyContext;
+	ChitBag* chitBag = new ChitBag(dummyContext);
+
+	Chit* chit0 = chitBag->NewChit();
+	Chit* chit1 = chitBag->NewChit();
+	Chit* chit2 = chitBag->NewChit();
+	Chit* chit3 = chitBag->NewChit();
+
+	chit0->SetPosition(10, 0, 10);
+	chit1->SetPosition(10.5f, 0, 10);
+	chit2->SetPosition(11, 0, 11);
+	chit3->SetPosition(12, 0, 12);
+
+	CChitArray arr;
+	Rectangle2F r;
+	Rectangle2I ri;
+	ChitAcceptAll all;
+
+	r.Set(10, 10, 11, 11);
+	chitBag->QuerySpatialHash(&arr, r, 0, &all);
+	GLTEST(arr.Size() == 3);
+
+	ri.Set(10, 10, 10, 10);
+	chitBag->QuerySpatialHash(&arr, ri, 0, &all);
+	GLTEST(arr.Size() == 2);	// should NOT pick 11,11
+
+	Vector2F center = { 10, 10 };
+	chitBag->QuerySpatialHash(&arr, center, 0.7f, 0, &all);
+	GLTEST(arr.Size() == 2);
+	chitBag->QuerySpatialHash(&arr, center, 1.0f, 0, &all);
+	GLTEST(arr.Size() == 3);
+	chitBag->QuerySpatialHash(&arr, center, 2.0f, 0, &all);
+	GLTEST(arr.Size() == 4);
+
+	chitBag->DeleteChit(chit0);
+	chitBag->DeleteChit(chit1);
+	chitBag->DeleteChit(chit2);
+	chitBag->DeleteChit(chit3);
+	delete chitBag;
+	GLOUTPUT(("ChitBag test done."));
+}
+

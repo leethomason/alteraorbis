@@ -41,6 +41,8 @@
 
 #include "../script/itemscript.h"
 
+#include "../xegame/chitbag.h"
+
 #include <time.h>
 #include <direct.h>	// for _mkdir
 #include "../game/layout.h"
@@ -71,6 +73,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 
 #ifdef DEBUG
 	Matrix4::Test();
+	ChitBag::Test();
 #endif
 
 	scenePopQueued = false;
