@@ -24,7 +24,7 @@ public:
 	void Rotate(float degrees);
 	void MoveCamera(float dx, float dy);
 
-	virtual void Tap(int action, const grinliz::Vector2F& screen, const grinliz::Ray& world);
+	virtual bool Tap(int action, const grinliz::Vector2F& screen, const grinliz::Ray& world);
 	virtual void ItemTapped(const gamui::UIItem* item);
 	virtual void HandleHotKey(int mask) { super::HandleHotKey(mask); }
 

@@ -36,15 +36,15 @@ x touch support
 	x art: uniform clear and build markers
 x show rotation mode
 x check plan and built rotation consistent
+x 2 finger pan detection is inconsistent, depending on window size
+x spatial hash table 
 
 - Circuits
-	- full test including circuit types
+	x full test including circuit types
 	- abandoned domains should be dangerous
-- play a game through on touch
-x spatial hash table 
-- world gen too slow in debug
-- 2 finger pan detection is inconsistent, depending on window size
+x play a game through on touch
 
+- world gen too slow in debug
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 x GT: how many structures of each type?
 - GT: food as medkit

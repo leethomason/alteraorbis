@@ -58,7 +58,7 @@ public:
 	void Rotate( float degrees );
 	void MoveCamera(float dx, float dy);
 
-	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	virtual bool Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);
 	virtual void ItemTapped(const gamui::UIItem* item);
 	virtual void HandleHotKey( int mask );
@@ -145,8 +145,7 @@ private:
 		BUILDING_ROTATION,
 		PLAN_AREA,
 		PLAN_MOVE,
-		PLAN_ROTATION,
-		PAN
+		PLAN_ROTATION
 	};
 
 	// returns the name from the build button

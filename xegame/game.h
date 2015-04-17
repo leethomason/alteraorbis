@@ -108,13 +108,6 @@ public:
 	const Screenport& GetScreenport() const { return screenport; }
 	Screenport* GetScreenportMutable() { return &screenport; }
 
-	//enum {
-	//	ATOM_TEXT, ATOM_TEXT_D,
-	//	ATOM_COUNT
-	//};
-	//const gamui::RenderAtom& GetRenderAtom( int id );
-	//gamui::RenderAtom CreateRenderAtom( int uiRendering, const char* assetName, float x0=0, float y0=0, float x1=1, float y1=1 );
-	
 	// For creating some required textures:
 	virtual void CreateTexture( Texture* t );
 
@@ -185,6 +178,7 @@ protected:
 	bool perfText;
 	int perfFrameCount;
 	bool renderUI;
+	bool alsoPan;
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database

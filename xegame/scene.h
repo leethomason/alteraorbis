@@ -68,9 +68,7 @@ public:
 	virtual void DeActivate()									{}
 
 	// UI
-	virtual void Tap(	int action, 
-						const grinliz::Vector2F& view,
-						const grinliz::Ray& world )				{}
+	virtual bool Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world) { return false; }	// return true if the tap is handled (did something)
 	virtual void Zoom( int style, float normal )				{}
 	virtual void Rotate( float degrees )						{}
 	virtual void CancelInput()									{}

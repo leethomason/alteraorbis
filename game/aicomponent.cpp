@@ -108,23 +108,30 @@ inline int ToWG(const grinliz::Vector2I& v) {
 }
 
 
-template<int EXCLUDED>
+template<int INCLUDE0, int INCLUDE1>
 bool FEFilter(Chit* parentChit, int id) {
-		const ChitContext* context = parentChit->Context();
-		if (id < 0) {
-			Vector2I p = ToWG(id);
-			const WorldGrid& wg = context->worldMap->GetWorldGrid(p);
-			return wg.Plant() || wg.RockHeight();
-		}
-		Chit* chit = context->chitBag->GetChit(id);
-		if (!chit) return false;
+	if (!parentChit) return false;
 
-		float range2 = (chit->Position() - parentChit->Position()).LengthSquared();
+	const ChitContext* context = parentChit->Context();
+	if (id < 0) {
+		Vector2I p = ToWG(id);
+		const WorldGrid& wg = context->worldMap->GetWorldGrid(p);
+		return wg.Plant() || wg.RockHeight();
+	}
+	Chit* chit = context->chitBag->GetChit(id);
+	if (!chit) return false;
 
-		return (chit != parentChit) 
-			&& (range2 < LOOSE_AWARENESS * LOOSE_AWARENESS)
-			&& (ToSector(chit->Position()) == ToSector(parentChit->Position())) 
-			&& (Team::GetRelationship(chit, parentChit) != EXCLUDED);
+	float range2 = (chit->Position() - parentChit->Position()).LengthSquared();
+
+	if ((chit != parentChit)
+		&& (range2 < LOOSE_AWARENESS * LOOSE_AWARENESS)
+		&& (ToSector(chit->Position()) == ToSector(parentChit->Position())))
+	{
+		int relate = Team::GetRelationship(chit, parentChit);
+		if (relate == INCLUDE0 || relate == INCLUDE1)
+			return true;
+	}
+	return false;
 }
 
 
@@ -264,13 +271,8 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 		if (enemyList2.Find(id) >= 0) continue;
 
 		Chit* chit = Context()->chitBag->GetChit( enemyIDs[i] );
-		if ( chit ) {
-			int status = Team::GetRelationship( chit, parentChit );
-			if ( status == RELATE_ENEMY ) {
-				if (FEFilter<RELATE_FRIEND>(parentChit, id)) {
-					enemyList2.Push( id );
-				}
-			}
+		if (FEFilter<RELATE_ENEMY, RELATE_NEUTRAL>(chit, 0)) {
+			enemyList2.Push( id );
 		}
 	}
 }
@@ -323,11 +325,11 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	if (tick) friendList2.Clear();
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
-		return FEFilter<RELATE_FRIEND>(parentChit, id);
+		return FEFilter<RELATE_ENEMY, RELATE_NEUTRAL>(parentChit, id);
 	});
 
 	friendList2.Filter(parentChit, [](Chit* parentChit, int id) {
-		return FEFilter<RELATE_ENEMY>(parentChit, id);
+		return FEFilter<RELATE_FRIEND, -1>(parentChit, id);
 	});
 
 	// Did we lose our focused target?
@@ -356,28 +358,37 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		// Order matters: prioritize mobs, then a core, then buildings.
 		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
 
+		ChitAcceptAll all;
+		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
+
 		for (int pass = 0; pass < 3; ++pass) {
 			// Add extra friends or enemies into the list.
-			Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, filters[pass]);
 			for (int i = 0; i < chitArr.Size(); ++i) {
-				int status = Team::GetRelationship(parentChit, chitArr[i]);
-				int id = chitArr[i]->ID();
-				if (chitArr[i]->GetItem() && (chitArr[i]->GetItem()->flags & GameItem::AI_NOT_TARGET)) {
+				Chit* chit = chitArr[i];
+				if (!chit || !filters[pass]->Accept(chit)) continue;
+				GLASSERT(chit->GetItem());	// else should have been filtered, above.
+				if (chit->GetItem()->flags & GameItem::AI_NOT_TARGET) {
+					chitArr[i] = nullptr;
 					continue;
 				}
 
+				int status = Team::GetRelationship(parentChit, chit);
+				int id = chit->ID();
+
 				if (status == RELATE_ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
 					if (   fullSectorAware 
-						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chitArr[i]->Position()))) 
+						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()))) 
 					{
-						if (FEFilter<RELATE_FRIEND>(parentChit, id)) {
+						if (FEFilter<RELATE_ENEMY, -1>(parentChit, id)) {
 							enemyList2.Push(id);
+							chitArr[i] = nullptr;
 						}
 					}
 				}
 				else if (pass == 0 && status == RELATE_FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
-					if (FEFilter<RELATE_ENEMY>(parentChit, id)) {
+					if (FEFilter<RELATE_FRIEND, -1>(parentChit, id)) {
 						friendList2.Push(id);
+						chitArr[i] = nullptr;
 					}
 				}
 			}

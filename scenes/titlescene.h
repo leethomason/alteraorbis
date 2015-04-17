@@ -33,9 +33,9 @@ public:
 
 	virtual void Resize();
 
-	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
+	virtual bool Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
 	{
-		ProcessTap( action, screen, world );
+		return ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D(U32 deltaTime);
@@ -44,6 +44,7 @@ public:
 
 private:
 	void SetAudioButton();
+	void SetMouseTouchButton();
 	void DeleteEngine();
 
 	LumosGame*		lumosGame;
@@ -92,6 +93,7 @@ private:
 	gamui::PushButton		testScene[NUM_TESTS];
 	gamui::PushButton		gameScene[NUM_GAME];
 	gamui::ToggleButton		audioButton;
+	gamui::ToggleButton		mouseTouchButton;
 	gamui::PushButton		creditsButton;
 	gamui::TextLabel		note;
 	gamui::Canvas			testCanvas;

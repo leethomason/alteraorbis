@@ -111,7 +111,7 @@ void FluidTestScene::MouseMove(const grinliz::Vector2F& view, const grinliz::Ray
 }
 
 
-void FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+bool FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	bool uiHasTap = ProcessTap(action, view, world);
 	if (!uiHasTap) {
@@ -140,6 +140,7 @@ void FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinli
 			}
 		}
 	}
+	return true;
 }
 
 
