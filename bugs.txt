@@ -38,15 +38,19 @@ x show rotation mode
 x check plan and built rotation consistent
 x 2 finger pan detection is inconsistent, depending on window size
 x spatial hash table 
-
-- Circuits
+x Circuits
 	x full test including circuit types
-	- abandoned domains should be dangerous
+	x abandoned domains should be dangerous
 x play a game through on touch
-
-- world gen too slow in debug
 x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
 x GT: how many structures of each type?
+x colors of buildings (not enough)
+x add target portrait
+x remove sleep tube cap?
+x remove disabled building choices?
+
+
+- world gen too slow in debug
 - GT: food as medkit
 - GT: suggestion - pick up and use food as medkit
 - GT: new rotation UI (2/20/2015)
@@ -81,7 +85,6 @@ x rethink spawning. spawn based on need? what's around?
 d add rez-in animation
 - maps: what direction is player pointed?
 - Click through of disabled buttons is surprising
-x colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - general extension of the effect of tech on buildings, and morale on MOBs
@@ -97,7 +100,6 @@ d buttons for weapons changing
 		- shield booster (gobmen)
 	- boost items
 	- sellable items
-x add target portrait
 - review all atlases for texture mem usage
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
@@ -131,8 +133,6 @@ x AI take over mode?
 	- Troll distribution
 	- Troll gun distribution
 - fix world get layout / text / debugging display	
-x remove sleep tube cap?
-x remove disabled building choices?
 - optimize hit testing (and correct for xform)	
 - test destination marks
 - test squad motion in general
