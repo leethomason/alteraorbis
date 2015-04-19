@@ -21,15 +21,16 @@
     distribution.
 */
 
+#define BRIDGE 1
+
 #include "glew.h"
-#include "../libs/SDL2/include/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "gamui.h"
 #include "gamuifreetype.h"
+
 #include <stdio.h>
 #include <math.h>
-
-#define BRIDGE 1
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
@@ -93,7 +94,7 @@ public:
 	virtual void BeginRenderState( const void* _renderState )
 	{
 		TESTGLERR();
-		int renderState = (int)_renderState;
+		intptr_t renderState = (intptr_t)(_renderState);
 
 #if 0
 		if ( renderState == RENDERSTATE_TEXT )
@@ -120,9 +121,10 @@ public:
 		TESTGLERR();
 	}
 
-	virtual void BeginTexture( const void* textureHandle )
+	virtual void BeginTexture( const void* _textureHandle )
 	{
 		TESTGLERR();
+		intptr_t textureHandle = (intptr_t)_textureHandle;
 		glBindTexture( GL_TEXTURE_2D, (GLuint)textureHandle );
 		TESTGLERR();
 	}
