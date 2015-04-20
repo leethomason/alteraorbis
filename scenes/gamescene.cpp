@@ -447,6 +447,11 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	selectionTile.SetPos(floorf(at.x), floorf(at.z));
 	selectionTile.SetSize(size, size);
 	selectionTile.SetAtom(atom);
+	// Set invisible when it starts dragging.
+	// Turn back on here if not dragging.
+	if (dragMode == EDragMode::NONE) {
+		selectionTile.SetVisible(true);
+	}
 }
 
 
@@ -970,6 +975,10 @@ bool GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 		for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
 			buildMark[i].SetVisible(false);
 		}
+	}
+	// Turn off if we are dragging. Turn back on in move.
+	if (dragMode != EDragMode::NONE) {
+		selectionTile.SetVisible(false);
 	}
 	return uiHasTap || (dragMode != EDragMode::NONE) || tapHandled;
 }
