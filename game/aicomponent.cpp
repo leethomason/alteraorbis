@@ -1279,7 +1279,7 @@ bool AIComponent::SectorHerd( bool focus)
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	IString mob = gameItem->keyValues.GetIString("mob");
+	IString mob = gameItem->keyValues.GetIString(ISC::mob);
 	CArray<Vector2I, NDELTA * 2> delta, rinit;
 	for (int i = 0; i < NDELTA; ++i) {
 		rinit.Push(initDelta[i]);

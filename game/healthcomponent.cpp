@@ -66,7 +66,7 @@ int HealthComponent::DoTick(U32 delta)
 			}
 
 			// Tombstone
-			IString mob = item->keyValues.GetIString("mob");
+			IString mob = item->keyValues.GetIString(ISC::mob);
 			if (!mob.empty()) {
 				const char* asset = 0;
 				if (mob == ISC::lesser) asset = "tombstoneLesser";

@@ -153,7 +153,7 @@ void CensusScene::ScanItem(ItemComponent* ic, const GameItem* item)
 {
 	if (item->Intrinsic()) return;
 
-	IString mobIStr = item->keyValues.GetIString("mob");
+	IString mobIStr = item->keyValues.GetIString(ISC::mob);
 	if (!mobIStr.empty()) {
 		mobWallet.Add(item->wallet);
 

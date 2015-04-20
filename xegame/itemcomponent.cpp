@@ -192,7 +192,7 @@ void ItemComponent::AddCraftXP( int nCrystals )
 void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 {
 	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
-	if ( loser->keyValues.GetIString( "mob" ) == IString() ) {
+	if (loser->keyValues.GetIString(ISC::mob) == IString()) {
 		return;
 	}
 
@@ -705,7 +705,7 @@ void ItemComponent::InformCensus(bool add)
 {
 	GameItem* mainItem = itemArr[0];
 	if (Context()->chitBag) {
-		IString mob = mainItem->keyValues.GetIString("mob");
+		IString mob = mainItem->keyValues.GetIString(ISC::mob);
 		IString core = mainItem->IName();
 
 		if (mainItem->IName() == ISC::fruit && mainItem->IProperName() == ISC::wildFruit) {
@@ -1245,7 +1245,7 @@ void ItemComponent::ApplyLootLimits()
 	// Some MOBs gather a lot of loot. Cheat a little, and send
 	// the massive loot tax off the reserve.
 	GameItem* mainItem = itemArr[0];
-	IString mob = mainItem->keyValues.GetIString("mob");
+	IString mob = mainItem->keyValues.GetIString(ISC::mob);
 	
 	// Lesser.
 	int limit = 0;
