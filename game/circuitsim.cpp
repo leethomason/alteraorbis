@@ -326,7 +326,7 @@ void CircuitSim::DoTick(U32 delta)
 		DrawGroups();
 	}
 
-	static const float SPEED = 4.0f;
+	static const float SPEED = 6.0f;
 	float travel = Travel(SPEED, delta);
 
 	// Once again...don't mutate the array we are iterating on. *sigh*
