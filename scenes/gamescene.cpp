@@ -60,7 +60,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
-	selectionModel = 0;
 	chitTracking = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
@@ -237,7 +236,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 GameScene::~GameScene()
 {
 	delete menu;
-	delete selectionModel;
 	delete sim;
 	delete adviser;
 	delete tutorial;

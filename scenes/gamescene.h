@@ -174,7 +174,6 @@ private:
 	TutorialWidget*		tutorial;
 
 	// Shows what is being built or removed.
-	Model*				selectionModel;
 	gamui::Image		selectionTile;
 	GameSceneMenu*		menu;
 
