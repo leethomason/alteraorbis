@@ -927,34 +927,19 @@ void Sim::UseBuilding()
 }
 
 
-const Web& Sim::CalcWeb()
+const Web& Sim::GetCachedWeb()
 {
-	CArray<Vector2I, NUM_SECTORS * NUM_SECTORS> cores;
-	for (int j = 0; j < NUM_SECTORS; ++j) {
-		for (int i = 0; i < NUM_SECTORS; ++i) {
-			Vector2I sector = { i, j };
-			CoreScript* cs = CoreScript::GetCore(sector);
-			if (cs
-				&& cs->InUse()
-				&& Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY)
-			{
-				if (cores.HasCap()) {
-					cores.Push(sector);
-				}
-			}
-		}
+	if (cachedWebAge > 2000) {
+		web.Calc(nullptr);
+		cachedWebAge = 0;
 	}
-	web.Calc(cores.Mem(), cores.Size());
 	return web;
 }
 
 
-const Web& Sim::GetCachedWeb()
+const Web& Sim::CalcWeb()
 {
-	if (cachedWebAge > 2000) {
-		CalcWeb();
-		cachedWebAge = 0;
-	}
+	web.Calc(nullptr);
 	return web;
 }
 

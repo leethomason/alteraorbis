@@ -1,4 +1,6 @@
 #include "team.h"
+#include "visitorweb.h"
+#include "../script/corescript.h"
 #include "../grinliz/glutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/chit.h"
@@ -177,6 +179,57 @@ int Team::GetRelationship( Chit* chit0, Chit* chit1 )
 	return RELATE_NEUTRAL;
 }
 
+
+int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
+{
+	GLASSERT(eval != center);
+
+	// Positive: more friendly
+	// Negative: more enemy
+
+	// Species 
+	int relate = GetRelationship(center->ParentChit(), eval->ParentChit());
+	int d = 0;
+	/*
+	switch (relate) {
+		case RELATE_FRIEND:	d = d + 2;	break;
+		case RELATE_ENEMY:	d = d - 1;	break;
+	}
+	*/
+	// Compete for Visitors
+	Vector2I sector = ToSector(center->ParentChit()->Position());
+	const Web::Node* webNode = web->FindNode(sector);
+	float visitorStr = webNode->strength;
+
+	// An an alternate world where 'eval' is gone...what happens?
+	Web altWeb;
+	Vector2I altSector = ToSector(eval->ParentChit()->Position());
+	altWeb.Calc(&altSector);
+	const Web::Node* altWebNode = altWeb.FindNode(sector);
+	float altVisitorStr = altWebNode->strength;
+
+	if (altVisitorStr > visitorStr) {
+		d--;		// better off if they are gone...
+	}
+	else if (altVisitorStr < visitorStr) {
+		d += 2;		// better off with them around...
+	}
+
+	/*
+	// Techiness
+	if (eval->GetTech() > center->GetTech()) {
+		// envy
+		d--;
+	}
+
+	// Wealth
+	if (eval->CoreWealth() > center->CoreWealth()) {
+		// envy
+		d--;
+	}
+	*/
+	return d;
+}
 
 void Team::Serialize(XStream* xs)
 {

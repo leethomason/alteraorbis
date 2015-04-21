@@ -20,6 +20,8 @@
 
 class Chit;
 class XStream;
+class CoreScript;
+class Web;
 
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
@@ -75,6 +77,7 @@ public:
 
 	static int GetRelationship(int team0, int team1);
 	static int GetRelationship(Chit* chit0, Chit* chit1);
+	static int CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web);
 
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)

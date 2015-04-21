@@ -193,6 +193,7 @@ void MapScene::DrawMap()
 	int primaryTeam = lumosChitBag->GetHomeTeam();
 	const ChitContext* context = lumosChitBag->Context();
 	int nFace = 0;
+	const Web& web = lumosChitBag->GetSim()->CalcWeb();
 
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
@@ -228,7 +229,7 @@ void MapScene::DrawMap()
 		Rectangle2F r = GridBounds2(i, j, true);
 		gridWidget[index].SetPos(r.min.x, r.min.y);
 		gridWidget[index].SetSize(r.Width(), r.Height());
-		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore());
+		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore(), &web);
 	}
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
@@ -300,7 +301,6 @@ void MapScene::DrawMap()
 
 	float scale = float(mapImage.Width()) / float(NUM_SECTORS);
 	{
-		const Web& web = lumosChitBag->GetSim()->CalcWeb();
 		webCanvas.Clear();
 
 		for (int i = 0; i < web.NumNodes(); i++) {

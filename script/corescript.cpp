@@ -52,6 +52,8 @@ using namespace grinliz;
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
+grinliz::CArray<CoreScript*, NUM_SECTORS*NUM_SECTORS> CoreScript::coreList;
+
 
 void CoreScript::Init()
 {
@@ -172,6 +174,7 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(coreInfoArr[index].coreScript == 0);
 	coreInfoArr[index].coreScript = this;
+	coreList.Push(this);
 
 	aiTicker.Randomize(parentChit->random.Rand());
 }
@@ -182,6 +185,10 @@ void CoreScript::OnRemove()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(coreInfoArr[index].coreScript == this);
 	coreInfoArr[index].coreScript = 0;
+
+	int idx = coreList.Find(this);
+	GLASSERT(idx >= 0);
+	coreList.SwapRemove(idx);
 
 	delete workQueue;
 	workQueue = 0;
@@ -802,6 +809,13 @@ void CoreScript::RemoveTask(const grinliz::Vector2I& pos2i)
 bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 {
 	return tasks.Find(pos2i) >= 0;
+}
+
+
+CoreScript** CoreScript::GetCoreList(int *n)
+{
+	*n = coreList.Size();
+	return coreList.Mem();
 }
 
 

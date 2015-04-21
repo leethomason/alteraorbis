@@ -1,6 +1,8 @@
 #include "visitorweb.h"
-#include "../grinliz/glarrayutil.h"
 #include "gamelimits.h"
+#include "../grinliz/glarrayutil.h"
+#include "../script/corescript.h"
+#include "../game/team.h"
 
 using namespace grinliz;
 
@@ -20,6 +22,26 @@ const Web::Node* Web::FindNode(const grinliz::Vector2I& v) const
 		}
 	}
 	return 0;
+}
+
+
+void Web::Calc(const Vector2I* exclude)
+{
+	CArray<Vector2I, NUM_SECTORS * NUM_SECTORS> cores;
+	int n = 0;
+	CoreScript** list = CoreScript::GetCoreList(&n);
+	for (int i = 0; i < n; ++i) {
+		CoreScript* cs = list[i];
+		Vector2I sector = ToSector(cs->ParentChit()->Position());
+		if (cs && cs->InUse() && Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY) {
+			GLASSERT(cores.HasCap());
+			if (!exclude || (*exclude != sector)) {
+				cores.Push(sector);
+			}
+		}
+
+	}
+	Calc(cores.Mem(), cores.Size());
 }
 
 

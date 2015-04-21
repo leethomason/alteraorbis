@@ -99,8 +99,8 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
-	const Web& CalcWeb();
 	const Web& GetCachedWeb();
+	const Web& CalcWeb();
 
 	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, int relate, grinliz::CArray<CoreScript*, 32> *stateArr);
 	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet

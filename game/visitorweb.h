@@ -18,6 +18,7 @@ public:
 	Web()	{}
 	~Web()	{}
 
+	void Calc(const grinliz::Vector2I* exclude);
 	void Calc(const grinliz::Vector2I* points, int n);
 
 	const grinliz::Vector2I& Origin() const { return origin; }
@@ -41,10 +42,10 @@ public:
 		float						strength;
 	};
 
-	int NumNodes() const { return nodes.Size(); }
-	const Node* NodeAt(int i) const { return &nodes[i]; }
+	int NumNodes() const				{ return nodes.Size(); }
+	const Node* NodeAt(int i) const		{ return &nodes[i]; }
 
-	const Node* Root() const { return nodes.Empty() ? 0 : nodes.Mem(); }
+	const Node* Root() const			{ return nodes.Empty() ? 0 : nodes.Mem(); }
 	const Node* FindNode(const grinliz::Vector2I& v) const;
 
 private:

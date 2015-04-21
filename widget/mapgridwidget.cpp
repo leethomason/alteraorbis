@@ -20,6 +20,8 @@ MapGridWidget::MapGridWidget()
 void MapGridWidget::Init(Gamui* gamui2D)
 {
 	textLabel.Init(gamui2D);
+	dScore.Init(gamui2D);
+
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].Init(gamui2D, RenderAtom(), true);
 	}
@@ -109,15 +111,18 @@ void MapGridWidget::DoLayout()
 	float fy = compact ? y + dh : y + dh * 2.0f;
 	image[CIV_TECH_IMAGE].SetPos(x, fy);
 
-//	image[GOLD_IMAGE].SetSize(dw * MULT, dh * MULT);
 	image[GOLD_IMAGE].SetCenterPos(x + dw * 0.5f, fy + dh * 0.5f);
 
 	float fx = compact ? x + dw : x + dw*2.0f;
 	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
+
+	if (!compact) {
+		dScore.SetPos(x + dw, y + dh * 2);
+	}
 }
 
 
-void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, CoreScript* home)
+void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, CoreScript* home, const Web* web)
 {
 	Clear();
 	if (!coreScript) return;
@@ -245,10 +250,20 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 		RenderAtom atom;
 		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
 
-		if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
+		if (relate == RELATE_FRIEND) atom       = LumosGame::CalcUIIconAtom("friend");
 		else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
-		else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+		else if (relate == RELATE_ENEMY) atom   = LumosGame::CalcUIIconAtom("enemy");
 
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
+
+		if (web && (home != coreScript)) {
+			int diplomacy = Team::CalcDiplomacy(home, coreScript, web);
+			CStr<32> str;
+			str.Format("%+d", diplomacy);
+			dScore.SetText(str.safe_str());
+		}
+	}
+	else {
+		dScore.SetText("");
 	}
 }
