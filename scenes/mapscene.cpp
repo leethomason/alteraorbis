@@ -303,15 +303,13 @@ void MapScene::DrawMap()
 	{
 		webCanvas.Clear();
 
-		for (int i = 0; i < web.NumNodes(); i++) {
-			const Web::Node* node = web.NodeAt(i);
-			for (int k = 0; k < node->child.Size(); ++k) {
-				Vector2I s0 = node->sector;
-				Vector2I s1 = node->child[k]->sector;
-				Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
-				Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
-				webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node->strength * 2.0f);
-			}
+		for (int i = 1; i < web.NumNodes(); i++) {
+			const MinSpanTree::Node& node = web.NodeAt(i);
+			Vector2I s0 = node.parentPos;
+			Vector2I s1 = node.pos;
+			Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
+			Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
+			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node.strength * 2.0f);
 		}
 	}
 

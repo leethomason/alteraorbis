@@ -198,14 +198,14 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 	*/
 	// Compete for Visitors
 	Vector2I sector = ToSector(center->ParentChit()->Position());
-	const Web::Node* webNode = web->FindNode(sector);
+	const MinSpanTree::Node* webNode = web->FindNode(sector);
 	float visitorStr = webNode->strength;
 
 	// An an alternate world where 'eval' is gone...what happens?
 	Web altWeb;
 	Vector2I altSector = ToSector(eval->ParentChit()->Position());
 	altWeb.Calc(&altSector);
-	const Web::Node* altWebNode = altWeb.FindNode(sector);
+	const MinSpanTree::Node* altWebNode = altWeb.FindNode(sector);
 	float altVisitorStr = altWebNode->strength;
 
 	if (altVisitorStr > visitorStr) {

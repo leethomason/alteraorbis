@@ -497,7 +497,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 	const ChitContext* context = Context();
 	if (web.Empty()) return 0;
 
-	Vector2I startSector = web.Origin();
+	Vector2I startSector = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
 	CoreScript* cs = CoreScript::GetCore(startSector);
 	if (!cs) return 0;	// cores get deleted, web is cached, etc.
 	Vector3F pos = cs->ParentChit()->Position();
