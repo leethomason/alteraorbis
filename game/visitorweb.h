@@ -40,6 +40,7 @@ private:
 	grinliz::CDynArray<Node> nodes;
 };
 
+
 class Web
 {
 public:

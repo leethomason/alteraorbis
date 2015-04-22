@@ -188,14 +188,17 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 	// Negative: more enemy
 
 	// Species 
+	int centerTeam = center->ParentChit()->Team();
+	if (Team::IsDeityCore(centerTeam)) return 0;
+
 	int relate = GetRelationship(center->ParentChit(), eval->ParentChit());
 	int d = 0;
-	/*
+
 	switch (relate) {
 		case RELATE_FRIEND:	d = d + 2;	break;
 		case RELATE_ENEMY:	d = d - 1;	break;
 	}
-	*/
+
 	// Compete for Visitors
 	Vector2I sector = ToSector(center->ParentChit()->Position());
 	const MinSpanTree::Node* webNode = web->FindNode(sector);
@@ -215,19 +218,19 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 		d += 2;		// better off with them around...
 	}
 
-	/*
-	// Techiness
-	if (eval->GetTech() > center->GetTech()) {
-		// envy
-		d--;
+	// Techiness, envy of Kamakiri
+	if (Team::Group(centerTeam) == TEAM_KAMAKIRI) {
+		if (eval->GetTech() > center->GetTech()) {
+			d--;
+		}
 	}
 
 	// Wealth
-	if (eval->CoreWealth() > center->CoreWealth()) {
-		// envy
-		d--;
+	if (Team::Group(centerTeam) == TEAM_GOB) {
+		if (eval->CoreWealth() > center->CoreWealth()) {
+			d--;
+		}
 	}
-	*/
 	return d;
 }
 

@@ -18,6 +18,7 @@ void MinSpanTree::Calc(const grinliz::Vector2I* points, int n)
 	nodes.Push(start);
 
 	CDynArray<Vector2I> inSet;
+	inSet.Reserve(n-1);
 	for (int i = 1; i < n; ++i) {
 		inSet.Push(points[i]);
 	}

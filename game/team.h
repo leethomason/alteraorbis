@@ -104,6 +104,11 @@ public:
 		return (team & 0xffffff00) == 0;
 	}
 
+	static bool IsDeityCore(int team) {
+		int group = Group(team);
+		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
+	}
+
 	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:

@@ -246,7 +246,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
 
-	if (coreScript && home && coreScript->InUse() && home->InUse()) {
+	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeityCore(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
 		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
 
