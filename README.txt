@@ -26,39 +26,12 @@ changing and growing. Thanks for playing and checking the game out.
 Feedback on the forums is appreciated!
 
 
-Changes in Beta3c+
+Changes in Beta4a
 ------------------
-- Fixed 100+ bugs!
-- 'space bar' now pauses. You can issue move or attack commands
-  to the avatar while paused.
-- There are no longer different types of kiosks. (That game mechanic
-  wasn't fun.) Now you just build a 'kiosk', although there are
-  4 different variations of the art.
-- You can now abandon a domain if you want to start fresh.
-  The button is in the lower right if you select "Build"
-- New art icons from ShroomArts!
-- Color changes for visual clarity. 
-  Special thanks for ShroomArts for suggesting color changes.
-- Freetype is now the text renderer. Text is much cleaner at 
-  all sizes, especially small sizes.
-- Map view is re-written:
-	- you can see the entire web, and the Visitor paths emanating
-	  from MotherCore
-	- you now get much more information about the strength,
-	  wealth, CivTech, and monsters in the domains
-- World Generation shows more information about what is going on.
-  It also is taking longer to run; more detail is computed.
-- All creatures now eat fruit to heal. Fruit spawns in "wild" domains.
-  Healing by other methods (eating plants and hanging out at cores)
-  has been removed.
-
-Changes in Beta3d+
---------------------
-- intro tutorial
-- faster world gen; let world gen be stopped early
-- can no longer delete your own core
-- bug fixes
-- architecture simplification
+- simpler and more useful circuit system for you to build traps and defenses
+- support for both mouse and touch interfaces
+- build UI improvements
+- improved name generation
 
 FAQ
 ---
