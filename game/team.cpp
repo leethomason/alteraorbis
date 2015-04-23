@@ -9,7 +9,27 @@
 
 using namespace grinliz;
 
-int Team::idPool = 1;	// id=0 is rogue.
+Team* Team::instance = 0;
+
+Team::Team()
+{
+	GLASSERT(!instance);
+	instance = this;
+	idPool = 1;	// id=0 is rogue.
+}
+
+Team::~Team()
+{
+	GLASSERT(instance == this);
+	instance = 0;
+}
+
+void Team::Serialize(XStream* xs)
+{
+	XarcOpen(xs,"Team");
+	XARC_SER(xs, idPool);
+	XarcClose(xs);
+}
 
 grinliz::IString Team::TeamName(int team)
 {
@@ -225,7 +245,7 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 		}
 	}
 
-	// Wealth
+	// Wealth, envy of the Gobmen
 	if (Team::Group(centerTeam) == TEAM_GOB) {
 		if (eval->CoreWealth() > center->CoreWealth()) {
 			d--;
@@ -234,9 +254,3 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 	return d;
 }
 
-void Team::Serialize(XStream* xs)
-{
-	XarcOpen(xs,"Team");
-	XARC_SER(xs, idPool);
-	XarcClose(xs);
-}

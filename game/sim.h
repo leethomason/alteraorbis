@@ -48,6 +48,7 @@ class ItemDB;
 class CoreScript;
 class PlantScript;
 class CircuitSim;
+class Team;
 
 class Sim : public IChitListener, public IUITracker
 {
@@ -118,6 +119,7 @@ private:
 	ChitContext		context;
 	Weather*		weather;
 	ReserveBank*	reserveBank;
+	Team*			teamInfo;
 	Visitors*		visitors;
 	ItemDB*			itemDB;
 	PlantScript*	plantScript;

@@ -24,7 +24,11 @@
 #define BRIDGE 1
 
 #include "glew.h"
-#include <SDL2/SDL.h>
+#if defined(_MSC_VER)
+#include "../libs/SDL2/include/SDL.h"
+#else
+#include "SDL.h"
+#endif
 
 #include "gamui.h"
 #include "gamuifreetype.h"

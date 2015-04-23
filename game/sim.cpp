@@ -68,6 +68,7 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	context.engine		= new Engine( port, database, context.worldMap );
 	weather				= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	reserveBank			= new ReserveBank();
+	teamInfo			= new Team();
 	visitors			= new Visitors();
 
 	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -101,6 +102,7 @@ Sim::~Sim()
 	delete visitors;
 	delete weather;
 	delete reserveBank;
+	delete teamInfo;
 	delete context.chitBag;
 	context.chitBag = 0;
 	delete context.engine;
@@ -155,12 +157,12 @@ void Sim::DumpModel()
 }
 
 
-void Sim::Load( const char* mapDAT, const char* gameDAT )
+void Sim::Load(const char* mapDAT, const char* gameDAT)
 {
 	context.chitBag->DeleteAll();
-	context.worldMap->Load( mapDAT );
+	context.worldMap->Load(mapDAT);
 
-	if ( !gameDAT ) {
+	if (!gameDAT) {
 		// Fresh start
 		CreateRockInOutland();
 		CreateCores();
@@ -171,66 +173,66 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
 
 		FILE* fp = fopen(path.c_str(), "rb");
-		GLASSERT( fp );
-		if ( fp ) {
-			StreamReader reader( fp );
-			XarcOpen( &reader, "Sim" );
+		GLASSERT(fp);
+		if (fp) {
+			StreamReader reader(fp);
+			XarcOpen(&reader, "Sim");
 
 			XARC_SER(&reader, avatarTimer);
 			XARC_SER(&reader, GameItem::idPool);
 
-			minuteClock.Serialize( &reader, "minuteClock" );
-			secondClock.Serialize( &reader, "secondClock" );
-			volcTimer.Serialize( &reader, "volcTimer" );
+			minuteClock.Serialize(&reader, "minuteClock");
+			secondClock.Serialize(&reader, "secondClock");
+			volcTimer.Serialize(&reader, "volcTimer");
 			spawnClock.Serialize(&reader, "spawnClock");
 			visitorClock.Serialize(&reader, "visitorClock");
-			Team::Serialize(&reader);
 			itemDB->Serialize(&reader);
-			reserveBank->Serialize( &reader );
-			visitors->Serialize( &reader );
+			reserveBank->Serialize(&reader);
+			teamInfo->Serialize(&reader);
+			visitors->Serialize(&reader);
 			context.physicsSims->Serialize(&reader);
-			context.engine->camera.Serialize( &reader );
-			context.chitBag->Serialize( &reader );
+			context.engine->camera.Serialize(&reader);
+			context.chitBag->Serialize(&reader);
 
-			XarcClose( &reader );
+			XarcClose(&reader);
 
-			fclose( fp );
+			fclose(fp);
 		}
 	}
 }
 
 
-void Sim::Save( const char* mapDAT, const char* gameDAT )
+void Sim::Save(const char* mapDAT, const char* gameDAT)
 {
-	context.worldMap->Save( mapDAT );
+	context.worldMap->Save(mapDAT);
 
 	{
-		QuickProfile qp( "Sim::SaveXarc" );
+		QuickProfile qp("Sim::SaveXarc");
 
 		GLString path;
 		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
 		FILE* fp = fopen(path.c_str(), "wb");
-		if ( fp ) {
+		if (fp) {
 			StreamWriter writer(fp, CURRENT_FILE_VERSION);
-			XarcOpen( &writer, "Sim" );
+			XarcOpen(&writer, "Sim");
 			XARC_SER(&writer, avatarTimer);
 			XARC_SER(&writer, GameItem::idPool);
 
-			minuteClock.Serialize( &writer, "minuteClock" );
-			secondClock.Serialize( &writer, "secondClock" );
-			volcTimer.Serialize( &writer, "volcTimer" );
+			minuteClock.Serialize(&writer, "minuteClock");
+			secondClock.Serialize(&writer, "secondClock");
+			volcTimer.Serialize(&writer, "volcTimer");
 			spawnClock.Serialize(&writer, "spawnClock");
 			visitorClock.Serialize(&writer, "visitorClock");
-			Team::Serialize(&writer);
-			itemDB->Serialize( &writer );
-			reserveBank->Serialize( &writer );
-			visitors->Serialize( &writer );
+			itemDB->Serialize(&writer);
+			reserveBank->Serialize(&writer);
+			teamInfo->Serialize(&writer);
+			visitors->Serialize(&writer);
 			context.physicsSims->Serialize(&writer);
-			context.engine->camera.Serialize( &writer );
-			context.chitBag->Serialize( &writer );
+			context.engine->camera.Serialize(&writer);
+			context.chitBag->Serialize(&writer);
 
-			XarcClose( &writer );
-			fclose( fp );
+			XarcClose(&writer);
+			fclose(fp);
 		}
 	}
 }

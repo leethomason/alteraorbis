@@ -2742,7 +2742,7 @@ void AIComponent::EnterNewGrid()
 				DomainAI* ai = DomainAI::Factory(gameItem->Team());
 				if (ai) {
 					GLASSERT(Team::IsRogue(gameItem->Team()));
-					int newCoreTeam = Team::GenTeam(gameItem->Team());
+					int newCoreTeam = Team::Instance()->GenTeam(gameItem->Team());
 					CoreScript* newCS = CoreScript::CreateCore(sector, newCoreTeam, Context());
 					newCS->ParentChit()->Add(ai);
 					newCS->AddCitizen(parentChit);

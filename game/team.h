@@ -61,7 +61,12 @@ enum {
 class Team
 {
 public:
-	static void Serialize(XStream* xs);
+	Team();
+	~Team();
+
+	static Team* Instance() { return instance; }
+
+	void Serialize(XStream* xs);
 
 	// Team name, where it has one.
 	static grinliz::IString TeamName(int team);
@@ -69,7 +74,7 @@ public:
 	static int GetTeam(const grinliz::IString& name);
 
 	// Take a team, and add an id to it.
-	static int GenTeam(int teamGroup) {
+	int GenTeam(int teamGroup) {
 		teamGroup = Group(teamGroup);
 		int team = teamGroup | ((++idPool) << 8);
 		return team;
@@ -112,7 +117,8 @@ public:
 	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:
-	static int idPool;
+	int idPool;
+	static Team* instance;
 };
 
 

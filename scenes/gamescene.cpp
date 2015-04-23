@@ -1964,7 +1964,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		const SectorData* sd = (const SectorData*)data;
 		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
-		int team = Team::GenTeam(TEAM_HOUSE);
+		int team = Team::Instance()->GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
 		CoreScript::CreateCore(ToSector(sd->x, sd->y), team, sim->Context());
 		ForceHerd(ToSector(sd->x, sd->y));
