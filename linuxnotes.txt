@@ -7,4 +7,10 @@ sudo apt-get install libsdl2-dev
 discussion of pulling in SDL2:
 http://duganchen.ca/building-sdl2-programs-with-cmake-and-pkgconfig/
 
+Debug vs. Release:
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
+
+
+
 
