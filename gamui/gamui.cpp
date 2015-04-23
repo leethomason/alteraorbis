@@ -1409,15 +1409,15 @@ void DigitalBar::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex 
 Gamui::Gamui()
 	:	m_itemTapped( 0 ),
 		m_disabledItemTapped(0),
+		m_iRenderer(0),
 		m_iText( 0 ),
-		m_orderChanged( true ),
 		m_physicalWidth(800),
 		m_physicalHeight(600),
 		m_virtualHeight(600),
+		m_orderChanged( true ),
 		m_modified( true ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
-		//m_textHeight( 16 ),
 		m_relativeX( 0 ),
 		m_relativeY( 0 ),
 		m_focus( -1 ),
@@ -1743,66 +1743,6 @@ const char* EndOfWord( const char* p ) {
 }
 
 
-#if 0
-void Gamui::LayoutTextBlock(	const char* text,
-								TextLabel* textLabels, int nText,
-								float originX, float originY,
-								float width )
-{
-	GAMUIASSERT( text );
-	const char* p = text;
-	int i = 0;
-
-	TextLabel label;
-	label.Init( this );
-	label.SetText( "X" );
-	float lineHeight = label.Height();
-
-	while ( i < nText && *p ) {
-		label.ClearText();
-		
-		// Add first word: always get at least one.		
-		p = SkipSpace( p );
-		const char* end = EndOfWord( p );
-		end = SkipSpace( end );
-
-		// (p,end) definitely gets added. The question is how much more?
-		const char* q = end;
-		while ( *q && *q != '\n' ) {
-			q = EndOfWord( q );
-			q = SkipSpace( q );
-			label.SetText( p, q );
-			if ( label.Width() > width ) {
-				break;
-			}
-			else {
-				end = q;
-			}
-		}
-		
-		textLabels[i].SetText( p, end );
-		textLabels[i].SetPos( originX, originY + (float)i*lineHeight );
-		p = end;
-		++i;
-		// We just put in a carriage return, so the first is free:
-		if ( *p == '\n' )
-			++p;
-
-		// The rest advance i:
-		while ( *p == '\n' && i < nText ) {
-			textLabels[i].ClearText();
-			++i;
-			++p;
-		}
-	}
-	while( i < nText ) {
-		textLabels[i].ClearText();
-		++i;
-	}
-}
-#endif
-
-
 void Gamui::AddToFocusGroup( const UIItem* item, int id )
 {
 	FocusItem* fi = m_focusItems.PushArr(1);
@@ -2024,74 +1964,4 @@ void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, int _cx, int _cy, 
 		float h = height * float(_cy) + spacingY * float(_cy-1);
 		item->SetSize( w, h );
 	}
-
-	if ( item->Visible() ) {
-		// Track the inner rectangle.
-		float x0, x1, y0, y1;
-
-		if ( _x >= 0 ) {
-			x0 = item->X() + item->Width() + gutter[0];
-			x1 = screenWidth;
-		}
-		else {
-			x0 = 0;
-			x1 = item->X() - gutter[0];
-		}
-		if ( _y >= 0 ) {
-			y0 = item->Y() + item->Height() + gutter[1];
-			y1 = screenHeight;
-		}
-		else {
-			y0 = 0;
-			y1 = item->Y() - gutter[1];
-		}
-	
-//		innerX0 = Max( innerX0, gutter[0] );
-//		innerY0 = Max( innerY0, gutter[1] );
-//		innerX1 = Min( innerX1, screenWidth  - gutter[0] );
-//		innerY1 = Min( innerY1, screenHeight - gutter[1] );
-
-		// Can trim to y or x. Which one?
-//		float areaX = ( Min( innerX1, x1 ) - Max( innerX0, x0 ) ) * ( innerY1 - innerY0 );
-//		float areaY = ( innerX1 - innerX0 ) * ( Min( innerY1, y1 ) - Max( innerY0, y0 ));
-//		if ( areaX > areaY ) {
-//			innerX0 = Max( innerX0, x0 );
-//			innerX1 = Min( innerX1, x1 );
-//		}
-//		else {
-//			innerY0 = Max( innerY0, y0 );
-//			innerY1 = Min( innerY1, y1 );
-//		}
-	}
 }
-
-
-/*
-void LayoutCalculator::PosInner( IWidget* item, float wDivH )
-{
-	innerX0 = Max( innerX0, gutterX );
-	innerX1 = Min( innerX1, screenWidth - gutterX );
-	innerY0 = Max( innerY0, gutterY );
-	innerY1 = Min( innerY1, screenHeight - gutterY );
-
-	float dx = innerX1 - innerX0;
-	float dy = innerY1 - innerY0;
-
-	if ( wDivH == 0 ) {
-		item->SetPos( innerX0, innerY0 );
-		item->SetSize( dx, dy );
-	}
-	else {
-		if ( wDivH > (dx/dy) ) {
-			float cy = dx / wDivH;
-			item->SetPos( innerX0, innerY0 + (dy-cy)*0.5f );
-			item->SetSize( dx, cy );
-		}
-		else {
-			float cx = dy * wDivH;
-			item->SetPos( innerX0 + (dx-cx)*0.5f, innerY0 );
-			item->SetSize( cx, dy );
-		}
-	}
-}
-*/

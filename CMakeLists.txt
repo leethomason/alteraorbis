@@ -29,7 +29,7 @@ include_directories(${FREETYPE_INCLUDE_DIRS})
 target_link_libraries(gamuitest ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
 
 if(CMAKE_C_COMPILER_ID )
-	add_definitions(-Wno-int-to-pointer-cast)
+	add_definitions(-Wno-int-to-pointer-cast -Wall)
 endif(CMAKE_C_COMPILER_ID )
 
 

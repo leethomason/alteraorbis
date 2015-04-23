@@ -181,8 +181,6 @@ public:
 
 int main( int argc, char **argv )
 {    
-	SDL_Surface *surface = 0;
-
 	printf("GamuiTest started.\n");
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
