@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <memory.h>
 #include <string.h>
+#include <stdlib.h>
 
 #if defined( _DEBUG ) || defined( DEBUG )
 #	if defined( _MSC_VER )
@@ -159,7 +160,7 @@ public:
 			if (count < 16) capacity = 16;
 			while (capacity < count) capacity *= 2;
 			if ( mem == reinterpret_cast<T*>(cache) ) {
-				mem = (T*)malloc( capacity*sizeof(T) );
+				mem = (T*) malloc( capacity*sizeof(T) );
 				memcpy( mem, cache, size*sizeof(T) );
 			}
 			else {

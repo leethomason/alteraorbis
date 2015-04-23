@@ -183,11 +183,11 @@ int main( int argc, char **argv )
 {    
 	SDL_Surface *surface = 0;
 
-
+	printf("GamuiTest started.\n");
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
 	{
-	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
+	    printf( "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
@@ -203,6 +203,7 @@ int main( int argc, char **argv )
 											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	SDL_GL_CreateContext( screen );
 	glViewport(0, 0, screenX, screenY);
+	printf("Window created.\n");
 
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
