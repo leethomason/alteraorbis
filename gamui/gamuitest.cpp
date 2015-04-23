@@ -21,15 +21,16 @@
     distribution.
 */
 
+#define BRIDGE 1
+
 #include "glew.h"
-#include "../libs/SDL2/include/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "gamui.h"
 #include "gamuifreetype.h"
+
 #include <stdio.h>
 #include <math.h>
-
-#define BRIDGE 1
 
 #define TESTGLERR()	{	GLenum err = glGetError();				\
 						if ( err != GL_NO_ERROR ) {				\
@@ -93,7 +94,7 @@ public:
 	virtual void BeginRenderState( const void* _renderState )
 	{
 		TESTGLERR();
-		int renderState = (int)_renderState;
+		intptr_t renderState = (intptr_t)(_renderState);
 
 #if 0
 		if ( renderState == RENDERSTATE_TEXT )
@@ -120,9 +121,10 @@ public:
 		TESTGLERR();
 	}
 
-	virtual void BeginTexture( const void* textureHandle )
+	virtual void BeginTexture( const void* _textureHandle )
 	{
 		TESTGLERR();
+		intptr_t textureHandle = (intptr_t)_textureHandle;
 		glBindTexture( GL_TEXTURE_2D, (GLuint)textureHandle );
 		TESTGLERR();
 	}
@@ -181,11 +183,11 @@ int main( int argc, char **argv )
 {    
 	SDL_Surface *surface = 0;
 
-
+	printf("GamuiTest started.\n");
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
 	{
-	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
+	    printf( "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
@@ -201,6 +203,7 @@ int main( int argc, char **argv )
 											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	SDL_GL_CreateContext( screen );
 	glViewport(0, 0, screenX, screenY);
+	printf("Window created.\n");
 
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
