@@ -13,6 +13,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../engine/settings.h"
 
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
@@ -59,7 +60,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
-	selectionModel = 0;
 	chitTracking = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
@@ -108,7 +108,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	censusButton.Init( &gamui2D, game->GetButtonLook(0) );
 	censusButton.SetText( "Census" );
 	viewButton.Init(&gamui2D, game->GetButtonLook(0));
-	viewButton.SetText("View");
+	viewButton.SetText("Camera");
 	pauseButton.Init(&gamui2D, game->GetButtonLook(0));
 	pauseButton.SetText("Pause");
 
@@ -236,7 +236,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 GameScene::~GameScene()
 {
 	delete menu;
-	delete selectionModel;
 	delete sim;
 	delete adviser;
 	delete tutorial;
@@ -424,7 +423,7 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();
-	if (buildActive && PlatformHasMouseSupport()) {
+	if (buildActive && PlatformHasMouseSupport() && !SettingsManager::Instance()->TouchOn()) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
 			name = "clearMarker1";
@@ -443,38 +442,14 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 			atom = LumosGame::CalcIconAtom("build");
 		}
 	}
-#if 0
-	if (*name) {
-		// Make the model current.
-		if (!selectionModel || !StrEqual(selectionModel->GetResource()->Name(), name)) {
-			delete selectionModel;
-			selectionModel = new Model(name, engine->GetSpaceTree());
-			GLASSERT(selectionModel);
-		}
-	}
-	else {
-		delete selectionModel;
-		selectionModel = 0;
-	}
-	if (selectionModel) {
-		// Move away from the eye so that the new color is visible.
-		Vector3F pos = at;
-		pos.x = floorf(at.x) + size*0.5f;
-		pos.z = floorf(at.z) + size*0.5f;
-
-		Vector3F dir = pos - engine->camera.PosWC();
-		dir.Normalize();
-		pos = pos + dir*0.01f;
-
-		selectionModel->SetPos(pos);
-		Vector4F color = { 1, 1, 1, 0.3f };
-		selectionModel->SetColor(color);
-	}
-#else
 	selectionTile.SetPos(floorf(at.x), floorf(at.z));
 	selectionTile.SetSize(size, size);
 	selectionTile.SetAtom(atom);
-#endif	
+	// Set invisible when it starts dragging.
+	// Turn back on here if not dragging.
+	if (dragMode == EDragMode::NONE) {
+		selectionTile.SetVisible(true);
+	}
 }
 
 
@@ -604,16 +579,6 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 				ControlTap(i-1, plane2i);
 			}
 		}
-#if 0
-		CArray<int, 32> citizens;
-		for (int i = 0; i < coreScript->NumCitizens(); ++i) {
-			Chit* c = coreScript->CitizenAtIndex(i);
-			GLASSERT(c);
-			citizens.Push(c->ID());
-		}
-		coreScript->SetWaypoints(citizens.Mem(), citizens.Size(), plane2i);
-#endif
-
 		return;
 	}
 
@@ -863,9 +828,10 @@ void GameScene::ControlTap(int slot, const Vector2I& pos2i)
 }
 
 
-void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+bool GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	static const float CLICK_RAD = 10.0f;
+	bool tapHandled = false;
 
 	tapView = view;	// justs a temporary to pass through to ItemTapped()
 	bool uiHasTap = ProcessTap(action, view, world);
@@ -884,27 +850,32 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			if (StartDragCircuit(ToWorld2I(at))) {
 				dragMode = EDragMode::CIRCUIT;
 				sim->Context()->physicsSims->GetCircuitSim(ToSector(at))->DragStart(ToWorld2F(at));
+				tapHandled = true;
 			}
 			else if (DragBuildArea(&atom)) {
 				dragMode = EDragMode::PLAN_AREA;
+				tapHandled = true;
 			}
 			else if (StartDragPlanLocation(ToWorld2I(at), &dragWorkItem)) {
 				dragMode = EDragMode::PLAN_MOVE;
 				DrawBuildMarks(dragWorkItem);
+				tapHandled = true;
 			}
 			else if (StartDragPlanRotation(ToWorld2I(at), &dragWorkItem)) {
 				dragMode = EDragMode::PLAN_ROTATION;
 				DrawBuildMarks(dragWorkItem);
+				tapHandled = true;
 			}
 			else if (DragRotate(ToWorld2I(at))) {
 				dragMode = EDragMode::BUILDING_ROTATION;
+				tapHandled = true;
 			}
 			else {
-				dragMode = EDragMode::PAN;
 				// This interacts badly with the other events.
 				// Moved control to the main loop. (Which creates
 				// the 2 finger close vs. far thing.)
 				//Process3DTap(GAME_PAN_START, view, world, sim->GetEngine());
+
 			}
 		}
 		else if (action == GAME_TAP_MOVE) {
@@ -942,9 +913,6 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			else if (dragMode == EDragMode::PLAN_ROTATION) {
 				DragRotatePlan(ToWorld2F(at), &dragWorkItem);
 				DrawBuildMarks(dragWorkItem);
-			}
-			else if (dragMode == EDragMode::PAN) {
-				// Do nothing.
 			}
 		}
 		else if (action == GAME_TAP_UP) {
@@ -990,7 +958,7 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 					workQueue->AddAction(dragWorkItem.pos, dragWorkItem.buildScriptID, dragWorkItem.rotation, dragWorkItem.variation);
 				}
 			}
-			else if (dragMode == EDragMode::PAN) {
+			else if (dragMode == EDragMode::NONE) {
 				// FIXME: is it possible to filter out at a higher level?
 				// Check if the pan isn't a pan (actually a 2 finger drag) and do something.
 				if ((tapDown - view).Length() < CLICK_RAD) {	// magic tap accuracy...
@@ -1006,6 +974,11 @@ void GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 			buildMark[i].SetVisible(false);
 		}
 	}
+	// Turn off if we are dragging. Turn back on in move.
+	if (dragMode != EDragMode::NONE) {
+		selectionTile.SetVisible(false);
+	}
+	return uiHasTap || (dragMode != EDragMode::NONE) || tapHandled;
 }
 
 
@@ -1267,16 +1240,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-#if 0
-	if ( item == &clearButton ) {
-		if ( FreeCameraMode() ) {
-			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-			if ( cc  ) {
-				cc->SetTrack( 0 );
-			}
-		}
-	}
-#endif
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		if ( i < pickupData.Size() && item == &pickupButton[i] ) {
@@ -1402,7 +1365,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Create Human domain.
+#if 0	// Create Human domain.
 		{
 			CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2F(at)));
 			if (cs) {
@@ -1436,10 +1399,10 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 0	// Monster swarm
+#if 1	// Monster swarm
 		for (int i = 0; i<5; ++i) {
-			sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_GOB);
-//			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+//			sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_GOB);
+			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
 		}
 #endif

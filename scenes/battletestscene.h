@@ -41,7 +41,7 @@ public:
 	void Rotate( float degrees );
 	virtual void MoveCamera(float dx, float dy);
 
-	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	virtual bool Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();

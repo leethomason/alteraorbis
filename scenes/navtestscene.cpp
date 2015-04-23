@@ -165,9 +165,10 @@ bool NavTestScene::MapGridBlocked( int x, int y )
 }
 
 
-void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
+bool NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
+
 	if ( !uiHasTap && action == GAME_TAP_UP) {
 		Vector3F oldMark = tapMark;
 
@@ -201,6 +202,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			context.worldMap->ShowAdjacentRegions( tapMark.x, tapMark.z );
 		}
 	}
+	return true;
 }
 
 

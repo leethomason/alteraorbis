@@ -79,9 +79,26 @@ void SettingsManager::SetAudioOn( bool value )
 	}
 }
 
+void SettingsManager::SetTouchOn( bool value )
+{
+	if ( TouchOn() != value ) {
+		XMLElement* ele = XMLHandle(xmlDoc).FirstChildElement("Settings").FirstChildElement("Game").ToElement();
+		if (ele) {
+			ele->SetAttribute("touchOn", value);
+			xmlDoc.SaveFile(path.safe_str());
+		}
+	}
+}
+
+
 bool SettingsManager::AudioOn() const
 {
 	return Read("Game", "audioOn", true);
+}
+
+bool SettingsManager::TouchOn() const
+{
+	return Read("Game", "touchOn", false);
 }
 
 float SettingsManager::DenizenDate() const

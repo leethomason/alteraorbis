@@ -223,9 +223,9 @@ void NavTest2Scene::Pan(int action, const grinliz::Vector2F& view, const grinliz
 }
 
 
-void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
+bool NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
-	bool uiHasTap = ProcessTap( action, view, world );
+	return ProcessTap( action, view, world );
 }
 
 

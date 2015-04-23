@@ -34,8 +34,11 @@ public:
 	static void Destroy();
 
 	void SetAudioOn( bool value );
+	void SetTouchOn(bool value);
 
 	bool AudioOn() const;
+	bool TouchOn() const;
+
 	float DenizenDate() const;
 	float SpawnDate() const;
 	float WorldGenDone() const;

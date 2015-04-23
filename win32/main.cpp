@@ -43,6 +43,7 @@
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
+//#define OUTPUT_MOUSE_AND_TOUCH
 
 #define TIME_BETWEEN_FRAMES	1000/33
 
@@ -62,7 +63,7 @@ bool fullscreen = false;
 int restoreWidth = SCREEN_WIDTH;
 int restoreHeight = SCREEN_HEIGHT;
 bool cameraIso = true;
-bool hasMouse = false;
+
 
 int nModDB = 0;
 grinliz::GLString* databases[GAME_MAX_MOD_DATABASES];	
@@ -71,7 +72,7 @@ void ScreenCapture();
 void PostCurrentGame();
 
 bool PlatformHasMouseSupport() {
-	return hasMouse;
+	return true;
 }
 
 
@@ -208,22 +209,28 @@ int main(int argc, char **argv)
 	float yRotation = 45.0f;
 	grinliz::Vector2I mouseDown = { 0, 0 };
 	grinliz::Vector2I prevMouseDown = { 0, 0 };
-	grinliz::Vector2I rightMouseDown = { -1, -1 };
+	grinliz::Vector2I rightMouseDown = { 0, 0 };
 	U32 prevMouseDownTime = 0;
 
 	int zoomX = 0;
 	int zoomY = 0;
-	bool fingersClose = true;
+	// Used to compute fingers close, but problems:
+	// - really to the OS to do that, because of all the tuning
+	// - the coordinates are in windows normalized, so can't get the physical distance reliably.
+	//bool fingersClose = true;
+	int nFingers = 0;
 
 	void* game = NewGame(screenWidth, screenHeight, 0);
 
 	int modKeys = SDL_GetModState();
 	U32 tickTimer = 0, lastTick = 0, thisTick = 0;
 
+#ifdef OUTPUT_MOUSE_AND_TOUCH
 	int value = GetSystemMetrics(SM_DIGITIZER);
 	if (value & NID_INTEGRATED_TOUCH) GLOUTPUT(("NID_INTEGRATED_TOUCH\n"));
 	if (value & NID_MULTI_INPUT) GLOUTPUT(("NID_MULTI_INPUT\n"));
 	if (value & NID_READY) GLOUTPUT(("NID_READY\n"));
+#endif
 
 	grinliz::Vector2F multiTouchStart = { 0, 0 };
 	int mouseMoveCount = 0;
@@ -339,19 +346,27 @@ int main(int argc, char **argv)
 				{
 					int x = event.button.x;
 					int y = event.button.y;
-					GLOUTPUT(("Mouse down %d %d\n", x, y));
 
 					int mod = 0;
 					if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
 					else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
 
-					if (event.button.button == SDL_BUTTON_LEFT) {
+					if (nFingers > 1) {
+						// do nothing
+					}
+					else if (event.button.button == SDL_BUTTON_LEFT) {
+						#ifdef OUTPUT_MOUSE_AND_TOUCH
+						GLOUTPUT(("Left mouse down %d %d\n", x, y));
+						#endif
 						mouseDown.Set(event.button.x, event.button.y);
 						GameTap(game, GAME_TAP_DOWN, x, y, mod);
 					}
 					else if (event.button.button == SDL_BUTTON_RIGHT) {
+						#ifdef OUTPUT_MOUSE_AND_TOUCH
+						GLOUTPUT(("Right mouse down %d %d\n", x, y));
+						#endif
 						GameTap(game, GAME_TAP_CANCEL, x, y, mod);
-						rightMouseDown.Set(-1, -1);
+						rightMouseDown.Zero();
 						if (mod == 0) {
 							rightMouseDown.Set(event.button.x, event.button.y);
 							GameCameraPan(game, GAME_PAN_START, float(x), float(y));
@@ -370,18 +385,26 @@ int main(int argc, char **argv)
 					int x = event.button.x;
 					int y = event.button.y;
 
-					if (event.button.button == 3) {
+					if (event.button.button == SDL_BUTTON_RIGHT) {
+						#ifdef OUTPUT_MOUSE_AND_TOUCH
+						GLOUTPUT(("Right mouse up %d %d\n", x, y));
+						#endif
 						zooming = false;
-						if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+						if (!rightMouseDown.IsZero()) {
 							GameCameraPan(game, GAME_PAN_END, float(x), float(y));
-							rightMouseDown.Set(-1, -1);
+							rightMouseDown.Zero();
 						}
 					}
-					if (event.button.button == 1) {
-						int mod = 0;
-						if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
-						else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
-						GameTap(game, GAME_TAP_UP, x, y, mod);
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						if (!mouseDown.IsZero()) {	// filter out mouse events that become finger events.
+							#ifdef OUTPUT_MOUSE_AND_TOUCH
+							GLOUTPUT(("Left mouse up %d %d\n", x, y));
+							#endif
+							int mod = 0;
+							if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
+							else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
+							GameTap(game, GAME_TAP_UP, x, y, mod);
+						}
 					}
 				}
 				break;
@@ -389,36 +412,38 @@ int main(int argc, char **argv)
 				case SDL_MOUSEMOTION:
 				{
 					SDL_GetRelativeMouseState(&zoomX, &zoomY);
-					int state = SDL_GetMouseState(NULL, NULL);
-					int x = event.button.x;
-					int y = event.button.y;
+					int state = event.motion.state;
+					int x = event.motion.x;
+					int y = event.motion.y;
 
 					int mod = 0;
 					if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
 					else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
 
-					if (state & SDL_BUTTON(1)) {
-						GameTap(game, GAME_TAP_MOVE, x, y, mod);
-						mouseMoveCount = 0;
+					if (nFingers > 1) {
+						// Do nothing.
+						// Multi touch in progress.
 					}
-					else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+					else if (state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+						if (!mouseDown.IsZero()) {
+							#ifdef OUTPUT_MOUSE_AND_TOUCH
+							GLOUTPUT(("Left Mouse move %d %d\n", x, y));
+							#endif
+							GameTap(game, GAME_TAP_MOVE, x, y, mod);
+							mouseMoveCount = 0;
+						}
+					}
+					else if (!rightMouseDown.IsZero()) {
+						GLASSERT(state & SDL_BUTTON(SDL_BUTTON_RIGHT));
 						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
 					}
-					else if (zooming && (state & SDL_BUTTON(3))) {
+					else if (zooming && (state & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
 						float deltaZoom = 0.01f * (float)zoomY;
 						GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
 						GameCameraRotate(game, (float)(zoomX)*0.5f);
 					}
-					else if (((state & SDL_BUTTON(1)) == 0)) {
+					else if (state ==0) {
 						GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
-						mouseMoveCount++;
-						if (mouseMoveCount == 5) {
-							if (!hasMouse) {
-								GLOUTPUT(("Mouse supported.\n"));
-								GLOUTPUT_REL(("Mouse supported.\n"));
-							}
-							hasMouse = true;	// filter out OS stuff. make sure we get a decent number before going "mouse on"
-						}
 					}
 				}
 				break;
@@ -435,10 +460,28 @@ int main(int argc, char **argv)
 				case SDL_FINGERUP:
 				{
 					const SDL_TouchFingerEvent* tfe = &event.tfinger;
-					int nFingers = SDL_GetNumTouchFingers(tfe->touchId);
+					nFingers = SDL_GetNumTouchFingers(tfe->touchId);
 					if (nFingers < 2 && !multiTouchStart.IsZero()) {
+						#ifdef OUTPUT_MOUSE_AND_TOUCH
 						GLOUTPUT(("2 finger END.\n"));
+						#endif
 						multiTouchStart.Zero();
+					}
+				}
+				break;
+
+				case SDL_FINGERDOWN:
+				{
+					const SDL_TouchFingerEvent* tfe = &event.tfinger;
+					nFingers = SDL_GetNumTouchFingers(tfe->touchId);
+					if (nFingers > 1) {
+						if (!mouseDown.IsZero()) {
+							// Wrap up the existing action.
+							#ifdef OUTPUT_MOUSE_AND_TOUCH
+							GLOUTPUT(("Switch to gesture.\n"));
+							#endif
+							mouseDown.Zero();
+						}
 					}
 				}
 				break;
@@ -446,17 +489,11 @@ int main(int argc, char **argv)
 				case SDL_MULTIGESTURE:
 				{
 					const SDL_MultiGestureEvent* mge = &event.mgesture;
-					int nFingers = SDL_GetNumTouchFingers(mge->touchId);
+					nFingers = SDL_GetNumTouchFingers(mge->touchId);
 					if (nFingers > 1 && multiTouchStart.IsZero()) {
-						SDL_Finger* finger0 = SDL_GetTouchFinger(mge->touchId, 0);
-						SDL_Finger* finger1 = SDL_GetTouchFinger(mge->touchId, 1);
-						fingersClose = true;
-						if (finger0 && finger1) {
-							grinliz::Vector2F d = { finger1->x - finger0->x, finger1->y - finger0->y };
-							fingersClose = d.Length() < 0.10f;
-						}
-
-						GLOUTPUT(("2 finger START %s.\n", fingersClose ? "CLOSE" : "FAR" ));
+						#ifdef OUTPUT_MOUSE_AND_TOUCH
+						GLOUTPUT(("2 finger START.\n"));
+						#endif
 						multiTouchStart.Set(mge->x, mge->y);
 					}
 					else if (!multiTouchStart.IsZero()) {
@@ -470,7 +507,8 @@ int main(int argc, char **argv)
 						GameCameraPan(game, GAME_PAN_END,
 									  multiTouchStart.x * float(screenWidth), multiTouchStart.y*float(screenHeight));
 					}
-					if (nFingers == 2 && !fingersClose) {
+
+					if (nFingers == 2) {
 						GameZoom(game, GAME_ZOOM_DISTANCE, -mge->dDist * 10.f);
 						GameCameraRotate(game, -mge->dTheta * 100.0f);
 						//GLOUTPUT(("MultiGestureEvent dTheta=%.4f dDist=%.4f x=%.4f y=%.4f nFing=%d\n", mge->dTheta, mge->dDist, mge->x, mge->y, mge->numFingers));

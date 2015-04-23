@@ -343,7 +343,7 @@ bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* headin
 }
 
 
-void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading )
+void PathMoveComponent::AvoidOthers(U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading)
 {
 	//PROFILE_FUNC();
 
@@ -352,38 +352,38 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 	avoidForceApplied = false;
 
 	RenderComponent* render = parentChit->GetRenderComponent();
-	if ( !render ) return;
-	
+	if (!render) return;
+
 	Rectangle2F bounds;
 	bounds.min = bounds.max = *pos2;
-	bounds.Outset( PATH_AVOID_DISTANCE );
+	bounds.Outset(PATH_AVOID_DISTANCE);
 
 	ChitHasMoveComponent hasMoveComponentFilter;
 	CChitArray chitArr;
-	Context()->chitBag->QuerySpatialHash( &chitArr, bounds, parentChit, &hasMoveComponentFilter );
+	Context()->chitBag->QuerySpatialHash(&chitArr, bounds, parentChit, &hasMoveComponentFilter);
 
 	/* Push in a normal direction and slow down, but don't accelerate. */
 
-	if ( !chitArr.Empty() ) {
-		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
+	if (!chitArr.Empty()) {
+		float radius = parentChit->GetRenderComponent()->RadiusOfBase();
 
 		Vector2F avoid = { 0, 0 };
 
-		for( int i=0; i<chitArr.Size(); ++i ) {
+		for (int i = 0; i < chitArr.Size(); ++i) {
 			Chit* chit = chitArr[i];
-			GLASSERT( chit != parentChit );
+			GLASSERT(chit != parentChit);
 
-			if ( !chit->GetMoveComponent()->ShouldAvoid() ) {
+			if (!chit->GetMoveComponent()->ShouldAvoid()) {
 				continue;
 			}
 
 			Vector2F itPos2 = ToWorld2F(chit->Position());
-			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
+			float itRadius = chit->GetRenderComponent()->RadiusOfBase();
 
-			float d = ((*pos2)-itPos2).Length();
+			float d = ((*pos2) - itPos2).Length();
 			float r = radius + itRadius;
 
-			if ( d < r ) {
+			if (d < r) {
 				avoidForceApplied = true;
 				// Want the other to respond to force, so wake it up:
 				chit->SetTickNeeded();
@@ -391,24 +391,24 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 				// Move away from the centers so the bases don't overlap.
 				Vector2F normal = *pos2 - itPos2;
 				normal.Normalize();
-				float alignment = DotProduct( -normal, *heading ); // how "in the way" is this?
-					
+				float alignment = DotProduct(-normal, *heading); // how "in the way" is this?
+
 				// Not getting stuck forever is very important. It breaks
 				// pathing where a CalcPath() is expected to get there.
 				// Limiting the magnitute to a fraction of the travel 
 				// speed avoids deadlocks.
-				float mag = Min( r-d, 0.5f * Travel( Speed(), delta ) ); 
+				float mag = Min(r - d, 0.5f * Travel(Speed(), delta));
 
 				//if ( alignment > 0 ) {
-					normal.Multiply( mag );
-					avoid += normal;
+				normal.Multiply(mag);
+				avoid += normal;
 				//}
-				
+
 				// Apply a sidestep vector so they don't just push.
-				if ( alignment > 0.7f ) {
+				if (alignment > 0.7f) {
 					Vector2F right = { heading->x, -heading->y };
-					avoid += right * (0.5f*mag );
-				}	
+					avoid += right * (0.5f*mag);
+				}
 			}
 		}
 		*pos2 += avoid;

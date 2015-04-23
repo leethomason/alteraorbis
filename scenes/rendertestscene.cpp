@@ -131,12 +131,14 @@ void RenderTestScene::SetupTest()
 }
 
 
-void RenderTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
+bool RenderTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
-	if ( !uiHasTap ) {
-		Process3DTap( action, view, world, engine );
-	}
+	if (uiHasTap)
+		return true;
+
+	Process3DTap( action, view, world, engine );
+	return true;
 }
 
 

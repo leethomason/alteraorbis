@@ -463,7 +463,7 @@ void BattleTestScene::MoveCamera(float dx, float dy)
 	MoveImpl(dx, dy, context.engine);
 }
 
-void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
+bool BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
@@ -479,6 +479,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 #endif		
 		}
 	}
+	return true;
 }
 
 

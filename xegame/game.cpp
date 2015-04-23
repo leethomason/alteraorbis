@@ -653,16 +653,13 @@ void Game::Tap( int action, int wx, int wy, int mod )
 
 	grinliz::Ray world;
 	screenport.ViewToWorld( view, 0, &world );
-
-#if 0
-	{
-		Vector2F ui;
-		screenport.ViewToUI( view, &ui );
-		if ( action != GAME_TAP_MOVE )
-			GLOUTPUT(( "Tap: action=%d window(%.1f,%.1f) view(%.1f,%.1f) ui(%.1f,%.1f)\n", action, window.x, window.y, view.x, view.y, ui.x, ui.y ));
+	bool handled = sceneStack.Top()->scene->Tap(action, view, world);
+	if (action == GAME_TAP_DOWN) {
+		alsoPan = !handled;
 	}
-#endif
-	sceneStack.Top()->scene->Tap( action, view, world );
+	if (alsoPan) {
+		Pan(GAME_PAN_START + (action - GAME_TAP_DOWN), float(wx), float(wy));
+	}
 }
 
 
