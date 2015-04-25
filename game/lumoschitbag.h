@@ -22,6 +22,7 @@
 #include "census.h"
 #include "visitor.h"
 #include "visitorweb.h"
+#include "team.h"
 
 class WorldMap;
 class Wallet;
@@ -54,16 +55,16 @@ public:
 class RelationshipFilter : public IChitAccept
 {
 public:
-	RelationshipFilter() : team(-1), relationship(0) {}
+	RelationshipFilter() : team(-1), relationship(ERelate::NEUTRAL) {}
 
 	virtual bool Accept( Chit* chit );
 
-	void CheckRelationship(Chit* compareTo, int status);
-	void CheckRelationship(int team, int status);
+	void CheckRelationship(Chit* compareTo, ERelate status);
+	void CheckRelationship(int team, ERelate status);
 
 private:
 	int team;
-	int relationship;
+	ERelate relationship;
 };
 
 // Literally has the MOB key: Denizen, Lesser, Greater

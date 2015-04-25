@@ -946,7 +946,7 @@ const Web& Sim::CalcWeb()
 }
 
 
-void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, int relate, grinliz::CArray<CoreScript*, 32> *stateArr)
+void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, ERelate relate, grinliz::CArray<CoreScript*, 32> *stateArr)
 {
 	stateArr->Clear();
 
@@ -964,10 +964,19 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, i
 		if (cs
 			&& cs != originCore
 			&& cs->InUse()
-			&& Team::GetRelationship(cs->ParentChit(), originCore->ParentChit()) == relate
 			&& stateArr->HasCap())
 		{
-			stateArr->Push(cs);
+			ERelate previousRelate = Team::Instance()->GetRelationship(originCore->ParentChit(), cs->ParentChit());
+			Team::Instance()->CalcAttitude(originCore, cs, &web);
+			ERelate newRelate = Team::Instance()->GetRelationship(originCore->ParentChit(), cs->ParentChit());
+
+			if (previousRelate != newRelate) {
+				//NewsEvent 
+			}
+
+			if (newRelate == relate) {
+				stateArr->Push(cs);
+			}
 		}
 	}
 }

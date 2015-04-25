@@ -51,10 +51,10 @@ enum {
 };
 
 
-enum {
-	RELATE_FRIEND,
-	RELATE_ENEMY,
-	RELATE_NEUTRAL
+enum class ERelate {
+	FRIEND,
+	NEUTRAL,
+	ENEMY
 };
 
 
@@ -80,9 +80,17 @@ public:
 		return team;
 	}
 
-	static int GetRelationship(int team0, int team1);
-	static int GetRelationship(Chit* chit0, Chit* chit1);
-	static int CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web);
+	// A base relationship is symmetric (both parties feel the same way)
+	// and based on species.
+	static ERelate BaseRelationship(int team0, int team1);
+
+	// The current relationship is symmetric
+	ERelate GetRelationship(int team0, int team1);
+	ERelate GetRelationship(Chit* chit0, Chit* chit1);
+
+	// The attitude is asymetric 
+	int CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web);
+	int Attitude(CoreScript* center, CoreScript* eval);
 
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)
@@ -117,7 +125,44 @@ public:
 	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:
+	static ERelate AttitudeToRelationship(int d) {
+		if (d > 0) return ERelate::FRIEND;
+		if (d < 0) return ERelate::ENEMY;
+		return ERelate::NEUTRAL;
+	}
+	static int RelationshipToAttitude(ERelate r) {
+		if (r == ERelate::FRIEND) return 2;
+		if (r == ERelate::ENEMY) return -1;
+		return 0;
+	}
+
 	int idPool;
+
+	struct TeamKey {
+		TeamKey() : t0(0), t1(0) {}
+
+		TeamKey(int origin, int stanceTo) {
+			this->t0 = origin;
+			this->t1 = stanceTo;
+		}
+
+		static bool Equal(const TeamKey& a, const TeamKey& b) {
+			return a.t0 == b.t0 && a.t1 == b.t1;
+		}
+		static bool Less(const TeamKey& a, const TeamKey& b) {
+			if (a.t0 < b.t0) return true;
+			else if (a.t0 > b.t0) return false;
+			else return a.t1 < b.t1;
+		}
+		static U32 Hash(const TeamKey& t) {
+			return t.t0 + t.t1;
+		}
+
+	private:
+		int t0, t1;
+	};
+	grinliz::HashTable<TeamKey, int, TeamKey> hashTable;
+
 	static Team* instance;
 };
 

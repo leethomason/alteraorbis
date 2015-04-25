@@ -340,10 +340,10 @@ void MapScene::DrawMap()
 			RenderAtom atom;
 
 			if (core && homeCore && homeCore->InUse() && core->InUse()) {
-				int relate = Team::GetRelationship(core->ParentChit(), homeCore->ParentChit());
-				if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
-				else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
-				else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+				ERelate relate = Team::Instance()->GetRelationship(core->ParentChit(), homeCore->ParentChit());
+				if (relate == ERelate::FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
+				else if (relate == ERelate::NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+				else if (relate == ERelate::ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
 				
 				diplomacy[j*NUM_SECTORS + i].SetSize(scale*0.8f, scale*0.8f);
 			}

@@ -48,6 +48,8 @@ public:
 		VISION_QUEST,				//	victim
 		GREATER_SUMMON_TECH,		//  mob
 		DOMAIN_CONQUER,				//	conquered	conquerer
+		
+		DIPLOMACY_FRIEND,			
 
 		NUM_WHAT
 	};

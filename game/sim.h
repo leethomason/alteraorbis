@@ -25,6 +25,7 @@
 #include "gamelimits.h"
 #include "visitor.h"
 #include "visitorweb.h"
+#include "team.h"
 
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
@@ -103,7 +104,7 @@ public:
 	const Web& GetCachedWeb();
 	const Web& CalcWeb();
 
-	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, int relate, grinliz::CArray<CoreScript*, 32> *stateArr);
+	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, ERelate relate, grinliz::CArray<CoreScript*, 32> *stateArr);
 	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
 
 private:

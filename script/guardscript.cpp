@@ -56,7 +56,7 @@ int GuardScript::DoTick(U32 delta)
 		MOBIshFilter enemyFilter;
 		CArray<int, 8> enemyID;
 
-		enemyFilter.CheckRelationship(parentChit, RELATE_ENEMY);
+		enemyFilter.CheckRelationship(parentChit, ERelate::ENEMY);
 		Context()->chitBag->QuerySpatialHash(&enemyArr, rf, 0, &enemyFilter);
 		for (int i = 0; i < enemyArr.Size() && enemyID.HasCap(); ++i) {
 			// convert to IDs for MakeAware()
@@ -71,7 +71,7 @@ int GuardScript::DoTick(U32 delta)
 
 			CChitArray friendArr;
 			MOBIshFilter friendFilter;
-			friendFilter.CheckRelationship(parentChit, RELATE_FRIEND);
+			friendFilter.CheckRelationship(parentChit, ERelate::FRIEND);
 
 			Context()->chitBag->QuerySpatialHash(&friendArr, rf, 0, &friendFilter);
 			for (int i = 0; i < friendArr.Size(); ++i) {

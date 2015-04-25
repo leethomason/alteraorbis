@@ -177,6 +177,7 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	coreList.Push(this);
 
 	aiTicker.Randomize(parentChit->random.Rand());
+	strategicTicker.Randomize(parentChit->random.Rand());
 }
 
 
@@ -533,7 +534,7 @@ bool CoreScript::RecruitNeutral()
 
 	for (int i = 0; i < arr.Size(); ++i) {
 		Chit* chit = arr[i];
-		if (Team::GetRelationship(chit, parentChit) != RELATE_ENEMY) {
+		if (Team::Instance()->GetRelationship(chit, parentChit) != ERelate::ENEMY) {
 			if (this->IsCitizen(chit)) continue;
 			if (!chit->GetItem()) continue;
 
@@ -912,7 +913,6 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 			context->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &buildings, 0);
 			
 			for (int i = 0; i < buildings.Size(); ++i) {
-			//for (Chit* c : buildings) {
 				Chit* c = buildings[i];
 				if (c->GetItem() && c->GetItem()->IName() != ISC::core) {
 					c->GetItem()->SetTeam(team);
@@ -1146,7 +1146,7 @@ void CoreScript::DoStrategicTick()
 
 	Vector2I sector = ToSector(ParentChit()->Position());
 	CCoreArray stateArr;
-	sim->CalcStrategicRelationships(sector, 3, RELATE_ENEMY, &stateArr);
+	sim->CalcStrategicRelationships(sector, 3, ERelate::ENEMY, &stateArr);
 
 	int myPower = this->CorePower();
 	int myWealth = this->CoreWealth();
@@ -1160,7 +1160,7 @@ void CoreScript::DoStrategicTick()
 		int power = cs->CorePower();
 		int wealth   = cs->CoreWealth();
 
-		if ((power < myPower / 2) && (wealth > myWealth || wealth > 400)) {
+		if (power < myPower / 2) {
 			// Assuming this is actually so rare that it doesn't matter to select the best.
 			target = cs;
 			break;

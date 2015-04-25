@@ -248,18 +248,19 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeityCore(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
-		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
+		ERelate relate = Team::Instance()->GetRelationship(coreScript->ParentChit(), home->ParentChit());
 
-		if (relate == RELATE_FRIEND) atom       = LumosGame::CalcUIIconAtom("friend");
-		else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
-		else if (relate == RELATE_ENEMY) atom   = LumosGame::CalcUIIconAtom("enemy");
+		if (relate == ERelate::FRIEND) atom       = LumosGame::CalcUIIconAtom("friend");
+		else if (relate == ERelate::NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+		else if (relate == ERelate::ENEMY) atom   = LumosGame::CalcUIIconAtom("enemy");
 
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
 
 		if (web && (home != coreScript)) {
-			int diplomacy = Team::CalcDiplomacy(home, coreScript, web);
+			//int diplomacy = Team::Instance()->CalcDiplomacy(home, coreScript, web);
+			int attitude = Team::Instance()->Attitude(home, coreScript);
 			CStr<32> str;
-			str.Format("%+d", diplomacy);
+			str.Format("%+d", attitude);
 			dScore.SetText(str.safe_str());
 		}
 	}

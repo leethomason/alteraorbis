@@ -486,7 +486,7 @@ void GameScene::MoveModel( Chit* target )
 	if ( target && target != focusedTarget ) {
 		AIComponent* ai = player->GetAIComponent();
 
-		if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
+		if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::ENEMY ) {
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
@@ -511,11 +511,11 @@ void GameScene::TapModel( Chit* target )
 	AIComponent* ai = player ? player->GetAIComponent() : 0;
 	const char* setTarget = 0;
 
-	if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
+	if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::ENEMY ) {
 		ai->Target( target, true );
 		setTarget = "target";
 	}
-	else if ( ai && Team::GetRelationship( target, player ) == RELATE_FRIEND ) {
+	else if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::FRIEND ) {
 		const GameItem* item = target->GetItem();
 		// FIXME: should use key
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;

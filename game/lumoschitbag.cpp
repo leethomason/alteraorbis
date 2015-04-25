@@ -984,14 +984,14 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 }
 
 
-void RelationshipFilter::CheckRelationship(Chit* _compareTo, int _relationship)
+void RelationshipFilter::CheckRelationship(Chit* _compareTo, ERelate _relationship)
 {
 	team = _compareTo->Team();
 	relationship = _relationship;
 }
 
 
-void RelationshipFilter::CheckRelationship(int _team, int _relationship)
+void RelationshipFilter::CheckRelationship(int _team, ERelate _relationship)
 {
 	team = _team;
 	relationship = _relationship;
@@ -1001,7 +1001,7 @@ void RelationshipFilter::CheckRelationship(int _team, int _relationship)
 bool RelationshipFilter::Accept( Chit* chit )
 {
 	if (team < 0) return true;	// not checking.
-	return Team::GetRelationship(team, chit->Team()) == relationship;
+	return Team::Instance()->GetRelationship(team, chit->Team()) == relationship;
 }
 
 

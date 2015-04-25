@@ -117,7 +117,9 @@ void Web::Calc(const Vector2I* exclude)
 	for (int i = 0; i < n; ++i) {
 		CoreScript* cs = list[i];
 		Vector2I sector = ToSector(cs->ParentChit()->Position());
-		if ((sector != origin) && cs && cs->InUse() && Team::GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != RELATE_ENEMY) {
+		if (    (sector != origin) && cs && cs->InUse() 
+			 && Team::Instance()->GetRelationship(cs->ParentChit()->Team(), TEAM_VISITOR) != ERelate::ENEMY) 
+		{
 			GLASSERT(cores.HasCap());
 			if (!exclude || (*exclude != sector)) {
 				cores.Push(sector);

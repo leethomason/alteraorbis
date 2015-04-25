@@ -136,7 +136,7 @@ bool Team::IsDefault(const IString& str, int team)
 }
 
 
-int Team::GetRelationship( int _t0, int _t1 )
+ERelate Team::BaseRelationship( int _t0, int _t1 )
 {
 	int t0 = 0, t1 = 0;
 	int g0 = 0, g1  =0 ;
@@ -149,18 +149,18 @@ int Team::GetRelationship( int _t0, int _t1 )
 	// Neutral is just neutral. Else Chaos units
 	// keep attacking neutral cores. Very annoying.
 	if (t0 == TEAM_NEUTRAL || t1 == TEAM_NEUTRAL)
-		return RELATE_NEUTRAL;
+		return ERelate::NEUTRAL;
 
 	// CHAOS hates all - even each other.
 	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
-		return RELATE_ENEMY;
+		return ERelate::ENEMY;
 
 	GLASSERT(t0 >= TEAM_RAT && t0 < NUM_TEAMS);
 	GLASSERT(t1 >= TEAM_RAT && t1 < NUM_TEAMS);
 
-	static const int F = RELATE_FRIEND;
-	static const int E = RELATE_ENEMY;
-	static const int N = RELATE_NEUTRAL;
+	static const int F = int(ERelate::FRIEND);
+	static const int E = int(ERelate::ENEMY);
+	static const int N = int(ERelate::NEUTRAL);
 	static const int OFFSET = TEAM_RAT;
 	static const int NUM = NUM_TEAMS - OFFSET;
 
@@ -183,24 +183,56 @@ int Team::GetRelationship( int _t0, int _t1 )
 	if (   t0 == t1 
 		&& ((g0 == TEAM_ID_LEFT && g1 == TEAM_ID_RIGHT) || (g0 == TEAM_ID_RIGHT && g1 == TEAM_ID_LEFT))) 
 	{
-		return RELATE_ENEMY;
+		return ERelate::ENEMY;
 	}
-
-	return relate[t0-OFFSET][t1-OFFSET];
+	return ERelate(relate[t0-OFFSET][t1-OFFSET]);
 }
 
 
-int Team::GetRelationship( Chit* chit0, Chit* chit1 )
+ERelate Team::GetRelationship( Chit* chit0, Chit* chit1 )
 {
 	if ( chit0->GetItem() && chit1->GetItem() ) {
 		return GetRelationship( chit0->GetItem()->Team(),
 								chit1->GetItem()->Team() );
 	}
-	return RELATE_NEUTRAL;
+	return ERelate::NEUTRAL;
 }
 
 
-int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
+ERelate Team::GetRelationship(int t0, int t1)
+{
+	TeamKey tk0(t0, t1);
+	TeamKey tk1(t1, t0);
+	int d0 = 0, d1 = 0;
+
+	if (!hashTable.Query(tk0, &d0)) {
+		d0 = RelationshipToAttitude(BaseRelationship(t0, t1));
+	}
+	if (!hashTable.Query(tk1, &d1)) {
+		d1 = RelationshipToAttitude(BaseRelationship(t0, t1));
+	}
+	int d = Max(d0, d1);
+	ERelate r = AttitudeToRelationship(d);
+	return r;
+}
+
+
+int Team::Attitude(CoreScript* center, CoreScript* eval)
+{
+	int t0 = center->ParentChit()->Team();
+	int t1 = eval->ParentChit()->Team();
+
+	TeamKey tk(t0, t1);
+	int d0 = 0;
+	if (hashTable.Query(tk, &d0)) {
+		return d0;
+	}
+	ERelate relate = BaseRelationship(t0, t1);
+	int d = RelationshipToAttitude(relate);
+	return d;
+}
+
+int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 {
 	GLASSERT(eval != center);
 
@@ -209,14 +241,15 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 
 	// Species 
 	int centerTeam = center->ParentChit()->Team();
+	int evalTeam = eval->ParentChit()->Team();
 	if (Team::IsDeityCore(centerTeam)) return 0;
 
-	int relate = GetRelationship(center->ParentChit(), eval->ParentChit());
+	ERelate relate = BaseRelationship(centerTeam, evalTeam);
 	int d = 0;
 
 	switch (relate) {
-		case RELATE_FRIEND:	d = d + 2;	break;
-		case RELATE_ENEMY:	d = d - 1;	break;
+		case ERelate::FRIEND:	d = d + 2;	break;
+		case ERelate::ENEMY:	d = d - 1;	break;
 	}
 
 	// Compete for Visitors
@@ -251,6 +284,9 @@ int Team::CalcDiplomacy(CoreScript* center, CoreScript* eval, const Web* web)
 			d--;
 		}
 	}
+
+	TeamKey tk(centerTeam, evalTeam);
+	hashTable.Add(tk, d);
 	return d;
 }
 
