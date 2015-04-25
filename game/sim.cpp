@@ -971,7 +971,14 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, E
 			ERelate newRelate = Team::Instance()->GetRelationship(originCore->ParentChit(), cs->ParentChit());
 
 			if (previousRelate != newRelate) {
-				//NewsEvent 
+				int eventID = NewsEvent::ATTITUDE_NEUTRAL;
+				if (newRelate == ERelate::FRIEND)		eventID = NewsEvent::ATTITUDE_FRIEND;
+				else if (newRelate == ERelate::ENEMY)	eventID = NewsEvent::ATTITUDE_ENEMY;
+				NewsEvent newsEvent(eventID,
+									ToWorld2F(originCore->ParentChit()->Position()),
+									originCore->ParentChit()->GetItemID(),
+									cs->ParentChit()->GetItemID(),
+									originCore->ParentChit()->Team());
 			}
 
 			if (newRelate == relate) {

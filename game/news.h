@@ -22,7 +22,6 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-
 	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem, int team );
 
 	void Serialize( XStream* xs );
@@ -49,7 +48,9 @@ public:
 		GREATER_SUMMON_TECH,		//  mob
 		DOMAIN_CONQUER,				//	conquered	conquerer
 		
-		DIPLOMACY_FRIEND,			
+		ATTITUDE_FRIEND,			//  origin		opinionOf
+		ATTITUDE_NEUTRAL,
+		ATTITUDE_ENEMY,
 
 		NUM_WHAT
 	};

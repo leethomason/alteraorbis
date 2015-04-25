@@ -158,6 +158,9 @@ private:
 			return t.t0 + t.t1;
 		}
 
+		int T0() const { return t0; }
+		int T1() const { return t1; }
+
 	private:
 		int t0, t1;
 	};

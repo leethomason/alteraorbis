@@ -28,6 +28,40 @@ void Team::Serialize(XStream* xs)
 {
 	XarcOpen(xs,"Team");
 	XARC_SER(xs, idPool);
+
+	XarcOpen(xs, "attitude");
+	if (xs->Saving()) {
+		int size = hashTable.Size();
+		XARC_SER_KEY(xs, "size", size);
+		for (int i = 0; i < hashTable.Size(); ++i) {
+			XarcOpen(xs, "teamkey");
+			const TeamKey& tk = hashTable.GetKey(i);
+			int t0 = tk.T0();
+			int t1 = tk.T1();
+			int a = hashTable.GetValue(i);
+			XARC_SER_KEY(xs, "t0", t0);
+			XARC_SER_KEY(xs, "t1", t1);
+			XARC_SER_KEY(xs, "a", a);
+			XarcClose(xs);
+		}
+	}
+	else {
+		hashTable.Clear();
+		int size = 0;
+		XARC_SER_KEY(xs, "size", size);
+		for (int i = 0; i < size; ++i) {
+			XarcOpen(xs, "teamkey");
+			int t0, t1, a;
+			XARC_SER_KEY(xs, "t0", t0);
+			XARC_SER_KEY(xs, "t1", t1);
+			XARC_SER_KEY(xs, "a", a);
+			TeamKey tk(t0, t1);
+			hashTable.Add(tk, a);
+			XarcClose(xs);
+		}
+	}
+	XarcClose(xs);
+
 	XarcClose(xs);
 }
 
@@ -189,11 +223,13 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 }
 
 
-ERelate Team::GetRelationship( Chit* chit0, Chit* chit1 )
+ERelate Team::GetRelationship(Chit* chit0, Chit* chit1)
 {
-	if ( chit0->GetItem() && chit1->GetItem() ) {
-		return GetRelationship( chit0->GetItem()->Team(),
-								chit1->GetItem()->Team() );
+	if (chit0->GetItem() && chit1->GetItem()) {
+		ERelate r = GetRelationship(chit0->GetItem()->Team(), chit1->GetItem()->Team());
+		// Check symmetry:
+		GLASSERT(r == GetRelationship(chit1->GetItem()->Team(), chit0->GetItem()->Team()));
+		return r;
 	}
 	return ERelate::NEUTRAL;
 }

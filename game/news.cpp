@@ -123,6 +123,9 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Vision Quest",
 		"Greater Summoned",
 		"Domain Conquered",
+		"Attitude Friend",
+		"Attitude Neutral",
+		"Attitude Enemy"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
@@ -256,6 +259,18 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 
 		case DOMAIN_CONQUER:
 		str->Format("%.2f: %s is occupied by team %s.", age, domain.safe_str(), teamName.safe_str() );
+		break;
+
+		case ATTITUDE_FRIEND:
+		str->Format("%.2f: %s sees %s with friendly intent.", age, firstName.safe_str(), secondName.safe_str());
+		break;
+
+		case ATTITUDE_NEUTRAL:
+		str->Format("%.2f: %s sees %s with neutral regard.", age, firstName.safe_str(), secondName.safe_str());
+		break;
+
+		case ATTITUDE_ENEMY:
+		str->Format("%.2f: %s sees %s as an enemy.", age, firstName.safe_str(), secondName.safe_str());
 		break;
 
 		default:
