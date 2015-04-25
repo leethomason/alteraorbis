@@ -27,6 +27,7 @@ distribution.
 #define GRINLIZ_RECTANGLE_INCLUDED
 
 #include "glvector.h"
+#include <limits.h>
 
 namespace grinliz {
 

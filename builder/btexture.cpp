@@ -162,7 +162,7 @@ bool BTexture::Load()
 		for (int y = 0; y<surface->h; ++y) {
 			for (int x = 0; x<surface->w; ++x) {
 				Color4U8 rgb = GetPixel(surface, x, y);
-				Color4U8 c = { 255, 255, 255, (rgb.x + rgb.y + rgb.z) / 3 };
+				Color4U8 c = { 255, 255, 255, U8((rgb.x + rgb.y + rgb.z) / 3) };
 				PutPixel(alpha, x, y, c);
 			}
 		}
