@@ -316,7 +316,7 @@ SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface )
 					a32 += c.a();
 				}
 			}
-			Color4U8 c = { r32/(sx*sy), g32/(sx*sy), b32/(sx*sy), a32/(sx*sy) };
+			Color4U8 c = { U8(r32/(sx*sy)), U8(g32/(sx*sy)), U8(b32/(sx*sy)), U8(a32/(sx*sy)) };
 			PutPixel( newSurf, x, y, c );
 		}
 	}

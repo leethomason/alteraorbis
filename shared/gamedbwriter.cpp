@@ -26,7 +26,10 @@
 #include "../zlib/zlib.h"
 #include "gamedb.h"
 
+#if defined( _MSC_VER )
 #pragma warning ( disable : 4996 )
+#endif
+
 using namespace gamedb;
 using namespace grinliz;
 
@@ -193,7 +196,7 @@ void WItem::Init( const char* name, WItem* parent, Writer* writer )
 WItem* WItem::FetchChild( const char* name )
 {
 	GLASSERT( name && *name );
-	IString iname = writer->stringPool->Get( name );
+	//IString iname = writer->stringPool->Get( name );
 	for( WItem* c = child; c; c=c->sibling ) {
 		if ( c->itemName == name )
 			return c;
@@ -205,7 +208,7 @@ WItem* WItem::FetchChild( const char* name )
 WItem* WItem::CreateChild( const char* name )
 {
 	GLASSERT( name && *name );
-	IString iname = writer->stringPool->Get( name );
+	//IString iname = writer->stringPool->Get( name );
 
 	WItem* witem = new WItem();
 	witem->Init( name, this, writer );

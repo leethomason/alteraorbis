@@ -6,7 +6,6 @@ using namespace grinliz;
 
 
 template < class T > bool IsZeroArray( T* mem, int n ) {
-	bool zero = true;
 	for( int i=0; i<n; ++i ) {
 		if ( mem[i] ) {
 			return false;

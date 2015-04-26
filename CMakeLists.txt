@@ -22,7 +22,22 @@ target_link_libraries(gamuitest ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE
 
 ### Builder ###
 
-file(GLOB BUILDER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp")
+file(GLOB BUILDER_SOURCES   "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/shared/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/grinliz/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2/tinyxml2.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/markov/markov.cpp"
+							
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/glstreamer.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/squisher.cpp"
+
+							"${CMAKE_CURRENT_SOURCE_DIR}/importers/ac3d.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/importers/import.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/importers/off.cpp"
+
+							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+)
+
 add_executable(builder ${BUILDER_SOURCES})
 target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
 

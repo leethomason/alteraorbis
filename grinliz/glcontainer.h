@@ -614,7 +614,7 @@ public:
 		return hash;
 	}
 	template <class T>
-	static bool Equal( T& v0, T& v1 ) { return StrEqual( v0, v1 ); }
+	static bool Equal( T& v0, T& v1 ) { return strcmp( v0, v1 ) == 0; }
 };
 
 

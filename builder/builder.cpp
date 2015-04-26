@@ -24,7 +24,6 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glcolor.h"
-#include "../grinliz/gldynamic.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glstringutil.h"
 
@@ -338,10 +337,16 @@ void ProcessMarkov(XMLElement* data)
 	ParseNames(data, &assetName, &pathName, 0);
 
 	// copy the entire file.
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+#endif
+
 	FILE* read = fopen(pathName.c_str(), "r");
+
+#if defined( _MSC_VER )
 #pragma warning (pop)
+#endif
 
 	if (!read) {
 		ExitError("Markov", pathName.c_str(), assetName.c_str(), "Could not load file.");
@@ -406,10 +411,16 @@ void ProcessMarkovWord( XMLElement* data )
 	ParseNames( data, &assetName, &pathName, 0 );
 
 	// copy the entire file.
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+#endif
+
 	FILE* read = fopen( pathName.c_str(), "r" );
+
+#if defined( _MSC_VER )
 #pragma warning (pop)
+#endif
 
 	if ( !read ) {
 		ExitError( "Markov", pathName.c_str(), assetName.c_str(), "Could not load file." );
@@ -419,7 +430,6 @@ void ProcessMarkovWord( XMLElement* data )
 	char buffer[256];
 	int section = 0;
 	static const int MAX_SECTIONS = 3;
-	CDynArray<char> words[MAX_SECTIONS];
 
 	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
 	gamedb::WItem* child[MAX_SECTIONS] = { 0, 0, 0 };
@@ -473,10 +483,15 @@ void ProcessData( XMLElement* data )
 	ParseNames( data, &assetName, &pathName, 0 );
 
 	// copy the entire file.
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+#endif
 	FILE* read = fopen( pathName.c_str(), "rb" );
+
+#if defined( _MSC_VER )
 #pragma warning (pop)
+#endif
 
 	if ( !read ) {
 		ExitError( "Data", pathName.c_str(), assetName.c_str(), "Could not load asset file." );
@@ -490,7 +505,6 @@ void ProcessData( XMLElement* data )
 	char* mem = new char[len];
 	fread( mem, len, 1, read );
 
-	int index = 0;
 	gamedb::WItem* witem = writer->Root()->FetchChild( "data" )->FetchChild( assetName.c_str() );
 	witem->SetData( "binary", mem, len, compression );
 
@@ -591,28 +605,41 @@ void ProcessText( XMLElement* textEle )
 
 void StringToVector( const char* str, Vector3F* vec )
 {
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )
+#endif
 		sscanf( str, "%f %f %f", &vec->x, &vec->y, &vec->z );
+
+#if defined( _MSC_VER )
 #pragma warning ( pop )
+#endif
 }
 
 
 void StringToVector( const char* str, Vector4F* vec )
 {
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )
+#endif
 		sscanf( str, "%f %f %f %f", &vec->x, &vec->y, &vec->z, &vec->w );
+#if defined( _MSC_VER )
 #pragma warning ( pop )
+#endif
 }
 
 
 void StringToAxisAngle( const char* str, Vector3F* axis, float* angle )
 {
+#if defined( _MSC_VER )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )
+#endif
 		sscanf( str, "%f %f %f %f", &axis->x, &axis->y, &axis->z, angle );
+#if defined( _MSC_VER )
 #pragma warning ( pop )
+#endif
 }
 
 
@@ -782,8 +809,6 @@ void ProcessModel( XMLElement* model )
 	GLASSERT( pVertex == pVertexEnd );
 	GLASSERT( pIndex == pIndexEnd );
 
-	int vertexID = 0, indexID = 0;
-
 	//witem->SetData( "header", &header, sizeof(header ) );
 	header.Save( witem );
 	witem->SetData( "vertex", vertexBuf, nTotalVertex*sizeof(Vertex) );
@@ -939,7 +964,7 @@ SDL_Surface* LoadImage( const char* pathname )
 		error = lodepng_decode24( &out, &w, &h, data, size );
 		GLASSERT( !error );
 		surface = SDL_CreateRGBSurface( 0, w, h, 24, 0xff0000, 0x00ff00, 0x0000ff, 0 );
-		GLASSERT( surface->pitch == w * 3 );
+		GLASSERT( surface->pitch == int(w * 3));
 		memcpy( surface->pixels, out, w*h*3 );
 		free( out );
 	}
@@ -948,7 +973,7 @@ SDL_Surface* LoadImage( const char* pathname )
 		error = lodepng_decode32( &out, &w, &h, data, size );
 		GLASSERT( !error );
 		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
-		GLASSERT( surface->pitch == w*4 );
+		GLASSERT( surface->pitch == int(w*4) );
 		memcpy( surface->pixels, out, w*h*4 );
 		free( out );
 	}
@@ -957,7 +982,7 @@ SDL_Surface* LoadImage( const char* pathname )
 		error = lodepng_decode_memory( &out, &w, &h, data, size, LCT_GREY, 8  );
 		GLASSERT( !error );
 		surface = SDL_CreateRGBSurface( 0, w, h, 8, 0, 0, 0, 0xff );
-		GLASSERT( surface->pitch == w );
+		GLASSERT( surface->pitch == int(w) );
 		memcpy( surface->pixels, out, w*h );
 		free( out );
 	}
@@ -1138,7 +1163,7 @@ int main( int argc, char* argv[] )
 	grinliz::StrSplitFilename( _inputFullPath, &_inputDirectory, &name, &extension );
 	inputDirectory = _inputDirectory.c_str();
 
-	const char* xmlfile = argv[2];
+//	const char* xmlfile = argv[2];
 	printf( "Opening, path: '%s' filename: '%s'\n", inputDirectory.c_str(), inputFullPath.c_str() );
 	
 	// Test:

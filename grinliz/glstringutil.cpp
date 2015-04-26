@@ -147,8 +147,8 @@ void GLString::Format( const char* format, ...)
 	// Reading the spec, the size does seem correct. The man pages
 	// say it will aways be null terminated (whereas the strcpy is not.)
 	// Pretty nervous about the implementation, so force a null after.
-    int result = vsnprintf( str, size, format, va );
-	str[size-1] = 0;
+    vsnprintf( m_buf, m_allocated, format, va );
+	m_buf[m_allocated-1] = 0;
 #endif
     va_end( va );
 	m_size = len;
@@ -180,9 +180,8 @@ void GLString::AppendFormat( const char* format, ...)
 	// Reading the spec, the size does seem correct. The man pages
 	// say it will aways be null terminated (whereas the strcpy is not.)
 	// Pretty nervous about the implementation, so force a null after.
-	fix
-	int result = vsnprintf(str, size, format, va);
-	str[size - 1] = 0;
+    vsnprintf( m_buf + m_size, m_allocated - m_size, format, va );
+	m_buf[m_allocated-1] = 0;
 #endif
 	va_end(va);
 	m_size += len;
