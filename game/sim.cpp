@@ -942,6 +942,7 @@ const Web& Sim::GetCachedWeb()
 const Web& Sim::CalcWeb()
 {
 	web.Calc(nullptr);
+	cachedWebAge = 0;
 	return web;
 }
 
@@ -958,6 +959,9 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, E
 
 	CoreScript* originCore = CoreScript::GetCore(sector);
 	if (!originCore) return;
+
+	// Flush the cache:
+	CalcWeb();
 
 	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
 		CoreScript* cs = CoreScript::GetCore(it.Pos());
@@ -979,6 +983,7 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, E
 									originCore->ParentChit()->GetItemID(),
 									cs->ParentChit()->GetItemID(),
 									originCore->ParentChit()->Team());
+				context.chitBag->GetNewsHistory()->Add(newsEvent);
 			}
 
 			if (newRelate == relate) {

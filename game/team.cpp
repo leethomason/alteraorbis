@@ -33,7 +33,7 @@ void Team::Serialize(XStream* xs)
 	if (xs->Saving()) {
 		int size = hashTable.Size();
 		XARC_SER_KEY(xs, "size", size);
-		for (int i = 0; i < hashTable.Size(); ++i) {
+		for (int i = 0; i < size; ++i) {
 			XarcOpen(xs, "teamkey");
 			const TeamKey& tk = hashTable.GetKey(i);
 			int t0 = tk.T0();
@@ -60,9 +60,8 @@ void Team::Serialize(XStream* xs)
 			XarcClose(xs);
 		}
 	}
-	XarcClose(xs);
-
-	XarcClose(xs);
+	XarcClose(xs);	// attitude
+	XarcClose(xs);	// team
 }
 
 grinliz::IString Team::TeamName(int team)
@@ -247,7 +246,8 @@ ERelate Team::GetRelationship(int t0, int t1)
 	if (!hashTable.Query(tk1, &d1)) {
 		d1 = RelationshipToAttitude(BaseRelationship(t0, t1));
 	}
-	int d = Max(d0, d1);
+	// Combined relationship is the worse one.
+	int d = Min(d0, d1);
 	ERelate r = AttitudeToRelationship(d);
 	return r;
 }
@@ -280,6 +280,10 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 	int evalTeam = eval->ParentChit()->Team();
 	if (Team::IsDeityCore(centerTeam)) return 0;
 
+	const bool ENVIES_WEALTH = (centerTeam == TEAM_GOB);
+	const bool ENVIES_TECH = (centerTeam == TEAM_KAMAKIRI);
+	const bool WARLIKE = (centerTeam == TEAM_KAMAKIRI);
+
 	ERelate relate = BaseRelationship(centerTeam, evalTeam);
 	int d = 0;
 
@@ -290,7 +294,11 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 
 	// Compete for Visitors
 	Vector2I sector = ToSector(center->ParentChit()->Position());
+	// There should be a webNode where we are, of course,
+	// but that depends on bringing the web cache current.
 	const MinSpanTree::Node* webNode = web->FindNode(sector);
+	GLASSERT(webNode);
+	if (!webNode) return 0;
 	float visitorStr = webNode->strength;
 
 	// An an alternate world where 'eval' is gone...what happens?
@@ -304,21 +312,17 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 		d--;		// better off if they are gone...
 	}
 	else if (altVisitorStr < visitorStr) {
-		d += 2;		// better off with them around...
+		d += WARLIKE ? 1 : 2;		// better off with them around...
 	}
 
 	// Techiness, envy of Kamakiri
-	if (Team::Group(centerTeam) == TEAM_KAMAKIRI) {
-		if (eval->GetTech() > center->GetTech()) {
-			d--;
-		}
+	if (ENVIES_TECH && eval->GetTech() > center->GetTech()) {
+		d--;
 	}
 
 	// Wealth, envy of the Gobmen
-	if (Team::Group(centerTeam) == TEAM_GOB) {
-		if (eval->CoreWealth() > center->CoreWealth()) {
-			d--;
-		}
+	if (ENVIES_WEALTH && ((eval->CoreWealth() * 2 / 3) > center->CoreWealth())) {
+		d--;
 	}
 
 	TeamKey tk(centerTeam, evalTeam);

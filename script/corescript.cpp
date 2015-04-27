@@ -1138,7 +1138,6 @@ void CoreScript::DoStrategicTick()
 		if (squadReady[i])
 			++nReady;
 	}
-	if (nReady == 0) return;
 
 	Sim* sim = Context()->chitBag->GetSim();
 	GLASSERT(sim);
@@ -1147,6 +1146,12 @@ void CoreScript::DoStrategicTick()
 	Vector2I sector = ToSector(ParentChit()->Position());
 	CCoreArray stateArr;
 	sim->CalcStrategicRelationships(sector, 3, ERelate::ENEMY, &stateArr);
+
+	// The strategic relationships need to be calculated, but after that,
+	// there's no point in computing further if we don't have a squad to 
+	// send into action.
+	if (nReady == 0) 
+		return;
 
 	int myPower = this->CorePower();
 	int myWealth = this->CoreWealth();

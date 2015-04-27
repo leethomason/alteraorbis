@@ -257,8 +257,8 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
 
 		if (web && (home != coreScript)) {
-			//int diplomacy = Team::Instance()->CalcDiplomacy(home, coreScript, web);
-			int attitude = Team::Instance()->Attitude(home, coreScript);
+			// Print out how THEY feel about US.
+			int attitude = Team::Instance()->Attitude(coreScript, home);
 			CStr<32> str;
 			str.Format("%+d", attitude);
 			dScore.SetText(str.safe_str());

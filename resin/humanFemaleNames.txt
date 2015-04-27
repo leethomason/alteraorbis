@@ -38,10 +38,10 @@ Motoko
 Netalia
 Nelixa
 Nyota
+Odessa
+Ophelia
 Padme
 Phoenix
-Ophelia
-Odessa
 Quorra
 Quorian
 Qualla
@@ -67,4 +67,7 @@ Trillis
 Uhura
 Verice
 Verite
+Wilde
 Zoe
+Zoesta
+

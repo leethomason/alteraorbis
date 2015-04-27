@@ -1,53 +1,3 @@
-x namegen: re-use too common. switch to loop
-x [Reenen] Circuits are way complex... (see post)
-x [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
-x check human spawn: correctly handling male/female
-x clean up world gen layout
-x DomainAI: don't clear existing pave? (Depends on AI?)
-x interface annoyances
-	x when does/should flick rotation work?
-	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
-x remove grid64 BS for proper optimization
-x control flag art
-x Visitor trails on map
-x check gobman that is House denizen healing
-x unify rotation model
-x tax on buy or sell. show tax income on main screen.
-x any building attack should cause awareness in domainAI
-x unified build marks
-x icons instead of m/r in control screen
-x flags 
-	x stay with squad (if not at home)
-	x clicking any flag should reset that squad
-x info on attack flags: who is attacking me??
-x crash in Model::userData = 0xffeefffee
-x expand strategic attack bounds
-x touch support
-	x 2 finger pan
-	x 2 finger drag / pan / rotate
-	x single finger view drag?
-	x no pause (space)
-	x no view change (tab)
-	x build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
-	x build rotation?
-	x build reticule is useless & incorrect. detect mouse mode and re-enable.
-	x shoot at location (long press?)
-	x art: correct porch icon for building
-	x art: uniform clear and build markers
-x show rotation mode
-x check plan and built rotation consistent
-x 2 finger pan detection is inconsistent, depending on window size
-x spatial hash table 
-x Circuits
-	x full test including circuit types
-	x abandoned domains should be dangerous
-x play a game through on touch
-x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
-x GT: how many structures of each type?
-x colors of buildings (not enough)
-x add target portrait
-x remove sleep tube cap?
-x remove disabled building choices?
 
 
 - world gen too slow in debug
@@ -172,16 +122,16 @@ x AI take over mode?
 	x Long game: 
 		x squad control
 			x flags reflect squads
-		- greater travel
+		t greater travel
 		- diplomacy
 	x New promo assets
 	x IndieDB
 		x Tutorial
 		x assets
 
-- Beta3+
+- Beta3
 	- Android
-	- circuits
+	x circuits
 
 - World Gen
 	x less techy, more interesting world gen
@@ -333,6 +283,56 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x namegen: re-use too common. switch to loop
+x [Reenen] Circuits are way complex... (see post)
+x [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
+x check human spawn: correctly handling male/female
+x clean up world gen layout
+x DomainAI: don't clear existing pave? (Depends on AI?)
+x interface annoyances
+	x when does/should flick rotation work?
+	x end selects avatar, but doesn't change UI from Build. Correct? What about end-end?
+x remove grid64 BS for proper optimization
+x control flag art
+x Visitor trails on map
+x check gobman that is House denizen healing
+x unify rotation model
+x tax on buy or sell. show tax income on main screen.
+x any building attack should cause awareness in domainAI
+x unified build marks
+x icons instead of m/r in control screen
+x flags 
+	x stay with squad (if not at home)
+	x clicking any flag should reset that squad
+x info on attack flags: who is attacking me??
+x crash in Model::userData = 0xffeefffee
+x expand strategic attack bounds
+x touch support
+	x 2 finger pan
+	x 2 finger drag / pan / rotate
+	x single finger view drag?
+	x no pause (space)
+	x no view change (tab)
+	x build cancel? drag? how to deal with placing buildings? Use drag in mark mode vs. drag mode?
+	x build rotation?
+	x build reticule is useless & incorrect. detect mouse mode and re-enable.
+	x shoot at location (long press?)
+	x art: correct porch icon for building
+	x art: uniform clear and build markers
+x show rotation mode
+x check plan and built rotation consistent
+x 2 finger pan detection is inconsistent, depending on window size
+x spatial hash table 
+x Circuits
+	x full test including circuit types
+	x abandoned domains should be dangerous
+x play a game through on touch
+x GT: suggestion - show structure door in blueprint before structure placement (i think this is important)
+x GT: how many structures of each type?
+x colors of buildings (not enough)
+x add target portrait
+x remove sleep tube cap?
+x remove disabled building choices?
 x GT: suggestion - add popup advisor when the game starts (welcome to altera, altera is a, you are a, your aim is to, some story or lore  and ask if people want detailed tutorial popus with pause (step by step, click menu to build this because xxx) or make do with the tiny "live" advisor on the ui
 x GT: use color/glow to show building control / ownership / working (2/20/2015)
 d GT: humans change color as they walk. unfixable driver issue? no system repros. did improve 3.2 & 3.3 context support.
