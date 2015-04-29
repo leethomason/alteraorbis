@@ -236,9 +236,6 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 {
 	gamedb::WItem* boneItem = frameItem->FetchChild( node->name.c_str() );
 
-	if ( node->name == "arm.lower.right" && typeName == "gunstand" ) {
-		int debug=1;
-	}
 	/* swizzle for coordinate xform
 	glX = bX
 	glY = bZ

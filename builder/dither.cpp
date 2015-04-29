@@ -22,7 +22,6 @@ using namespace grinliz;
 
 int ReducePixelDiv( int c, int shift, int num, int denom )
 {
-	int max        = 256 >> shift;	// the max color value + 1
 	int resolution = 1 << shift;	// the step size of color. So if the shift is 4, then the color resolation in 16
 
 	// Increase cPrime by a number from [0,resolution)

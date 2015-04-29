@@ -201,7 +201,7 @@ struct Vector2
 	// Assuming 'this' is a point, get the adjacent ones.
 	Vector2<T> Adjacent(int which) const {
 		GLASSERT(which >= 0 && which < 4);
-		static const Vector2I delta[4] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+		static const Vector2<T> delta[4] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 		return *this + delta[which];
 	}
 };

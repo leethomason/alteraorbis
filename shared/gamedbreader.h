@@ -175,9 +175,6 @@ public:
 	
 	static const Reader* GetContext( const Item* item );
 
-	void AttachChain( const Reader* mod )			{ this->mod = mod; }
-	const Item* ChainItem( const Item* in ) const;
-
 	int GetDataSize( int dataID ) const;
 	void GetData( int dataID, void* mem, int memSize ) const;
 
@@ -209,7 +206,6 @@ private:
 
 	static Reader* readerRoot;
 	Reader* next;
-	const Reader* mod;	// when chaining, 'this' is the base, 'mod' overrides
 
 	FILE* fp;
 	int databaseID;

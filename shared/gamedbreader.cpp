@@ -118,37 +118,11 @@ public:
 	return 0;
 }
 
-
-const Item* Reader::ChainItem( const Item* item ) const
-{
-	if ( item && mod ) {
-		const static int MAX=16;
-		const char* path[MAX];
-		int pathSize = 0;
-
-		for( const Item* i=item; i && pathSize<MAX; i=i->Parent() ) {
-			path[pathSize++] = i->Name();
-		}
-		const Item* alt = mod->Root();
-		for( int k=1; k<pathSize && alt; ++k ) {
-			alt = alt->Child( path[pathSize-1-k] );
-		}
-		if ( alt ) {
-			GLOUTPUT(( "Chained item %x to %x\n", item, alt ));
-			return alt;
-		}
-	}
-	return item;
-}
-
-
-
 Reader::Reader()
 {
 	mem = 0;
 	memSize = 0;
 	fp = 0;
-	mod = 0;
 
 	// Add to linked list.
 	next = readerRoot;
