@@ -21,7 +21,6 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../micropather/micropather.h"
 #include "../engine/enginelimits.h"
-#include "../xegame/stackedsingleton.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glutil.h"
 
@@ -98,8 +97,7 @@ inline GridBlock MapToGridBlock(float x, float y)
 	return gb;
 }
 
-class WorldInfo : public micropather::Graph, 
-				  public StackedSingleton< WorldInfo >
+class WorldInfo : public micropather::Graph
 {
 public:
 	WorldInfo( const WorldGrid* worldGrid, int mapWidth, int mapHeight );

@@ -112,7 +112,6 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	delete modelLoader;
 	modelLoader = 0;
 
-
 	// Load font:
 	GLString fontPath = "./res/";
 	FontSingleton* bridge = FontSingleton::Instance();

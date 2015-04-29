@@ -52,8 +52,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Weather* StackedSingleton<Weather>::instance	= 0;
-Sim* StackedSingleton<Sim>::instance			= 0;
+Weather* Weather::instance	= 0;
 
 Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10 * 1000), visitorClock(4*1000)
 {

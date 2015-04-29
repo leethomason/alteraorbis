@@ -35,8 +35,6 @@
 
 #include "../gamui/gamui.h"
 
-#include "../xegame/stackedsingleton.h"
-
 class RenderQueue;
 class RenderTarget;
 class ParticleSystem;
