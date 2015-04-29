@@ -26,7 +26,7 @@
 #include "shadermanager.h"
 #include "engine.h"
 #include "loosequadtree.h"
-#include "renderQueue.h"
+#include "renderqueue.h"
 #include "surface.h"
 #include "texture.h"
 #include "particle.h"
@@ -55,8 +55,7 @@ using namespace grinliz;
 //#define ENGINE_DETAILED_PROFILE PROFILE_BLOCK
 #define ENGINE_DETAILED_PROFILE(name)
 
-Engine* StackedSingleton<Engine>::instance = 0;
-
+//Engine* StackedSingleton<Engine>::instance = 0;
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
 	:	

@@ -116,18 +116,20 @@ public:
 	int Capacity() const				{ return ALLOCATE-1; }
 	void ClearBuf()						{ memset( buf, 0, ALLOCATE ); }
 	void Clear()						{ buf[0] = 0; }
+
 	void Format( const char* format, ...) 
 	{
 		va_list     va;
 		va_start( va, format );
 	#ifdef _MSC_VER
-		int result = vsnprintf_s( buf, ALLOCATE, _TRUNCATE, format, va );
+		vsnprintf_s( buf, ALLOCATE, _TRUNCATE, format, va );
 	#else
-		int result = vsnprintf( buf, ALLOCATE, format, va );
+		vsnprintf( buf, ALLOCATE, format, va );
 	#endif
 		va_end( va );
 		Validate();
 	}
+
 	void AppendFormat( const char* format, ... )
 	{
 		va_list     va;
@@ -143,7 +145,6 @@ public:
 		va_end( va );
 		Validate();
 	}
-
 
 	bool operator==( const char* str ) const						{ return buf && str && strcmp( buf, str ) == 0; }
 	bool operator!=( const char* str ) const						{ return !(*this == str); }
@@ -161,6 +162,7 @@ public:
 		}
 		Validate();
 	}
+	
 	void operator=( int value ) {
 		SNPrintf( buf, ALLOCATE, "%d", value );
 		Validate();

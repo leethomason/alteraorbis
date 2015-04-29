@@ -20,6 +20,8 @@
 #include "../grinliz/glutil.h"
 #include "model.h"
 
+#include <float.h>
+
 using namespace grinliz;
 
 static const int MODEL_BLOCK = 10*1000;

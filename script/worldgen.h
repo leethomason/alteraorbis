@@ -94,7 +94,7 @@ public:
 	};
 
 	grinliz::Vector2I FromState( void* s ) {
-		int i = (int)s;
+		int i = int(intptr_t(s));
 		int y = i / SIZE;
 		int x = i - y*SIZE;
 		grinliz::Vector2I v = { x, y };

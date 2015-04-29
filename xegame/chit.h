@@ -62,11 +62,11 @@ struct ChitDamageInfo
 		originOfImpact.Zero();
 	}
 
+	const DamageDesc&	dd;
 	int					originID;		// chitID of who caused damage
 	bool				awardXP;
 	bool				isMelee;
 	bool				isExplosion;
-	const DamageDesc&	dd;
 	grinliz::Vector3F	originOfImpact;
 };
 
@@ -94,24 +94,24 @@ public:
 		CORE_TAKEOVER,			// Yes		vector location, in grid coordinates.
 	};
 
-	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0), originID(0) {
+	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) {
 		vector.Zero();
 	}
 
-	int ID() const { return id; }
-	int Data() const { return data; }
+	int ID() const 			{ return id; }
+	int Data() const 		{ return data; }
 	const void* Ptr() const { return ptr; }
 
 	// useful data members:
 	grinliz::Vector3F	vector;
-	float				dataF;
-	int					originID;
+	float				dataF 		= 0;
+	int					originID 	= 0;
 	grinliz::IString	str;
 
 private:
-	int id;
-	int data;
-	const void* ptr;
+	int id 				= 0;
+	int data 			= 0;
+	const void* ptr 	= nullptr;
 };
 
 

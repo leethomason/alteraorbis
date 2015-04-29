@@ -41,6 +41,35 @@ file(GLOB BUILDER_SOURCES   "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp"
 add_executable(builder ${BUILDER_SOURCES})
 target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
 
+### Altera ###
+
+file(GLOB ALTERA_SOURCES    "${CMAKE_CURRENT_SOURCE_DIR}/ai/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/audio/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/engine/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/game/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/gamui/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/micropather/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/scenes/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/script/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/Shiny/src/*.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/widget/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/shared/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/grinliz/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/worldgen/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/xegame/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2/tinyxml2.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/win32/main.cpp"
+							
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/glstreamer.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/squisher.cpp"
+
+							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+)
+
+add_executable(alteraorbis ${ALTERA_SOURCES})
+target_link_libraries(alteraorbis ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+
+
 ### General Config ###
 
 if(CMAKE_C_COMPILER_ID )

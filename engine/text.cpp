@@ -63,7 +63,7 @@ void UFOText::DeviceLoss()
 
 void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 {
-	bool rendering = true;
+//	bool rendering = true;
 	float x = (float)_x;
 	float y = (float)_y;
 	float h = (float)_h;

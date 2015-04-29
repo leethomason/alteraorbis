@@ -1,7 +1,7 @@
 #ifndef UFOATTACK_SETTINGS_SCENE_INCLUDED
 #define UFOATTACK_SETTINGS_SCENE_INCLUDED
 
-#include "scene.h"
+#include "../xegame/scene.h"
 #include "../grinliz/glstringutil.h"
 
 class SettingScene : public Scene

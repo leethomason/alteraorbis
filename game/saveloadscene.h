@@ -15,6 +15,7 @@
 
 #ifndef UFO_ATTACK_SAVE_SCENE_INCLUDED
 #define UFO_ATTACK_SAVE_SCENE_INCLUDED
+#if 0
 
 #include "scene.h"
 
@@ -70,5 +71,5 @@ private:
 	gamui::TextLabel	confirmText;
 };
 
-
+#endif
 #endif // UFO_ATTACK_SAVE_SCENE_INCLUDED

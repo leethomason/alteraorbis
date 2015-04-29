@@ -6,6 +6,7 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
+template< class WorldInfo >
 WorldInfo* StackedSingleton< WorldInfo >::instance = 0;
 
 WorldInfo::WorldInfo( const WorldGrid* grid, int mw, int mh )

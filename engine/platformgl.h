@@ -51,8 +51,21 @@
 	#define glBufferSubDataX	glBufferSubData
 	#define glBindBufferX		glBindBuffer
 	#define glDeleteBuffersX	glDeleteBuffers
+#elif defined (__GNUC__)
+    //#include "SDL2/SDL_opengl.h"
+    //#include <GL/gl.h>
+	#include "../win32/glew.h"
+	#define glFrustumfX			glFrustum
+	#define glOrthofX			glOrtho
+	#define USING_GL
+	#define glGenBuffersX		glGenBuffers
+	#define glBindBufferX		glBindBuffer
+	#define glBufferDataX		glBufferData
+	#define glBufferSubDataX	glBufferSubData
+	#define glBindBufferX		glBindBuffer
+	#define glDeleteBuffersX	glDeleteBuffers
 #else
-	#error Undefined platform
+    Platform not defined.
 #endif
 
 #ifdef DEBUG

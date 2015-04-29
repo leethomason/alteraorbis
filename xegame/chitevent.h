@@ -30,12 +30,12 @@ public:
 		//EFFECT					// data: EFFECT_xyz, factor: strength of effect at AOE center
 	};
 
-	int		data;				// if there is obvious data
-	int		team;
-	float	factor;				
+	int		data = 0;				// if there is obvious data
+	int		team = 0;
+	float	factor = 0;				
 
 	ChitEvent( int p_id, const grinliz::Rectangle2F& areaOfEffect, int filter=0 )
-		: id(p_id), aoe( areaOfEffect ), itemFilter(filter), data(0), team(0) {}
+		: data(0), team(0), id(p_id), aoe( areaOfEffect ), itemFilter(filter) {}
 
 	const grinliz::Rectangle2F& AreaOfEffect() const	{ return aoe; }
 	int ID() const										{ return id; }
@@ -54,9 +54,9 @@ public:
 	*/
 
 private:
+	int id = 0;
 	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast
-	int id;
-	int itemFilter;				// used to filter the spatial query
+	int itemFilter = 0;				// used to filter the spatial query
 };
 
 

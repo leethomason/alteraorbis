@@ -376,7 +376,7 @@ private:
 	}
 
 	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec ) {
-		int v = (int)(state);
+		int v = (int)(intptr_t(state));
 		int x = v & EL_MAP_X_MASK;
 		int y = v >> EL_MAP_Y_SHIFT;
 		GLASSERT(x >= 0 && x < width);

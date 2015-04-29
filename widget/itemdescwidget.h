@@ -30,8 +30,8 @@ public:
 	void SetShortForm(bool s) { shortForm = s; }
 
 private:
-	bool shortForm;
 	gamui::LayoutCalculator	layout;
+	bool 					shortForm;
 	gamui::TextLabel		text;
 	grinliz::CStr< 4096 >	textBuffer;
 };

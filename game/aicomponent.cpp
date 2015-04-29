@@ -1482,9 +1482,10 @@ void AIComponent::ThinkVisitor(  )
 	else {
 		// Find a kiosk.
 		Chit* temple = Context()->chitBag->FindBuilding(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
+		Vector2F pos = ToWorld2F(parentChit->Position());
 		Chit* kiosk = Context()->chitBag->FindBuilding(	ISC::kiosk,
 														sector,
-														&ToWorld2F(parentChit->Position()),
+														&pos,
 														LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
 
 		if ( kiosk && temple) {
@@ -1880,9 +1881,10 @@ bool AIComponent::ThinkDelivery(  )
 		}
 		if ( needVaultRun ) {
 			Vector2I sector = ToSector(parentChit->Position());
+			Vector2F pos = ToWorld2F(parentChit->Position());
 			Chit* vault = Context()->chitBag->FindBuilding(	ISC::vault, 
 															sector, 
-															&ToWorld2F(parentChit->Position()),
+															&pos,
 															LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
@@ -1911,8 +1913,9 @@ bool AIComponent::ThinkDelivery(  )
 			const GameItem* item = thisIC->FindItem(iItem);
 			if (item) {
 				Vector2I sector = ToSector(parentChit->Position());
+				Vector2F pos = ToWorld2F(parentChit->Position());
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
-																  &ToWorld2F(parentChit->Position()),
+																  &pos,
 																  LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
 				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
@@ -1950,9 +1953,10 @@ bool AIComponent::ThinkRepair()
 	BuildingRepairFilter filter;
 	Vector2I sector = ToSector(parentChit->Position());
 
+	Vector2F pos = ToWorld2F(parentChit->Position());
 	Chit* building = Context()->chitBag->FindBuilding(IString(),
 		sector,
-		&ToWorld2F(parentChit->Position()),
+		&pos,
 		LumosChitBag::EFindMode::RANDOM_NEAR, 0, &filter);
 
 	if (!building) return false;
