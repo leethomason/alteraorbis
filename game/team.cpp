@@ -24,10 +24,32 @@ Team::~Team()
 	instance = 0;
 }
 
+void Team::DoTick(int delta)
+{
+	for (int i = 0; i < treaties.Size(); ++i) {
+		treaties[i].peaceTimer -= delta;
+		treaties[i].warTimer -= delta;
+		if (treaties[i].peaceTimer < 0) treaties[i].peaceTimer = 0;
+		if (treaties[i].warTimer < 0) treaties[i].warTimer = 0;
+	}
+}
+
+void Team::SymmetricTK::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "SymmetricTK");
+	XARC_SER(xs, t0);
+	XARC_SER(xs, t1);
+	XARC_SER(xs, warTimer);
+	XARC_SER(xs, peaceTimer);
+	XarcClose(xs);
+}
+
+
 void Team::Serialize(XStream* xs)
 {
 	XarcOpen(xs,"Team");
 	XARC_SER(xs, idPool);
+	XARC_SER_CARRAY(xs, treaties);
 
 	XarcOpen(xs, "attitude");
 	if (xs->Saving()) {
@@ -323,6 +345,18 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 	// Wealth, envy of the Gobmen
 	if (ENVIES_WEALTH && ((eval->CoreWealth() * 2 / 3) > center->CoreWealth())) {
 		d--;
+	}
+
+	// Treaties:
+	SymmetricTK stk(centerTeam, evalTeam);
+	int idx = treaties.Find(stk);
+	if (idx >= 0) {
+		if (treaties[idx].warTimer) {
+			d -= treaties[idx].warTimer * 10 / TREATY_TIME;
+		}
+		else if (treaties[idx].peaceTimer) {
+			d += treaties[idx].peaceTimer * 10 / TREATY_TIME;
+		}
 	}
 
 	TeamKey tk(centerTeam, evalTeam);

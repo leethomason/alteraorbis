@@ -67,6 +67,7 @@ Trillis
 Uhura
 Verice
 Verite
+Vilka
 Wilde
 Zoe
 Zoesta

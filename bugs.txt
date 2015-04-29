@@ -1,4 +1,8 @@
-
+- war button
+- peace button
+- more diplomacy testing
+- diplomacy art (for map)
+- teleport out on war switch
 
 - world gen too slow in debug
 - GT: food as medkit
@@ -20,7 +24,6 @@
 - Mini map flash of battles.
 - should show information about anyone you click, see monsters when you click on them
 - “data” the default screen of census
-- switch to war mode
 - bar-market-forge need to look more distinct
 - should be able to browse units in character screen
 - AIComponent::LineOfSight() uses TEST_HIT_AABB which is very big. (And creates annoying bugs,

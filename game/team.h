@@ -67,6 +67,7 @@ public:
 	static Team* Instance() { return instance; }
 
 	void Serialize(XStream* xs);
+	void DoTick(int delta);
 
 	// Team name, where it has one.
 	static grinliz::IString TeamName(int team);
@@ -125,6 +126,10 @@ public:
 	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:
+	enum {
+		TREATY_TIME = 10*1000
+	};
+
 	static ERelate AttitudeToRelationship(int d) {
 		if (d > 0) return ERelate::FRIEND;
 		if (d < 0) return ERelate::ENEMY;
@@ -164,7 +169,29 @@ private:
 	private:
 		int t0, t1;
 	};
+
 	grinliz::HashTable<TeamKey, int, TeamKey> hashTable;
+
+	struct SymmetricTK {
+		SymmetricTK() : t0(0), t1(0), warTimer(0), peaceTimer(0) {}
+		SymmetricTK(int _t0, int _t1) {
+			t0 = grinliz::Min(_t0, _t1);
+			t1 = grinliz::Max(_t0, _t1);
+			warTimer = peaceTimer = 0;
+		}
+
+		int t0;
+		int t1;
+		int warTimer;
+		int peaceTimer;
+
+		bool operator==(const SymmetricTK& rhs) {
+			return t0 == rhs.t0 && t1 == rhs.t1;
+		}
+		void Serialize(XStream* xs);
+	};
+
+	grinliz::CDynArray<SymmetricTK> treaties;
 
 	static Team* instance;
 };

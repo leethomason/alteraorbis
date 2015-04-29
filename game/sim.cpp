@@ -502,6 +502,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	context.worldMap->DoTick( delta, context.chitBag );
 	plantScript->DoTick(delta);
 	context.physicsSims->DoTick(delta);
+	Team::Instance()->DoTick(delta);
 
 	if (useAreaOfInterest) {
 		Vector3F center = V3F_ZERO;
