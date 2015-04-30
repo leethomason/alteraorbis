@@ -243,10 +243,17 @@ public:
 
 	void Push( const T& t ) {
 		EnsureCap( size+1 );
-		#pragma warning ( push )
-		#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
+#if defined( _MSC_VER )
+#pragma warning ( push )
+#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
+#endif
+
 		new (mem+size) T( t );	// placement new copy constructor.
-		#pragma warning ( pop )
+		
+#if defined( _MSC_VER )
+#pragma warning ( pop )
+#endif
+
 		++size;
 		++nAlloc;
 	}
@@ -266,10 +273,16 @@ public:
 		EnsureCap( size+count );
 		T* result = &mem[size];
 		for( int i=0; i<count; ++i ) {
-			#pragma warning ( push )
-			#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
+#if defined( _MSC_VER )
+#pragma warning ( push )
+#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
+#endif
+
 			new (result+i) T();	// placement new constructor
-			#pragma warning ( pop )
+
+#if defined( _MSC_VER )
+#pragma warning ( pop )
+#endif
 		}
 		size += count;
 		nAlloc += count;
@@ -434,22 +447,22 @@ class SortedDynArray : public CDynArray< T, SEM, KCOMPARE >
 {
 public:
 	void Add( const T& t ) {
-		EnsureCap( size+1 );
+		this->EnsureCap( this->size+1 );
 
-		int i = size;
-		while ( (i>0) && ( KCOMPARE::Less( t,mem[i-1] ))) {
-			mem[i] = mem[i-1];
+		int i = this->size;
+		while ( (i>0) && ( KCOMPARE::Less( t, this->mem[i-1] ))) {
+			this->mem[i] = this->mem[i-1];
 			--i;
 		}
-		mem[i] = t;
-		++size;
-		++nAlloc;
+		this->mem[i] = t;
+		++(this->size);
+		++(this->nAlloc);
 
 #ifdef DEBUG
-		for (int i = 1; i < size; ++i) {
+		for (int i = 1; i < this->size; ++i) {
 			// Use the !, swap the operators, becomes
 			// 'greater than or equal to'
-			GLASSERT(!KCOMPARE::Less(mem[i], mem[i-1]));
+			GLASSERT(!KCOMPARE::Less(this->mem[i], this->mem[i-1]));
 		}
 #endif
 	}
@@ -601,7 +614,7 @@ public:
 		return hash;
 	}
 	template <class T>
-	static bool Equal( T& v0, T& v1 ) { return StrEqual( v0, v1 ); }
+	static bool Equal( T& v0, T& v1 ) { return strcmp( v0, v1 ) == 0; }
 };
 
 

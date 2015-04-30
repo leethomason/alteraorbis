@@ -20,13 +20,13 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glrandom.h"
-#include "../xegame/stackedsingleton.h"
 
-class Weather : public StackedSingleton<Weather>
+class Weather
 {
 public:
-	Weather( int p_width, int p_height ) : width((float)p_width), height((float)p_height) { PushInstance( this ); }
-	~Weather() { PopInstance( this ); }
+	Weather(int p_width, int p_height) : width((float)p_width), height((float)p_height) { GLASSERT(instance == 0); instance = this; }
+	~Weather() { GLASSERT(instance == this); instance = 0; }
+	static Weather* Instance() { return instance; }
 
 	bool IsRaining(float x, float y) {
 		return RainFraction(x, y) > 0.5f;
@@ -67,6 +67,7 @@ public:
 	}
 
 private:
+	static Weather* instance;
 	float width;
 	float height;
 };

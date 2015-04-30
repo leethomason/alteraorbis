@@ -2,14 +2,14 @@
 #include "gameitem.h"
 #include "worldinfo.h"
 #include "team.h"
+#include "worldmap.h"
 #include "../xarchive/glstreamer.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
+#include "../xegame/chitcontext.h"
 #include "../script/itemscript.h"
 
 using namespace grinliz;
-
-NewsHistory* StackedSingleton< NewsHistory >::instance = 0;
 
 NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 {
@@ -163,7 +163,7 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 }
 
 
-void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameID) const
+void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 {
 	*str = "";
 	IString wstr = GetWhat();
@@ -172,7 +172,6 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 	const GameItem* first  = ItemDB::Instance()->Active(firstItemID);
 	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
 
-
 	IString firstName  = IDToName(firstItemID,  firstItemID == shortNameID);
 	IString secondName = IDToName(secondItemID, secondItemID == shortNameID);
 	if (firstName.empty())  firstName  = StringPool::Intern("[unknown]");
@@ -180,8 +179,8 @@ void NewsEvent::Console(grinliz::GLString* str, ChitBag* chitBag, int shortNameI
 
 	float age = float(double(date) / double(AGE_IN_MSEC));
 	IString domain;
-	if (WorldInfo::Instance()) {
-		const SectorData& sd = WorldInfo::Instance()->GetSector(sector);
+	if (chitBag->Context()->worldMap) {
+		const SectorData& sd = chitBag->Context()->worldMap->GetSectorData(sector);
 		domain = sd.name;
 	}
 

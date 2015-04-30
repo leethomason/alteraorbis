@@ -29,7 +29,6 @@
 
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
-#include "../xegame/stackedsingleton.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/chitcontext.h"
 

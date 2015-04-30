@@ -73,9 +73,6 @@
     <ClCompile Include="..\grinliz\gldebug.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
-    <ClCompile Include="..\grinliz\gldynamic.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
     <ClCompile Include="..\grinliz\glfixed.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
@@ -193,9 +190,6 @@
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\gldebug.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\gldynamic.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\glfixed.h">

@@ -162,7 +162,7 @@ bool BTexture::Load()
 		for (int y = 0; y<surface->h; ++y) {
 			for (int x = 0; x<surface->w; ++x) {
 				Color4U8 rgb = GetPixel(surface, x, y);
-				Color4U8 c = { 255, 255, 255, (rgb.x + rgb.y + rgb.z) / 3 };
+				Color4U8 c = { 255, 255, 255, U8((rgb.x + rgb.y + rgb.z) / 3) };
 				PutPixel(alpha, x, y, c);
 			}
 		}
@@ -316,7 +316,7 @@ SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface )
 					a32 += c.a();
 				}
 			}
-			Color4U8 c = { r32/(sx*sy), g32/(sx*sy), b32/(sx*sy), a32/(sx*sy) };
+			Color4U8 c = { U8(r32/(sx*sy)), U8(g32/(sx*sy)), U8(b32/(sx*sy)), U8(a32/(sx*sy)) };
 			PutPixel( newSurf, x, y, c );
 		}
 	}

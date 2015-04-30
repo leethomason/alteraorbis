@@ -17,7 +17,6 @@
 #define LUMOS_LUMOSGAME_INCLUDED
 
 #include "../xegame/game.h"
-#include "../xegame/stackedsingleton.h"
 
 class GameItem;
 

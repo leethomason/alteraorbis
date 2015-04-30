@@ -60,6 +60,7 @@ void relprintf( const char* format, ... );
         #include <stdio.h>
 		#define GLASSERT		assert
 		#define GLOUTPUT( x )	printf x	
+		#define GLOUTPUT_REL( x )	relprintf x
 	#endif
 #else
 	#define GLOUTPUT( x )

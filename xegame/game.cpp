@@ -112,7 +112,6 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	delete modelLoader;
 	modelLoader = 0;
 
-
 	// Load font:
 	GLString fontPath = "./res/";
 	FontSingleton* bridge = FontSingleton::Instance();
@@ -397,7 +396,6 @@ void Game::LoadPalettes()
 	const gamedb::Item* parent = database0->Root()->Child( "data" )->Child( "palettes" );
 	for( int i=0; i<parent->NumChildren(); ++i ) {
 		const gamedb::Item* child = parent->ChildAt( i );
-		child = database0->ChainItem( child );
 
 		Palette* p = 0;
 		if ( palettes.Size() <= i ) 

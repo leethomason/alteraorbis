@@ -51,7 +51,7 @@ public:
 	}
 	int PixelSize() const { return surface->w * surface->h; }
 
-	static SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface );
+	static SDL_Surface* CreateScaledSurface( int w, int h, SDL_Surface* surface );
 
 	grinliz::GLString pathName;
 	grinliz::GLString alphaPathName;

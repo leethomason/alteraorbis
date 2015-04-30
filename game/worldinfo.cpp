@@ -6,21 +6,17 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
-WorldInfo* StackedSingleton< WorldInfo >::instance = 0;
-
 WorldInfo::WorldInfo( const WorldGrid* grid, int mw, int mh )
 {
 	pather = new micropather::MicroPather( this, NUM_SECTORS*NUM_SECTORS, 4, true );
 	worldGrid = grid;
 	mapWidth = mw;
 	mapHeight = mh;
-	PushInstance( this );
 }
 
 
 WorldInfo::~WorldInfo()
 {
-	PopInstance( this );
 	delete pather;
 }
 
