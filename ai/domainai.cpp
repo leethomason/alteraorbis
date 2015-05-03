@@ -47,7 +47,7 @@ DomainAI* DomainAI::Factory(int team)
 
 DomainAI::DomainAI()
 {
-	GLASSERT(MAX_ROADS == RoadAI::MAX_ROADS);
+	GLASSERT((int)MAX_ROADS == (int)RoadAI::MAX_ROADS);
 	for (int i = 0; i < MAX_ROADS; ++i) {
 		buildDistance[i] = 0;
 	}
@@ -229,7 +229,7 @@ bool DomainAI::BuildPlaza()
 				}
 
 				const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-				if ( wg.IsLand() && (wg.Pave() != pave) || wg.Plant() || wg.RockHeight()) {
+				if ( wg.IsLand() && ((wg.Pave() != pave) || wg.Plant() || wg.RockHeight())) {
 					workQueue->AddAction(it.Pos(), BuildScript::PAVE, 0, pave);
 					issuedOrders = true;
 				}
@@ -880,7 +880,7 @@ bool GobDomainAI::DoSpecialBuild(int stage)
 			return false;
 
 		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
-		Rectangle2I sectorBounds = SectorBounds(sector);
+		//Rectangle2I sectorBounds = SectorBounds(sector);
 		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 
 		if (arr[BuildScript::GOBMAN_STATUE] < 2) {
@@ -945,7 +945,7 @@ bool KamakiriDomainAI::DoSpecialBuild(int stage)
 			return false;
 
 		int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
-		Rectangle2I sectorBounds = SectorBounds(sector);
+		//Rectangle2I sectorBounds = SectorBounds(sector);
 		Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
 
 		if (arr[BuildScript::KAMAKIRI_STATUE] < 4) {

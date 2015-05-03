@@ -12,7 +12,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#if 0
 #ifndef UFO_GAMESETTINGS_INCLUDED
 #define UFO_GAMESETTINGS_INCLUDED
 
@@ -66,3 +66,4 @@ private:
 
 
 #endif // UFO_GAMESETTINGS_INCLUDED
+#endif

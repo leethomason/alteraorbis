@@ -6,22 +6,17 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
-template< class WorldInfo >
-WorldInfo* StackedSingleton< WorldInfo >::instance = 0;
-
 WorldInfo::WorldInfo( const WorldGrid* grid, int mw, int mh )
 {
 	pather = new micropather::MicroPather( this, NUM_SECTORS*NUM_SECTORS, 4, true );
 	worldGrid = grid;
 	mapWidth = mw;
 	mapHeight = mh;
-	PushInstance( this );
 }
 
 
 WorldInfo::~WorldInfo()
 {
-	PopInstance( this );
 	delete pather;
 }
 
@@ -150,7 +145,7 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 
 	for (int i = 0; i < adj.Size(); ++i) {
 		Vector2I v = { adj[i].x, adj[i].y };
-		GridBlock vgb = { adj[i].x, adj[i].y };
+		GridBlock vgb = { S16(adj[i].x), S16(adj[i].y) };
 		if (bounds.Contains(v) && worldGrid[INDEX(vgb)].IsGrid()) {
 			micropather::StateCost sc = { ToState(vgb), HALF };
 			adjacent->push_back(sc);

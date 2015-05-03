@@ -28,8 +28,6 @@
 
 #include "../script/procedural.h"
 
-#include <direct.h>
-
 extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 
 using namespace gamui;

@@ -169,6 +169,7 @@ bool Reader::Init( int id, const char* filename, int _offset )
 	databaseID = id;
 	fp = fopen( filename, "rb" );
 	if ( !fp ) {
+		GLOUTPUT_REL(("Reader::Init failed on '%s'\n", filename ? filename : ""));
 		GLASSERT( 0 );
 		return false;
 	}

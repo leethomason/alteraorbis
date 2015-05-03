@@ -21,7 +21,6 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../micropather/micropather.h"
 #include "../engine/enginelimits.h"
-#include "../xegame/stackedsingleton.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glutil.h"
 
@@ -58,7 +57,7 @@ public:
 	// Nearest port to 'pos'. There are no limits on pos.
 	int NearestPort( const grinliz::Vector2I& pos ) const;	
 	int NearestPort( const grinliz::Vector2F pos ) const {
-		grinliz::Vector2I p = { grinliz::LRintf(pos.x), grinliz::LRintf(pos.y) };
+		grinliz::Vector2I p = { int(grinliz::LRintf(pos.x)), int(grinliz::LRintf(pos.y)) };
 		return NearestPort( p );
 	}
 	int RandomPort(grinliz::Random* random) const;
@@ -94,12 +93,13 @@ typedef grinliz::Vector2<S16> GridBlock;
 inline GridBlock MapToGridBlock(float x, float y)
 {
 	// x: 32,32 is the gridblock. [31.0, 33.0)->32
-	GridBlock gb = { int(x + 1.0) & (~1), int(y + 1.0) & (~1) };
+	int gbx = int(x + 1.0) & (~1);
+	int gby = int(y + 1.0) & (~1);
+	GridBlock gb = {  S16(gbx), S16(gby) };
 	return gb;
 }
 
-class WorldInfo : public micropather::Graph, 
-				  public StackedSingleton< WorldInfo >
+class WorldInfo : public micropather::Graph
 {
 public:
 	WorldInfo( const WorldGrid* worldGrid, int mapWidth, int mapHeight );

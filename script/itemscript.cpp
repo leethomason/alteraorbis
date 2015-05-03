@@ -28,7 +28,7 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
-ItemDefDB* StackedSingleton< ItemDefDB >::instance = 0;
+ItemDefDB* ItemDefDB::instance = 0;
 
 void ItemDefDB::Load( const char* path )
 {
@@ -301,7 +301,7 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history, const char* s
 }
 
 
-ItemDB* StackedSingleton< ItemDB >::instance = 0;
+ItemDB* ItemDB::instance = 0;
 
 void ItemDB::Serialize( XStream* xs ) 
 {

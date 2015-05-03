@@ -128,7 +128,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		if (item == &link[i]) {
 			Chit* chit = 0; 
-			int itemID = (int)link[i].userData;
+			int itemID = int(intptr_t(link[i].userData));
 			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
 				const GameItem* gi = ItemDB::Instance()->Active(itemID);

@@ -7,7 +7,6 @@
 #include "../grinliz/glstringutil.h"
 #include "gamelimits.h"
 #include "lumosmath.h"
-#include "../xegame/stackedsingleton.h"
 
 class XStream;
 class WorldMap;

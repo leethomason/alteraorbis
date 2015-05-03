@@ -132,6 +132,6 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 
 
 	GLASSERT( 0 );
-	GLOUTPUT_REL(( "%s", name ));
+	GLOUTPUT_REL(( "%s", _name ));
 	return 0;
 }

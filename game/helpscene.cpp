@@ -1,3 +1,4 @@
+#if 0
 #include "helpscene.h"
 #include "game.h"
 #include "cgame.h"
@@ -195,3 +196,4 @@ void HelpScene::HandleHotKeyMask( int mask )
 	}
 	Resize();
 }
+#endif

@@ -21,15 +21,15 @@
 #include "../grinliz/glcontainer.h"
 
 #include "../game/gameitem.h"
-#include "../xegame/stackedsingleton.h"
 
 class NewsHistory;
 
-class ItemDefDB : public StackedSingleton< ItemDefDB >
+class ItemDefDB
 {
 public:
-	ItemDefDB()		{ PushInstance( this ); }
-	~ItemDefDB()	{ PopInstance( this ); }
+	ItemDefDB()		{ GLASSERT(!instance); instance = this; }
+	~ItemDefDB()	{ GLASSERT(instance == this); instance = 0; }
+	static ItemDefDB* Instance() { GLASSERT(instance); return instance; }
 
 	void Load( const char* path );
 
@@ -51,6 +51,8 @@ public:
 	const grinliz::CDynArray< grinliz::IString >& LesserMOBs() const  { return lesserMOBs; }
 
 private:
+	static ItemDefDB* instance;
+
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;
@@ -85,11 +87,12 @@ struct ItemHistory
 	able to look up items for history and such. It either is in use, or deleted, and
 	we need a record of what it was.
 */
-class ItemDB : public StackedSingleton< ItemDB >
+class ItemDB
 {
 public:
-	ItemDB()	{ PushInstance( this ); }
-	~ItemDB()	{ PopInstance( this );; }
+	ItemDB()	{ GLASSERT(instance == 0); instance = this; }
+	~ItemDB()	{ GLASSERT(instance == this); instance = 0; }
+	static ItemDB* Instance() { return instance;  }
 
 	void Add( const GameItem* );		// start tracking (possibly insignificant)
 	void Update( const GameItem* );		// item changed
@@ -110,9 +113,8 @@ public:
 	const ItemHistory& RegistryByIndex(int i) { return itemRegistry.GetValue(i); }
 
 private:
+	static ItemDB* instance;
 	grinliz::HashTable< int, const GameItem* > itemMap;							// map of all the active, allocated items.
-	//grinliz::HashTable< const GameItem*, const ItemComponent* > itemToICMap;	// map of allocated items.
-
 	grinliz::HashTable<int, ItemHistory> itemRegistry; // all the significant items ever created
 };
 

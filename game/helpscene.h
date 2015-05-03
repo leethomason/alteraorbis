@@ -13,6 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if 0
 #ifndef UFO_ATTACK_HELP_SCENE_INCLUDED
 #define UFO_ATTACK_HELP_SCENE_INCLUDED
 
@@ -76,3 +77,4 @@ private:
 
 
 #endif // UFO_ATTACK_HELP_SCENE_INCLUDED
+#endif

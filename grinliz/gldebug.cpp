@@ -426,6 +426,14 @@ void MemStartCheck()
 #endif // GRINLIZ_DEBUG_MEM
 #endif // DEBUG
 
+FILE* relFP = 0;
+
+void SetReleaseLog(FILE* fp)
+{
+	GLASSERT(!relFP);
+	relFP = fp;
+}
+
 #ifdef _WIN32
 
 void WinDebugBreak()
@@ -479,15 +487,6 @@ void logprintf( const char* format, ... )
 	}
 	fprintf( logFP, "%s", buffer );
 }
-
-FILE* relFP = 0;
-
-void SetReleaseLog(FILE* fp)
-{
-	GLASSERT(!relFP);
-	relFP = fp;
-}
-
 
 void relprintf( const char* format, ... )
 {

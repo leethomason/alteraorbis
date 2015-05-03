@@ -49,6 +49,7 @@ struct Bolt {
 
 		chitID = 0;
 	} 
+	virtual ~Bolt() {}
 
 	void Serialize( XStream* );
 

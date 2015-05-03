@@ -33,7 +33,7 @@ int GameMoveComponent::DoTick(U32 delta)
 
 	// Basic physics and block avoidance.
 	bool floating = false;
-	bool appliedFluid = ApplyFluid(delta, &pos, &floating);
+	ApplyFluid(delta, &pos, &floating);
 
 	if (!floating) {
 		Vector2F pos2 = ToWorld2F(pos);

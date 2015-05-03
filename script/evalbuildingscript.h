@@ -30,7 +30,7 @@ class EvalBuildingScript : public Component
 {
 	typedef Component super;
 public:
-	EvalBuildingScript() : lastEval(0), eval(0), reachable(true), timer(2000) {}
+	EvalBuildingScript() : timer(2000), lastEval(0), eval(0), reachable(true) {}
 	virtual ~EvalBuildingScript()	{}
 
 	virtual void OnAdd(Chit* chit, bool init);

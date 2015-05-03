@@ -12,7 +12,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#if 0
 #include "game.h"
 #include "cgame.h"
 #include "unit.h"
@@ -669,3 +669,4 @@ void Game::LoadAtoms()
 	buttonLooks[RED_BUTTON].Init( renderAtoms[ ATOM_RED_BUTTON_UP ], renderAtoms[ ATOM_RED_BUTTON_UP_D ], renderAtoms[ ATOM_RED_BUTTON_DOWN ], renderAtoms[ ATOM_RED_BUTTON_DOWN_D ] );
 	buttonLooks[BLUE_TAB_BUTTON].Init( renderAtoms[ ATOM_BLUE_TAB_BUTTON_UP ], renderAtoms[ ATOM_BLUE_TAB_BUTTON_UP_D ], renderAtoms[ ATOM_BLUE_TAB_BUTTON_DOWN ], renderAtoms[ ATOM_BLUE_TAB_BUTTON_DOWN_D ] );
 }
+#endif

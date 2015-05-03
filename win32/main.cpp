@@ -34,11 +34,11 @@
 #include "../shared/lodepng.h"
 
 #include "../version.h"
+#if defined (UFO_WIN32_SDL)
 #include "wglew.h"
-
-// For error logging.
-#define WINDOWS_LEAN_AND_MEAN
-#include <winhttp.h>
+#else
+#include "glew.h"
+#endif
 
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED

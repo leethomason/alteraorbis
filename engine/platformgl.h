@@ -51,10 +51,8 @@
 	#define glBufferSubDataX	glBufferSubData
 	#define glBindBufferX		glBindBuffer
 	#define glDeleteBuffersX	glDeleteBuffers
-#elif defined (__GNUC__)
-    //#include "SDL2/SDL_opengl.h"
-    //#include <GL/gl.h>
-	#include "../win32/glew.h"
+#elif defined ( UFO_LINUX_SDL )
+	#include "../glew/include/GL/glew.h"
 	#define glFrustumfX			glFrustum
 	#define glOrthofX			glOrtho
 	#define USING_GL

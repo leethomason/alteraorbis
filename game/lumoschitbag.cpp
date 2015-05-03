@@ -316,7 +316,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	context->engine->particleSystem->EmitPD( ISC::constructiondone, ToWorld3F( pos ), V3F_UP, 0 );
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
+		Vector3F pos3 = ToWorld3F(pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
 	}
 
 	return chit;
@@ -361,7 +362,8 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	context->engine->particleSystem->EmitPD(ISC::constructiondone, ToWorld3F(pos), V3F_UP, 0);
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
+		Vector3F pos3 = ToWorld3F(pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
 	}
 
 	return chit;
@@ -464,7 +466,8 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
+		Vector3F pos3 = ToWorld3F(pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
 	}
 
 	return chit;

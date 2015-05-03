@@ -13,9 +13,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WINDOWS_LEAN_AND_MEAN
-#include <crtdbg.h>
-
 #include "chitbag.h"
 #include "chit.h"
 #include "chitcontext.h"

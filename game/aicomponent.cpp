@@ -316,12 +316,12 @@ Vector3F AIComponent::EnemyPos(int id, bool target)
 void AIComponent::ProcessFriendEnemyLists(bool tick)
 {
 	Vector2F center = ToWorld2F(parentChit->Position());
-	Vector2I sector = ToSector(center);
+	//Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
 	// Enemy list: not sure the best polity. Right now keeps.
 	// Friend list: clear and focus on near.
-	int target = enemyList2.Empty() ? -1 : enemyList2[0];
+	//int target = enemyList2.Empty() ? -1 : enemyList2[0];
 	if (tick) friendList2.Clear();
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
@@ -559,7 +559,7 @@ void AIComponent::DoMove()
 
 void AIComponent::DoShoot()
 {
-	bool pointed = false;
+	//bool pointed = false;
 	Vector3F leading = { 0, 0, 0 };
 	bool isMoving = false;
 
@@ -596,7 +596,7 @@ void AIComponent::DoShoot()
 	// Rotate to target.
 	Vector2F heading = parentChit->Heading2D();
 	Vector2F normalToTarget = leading2D - ToWorld2F(parentChit->Position());
-	float distanceToTarget = normalToTarget.Length();
+	//float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
 	float dot = DotProduct( heading, normalToTarget );
 
@@ -726,10 +726,10 @@ bool AIComponent::DoStand( U32 time )
 	MoveComponent* thisMove = parentChit->GetMoveComponent();
 	if (!thisMove) return false;
 
-	int itemFlags			= item->flags;
-	double totalHP			= double(item->TotalHP());
-	int tick = 400;
-	const ChitContext* context = Context();
+	//int itemFlags			= item->flags;
+	//double totalHP			= double(item->TotalHP());
+	//int tick = 400;
+	//const ChitContext* context = Context();
 
 	if (visitorIndex >= 0 && !thisMove->IsMoving())
 	{
@@ -809,6 +809,7 @@ void AIComponent::Think()
 		case AIMode::NORMAL_MODE:		ThinkNormal();	break;
 		case AIMode::BATTLE_MODE:		ThinkBattle();	break;
 		case AIMode::RAMPAGE_MODE:		ThinkRampage();	break;
+		default: GLASSERT(0); break;
 	}
 }
 
@@ -836,7 +837,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 
 	if ( pmc ) {
 		// Read our destination port information:
-		const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
+		//const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
 				
 		// Read our local get-on-the-grid info
 		SectorPort local = context->worldMap->NearestPort( ToWorld2F(parentChit->Position()) );
@@ -1088,7 +1089,7 @@ void AIComponent::ThinkRampage(  )
 	const WorldGrid& wg0	= context->worldMap->GetWorldGrid( pos2i.x, pos2i.y );
 	Vector2I next			= pos2i + wg0.Path( rampageTarget );
 	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
-	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
+//	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
 
 	if ( RampageDone()) {
 		aiMode = AIMode::NORMAL_MODE;
@@ -1293,7 +1294,7 @@ bool AIComponent::SectorHerd( bool focus)
 
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
-	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
+	//const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
 	const SectorPort start = context->worldMap->NearestPort(pos);
 	//Sometimes we can't path to any port. Hopefully rampage cuts in.
 	//GLASSERT(start.IsValid());
@@ -1301,7 +1302,7 @@ bool AIComponent::SectorHerd( bool focus)
 		return false;
 	}
 
-	Vector2I sector = ToSector(ToWorld2I(pos));
+	//Vector2I sector = ToSector(ToWorld2I(pos));
 
 	if (gameItem->IName() == ISC::troll) {
 		// Visit Truulga every now and again. And if leaving truuga...go far.
@@ -1310,7 +1311,7 @@ bool AIComponent::SectorHerd( bool focus)
 			Vector2I truulgaSector = ToSector(truulga->Position());
 			if (ToSector(parentChit->Position()) == truulgaSector) {
 				// At Truulga - try to go far.
-				Vector2I destSector = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
+				Vector2I destSector = { int(parentChit->random.Rand(NUM_SECTORS)), int(parentChit->random.Rand(NUM_SECTORS)) };
 				if (DoSectorHerd(focus, destSector))
 					return true;
 				// Else drop out and use code below to go to a neighbor.
@@ -1404,7 +1405,7 @@ bool AIComponent::DoSectorHerd( bool focus, const grinliz::Vector2I& sector)
 bool AIComponent::DoSectorHerd( bool focus, const SectorPort& dest)
 {
 	if (dest.IsValid()) {
-		const ChitContext* context = Context();
+		//const ChitContext* context = Context();
 		GLASSERT(dest.port);
 
 		RenderComponent* rc = parentChit->GetRenderComponent();
@@ -1452,7 +1453,7 @@ void AIComponent::ThinkVisitor(  )
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
-	CoreScript* coreScript = CoreScript::GetCore(sector);
+	//CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i);
 	if ( kiosk && kiosk->GetItem()->IName() == ISC::kiosk ) {
@@ -1520,7 +1521,7 @@ bool AIComponent::ThinkWanderEat()
 
 	// Plant eater
 	if (gameItem->HPFraction() < EAT_WILD_FRUIT) {
-		Vector2I pos2i = ToWorld2I(parentChit->Position());
+		//Vector2I pos2i = ToWorld2I(parentChit->Position());
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 
 		// Are we near fruit?
@@ -1672,9 +1673,9 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 	// Now we need to use full pathing for meaningful results.
 	// Only need to check the farm porch - all fruit goes there.
 	for (int pass = 0; pass < 2; ++pass) {
-		if (pass == 1) {
-			int debug = 1;
-		}
+//		if (pass == 1) {
+//			int debug = 1;
+//		}
 		CChitArray buildingArr;
 		chitBag->FindBuildingCC(pass == 0 ? ISC::farm : ISC::distillery,
 								ToSector(ToWorld2I(pos2)),
@@ -2017,7 +2018,7 @@ bool AIComponent::ThinkNeeds()
 	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
 	BuildScript			buildScript;
-	int					bestIndex = -1;
+//	int					bestIndex = -1;
 	double				bestScore = 0;
 	const BuildData*	bestBD = 0;
 	Vector2I			bestPorch = { 0, 0 };
@@ -2081,7 +2082,7 @@ bool AIComponent::ThinkNeeds()
 
 		if (debugLog) {
 			if (!debugBuildingOutput[buildDataID]) {
-				GLASSERT(buildDataID >= 0 && buildDataID < GL_C_ARRAY_SIZE(debugBuildingOutput));
+				GLASSERT(buildDataID >= 0 && buildDataID < int(GL_C_ARRAY_SIZE(debugBuildingOutput)));
 				debugBuildingOutput[buildDataID] = true;
 				GLOUTPUT(("  %.2f %s %s\n", score, building->GetItem()->Name(), functional ? "func" : "norm" ));
 			}
@@ -2091,7 +2092,7 @@ bool AIComponent::ThinkNeeds()
 			&& score > bestScore)
 		{
 			bestScore = score;
-			bestIndex = i;
+//			bestIndex = i;
 			bestBD = bd;
 			bestPorch = porch;
 		}
@@ -2180,9 +2181,9 @@ void AIComponent::ThinkNormal(  )
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
-	Vector2F pos2 = ToWorld2F(parentChit->Position());
-	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
-	const ChitContext* context = Context();
+	//Vector2F pos2 = ToWorld2F(parentChit->Position());
+	//Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+	//const ChitContext* context = Context();
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
@@ -2277,7 +2278,7 @@ void AIComponent::ThinkBattle()
 	}
 	const Vector3F pos = parentChit->Position();
 	Vector2F pos2 = { pos.x, pos.z };
-	Vector2I sector = ToSector(pos2);
+	//Vector2I sector = ToSector(pos2);
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
@@ -2339,7 +2340,7 @@ void AIComponent::ThinkBattle()
 		int targetID = enemyList2[k];
 
 		Chit* enemyChit = context->chitBag->GetChit(targetID);	// null if there isn't a chit
-		Vector2I voxelTarget = ToWG(targetID);					// zero if there isn't a voxel target
+		//Vector2I voxelTarget = ToWG(targetID);					// zero if there isn't a voxel target
 
 		const Vector3F	enemyPos = EnemyPos(targetID, true);
 		const Vector2F	enemyPos2 = { enemyPos.x, enemyPos.z };
@@ -2536,10 +2537,10 @@ void AIComponent::ThinkBattle()
 void AIComponent::FlushTaskList( U32 delta )
 {
 	if ( !taskList.Empty() ) {
-		Vector2I pos2i = ToWorld2I(parentChit->Position());
-		Vector2I sector = ToSector(pos2i);
+		//Vector2I pos2i = ToWorld2I(parentChit->Position());
+		//Vector2I sector = ToSector(pos2i);
 
-		WorkQueue* workQueue = GetWorkQueue();
+		//WorkQueue* workQueue = GetWorkQueue();
 		taskList.DoTasks(parentChit, delta);	
 	}
 }
@@ -2691,7 +2692,7 @@ void AIComponent::EnterNewGrid()
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, 0.7f, 0, &fruitFilter);
 
 		for (int i = 0; i < arr.Size(); ++i) {
-			const GameItem* item = arr[i]->GetItem();
+			//const GameItem* item = arr[i]->GetItem();
 			gameItem->hp = gameItem->TotalHP();
 			RenderComponent* rc = parentChit->GetRenderComponent();
 			if (rc) {
@@ -2769,7 +2770,7 @@ void AIComponent::EnterNewGrid()
 			RenderComponent* rc = parentChit->GetRenderComponent();
 			Vector2F center = ToWorld2F(parentChit->Position());	// center of the grid.
 			CChitArray arr;
-			const ChitContext* context = this->Context();
+			//const ChitContext* context = this->Context();
 			LumosChitBag* chitBag = this->Context()->chitBag;
 
 			// For now, just tombstones.
@@ -2873,9 +2874,9 @@ bool AIComponent::ThinkWaypoints()
 	}
 
 	Vector2F dest2 = ToWorld2F(waypoint);
-	Vector2F pos2 = ToWorld2F(parentChit->Position());
+	//Vector2F pos2 = ToWorld2F(parentChit->Position());
 
-	static const float FRIEND_RANGE = 2.0f;
+	//static const float FRIEND_RANGE = 2.0f;
 
 	Vector2I destSector = ToSector(waypoint);
 	Vector2I currentSector = ToSector(parentChit->Position());
@@ -2912,8 +2913,8 @@ int AIComponent::DoTick( U32 deltaTime )
 //	wanderTime += deltaTime;
 	AIAction oldAction = currentAction;
 
-	ChitBag* chitBag = this->Context()->chitBag;
-	const ChitContext* context = Context();
+	//ChitBag* chitBag = this->Context()->chitBag;
+	//const ChitContext* context = Context();
 	GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return VERY_LONG_TICK;
 
@@ -3112,7 +3113,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	   */
 
 	Vector2I mapPos = ToWorld2I(parentChit->Position());
-	Vector2I sector = ToSector(mapPos);
+	//Vector2I sector = ToSector(mapPos);
 
 	switch (msg.ID()) {
 		case ChitMsg::CHIT_DAMAGE:
@@ -3171,7 +3172,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 		case ChitMsg::PATHMOVE_TO_GRIDMOVE:
 		{
-			LumosChitBag* chitBag = Context()->chitBag;
+			//LumosChitBag* chitBag = Context()->chitBag;
 			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
 			Vector2I sector = sectorPort->sector;
 			CoreScript* cs = CoreScript::GetCore(sector);
