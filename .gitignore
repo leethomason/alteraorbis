@@ -9,6 +9,7 @@
 *.obj
 *.mtl
 *.bmp
+*.*~
 
 Debug
 Release
