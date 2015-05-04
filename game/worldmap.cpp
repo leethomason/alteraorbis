@@ -1686,8 +1686,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
 				Vector2I originA, originB;
-				//WorldGrid* rA = ToGrid( pathRegions[i], &originA );
-				//WorldGrid* rB = ToGrid( pathRegions[i+1], &originB );
+				ToGrid( pathRegions[i], &originA );
+				ToGrid( pathRegions[i+1], &originB );
 
 				Rectangle2F bA = ZoneBounds( originA.x, originA.y );
 				Rectangle2F bB = ZoneBounds( originB.x, originB.y );					

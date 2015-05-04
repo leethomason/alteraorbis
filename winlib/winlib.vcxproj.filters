@@ -43,9 +43,6 @@
     <ClCompile Include="..\zlib\deflate.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\zlib\gzio.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\zlib\infback.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
@@ -71,9 +68,6 @@
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
     <ClCompile Include="..\grinliz\gldebug.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\gldynamic.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
     <ClCompile Include="..\grinliz\glfixed.cpp">
@@ -193,9 +187,6 @@
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\gldebug.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\gldynamic.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\glfixed.h">

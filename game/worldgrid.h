@@ -214,7 +214,7 @@ public:
 	}
 
 	int Height() const {
-		return grinliz::Max(fluidHeight/FLUID_PER_ROCK, int(rockHeight));
+		return grinliz::Max(int(fluidHeight)/FLUID_PER_ROCK, int(rockHeight));
 	}
 
 	bool IsFluid() const {

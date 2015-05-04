@@ -89,7 +89,6 @@
   <ItemGroup>
     <ClCompile Include="..\grinliz\glcontainer.cpp" />
     <ClCompile Include="..\grinliz\gldebug.cpp" />
-    <ClCompile Include="..\grinliz\gldynamic.cpp" />
     <ClCompile Include="..\grinliz\glfixed.cpp" />
     <ClCompile Include="..\grinliz\glgeometry.cpp" />
     <ClCompile Include="..\grinliz\glmatrix.cpp" />
@@ -118,7 +117,6 @@
     <ClCompile Include="..\zlib\compress.c" />
     <ClCompile Include="..\zlib\crc32.c" />
     <ClCompile Include="..\zlib\deflate.c" />
-    <ClCompile Include="..\zlib\gzio.c" />
     <ClCompile Include="..\zlib\infback.c" />
     <ClCompile Include="..\zlib\inffast.c" />
     <ClCompile Include="..\zlib\inflate.c" />
@@ -133,7 +131,6 @@
     <ClInclude Include="..\grinliz\glcolor.h" />
     <ClInclude Include="..\grinliz\glcontainer.h" />
     <ClInclude Include="..\grinliz\gldebug.h" />
-    <ClInclude Include="..\grinliz\gldynamic.h" />
     <ClInclude Include="..\grinliz\glfixed.h" />
     <ClInclude Include="..\grinliz\glgeometry.h" />
     <ClInclude Include="..\grinliz\glinnercircle.h" />

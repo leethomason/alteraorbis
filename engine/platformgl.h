@@ -40,7 +40,7 @@
 	#define glBufferSubDataX	glBufferSubData
 	#define glDeleteBuffersX	glDeleteBuffers
 #elif defined( UFO_WIN32_SDL )
-	#include "../win32/glew.h"
+	#include "../glew/include/GL/glew.h"
 
 	#define glFrustumfX		glFrustum
 	#define glOrthofX		glOrtho

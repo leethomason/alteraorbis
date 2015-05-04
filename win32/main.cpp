@@ -15,7 +15,7 @@
 
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
 
-#include "glew.h"
+#include "../glew/include/GL/glew.h"
 #include "../libs/SDL2/include/SDL.h"
 
 #include "../grinliz/gldebug.h"
@@ -35,7 +35,7 @@
 
 #include "../version.h"
 #if defined (UFO_WIN32_SDL)
-#include "wglew.h"
+#include "../glew/include/GL/wglew.h"
 #else
 #include "glew.h"
 #endif

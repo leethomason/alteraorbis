@@ -51,7 +51,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>GRINLIZ_PROFILE; _CRT_SECURE_NO_WARNINGS;UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GRINLIZ_PROFILE;_CRT_SECURE_NO_WARNINGS;UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -153,6 +153,7 @@
     <ClCompile Include="..\game\fluidsim.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\gamui\gamuifreetype.cpp" />
+    <ClCompile Include="..\glew\src\glew.c" />
     <ClCompile Include="..\markov\markov.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\animationscene.cpp" />
@@ -202,8 +203,6 @@
     <ClCompile Include="..\widget\moneywidget.cpp" />
     <ClCompile Include="..\widget\startwidget.cpp" />
     <ClCompile Include="..\widget\tutorialwidget.cpp" />
-    <ClCompile Include="..\win32\framebuffer.cpp" />
-    <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
     <ClCompile Include="..\xarchive\squisher.cpp" />
     <ClCompile Include="..\xegame\cameracomponent.cpp" />
@@ -348,9 +347,6 @@
     <ClInclude Include="..\widget\moneywidget.h" />
     <ClInclude Include="..\widget\startwidget.h" />
     <ClInclude Include="..\widget\tutorialwidget.h" />
-    <ClInclude Include="..\win32\framebuffer.h" />
-    <ClInclude Include="..\win32\glew.h" />
-    <ClInclude Include="..\win32\wglew.h" />
     <ClInclude Include="..\xegame\cameracomponent.h" />
     <ClInclude Include="..\xegame\cgame.h" />
     <ClInclude Include="..\xegame\chit.h" />

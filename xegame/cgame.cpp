@@ -13,8 +13,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "SDL.h"
 
+#include "../libs/SDL2/include/SDL.h"
 #include "../grinliz/gldebug.h"
 #include "cgame.h"
 #include "../game/lumosgame.h"
