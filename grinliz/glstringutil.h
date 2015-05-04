@@ -137,9 +137,9 @@ public:
 		int s = size();
 		if ( s < Capacity() ) {
 			#ifdef _MSC_VER
-				int result = vsnprintf_s( buf+s, ALLOCATE-s, _TRUNCATE, format, va );
+				vsnprintf_s( buf+s, ALLOCATE-s, _TRUNCATE, format, va );
 			#else
-				int result = vsnprintf( buf+s, ALLOCATE-s, format, va );
+				vsnprintf( buf+s, ALLOCATE-s, format, va );
 			#endif
 		}
 		va_end( va );

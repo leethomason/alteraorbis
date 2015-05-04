@@ -105,7 +105,7 @@ void RenderComponent::Serialize(XStream* xs)
 void RenderComponent::OnAdd( Chit* chit, bool init )
 {
 	Component::OnAdd( chit, init );
-	const ChitContext* context = Context();
+//	const ChitContext* context = Context();
 
 	if (!model[0]) {
 		model[0] = new Model(mainAsset.c_str(), Context()->engine->GetSpaceTree());
@@ -123,7 +123,7 @@ void RenderComponent::OnAdd( Chit* chit, bool init )
 
 void RenderComponent::OnRemove()
 {
-	const ChitContext* context = Context();
+//	const ChitContext* context = Context();
 	Component::OnRemove();
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
@@ -175,7 +175,7 @@ int RenderComponent::CalcAnimation() const
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
-	ItemComponent* inv = parentChit->GetItemComponent();
+//	ItemComponent* inv = parentChit->GetItemComponent();
 
 	bool isCarrying = model[HARDPOINT_TRIGGER] != 0;
 
@@ -302,7 +302,7 @@ void RenderComponent::Detach( int metaData )
 {
 	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
 	if ( model[metaData] ) {
-		const ChitContext* context = Context();
+//		const ChitContext* context = Context();
 		delete model[metaData];
 	}
 	model[metaData] = 0;
@@ -355,7 +355,7 @@ int RenderComponent::DoTick( U32 deltaTime )
 	// Position the attachments relative to the parent.
 	GLASSERT(model[0]);
 	if (model[0]) {
-		const ModelHeader& header = model[0]->GetResource()->header;
+//		const ModelHeader& header = model[0]->GetResource()->header;
 		for (int i = 1; i < NUM_MODELS; ++i) {
 			if (model[i]) {
 				Matrix4 xform;
@@ -400,7 +400,7 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	}
 
 	if ( !found ) {
-		const ChitContext* context = Context();
+//		const ChitContext* context = Context();
 		HUD::Icon* icon = hud->icons.PushArr(1);
 		icon->atom = atom;
 		icon->image = 0;
@@ -496,8 +496,8 @@ void RenderComponent::ProcessIcons( int delta )
 {
 	// This gets bit by the "delta huge" bug, since the icon
 	// can turn on long-dormant rendering.
-	if (delta > MAX_FRAME_TIME) {
-		delta = MAX_FRAME_TIME;
+	if (delta > int(MAX_FRAME_TIME)) {
+		delta = int(MAX_FRAME_TIME);
 	}
 
 	if (hud) {
@@ -650,7 +650,7 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
-		IString trigger = ISC::trigger;
+//		IString trigger = ISC::trigger;
 		if ( HasMetaData( HARDPOINT_TRIGGER )) { 
 			if ( pos ) 
 				GetMetaData( HARDPOINT_TRIGGER, pos );
@@ -688,8 +688,8 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED ) {
 		static const Vector3F UP = { 0, 1, 0 };
-		static const Vector3F DOWN = { 0, -1, 0 };
-		static const Vector3F RIGHT = { 1, 0, 0 };
+//		static const Vector3F DOWN = { 0, -1, 0 };
+//		static const Vector3F RIGHT = { 1, 0, 0 };
 		context->engine->particleSystem->EmitPD( ISC::derez, model[0]->AABB().Center(), UP, 0 );
 	}
 	else {

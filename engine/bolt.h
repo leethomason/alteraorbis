@@ -49,7 +49,7 @@ struct Bolt {
 
 		chitID = 0;
 	} 
-	virtual ~Bolt() {}
+	~Bolt() {}
 
 	void Serialize( XStream* );
 
@@ -70,7 +70,6 @@ struct Bolt {
 
 private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
 };
 
 
@@ -78,7 +77,7 @@ class BoltRenderer : public IDeviceLossHandler
 {
 public:
 	BoltRenderer();
-	~BoltRenderer();
+	virtual ~BoltRenderer();
 
 	void DrawAll( const Bolt* bolts, int nBolts, Engine* engine );
 	virtual void DeviceLoss();

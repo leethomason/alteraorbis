@@ -128,7 +128,7 @@ void MapScene::Resize()
 {
 	PositionStd( &okay, 0 );
 
-	const Screenport& port = lumosGame->GetScreenport();
+//	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = DefaultLayout();
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
@@ -190,9 +190,9 @@ void MapScene::DrawMap()
 {
 	CDynArray<Chit*> query;
 
-	int primaryTeam = lumosChitBag->GetHomeTeam();
+//	int primaryTeam = lumosChitBag->GetHomeTeam();
 	const ChitContext* context = lumosChitBag->Context();
-	int nFace = 0;
+//	int nFace = 0;
 
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
@@ -212,8 +212,8 @@ void MapScene::DrawMap()
 		int j = (sector.y - subBounds.min.y);
 		int index = j * MAP2_SIZE + i;
 
-		Rectangle2I inner = sd.InnerBounds();
-		Rectangle2F innerF = ToWorld2F(inner);
+//		Rectangle2I inner = sd.InnerBounds();
+//		Rectangle2F innerF = ToWorld2F(inner);
 		CoreScript* coreScript = CoreScript::GetCore(sector);
 
 		CStr<64> str = "";

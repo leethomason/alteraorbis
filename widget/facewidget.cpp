@@ -112,7 +112,7 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai ) 
 {
 	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+//	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
 
 	CStr<30> str;
@@ -133,7 +133,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 			barStack.barArr[BAR_LEVEL]->SetText(str.safe_str());
 			barStack.barArr[BAR_LEVEL]->SetRange(float(xp - pxp) / float(nxp - pxp));
 		}
-		Shield* ishield			= ic->GetShield();
+//		Shield* ishield			= ic->GetShield();
 		RangedWeapon* iweapon	= ic->GetRangedWeapon(0);
 
 		if ( iweapon ) {

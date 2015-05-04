@@ -86,7 +86,7 @@ void PlantScript::DoTick(U32 delta)
 
 	const Vector3F& light = context->engine->lighting.direction;
 	const float		norm = Max(fabs(light.x), fabs(light.z));
-	Vector2I		lightTap = { LRintf(light.x / norm), LRintf(light.z / norm) };
+	Vector2I		lightTap = { int(LRintf(light.x / norm)), int(LRintf(light.z / norm)) };
 	Census*			census = &context->chitBag->census;
 
 	for (int i = 0; i < n; ++i) {
@@ -207,7 +207,7 @@ void PlantScript::DoTick(U32 delta)
 					worldMap->SetPlant(pos2i.x, pos2i.y, wg.Plant(), wg.PlantStage() + 1);
 					worldMap->SetWorldGridHP(pos2i.x, pos2i.y, hp);
 				}
-				if (random.Rand(GROWTH_CHANCE) < (U32)wg.PlantStage()) {
+				if (random.Rand(GROWTH_CHANCE) < wg.PlantStage()) {
 					// Number range reflects wind direction.
 					int dx = -1 + random.Rand(4);	// [-1,2]
 					int dy = -1 + random.Rand(3);	// [-1,1]

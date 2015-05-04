@@ -69,6 +69,8 @@ class Random
 										v = ( upperBound & 0xffff0000 ) ? v : (v ^ (v>>16) );
 										return v % upperBound; }
 
+	int Rand(int upperBound) 		{ return int(Rand(U32(upperBound))); }									
+
 	/** "Roll dice." Has the same bell curve distribution as N dice. Dice start with the 
 		value '1', so RandD2( 2, 6 ) returns a value from 2-12
 	*/

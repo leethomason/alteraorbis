@@ -117,7 +117,8 @@ bool FluidTestScene::Tap(int action, const grinliz::Vector2F& view, const grinli
 	if (!uiHasTap) {
 		Vector3F at = { 0, 0, 0 };
 		float t = 0;
-		int result = IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
+//		int result = 
+		IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, &t);
 		Process3DTap(action, view, world, context.engine);
 		Vector2I sector = { 0, 0 };
 		CircuitSim* circuitSim = context.physicsSims->GetCircuitSim(sector);
@@ -295,7 +296,7 @@ void FluidTestScene::DrawDebugText()
 void FluidTestScene::DoTick(U32 delta)
 {
 	context.worldMap->DoTick(delta, context.chitBag);
-	Vector2I zero = { 0, 0 };
+//	Vector2I zero = { 0, 0 };
 	context.physicsSims->DoTick(delta);
 	context.chitBag->DoTick(delta);
 }

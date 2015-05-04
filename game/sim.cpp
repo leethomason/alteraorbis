@@ -303,7 +303,7 @@ void Sim::SpawnDenizens()
 		SectorPort sp;
 		for (int i = 0; i < 4; ++i) {
 			sp.Zero();
-			Vector2I sector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
+			Vector2I sector = { int(random.Rand(NUM_SECTORS)), int(random.Rand(NUM_SECTORS)) };
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && !cs->InUse()) {
 				const SectorData& sd = context.worldMap->GetSectorData(sector);
@@ -341,7 +341,7 @@ void Sim::SpawnDenizens()
 
 				Vector3F pos = { (float)context.worldMap->Width()*0.5f, 0.0f, (float)context.worldMap->Height()*0.5f };
 				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
-				GameItem * item = 0;
+				//GameItem * item = 0;
 
 				int itemType = -1;
 				switch (random.Rand(4)) {
@@ -530,7 +530,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	CreateTruulgaCore();
 
 	int minuteTick = minuteClock.Delta( delta );
-	int secondTick = secondClock.Delta( delta );
+//	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
 
 #if SPAWN_MOBS > 0

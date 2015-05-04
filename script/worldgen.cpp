@@ -545,7 +545,7 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
 	r.Set(0, 0, 0, 0);
-	static const int LONG  = 4;
+//	static const int LONG  = 4;
 	static const int SHORT = 2;
 	static const int HALF  = SECTOR_SIZE/2;
 
@@ -585,8 +585,8 @@ Vector2F SectorData::PortPos( const grinliz::Rectangle2I portRect, U32 seed )
 
 void WorldGen::AddPorts( SectorData* s )
 {
-	int x = s->x;
-	int y = s->y;
+//	int x = s->x;
+//	int y = s->y;
 
 	for( int i=0; i<4; ++i ) {
 		int port = 1 << i;
@@ -723,7 +723,7 @@ void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int r
 	rot.SetRotation( rotation );
 
 	int cx = featuresSize.x / SECTOR_SIZE;
-	int cy = featuresSize.y / SECTOR_SIZE;
+//	int cy = featuresSize.y / SECTOR_SIZE;
 	int fy = feature / cx;
 	int fx = feature - fy*cx;
 

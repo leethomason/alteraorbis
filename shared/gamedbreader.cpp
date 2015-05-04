@@ -246,6 +246,7 @@ void Reader::RecWalk( const Item* item, int depth )
 		switch( item->AttributeType( i ) ) {
 			case ATTRIBUTE_DATA:
 				printf( "data(#%d %d)", item->GetDataID( name ), item->GetDataSize( name ) );
+				this->AccessData(item, name);
 				break;
 			case ATTRIBUTE_INT_ARRAY:
 				{
@@ -378,6 +379,9 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 									(uLongf*)&dataDesc.size, 
 									(const Bytef*)buffer,
 									dataDesc.compressedSize );
+		if (result != 0) {
+			GLOUTPUT_REL(("Reader::GetData uncompress returned %d. dataID=%d size=%d compressedSize=%d memSize=%d\n", result, dataID, dataDesc.size, dataDesc.compressedSize, memSize));
+		}
 		GLASSERT( result == Z_OK );
 		GLASSERT( dataDesc.size == (U32)memSize );
 	}
@@ -398,7 +402,7 @@ const void* Reader::AccessData( const Item* item, const char* name, int* p_size 
 	size = item->GetDataSize( name );
 	// Make sure we have enough space, including appended null terminator.
 	if ( (size+1) > accessSize ) {
-		accessSize = (size+1) * 5 / 4;
+		accessSize = (size+1);
 		if ( access )
 			access = Realloc( access, accessSize );
 		else

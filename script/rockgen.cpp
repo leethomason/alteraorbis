@@ -31,7 +31,7 @@ float RockGen::Fractal( int x, int y, float octave0, float octave1, float octave
 	float nx1 = OCTAVE_1 * (float)x * INV;
 	float ny1 = OCTAVE_1 * (float)y * INV;
 
-	float n = 1.0f - fabs( noise0->Noise( nx0, ny0, 0 ) - noise1->Noise( nx0, ny0, 0 ) );
+	float n = 1.0f - fabs( noise0->Noise( nx0, ny0, 0 ) - noise1->Noise( nx1, ny1, 0 ) );
 	n = Clamp( n, -1.0f, 1.0f );
 	return n;
 }
@@ -81,8 +81,8 @@ void RockGen::DoThreshold( int seed, float targetFractionBlack, int heightStyle 
 				else if ( heightStyle == NOISE_HEIGHT || heightStyle == NOISE_HIGH_HEIGHT ) {
 
 					const float OCTAVE8  = (float)size / 32;
-					const float OCTAVE16 = (float)size / 16;
-					const float OCTAVE32 = (float)size / 8;	
+					//const float OCTAVE16 = (float)size / 16;
+					//const float OCTAVE32 = (float)size / 8;	
 					const float OCTAVE64 = (float)size / 3;	
 					const float SECOND = 0.6f;
 

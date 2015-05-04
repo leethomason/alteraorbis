@@ -136,7 +136,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				
 				const WorldGrid& wg = worldMap->GetWorldGrid(p.x, p.y);
 				if (wg.Plant()) {
-					int type = wg.Plant() - 1;
+//					int type = wg.Plant() - 1;
 					int stage = wg.PlantStage();
 
 					if (stage >= 2) {

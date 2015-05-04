@@ -792,8 +792,9 @@ void PathCache::AddItem( const Item& item )
 			break;
 		}
 		++index;
-		if ( index == allocated )
+		if ( index == unsigned(allocated) ) {
 			index = 0;
+		}
 	}
 }
 
@@ -811,8 +812,9 @@ const PathCache::Item* PathCache::Find( void* start, void* end )
 			return mem + index;
 		}
 		++index;
-		if ( index == allocated )
+		if ( index == unsigned(allocated )) {
 			index = 0;
+		}
 	}
 }
 

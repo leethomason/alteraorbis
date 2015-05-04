@@ -42,7 +42,20 @@ file(GLOB BUILDER_SOURCES   "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp"
 )
 
 add_executable(builder ${BUILDER_SOURCES})
-target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+target_link_libraries(builder ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+
+### GameDB Reader ###
+
+file(GLOB DBREADER_SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/gamedbreader/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/shared/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/grinliz/*.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/glstreamer.cpp"
+							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/squisher.cpp"
+)
+
+add_executable(dbreader ${DBREADER_SOURCES})
+#target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
 
 ### Altera ###
 

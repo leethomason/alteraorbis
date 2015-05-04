@@ -47,7 +47,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
 
 	RenderAtom atom;
-	Vector2F pos2 = { 0, 0 };
+	//Vector2F pos2 = { 0, 0 };
 
 	for (; currentNews < history->NumNews(); ++currentNews) {
 		const NewsEvent& ne = history->News(currentNews);
@@ -78,8 +78,9 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::FORGED:
 			case NewsEvent::UN_FORGED:
 			case NewsEvent::PURCHASED:
-			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team()))
-				|| sector == homeSector)
+			if ( (    homeCore 
+				  && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team())))
+				|| (sector == homeSector))
 			{
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");

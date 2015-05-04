@@ -141,9 +141,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 	}
 
-	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
+//	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
-	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
+//	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
 	dateLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
@@ -412,32 +412,33 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 {
 	Vector3F at = { 0, 0, 0 };
-	ModelVoxel mv = this->ModelAtMouse(view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at);
-	Vector2I pos2i = { (int)at.x, (int)at.z };
+	this->ModelAtMouse(view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at);
+
+//	Vector2I pos2i = { (int)at.x, (int)at.z };
 
 	// --- Selection display. (Only in desktop interface.)
-	Engine* engine = sim->GetEngine();
+//	Engine* engine = sim->GetEngine();
 	float size = 1.0f;
-	int height = 1;
-	const char* name = "";
+	//int height = 1;
+//	const char* name = "";
 	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();
 	if (buildActive && PlatformHasMouseSupport() && !SettingsManager::Instance()->TouchOn()) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
-			name = "clearMarker1";
+			//name = "clearMarker1";
 			atom = LumosGame::CalcIconAtom("delete");
 		}
 		else {
 			BuildScript buildScript;
 			int s = buildScript.GetData(buildActive).size;
 			if (s == 1) {
-				name = "buildMarker1";
+				//name = "buildMarker1";
 			}
 			else {
 				size = 2.0f;
-				name = "buildMarker2";
+				//name = "buildMarker2";
 			}
 			atom = LumosGame::CalcIconAtom("build");
 		}
@@ -558,12 +559,12 @@ void GameScene::MoveCamera(float dx, float dy)
 
 void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
-	Engine* engine = sim->GetEngine();
+//	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 
 	CoreScript* coreScript = GetHomeCore();
 
-	Vector3F atModel = { 0, 0, 0 };
+//	Vector3F atModel = { 0, 0, 0 };
 	Vector3F plane = { 0, 0, 0 };
 	ModelVoxel mv = ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, Model::MODEL_CLICK_THROUGH, nullptr, &plane);
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
@@ -835,8 +836,8 @@ bool GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 
 	tapView = view;	// justs a temporary to pass through to ItemTapped()
 	bool uiHasTap = ProcessTap(action, view, world);
-	Engine* engine = sim->GetEngine();
-	WorldMap* map = sim->GetWorldMap();
+//	Engine* engine = sim->GetEngine();
+//	WorldMap* map = sim->GetWorldMap();
 	Vector3F at = { 0, 0, 0 };
 	IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, 0);
 
@@ -1325,7 +1326,7 @@ void GameScene::HandleHotKey( int mask )
 		paused = !paused;
 	}
 	else if (mask == GAME_HK_DEBUG_ACTION) {
-		Chit* playerChit = GetPlayerChit();
+//		Chit* playerChit = GetPlayerChit();
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
 
@@ -1755,7 +1756,7 @@ void GameScene::DoTick( U32 delta )
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
 
-	bool debugUiVisible = game->GetDebugUI();
+//	bool debugUiVisible = game->GetDebugUI();
 	bool abandonVisible = (menu->UIMode() == GameSceneMenu::UI_BUILD) && homeCoreScript;
 	abandonButton.SetVisible(abandonVisible);
 	if (!abandonVisible) {

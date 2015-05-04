@@ -45,8 +45,12 @@
 
 using namespace grinliz;
 
-ItemComponent::ItemComponent( GameItem* item ) 
-: slowTick(500), hardpointsModified(true), lastDamageID(0), debugEnabled(false), hardpointsComputed(false)
+ItemComponent::ItemComponent( GameItem* item ) :
+	hardpointsModified(true), 
+	slowTick(500),
+	lastDamageID(0), 
+	debugEnabled(false), 
+	hardpointsComputed(false)
 {
 	for (int i = 0; i < EL_NUM_METADATA; ++i) {
 		hasHardpoint[i] = false;
@@ -301,7 +305,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				Vector3F target;
 				rc->CalcTarget( &target );
 				Vector3F v = (target - info->originOfImpact); 
-				float len = v.Length();
+//				float len = v.Length();
 				v.Normalize();
 
 				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
@@ -480,7 +484,7 @@ int ItemComponent::ProcessEffect(int delta)
 	static const float CHANCE_FIRE_HIGH_IC   = CHANCE_FIRE_HIGH * 0.1f;
 	static const float CHANCE_FIRE_SPREAD_IC = CHANCE_FIRE_SPREAD * 0.1f;
 
-	const float deltaF = float(delta) * 0.001f;
+//	const float deltaF = float(delta) * 0.001f;
 
 	Vector2F pos2 = ToWorld2F(parentChit->Position());
 	Vector2I pos2i = ToWorld2I(pos2);
@@ -644,7 +648,7 @@ int ItemComponent::DoTick( U32 delta )
 		SetHardpoints();
 		hardpointsModified = false;
 	}
-	const ChitContext* context = Context();
+//	const ChitContext* context = Context();
 
 	GameItem* mainItem = itemArr[0];
 
@@ -737,7 +741,7 @@ void ItemComponent::InformCensus(bool add)
 
 void ItemComponent::OnAdd( Chit* chit, bool init )
 {
-	GameItem* mainItem = itemArr[0];
+//	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit, init );
 	hardpointsModified = true;
@@ -750,7 +754,7 @@ void ItemComponent::OnAdd( Chit* chit, bool init )
 
 void ItemComponent::OnRemove() 
 {
-	GameItem* mainItem = itemArr[0];
+//	GameItem* mainItem = itemArr[0];
 	InformCensus(false);
 	super::OnRemove();
 }

@@ -77,7 +77,7 @@ WorldGenScene::~WorldGenScene()
 
 void WorldGenScene::Resize()
 {
-	const Screenport& port = game->GetScreenport();
+//	const Screenport& port = game->GetScreenport();
 	PositionStd(&okay, &cancel);
 
 	float size = gamui2D.Height() * 0.75f;

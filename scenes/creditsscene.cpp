@@ -48,7 +48,7 @@ CreditsScene::~CreditsScene()
 
 void CreditsScene::Resize()
 {
-	const Screenport& port = game->GetScreenport();
+//	const Screenport& port = game->GetScreenport();
 	PositionStd(&okay, 0);
 	LayoutCalculator layout = DefaultLayout();
 

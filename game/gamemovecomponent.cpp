@@ -61,7 +61,7 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 	if ( !render ) return;
 
 	Vector2F newPos = *pos;
-	float rotation = 0;
+	//float rotation = 0;
 	float radius = render->RadiusOfBase();
 
 	const ChitContext* context = Context();

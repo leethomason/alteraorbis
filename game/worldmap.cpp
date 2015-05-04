@@ -235,7 +235,7 @@ void WorldMap::AttatchPhysics(PhysicsSims* sims)
 
 void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 {
-	Vector2I v2 = { v.x, v.z };
+	//Vector2I v2 = { v.x, v.z };
 	int index = INDEX(v.x, v.z);
 	const WorldGrid wasWG = grid[index];
 	
@@ -484,7 +484,7 @@ bool WorldMap::InitPNG( const char* filename,
 		Init( w, h );
 		int x = 0;
 		int y = 0;
-		int color=0;
+		//int color=0;
 		for (unsigned j = 0; j < h; ++j) {
 			for (unsigned i = 0; i < w; ++i) {
 
@@ -499,7 +499,7 @@ bool WorldMap::InitPNG( const char* filename,
 				}
 				else if (c.r() == c.g() && c.g() == c.b()) {
 					grid[index].SetLand(WorldGrid::LAND);
-					color = c.r();
+					//color = c.r();
 				}
 				else if (c == BLUE) {
 					grid[index].SetWater();
@@ -513,7 +513,7 @@ bool WorldMap::InitPNG( const char* filename,
 					features->Push(p);
 				}
 				++x;
-				if (x == w) {
+				if (x == int(w)) {
 					x = 0;
 					++y;
 				}
@@ -747,8 +747,8 @@ void WorldMap::DoTick(U32 delta, ChitBag* chitBag)
 	// Do particles every time.
 	//	ParticleDef pdEmber = engine->particleSystem->GetPD( "embers" );
 	ParticleDef pdSmoke = engine->particleSystem->GetPD(ISC::smoke);
-	ParticleDef pdFire = engine->particleSystem->GetPD(ISC::fire);
-	ParticleDef pdShock = engine->particleSystem->GetPD(ISC::shock);
+	//ParticleDef pdFire = engine->particleSystem->GetPD(ISC::fire);
+	//ParticleDef pdShock = engine->particleSystem->GetPD(ISC::shock);
 
 	for (int i = 0; i < magmaGrids.Size(); ++i) {
 		Rectangle3F r;
@@ -1153,10 +1153,10 @@ void WorldMap::CalcZone( int mapX, int mapY )
 				}
 			}
 			else if ( sz.size > 1 ) {
-				SZ sz00 = { sz.x, sz.y, sz.size/2 };
-				SZ sz10 = { sz.x+sz.size/2, sz.y, sz.size/2 };
-				SZ sz01 = { sz.x, sz.y+sz.size/2, sz.size/2 };
-				SZ sz11 = { sz.x+sz.size/2, sz.y+sz.size/2, sz.size/2 };
+				SZ sz00 = { U8(sz.x), U8(sz.y), U8(sz.size/2) };
+				SZ sz10 = { U8(sz.x+sz.size/2), U8(sz.y), U8(sz.size/2) };
+				SZ sz01 = { U8(sz.x), U8(sz.y+sz.size/2), U8(sz.size/2) };
+				SZ sz11 = { U8(sz.x+sz.size/2), U8(sz.y+sz.size/2), U8(sz.size/2) };
 				stack.Push( sz00 );
 				stack.Push( sz10 );
 				stack.Push( sz01 );
@@ -1475,7 +1475,7 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 
 	SectorPort sp;
 	while ( true ) {
-		Vector2I sector = { random->Rand( NUM_SECTORS ), random->Rand( NUM_SECTORS ) };
+		Vector2I sector = { int(random->Rand( NUM_SECTORS )), int(random->Rand( NUM_SECTORS )) };
 		const SectorData& sd = GetSectorData( sector );
 		if ( sd.HasCore() ) {
 			GLASSERT( sd.ports );
@@ -1686,8 +1686,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
 				Vector2I originA, originB;
-				WorldGrid* rA = ToGrid( pathRegions[i], &originA );
-				WorldGrid* rB = ToGrid( pathRegions[i+1], &originB );
+				//WorldGrid* rA = ToGrid( pathRegions[i], &originA );
+				//WorldGrid* rB = ToGrid( pathRegions[i+1], &originB );
 
 				Rectangle2F bA = ZoneBounds( originA.x, originA.y );
 				Rectangle2F bB = ZoneBounds( originB.x, originB.y );					
@@ -1986,7 +1986,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter - water
 		{ BLACKMAG_X(1), BLACKMAG_Y(5) },	// emitter - lava
 	};
-	static const int NUM = GL_C_ARRAY_SIZE(UV);
+	//static const int NUM = GL_C_ARRAY_SIZE(UV);
 
 	static const int PORCH = 7;
 	static const int PAVE = 4;
@@ -2477,7 +2477,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 								}
 							}
 							if (okay) {
-								WorldGrid* wg = &grid[INDEX(x, y)];
+								//WorldGrid* wg = &grid[INDEX(x, y)];
 								SetEmitter(x, y, true, WorldGrid::FLUID_WATER);
 								++nRandomEmitters;
 							}

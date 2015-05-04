@@ -301,7 +301,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
-		LumosGame* game = Context()->game;
+//		LumosGame* game = Context()->game;
 		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand(), 0, 0);
 		chit->GetItem()->SetProperName( p );
 	}
@@ -462,7 +462,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( new HealthComponent());
 	chit->SetPosition( (float)pos.x+0.5f, 0, (float)pos.y+0.5f );
 
-	Vector2I sector = ToSector( pos );
+//	Vector2I sector = ToSector( pos );
 	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
 
 	if (XenoAudio::Instance()) {
@@ -632,12 +632,12 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 }
 
 
-Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzz )
+Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& _pos, Wallet* src, bool fuzz )
 {
-	Vector2F v2 = { pos.x, pos.z };
+	Vector3F pos = _pos;
 	if ( fuzz ) {
-		v2.x = floorf(pos.x) + random.Uniform();
-		v2.y = floorf(pos.y) + random.Uniform();
+		pos.x = floorf(_pos.x) + random.Uniform();
+		pos.y = floorf(_pos.y) + random.Uniform();
 	}
 
 	int crystal = -1;
@@ -1253,7 +1253,7 @@ IString LumosChitBag::StaticNameGen(const gamedb::Reader* database, const char* 
 		const void* data = database->AccessData(item, "triplets", &size);
 		MarkovGenerator gen((const char*)data, size, seed);
 
-		int len = max + 1;
+		//int len = max + 1;
 		int error = 100;
 		while (error--) {
 			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {

@@ -65,7 +65,7 @@ void ParticleScene::Clear()
 
 void ParticleScene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = DefaultLayout();
@@ -144,7 +144,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 			if ( buttonArr[i]->ToPushButton() ) {
 				Vector3F pos = { SIZE/2, 0.01f, SIZE/2 };
 				Vector3F normal = { 0, 1, 0 };
-				Vector3F dir = { 1, 0, 0 };
+//				Vector3F dir = { 1, 0, 0 };
 				engine->particleSystem->EmitPD( *def, pos, normal, 0 );
 			}
 		}
@@ -159,7 +159,7 @@ void ParticleScene::DoTick( U32 deltaTime )
 		if ( toggle && toggle->Down() ) {
 			Vector3F pos = { SIZE/2, 0.01f, SIZE/2 };
 			Vector3F normal = { 0, 1, 0 };
-			Vector3F dir = { 1, 0, 0 };
+			//Vector3F dir = { 1, 0, 0 };
 			ParticleDef* def = &particleDefArr[i];
 
 			if ( def->spread == ParticleDef::SPREAD_POINT ) {

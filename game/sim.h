@@ -52,7 +52,7 @@ class Sim : public IChitListener, public IUITracker
 {
 public:
 	Sim( LumosGame* game );
-	~Sim();
+	virtual ~Sim();
 
 	void DoTick( U32 deltaTime, bool useAreaOfInterest=true );
 	void Draw3D( U32 deltaTime );

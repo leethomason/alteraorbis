@@ -161,9 +161,9 @@ BattleTestScene::~BattleTestScene()
 
 void BattleTestScene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 
-	const Screenport& port = context.game->GetScreenport();
+//	const Screenport& port = context.game->GetScreenport();
 	LayoutCalculator layout = DefaultLayout();
 
 	layout.PosAbs( &okay, 0, -1 );
@@ -253,7 +253,7 @@ void BattleTestScene::LoadMap()
 		context.worldMap->SetRock( v.x, v.y, 1, false, 0 );
 	}
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+//	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 
 	for( int i=0; i<features.Size(); ++i ) {
 		const Vector2I& v = features[i];
@@ -467,7 +467,7 @@ bool BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
-		bool tap = Process3DTap( action, view, world, context.engine );
+		Process3DTap( action, view, world, context.engine );
 		if ( action == GAME_TAP_DOWN ) {
 #if 1
 			Vector3F at;

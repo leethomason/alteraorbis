@@ -49,7 +49,7 @@ class GameScene : public Scene,
 	typedef Scene super;
 public:
 	GameScene( LumosGame* game );
-	~GameScene();
+	virtual ~GameScene();
 
 	virtual void DoTick( U32 deltaTime );
 

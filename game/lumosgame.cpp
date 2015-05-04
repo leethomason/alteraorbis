@@ -62,7 +62,7 @@ LumosGame::~LumosGame()
 
 void LumosGame::InitButtonLooks()
 {
-	TextureManager* tm = TextureManager::Instance();
+//	TextureManager* tm = TextureManager::Instance();
 
 	static const char* UP[2]   = { "buttonUp", "tabUp" };
 	static const char* DOWN[2] = { "buttonDown", "tabDown" };
@@ -197,7 +197,7 @@ RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 	float u = ((float)x+0.5f)/(float)p->dx;
 	float v = 1.0f - ((float)y+0.5f)/(float)p->dy;
 
-	Vector2I c = { 0, 0 };
+	//Vector2I c = { 0, 0 };
 	Texture* texture = TextureManager::Instance()->GetTexture( "palette" );
 
 	// FIXME: should be normal_opaque?

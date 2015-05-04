@@ -84,7 +84,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& view, const grinliz
 		return tapCaptured;		// whether it was captured.
 	}
 	else if ( action == GAME_TAP_UP ) {
-		const UIItem* dragStart = gamui2D.TapCaptured();
+//		const UIItem* dragStart = gamui2D.TapCaptured();
 		uiItem = gamui2D.TapUp( window.x, window.y );
 		
 		if ( dragStarted ) {

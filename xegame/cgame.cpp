@@ -72,7 +72,7 @@ void DeleteGame( void* handle )
 {
 	CheckThread check;
 
-	GLOUTPUT(( "DeleteGame. handle=%x\n", handle ));
+	GLOUTPUT(( "DeleteGame. handle=%p\n", handle ));
 	if ( handle ) {
 		Game* game = (Game*)handle;
 		delete game;
@@ -90,7 +90,7 @@ void DeleteGame( void* handle )
 void GameResize( void* handle, int width, int height, int rotation ) {
 	CheckThread check;
 
-	GLOUTPUT(( "GameResize. handle=%x\n", handle ));
+	GLOUTPUT(( "GameResize. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->Resize( width, height, rotation );
 }
@@ -99,7 +99,7 @@ void GameResize( void* handle, int width, int height, int rotation ) {
 void GameSave( void* handle ) {
 	CheckThread check;
 
-	GLOUTPUT(( "GameSave. handle=%x\n", handle ));
+	GLOUTPUT(( "GameSave. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->Save();
 }
@@ -109,7 +109,7 @@ void GameDeviceLoss( void* handle )
 {
 	CheckThread check;
 
-	GLOUTPUT(( "GameDeviceLoss. handle=%x\n", handle ));
+	GLOUTPUT(( "GameDeviceLoss. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->DeviceLoss();
 }

@@ -149,7 +149,7 @@ AnimationScene::~AnimationScene()
 
 void AnimationScene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = DefaultLayout();

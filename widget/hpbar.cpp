@@ -81,7 +81,7 @@ void HPBar::Set(ItemComponent* ic)
 
 bool HPBar::DoLayout()
 {
-	bool r = DigitalBar::DoLayout();
+	DigitalBar::DoLayout();
 	float size = this->Height() * 0.8f;
 	rangedIcon.SetSize(size, size);
 	meleeIcon.SetSize(size, size);

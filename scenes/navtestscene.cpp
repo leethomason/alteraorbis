@@ -111,7 +111,7 @@ NavTestScene::~NavTestScene()
 
 void NavTestScene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	PositionStd( &okay, 0 );
 	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &block, 1, -1 );
@@ -170,7 +170,7 @@ bool NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 	bool uiHasTap = ProcessTap( action, view, world );
 
 	if ( !uiHasTap && action == GAME_TAP_UP) {
-		Vector3F oldMark = tapMark;
+//		Vector3F oldMark = tapMark;
 
 		Matrix4 mvpi;
 		Ray ray;
