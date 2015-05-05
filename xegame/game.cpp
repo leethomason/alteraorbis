@@ -378,19 +378,6 @@ void Game::CreateSceneLower( const SceneNode& in, SceneNode* node )
 }
 
 
-/*
-void Game::LoadAtoms()
-{
-	TextureManager* tm = TextureManager::Instance();
-
-	renderAtoms[ATOM_TEXT].Init(   (const void*)UIRenderer::RENDERSTATE_UI_TEXT, 
-		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-	renderAtoms[ATOM_TEXT_D].Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
-		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
-}
-*/
-
-
 void Game::LoadPalettes()
 {
 	const gamedb::Item* parent = database0->Root()->Child( "data" )->Child( "palettes" );

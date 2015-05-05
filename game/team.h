@@ -93,6 +93,11 @@ public:
 	int CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web);
 	int Attitude(CoreScript* center, CoreScript* eval);
 
+	// Go to war? If 'commit' is true, actually do it,
+	// else a query. Returns success.
+	bool War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
+	int  Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
+
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)
 			*group = (t & 0xff);
@@ -127,7 +132,7 @@ public:
 
 private:
 	enum {
-		TREATY_TIME = 10*1000
+		TREATY_TIME = 10*60*1000	// minutes of game time.
 	};
 
 	static ERelate AttitudeToRelationship(int d) {

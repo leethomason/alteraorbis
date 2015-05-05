@@ -3,6 +3,21 @@
 - more diplomacy testing
 - diplomacy art (for map)
 - teleport out on war switch
+- domain takeover
+- cross swords on map: fighting there?
+- remove industrial from switches
+- top down: can’t tell on switch from off switch. 
+- switch should fire if avatar goes there
+- flag - for local control - awkward. just click switches to go there
+- kiosks higher on recommendation list
+- name of buildings - pop up? info?
+- weapon stats: write units
+- detail view of building w/ mouse down
+- temple charge: show differently? bar?
+- don’t build up a squad if deployed
+- auto-pickup loot? obnoxious, but list isn’t great either
+- make sure domain takeover works in next version
+- shield value over-accounts for reload time
 
 - world gen too slow in debug
 - GT: food as medkit

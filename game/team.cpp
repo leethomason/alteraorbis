@@ -31,6 +31,11 @@ void Team::DoTick(int delta)
 		treaties[i].warTimer -= delta;
 		if (treaties[i].peaceTimer < 0) treaties[i].peaceTimer = 0;
 		if (treaties[i].warTimer < 0) treaties[i].warTimer = 0;
+
+		if (treaties[i].warTimer == 0 && treaties[i].peaceTimer == 0) {
+			treaties.SwapRemove(i);
+			--i;
+		}
 	}
 }
 
@@ -364,3 +369,54 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 	return d;
 }
 
+
+bool Team::War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
+{
+	if (c0 && c1 && (c0 != c1) && c0->InUse() && c1->InUse() && !Team::IsDeityCore(c0->ParentChit()->Team()) && !Team::IsDeityCore(c1->ParentChit()->Team())) {
+		ERelate relate = GetRelationship(c0->ParentChit(), c1->ParentChit());
+		if (relate != ERelate::ENEMY) {
+			SymmetricTK stk(c0->ParentChit()->Team(), c1->ParentChit()->Team());
+			int idx = treaties.Find(stk);
+			if (idx < 0) {
+				// no treaty in place, of either kind.
+				if (commit) {
+					stk.warTimer = TREATY_TIME;
+					treaties.Push(stk);
+				}
+				CalcAttitude(c0, c1, web);
+				CalcAttitude(c1, c0, web);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
+{
+	if (c0 && c1 && (c0 != c1) && c0->InUse() && c1->InUse() && !Team::IsDeityCore(c0->ParentChit()->Team()) && !Team::IsDeityCore(c1->ParentChit()->Team())) {
+		ERelate relate = GetRelationship(c0->ParentChit(), c1->ParentChit());
+		if (relate == ERelate::ENEMY) {
+			SymmetricTK stk(c0->ParentChit()->Team(), c1->ParentChit()->Team());
+			int idx = treaties.Find(stk);
+			if (idx < 0) {
+				// no treaty in place, of either kind.
+				if (commit) {
+					stk.peaceTimer = TREATY_TIME;
+					treaties.Push(stk);
+				}
+				CalcAttitude(c0, c1, web);
+				CalcAttitude(c1, c0, web);
+
+				int a0 = Team::Instance()->Attitude(c0, c1);
+				int a1 = Team::Instance()->Attitude(c1, c0);
+				int a = Min(a0, a1);
+				int cost = -a * 50;
+				cost = Min(cost, 50);
+				return cost;
+			}
+		}
+	}
+	return 0;
+}
