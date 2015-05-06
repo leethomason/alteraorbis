@@ -293,15 +293,10 @@ x more natural skin tones
 http://weloveiconfonts.com/ : entypo
 Neuropol
 
+-- Notes --
+zlib:	5832
+fastLZ:	7373
 
-Currently:
-- farm efficiency
-- weapon quality
-Consider:
-- sleep tube limit
-- food limit
-- grid access
-- food drives population?
 
 ---------- Defer ----------
 x mobs rush new domains (teleport out? really really sector herd?)
