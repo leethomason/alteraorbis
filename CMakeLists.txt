@@ -38,7 +38,7 @@ file(GLOB BUILDER_SOURCES   "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/importers/import.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/importers/off.cpp"
 
-							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/FastLZ/*.c"
 )
 
 add_executable(builder ${BUILDER_SOURCES})
@@ -49,7 +49,7 @@ target_link_libraries(builder ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
 file(GLOB DBREADER_SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/gamedbreader/*.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/shared/*.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/grinliz/*.cpp"
-							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/FastLZ/*.c"
 							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/glstreamer.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/squisher.cpp"
 )
@@ -79,7 +79,7 @@ file(GLOB ALTERA_SOURCES    "${CMAKE_CURRENT_SOURCE_DIR}/ai/*.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/glstreamer.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/xarchive/squisher.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/markov/markov.cpp"							
-							"${CMAKE_CURRENT_SOURCE_DIR}/zlib/*.c"
+							"${CMAKE_CURRENT_SOURCE_DIR}/FastLZ/*.c"
 )
 
 add_executable(alteraorbis ${ALTERA_SOURCES})
