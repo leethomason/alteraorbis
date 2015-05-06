@@ -26,12 +26,7 @@
 
 #include "gamedbreader.h"
 #include "../grinliz/glstringutil.h"	// FIXME: only used for child index snprintf. Can and should be removed.
-
-#ifdef ANDROID_NDK
-#	include <zlib.h>		// Built in zlib support.
-#else
-#	include "../zlib/zlib.h"
-#endif
+#include "../FastLZ/fastlz.h"
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4996 )
@@ -375,14 +370,15 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 		}
 		fread( buffer, dataDesc.compressedSize, 1, fp );
 
-		int result = uncompress(	(Bytef*)target, 
-									(uLongf*)&dataDesc.size, 
-									(const Bytef*)buffer,
-									dataDesc.compressedSize );
-		if (result != 0) {
-			GLOUTPUT_REL(("Reader::GetData uncompress returned %d. dataID=%d size=%d compressedSize=%d memSize=%d\n", result, dataID, dataDesc.size, dataDesc.compressedSize, memSize));
+//		int result = uncompress(	(Bytef*)target, 
+//									(uLongf*)&dataDesc.size, 
+//									(const Bytef*)buffer,
+//									dataDesc.compressedSize );
+		int resultSize = fastlz_decompress(buffer, dataDesc.compressedSize, target, dataDesc.size);
+
+		if (resultSize != dataDesc.size) {
+			GLOUTPUT_REL(("Reader::GetData uncompress returned size %d. dataID=%d size=%d compressedSize=%d memSize=%d\n", resultSize, dataID, dataDesc.size, dataDesc.compressedSize, memSize));
 		}
-		GLASSERT( result == Z_OK );
 		GLASSERT( dataDesc.size == (U32)memSize );
 	}
 }
