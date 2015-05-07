@@ -53,72 +53,71 @@ Writer::~Writer()
 }
 
 
-void Writer::Save( const char* filename )
+void Writer::Save(const char* filename)
 {
-	FILE* fp = fopen( filename, "wb" );
-	GLASSERT( fp );
-	if ( !fp ) {
+	FILE* fp = fopen(filename, "wb");
+	GLASSERT(fp);
+	if (!fp) {
 		return;
 	}
 
 	// Get all the strings used for anything to build a string pool.
 	CDynArray< IString > poolVec;
-	stringPool->GetAllStrings( &poolVec );
+	stringPool->GetAllStrings(&poolVec);
 
 	poolVec.Sort();
 
 	// --- Header --- //
 	HeaderStruct headerStruct;	// come back later and fill in.
-	fwrite( &headerStruct, sizeof(HeaderStruct), 1, fp );
+	fwrite(&headerStruct, sizeof(HeaderStruct), 1, fp);
 
 	// --- String Pool --- //
 	headerStruct.nString = poolVec.Size();
-	U32 mark = ftell( fp ) + 4*poolVec.Size();		// position of first string.
-	for( int i=0; i<poolVec.Size(); ++i ) {
-		WriteU32( fp, mark );
+	U32 mark = ftell(fp) + 4 * poolVec.Size();		// position of first string.
+	for (int i = 0; i < poolVec.Size(); ++i) {
+		WriteU32(fp, mark);
 		mark += poolVec[i].size() + 1;				// size of string and null terminator.
 	}
-	for( int i=0; i<poolVec.Size(); ++i ) {
-		fwrite( poolVec[i].c_str(), poolVec[i].size()+1, 1, fp );
+	for (int i = 0; i < poolVec.Size(); ++i) {
+		fwrite(poolVec[i].c_str(), poolVec[i].size() + 1, 1, fp);
 	}
 	// Move to a 32-bit boundary.
-	while( ftell(fp)%4 ) {
-		fputc( 0, fp );
+	while (ftell(fp) % 4) {
+		fputc(0, fp);
 	}
 
 	// --- Items --- //
-	headerStruct.offsetToItems = ftell( fp );
+	headerStruct.offsetToItems = ftell(fp);
 	grinliz::CDynArray< WItem::MemSize > dataPool;
 	grinliz::CDynArray< U8 > buffer;
 
-	root->Save( fp, poolVec, &dataPool );
+	root->Save(fp, poolVec, &dataPool);
 
 	// --- Data Description --- //
-	headerStruct.offsetToDataDesc = ftell( fp );
+	headerStruct.offsetToDataDesc = ftell(fp);
 
 	// reserve space for offsets
 	grinliz::CDynArray< DataDescStruct > ddsVec;
-	ddsVec.PushArr( dataPool.Size() );
-	fwrite( ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
+	ddsVec.PushArr(dataPool.Size());
+	fwrite(ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp);
 
 	// --- Data --- //
-	headerStruct.offsetToData = ftell( fp );
+	headerStruct.offsetToData = ftell(fp);
 	headerStruct.nData = dataPool.Size();
 
-	for( int i=0; i<dataPool.Size(); ++i ) {
+	for (int i = 0; i < dataPool.Size(); ++i) {
 		WItem::MemSize* m = &dataPool[i];
 
-		ddsVec[i].offset = ftell( fp );
+		ddsVec[i].offset = ftell(fp);
 		ddsVec[i].size = m->size;
 
 		int compressed = 0;
 		int compressedSize = 0;
 
-		if ( m->size > 20 && dataPool[i].compressData ) {
+		if (m->size > 20 && dataPool[i].compressData) {
 			buffer.Clear();
 			buffer.PushArr(fastlz_compress_buffer_size(m->size));
 
-			//int result = compress( (Bytef*)&buffer[0], &compressedSize, (const Bytef*)m->mem, m->size );
 			compressedSize = fastlz_compress(m->mem, m->size, &buffer[0]);
 			GLASSERT(compressedSize > 0);
 
@@ -127,31 +126,31 @@ void Writer::Save( const char* filename )
 			}
 		}
 
-		if ( compressed ) {
-			fwrite( &buffer[0], compressedSize, 1, fp );
+		if (compressed) {
+			fwrite(&buffer[0], compressedSize, 1, fp);
 			ddsVec[i].compressedSize = compressedSize;
 		}
 		else {
-			fwrite( m->mem, m->size, 1, fp );
+			fwrite(m->mem, m->size, 1, fp);
 			ddsVec[i].compressedSize = m->size;
 		}
 	}
-	unsigned totalSize = ftell( fp );
+	unsigned totalSize = ftell(fp);
 
 	// --- Data Description, revisited --- //
-	fseek( fp, headerStruct.offsetToDataDesc, SEEK_SET );
-	fwrite( ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
+	fseek(fp, headerStruct.offsetToDataDesc, SEEK_SET);
+	fwrite(ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp);
 
 	// Go back and patch header:
-	fseek( fp, 0, SEEK_SET );
-	fwrite( &headerStruct, sizeof(headerStruct), 1, fp );
-	fclose( fp );
+	fseek(fp, 0, SEEK_SET);
+	fwrite(&headerStruct, sizeof(headerStruct), 1, fp);
+	fclose(fp);
 
-	GLOUTPUT(( "Database write complete. size=%dk stringPool=%dk tree=%dk data=%dk\n",
-			   totalSize / 1024,
-			   headerStruct.offsetToItems / 1024,
-			   ( headerStruct.offsetToData - headerStruct.offsetToItems ) / 1024,
-			   ( totalSize - headerStruct.offsetToData ) / 1024 ));
+	GLOUTPUT(("Database write complete. size=%dk stringPool=%dk tree=%dk data=%dk\n",
+		totalSize / 1024,
+		headerStruct.offsetToItems / 1024,
+		(headerStruct.offsetToData - headerStruct.offsetToItems) / 1024,
+		(totalSize - headerStruct.offsetToData) / 1024));
 }
 
 

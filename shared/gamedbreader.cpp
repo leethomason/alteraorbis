@@ -370,10 +370,6 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 		}
 		fread( buffer, dataDesc.compressedSize, 1, fp );
 
-//		int result = uncompress(	(Bytef*)target, 
-//									(uLongf*)&dataDesc.size, 
-//									(const Bytef*)buffer,
-//									dataDesc.compressedSize );
 		int resultSize = fastlz_decompress(buffer, dataDesc.compressedSize, target, dataDesc.size);
 
 		if (resultSize != dataDesc.size) {
