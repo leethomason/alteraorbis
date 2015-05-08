@@ -67,7 +67,7 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 	context.engine		= new Engine( port, database, context.worldMap );
 	weather				= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	reserveBank			= new ReserveBank();
-	teamInfo			= new Team();
+	teamInfo			= new Team(database);
 	visitors			= new Visitors();
 
 	context.engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -276,13 +276,30 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		if (chit->GetComponent("CoreScript")) {
 			Vector2I pos2i = ToWorld2I(chit->Position());
 			Vector2I sector = ToSector(pos2i);
-			coreCreateList.Push(sector);
+
+			int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
+			Chit* deleter = context.chitBag->GetChit(deleterID);
+			int superTeam = 0;
+			if (   deleter 
+				&& (deleter->Team() == Team::Instance()->SuperTeam(deleter->Team())) 
+				&& Team::IsDenizen(chit->Team())) 
+			{
+				superTeam = deleter->Team();
+			}
 
 			if (chit->Team() != TEAM_NEUTRAL) {
-				int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
-				Chit* deleter = context.chitBag->GetChit(deleterID);
-				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0, chit->Team());
-				context.chitBag->GetNewsHistory()->Add(news);
+				if (superTeam) {
+					CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
+					coreCreateList.Push(data);
+					NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID(), deleter->Team());
+					context.chitBag->GetNewsHistory()->Add(news);
+				}
+				else {
+					CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
+					coreCreateList.Push(data);
+					NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0, chit->Team());
+					context.chitBag->GetNewsHistory()->Add(news);
+				}
 			}
 		}
 	}
@@ -521,13 +538,34 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	// From the CHIT_DESTROYED_START we have a list of
 	// Cores that will be going away...check them here,
 	// so that we replace as soon as possible.
-	for (int i = 0; i < coreCreateList.Size(); ++i ) {
-		Vector2I sector = coreCreateList[i];
-		CoreScript* sc = CoreScript::GetCore(sector);
+	while (!coreCreateList.Empty()) {
+		CreateCoreData data = coreCreateList.Pop();
+		CoreScript* sc = CoreScript::GetCore(data.sector);
+		Vector2I sector = data.sector;
+
 		if (!sc) {
-			CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
-			coreCreateList.SwapRemove(i);
-			--i;
+			if (   data.wantsTakeover 
+				&& data.conqueringTeam 
+				&& (Team::Instance()->SuperTeam(data.conqueringTeam) == data.conqueringTeam)) 
+			{
+				// The case where this domain is conquered. Switch to a sub-domain team ID,
+				// and switch the existing team over. Intentionally limit to CChitArray items so there
+				// isn't a full switch over.
+
+				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
+				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
+				CoreScript::CreateCore(sector, teamID, &context);
+
+				CChitArray arr;
+				TeamFilter filter(data.defeatedTeam);
+				Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
+				for (Chit* c : arr) {
+					c->GetItem()->SetTeam(teamID);
+				}
+			}
+			else {
+				CoreScript::CreateCore(sector, TEAM_NEUTRAL, &context);
+			}
 		}
 	}
 	CreateTruulgaCore();

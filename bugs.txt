@@ -1,10 +1,20 @@
-- war button
-- peace button
+x war button
+x peace button
 - more diplomacy testing
 - diplomacy art (for map)
-- teleport out on war switch
 - domain takeover
-- cross swords on map: fighting there?
+	x super / sub team infrastructure
+	x sub team names
+	- clean up console: don't need "team TechHub"
+	- sub teams "released" on super-domain loss
+	- map shows sub-domains
+	- news events of 
+		- aquisition, 
+		- loss, and 
+		- fall of super-domain
+	- rules for sub-teams (must be adjacent? near?)
+
+- cross swords on map: fighting there? confusing icons
 - remove industrial from switches
 - top down: can’t tell on switch from off switch. 
 - switch should fire if avatar goes there
@@ -19,6 +29,7 @@
 - make sure domain takeover works in next version
 - shield value over-accounts for reload time
 
+- teleport out on war switch
 - world gen too slow in debug
 - GT: food as medkit
 - GT: suggestion - pick up and use food as medkit

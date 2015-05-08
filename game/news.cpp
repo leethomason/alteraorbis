@@ -114,6 +114,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Greater " MOB_Destroyed,
 		"Domain " MOB_Created,
 		"Domain " MOB_Destroyed,
+		"Domain Conquered ",
 		"Roque Joins",
 		"Forged",
 		MOB_Destroyed,
@@ -184,7 +185,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		domain = sd.name;
 	}
 
-	IString teamName = Team::TeamName(team);
+	IString teamName = Team::Instance()->TeamName(team);
 
 	switch (what) {
 		case DENIZEN_CREATED:

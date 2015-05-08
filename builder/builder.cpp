@@ -376,7 +376,6 @@ void ProcessMarkov(XMLElement* data)
 	builder.Process();
 	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
 
-#if 1
 	HashTable<U32, GLString> nameTable;
 	MarkovGenerator generator(builder.Data(), builder.NumBytes(), 1);
 	for (int i = 0; i < 4000 && nameTable.Size() < 1000; ++i) {
@@ -396,11 +395,6 @@ void ProcessMarkov(XMLElement* data)
 		nameChild->SetString("name", nameTable.GetValue(i).c_str());
 	}
 	printf("markovName '%s' numNames=%d\n", assetName.c_str(), nameTable.Size());
-#else
-	witem->SetData("triplets", builder.Data(), builder.NumBytes(), false);	// prefer fast access to size
-	printf("markovName '%s'\n", assetName.c_str());
-	totalDataMem += builder.NumBytes();
-#endif
 	fclose(read);
 }
 
@@ -409,6 +403,8 @@ void ProcessMarkovWord( XMLElement* data )
 {
 	GLString assetName, pathName;
 	ParseNames( data, &assetName, &pathName, 0 );
+	bool insertSpace = true;
+	data->QueryAttribute("space", &insertSpace);
 
 	// copy the entire file.
 #if defined( _MSC_VER )
@@ -430,13 +426,7 @@ void ProcessMarkovWord( XMLElement* data )
 	char buffer[256];
 	int section = 0;
 	static const int MAX_SECTIONS = 3;
-
-	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
-	gamedb::WItem* child[MAX_SECTIONS] = { 0, 0, 0 };
-	GLASSERT(MAX_SECTIONS == 3);
-	child[0] = witem->FetchChild("words0");
-	child[1] = witem->FetchChild("words1");
-	child[2] = witem->FetchChild("words2");
+	CDynArray<GLString> sectionArr[MAX_SECTIONS];
 
 	while( fgets( buffer, 256, read )) {
 		// Filter out comments.
@@ -457,13 +447,37 @@ void ProcessMarkovWord( XMLElement* data )
 		}
 		else {
 			char* q = (char*)strchr(p, '\n');
-			if (q)
-				*q = 0;
-			child[section]->SetString(p, p);
+			if (q) *q = 0;
+			GLString str(p);
+			sectionArr[section].Push(str);
 		}
 	}
-
 	fclose( read );
+
+	CDynArray<GLString> nameList;
+	GLASSERT(section == 1);	// just not a general algorithm.
+	for (int i = 0; i < sectionArr[0].Size(); ++i) {
+		for (int j = 0; j < sectionArr[1].Size(); ++j) {
+			GLString str = sectionArr[0][i];
+			if (insertSpace) str += " ";
+			str.append(sectionArr[1][j]);
+			nameList.Push(str);
+		}
+	}
+	Random random;
+	random.ShuffleArray(nameList.Mem(), nameList.Size());
+
+	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
+	gamedb::WItem* child = witem->FetchChild("names");
+
+	int SIZE = nameList.Size();
+	if (SIZE > 1000) SIZE = 1000;
+
+	for (int i = 0; i < SIZE; ++i) {
+		gamedb::WItem* nameChild = child->FetchChild(i);
+		nameChild->SetString("name", nameList[i].safe_str());
+	}
+	printf("markovName-words '%s' numNames=%d\n", assetName.c_str(), SIZE );
 }
 
 

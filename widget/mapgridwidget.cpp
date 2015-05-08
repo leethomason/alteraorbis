@@ -135,7 +135,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	if (!compact) {
 		const char* owner = "";
 		if (coreScript->InUse()) {
-			owner = Team::TeamName(coreScript->ParentChit()->Team()).safe_str();
+			owner = Team::Instance()->TeamName(coreScript->ParentChit()->Team()).safe_str();
 		}
 		str.Format("%s\n%s", sd.name.c_str(), owner);
 		textLabel.SetText(str.safe_str());

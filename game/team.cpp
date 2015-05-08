@@ -1,5 +1,6 @@
 #include "team.h"
 #include "visitorweb.h"
+#include "lumoschitbag.h"
 #include "../script/corescript.h"
 #include "../grinliz/glutil.h"
 #include "../xegame/istringconst.h"
@@ -11,10 +12,11 @@ using namespace grinliz;
 
 Team* Team::instance = 0;
 
-Team::Team()
+Team::Team(const gamedb::Reader* db)
 {
 	GLASSERT(!instance);
 	instance = this;
+	database = db;
 	idPool = 1;	// id=0 is rogue.
 }
 
@@ -100,11 +102,24 @@ grinliz::IString Team::TeamName(int team)
 
 	switch (group) {
 		case TEAM_HOUSE:
-		if (id)
-			str.Format("House-%x", id);
-		else
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		if (id) {
+			int superTeam = this->SuperTeam(team);
+			if (superTeam == team) {
+				name = LumosChitBag::StaticNameGen(database, "domainNames", id);
+			}
+			else { 
+				IString super = LumosChitBag::StaticNameGen(database, "domainNames", Team::ID(superTeam));
+				IString sub   = LumosChitBag::StaticNameGen(database, "domainNames", id);
+				str.Format("%s.%s", sub.safe_str(), super.safe_str());
+				name = StringPool::Intern(str.c_str());
+			}
+		}
+		else {
 			str = "House";
-		name = StringPool::Intern(str.c_str());
+			name = StringPool::Intern(str.c_str());
+		}
 		break;
 
 		case TEAM_TROLL:
@@ -112,22 +127,6 @@ grinliz::IString Team::TeamName(int team)
 		// any troll core is by definition
 		// Truulga. (At least at this point.)
 		name = ISC::Truulga;
-		break;
-
-		case TEAM_GOB:
-		if (id)
-			str.Format("Gobmen-%x", id);
-		else
-			str = "Gobmen";
-		name = StringPool::Intern(str.c_str());
-		break;
-
-		case TEAM_KAMAKIRI:
-		if (id)
-			str.Format("Kamakiri-%x", id);
-		else
-			str = "Kamakiri";
-		name = StringPool::Intern(str.c_str());
 		break;
 
 		case TEAM_DEITY:
@@ -420,3 +419,28 @@ int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 	}
 	return 0;
 }
+
+
+void Team::AddSubteam(int super, int sub)
+{
+	// Run the array; make sure that 'sub' isn't a super.
+	// Do nothing if exists, etc.
+	for (const Control& c : control) {
+		GLASSERT(c.super != sub);	// oops.
+		if (c.super == super && c.sub == sub) return;
+	}
+	Control c = { super, sub };
+	control.Push(c);
+}
+
+int Team::SuperTeam(int team) const
+{
+	if (team == 0) return 0;
+	for (const Control& c : control) {
+		if (c.sub == team) {
+			return c.super;
+		}
+	}
+	return team;
+}
+

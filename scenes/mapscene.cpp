@@ -276,7 +276,7 @@ void MapScene::DrawMap()
 		const char* owner = "";
 		if (coreScript) {
 			if ( coreScript->InUse() ) {
-				owner = Team::TeamName( coreScript->ParentChit()->Team() ).safe_str();
+				owner = Team::Instance()->TeamName( coreScript->ParentChit()->Team() ).safe_str();
 			}
 		}
 		str.Format( "%s\n%s", sd.name.safe_str(), owner );

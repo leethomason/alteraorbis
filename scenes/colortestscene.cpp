@@ -260,7 +260,7 @@ void ColorTestScene::ItemTapped( const gamui::UIItem* item )
 		else if (currentTeamGroup == TEAM_GOB) currentTeamGroup = TEAM_KAMAKIRI;
 		else GLASSERT(0);
 
-		teamButton.SetText(Team::TeamName(currentTeamGroup).safe_str());
+		teamButton.SetText(Team::Instance()->TeamName(currentTeamGroup).safe_str());
 		reviewMode = true;
 		DoProcedural();
 	}

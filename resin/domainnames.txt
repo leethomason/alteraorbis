@@ -1,0 +1,48 @@
+0
+Dak
+Data
+Disc
+Gen
+In
+Ink
+Mico
+Mega
+Mot
+Nano
+Pico
+Pin
+Piv
+Tech
+Tek
+Tel
+Zec
+
+1
+Co
+Com
+Con
+Core
+Forge
+Hub
+Net
+Org
+Soft
+Tech
+Tel
+
+
+# Human:
+# InTel
+# TelCon
+# DiscOrg
+# ZecNet
+
+# Gob:
+# InkOrg
+# ForgeDsk
+# TechHub
+
+# Kama:
+# MotCo
+# PixvCon
+# 

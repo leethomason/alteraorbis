@@ -299,7 +299,7 @@ private:
 };
 
 
-class CompValueIString {
+class CompValueString {
 public:
 	// Hash table:
 	template <class T>

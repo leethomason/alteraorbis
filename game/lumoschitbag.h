@@ -175,6 +175,17 @@ public:
 	virtual bool Accept(Chit* chit);
 };
 
+
+class TeamFilter : public IChitAccept
+{
+public:
+	TeamFilter(int _team) : team(_team) {}
+	virtual bool Accept(Chit* chit);
+
+private:
+	int team;
+};
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridBlocked
 {
@@ -287,9 +298,6 @@ public:
 	}
 	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr );
 
-	//Chit* QueryRemovable( const grinliz::Vector2I& pos );
-
-	//LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request
 	// a new scene because of a player action. Both queues,
 	// and doesn't allow multiple scenes to queue.
@@ -297,15 +305,10 @@ public:
 	bool PopScene( int* id, SceneData** data );
 	bool IsScenePushed() const { return sceneID >= 0; }
 
-	grinliz::IString NameGen(const char* dataset, int seed, int min, int max);
-
-	// The seed is just a lookup into the name, in this form.
-	// Generally use the NameGen() method.
-	static grinliz::IString StaticNameGen(const gamedb::Reader* database, const char* dataset, int seed, int min, int max);
+	grinliz::IString NameGen(const char* dataset, int seed);
+	static grinliz::IString StaticNameGen(const gamedb::Reader* database, const char* dataset, int seed);
 
 private:
-
-	//static bool HasMapSpatialInUse( Chit* );
 
 	int							sceneID;
 	SceneData*					sceneData;

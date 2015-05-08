@@ -35,6 +35,7 @@ public:
 		GREATER_MOB_KILLED,			//  killed		killer
 		DOMAIN_CREATED,				//  domain
 		DOMAIN_DESTROYED,			//  domain		killer	
+		DOMAIN_TAKEOVER,			//	domain		conqueror
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
 
 		FORGED,						//	item		maker

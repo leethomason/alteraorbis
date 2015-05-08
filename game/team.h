@@ -17,6 +17,7 @@
 #define LUMOS_TEAM_INCLUDED
 
 #include "../grinliz/glstringutil.h"
+#include "../shared/gamedbreader.h"
 
 class Chit;
 class XStream;
@@ -61,7 +62,7 @@ enum class ERelate {
 class Team
 {
 public:
-	Team();
+	Team(const gamedb::Reader* database);
 	~Team();
 
 	static Team* Instance() { return instance; }
@@ -70,7 +71,7 @@ public:
 	void DoTick(int delta);
 
 	// Team name, where it has one.
-	static grinliz::IString TeamName(int team);
+	grinliz::IString TeamName(int team);
 	// Given a MOB name, return the team.
 	static int GetTeam(const grinliz::IString& name);
 
@@ -80,6 +81,10 @@ public:
 		int team = teamGroup | ((++idPool) << 8);
 		return team;
 	}
+
+	// Returns the team, or itself, that is the controlling team.
+	int SuperTeam(int team) const;
+	void AddSubteam(int super, int sub);
 
 	// A base relationship is symmetric (both parties feel the same way)
 	// and based on species.
@@ -123,6 +128,11 @@ public:
 		return (team & 0xffffff00) == 0;
 	}
 
+	static bool IsDenizen(int team) {
+		int group = Group(team);
+		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_HOUSE);
+	}
+
 	static bool IsDeityCore(int team) {
 		int group = Group(team);
 		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
@@ -147,6 +157,7 @@ private:
 	}
 
 	int idPool;
+	const gamedb::Reader* database;
 
 	struct TeamKey {
 		TeamKey() : t0(0), t1(0) {}
@@ -197,6 +208,12 @@ private:
 	};
 
 	grinliz::CDynArray<SymmetricTK> treaties;
+
+	struct Control {
+		int super;
+		int sub;
+	};
+	grinliz::CDynArray<Control> control;
 
 	static Team* instance;
 };
