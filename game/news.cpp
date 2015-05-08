@@ -223,6 +223,15 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		}
 		break;
 
+		case DOMAIN_TAKEOVER:
+		if (team) {
+			str->Format("%.2f: %s domain %s " "conquered" " by %s.", age, teamName.safe_str(), domain.safe_str(), secondName.safe_str());
+		}
+		else {
+			str->Format("%.2f: %s " "conquered" ".", age, domain.c_str());
+		}
+		break;
+
 		case FORGED:
 		str->Format("%.2f: %s forged %s at %s.", age, secondName.safe_str(), firstName.c_str(), domain.safe_str());
 		break;
@@ -258,7 +267,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case DOMAIN_CONQUER:
-		str->Format("%.2f: %s is occupied by team %s.", age, domain.safe_str(), teamName.safe_str() );
+		str->Format("%.2f: %s is occupied by %s.", age, domain.safe_str(), teamName.safe_str() );
 		break;
 
 		case ATTITUDE_FRIEND:

@@ -551,13 +551,14 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 				// The case where this domain is conquered. Switch to a sub-domain team ID,
 				// and switch the existing team over. Intentionally limit to CChitArray items so there
 				// isn't a full switch over.
+				// Also, remember by the time this code is executed, the team will be Rogue.
 
 				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
 				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
 				CoreScript::CreateCore(sector, teamID, &context);
 
 				CChitArray arr;
-				TeamFilter filter(data.defeatedTeam);
+				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.
 				Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
 				for (Chit* c : arr) {
 					c->GetItem()->SetTeam(teamID);

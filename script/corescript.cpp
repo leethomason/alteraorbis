@@ -210,6 +210,7 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				citizen->GetItem()->SetRogue();
 			}
 		}
+		Team::Instance()->RemoveSuperTeam(chit->Team());
 	}
 }
 

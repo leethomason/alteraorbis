@@ -85,6 +85,7 @@ public:
 	// Returns the team, or itself, that is the controlling team.
 	int SuperTeam(int team) const;
 	void AddSubteam(int super, int sub);
+	void RemoveSuperTeam(int super);
 
 	// A base relationship is symmetric (both parties feel the same way)
 	// and based on species.
@@ -201,8 +202,11 @@ private:
 		int warTimer;
 		int peaceTimer;
 
-		bool operator==(const SymmetricTK& rhs) {
+		bool operator==(const SymmetricTK& rhs) const {
 			return t0 == rhs.t0 && t1 == rhs.t1;
+		}
+		bool operator!=(const SymmetricTK& rhs) const {
+			return t0 != rhs.t0 || t1 != rhs.t1;
 		}
 		void Serialize(XStream* xs);
 	};

@@ -363,6 +363,14 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 		}
 	}
 
+	// Control!
+	if ((evalTeam == SuperTeam(centerTeam)) || (centerTeam == SuperTeam(evalTeam))) {
+		d = Max(d, 0);	// at least neutral.
+	}
+	else if (SuperTeam(evalTeam) == SuperTeam(centerTeam)) {
+		d += 2;	// tend to be friendlier.
+	}
+
 	TeamKey tk(centerTeam, evalTeam);
 	hashTable.Add(tk, d);
 	return d;
@@ -423,6 +431,12 @@ int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 
 void Team::AddSubteam(int super, int sub)
 {
+	// Removes all existing treaties:
+	SymmetricTK stk(super, sub);
+	treaties.Filter(stk, [](const SymmetricTK& stk, const SymmetricTK& item) {
+		return stk != item;
+	});
+
 	// Run the array; make sure that 'sub' isn't a super.
 	// Do nothing if exists, etc.
 	for (const Control& c : control) {
@@ -432,6 +446,15 @@ void Team::AddSubteam(int super, int sub)
 	Control c = { super, sub };
 	control.Push(c);
 }
+
+
+void Team::RemoveSuperTeam(int super)
+{
+	control.Filter(super, [](int super, const Control& c) {
+		return c.super != super;
+	});
+}
+
 
 int Team::SuperTeam(int team) const
 {

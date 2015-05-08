@@ -5,13 +5,17 @@ x peace button
 - domain takeover
 	x super / sub team infrastructure
 	x sub team names
-	- clean up console: don't need "team TechHub"
-	- sub teams "released" on super-domain loss
+	x clean up console: don't need "team TechHub"
+	x DOMAIN_TAKEOVER message should give 2nd team name.
+	x sub teams "released" on super-domain loss
+	- sub-team advantages
+		- tech?
+		- gold?
 	- map shows sub-domains
 	- news events of 
 		- aquisition, 
 		- loss, and 
-		- fall of super-domain
+		- fall of super-domain: means integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 
 - cross swords on map: fighting there? confusing icons
