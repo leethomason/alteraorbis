@@ -39,6 +39,8 @@ private:
 	gamui::TextLabel	dScore;
 
 	enum {
+		SUPER_TEAM_COLOR,
+
 		FACE_IMAGE_0,
 		FACE_IMAGE_1,
 		FACE_IMAGE_2,
@@ -53,10 +55,6 @@ private:
 		NUM_IMAGES,
 
 		NUM_FACE_IMAGES = 3,
-		FACE_IMAGE_START = FACE_IMAGE_0,
-		FACE_IMAGE_END = FACE_IMAGE_2+1,
-		MOB_COUNT_START = MOB_COUNT_IMAGE_0,
-		MOB_COUNT_END = MOB_COUNT_IMAGE_2+1
 	};
 
 	gamui::Image		image[NUM_IMAGES];

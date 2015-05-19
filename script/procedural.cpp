@@ -482,9 +482,9 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 	}
 
 	int index = abs(teamID) % nColors;
-	*base = colors[index * 3 + 0];
-	*contrast = colors[index * 3 + 1];
-	*glow = colors[index * 3 + 2];
+	if (base) *base = colors[index * 3 + 0];
+	if (contrast) *contrast = colors[index * 3 + 1];
+	if (glow) *glow = colors[index * 3 + 2];
 }
 
 
@@ -549,9 +549,8 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 }
 
 
-void TeamGen::Assign(U32 seed, int team, ProcRenderInfo* info)
+void TeamGen::Assign(int team, ProcRenderInfo* info)
 {
-
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
 	Vector2I vbase, vcontrast, vglow;
@@ -598,7 +597,7 @@ void AssignProcedural( const IString& proc,
 					   ProcRenderInfo* info )
 {
 	if ( proc == ISC::team) {
-		TeamGen::Assign( seed, team, info );
+		TeamGen::Assign( team, info );
 	}
 	else if ( proc == ISC::suit) {
 		HumanGen gen( female, seed, team, electric );

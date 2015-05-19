@@ -11,7 +11,10 @@ x peace button
 	- sub-team advantages
 		- tech?
 		- gold?
-	- map shows sub-domains
+	- map
+		x show sub-domain
+		- replace orange "home" color
+		- small map rep?
 	- news events of 
 		- aquisition, 
 		- loss, and 
