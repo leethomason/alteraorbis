@@ -106,6 +106,7 @@ public:
 
 	// Debugging; this wallet is no longer accepting deposits.
 	void SetClosed() { closed = true; }
+	bool Closed() const { return closed;  }	// shouldn't ever need this. Useful for debugging.
 
 private:
 	Wallet(const Wallet& w);	// private, unimplemented.

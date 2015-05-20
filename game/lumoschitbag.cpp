@@ -614,7 +614,8 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 	// this could be a problem. Would be nice to make
 	// deletion immediate.
 	for (int i = 0; i < chitList.Size(); ++i) {
-		if (chitList[i] && !IsQueuedForDelete(chitList[i])) {
+		Chit* c = chitList[i];
+		if (c && !IsQueuedForDelete(c) && c->GetWallet() && !c->GetWallet()->Closed()) {
 			chit = chitList[i];
 			break;
 		}
