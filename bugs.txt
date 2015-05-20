@@ -35,6 +35,7 @@ x peace button
 - auto-pickup loot? obnoxious, but list isn’t great either
 - make sure domain takeover works in next version
 x shield value over-accounts for reload time
+- detector beam
 
 - teleport out on war switch
 - world gen too slow in debug

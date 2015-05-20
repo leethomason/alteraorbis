@@ -655,7 +655,7 @@ int GameItem::GetValue() const
 	value = 0;
 
 	static const float EFFECT_BONUS = 1.5f;
-	static const float MELEE_VALUE = 20;
+	static const float MELEE_VALUE  = 20;
 	static const float RANGED_VALUE = 30;
 	static const float SHIELD_VALUE = 20;
 
@@ -687,8 +687,7 @@ int GameItem::GetValue() const
 		if (flags & GameItem::EFFECT_SHOCK) v *= EFFECT_BONUS;
 		if (flags & GameItem::EFFECT_EXPLOSIVE) v *= EFFECT_BONUS;
 
-		if (value) value += LRintf(v*0.5f);
-		else value = LRintf(v);
+		value = LRintf(v);
 	}
 
 	const Shield* shield = ToShield();
@@ -696,16 +695,16 @@ int GameItem::GetValue() const
 		const GameItem& basic = ItemDefDB::Instance()->Get("shield");
 		const Shield* refShield = basic.ToShield();
 		GLASSERT(refShield);
-
-		float vRef = refShield->Capacity() / refShield->ShieldRechargeTime();
-		float vItem = shield->Capacity() / shield->ShieldRechargeTime();
+		
+		// Reduce importance of shield recharge time
+		float vRef = refShield->Capacity() / sqrtf((float)refShield->ShieldRechargeTime());
+		float vItem = shield->Capacity()   / sqrtf((float)shield->ShieldRechargeTime());
 		float v = vItem * SHIELD_VALUE / vRef;
 
-		if (flags & GameItem::EFFECT_FIRE)  v *= 2.0f;
-		if (flags & GameItem::EFFECT_SHOCK) v *= 2.0f;
+		if (flags & GameItem::EFFECT_FIRE)  v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_SHOCK) v *= EFFECT_BONUS;
 
-		if (value) value += LRintf(v*0.5f);
-		else value = LRintf(v);
+		value = LRintf(v);
 	}
 	return value;
 }
