@@ -8,13 +8,13 @@ x peace button
 	x clean up console: don't need "team TechHub"
 	x DOMAIN_TAKEOVER message should give 2nd team name.
 	x sub teams "released" on super-domain loss
-	- sub-team advantages
-		- tech?
-		- gold?
-	- map
+	x sub-team advantages
+		x tech?
+		d gold?
+	x map
 		x show sub-domain
-		- replace orange "home" color
-		- small map rep?
+		x replace orange "home" color
+		d small map rep?
 	- news events of 
 		- aquisition, 
 		- loss, and 
@@ -34,7 +34,7 @@ x peace button
 - don’t build up a squad if deployed
 - auto-pickup loot? obnoxious, but list isn’t great either
 - make sure domain takeover works in next version
-- shield value over-accounts for reload time
+x shield value over-accounts for reload time
 
 - teleport out on war switch
 - world gen too slow in debug

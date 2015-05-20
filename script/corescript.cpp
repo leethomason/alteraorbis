@@ -786,8 +786,16 @@ void CoreScript::AddTech()
 {
 	tech += TECH_ADDED_BY_VISITOR;
 	tech = Clamp( tech, 0.0, Min( double(TECH_MAX), double( MaxTech() ) - 0.01 ));
-
 	achievement.techLevel = Max(achievement.techLevel, (int)tech);
+
+	int team = ParentChit()->Team();
+	int superTeam = Team::Instance()->SuperTeam(team);
+	if (team != superTeam) {
+		CoreScript* super = CoreScript::GetCoreFromTeam(superTeam);
+		if (super) {
+			super->AddTech();
+		}
+	}
 }
 
 

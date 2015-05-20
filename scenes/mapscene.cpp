@@ -58,6 +58,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	playerMark[0].Init( &gamui2D, atom, true );
 	playerMark[1].Init( &gamui2D, atom, true );
 
+	atom = lumosGame->CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
 	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 	homeMark[0].Init( &gamui2D, atom, true );
 	homeMark[1].Init( &gamui2D, atom, true );

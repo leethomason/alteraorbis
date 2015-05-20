@@ -138,7 +138,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	Vector2I sector = ToSector(coreScript->ParentChit()->Position());
 	const SectorData& sd = context->worldMap->GetSectorData( sector );
 
-	// ----- Reset images -----
+	// ----- Reset -----
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].SetAtom(RenderAtom());
 	}

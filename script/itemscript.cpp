@@ -203,7 +203,7 @@ void ItemDefDB::DumpWeaponStats()
 void ItemHistory::Set( const GameItem* gi )
 {
 	this->itemID		= gi->ID();
-	this->titledName	= gi->INameAndTitle();
+	this->titledName	= gi->IFullName();
 	this->level			= gi->Traits().Level();
 	this->value			= gi->GetValue();
 
