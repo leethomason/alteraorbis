@@ -96,12 +96,18 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::DOMAIN_DESTROYED:
 			case NewsEvent::GREATER_SUMMON_TECH:
 			case NewsEvent::DOMAIN_CONQUER:
-			case NewsEvent::ATTITUDE_FRIEND:
-			case NewsEvent::ATTITUDE_NEUTRAL:
-			case NewsEvent::ATTITUDE_ENEMY:
 			ne.Console(&str, chitBag, 0);
 			break;
 
+			case NewsEvent::ATTITUDE_FRIEND:
+			case NewsEvent::ATTITUDE_NEUTRAL:
+			case NewsEvent::ATTITUDE_ENEMY:
+			if (   !homeCore 
+				|| homeCore->ParentChit()->GetItemID() == ne.FirstItemID() 
+				|| homeCore->ParentChit()->GetItemID() == ne.SecondItemID())
+			{
+				ne.Console(&str, chitBag, 0);
+			}
 			default:
 			break;
 		}
