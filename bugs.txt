@@ -1,3 +1,6 @@
+- are the shader uniform counts being computed correctly?
+- do I need to switch on no instancing?
+
 x namegen: re-use too common. switch to loop
 x [Reenen] Circuits are way complex... (see post)
 x [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625
