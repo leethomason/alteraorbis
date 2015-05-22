@@ -85,7 +85,7 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 		Vector3F test;
 
 		for( unsigned i=0; i<header.nAtoms; ++i ) {
-			for( unsigned j=0; j<atom[i].nIndex; j+=3 ) {
+			for( int j=0; j<atom[i].nIndex; j+=3 ) {
 				int r = IntersectRayTri( point, dir, 
 										 atom[i].vertex[ atom[i].index[j+0] ].pos,
 										 atom[i].vertex[ atom[i].index[j+1] ].pos,
@@ -157,14 +157,37 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	Vector3<double> centroid[EL_MAX_BONES] = { 0 };
 	int centroidCount[EL_MAX_BONES] = { 0 };
 
-	for( U32 i=0; i<res->header.nAtoms; ++i )
+	for (U32 i = 0; i < res->header.nAtoms; ++i) {
+		ModelAtom* atom = &res->atom[i];
+		int maxVertex = 64 * 1024 / atom->nVertex;
+		int maxIndex = 64 * 1024 / atom->nIndex;
+		atom->nInstance = Min((int)EL_MAX_INSTANCE, maxVertex, maxIndex);
+		GLASSERT(atom->nInstance > 0);
+		GLOUTPUT(("'%s' atom=%d nInstance=%d\n", res->Name(), i, atom->nInstance));
+	}
+
+	for (U32 i = 0; i < res->header.nAtoms; ++i)
 	{
 		ModelAtom* atom = &res->atom[i];
-		
-		atom->vertex = new Vertex[atom->nVertex];
-		for( unsigned j=0; j<atom->nVertex; ++j ) {
+		GLASSERT(atom->nInstance > 0 && atom->nInstance <= EL_MAX_INSTANCE);
+		atom->vertex = new VertexInst[atom->nVertex * atom->nInstance];
+
+		// Assign vertices for each instance and set the
+		// instanceID. 
+		for (int k = 0; k < atom->nInstance; ++k) {
+			for (int j = 0; j < atom->nVertex; ++j) {
+				const Vertex& vertex = vBuffer[j+vOffset];
+				VertexInst* inst = &atom->vertex[j + k*atom->nVertex];
+				inst->pos			= vertex.pos;
+				inst->normal		= vertex.normal;
+				inst->tex			= vertex.tex;
+				inst->boneID		= vertex.boneID;
+				inst->instanceID	= float(k);
+			}
+		}
+
+		for( int j=0; j<atom->nVertex; ++j ) {
 			const Vertex& vertex = vBuffer[j+vOffset];
-			atom->vertex[j] = vertex;
 
 			int boneID = LRint(vertex.boneID);
 			GLASSERT(boneID < EL_MAX_BONES);
@@ -176,9 +199,11 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 			}
 		}
 		
-		atom->index  = new U16[atom->nIndex];
-		for( unsigned j=0; j<atom->nIndex; ++j ) {
-			atom->index[j] = iBuffer[j+iOffset];
+		atom->index  = new U16[atom->nIndex * atom->nInstance];
+		for (int k = 0; k < atom->nInstance; ++k) {
+			for (int j = 0; j < atom->nIndex; ++j) {
+				atom->index[j + k * atom->nIndex] = iBuffer[j + iOffset] + (atom->nVertex * k);
+			}
 		}
 		vOffset += atom->nVertex;
 		iOffset += atom->nIndex;
@@ -865,14 +890,15 @@ void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 	*stream = vertexStream;
 
 	if ( !vertexBuffer ) {
-		vertexBuffer = new GPUVertexBuffer( vertex, sizeof(*vertex)*nVertex );
-		indexBuffer  = new GPUIndexBuffer(  index,  nIndex );
+		vertexBuffer = new GPUVertexBuffer( vertex, sizeof(*vertex)*nVertex*nInstance );
+		indexBuffer  = new GPUIndexBuffer(  index,  nIndex*nInstance );
 	}
 
 	data->indexBuffer = indexBuffer->ID();
 	data->vertexBuffer = vertexBuffer->ID();
 
 	data->texture0 = this->texture;
+	data->maxInstance = this->nInstance;
 }
 
 

@@ -47,6 +47,7 @@ struct ModelAtom
 {
 	void Init() {
 		texture = 0;
+		nIndex = 0;
 		nVertex = nIndex = 0;
 		index = 0;
 		vertex = 0;
@@ -76,10 +77,11 @@ struct ModelAtom
 
 	void Bind( GPUStream* stream, GPUStreamData* data ) const;
 
-	U32		nVertex;
-	U32		nIndex;
-	U16*	index;
-	Vertex* vertex;
+	int		nInstance;
+	int		nVertex;		// per instance
+	int		nIndex;
+	U16*		index;			// all instances
+	VertexInst* vertex;
 };
 
 

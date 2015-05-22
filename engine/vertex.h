@@ -32,7 +32,7 @@ struct Vertex
 		POS_OFFSET = 0,
 		NORMAL_OFFSET = 12,
 		TEXTURE_OFFSET = 24,
-		BONE_ID_OFFSET = 32
+		BONE_ID_OFFSET = 32,
 	};
 
 	grinliz::Vector3F	pos;
@@ -41,27 +41,50 @@ struct Vertex
 	float				boneID;			// 8 bits would be fine; but GL 3.2 doesn't like int attributes. So use a float.
 
 	bool Equal( const Vertex& v ) const {
-		if (    pos == v.pos 
-			 && normal == v.normal
-			 && tex == v.tex )
-		{
-			return true;
-		}
-		return false;
+		return  pos == v.pos
+			&& normal == v.normal
+			&& tex == v.tex;
 	}
 
 	bool Equal( const Vertex& v, float EPS ) const
 	{
-		if (	pos.Equal( v.pos, EPS ) 
-			 && normal.Equal( v.normal, EPS ) 
-			 && tex.Equal( v.tex, EPS ) )
-		{
-			return true;
-		}
-		return false;
+		return pos.Equal(v.pos, EPS)
+			&& normal.Equal(v.normal, EPS)
+			&& tex.Equal(v.tex, EPS);
 	}
 };
 	
+
+struct VertexInst
+{
+	enum {
+		POS_OFFSET = 0,
+		NORMAL_OFFSET = 12,
+		TEXTURE_OFFSET = 24,
+		BONE_ID_OFFSET = 32,
+		INSTANCE_ID_OFFSET = 36
+	};
+
+	grinliz::Vector3F	pos;
+	grinliz::Vector3F	normal;
+	grinliz::Vector2F	tex;
+	float				boneID;			// 8 bits would be fine; but GL 3.2 doesn't like int attributes. So use a float.
+	float				instanceID;		// ditto
+
+	bool Equal( const Vertex& v ) const {
+		return  pos == v.pos
+			&& normal == v.normal
+			&& tex == v.tex;
+	}
+
+	bool Equal( const Vertex& v, float EPS ) const
+	{
+		return pos.Equal(v.pos, EPS)
+			&& normal.Equal(v.normal, EPS)
+			&& tex.Equal(v.tex, EPS);
+	}
+};
+
 
 struct PTVertex
 {

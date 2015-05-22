@@ -31,7 +31,9 @@ uniform vec4		u_controlParamArr[MAX_INSTANCE];
 uniform vec4 u_colorMult;			// Overall Color, if specified.
 
 // IN: ins
-in 		vec3 a_pos;				// vertex position
+in vec3		a_pos;				// vertex position
+in float 	a_instanceID;		// instanceID (gets converted to an int)
+
 #if COLORS == 1
 	in 	vec4 a_color;			// vertex color
 #endif
@@ -74,25 +76,25 @@ out vec4 v_color;
 out vec4 v_control;
 
 void main() {
-
-	vec4 controlParam 	= u_controlParamArr[gl_InstanceID];
+	int instanceID = int(a_instanceID);
+	vec4 controlParam 	= u_controlParamArr[instanceID];
 	v_control = controlParam;
 
 	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
-		vec4 colorParam 	= u_colorParamArr[gl_InstanceID];
+		vec4 colorParam 	= u_colorParamArr[instanceID];
 	#endif
 	#if BONE_FILTER == 1
-		vec4 filterParam 	= u_filterParamArr[gl_InstanceID];
+		vec4 filterParam 	= u_filterParamArr[instanceID];
 	#endif
 	#if TEXTURE0_XFORM == 1
-		vec4 texture0XForm 	= u_texture0XFormArr[gl_InstanceID];
+		vec4 texture0XForm 	= u_texture0XFormArr[instanceID];
 	#endif
 	#if TEXTURE0_CLIP == 1
-		v_texture0Clip 		= u_texture0ClipArr[gl_InstanceID];
+		v_texture0Clip 		= u_texture0ClipArr[instanceID];
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		mat4 colorMap 		= u_colorMapArr[gl_InstanceID];
+		mat4 colorMap 		= u_colorMapArr[instanceID];
 	#endif
 
 	vec4 color = u_colorMult;
@@ -118,17 +120,17 @@ void main() {
 
 	mat4 xform = mat4( 1.0 );	
 	#if BONE_XFORM == 1
-		xform = u_boneXForm[int(a_boneID) + gl_InstanceID*EL_MAX_BONES];
+		xform = u_boneXForm[int(a_boneID) + instanceID*EL_MAX_BONES];
 	#endif
 	
 	#if BONE_XFORM == 0
-		vec4 pos = (u_mvpMatrix * u_mMatrix[gl_InstanceID]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = (u_mvpMatrix * u_mMatrix[instanceID]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#else
-		vec4 pos = (u_mvpMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = (u_mvpMatrix * u_mMatrix[instanceID]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 	
 	#if LIGHTING == 1
-		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[instanceID]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 
 		#if 0
 			// Lambert lighting with ambient term.

@@ -34,6 +34,7 @@ static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 	"a_normal",
 	"a_color",
 	"a_boneID",
+	"a_instanceID"
 };
 
 

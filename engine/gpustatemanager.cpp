@@ -220,120 +220,128 @@ void GPUDevice::ResetState()
 }
 
 
-int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int start, int instanceTotal )
+int GPUDevice::Upload(const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int start, int instanceTotal)
 {
 	ShaderManager* shadman = ShaderManager::Instance();
 	int nInstance = instanceTotal - start;
-	nInstance = Min( nInstance, shadman->MaxInstances() );
-	GLASSERT( nInstance > 0 );
+	nInstance = Min(nInstance, shadman->MaxInstances());
+	nInstance = Min(nInstance, data.maxInstance);
+	GLASSERT(nInstance > 0);
 
 	int flags = shadman->ShaderFlags();
 
-	const Matrix4& mv = TopMatrix( MODELVIEW_MATRIX );
+	const Matrix4& mv = TopMatrix(MODELVIEW_MATRIX);
 
 	Matrix4 mvp;
-    MultMatrix4( TopMatrix( PROJECTION_MATRIX ), mv, &mvp );
-    shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
- 
-	shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, nInstance, 
-							  data.matrix ? &data.matrix[start] : identity );
+	MultMatrix4(TopMatrix(PROJECTION_MATRIX), mv, &mvp);
+	shadman->SetUniform(ShaderManager::U_MVP_MAT, mvp);
 
-	if ( flags & ShaderManager::COLOR_PARAM ) {
-		GLASSERT( data.colorParam );
-		shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, nInstance, &data.colorParam[start] );
+	shadman->SetUniformArray(ShaderManager::U_M_MAT_ARR, nInstance,
+							 data.matrix ? &data.matrix[start] : identity);
+
+	if (flags & ShaderManager::COLOR_PARAM) {
+		GLASSERT(data.colorParam);
+		shadman->SetUniformArray(ShaderManager::U_COLOR_PARAM_ARR, nInstance, &data.colorParam[start]);
 	}
-	if ( flags & ShaderManager::BONE_FILTER ) {
-		GLASSERT( data.boneFilter );
-		shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, nInstance, &data.boneFilter[start] );
+	if (flags & ShaderManager::BONE_FILTER) {
+		GLASSERT(data.boneFilter);
+		shadman->SetUniformArray(ShaderManager::U_FILTER_PARAM_ARR, nInstance, &data.boneFilter[start]);
 	}
-	if ( flags & ShaderManager::TEXTURE0_XFORM ) {
-		GLASSERT( data.texture0XForm );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, nInstance, &data.texture0XForm[start] );
+	if (flags & ShaderManager::TEXTURE0_XFORM) {
+		GLASSERT(data.texture0XForm);
+		shadman->SetUniformArray(ShaderManager::U_TEXTURE0_XFORM_ARR, nInstance, &data.texture0XForm[start]);
 	}
-	if ( flags & ShaderManager::TEXTURE0_CLIP ) {
-		GLASSERT( data.texture0Clip );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, nInstance, &data.texture0Clip[start] );
+	if (flags & ShaderManager::TEXTURE0_CLIP) {
+		GLASSERT(data.texture0Clip);
+		shadman->SetUniformArray(ShaderManager::U_TEXTURE0_CLIP_ARR, nInstance, &data.texture0Clip[start]);
 	}
-	if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
-		GLASSERT( data.texture0ColorMap );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, nInstance, &data.texture0ColorMap[start] );
+	if (flags & ShaderManager::TEXTURE0_COLORMAP) {
+		GLASSERT(data.texture0ColorMap);
+		shadman->SetUniformArray(ShaderManager::U_TEXTURE0_COLORMAP_ARR, nInstance, &data.texture0ColorMap[start]);
 	}
 
-	for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
+	for (int i = 0; i < EL_MAX_INSTANCE; ++i) {
 		defaultControl[i].Init();
 	}
 	shadman->SetUniformArray(ShaderManager::U_CONTROL_PARAM_ARR, nInstance,
-		data.controlParam ? data.controlParam[start].Mem() 
-							: defaultControl[0].Mem());
+							 data.controlParam ? data.controlParam[start].Mem()
+							 : defaultControl[0].Mem());
 
 	// Texture0
-	glActiveTexture( GL_TEXTURE0 );
+	glActiveTexture(GL_TEXTURE0);
 
-	if ( flags & ShaderManager::TEXTURE0 ) {
-		if ( start == 0 ) {
-			GLASSERT( data.texture0 );
-			glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
-			shadman->SetTexture( 0, data.texture0 );
+	if (flags & ShaderManager::TEXTURE0) {
+		if (start == 0) {
+			GLASSERT(data.texture0);
+			glBindTexture(GL_TEXTURE_2D, data.texture0->GLID());
+			shadman->SetTexture(0, data.texture0);
 
-			shadman->SetStreamData( ShaderManager::A_TEXTURE0, 2, GL_FLOAT, stream.stride, PTR( 0, stream.texture0Offset ) );
+			shadman->SetStreamData(ShaderManager::A_TEXTURE0, 2, GL_FLOAT, stream.stride, PTR(0, stream.texture0Offset));
 		}
 	}
 	CHECK_GL_ERROR;
 
 	// vertex
-	if ( stream.HasPos() ) {
-		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR( 0, stream.posOffset ) );	 
+	if (stream.HasPos()) {
+		if (start == 0) {
+			shadman->SetStreamData(ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR(0, stream.posOffset));
+		}
+	}
+
+	// instanceID
+	if (stream.HasInstanceID()) {
+		if (start == 0) {
+			shadman->SetStreamData(ShaderManager::A_INSTANCE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.idOffset));
 		}
 	}
 
 	// color
-	if ( stream.HasColor() ) {
-		GLASSERT( stream.nColor == 4 );
-		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR( 0, stream.colorOffset ) );	 
+	if (stream.HasColor()) {
+		GLASSERT(stream.nColor == 4);
+		if (start == 0) {
+			shadman->SetStreamData(ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR(0, stream.colorOffset));
 		}
 	}
 
 	// bones
-	if ( flags & ShaderManager::BONE_XFORM ) {
-		GLASSERT( stream.boneOffset );	// could be zero...but that would be odd.
+	if (flags & ShaderManager::BONE_XFORM) {
+		GLASSERT(stream.boneOffset);	// could be zero...but that would be odd.
 		int count = EL_MAX_BONES * nInstance;
 
 		// This could be much better packed (by a factor of 2) by using pos/rot as 2 vector4 instead
 		// of expanding to a matrix. And less work for the CPU as well. Disadvantages to keep in mind:
 		// - easier to debug a set of matrices
 		// - simpler shader code
-		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES] );
-		if ( start == 0 ) {
+		shadman->SetUniformArray(ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES]);
+		if (start == 0) {
 			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
-	else if ( flags & ShaderManager::BONE_FILTER ) {
-		if ( start == 0 ) {
+	else if (flags & ShaderManager::BONE_FILTER) {
+		if (start == 0) {
 			shadman->SetStreamData(ShaderManager::A_BONE_ID, 1, GL_FLOAT, stream.stride, PTR(0, stream.boneOffset));
 		}
 	}
 
 	// lighting 
-	if ( flags & ShaderManager::LIGHTING ) {
+	if (flags & ShaderManager::LIGHTING) {
 
 		Vector4F dirEye = ViewMatrix() * directionWC;
-		GLASSERT( Equal( dirEye.Length(), 1.f, 0.01f ));
+		GLASSERT(Equal(dirEye.Length(), 1.f, 0.01f));
 		Vector3F dirEye3 = { dirEye.x, dirEye.y, dirEye.z };
 
 		// NOTE: the normal matrix can be used because the game doesn't support scaling.
-		shadman->SetUniform( ShaderManager::U_NORMAL_MAT, mv );
-		shadman->SetUniform( ShaderManager::U_LIGHT_DIR, dirEye3 );
-		shadman->SetUniform( ShaderManager::U_AMBIENT, ambient );
-		shadman->SetUniform( ShaderManager::U_DIFFUSE, diffuse );
-		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR( 0, stream.normalOffset ) );	 
+		shadman->SetUniform(ShaderManager::U_NORMAL_MAT, mv);
+		shadman->SetUniform(ShaderManager::U_LIGHT_DIR, dirEye3);
+		shadman->SetUniform(ShaderManager::U_AMBIENT, ambient);
+		shadman->SetUniform(ShaderManager::U_DIFFUSE, diffuse);
+		if (start == 0) {
+			shadman->SetStreamData(ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR(0, stream.normalOffset));
 		}
 	}
 
 	// color multiplier is always set
-	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.Color() );
+	shadman->SetUniform(ShaderManager::U_COLOR_MULT, state.Color());
 
 	return nInstance;
 }
@@ -583,8 +591,12 @@ void GPUDevice::Draw( const GPUState& state, const GPUStream& stream, const GPUS
 		start += n;
 
 		++drawCalls;
-		glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
-								 nIndex, GL_UNSIGNED_SHORT, (const void*)(first*2), n );
+//		glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
+//								 nIndex, GL_UNSIGNED_SHORT, (const void*)(first*2), n );
+		glDrawElements(primitive,	// GL_TRIANGLES except when debugging 
+					   nIndex * n,
+					   GL_UNSIGNED_SHORT,
+					   (const void*)(first * 2));
 	}
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -785,11 +797,25 @@ GPUStream::GPUStream( const Vertex& vertex )
 	posOffset = Vertex::POS_OFFSET;
 	nNormal = 3;
 	normalOffset = Vertex::NORMAL_OFFSET;
-//	nTexture0 = 2;
 	texture0Offset = Vertex::TEXTURE_OFFSET;
 	boneOffset = Vertex::BONE_ID_OFFSET;
+	idOffset = 0;
 }
 
+
+GPUStream::GPUStream( const VertexInst& vertex )
+{
+	Clear();
+
+	stride = sizeof( VertexInst );
+	nPos = 3;
+	posOffset = VertexInst::POS_OFFSET;
+	nNormal = 3;
+	normalOffset = VertexInst::NORMAL_OFFSET;
+	texture0Offset = VertexInst::TEXTURE_OFFSET;
+	boneOffset = VertexInst::BONE_ID_OFFSET;
+	idOffset = VertexInst::INSTANCE_ID_OFFSET;
+}
 
 GPUStream::GPUStream( GamuiType )
 {
@@ -797,7 +823,6 @@ GPUStream::GPUStream( GamuiType )
 	stride = sizeof( gamui::Gamui::Vertex );
 	nPos = 2;
 	posOffset = gamui::Gamui::Vertex::POS_OFFSET;
-//	nTexture0 = 2;
 	texture0Offset = gamui::Gamui::Vertex::TEX_OFFSET;
 }
 
@@ -808,7 +833,6 @@ GPUStream::GPUStream( const PTVertex& vertex )
 	stride = sizeof( PTVertex );
 	nPos = 3;
 	posOffset = PTVertex::POS_OFFSET;
-//	nTexture0 = 2;
 	texture0Offset = PTVertex::TEXTURE_OFFSET;
 }
 
@@ -819,7 +843,6 @@ GPUStream::GPUStream( const PTVertex2& vertex )
 	stride = sizeof( PTVertex2 );
 	nPos = 2;
 	posOffset = PTVertex2::POS_OFFSET;
-//	nTexture0 = 2;
 	texture0Offset = PTVertex2::TEXTURE_OFFSET;
 
 }

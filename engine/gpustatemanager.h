@@ -109,6 +109,7 @@ struct GPUStream {
 	int nColor;
 	int colorOffset;
 	int boneOffset;
+	int idOffset;
 
 	enum GamuiType { kGamuiType };
 
@@ -116,10 +117,10 @@ struct GPUStream {
 				nPos( 0 ), posOffset( 0 ), 
 				texture0Offset( 0 ),
 				nNormal( 0 ), normalOffset( 0 ),
-				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ) {}
+				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ), idOffset(0) {}
 
-	// Uses type: GPUStream stream( Vertex );
 	GPUStream( const Vertex& vertex );
+	GPUStream( const VertexInst& vertex );
 	GPUStream( GamuiType );
 	GPUStream( const PTVertex& vertex );
 	GPUStream( const PTVertex2& vertex );
@@ -129,6 +130,7 @@ struct GPUStream {
 	bool HasPos() const			{ return nPos > 0; }
 	bool HasNormal() const		{ return nNormal > 0; }
 	bool HasColor() const		{ return nColor > 0; }
+	bool HasInstanceID() const	{ return idOffset > 0; }
 };
 
 struct GPUControlParam
@@ -155,6 +157,7 @@ struct GPUStreamData
 	GPUStreamData() : vertexBuffer(0), 
 					  indexBuffer(0), 
 					  texture0(0), 
+					  maxInstance(1),
 					  matrix(0), 
 					  colorParam(0), 
 					  boneFilter(0), 
@@ -169,6 +172,7 @@ struct GPUStreamData
 	U32					indexBuffer;
 
 	Texture*			texture0;			// NOT instanced.
+	int					maxInstance;
 
 	grinliz::Matrix4*	matrix;
 	grinliz::Vector4F*	colorParam;
@@ -296,9 +300,6 @@ public:
 	GPUIndexBuffer*  GetUIIBO( int id );
 
 private:
-	// draws a vertex-buffer-only primitive (not indexed)
-	//void DrawPrimitive( int prim, const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int count );
-
 	static GPUDevice* instance;
 	GPUDevice();
 
