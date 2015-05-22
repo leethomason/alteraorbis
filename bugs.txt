@@ -21,8 +21,7 @@ x peace button
 		- fall of super-domain: means integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 
-- cross swords on map: fighting there? confusing icons
-- remove industrial from switches
+x remove industrial from switches
 - top down: can’t tell on switch from off switch. 
 - switch should fire if avatar goes there
 - flag - for local control - awkward. just click switches to go there
@@ -36,6 +35,7 @@ x peace button
 - make sure domain takeover works in next version
 x shield value over-accounts for reload time
 
+- cross swords on map: fighting there? confusing icons
 - detector beam
 - teleport out on war switch
 - world gen too slow in debug
