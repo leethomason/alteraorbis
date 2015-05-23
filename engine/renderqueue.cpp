@@ -37,7 +37,7 @@ bool RenderQueue::CompareItem::Less( const Item* s0, const Item* s1 )
 {
 	// Priority list:
 
-	GLASSERT( sizeof(Item) < 100 );	// just a sanity check.	
+	GLASSERT( sizeof(Item) < 200 );	// just a sanity check.	
 	int result = s1->state.StateFlags() - s0->state.StateFlags();
 	if ( result ) return result > 0;
 
