@@ -125,6 +125,11 @@ int main(int argc, char **argv)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif
 #if 0
+	// 3.0 context.
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+#if 0
 	// The trickier 3.2 context.
 	// No GL_QUADs anymore.
 	// All the attributes need to be floats.
