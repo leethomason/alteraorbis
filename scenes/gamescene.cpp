@@ -1805,7 +1805,9 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()));
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange 
+				 || name == ISC::switchOff || name == ISC::switchOn) 
+			{
 				useBuildingVisible = true;
 			}
 		}

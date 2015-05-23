@@ -23,11 +23,11 @@ x peace button
 
 x remove industrial from switches
 - top down: can’t tell on switch from off switch. 
-- switch should fire if avatar goes there
-- flag - for local control - awkward. just click switches to go there
-- kiosks higher on recommendation list
+t switch should fire if avatar goes there
+d flag - for local control - awkward. just click switches to go there
+x kiosks higher on recommendation list
 - name of buildings - pop up? info?
-- weapon stats: write units
+x weapon stats: write units
 - detail view of building w/ mouse down
 - temple charge: show differently? bar?
 - don’t build up a squad if deployed

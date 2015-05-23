@@ -47,7 +47,6 @@ class NewsHistory;
 class ItemDB;
 class CoreScript;
 class PlantScript;
-class CircuitSim;
 class Team;
 
 class Sim : public IChitListener, public IUITracker

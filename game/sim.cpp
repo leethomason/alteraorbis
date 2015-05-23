@@ -963,6 +963,10 @@ void Sim::UseBuilding()
 				data->itemComponent = ic;
 				context.chitBag->PushScene( LumosGame::SCENE_FORGE, data );
 			}
+			else if (name == ISC::switchOn || name == ISC::switchOff) {
+				CircuitSim* circuitSim = context.physicsSims->GetCircuitSim(sector);
+				circuitSim->TriggerSwitch(pos2i);
+			}
 		}
 	}
 }
