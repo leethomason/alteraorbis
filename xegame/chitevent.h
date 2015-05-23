@@ -40,19 +40,6 @@ public:
 	const grinliz::Rectangle2F& AreaOfEffect() const	{ return aoe; }
 	int ID() const										{ return id; }
 
-	// Utility:
-	/*
-	static ChitEvent EffectEvent( const grinliz::Vector2F origin, float radius, int effect, float strength ) {
-		grinliz::Rectangle2F r;
-		r.min = r.max = origin;
-		r.Outset( radius );
-		ChitEvent event( ChitEvent::EFFECT, r );
-		event.data   = effect;
-		event.factor = strength;
-		return event;
-	}
-	*/
-
 private:
 	int id = 0;
 	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast

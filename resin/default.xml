@@ -27,6 +27,7 @@
   <markov filename="gobnames.txt" assetName="gobnames" />
   <markov filename="kamakirinames.txt" assetName="kamakirinames" />
   <markov-word filename="barNames.txt" assetName="barNames" />
+  <markov-word filename="domainnames.txt" assetName="domainNames" space="false" />
   
   <!-- Icon and UI -->
   <texture filename="title.png" depth="32"/>

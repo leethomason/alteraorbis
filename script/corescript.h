@@ -157,6 +157,7 @@ public:
 
 	static CoreScript* GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
 	static CoreScript* GetCoreFromTeam(int team);
+	static CoreScript** GetCoreList(int *n);
 	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
 
 	static void Init();
@@ -206,6 +207,7 @@ private:
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 	static grinliz::HashTable<int, int>* teamToCoreInfo;
+	static grinliz::CArray<CoreScript*, NUM_SECTORS*NUM_SECTORS> coreList;
 };
 
 #endif // CORESCRIPT_INCLUDED

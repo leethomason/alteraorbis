@@ -135,7 +135,7 @@ void ItemComponent::NameItem(GameItem* item)
 		if ( item->IProperName().empty() ) {
 			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
-				item->SetProperName(context->chitBag->NameGen(nameGen.c_str(), item->ID(), 4, 10));
+				item->SetProperName(context->chitBag->NameGen(nameGen.c_str(), item->ID()));
 			}
 
 			/*
@@ -728,7 +728,7 @@ void ItemComponent::InformCensus(bool add)
 		else if (core == "core") {
 			int team = parentChit->Team();
 			if (team) {
-				IString team = Team::TeamName(Team::Group(parentChit->Team()));
+				IString team = Team::Instance()->TeamName(Team::Group(parentChit->Team()));
 				if (add)
 					Context()->chitBag->census.AddCore(team);
 				else

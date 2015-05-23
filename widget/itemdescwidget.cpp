@@ -57,13 +57,13 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		str.Format( "Effective Range\t%.1f\n", BattleMechanics::EffectiveRange( radAt1 ));
 		textBuffer += str.c_str();
 
-		str.Format( "Fire Rate\t%.1f\n", 1.0f / (0.001f * (float)rangedWeapon->CooldownTime()));
+		str.Format( "Fire Delay\t%.1f\n", 1.0f / (0.001f * (float)rangedWeapon->CooldownTime()));
 		textBuffer += str.c_str();
 
-		str.Format( "Clip/Reload\t%d / %.1f\n", rangedWeapon->ClipCap(), 0.001f * (float)rangedWeapon->ReloadTime() );
+		str.Format( "Clip/Reload Time\t%d / %.1f\n", rangedWeapon->ClipCap(), 0.001f * (float)rangedWeapon->ReloadTime() );
 		textBuffer += str.c_str();
 
-		str.Format( "Ranged D/S\t%.1f\n", BattleMechanics::RangedDPTU( rangedWeapon, false ));
+		str.Format( "Ranged DpS\t%.1f\n", BattleMechanics::RangedDPTU( rangedWeapon, false ));
 		textBuffer += str.c_str();
 	}
 
@@ -87,7 +87,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		str.Format( "Capacity\t%d\n", (int)shield->Capacity() );
 		textBuffer += str.c_str();
 
-		str.Format("Reload\t%.1f\n", 0.001f * (float)shield->ShieldRechargeTime());
+		str.Format("Reload Time\t%.1f\n", 0.001f * (float)shield->ShieldRechargeTime());
 		textBuffer += str.c_str();
 	}
 

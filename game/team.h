@@ -17,9 +17,12 @@
 #define LUMOS_TEAM_INCLUDED
 
 #include "../grinliz/glstringutil.h"
+#include "../shared/gamedbreader.h"
 
 class Chit;
 class XStream;
+class CoreScript;
+class Web;
 
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
@@ -49,32 +52,57 @@ enum {
 };
 
 
-enum {
-	RELATE_FRIEND,
-	RELATE_ENEMY,
-	RELATE_NEUTRAL
+enum class ERelate {
+	FRIEND,
+	NEUTRAL,
+	ENEMY
 };
 
 
 class Team
 {
 public:
-	static void Serialize(XStream* xs);
+	Team(const gamedb::Reader* database);
+	~Team();
+
+	static Team* Instance() { return instance; }
+
+	void Serialize(XStream* xs);
+	void DoTick(int delta);
 
 	// Team name, where it has one.
-	static grinliz::IString TeamName(int team);
+	grinliz::IString TeamName(int team);
 	// Given a MOB name, return the team.
 	static int GetTeam(const grinliz::IString& name);
 
 	// Take a team, and add an id to it.
-	static int GenTeam(int teamGroup) {
+	int GenTeam(int teamGroup) {
 		teamGroup = Group(teamGroup);
 		int team = teamGroup | ((++idPool) << 8);
 		return team;
 	}
 
-	static int GetRelationship(int team0, int team1);
-	static int GetRelationship(Chit* chit0, Chit* chit1);
+	// Returns the team, or itself, that is the controlling team.
+	int SuperTeam(int team) const;
+	void AddSubteam(int super, int sub);
+	void RemoveSuperTeam(int super);
+
+	// A base relationship is symmetric (both parties feel the same way)
+	// and based on species.
+	static ERelate BaseRelationship(int team0, int team1);
+
+	// The current relationship is symmetric
+	ERelate GetRelationship(int team0, int team1);
+	ERelate GetRelationship(Chit* chit0, Chit* chit1);
+
+	// The attitude is asymetric 
+	int CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web);
+	int Attitude(CoreScript* center, CoreScript* eval);
+
+	// Go to war? If 'commit' is true, actually do it,
+	// else a query. Returns success.
+	bool War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
+	int  Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
 
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)
@@ -101,10 +129,97 @@ public:
 		return (team & 0xffffff00) == 0;
 	}
 
+	static bool IsDenizen(int team) {
+		int group = Group(team);
+		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_HOUSE);
+	}
+
+	static bool IsDeityCore(int team) {
+		int group = Group(team);
+		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
+	}
+
 	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:
-	static int idPool;
+	enum {
+		TREATY_TIME = 10*60*1000	// minutes of game time.
+	};
+
+	static ERelate AttitudeToRelationship(int d) {
+		if (d > 0) return ERelate::FRIEND;
+		if (d < 0) return ERelate::ENEMY;
+		return ERelate::NEUTRAL;
+	}
+	static int RelationshipToAttitude(ERelate r) {
+		if (r == ERelate::FRIEND) return 2;
+		if (r == ERelate::ENEMY) return -1;
+		return 0;
+	}
+
+	int idPool;
+	const gamedb::Reader* database;
+
+	struct TeamKey {
+		TeamKey() : t0(0), t1(0) {}
+
+		TeamKey(int origin, int stanceTo) {
+			this->t0 = origin;
+			this->t1 = stanceTo;
+		}
+
+		static bool Equal(const TeamKey& a, const TeamKey& b) {
+			return a.t0 == b.t0 && a.t1 == b.t1;
+		}
+		static bool Less(const TeamKey& a, const TeamKey& b) {
+			if (a.t0 < b.t0) return true;
+			else if (a.t0 > b.t0) return false;
+			else return a.t1 < b.t1;
+		}
+		static U32 Hash(const TeamKey& t) {
+			return t.t0 + t.t1;
+		}
+
+		int T0() const { return t0; }
+		int T1() const { return t1; }
+
+	private:
+		int t0, t1;
+	};
+
+	grinliz::HashTable<TeamKey, int, TeamKey> hashTable;
+
+	struct SymmetricTK {
+		SymmetricTK() : t0(0), t1(0), warTimer(0), peaceTimer(0) {}
+		SymmetricTK(int _t0, int _t1) {
+			t0 = grinliz::Min(_t0, _t1);
+			t1 = grinliz::Max(_t0, _t1);
+			warTimer = peaceTimer = 0;
+		}
+
+		int t0;
+		int t1;
+		int warTimer;
+		int peaceTimer;
+
+		bool operator==(const SymmetricTK& rhs) const {
+			return t0 == rhs.t0 && t1 == rhs.t1;
+		}
+		bool operator!=(const SymmetricTK& rhs) const {
+			return t0 != rhs.t0 || t1 != rhs.t1;
+		}
+		void Serialize(XStream* xs);
+	};
+
+	grinliz::CDynArray<SymmetricTK> treaties;
+
+	struct Control {
+		int super;
+		int sub;
+	};
+	grinliz::CDynArray<Control> control;
+
+	static Team* instance;
 };
 
 

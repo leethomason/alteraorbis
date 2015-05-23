@@ -286,7 +286,7 @@ void WorldGenScene::DoTick(U32 delta)
 						for (int i = 0; i < NUM_SECTORS; ++i) {
 							name = "sector";
 							// Keep the names a little short, so that they don't overflow UI.
-							IString n = LumosChitBag::StaticNameGen(database, "sector", random.Rand(), 4, 7);
+							IString n = LumosChitBag::StaticNameGen(database, "sector", random.Rand());
 							GLASSERT(!n.empty());
 							if (!n.empty()) {
 								name = n.safe_str();
@@ -439,7 +439,9 @@ void WorldGenScene::DoTick(U32 delta)
 				for (int i = 0; i < NUM_SECTORS; ++i) {
 					Vector2I sector = { i, j };
 					CoreScript* cs = CoreScript::GetCore(sector);
-					gridWidget[j*NUM_SECTORS + i].Set(sim->Context(), cs, 0);
+					// FIXME: don't need the sim->GetWeb() call. Here to force
+					// web calc to see performance cost.
+					gridWidget[j*NUM_SECTORS + i].Set(sim->Context(), cs, 0, &sim->CalcWeb());
 					gridWidget[j*NUM_SECTORS + i].SetVisible(true);
 				}
 			}

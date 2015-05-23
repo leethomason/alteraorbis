@@ -487,7 +487,7 @@ void GameScene::MoveModel( Chit* target )
 	if ( target && target != focusedTarget ) {
 		AIComponent* ai = player->GetAIComponent();
 
-		if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
+		if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::ENEMY ) {
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
@@ -512,11 +512,11 @@ void GameScene::TapModel( Chit* target )
 	AIComponent* ai = player ? player->GetAIComponent() : 0;
 	const char* setTarget = 0;
 
-	if ( ai && Team::GetRelationship( target, player ) == RELATE_ENEMY ) {
+	if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::ENEMY ) {
 		ai->Target( target, true );
 		setTarget = "target";
 	}
-	else if ( ai && Team::GetRelationship( target, player ) == RELATE_FRIEND ) {
+	else if ( ai && Team::Instance()->GetRelationship( target, player ) == ERelate::FRIEND ) {
 		const GameItem* item = target->GetItem();
 		// FIXME: should use key
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
@@ -1806,7 +1806,9 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()));
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange 
+				 || name == ISC::switchOff || name == ISC::switchOn) 
+			{
 				useBuildingVisible = true;
 			}
 		}
@@ -1965,7 +1967,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		const SectorData* sd = (const SectorData*)data;
 		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
-		int team = Team::GenTeam(TEAM_HOUSE);
+		int team = Team::Instance()->GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
 		CoreScript::CreateCore(ToSector(sd->x, sd->y), team, sim->Context());
 		ForceHerd(ToSector(sd->x, sd->y));

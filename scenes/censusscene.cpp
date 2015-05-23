@@ -60,7 +60,7 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && cs->ParentChit()->Team()) {
 				int group = Team::Group(cs->ParentChit()->Team());
-				IString team = Team::TeamName(group);
+				IString team = Team::Instance()->TeamName(group);
 				Census::MOBItem item;
 				item.name = team; item.count = 1;
 				

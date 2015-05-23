@@ -301,8 +301,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
-//		LumosGame* game = Context()->game;
-		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand(), 0, 0);
+		LumosGame* game = Context()->game;
+		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand());
 		chit->GetItem()->SetProperName( p );
 	}
 
@@ -452,7 +452,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	if ( !nameGen.empty() ) {
 		LumosChitBag* chitBag = chit->Context()->chitBag;
 		if ( chitBag ) {
-			chit->GetItem()->SetProperName(chitBag->NameGen(nameGen.c_str(), chit->ID(), 4, 8));
+			chit->GetItem()->SetProperName(chitBag->NameGen(nameGen.c_str(), chit->ID()));
 		}
 	}
 
@@ -500,7 +500,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex, const Web& web)
 	const ChitContext* context = Context();
 	if (web.Empty()) return 0;
 
-	Vector2I startSector = web.Origin();
+	Vector2I startSector = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
 	CoreScript* cs = CoreScript::GetCore(startSector);
 	if (!cs) return 0;	// cores get deleted, web is cached, etc.
 	Vector3F pos = cs->ParentChit()->Position();
@@ -614,7 +614,8 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, Wallet* src )
 	// this could be a problem. Would be nice to make
 	// deletion immediate.
 	for (int i = 0; i < chitList.Size(); ++i) {
-		if (chitList[i] && !IsQueuedForDelete(chitList[i])) {
+		Chit* c = chitList[i];
+		if (c && !IsQueuedForDelete(c) && c->GetWallet() && !c->GetWallet()->Closed()) {
 			chit = chitList[i];
 			break;
 		}
@@ -987,14 +988,14 @@ bool BuildingRepairFilter::Accept(Chit* chit)
 }
 
 
-void RelationshipFilter::CheckRelationship(Chit* _compareTo, int _relationship)
+void RelationshipFilter::CheckRelationship(Chit* _compareTo, ERelate _relationship)
 {
 	team = _compareTo->Team();
 	relationship = _relationship;
 }
 
 
-void RelationshipFilter::CheckRelationship(int _team, int _relationship)
+void RelationshipFilter::CheckRelationship(int _team, ERelate _relationship)
 {
 	team = _team;
 	relationship = _relationship;
@@ -1004,7 +1005,7 @@ void RelationshipFilter::CheckRelationship(int _team, int _relationship)
 bool RelationshipFilter::Accept( Chit* chit )
 {
 	if (team < 0) return true;	// not checking.
-	return Team::GetRelationship(team, chit->Team()) == relationship;
+	return Team::Instance()->GetRelationship(team, chit->Team()) == relationship;
 }
 
 
@@ -1111,6 +1112,12 @@ bool WeaponFilter::Accept(Chit* chit)
 }
 
 
+bool TeamFilter::Accept(Chit* chit)
+{
+	return chit->Team() == team;
+}
+
+
 Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 								Vector3F dir,
 								int effectFlags,
@@ -1174,7 +1181,7 @@ bool LumosChitBag::PopScene( int* id, SceneData** data )
 }
 
 
-IString LumosChitBag::NameGen(const char* dataset, int seed, int min, int max)
+IString LumosChitBag::NameGen(const char* dataset, int seed)
 {
 	const gamedb::Reader* database = Context()->game->GetDatabase();
 	const gamedb::Item* parent = database->Root()->Child("markovName");
@@ -1184,10 +1191,11 @@ IString LumosChitBag::NameGen(const char* dataset, int seed, int min, int max)
 	if (!item) return IString();
 	const gamedb::Item* names = item->Child("names");
 
+	int id = 0;
+
 	if (names) {
 		IString ds = StringPool::Intern(dataset);
 		bool found = false;
-		int id = 0;
 		for (int i = 0; i < namePool.Size(); ++i) {
 			if (namePool[i].dataset == ds) {
 				namePool[i].id++;
@@ -1196,74 +1204,27 @@ IString LumosChitBag::NameGen(const char* dataset, int seed, int min, int max)
 			}
 		}
 		if (!found) {
-			NamePoolID entry = { ds, 0 };
+			NamePoolID entry = { ds, id };
 			id = 0;
 			namePool.Push(entry);
 		}
-		seed = id;
 	}
-	return StaticNameGen(database, dataset, seed, min, max);
+	return StaticNameGen(database, dataset, id);
 }
 
-
-IString LumosChitBag::StaticNameGen(const gamedb::Reader* database, const char* dataset, int _seed, int min, int max)
+IString LumosChitBag::StaticNameGen(const gamedb::Reader* database, const char* dataset, int seed)
 {
 	const gamedb::Item* parent = database->Root()->Child("markovName");
 	GLASSERT(parent);
 	const gamedb::Item* item = parent->Child(dataset);
 	GLASSERT(item);
 	if (!item) return IString();
-
-	GLString nameBuffer = "";
-
-	// Make sure the name generator is warm:
-	Random random(_seed);
-	random.Rand();
-	random.Rand();
-	int seed = random.Rand();
-
-	const gamedb::Item* word = item->Child("words0");
 	const gamedb::Item* names = item->Child("names");
-	if (word) {
-		// The 3-word form.
-		for (int i = 0; i < 3; ++i) {
-			static const char* CHILD[] = { "words0", "words1", "words2" };
-			word = item->Child(CHILD[i]);
-			if (word && word->NumAttributes()) {
-				// attribute name and value are the same.
-				const char *attr = word->AttributeName(random.Rand(word->NumAttributes()));
-				if (i) {
-					nameBuffer.AppendFormat(" %s", attr);
-				}
-				else {
-					nameBuffer = attr;
-				}
-			}
-		}
-		return StringPool::Intern(nameBuffer.c_str());
-	}
-	else if (names) {
-		int index = abs(_seed) % names->NumChildren();
-		const char* n = names->ChildAt(index)->GetString("name");
-		return StringPool::Intern(n);
-	}
-	else {
-		// The triplet (letter) form.
-		int size = 0;
-		const void* data = database->AccessData(item, "triplets", &size);
-		MarkovGenerator gen((const char*)data, size, seed);
+	GLASSERT(names);
 
-		//int len = max + 1;
-		int error = 100;
-		while (error--) {
-			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {
-				return StringPool::Intern(nameBuffer.c_str());
-			}
-		}
-		gen.Name(&nameBuffer, max);
-		return StringPool::Intern(nameBuffer.c_str());
-	}
-	return IString();
+	int index = abs(seed) % names->NumChildren();
+	const char* n = names->ChildAt(index)->GetString("name");
+	return StringPool::Intern(n);
 }
 
 

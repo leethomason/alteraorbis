@@ -312,8 +312,6 @@ public:
 	grinliz::IString	IFullName() const;
 	const char*			ResourceName() const	{ return resource.c_str(); }
 	grinliz::IString	IResourceName() const	{ return resource; }
-	grinliz::IString	ITitle() const;
-	grinliz::IString	INameAndTitle() const;
 
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }

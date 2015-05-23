@@ -136,7 +136,7 @@ private:
 	int INDEX(const GridBlock& gb) const { return gb.y*mapWidth + gb.x; }
 
 	GridBlock FromState( void* state ) {
-		GLASSERT( sizeof(GridBlock) == sizeof(void*) );
+		GLASSERT( sizeof(GridBlock) <= sizeof(void*) );
 		GridBlock v = *((GridBlock*)&state);
 		return v;
 	}

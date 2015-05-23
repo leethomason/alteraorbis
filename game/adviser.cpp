@@ -76,11 +76,10 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 		BuildScript::MARKET,
 		BuildScript::FORGE,
 		BuildScript::TEMPLE,
+		BuildScript::KIOSK,
 		BuildScript::GUARDPOST,
 		BuildScript::EXCHANGE,
-		BuildScript::KIOSK,
 		BuildScript::VAULT,
-//		BuildScript::CIRCUITFAB
 	};
 
 	static const int NUM_BUILD_ADVISORS = GL_C_ARRAY_SIZE(BUILD_ADVISOR);

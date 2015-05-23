@@ -54,10 +54,11 @@ public:
 	virtual void HandleHotKey( int value );
 
 private:
-	grinliz::Rectangle2I MapBounds2();
-	grinliz::Rectangle2F GridBounds2(int x, int y, bool gutter);
-	grinliz::Vector2F ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
-	void DrawMap();
+	grinliz::Rectangle2I	MapBounds2();
+	grinliz::Rectangle2F	GridBounds2(int x, int y, bool gutter);
+	grinliz::Vector2F		ToUI(int select, const grinliz::Vector2F& pos, const grinliz::Rectangle2I& bounds, bool* inBounds);
+	void					DrawMap();
+	void					EnableButtons();
 
 	enum {	MAP2_RAD	= 2,
 			MAP2_SIZE	= MAP2_RAD*2+1,
@@ -74,17 +75,20 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel, viewButton;
+	gamui::PushButton	warButton, peaceButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
 
 	gamui::Image		playerMark[2];
 	gamui::Image		homeMark[2];
-	gamui::Image		travelMark;
+	//gamui::Image		travelMark;
 	gamui::Image		squadMark[2][MAX_SQUADS];
 	gamui::Image		selectionMark;
 	gamui::Image		diplomacy[NUM_SECTORS*NUM_SECTORS];
 	gamui::Canvas		webCanvas;
 	gamui::Image		unitMarker[MAX_CITIZENS];
+	gamui::TextLabel	numbers[NUM_SECTORS];
+	gamui::TextLabel	letters[NUM_SECTORS];
 
 	MapGridWidget		gridWidget[MAP2_SIZE2];
 };

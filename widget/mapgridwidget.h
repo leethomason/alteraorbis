@@ -6,6 +6,7 @@
 
 class CoreScript;
 class ChitContext;
+class Web;
 
 class MapGridWidget : public gamui::IWidget
 {
@@ -25,7 +26,7 @@ public:
 	virtual void SetVisible( bool vis );
 
 	// One or both can be null.
-	void Set(const ChitContext* context, CoreScript* cs, CoreScript* home);
+	void Set(const ChitContext* context, CoreScript* cs, CoreScript* home, const Web* web);
 	void Clear();
 
 private:
@@ -35,8 +36,11 @@ private:
 	float				width = 100.0f;
 	float				height = 100.0f;
 	gamui::TextLabel	textLabel;
+	gamui::TextLabel	dScore;
 
 	enum {
+		SUPER_TEAM_COLOR,
+
 		FACE_IMAGE_0,
 		FACE_IMAGE_1,
 		FACE_IMAGE_2,
@@ -51,10 +55,6 @@ private:
 		NUM_IMAGES,
 
 		NUM_FACE_IMAGES = 3,
-		FACE_IMAGE_START = FACE_IMAGE_0,
-		FACE_IMAGE_END = FACE_IMAGE_2+1,
-		MOB_COUNT_START = MOB_COUNT_IMAGE_0,
-		MOB_COUNT_END = MOB_COUNT_IMAGE_2+1
 	};
 
 	gamui::Image		image[NUM_IMAGES];

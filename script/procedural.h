@@ -135,7 +135,7 @@ private:
 class TeamGen
 {
 public:
-	static void Assign( U32 seed, int team, ProcRenderInfo* info );
+	static void Assign(int team, ProcRenderInfo* info);
 	static void TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast, grinliz::Vector2I* glow);
 	static void TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vector2I* contrast);
 };
