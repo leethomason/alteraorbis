@@ -1,5 +1,6 @@
 #include "mapgridwidget.h"
 #include "../script/corescript.h"
+#include "../script/procedural.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chitcontext.h"
 #include "../game/worldmap.h"
@@ -20,17 +21,22 @@ MapGridWidget::MapGridWidget()
 void MapGridWidget::Init(Gamui* gamui2D)
 {
 	textLabel.Init(gamui2D);
+	dScore.Init(gamui2D);
+
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].Init(gamui2D, RenderAtom(), true);
 	}
 
-	int layer = Gamui::LEVEL_FOREGROUND + 0;
+	int layer = Gamui::LEVEL_FOREGROUND + 1;
+	image[SUPER_TEAM_COLOR].SetLevel(layer);
+
+	layer = Gamui::LEVEL_FOREGROUND + 2;
 	image[FACE_IMAGE_0].SetLevel(layer);
 	image[FACE_IMAGE_1].SetLevel(layer);
 	image[FACE_IMAGE_2].SetLevel(layer);
 	image[CIV_TECH_IMAGE].SetLevel(layer);
 
-	layer = Gamui::LEVEL_FOREGROUND + 1;
+	layer = Gamui::LEVEL_FOREGROUND + 3;
 	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
@@ -99,6 +105,10 @@ void MapGridWidget::DoLayout()
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].SetSize(dw, dh);
 	}
+
+	image[SUPER_TEAM_COLOR].SetSize(w, dh);
+	image[SUPER_TEAM_COLOR].SetPos(x, y);
+
 	for (int i = 0; i < NUM_FACE_IMAGES; ++i) {
 		float fy = compact ? y : y + dh;
 		image[FACE_IMAGE_0 + i].SetSize(dw * MULT, dh * MULT);
@@ -109,15 +119,18 @@ void MapGridWidget::DoLayout()
 	float fy = compact ? y + dh : y + dh * 2.0f;
 	image[CIV_TECH_IMAGE].SetPos(x, fy);
 
-//	image[GOLD_IMAGE].SetSize(dw * MULT, dh * MULT);
 	image[GOLD_IMAGE].SetCenterPos(x + dw * 0.5f, fy + dh * 0.5f);
 
 	float fx = compact ? x + dw : x + dw*2.0f;
 	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
+
+	if (!compact) {
+		dScore.SetPos(x + dw, y + dh * 2);
+	}
 }
 
 
-void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, CoreScript* home)
+void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, CoreScript* home, const Web* web)
 {
 	Clear();
 	if (!coreScript) return;
@@ -125,18 +138,27 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	Vector2I sector = ToSector(coreScript->ParentChit()->Position());
 	const SectorData& sd = context->worldMap->GetSectorData( sector );
 
+	// ----- Reset -----
+	for (int i = 0; i < NUM_IMAGES; ++i) {
+		image[i].SetAtom(RenderAtom());
+	}
+
 	// ---- Text at top. ----
 	CStr<64> str = "";
 	if (!compact) {
 		const char* owner = "";
 		if (coreScript->InUse()) {
-			owner = Team::TeamName(coreScript->ParentChit()->Team()).safe_str();
+			owner = Team::Instance()->TeamName(coreScript->ParentChit()->Team()).safe_str();
+			Vector2I base = { 0, 0 };
+			TeamGen::TeamBuildColors(coreScript->ParentChit()->Team(), &base, 0, 0);
+			RenderAtom atom = LumosGame::CalcPaletteAtom(base.x, base.y);
+			image[SUPER_TEAM_COLOR].SetAtom(atom);
+		}
+		else {
+			image[SUPER_TEAM_COLOR].SetAtom(RenderAtom());
 		}
 		str.Format("%s\n%s", sd.name.c_str(), owner);
 		textLabel.SetText(str.safe_str());
-	}
-	for (int i = 0; i < NUM_IMAGES; ++i) {
-		image[i].SetAtom(RenderAtom());
 	}
 
 	// ---- Count of MOBs ---
@@ -241,14 +263,25 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
 
-	if (coreScript && home && coreScript->InUse() && home->InUse()) {
+	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeityCore(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
-		int relate = Team::GetRelationship(coreScript->ParentChit(), home->ParentChit());
+		ERelate relate = Team::Instance()->GetRelationship(coreScript->ParentChit(), home->ParentChit());
 
-		if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
-		else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
-		else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+		if (relate == ERelate::FRIEND) atom       = LumosGame::CalcUIIconAtom("friend");
+		else if (relate == ERelate::NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+		else if (relate == ERelate::ENEMY) atom   = LumosGame::CalcUIIconAtom("enemy");
 
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
+
+		if (web && (home != coreScript)) {
+			// Print out how THEY feel about US.
+			int attitude = Team::Instance()->Attitude(coreScript, home);
+			CStr<32> str;
+			str.Format("%+d", attitude);
+			dScore.SetText(str.safe_str());
+		}
+	}
+	else {
+		dScore.SetText("");
 	}
 }

@@ -21,7 +21,6 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-
 	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem, int team );
 
 	void Serialize( XStream* xs );
@@ -36,6 +35,7 @@ public:
 		GREATER_MOB_KILLED,			//  killed		killer
 		DOMAIN_CREATED,				//  domain
 		DOMAIN_DESTROYED,			//  domain		killer	
+		DOMAIN_TAKEOVER,			//	domain		conqueror
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
 
 		FORGED,						//	item		maker
@@ -47,6 +47,10 @@ public:
 		VISION_QUEST,				//	victim
 		GREATER_SUMMON_TECH,		//  mob
 		DOMAIN_CONQUER,				//	conquered	conquerer
+		
+		ATTITUDE_FRIEND,			//  origin		opinionOf
+		ATTITUDE_NEUTRAL,
+		ATTITUDE_ENEMY,
 
 		NUM_WHAT
 	};

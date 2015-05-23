@@ -25,6 +25,7 @@
 #include "gamelimits.h"
 #include "visitor.h"
 #include "visitorweb.h"
+#include "team.h"
 
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
@@ -46,7 +47,7 @@ class NewsHistory;
 class ItemDB;
 class CoreScript;
 class PlantScript;
-class CircuitSim;
+class Team;
 
 class Sim : public IChitListener, public IUITracker
 {
@@ -98,10 +99,10 @@ public:
 	// IUITracker
 	void UpdateUIElements(const Model* model[], int nModels);
 
-	const Web& CalcWeb();
 	const Web& GetCachedWeb();
+	const Web& CalcWeb();
 
-	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, int relate, grinliz::CArray<CoreScript*, 32> *stateArr);
+	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, ERelate relate, grinliz::CArray<CoreScript*, 32> *stateArr);
 	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
 
 private:
@@ -117,6 +118,7 @@ private:
 	ChitContext		context;
 	Weather*		weather;
 	ReserveBank*	reserveBank;
+	Team*			teamInfo;
 	Visitors*		visitors;
 	ItemDB*			itemDB;
 	PlantScript*	plantScript;
@@ -134,8 +136,15 @@ private:
 	int cachedWebAge;
 	Web web;
 
+	struct CreateCoreData {
+		grinliz::Vector2I sector;
+		bool wantsTakeover;
+		int defeatedTeam;
+		int conqueringTeam;
+	};
+
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
-	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
+	grinliz::CDynArray< CreateCoreData > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
 };
 

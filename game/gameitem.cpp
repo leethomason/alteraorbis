@@ -648,7 +648,7 @@ void GameItem::AbsorbDamage( const DamageDesc& dd )
 
 int GameItem::GetValue() const
 {
-	if ( value >= 0 ) {
+	if (value >= 0) {
 		return value;
 	}
 
@@ -659,51 +659,52 @@ int GameItem::GetValue() const
 	static const float RANGED_VALUE = 30;
 	static const float SHIELD_VALUE = 20;
 
-	if ( ToRangedWeapon() ) {
-		float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
-		float dptu = BattleMechanics::RangedDPTU( ToRangedWeapon(), true );
-		float er   = BattleMechanics::EffectiveRange( radAt1 );
+	if (ToRangedWeapon()) {
+		float radAt1 = BattleMechanics::ComputeRadAt1(0, ToRangedWeapon(), false, false);
+		float dptu = BattleMechanics::RangedDPTU(ToRangedWeapon(), true);
+		float er = BattleMechanics::EffectiveRange(radAt1);
 
-		const GameItem& basic = ItemDefDB::Instance()->Get( "blaster" );
-		float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
-		float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
-		float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
+		const GameItem& basic = ItemDefDB::Instance()->Get("blaster");
+		float refRadAt1 = BattleMechanics::ComputeRadAt1(0, basic.ToRangedWeapon(), false, false);
+		float refDPTU = BattleMechanics::RangedDPTU(basic.ToRangedWeapon(), true);
+		float refER = BattleMechanics::EffectiveRange(refRadAt1);
 
-		float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
-		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
-		value = LRintf( v );
+		float v = (dptu * er) / (refDPTU * refER) * RANGED_VALUE;
+		if (flags & GameItem::EFFECT_FIRE) v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_SHOCK) v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_EXPLOSIVE) v *= EFFECT_BONUS;
+		value = LRintf(v);
 	}
 
-	if ( ToMeleeWeapon() ) {
-		float dptu = BattleMechanics::MeleeDPTU( 0, ToMeleeWeapon() );
+	if (ToMeleeWeapon()) {
+		float dptu = BattleMechanics::MeleeDPTU(0, ToMeleeWeapon());
 
-		const GameItem& basic = ItemDefDB::Instance()->Get( "ring" );
-		float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
+		const GameItem& basic = ItemDefDB::Instance()->Get("ring");
+		float refDPTU = BattleMechanics::MeleeDPTU(0, basic.ToMeleeWeapon());
 
 		float v = dptu / refDPTU * MELEE_VALUE;
-		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_FIRE) v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_SHOCK) v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_EXPLOSIVE) v *= EFFECT_BONUS;
 
-		if ( value ) value += LRintf( v*0.5f );
-		else value = LRintf(v);
+		value = LRintf(v);
 	}
 
 	const Shield* shield = ToShield();
 	if (shield) {
-		const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
+		const GameItem& basic = ItemDefDB::Instance()->Get("shield");
 		const Shield* refShield = basic.ToShield();
 		GLASSERT(refShield);
+		
+		// Reduce importance of shield recharge time
+		float vRef = refShield->Capacity() / sqrtf((float)refShield->ShieldRechargeTime());
+		float vItem = shield->Capacity()   / sqrtf((float)shield->ShieldRechargeTime());
+		float v = vItem * SHIELD_VALUE / vRef;
 
-		float v = float(refShield->ShieldRechargeTime()) * SHIELD_VALUE / float(shield->ShieldRechargeTime());
+		if (flags & GameItem::EFFECT_FIRE)  v *= EFFECT_BONUS;
+		if (flags & GameItem::EFFECT_SHOCK) v *= EFFECT_BONUS;
 
-		if ( flags & GameItem::EFFECT_FIRE )  v *= 2.0f;
-		if ( flags & GameItem::EFFECT_SHOCK ) v *= 2.0f;
-
-		if ( value ) value += LRintf( v*0.5f );
-		else value = LRintf(v);
+		value = LRintf(v);
 	}
 	return value;
 }
@@ -795,6 +796,7 @@ IString GameItem::IFullName() const
 }
 
 
+#if 0
 IString GameItem::INameAndTitle() const
 {
 	//IString title = ITitle();
@@ -850,7 +852,7 @@ IString GameItem::ITitle() const
 	*/
 	return IString();
 }
-
+#endif
 
 void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator)
 {

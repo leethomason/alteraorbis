@@ -29,6 +29,7 @@ Gibson
 Gormun
 Goethe
 Hex
+Hexagon
 Indigo
 Inigo
 Jaak
@@ -64,8 +65,9 @@ Strident
 Syntax
 Tesla
 Varian
-Vulkar
 Vikarian
+Vulkar
+Vulkarian
 Whiskey
 Wraith
 Xallic

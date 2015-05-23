@@ -71,12 +71,14 @@ SectorPort Visitors::ChooseDestination(int index, const Web& web, ChitBag* chitB
 	if (!visitorChit) return sectorPort;
 
 	Vector2I thisSector = ToSector(visitorChit->Position());
-	const Web::Node* node = web.FindNode(thisSector);
-	if (!node || node->child.Empty()) 
+	const MinSpanTree::Node* node = web.FindNode(thisSector);
+	if (!node || node->firstChild == 0)
 		return sectorPort;
 
-	int which = random.Rand(node->child.Size());
-	Vector2I sector = node->child[which]->sector;
+	int nChildren = web.CountChildren(*node);
+	int which = random.Rand(nChildren);
+	const MinSpanTree::Node* child = web.ChildNode(*node, which);
+	Vector2I sector = child->pos;
 
 	const SectorData& sd = map->GetSectorData( sector );
 	GLASSERT(sd.ports);

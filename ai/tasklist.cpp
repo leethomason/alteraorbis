@@ -377,8 +377,8 @@ void TaskList::SocialPulse(const Vector2F& origin )
 
 	if ( arr.Size() < 2 ) return;
 	for( int i=1; i<arr.Size(); ++i ) {
-		int status = Team::GetRelationship( arr[0], arr[i] );
-		if ( status == RELATE_ENEMY ) {
+		ERelate status = Team::Instance()->GetRelationship( arr[0], arr[i] );
+		if ( status == ERelate::ENEMY ) {
 			// one bad apple ruins the bunch.
 			return;
 		}

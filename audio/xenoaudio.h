@@ -60,8 +60,8 @@ private:
 		grinliz::IString variation[NUM_VARIATIONS];
 	};
 
-	grinliz::HashTable< grinliz::IString, Mix_Chunk*, grinliz::CompValueIString > chunks;
-	grinliz::HashTable< grinliz::IString, SoundVariation, grinliz::CompValueIString > variations;
+	grinliz::HashTable< grinliz::IString, Mix_Chunk*, grinliz::CompValueString > chunks;
+	grinliz::HashTable< grinliz::IString, SoundVariation, grinliz::CompValueString > variations;
 	grinliz::CArray< Sound, CHANNELS > sounds;
 };
 

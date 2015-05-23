@@ -114,6 +114,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Greater " MOB_Destroyed,
 		"Domain " MOB_Created,
 		"Domain " MOB_Destroyed,
+		"Domain Conquered ",
 		"Roque Joins",
 		"Forged",
 		MOB_Destroyed,
@@ -123,6 +124,9 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Vision Quest",
 		"Greater Summoned",
 		"Domain Conquered",
+		"Attitude Friend",
+		"Attitude Neutral",
+		"Attitude Enemy"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
@@ -181,7 +185,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		domain = sd.name;
 	}
 
-	IString teamName = Team::TeamName(team);
+	IString teamName = Team::Instance()->TeamName(team);
 
 	switch (what) {
 		case DENIZEN_CREATED:
@@ -216,6 +220,15 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		}
 		else {
 			str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
+		}
+		break;
+
+		case DOMAIN_TAKEOVER:
+		if (team) {
+			str->Format("%.2f: %s domain %s " "conquered" " by %s.", age, teamName.safe_str(), domain.safe_str(), secondName.safe_str());
+		}
+		else {
+			str->Format("%.2f: %s " "conquered" ".", age, domain.c_str());
 		}
 		break;
 
@@ -254,7 +267,19 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case DOMAIN_CONQUER:
-		str->Format("%.2f: %s is occupied by team %s.", age, domain.safe_str(), teamName.safe_str() );
+		str->Format("%.2f: %s is occupied by %s.", age, domain.safe_str(), teamName.safe_str() );
+		break;
+
+		case ATTITUDE_FRIEND:
+		str->Format("%.2f: %s sees %s with friendly intent.", age, firstName.safe_str(), secondName.safe_str());
+		break;
+
+		case ATTITUDE_NEUTRAL:
+		str->Format("%.2f: %s sees %s with neutral regard.", age, firstName.safe_str(), secondName.safe_str());
+		break;
+
+		case ATTITUDE_ENEMY:
+		str->Format("%.2f: %s sees %s as an enemy.", age, firstName.safe_str(), secondName.safe_str());
 		break;
 
 		default:

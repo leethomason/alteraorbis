@@ -108,7 +108,7 @@ inline int ToWG(const grinliz::Vector2I& v) {
 }
 
 
-template<int INCLUDE0, int INCLUDE1>
+template<ERelate INCLUDE0, ERelate INCLUDE1>
 bool FEFilter(Chit* parentChit, int id) {
 	if (!parentChit) return false;
 
@@ -127,7 +127,7 @@ bool FEFilter(Chit* parentChit, int id) {
 		&& (range2 < LOOSE_AWARENESS * LOOSE_AWARENESS)
 		&& (ToSector(chit->Position()) == ToSector(parentChit->Position())))
 	{
-		int relate = Team::GetRelationship(chit, parentChit);
+		ERelate relate = Team::Instance()->GetRelationship(chit, parentChit);
 		if (relate == INCLUDE0 || relate == INCLUDE1)
 			return true;
 	}
@@ -271,7 +271,7 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 		if (enemyList2.Find(id) >= 0) continue;
 
 		Chit* chit = Context()->chitBag->GetChit( enemyIDs[i] );
-		if (FEFilter<RELATE_ENEMY, RELATE_NEUTRAL>(chit, 0)) {
+		if (FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(chit, 0)) {
 			enemyList2.Push( id );
 		}
 	}
@@ -325,11 +325,11 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	if (tick) friendList2.Clear();
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
-		return FEFilter<RELATE_ENEMY, RELATE_NEUTRAL>(parentChit, id);
+		return FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(parentChit, id);
 	});
 
 	friendList2.Filter(parentChit, [](Chit* parentChit, int id) {
-		return FEFilter<RELATE_FRIEND, -1>(parentChit, id);
+		return FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, id);
 	});
 
 	// Did we lose our focused target?
@@ -372,21 +372,21 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 					continue;
 				}
 
-				int status = Team::GetRelationship(parentChit, chit);
+				ERelate status = Team::Instance()->GetRelationship(parentChit, chit);
 				int id = chit->ID();
 
-				if (status == RELATE_ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
+				if (status == ERelate::ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
 					if (   fullSectorAware 
 						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()))) 
 					{
-						if (FEFilter<RELATE_ENEMY, -1>(parentChit, id)) {
+						if (FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, id)) {
 							enemyList2.Push(id);
 							chitArr[i] = nullptr;
 						}
 					}
 				}
-				else if (pass == 0 && status == RELATE_FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
-					if (FEFilter<RELATE_FRIEND, -1>(parentChit, id)) {
+				else if (pass == 0 && status == ERelate::FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
+					if (FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, id)) {
 						friendList2.Push(id);
 						chitArr[i] = nullptr;
 					}
@@ -1339,12 +1339,12 @@ bool AIComponent::SectorHerd( bool focus)
 
 			// Check repelled / attracted.
 			if (cs && cs->ParentChit()->Team()) {
-				int relate = Team::GetRelationship(cs->ParentChit(), parentChit);
+				ERelate relate = Team::Instance()->GetRelationship(cs->ParentChit(), parentChit);
 				int nTemples = cs->NumTemples();
 				float tech = cs->GetTech();
 
 				// For enemies, apply rules to make the gameplay smoother.
-				if (relate == RELATE_ENEMY) {
+				if (relate == ERelate::ENEMY) {
 					if (mob == ISC::lesser) {
 						if (nTemples <= TEMPLES_REPELS_LESSER) {
 							if (parentChit->random.Rand(2) == 0) {
@@ -1627,7 +1627,7 @@ bool AIComponent::AtFriendlyOrNeutralCore()
 	Vector2I sector = ToSector( parentChit->Position());
 	CoreScript* coreScript = CoreScript::GetCore( sector );
 	if (coreScript) {
-		return Team::GetRelationship(parentChit, coreScript->ParentChit()) != RELATE_ENEMY;
+		return Team::Instance()->GetRelationship(parentChit, coreScript->ParentChit()) != ERelate::ENEMY;
 	}
 	return false;
 }
@@ -2012,7 +2012,7 @@ bool AIComponent::ThinkNeeds()
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 
 	if (!coreScript) return false;
-	if (Team::GetRelationship(parentChit, coreScript->ParentChit()) == RELATE_ENEMY) return false;
+	if (Team::Instance()->GetRelationship(parentChit, coreScript->ParentChit()) == ERelate::ENEMY) return false;
 
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
@@ -2674,7 +2674,7 @@ void AIComponent::EnterNewGrid()
 	{
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs) {
-			if (cs->InUse() && Team::GetRelationship(parentChit, cs->ParentChit()) == RELATE_ENEMY) {
+			if (cs->InUse() && Team::Instance()->GetRelationship(parentChit, cs->ParentChit()) == ERelate::ENEMY) {
 				Context()->physicsSims->GetCircuitSim(ToSector(pos2i))->TriggerDetector(pos2i);
 			}
 			else if (!cs->InUse()) {
@@ -2747,7 +2747,7 @@ void AIComponent::EnterNewGrid()
 				DomainAI* ai = DomainAI::Factory(gameItem->Team());
 				if (ai) {
 					GLASSERT(Team::IsRogue(gameItem->Team()));
-					int newCoreTeam = Team::GenTeam(gameItem->Team());
+					int newCoreTeam = Team::Instance()->GenTeam(gameItem->Team());
 					CoreScript* newCS = CoreScript::CreateCore(sector, newCoreTeam, Context());
 					newCS->ParentChit()->Add(ai);
 					newCS->AddCitizen(parentChit);
@@ -2791,14 +2791,14 @@ void AIComponent::EnterNewGrid()
 				else if (mob == ISC::greater)	boost = 0.20;
 				else if (mob == ISC::denizen)	boost = 0.10;
 
-				int relate = Team::GetRelationship(parentChit->Team(), team);
-				if (relate == RELATE_ENEMY) {
+				ERelate relate = Team::Instance()->GetRelationship(parentChit->Team(), team);
+				if (relate == ERelate::ENEMY) {
 					GetNeedsMutable()->AddMorale(boost);
 					if (rc) {
 						rc->AddDeco("happy", STD_DECO);
 					}
 				}
-				else if (relate == RELATE_FRIEND) {
+				else if (relate == ERelate::FRIEND) {
 					GetNeedsMutable()->AddMorale(-boost);
 					if (rc) {
 						rc->AddDeco("sad", STD_DECO);

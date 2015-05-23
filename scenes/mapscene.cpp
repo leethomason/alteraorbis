@@ -7,6 +7,7 @@
 #include "../game/team.h"
 #include "../game/gameitem.h"
 #include "../game/sim.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -31,6 +32,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	viewButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
 	viewButton.SetText("View");
 
+	warButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	warButton.SetText("War!");
+	peaceButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	peaceButton.SetText("Peace\nTreaty");
+
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
 	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_GRAYSCALE_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
 	mapImage.Init( &gamui2D, mapAtom, false );
@@ -52,6 +58,7 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	playerMark[0].Init( &gamui2D, atom, true );
 	playerMark[1].Init( &gamui2D, atom, true );
 
+	atom = lumosGame->CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
 	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 	homeMark[0].Init( &gamui2D, atom, true );
 	homeMark[1].Init( &gamui2D, atom, true );
@@ -67,9 +74,9 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		diplomacy[i].Init(&gamui2D, RenderAtom(), true);
 	}
 
-	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
-	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
-	travelMark.Init( &gamui2D, travelAtom, true );
+//	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
+//	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+//	travelMark.Init( &gamui2D, travelAtom, true );
 
 	RenderAtom selectionAtom = lumosGame->CalcUIIconAtom("mapSelection", true);
 	selectionMark.Init(&gamui2D, selectionAtom, true);
@@ -84,6 +91,16 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	RenderAtom unitAtom = LumosGame::CalcUIIconAtom("unitMarker");
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
 		unitMarker[i].Init(&gamui2D, unitAtom, true);
+	}
+
+	for (int i = 1; i < NUM_SECTORS; ++i) {
+		numbers[i].Init(&gamui2D);
+		letters[i].Init(&gamui2D);
+		CStr<16> str;
+		str.Format("%c", 'A' + i);
+		letters[i].SetText(str.c_str());
+		str.Format("%d", i+1);
+		numbers[i].SetText(str.c_str());
 	}
 }
 
@@ -133,6 +150,8 @@ void MapScene::Resize()
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
 	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
+	layout.PosAbs(&warButton, -4, -1, 2, 1);
+	layout.PosAbs(&peaceButton, -2, -1, 2, 1);
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -154,14 +173,28 @@ void MapScene::Resize()
 			squadMark[i][k].SetSize(SQUAD_MARK_SIZE, SQUAD_MARK_SIZE);
 		}
 	}
-	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+//	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	homeMark[0].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	homeMark[1].SetSize(dx / float(MAP2_SIZE), dy / float(MAP2_SIZE));
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
 
 	webCanvas.SetPos(mapImage.X(), mapImage.Y());
 
+	for (int i = 0; i < NUM_SECTORS; ++i) {
+		float dx = gamui2D.TextHeightVirtual() * 0.5f;
+		float dy = gamui2D.TextHeightVirtual() * 0.5f;
+
+		float x = dx + mapImage.X() + mapImage.Width() * i / NUM_SECTORS;
+		float y = dy + mapImage.Y();
+		letters[i].SetPos(x, y);
+
+		x = dx + mapImage.X();
+		y = dy + mapImage.Y() + mapImage.Height() * i / NUM_SECTORS;
+		numbers[i].SetPos(x, y);
+	}
+
 	DrawMap();
+	EnableButtons();
 }
 
 
@@ -186,13 +219,36 @@ Rectangle2I MapScene::MapBounds2()
 	return subBounds;
 }
 
+
+void MapScene::EnableButtons()
+{
+	Vector2I v = data->destSector;
+	CoreScript* cs = CoreScript::GetCore(v);
+	CoreScript* homeCore = lumosChitBag->GetHomeCore();
+
+	warButton.SetEnabled(Team::Instance()->War(cs, homeCore, false, &lumosChitBag->GetSim()->GetCachedWeb()));
+	int peace = Team::Instance()->Peace(cs, homeCore, false, &lumosChitBag->GetSim()->GetCachedWeb());
+	const Wallet* wallet = homeCore->ParentChit()->GetWallet();
+
+	if (peace > 0 && wallet->HasGold(peace)) {
+		CStr<64> str;
+		str.Format("Peace Treaty %d Au", peace);
+		peaceButton.SetEnabled(true);
+		peaceButton.SetText(str.c_str());
+	}
+	else {
+		peaceButton.SetEnabled(false);
+		peaceButton.SetText("Peace Treaty");
+	}
+}
+
 void MapScene::DrawMap()
 {
 	CDynArray<Chit*> query;
 
-//	int primaryTeam = lumosChitBag->GetHomeTeam();
 	const ChitContext* context = lumosChitBag->Context();
-//	int nFace = 0;
+	int nFace = 0;
+	const Web& web = lumosChitBag->GetSim()->CalcWeb();
 
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
@@ -212,15 +268,13 @@ void MapScene::DrawMap()
 		int j = (sector.y - subBounds.min.y);
 		int index = j * MAP2_SIZE + i;
 
-//		Rectangle2I inner = sd.InnerBounds();
-//		Rectangle2F innerF = ToWorld2F(inner);
 		CoreScript* coreScript = CoreScript::GetCore(sector);
 
 		CStr<64> str = "";
 		const char* owner = "";
 		if (coreScript) {
 			if ( coreScript->InUse() ) {
-				owner = Team::TeamName( coreScript->ParentChit()->Team() ).safe_str();
+				owner = Team::Instance()->TeamName( coreScript->ParentChit()->Team() ).safe_str();
 			}
 		}
 		str.Format( "%s\n%s", sd.name.safe_str(), owner );
@@ -228,7 +282,7 @@ void MapScene::DrawMap()
 		Rectangle2F r = GridBounds2(i, j, true);
 		gridWidget[index].SetPos(r.min.x, r.min.y);
 		gridWidget[index].SetSize(r.Width(), r.Height());
-		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore());
+		gridWidget[index].Set(context, coreScript, lumosChitBag->GetHomeCore(), &web);
 	}
 
 	Vector2I homeSector = lumosChitBag->GetHomeSector();
@@ -282,10 +336,10 @@ void MapScene::DrawMap()
 
 		pos.Set(float(data->destSector.x * SECTOR_SIZE), float(data->destSector.y * SECTOR_SIZE));
 		v = ToUI(i,pos, b, &inBounds);
-		if (i == 0) {
-			travelMark.SetPos(v.x, v.y);
-			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
-		}
+//		if (i == 0) {
+//			travelMark.SetPos(v.x, v.y);
+//			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
+//		}
 		for (int k = 0; k < MAX_SQUADS; ++k) {
 			v = ToUI(i, ToWorld2F(data->squadDest[k]), b, &inBounds);
 			squadMark[i][k].SetCenterPos(v.x, v.y);
@@ -300,18 +354,15 @@ void MapScene::DrawMap()
 
 	float scale = float(mapImage.Width()) / float(NUM_SECTORS);
 	{
-		const Web& web = lumosChitBag->GetSim()->CalcWeb();
 		webCanvas.Clear();
 
-		for (int i = 0; i < web.NumNodes(); i++) {
-			const Web::Node* node = web.NodeAt(i);
-			for (int k = 0; k < node->child.Size(); ++k) {
-				Vector2I s0 = node->sector;
-				Vector2I s1 = node->child[k]->sector;
-				Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
-				Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
-				webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node->strength * 2.0f);
-			}
+		for (int i = 1; i < web.NumNodes(); i++) {
+			const MinSpanTree::Node& node = web.NodeAt(i);
+			Vector2I s0 = node.parentPos;
+			Vector2I s1 = node.pos;
+			Vector2F p0 = { (float(s0.x) + 0.5f) * scale, (float(s0.y) + 0.5f) * scale };
+			Vector2F p1 = { (float(s1.x) + 0.5f) * scale, (float(s1.y) + 0.5f) * scale };
+			webCanvas.DrawLine(p0.x, p0.y, p1.x, p1.y, 1.0f + node.strength * 2.0f);
 		}
 	}
 
@@ -342,10 +393,10 @@ void MapScene::DrawMap()
 			RenderAtom atom;
 
 			if (core && homeCore && homeCore->InUse() && core->InUse()) {
-				int relate = Team::GetRelationship(core->ParentChit(), homeCore->ParentChit());
-				if (relate == RELATE_FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
-				else if (relate == RELATE_NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
-				else if (relate == RELATE_ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
+				ERelate relate = Team::Instance()->GetRelationship(core->ParentChit(), homeCore->ParentChit());
+				if (relate == ERelate::FRIEND) atom = LumosGame::CalcUIIconAtom("friend");
+				else if (relate == ERelate::NEUTRAL) atom = LumosGame::CalcUIIconAtom("neutral");
+				else if (relate == ERelate::ENEMY) atom = LumosGame::CalcUIIconAtom("enemy");
 				
 				diplomacy[j*NUM_SECTORS + i].SetSize(scale*0.8f, scale*0.8f);
 			}
@@ -366,37 +417,57 @@ void MapScene::DrawMap()
 }
 
 
-void MapScene::ItemTapped( const gamui::UIItem* item )
+void MapScene::ItemTapped(const gamui::UIItem* item)
 {
 	Vector2I sector = { 0, 0 };
-	
-	if ( item == &okay ) {
+	Vector2I v = data->destSector;
+	CoreScript* cs = CoreScript::GetCore(v);
+	CoreScript* homeCore = lumosChitBag->GetHomeCore();
+
+	if (item == &okay) {
 		data->destSector.Zero();
 		lumosGame->PopScene();
 	}
-	else if ( item == &gridTravel ) {
+	else if (item == &gridTravel) {
 		lumosGame->PopScene();
 	}
-	else if ( item == &viewButton ) {
+	else if (item == &viewButton) {
 		data->view = true;
 		lumosGame->PopScene();
 	}
-	else if ( item == &mapImage ) {
-		float x=0, y=0;
-		gamui2D.GetRelativeTap( &x, &y );
-		sector.x = int( x * float(NUM_SECTORS) );
-		sector.y = int( y * float(NUM_SECTORS) );
+	else if (item == &mapImage) {
+		float x = 0, y = 0;
+		gamui2D.GetRelativeTap(&x, &y);
+		sector.x = int(x * float(NUM_SECTORS));
+		sector.y = int(y * float(NUM_SECTORS));
 		data->destSector = sector;
 		DrawMap();
+		EnableButtons();
 	}
-	else if ( item == &mapImage2 ) {
-		float x=0, y=0;
-		gamui2D.GetRelativeTap( &x, &y );
+	else if (item == &mapImage2) {
+		float x = 0, y = 0;
+		gamui2D.GetRelativeTap(&x, &y);
 		Rectangle2I b = MapBounds2();
-		sector.x = b.min.x + int( x * float(b.Width()) );
-		sector.y = b.min.y + int( y * float(b.Height()) );
+		sector.x = b.min.x + int(x * float(b.Width()));
+		sector.y = b.min.y + int(y * float(b.Height()));
 		data->destSector = sector;
 		DrawMap();
+		EnableButtons();
+	}
+	else if (item == &warButton) {
+		Team::Instance()->War(cs, homeCore, true, &lumosChitBag->GetSim()->GetCachedWeb());
+		DrawMap();
+		EnableButtons();
+	}
+	else if (item == &peaceButton) {
+		int cost = Team::Instance()->Peace(cs, homeCore, false, &lumosChitBag->GetSim()->GetCachedWeb());
+		Wallet* wallet = homeCore->ParentChit()->GetWallet();
+		if (wallet->HasGold(cost)) {
+			ReserveBank::Instance()->GetWallet()->Deposit(wallet, cost);
+			Team::Instance()->Peace(cs, homeCore, true, &lumosChitBag->GetSim()->GetCachedWeb());
+			DrawMap();
+			EnableButtons();
+		}
 	}
 }
 

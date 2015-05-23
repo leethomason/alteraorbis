@@ -74,7 +74,7 @@ int FlagScript::DoTick(U32 delta)
 				if (rc) {
 					GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
 					const char* NAME[MAX_SQUADS] = { "Alpha", "Beta", "Delta", "Omega" };
-					str.Format("%s\n%s #%d", Team::TeamName(cs->ParentChit()->Team()).safe_str(), NAME[squadID], idx+1);
+					str.Format("%s\n%s #%d", Team::Instance()->TeamName(cs->ParentChit()->Team()).safe_str(), NAME[squadID], idx+1);
 				}
 			}
 		}

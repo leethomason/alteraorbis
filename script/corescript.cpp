@@ -52,6 +52,8 @@ using namespace grinliz;
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
+grinliz::CArray<CoreScript*, NUM_SECTORS*NUM_SECTORS> CoreScript::coreList;
+
 
 void CoreScript::Init()
 {
@@ -172,8 +174,10 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(coreInfoArr[index].coreScript == 0);
 	coreInfoArr[index].coreScript = this;
+	coreList.Push(this);
 
 	aiTicker.Randomize(parentChit->random.Rand());
+	strategicTicker.Randomize(parentChit->random.Rand());
 }
 
 
@@ -182,6 +186,10 @@ void CoreScript::OnRemove()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(coreInfoArr[index].coreScript == this);
 	coreInfoArr[index].coreScript = 0;
+
+	int idx = coreList.Find(this);
+	GLASSERT(idx >= 0);
+	coreList.SwapRemove(idx);
 
 	delete workQueue;
 	workQueue = 0;
@@ -202,6 +210,7 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				citizen->GetItem()->SetRogue();
 			}
 		}
+		Team::Instance()->RemoveSuperTeam(chit->Team());
 	}
 }
 
@@ -526,7 +535,7 @@ bool CoreScript::RecruitNeutral()
 
 	for (int i = 0; i < arr.Size(); ++i) {
 		Chit* chit = arr[i];
-		if (Team::GetRelationship(chit, parentChit) != RELATE_ENEMY) {
+		if (Team::Instance()->GetRelationship(chit, parentChit) != ERelate::ENEMY) {
 			if (this->IsCitizen(chit)) continue;
 			if (!chit->GetItem()) continue;
 
@@ -777,8 +786,16 @@ void CoreScript::AddTech()
 {
 	tech += TECH_ADDED_BY_VISITOR;
 	tech = Clamp( tech, 0.0, Min( double(TECH_MAX), double( MaxTech() ) - 0.01 ));
-
 	achievement.techLevel = Max(achievement.techLevel, (int)tech);
+
+	int team = ParentChit()->Team();
+	int superTeam = Team::Instance()->SuperTeam(team);
+	if (team != superTeam) {
+		CoreScript* super = CoreScript::GetCoreFromTeam(superTeam);
+		if (super) {
+			super->AddTech();
+		}
+	}
 }
 
 
@@ -802,6 +819,13 @@ void CoreScript::RemoveTask(const grinliz::Vector2I& pos2i)
 bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
 {
 	return tasks.Find(pos2i) >= 0;
+}
+
+
+CoreScript** CoreScript::GetCoreList(int *n)
+{
+	*n = coreList.Size();
+	return coreList.Mem();
 }
 
 
@@ -898,7 +922,6 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 			context->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &buildings, 0);
 			
 			for (int i = 0; i < buildings.Size(); ++i) {
-			//for (Chit* c : buildings) {
 				Chit* c = buildings[i];
 				if (c->GetItem() && c->GetItem()->IName() != ISC::core) {
 					c->GetItem()->SetTeam(team);
@@ -1124,7 +1147,6 @@ void CoreScript::DoStrategicTick()
 		if (squadReady[i])
 			++nReady;
 	}
-	if (nReady == 0) return;
 
 	Sim* sim = Context()->chitBag->GetSim();
 	GLASSERT(sim);
@@ -1132,7 +1154,13 @@ void CoreScript::DoStrategicTick()
 
 	Vector2I sector = ToSector(ParentChit()->Position());
 	CCoreArray stateArr;
-	sim->CalcStrategicRelationships(sector, 3, RELATE_ENEMY, &stateArr);
+	sim->CalcStrategicRelationships(sector, 3, ERelate::ENEMY, &stateArr);
+
+	// The strategic relationships need to be calculated, but after that,
+	// there's no point in computing further if we don't have a squad to 
+	// send into action.
+	if (nReady == 0) 
+		return;
 
 	int myPower = this->CorePower();
 	int myWealth = this->CoreWealth();
@@ -1146,7 +1174,7 @@ void CoreScript::DoStrategicTick()
 		int power = cs->CorePower();
 		int wealth   = cs->CoreWealth();
 
-		if ((power < myPower / 2) && (wealth > myWealth || wealth > 400)) {
+		if (power < myPower / 2) {
 			// Assuming this is actually so rare that it doesn't matter to select the best.
 			target = cs;
 			break;
