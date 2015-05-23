@@ -74,9 +74,9 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 		diplomacy[i].Init(&gamui2D, RenderAtom(), true);
 	}
 
-	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
-	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
-	travelMark.Init( &gamui2D, travelAtom, true );
+//	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
+//	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+//	travelMark.Init( &gamui2D, travelAtom, true );
 
 	RenderAtom selectionAtom = lumosGame->CalcUIIconAtom("mapSelection", true);
 	selectionMark.Init(&gamui2D, selectionAtom, true);
@@ -173,7 +173,7 @@ void MapScene::Resize()
 			squadMark[i][k].SetSize(SQUAD_MARK_SIZE, SQUAD_MARK_SIZE);
 		}
 	}
-	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
+//	travelMark.SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	homeMark[0].SetSize(dx / float(NUM_SECTORS), dy / float(NUM_SECTORS));
 	homeMark[1].SetSize(dx / float(MAP2_SIZE), dy / float(MAP2_SIZE));
 	selectionMark.SetSize(float(MAP2_SIZE) * dx / float(NUM_SECTORS), float(MAP2_SIZE) *dx / float(NUM_SECTORS));
@@ -339,10 +339,10 @@ void MapScene::DrawMap()
 
 		pos.Set(float(data->destSector.x * SECTOR_SIZE), float(data->destSector.y * SECTOR_SIZE));
 		v = ToUI(i,pos, b, &inBounds);
-		if (i == 0) {
-			travelMark.SetPos(v.x, v.y);
-			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
-		}
+//		if (i == 0) {
+//			travelMark.SetPos(v.x, v.y);
+//			travelMark.SetVisible(inBounds && !data->destSector.IsZero());
+//		}
 		for (int k = 0; k < MAX_SQUADS; ++k) {
 			v = ToUI(i, ToWorld2F(data->squadDest[k]), b, &inBounds);
 			squadMark[i][k].SetCenterPos(v.x, v.y);

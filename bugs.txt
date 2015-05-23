@@ -21,22 +21,22 @@ x peace button
 		- fall of super-domain: means integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 
-- cross swords on map: fighting there? confusing icons
-- remove industrial from switches
+x remove industrial from switches
 - top down: can’t tell on switch from off switch. 
-- switch should fire if avatar goes there
-- flag - for local control - awkward. just click switches to go there
-- kiosks higher on recommendation list
+t switch should fire if avatar goes there
+d flag - for local control - awkward. just click switches to go there
+x kiosks higher on recommendation list
 - name of buildings - pop up? info?
-- weapon stats: write units
+x weapon stats: write units
 - detail view of building w/ mouse down
 - temple charge: show differently? bar?
 - don’t build up a squad if deployed
 - auto-pickup loot? obnoxious, but list isn’t great either
 - make sure domain takeover works in next version
 x shield value over-accounts for reload time
-- detector beam
 
+- cross swords on map: fighting there? confusing icons
+- detector beam
 - teleport out on war switch
 - world gen too slow in debug
 - GT: food as medkit
