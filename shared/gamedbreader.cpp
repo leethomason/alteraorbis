@@ -372,7 +372,7 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 
 		int resultSize = fastlz_decompress(buffer, dataDesc.compressedSize, target, dataDesc.size);
 
-		if (resultSize != dataDesc.size) {
+		if (resultSize != int(dataDesc.size)) {
 			GLOUTPUT_REL(("Reader::GetData uncompress returned size %d. dataID=%d size=%d compressedSize=%d memSize=%d\n", resultSize, dataID, dataDesc.size, dataDesc.compressedSize, memSize));
 		}
 		GLASSERT( dataDesc.size == (U32)memSize );

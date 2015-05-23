@@ -131,7 +131,7 @@ public:
 
 	static bool IsDenizen(int team) {
 		int group = Group(team);
-		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_HOUSE);
+		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_HOUSE) || (group == TEAM_KAMAKIRI);
 	}
 
 	static bool IsDeityCore(int team) {

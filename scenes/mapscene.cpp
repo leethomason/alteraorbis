@@ -247,7 +247,6 @@ void MapScene::DrawMap()
 	CDynArray<Chit*> query;
 
 	const ChitContext* context = lumosChitBag->Context();
-	int nFace = 0;
 	const Web& web = lumosChitBag->GetSim()->CalcWeb();
 
 	Rectangle2I subBounds = MapBounds2();

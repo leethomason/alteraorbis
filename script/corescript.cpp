@@ -1,11 +1,6 @@
 #include "corescript.h"
 
-#include "../grinliz/glvector.h"
-#include "../grinliz/glarrayutil.h"
-
 #include "../engine/engine.h"
-#include "../engine/particle.h"
-#include "../engine/loosequadtree.h"
 
 #include "../game/census.h"
 #include "../game/lumoschitbag.h"
@@ -13,19 +8,13 @@
 #include "../game/worldmap.h"
 #include "../game/aicomponent.h"
 #include "../game/workqueue.h"
-#include "../game/team.h"
-#include "../game/lumosmath.h"
 #include "../game/gameitem.h"
 #include "../game/sim.h"
 #include "../game/worldinfo.h"
 #include "../game/reservebank.h"
 #include "../game/healthcomponent.h"
 
-#include "../xegame/chit.h"
-#include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
-#include "../xegame/istringconst.h"
-#include "../xegame/cameracomponent.h"
 #include "../xegame/itemcomponent.h"
 
 #include "../script/procedural.h"
@@ -35,7 +24,7 @@
 
 /*
 	See also SectorHerd() for where this gets implemented.
-	Temples attrack / repel monsters
+	Temples attract / repel monsters
 
 	MAX_TECH	Less			Greater
 	1: 			repel some		repel
@@ -46,7 +35,6 @@
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.0001;
 static const double TECH_DECAY_1 = 0.0016;
-static const int SUMMON_GREATER_TIME = 10 * 60 * 1000;
 
 using namespace grinliz;
 
@@ -247,8 +235,8 @@ void CoreScript::AssignToSquads()
 	FilterData fd = { this, Context()->chitBag->GetAvatar() };
 
 	// Filter to: not in squad AND not player controlled
-	recruits.Filter(fd, [](const FilterData& fd, Chit* chit) {
-		return (fd.cs->SquadID(chit->ID()) < 0 && chit != fd.avatar);
+	recruits.Filter(fd, [](const FilterData& ffd, Chit* chit) {
+		return (ffd.cs->SquadID(chit->ID()) < 0 && chit != ffd.avatar);
 	});
 
 	// Sort the best recruits to the end.
@@ -283,8 +271,8 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 	GLASSERT(id >= 0 && id < MAX_SQUADS);
 	if (arr) arr->Clear();
 
-	squads[id].Filter(this, [](CoreScript* cs, int id){
-		return cs->IsCitizen(id);
+	squads[id].Filter(this, [](CoreScript* cs, int fid){
+		return cs->IsCitizen(fid);
 	});
 	if (arr) {
 		for (int i = 0; i < squads[id].Size(); ++i) {
@@ -623,7 +611,7 @@ int CoreScript::MaxCitizens()
 
 
 
-void CoreScript::DoTickInUse(int delta, int nSpawnTicks)
+void CoreScript::DoTickInUse(int /*delta*/, int nSpawnTicks)
 {
 	tech -= Lerp(TECH_DECAY_0, TECH_DECAY_1, tech / double(TECH_MAX));
 	int maxTech = MaxTech();
@@ -891,13 +879,21 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		context->chitBag->DeleteChit(core);
 	}
 
-//	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-//	const GameItem& coreItem = itemDefDB->Get("core");
-
 	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {
-		// Assert that the 'team' is correctly formed.
-		GLASSERT(team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::ID(team));
+		int group = 0, id = 0;
+		Team::SplitID(team, &group, &id);
+
+		// Lots of trouble with this code. Used to assert,
+		// but always seemed to be another case. White list
+		// groups that *can* take over a core.
+		if (team == TEAM_NEUTRAL || team == TEAM_TROLL || group == TEAM_DEITY || Team::IsDenizen(team)) {
+			// Okay! take over.
+			GLASSERT(!Team::IsDenizen(team) || id);		// make sure rogues got filtered out.
+		}
+		else {
+			team = group = id = 0;
+		}
 		Chit* chit = context->chitBag->NewBuilding(sd.core, "core", team);
 
 		// 'in use' instead of blocking.
@@ -918,8 +914,8 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 
 			// Make all buildings to be this team.
 			CDynArray<Chit*> buildings;
-			Vector2I sector = ToSector(chit->Position());
-			context->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &buildings, 0);
+			Vector2I buildingSector = ToSector(chit->Position());
+			context->chitBag->FindBuilding(IString(), buildingSector, 0, LumosChitBag::EFindMode::NEAREST, &buildings, 0);
 			
 			for (int i = 0; i < buildings.Size(); ++i) {
 				Chit* c = buildings[i];
@@ -1163,7 +1159,7 @@ void CoreScript::DoStrategicTick()
 		return;
 
 	int myPower = this->CorePower();
-	int myWealth = this->CoreWealth();
+//	int myWealth = this->CoreWealth();
 
 	CoreScript* target = 0;
 	for (int i = 0; i < stateArr.Size(); ++i) {
@@ -1172,7 +1168,7 @@ void CoreScript::DoStrategicTick()
 			continue;
 
 		int power = cs->CorePower();
-		int wealth   = cs->CoreWealth();
+//		int wealth   = cs->CoreWealth();
 
 		if (power < myPower / 2) {
 			// Assuming this is actually so rare that it doesn't matter to select the best.

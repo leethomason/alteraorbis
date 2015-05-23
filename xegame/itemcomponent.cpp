@@ -728,11 +728,12 @@ void ItemComponent::InformCensus(bool add)
 		else if (core == "core") {
 			int team = parentChit->Team();
 			if (team) {
-				IString team = Team::Instance()->TeamName(Team::Group(parentChit->Team()));
+				IString iTeam = Team::Instance()->TeamName(Team::Group(parentChit->Team()));
+				GLASSERT(!iTeam.empty());
 				if (add)
-					Context()->chitBag->census.AddCore(team);
+					Context()->chitBag->census.AddCore(iTeam);
 				else
-					Context()->chitBag->census.RemoveCore(team);
+					Context()->chitBag->census.RemoveCore(iTeam);
 			}
 		}
 	}

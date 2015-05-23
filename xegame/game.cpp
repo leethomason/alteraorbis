@@ -548,7 +548,7 @@ void Game::DoTick( U32 _currentTime )
 	int Y = 0;
 	int space = 16;
 	#ifndef GRINLIZ_DEBUG_MEM
-	const int memNewCount = 0;
+//	const int memNewCount = 0;
 	#endif
 #if 1
 	UFOText* ufoText = UFOText::Instance();

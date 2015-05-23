@@ -301,7 +301,6 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
-		LumosGame* game = Context()->game;
 		IString p = Context()->chitBag->NameGen(nameGen.c_str(), chit->random.Rand());
 		chit->GetItem()->SetProperName( p );
 	}

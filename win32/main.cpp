@@ -13,7 +13,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if defined(_MSC_VER)
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
+#endif
 
 #include "../glew/include/GL/glew.h"
 #include "../libs/SDL2/include/SDL.h"
@@ -24,11 +26,9 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
-#include "../grinliz/glcontainer.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "../xegame/cgame.h"
-#include "../game/gamesettings.h"
 #include "../engine/platformgl.h"
 
 #include "../shared/lodepng.h"
@@ -618,7 +618,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-
+#if 0
 // 0:lowX, 1:highX, 2:lowY, 3:highY
 bool RectangleIsBlack( const grinliz::Rectangle2I& r, int edge, SDL_Surface* surface )
 {
@@ -639,6 +639,7 @@ bool RectangleIsBlack( const grinliz::Rectangle2I& r, int edge, SDL_Surface* sur
 	}
 	return true;
 }
+#endif
 
 
 void ScreenCapture()

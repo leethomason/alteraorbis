@@ -3,6 +3,7 @@ Dak
 Data
 Disc
 Gen
+I
 In
 Ink
 Mico
@@ -14,6 +15,7 @@ Pin
 Tech
 Tek
 Tel
+You
 Zec
 
 1
