@@ -401,7 +401,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	shader->flags = flags;
 	shader->prog = glCreateProgram();
 
-	header = "#version 140\n";
+	header = "#version 130\n";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
 	AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
 	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
