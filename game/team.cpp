@@ -323,8 +323,10 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 	// There should be a webNode where we are, of course,
 	// but that depends on bringing the web cache current.
 	const MinSpanTree::Node* webNode = web->FindNode(sector);
-	GLASSERT(webNode);
-	if (!webNode) return 0;
+	if (!webNode) {
+		// Web needs to be updated. Return NEUTRAL for now.
+		return 0;
+	}
 	float visitorStr = webNode->strength;
 
 	// An an alternate world where 'eval' is gone...what happens?

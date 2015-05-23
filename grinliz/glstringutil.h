@@ -285,8 +285,8 @@ public:
 	bool operator!=( const GLString& other )  const	{ return !(*this == other); }
 	bool operator!=( const char* other )  const		{ return !(*this == other); }
 
-	bool operator<( const IString& other ) const	{ return strcmp( c_str(), other.c_str() ) < 0; } 
-	bool operator>( const IString& other ) const	{ return strcmp( c_str(), other.c_str() ) > 0; } 
+	bool operator<( const IString& other ) const	{ return strcmp( safe_str(), other.safe_str() ) < 0; } 
+	bool operator>( const IString& other ) const	{ return strcmp( safe_str(), other.safe_str() ) > 0; } 
 
 	const char* c_str() const					{ return str; }
 	const char* safe_str() const				{ return str ? str : ""; }
