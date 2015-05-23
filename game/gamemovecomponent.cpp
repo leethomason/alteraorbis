@@ -33,7 +33,7 @@ int GameMoveComponent::DoTick(U32 delta)
 
 	// Basic physics and block avoidance.
 	bool floating = false;
-	bool appliedFluid = ApplyFluid(delta, &pos, &floating);
+	ApplyFluid(delta, &pos, &floating);
 
 	if (!floating) {
 		Vector2F pos2 = ToWorld2F(pos);
@@ -61,7 +61,7 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 	if ( !render ) return;
 
 	Vector2F newPos = *pos;
-	float rotation = 0;
+	//float rotation = 0;
 	float radius = render->RadiusOfBase();
 
 	const ChitContext* context = Context();

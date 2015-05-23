@@ -1714,11 +1714,11 @@ public:
 
     /// Return a possibly helpful diagnostic location or string.
     const char* GetErrorStr1() const {
-        return _errorStr1;
+        return _errorStr1 ? _errorStr1 : "";
     }
     /// Return a possibly helpful secondary diagnostic location or string.
     const char* GetErrorStr2() const {
-        return _errorStr2;
+        return _errorStr2 ? _errorStr2 : "";
     }
     /// If there is an error, print it to stdout.
     void PrintError() const;

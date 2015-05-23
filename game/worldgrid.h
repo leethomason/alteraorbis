@@ -214,7 +214,7 @@ public:
 	}
 
 	int Height() const {
-		return grinliz::Max(fluidHeight/FLUID_PER_ROCK, rockHeight);
+		return grinliz::Max(int(fluidHeight)/FLUID_PER_ROCK, int(rockHeight));
 	}
 
 	bool IsFluid() const {
@@ -309,7 +309,7 @@ public:
 		if ( zoneSize ) {
 			mask = ~(zoneSize-1);
 		}
-		grinliz::Vector2I v = { x & mask, y & mask };
+		grinliz::Vector2I v = { int(x & mask), int(y & mask) };
 		return v;
 	}
 

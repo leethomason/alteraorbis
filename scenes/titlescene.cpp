@@ -112,7 +112,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	Vector3F forward = { 0, 0, 1 };
 	Vector3F across = { 0.4f, 0, 0 };
 
-	static const float STEP = 0.4f;
+//	static const float STEP = 0.4f;
 	static const float ANGLE = 5.f;
 	for (int i = 0; i < NUM_MODELS; ++i) {
 		Vector3F v = { 30.5f, 0, 39.5f };
@@ -221,7 +221,7 @@ void TitleScene::Resize()
 	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
 
 	gameScene[CONTINUE].SetEnabled( false );
-	const char* datPath = game->GamePath( "game", 0, "dat" );
+//	const char* datPath = game->GamePath( "game", 0, "dat" );
 	const char* mapPath = game->GamePath( "map",  0, "dat" );
 
 	GLString fullpath;

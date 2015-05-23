@@ -28,8 +28,6 @@
 
 #include "../script/procedural.h"
 
-#include <direct.h>
-
 extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 
 using namespace gamui;
@@ -151,7 +149,7 @@ AnimationScene::~AnimationScene()
 
 void AnimationScene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = DefaultLayout();

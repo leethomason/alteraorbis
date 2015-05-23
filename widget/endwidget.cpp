@@ -1,4 +1,4 @@
-#include "Endwidget.h"
+#include "endwidget.h"
 #include "../game/lumosgame.h"
 #include "../game/worldinfo.h"
 #include "../game/weather.h"

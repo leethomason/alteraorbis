@@ -145,9 +145,9 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 	Task* task = &taskList[0];
 	Vector2I pos2i = ToWorld2I(chit->Position());
 	Vector2I sector = ToSector(pos2i);
-	Vector2F taskPos2 = ToWorld2F(task->pos2i);
-	Vector3F taskPos3 = ToWorld3F(task->pos2i);
-	Rectangle2I innerBounds = InnerSectorBounds(sector);
+	//Vector2F taskPos2 = ToWorld2F(task->pos2i);
+	//Vector3F taskPos3 = ToWorld3F(task->pos2i);
+	//Rectangle2I innerBounds = InnerSectorBounds(sector);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
 
@@ -228,7 +228,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 			// up front for rocks. (Which aren't handled by the general code.)
 			// Although a small kludge, way better than things used to be.
 
-			const WorldGrid& wg = context->worldMap->GetWorldGrid(task->pos2i.x, task->pos2i.y);
+			//const WorldGrid& wg = context->worldMap->GetWorldGrid(task->pos2i.x, task->pos2i.y);
 
 			if (task->buildScriptID == BuildScript::CLEAR) {
 				context->worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
@@ -411,7 +411,7 @@ void TaskList::SocialPulse(const Vector2F& origin )
 
 void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 {
-	LumosChitBag* chitBag = chit->Context()->chitBag;
+	//LumosChitBag* chitBag = chit->Context()->chitBag;
 	Vector2I pos2i = ToWorld2I(chit->Position());
 	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
@@ -461,7 +461,7 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 			return;
 		}
 
-		int nElixir = ic->NumCarriedItems(ISC::elixir);
+		//int nElixir = ic->NumCarriedItems(ISC::elixir);
 
 		if (buildingName == ISC::market) {
 			GoShopping(building);
@@ -607,7 +607,7 @@ void TaskList::GoShopping(Chit* market)
 		// Sell the extras.
 		const GameItem* itemToSell = 0;
 		while ((itemToSell = thisIC->ItemToSell()) != 0) {
-			int value = itemToSell->GetValue();
+			//int value = itemToSell->GetValue();
 			int sold = MarketAI::Transact(itemToSell,
 				market->GetItemComponent(),	// buyer
 				thisIC,		// seller
@@ -671,7 +671,7 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 	int partsMask = 0xffffffff;
 	int team = Team::Group(chit->Team());
 	int subItem = -1;
-	const char* altRes = "";
+	//const char* altRes = "";
 
 	// Special rules.
 	if (itemType == ForgeScript::RING) {

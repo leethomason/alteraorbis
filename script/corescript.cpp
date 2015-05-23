@@ -88,12 +88,12 @@ void CoreAchievement::Serialize(XStream* xs)
 	XarcClose(xs);
 }
 
-CoreScript::CoreScript() 
-	: spawnTick( 20*1000 ), 
+CoreScript::CoreScript() :
 	  workQueue( 0 ),
 	  aiTicker(2000),
 	  scoreTicker(10*1000),
 	  strategicTicker(10*1000),
+	  spawnTick( 20*1000 ), 
 	  summonGreater(0),
 	  autoRebuild(false)
 {
@@ -387,7 +387,7 @@ Chit* CoreScript::CitizenFilter(int chitID)
 int CoreScript::Citizens(CChitArray* arr)
 {
 	int i=0;
-	const int team = parentChit->Team();
+//	const int team = parentChit->Team();
 
 	while (i < citizens.Size()) {
 		int id = citizens[i];
@@ -601,7 +601,7 @@ int CoreScript::NumTemples()
 
 int CoreScript::MaxCitizens()
 {
-	int team = parentChit->Team();
+//	int team = parentChit->Team();
 
 	CChitArray chitArr;
 	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, 0 );
@@ -623,7 +623,7 @@ void CoreScript::DoTickInUse(int delta, int nSpawnTicks)
 	MapSpatialComponent* ms = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 	GLASSERT(ms);
 	Vector2I pos2i = ms->MapPosition();
-	Vector2I sector = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
+	//Vector2I sector = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 
 	if (nSpawnTicks && Team::Group(parentChit->Team())) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
@@ -716,7 +716,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 					IString ispawn = StringPool::Intern(spawn, true);
 					int team = Team::GetTeam(ispawn);
 					GLASSERT(team != TEAM_NEUTRAL);
-					Chit* mob = Context()->chitBag->NewMonsterChit(pf, spawn, team);
+					Context()->chitBag->NewMonsterChit(pf, spawn, team);
 				}
 			}
 		}
@@ -867,8 +867,8 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		context->chitBag->DeleteChit(core);
 	}
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	const GameItem& coreItem = itemDefDB->Get("core");
+//	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+//	const GameItem& coreItem = itemDefDB->Get("core");
 
 	const SectorData& sd = context->worldMap->GetSectorData(sector);
 	if (sd.HasCore()) {

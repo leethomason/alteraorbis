@@ -13,6 +13,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+#include "../libs/SDL2/include/SDL.h"
 #include "../grinliz/gldebug.h"
 #include "cgame.h"
 #include "../game/lumosgame.h"
@@ -22,6 +24,10 @@
 #include "../libs/SDL2/include/SDL_filesystem.h"
 #include <Shlobj.h>
 static const char* winResourcePath = "./res/lumos.db";
+#endif
+
+#ifdef UFO_LINUX_SDL
+#include <sys/stat.h>
 #endif
 
 #ifdef UFO_IPHONE
@@ -66,7 +72,7 @@ void DeleteGame( void* handle )
 {
 	CheckThread check;
 
-	GLOUTPUT(( "DeleteGame. handle=%x\n", handle ));
+	GLOUTPUT(( "DeleteGame. handle=%p\n", handle ));
 	if ( handle ) {
 		Game* game = (Game*)handle;
 		delete game;
@@ -84,7 +90,7 @@ void DeleteGame( void* handle )
 void GameResize( void* handle, int width, int height, int rotation ) {
 	CheckThread check;
 
-	GLOUTPUT(( "GameResize. handle=%x\n", handle ));
+	GLOUTPUT(( "GameResize. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->Resize( width, height, rotation );
 }
@@ -93,7 +99,7 @@ void GameResize( void* handle, int width, int height, int rotation ) {
 void GameSave( void* handle ) {
 	CheckThread check;
 
-	GLOUTPUT(( "GameSave. handle=%x\n", handle ));
+	GLOUTPUT(( "GameSave. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->Save();
 }
@@ -103,7 +109,7 @@ void GameDeviceLoss( void* handle )
 {
 	CheckThread check;
 
-	GLOUTPUT(( "GameDeviceLoss. handle=%x\n", handle ));
+	GLOUTPUT(( "GameDeviceLoss. handle=%p\n", handle ));
 	Game* game = (Game*)handle;
 	game->DeviceLoss();
 }
@@ -174,6 +180,8 @@ void GameHotKey( void* handle, int mask )
 
 void PathToDatabase(char* buffer, int bufferLen, int* offset, int* length)
 {
+	*offset = 0;
+	*length = 0;
 #if defined( UFO_IPHONE )
 	CFStringRef nameRef = CFStringCreateWithCString( 0, name, kCFStringEncodingWindowsLatin1 );
 	CFStringRef extensionRef = CFStringCreateWithCString( 0, extension, kCFStringEncodingWindowsLatin1 );
@@ -188,12 +196,12 @@ void PathToDatabase(char* buffer, int bufferLen, int* offset, int* length)
 	CFURLGetFileSystemRepresentation( imageURL, true, (unsigned char*)buffer, bufferLen );
 #elif defined( UFO_WIN32_SDL )
 	grinliz::StrNCpy( buffer, winResourcePath, bufferLen );
-	*offset = 0;
-	*length = 0;
 #elif defined (ANDROID_NDK)
 	grinliz::StrNCpy( buffer, androidResourcePath, bufferLen );
 	*offset = androidResourceOffset;
 	*length = androidResourceLen;
+#elif defined (UFO_LINUX_SDL)
+	grinliz::StrNCpy(buffer, "res/lumos.db", bufferLen);
 #else
 #	error UNDEFINED
 #endif
@@ -206,6 +214,8 @@ const char* PlatformName()
 	return "pc";
 #elif defined (ANDROID_NDK)
 	return "android";
+#elif defined (UFO_LINUX_SDL)
+	return "linux";
 #else
 #	error UNDEFINED
 #endif
@@ -234,7 +244,7 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 
 	if (root == GAME_SAVE_DIR) {
 		if (!prefPath[0]) {
-#ifdef _WIN32
+#if defined(UFO_WIN32_SDL)
 			// The SDL path has a couple of problems on Windows.
 			//	1. It doesn't work. The code doesn't actually create the
 			//	   directory even though it returns without an error.
@@ -266,11 +276,15 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 				prefPath[n] = 0;
 			}
 			CoTaskMemFree(static_cast<void*>(pwstr));
+#elif defined(UFO_LINUX_SDL)
+			mkdir("save", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//			char* p = SDL_GetPrefPath("GrinningLizard", "AlteraOrbis");
+//			GLASSERT(p);
+//			grinliz::StrNCpy(prefPath, p, 256);
+//			SDL_free(p);
+			*out = "save";
 #else
-			char* p = SDL_GetPrefPath("GrinningLizard", "AlteraOrbis");
-			GLASSERT(p);
-			grinliz::StrNCpy(prefPath, p, 256);
-			SDL_free(p);
+	#error Platform undefined.
 #endif
 		}
 		out->append(prefPath);

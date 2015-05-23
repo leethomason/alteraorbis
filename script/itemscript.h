@@ -28,7 +28,7 @@ class ItemDefDB
 {
 public:
 	ItemDefDB()		{ GLASSERT(!instance); instance = this; }
-	~ItemDefDB()	{ GLASSERT(instance == this) instance = 0; }
+	~ItemDefDB()	{ GLASSERT(instance == this); instance = 0; }
 	static ItemDefDB* Instance() { GLASSERT(instance); return instance; }
 
 	void Load( const char* path );

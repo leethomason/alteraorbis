@@ -16,7 +16,7 @@ void ItemDescWidget::Init( gamui::Gamui* gamui )
 
 void ItemDescWidget::SetPos( float x, float y )
 {
-	float x1 = x + layout.Width()*2.0f + layout.SpacingX()*2.0f;
+//	float x1 = x + layout.Width()*2.0f + layout.SpacingX()*2.0f;
 
 	text.SetPos( x, y );
 	text.SetTab( layout.Width()*2.0f + layout.SpacingX()*2.0f );
@@ -43,7 +43,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		DEX		Melee D/TU	x		x
 	*/
 
-	int i = 0;
+//	int i = 0;
 
 	const RangedWeapon* rangedWeapon = item->ToRangedWeapon();
 	const MeleeWeapon* meleeWeapon = item->ToMeleeWeapon();

@@ -163,11 +163,11 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 {
 	*str = "";
-	IString wstr = GetWhat();
+	//IString wstr = GetWhat();
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	const GameItem* first  = ItemDB::Instance()->Active(firstItemID);
-	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
+	//const GameItem* second = ItemDB::Instance()->Active(secondItemID);
 
 	IString firstName  = IDToName(firstItemID,  firstItemID == shortNameID);
 	IString secondName = IDToName(secondItemID, secondItemID == shortNameID);

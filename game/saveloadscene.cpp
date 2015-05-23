@@ -1,3 +1,5 @@
+#if 0
+
 #include "saveloadscene.h"
 #include "game.h"
 #include "../engine/uirendering.h"
@@ -186,3 +188,5 @@ void SaveLoadScene::Confirm( bool action )
 	}
 	confirmText.SetText( buf );
 }
+
+#endif

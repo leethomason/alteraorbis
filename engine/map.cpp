@@ -47,7 +47,7 @@ Map::Map(int w, int h)
 	texture = 0;
 	GLASSERT(w <= EL_MAP_SIZE);
 	GLASSERT(h <= EL_MAP_SIZE);
-	GLOUTPUT(("Map created. %dK\n", sizeof(*this) / 1024));
+	GLOUTPUT(("Map created. %dK\n", int(sizeof(*this)) / 1024));
 	saturation = 1.0f;
 
 	gamui::RenderAtom nullAtom;
@@ -119,7 +119,7 @@ void Map::BeginRenderState( const void* renderState )
 {
 	const float ALPHA = 0.5f;
 	const float ALPHA_1 = 0.30f;
-	switch( (int)renderState ) {
+	switch( int(intptr_t(renderState)) ) {
 		case UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE:
 		case RENDERSTATE_MAP_OPAQUE:
 			gamuiShader.SetColor( 1, 1, 1, 1 );

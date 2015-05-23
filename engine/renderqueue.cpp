@@ -13,7 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "renderQueue.h"
+#include "renderqueue.h"
 #include "model.h"    
 #include "texture.h"
 #include "gpustatemanager.h"
@@ -123,7 +123,7 @@ void RenderQueue::Submit(	int modelRequired,
 		{
 			++end;
 		}
-		int delta = end - start;
+		//int delta = end - start;
 		const ModelAtom* atom = itemArr[start]->atom;
 		GPUState* state = &itemArr[start]->state;
 

@@ -12,7 +12,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#if 0
 #ifndef NOISETEST_SCENE_INCLUDED
 #define NOISETEST_SCENE_INCLUDED
 
@@ -32,9 +32,9 @@ public:
 
 	virtual void Resize();
 
-	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
+	virtual bool Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
 	{
-		ProcessTap( action, screen, world );
+		return ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 
@@ -50,3 +50,4 @@ private:
 };
 
 #endif // NOISETEST_SCENE_INCLUDED
+#endif

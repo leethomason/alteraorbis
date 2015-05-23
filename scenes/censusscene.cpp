@@ -104,7 +104,7 @@ void CensusScene::Resize()
 	PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = DefaultLayout();
-	const Screenport& port = lumosGame->GetScreenport();
+	//const Screenport& port = lumosGame->GetScreenport();
 
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		layout.PosAbs(&link[i], 2, i);
@@ -128,7 +128,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 	for (int i = 0; i < MAX_ROWS; ++i) {
 		if (item == &link[i]) {
 			Chit* chit = 0; 
-			int itemID = (int)link[i].userData;
+			int itemID = int(intptr_t(link[i].userData));
 			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
 				const GameItem* gi = ItemDB::Instance()->Active(itemID);
@@ -281,7 +281,7 @@ void CensusScene::DoLayout(bool first)
 {
 	ReserveBank* reserve = ReserveBank::Instance();
 	const Wallet& reserveWallet = reserve->wallet;
-	NewsHistory* history = chitBag->GetNewsHistory();
+//	NewsHistory* history = chitBag->GetNewsHistory();
 	GLString str;
 
 	if (first) {
@@ -314,7 +314,7 @@ void CensusScene::DoLayout(bool first)
 		label[i].SetText("");
 	}
 
-	static const char* SEP = "\n\t";
+//	static const char* SEP = "\n\t";
 
 	if (radio[GROUP_KILLS].Down()) {
 		for (int i = 0; i < Min(kills.Size(), (int)MAX_ROWS); ++i) {

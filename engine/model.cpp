@@ -16,7 +16,7 @@
 #include "model.h"
 #include "texture.h"
 #include "loosequadtree.h"
-#include "renderQueue.h"
+#include "renderqueue.h"
 #include "engineshaders.h"
 #include "shadermanager.h"
 #include "animation.h"
@@ -365,7 +365,7 @@ void Model::Serialize( XStream* xs)
 	XarcOpen( xs, "Model" );
 
 	static const Vector4F WHITE = { 1, 1, 1, 1 };
-	static const Vector4F ONE   = { 1, 1, 1, 1 };
+	//static const Vector4F ONE   = { 1, 1, 1, 1 };
 
 	XARC_SER_DEF( xs, debugScale, 1.0f );
 	XARC_SER_DEF( xs, animationRate, 1.0f );

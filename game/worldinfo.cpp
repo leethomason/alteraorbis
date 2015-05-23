@@ -145,7 +145,7 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 
 	for (int i = 0; i < adj.Size(); ++i) {
 		Vector2I v = { adj[i].x, adj[i].y };
-		GridBlock vgb = { adj[i].x, adj[i].y };
+		GridBlock vgb = { S16(adj[i].x), S16(adj[i].y) };
 		if (bounds.Contains(v) && worldGrid[INDEX(vgb)].IsGrid()) {
 			micropather::StateCost sc = { ToState(vgb), HALF };
 			adjacent->push_back(sc);

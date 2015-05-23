@@ -20,6 +20,8 @@
 #include "../grinliz/glutil.h"
 #include "model.h"
 
+#include <float.h>
+
 using namespace grinliz;
 
 static const int MODEL_BLOCK = 10*1000;
@@ -249,7 +251,7 @@ void SpaceTree::QueryPlanesRec(grinliz::CDynArray<Model*>* models,
 							   int intersection, const Node* node, U32 positive)
 {
 #define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
-	const int allPositive = (1 << nPlanes) - 1;
+	const U32 allPositive = (1 << nPlanes) - 1;
 
 	if (intersection == grinliz::POSITIVE)
 	{

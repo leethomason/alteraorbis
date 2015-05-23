@@ -79,7 +79,7 @@ public:
 		return ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
-	virtual gamui::RenderAtom	CharacterScene::DragStart( const gamui::UIItem* item );
+	virtual gamui::RenderAtom	DragStart( const gamui::UIItem* item );
 	virtual void				DragEnd( const gamui::UIItem* start, const gamui::UIItem* end );
 
 	virtual void DoTick( U32 deltaTime );

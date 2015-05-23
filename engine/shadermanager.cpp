@@ -17,7 +17,6 @@
 #include "platformgl.h"
 #include "texture.h"
 #include "../grinliz/glrandom.h"
-#include <direct.h>
 #include "../xegame/cgame.h"
 #include "../grinliz/glperformance.h"
 
@@ -201,7 +200,7 @@ void ShaderManager::SetStreamData( int id, int size, int type, int stride, const
 	int loc = active->GetAttributeLocation( id );
 	GLASSERT( loc >= 0 );
 	if ( gDebugging ) {
-		const float* ft = (const float*)data;
+		//const float* ft = (const float*)data;
 		for( int i=0; i<activeStreams.Size(); ++i ) {
 			GLASSERT( activeStreams[i] != loc );
 		}
@@ -299,8 +298,8 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector3F*
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
 	GLASSERT( texture );
-	char name[9] = "texture0";
-	name[7] = '0' + index;
+	//char name[9] = "texture0";
+	//name[7] = '0' + index;
 
 	int loc = active->GetUniformLocation( U_TEXTURE0 + index );
 	GLASSERT( loc >= 0 );

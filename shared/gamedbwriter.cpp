@@ -23,7 +23,7 @@
 
 #include "gamedbwriter.h"
 #include "../grinliz/glstringutil.h"
-#include "../zlib/zlib.h"
+#include "../FastLZ/fastlz.h"
 #include "gamedb.h"
 
 #if defined( _MSC_VER )
@@ -112,16 +112,19 @@ void Writer::Save( const char* filename )
 		ddsVec[i].size = m->size;
 
 		int compressed = 0;
-		uLongf compressedSize = 0;
+		int compressedSize = 0;
 
 		if ( m->size > 20 && dataPool[i].compressData ) {
 			buffer.Clear();
-			buffer.PushArr( m->size*8 / 10 );
-			compressedSize = buffer.Size();
+			buffer.PushArr(fastlz_compress_buffer_size(m->size));
 
-			int result = compress( (Bytef*)&buffer[0], &compressedSize, (const Bytef*)m->mem, m->size );
-			if ( result == Z_OK && compressedSize < (uLongf)m->size )
+			//int result = compress( (Bytef*)&buffer[0], &compressedSize, (const Bytef*)m->mem, m->size );
+			compressedSize = fastlz_compress(m->mem, m->size, &buffer[0]);
+			GLASSERT(compressedSize > 0);
+
+			if (compressedSize < m->size) {
 				compressed = 1;
+			}
 		}
 
 		if ( compressed ) {

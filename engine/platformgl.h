@@ -40,7 +40,7 @@
 	#define glBufferSubDataX	glBufferSubData
 	#define glDeleteBuffersX	glDeleteBuffers
 #elif defined( UFO_WIN32_SDL )
-	#include "../win32/glew.h"
+	#include "../glew/include/GL/glew.h"
 
 	#define glFrustumfX		glFrustum
 	#define glOrthofX		glOrtho
@@ -51,8 +51,19 @@
 	#define glBufferSubDataX	glBufferSubData
 	#define glBindBufferX		glBindBuffer
 	#define glDeleteBuffersX	glDeleteBuffers
+#elif defined ( UFO_LINUX_SDL )
+	#include "../glew/include/GL/glew.h"
+	#define glFrustumfX			glFrustum
+	#define glOrthofX			glOrtho
+	#define USING_GL
+	#define glGenBuffersX		glGenBuffers
+	#define glBindBufferX		glBindBuffer
+	#define glBufferDataX		glBufferData
+	#define glBufferSubDataX	glBufferSubData
+	#define glBindBufferX		glBindBuffer
+	#define glDeleteBuffersX	glDeleteBuffers
 #else
-	#error Undefined platform
+    Platform not defined.
 #endif
 
 #ifdef DEBUG

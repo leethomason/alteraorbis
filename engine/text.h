@@ -42,7 +42,7 @@ public:
 
 private:
 	UFOText(Texture* texture);
-	~UFOText();
+	virtual ~UFOText();
 
 	void TextOut( const char* str, int x, int y, int h, int *w );
 

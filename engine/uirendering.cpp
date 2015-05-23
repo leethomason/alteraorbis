@@ -117,10 +117,10 @@ void UIRenderer::EndRender()
 
 void UIRenderer::BeginRenderState( const void* renderState )
 {
-	int state = ((int)renderState) & 0xffff;
-	int data  = ((int)renderState) >> 16;
+	int state = int(intptr_t(renderState)) & 0xffff;
+	//int data  = int(intptr_t(renderState)) >> 16;
 	shader = CompositingShader();
-	GPUDevice* device = GPUDevice::Instance();
+	//GPUDevice* device = GPUDevice::Instance();
 
 	switch ( state )
 	{
@@ -201,7 +201,7 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	GPUControlParam control;
 	control.saturation = 0;
 
-	int rs = (int)renderState;
+	int rs = int(intptr_t(renderState));
 	if (rs == RENDERSTATE_UI_GRAYSCALE_OPAQUE) {
 		data.controlParam = &control;
 	}

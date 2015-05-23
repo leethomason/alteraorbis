@@ -129,7 +129,7 @@ public:
 	virtual bool Accept( Chit* chit );
 	
 private:
-	int excluded, required;
+	int required, excluded;
 };
 
 

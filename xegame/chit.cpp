@@ -30,7 +30,13 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), playerControlled( false ), timeToTick( 0 ), timeSince( 0 )
+Chit::Chit( int _id, ChitBag* bag ) : 
+	next( 0 ), 
+	timeToTick( 0 ), 
+	timeSince( 0 ),
+	chitBag( bag ), 
+	id( _id ), 
+	playerControlled( false )
 {
 	Init( _id, bag );
 }

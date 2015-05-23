@@ -161,7 +161,7 @@ int MapSpatialComponent::DoTick(U32 delta)
 	if (rc) {
 		const GameItem* gameItem = parentChit->GetItem();
 		if (gameItem && gameItem->keyValues.GetIString(ISC::procedural) == ISC::team) {
-			int team = parentChit->Team();
+//			int team = parentChit->Team();
 			ProcRenderInfo info;
 			AssignProcedural(parentChit->GetItem(), &info);
 			info.color.X(Matrix4::M41) *= glow;
@@ -222,15 +222,15 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 		}
 		worldMap->SetPorch(it.Pos().x, it.Pos().y, porchType);
 
-		float yRotation = 0;
-
-		Chit* chit = chitBag->QueryBuilding(IString(), it.Pos(), 0);
-		if (chit) {
-			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-			if (msc) {
-				yRotation = YRotation(chit->Rotation());
-			}
-		}
+//		float yRotation = 0;
+//
+//		Chit* chit = chitBag->QueryBuilding(IString(), it.Pos(), 0);
+//		if (chit) {
+//			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+//			if (msc) {
+//				yRotation = YRotation(chit->Rotation());
+//			}
+//		}
 	}
 }
 

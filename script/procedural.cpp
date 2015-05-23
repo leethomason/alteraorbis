@@ -226,6 +226,7 @@ Color4F WeaponGen::GetEffectColor(int flags)
 
 	const Game::Palette* palette = Game::GetMainPalette();
 	Color4F effectColor = palette->Get4F( effect.x, effect.y );
+	effectColor.a() = alpha;
 	return effectColor;
 }
 

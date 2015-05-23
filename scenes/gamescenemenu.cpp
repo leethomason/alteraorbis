@@ -340,7 +340,7 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 		int c = cs->SquadID(citizens[i]->ID()) + 1;
 		GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
 		if (count[c] < ((c == 0) ? CITIZEN_BASE : SQUAD_SIZE)) {
-			const GameItem* item = citizens[i]->GetItem();
+//			const GameItem* item = citizens[i]->GetItem();
 			int index = 0;
 			if (c == 0) {
 				index = count[0];

@@ -15,7 +15,7 @@
 
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
 
-#include "glew.h"
+#include "../glew/include/GL/glew.h"
 #include "../libs/SDL2/include/SDL.h"
 
 #include "../grinliz/gldebug.h"
@@ -34,11 +34,11 @@
 #include "../shared/lodepng.h"
 
 #include "../version.h"
-#include "wglew.h"
-
-// For error logging.
-#define WINDOWS_LEAN_AND_MEAN
-#include <winhttp.h>
+#if defined (UFO_WIN32_SDL)
+#include "../glew/include/GL/wglew.h"
+#else
+#include "glew.h"
+#endif
 
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
@@ -210,11 +210,11 @@ int main(int argc, char **argv)
 	bool zooming = false;
 	SDL_Event event;
 
-	float yRotation = 45.0f;
+//	float yRotation = 45.0f;
 	grinliz::Vector2I mouseDown = { 0, 0 };
-	grinliz::Vector2I prevMouseDown = { 0, 0 };
+//	grinliz::Vector2I prevMouseDown = { 0, 0 };
 	grinliz::Vector2I rightMouseDown = { 0, 0 };
-	U32 prevMouseDownTime = 0;
+//	U32 prevMouseDownTime = 0;
 
 	int zoomX = 0;
 	int zoomY = 0;
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 #endif
 
 	grinliz::Vector2F multiTouchStart = { 0, 0 };
-	int mouseMoveCount = 0;
+//	int mouseMoveCount = 0;
 
 	// ---- Main Loop --- //
 	while (!done) {
@@ -434,7 +434,7 @@ int main(int argc, char **argv)
 							GLOUTPUT(("Left Mouse move %d %d\n", x, y));
 							#endif
 							GameTap(game, GAME_TAP_MOVE, x, y, mod);
-							mouseMoveCount = 0;
+//							mouseMoveCount = 0;
 						}
 					}
 					else if (!rightMouseDown.IsZero()) {

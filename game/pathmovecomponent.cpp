@@ -420,7 +420,7 @@ int PathMoveComponent::DoTick( U32 delta )
 {
 	PROFILE_FUNC();
 
-	int id = parentChit->ID();
+//	int id = parentChit->ID();
 	const ChitContext* context = Context();
 
 	if ( NeedComputeDest() ) {

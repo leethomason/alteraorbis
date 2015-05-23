@@ -13,9 +13,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WINDOWS_LEAN_AND_MEAN
-#include <crtdbg.h>
-
 #include "chitbag.h"
 #include "chit.h"
 #include "chitcontext.h"
@@ -564,7 +561,7 @@ void ChitBag::InnerQuerySpatialHash(grinliz::CDynArray<Chit*>* array,
 
 	for (U32 j = j0; j <= j1; ++j) {
 		for (U32 i = i0; i <= i1; ++i) {
-			Vector2I pos = { i, j };
+			Vector2I pos = { int(i), int(j) };
 			spatialHash.Query(pos, array);
 		}
 	}

@@ -134,7 +134,7 @@ TrackingMoveComponent::TrackingMoveComponent() : GameMoveComponent(), target( 0 
 
 TrackingMoveComponent::~TrackingMoveComponent()		
 {
-	int debug=1;
+//	int debug=1;
 }
 
 

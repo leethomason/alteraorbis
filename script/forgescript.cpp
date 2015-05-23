@@ -89,7 +89,7 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 
 	// Get the inital to "everything"
 	int effects = 0;
-	for (int i = 0; i < GL_C_ARRAY_SIZE(effectsArr); ++i) {
+	for (int i = 0; i < int(GL_C_ARRAY_SIZE(effectsArr)); ++i) {
 		effects |= effectsArr[i];
 	}
 	effects = effects & effectsMask;
@@ -136,11 +136,11 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		}
 
 		bool didSomething = false;
-		if (avail.CanWithdraw(*cost) && ce < GL_C_ARRAY_SIZE(effectsArr)) {
+		if (avail.CanWithdraw(*cost) && ce < int(GL_C_ARRAY_SIZE(effectsArr))) {
 			effects &= ~(effectsArr[ce++]);
 			didSomething = true;
 		}
-		if (techRequired > tech && cp < GL_C_ARRAY_SIZE(partsArr)) {
+		if (techRequired > tech && cp < int(GL_C_ARRAY_SIZE(partsArr))) {
 			parts &= ~(partsArr[cp++]);
 			didSomething = true;
 		}
@@ -149,10 +149,10 @@ GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
 		// model above doesn't capture all the combos any more.
 		// Make sure something changes every loop.
 		if (!didSomething) {
-			if (ce < GL_C_ARRAY_SIZE(effectsArr)) {
+			if (ce < int(GL_C_ARRAY_SIZE(effectsArr))) {
 				effects &= ~(effectsArr[ce++]);
 			}
-			if (cp < GL_C_ARRAY_SIZE(partsArr)) {
+			if (cp < int(GL_C_ARRAY_SIZE(partsArr))) {
 				parts &= ~(partsArr[cp++]);
 			}
 		}
@@ -271,7 +271,7 @@ GameItem* ForgeScript::Build(	int type,			// GUN
 		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 	// 2 effects adds a 2nd violet crystal
-	if ( FloorPowerOf2( effectFlags ) != effectFlags ) {
+	if ( int(FloorPowerOf2( effectFlags )) != effectFlags ) {
 		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 

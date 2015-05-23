@@ -101,7 +101,7 @@ void TutorialWidget::ShowTutorial()
 		if (dest.x > adviser.X() && dest.y < adviser.Y())
 			origin.Set(adviser.X(), adviser.Y());
 
-		static const float LINE = 6;
+//		static const float LINE = 6;
 		static const float RECTANGLE = 20;
 		canvas.DrawLine(origin.x, origin.y, dest.x, dest.y, 8.0f);
 		canvas.DrawRectangle(origin.x - RECTANGLE / 2, origin.y - RECTANGLE / 2, RECTANGLE, RECTANGLE);

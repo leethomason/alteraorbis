@@ -5,9 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\zlib">
-      <UniqueIdentifier>{a4065814-77d8-4ce4-95de-08859e0bb785}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\grinliz">
       <UniqueIdentifier>{bc8292dc-e7d8-4f6d-81c4-cdb2689626eb}</UniqueIdentifier>
     </Filter>
@@ -23,6 +20,9 @@
     <Filter Include="Source Files\shiny">
       <UniqueIdentifier>{fb997ba6-31ca-4944-949c-22e39bfd6ef1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\fastlz">
+      <UniqueIdentifier>{60c7a907-d919-4216-be55-a1d47534f197}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -31,42 +31,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\zlib\adler32.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\compress.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\crc32.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\deflate.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\gzio.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\infback.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inffast.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inflate.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inftrees.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\trees.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\uncompr.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\zutil.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\grinliz\glcontainer.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
@@ -145,41 +109,11 @@
     <ClCompile Include="..\grinliz\glperformance.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
+    <ClCompile Include="..\FastLZ\fastlz.c">
+      <Filter>Source Files\fastlz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\zlib\crc32.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\deflate.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inffast.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inffixed.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inflate.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inftrees.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\trees.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zconf.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zconf.in.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zlib.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zutil.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\grinliz\glbitarray.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
@@ -302,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="..\grinliz\glspatialhash.h">
       <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FastLZ\fastlz.h">
+      <Filter>Source Files\fastlz</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -244,7 +244,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 	
 	if ( glowLayer >= 0 ) {
 		rtImage.SetVisible( true );
-		const Screenport& port = engine->GetScreenport();
+//		const Screenport& port = engine->GetScreenport();
 
 		RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 			(const void*)engine->GetRenderTargetTexture(glowLayer), 0, 0, 1, 1 );

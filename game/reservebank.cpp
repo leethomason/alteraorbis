@@ -110,7 +110,7 @@ const int* ReserveBank::CrystalValue()
 {
 	if (crystalValue[0] == 0) {
 		TransactAmt wallet;
-		int tech = 0;
+		//int tech = 0;
 		GameItem* item = ItemDefDB::Instance()->Get("blaster").Clone();
 		crystalValue[0] = int(item->GetValue() + 1.0f);
 		delete item; item = 0;

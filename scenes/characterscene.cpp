@@ -249,7 +249,7 @@ void CharacterScene::SetButtonText(const GameItem* select)
 
 		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
-		const GameItem* mainItem		= ic->GetItem(0);
+//		const GameItem* mainItem		= ic->GetItem(0);
 		const RangedWeapon* rangedItem = ic->QuerySelectRanged();
 		const MeleeWeapon* meleeItem = ic->QuerySelectMelee();
 		const Shield* shieldItem = ic->GetShield();
@@ -327,8 +327,8 @@ void CharacterScene::SetButtonText(const GameItem* select)
 			float d = 2.0f + size;
 			float y = aabb.SizeY() * 0.7f;
 			engine->camera.SetPosWC( 0, y, d );
-			Vector3F lookAt = aabb.Center();
-			lookAt.y = y;
+//			Vector3F lookAt = aabb.Center();
+//			lookAt.y = y;
 			engine->CameraLookAt( engine->camera.PosWC(), aabb.Center() );
 
 			IString proc = down->keyValues.GetIString( "procedural" );

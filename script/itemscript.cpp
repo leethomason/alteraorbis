@@ -108,7 +108,7 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 	Instance()->Get( name, &arr );
 	GLASSERT( arr.Size() > 0 );
 	
-	float v = 0;
+//	float v = 0;
 	arr[0]->keyValues.Get( prop, value );
 }
 

@@ -579,7 +579,7 @@ int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
 	if (delta > MAX_FRAME_TIME) delta = MAX_FRAME_TIME;
-	float deltaF = float(delta) * 0.001f;
+	//float deltaF = float(delta) * 0.001f;
 
 	double savedHP = hp;
 	if ( flags & IMMUNE_FIRE )		fireTime = 0;
@@ -797,7 +797,7 @@ IString GameItem::IFullName() const
 
 IString GameItem::INameAndTitle() const
 {
-	IString title = ITitle();
+	//IString title = ITitle();
 	CStr<128> str;
 	if (!ITitle().empty())
 		str.Format("%s %s", IFullName().safe_str(), ITitle().safe_str());

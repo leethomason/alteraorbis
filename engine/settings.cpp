@@ -40,6 +40,7 @@ void SettingsManager::Destroy()
 
 SettingsManager::SettingsManager( const char* savepath )
 {
+	GLOUTPUT_REL(("SettingsManager::SettingsManager opening '%s'\n", savepath));
 	GLASSERT( instance == 0 );
 	instance = this;
 	path = savepath;
@@ -48,7 +49,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	if (xmlDoc.Error()) {
 		const char* str0 = xmlDoc.GetErrorStr1();
 		const char* str1 = xmlDoc.GetErrorStr2();
-		GLOUTPUT_REL(("XML error: %s  %s\n"));
+		GLOUTPUT_REL(("XML error: %s  %s\n", str0, str1));
 
 		xmlDoc.Clear();
 
@@ -56,15 +57,6 @@ SettingsManager::SettingsManager( const char* savepath )
 		ele->InsertEndChild(xmlDoc.NewElement("Game"));
 		ele->InsertEndChild(xmlDoc.NewElement("Debug"));
 	}
-
-/*	// Set defaults.
-	audioOn = true;
-	debugGLCalls = false;
-	debugUI = false;
-	debugFPS = false;
-	spawnDate = 0.90f;
-	worldGenDone = 1.0f;
-*/
 }
 
 

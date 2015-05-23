@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "visitorweb.h"
 #include "../grinliz/glarrayutil.h"
 #include "gamelimits.h"

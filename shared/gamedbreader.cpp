@@ -26,12 +26,7 @@
 
 #include "gamedbreader.h"
 #include "../grinliz/glstringutil.h"	// FIXME: only used for child index snprintf. Can and should be removed.
-
-#ifdef ANDROID_NDK
-#	include <zlib.h>		// Built in zlib support.
-#else
-#	include "../zlib/zlib.h"
-#endif
+#include "../FastLZ/fastlz.h"
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4996 )
@@ -169,6 +164,7 @@ bool Reader::Init( int id, const char* filename, int _offset )
 	databaseID = id;
 	fp = fopen( filename, "rb" );
 	if ( !fp ) {
+		GLOUTPUT_REL(("Reader::Init failed on '%s'\n", filename ? filename : ""));
 		GLASSERT( 0 );
 		return false;
 	}
@@ -245,6 +241,7 @@ void Reader::RecWalk( const Item* item, int depth )
 		switch( item->AttributeType( i ) ) {
 			case ATTRIBUTE_DATA:
 				printf( "data(#%d %d)", item->GetDataID( name ), item->GetDataSize( name ) );
+				this->AccessData(item, name);
 				break;
 			case ATTRIBUTE_INT_ARRAY:
 				{
@@ -373,11 +370,15 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 		}
 		fread( buffer, dataDesc.compressedSize, 1, fp );
 
-		int result = uncompress(	(Bytef*)target, 
-									(uLongf*)&dataDesc.size, 
-									(const Bytef*)buffer,
-									dataDesc.compressedSize );
-		GLASSERT( result == Z_OK );
+//		int result = uncompress(	(Bytef*)target, 
+//									(uLongf*)&dataDesc.size, 
+//									(const Bytef*)buffer,
+//									dataDesc.compressedSize );
+		int resultSize = fastlz_decompress(buffer, dataDesc.compressedSize, target, dataDesc.size);
+
+		if (resultSize != dataDesc.size) {
+			GLOUTPUT_REL(("Reader::GetData uncompress returned size %d. dataID=%d size=%d compressedSize=%d memSize=%d\n", resultSize, dataID, dataDesc.size, dataDesc.compressedSize, memSize));
+		}
 		GLASSERT( dataDesc.size == (U32)memSize );
 	}
 }
@@ -397,7 +398,7 @@ const void* Reader::AccessData( const Item* item, const char* name, int* p_size 
 	size = item->GetDataSize( name );
 	// Make sure we have enough space, including appended null terminator.
 	if ( (size+1) > accessSize ) {
-		accessSize = (size+1) * 5 / 4;
+		accessSize = (size+1);
 		if ( access )
 			access = Realloc( access, accessSize );
 		else

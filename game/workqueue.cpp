@@ -187,7 +187,7 @@ const WorkQueue::QueueItem* WorkQueue::HasJobAt(const Vector2I& v) {
 			return &queue[i];
 		}
 	}
-	return false;
+	return nullptr;
 }
 
 
@@ -197,7 +197,7 @@ const WorkQueue::QueueItem* WorkQueue::HasPorchAt(const Vector2I& v) {
 			return &queue[i];
 		}
 	}
-	return false;
+	return nullptr;
 }
 
 
@@ -277,7 +277,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 										   int action,
 										   const Wallet& available)
 {
-	Vector2F pos2 = { (float)pos2i.x + 0.5f, (float)pos2i.y + 0.5f };
+//	Vector2F pos2 = { (float)pos2i.x + 0.5f, (float)pos2i.y + 0.5f };
 	const WorldGrid& wg = worldMap->GetWorldGrid(pos2i.x, pos2i.y);
 
 	BuildScript buildScript;

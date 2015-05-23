@@ -112,12 +112,6 @@
     <ClCompile Include="..\game\lumosgame.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
-    <ClCompile Include="..\win32\framebuffer.cpp">
-      <Filter>Source Files\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\win32\glew.c">
-      <Filter>Source Files\win32</Filter>
-    </ClCompile>
     <ClCompile Include="..\win32\main.cpp">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
@@ -445,6 +439,9 @@
     <ClCompile Include="..\game\physicssims.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\glew\src\glew.c">
+      <Filter>Source Files\win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -518,15 +515,6 @@
     </ClInclude>
     <ClInclude Include="..\game\lumosgame.h">
       <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\win32\framebuffer.h">
-      <Filter>Source Files\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\win32\glew.h">
-      <Filter>Source Files\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\win32\wglew.h">
-      <Filter>Source Files\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\micropather\micropather.h">
       <Filter>Source Files\micropather</Filter>

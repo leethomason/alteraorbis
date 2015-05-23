@@ -1,7 +1,8 @@
+#if 0
 #include "settingscene.h"
 #include "../engine/engine.h"
-#include "game.h"
-#include "cgame.h"
+#include "../xegame/game.h"
+#include "../xegame/cgame.h"
 #include "gamesettings.h"
 #include "../grinliz/glstringutil.h"
 
@@ -260,3 +261,5 @@ void SettingScene::Tap( int action, const grinliz::Vector2F& screen, const grinl
 		modCurrent.SetText( name.size() ? name.c_str() : "None" );
 	}
 }
+
+#endif

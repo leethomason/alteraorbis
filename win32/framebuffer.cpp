@@ -15,7 +15,7 @@
 
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
 
-#include "glew.h"
+#include "../glew/include/GL/glew.h"
 #include "framebuffer.h"
 #include "../grinliz/glutil.h"
 

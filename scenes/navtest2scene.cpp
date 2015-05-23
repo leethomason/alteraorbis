@@ -82,10 +82,10 @@ NavTest2Scene::~NavTest2Scene()
 
 void NavTest2Scene::Resize()
 {
-	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+//	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	PositionStd( &okay, 0 );
 
-	const Screenport& port = lumosGame->GetScreenport();
+//	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = DefaultLayout();
 	layout.PosAbs( &regionButton, 1, -1 );
 }
@@ -120,7 +120,7 @@ void NavTest2Scene::LoadMap()
 	}
 	//Performance::SetSampling( false );
 	clock_t end = clock();
-	GLOUTPUT(( "Create chit startup: %d msec\n", (end - start) ));
+	GLOUTPUT(( "Create chit startup: %d msec\n", int(end - start) ));
 	context.engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
 }
 

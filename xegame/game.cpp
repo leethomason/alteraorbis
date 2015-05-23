@@ -44,7 +44,6 @@
 #include "../xegame/chitbag.h"
 
 #include <time.h>
-#include <direct.h>	// for _mkdir
 #include "../game/layout.h"
 
 using namespace grinliz;
@@ -140,8 +139,6 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "fixedfont" );
 	GLASSERT( textTexture );
 	UFOText::Create(textTexture);
-
-	_mkdir( "save" );
 
 	itemDefDB = new ItemDefDB();
 	itemDefDB->Load( "./res/itemdef.xml" );

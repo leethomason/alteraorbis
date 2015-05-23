@@ -102,8 +102,8 @@ void XenoAudio::Play(const IString& iSound, const Vector3F* pos)
 			needClose = true;
 		}
 		if (fp) {
-			U8* buf = 0;
-			U32 len = 0;
+			//U8* buf = 0;
+			//U32 len = 0;
 			chunk = Mix_LoadWAV_RW(fp, false);
 			if (!chunk) {
 				GLOUTPUT(("Audio error: %s\n", Mix_GetError()));
@@ -148,11 +148,6 @@ void XenoAudio::SetListener(const grinliz::Vector3F& pos, const grinliz::Vector3
 void XenoAudio::SetChannelPos(int i)
 {
 	if (!audioOn) return;
-#ifdef DEBUG
-	if (Mix_Playing(i)) {
-		int debug = 1;
-	}
-#endif
 
 	if (sounds[i].pos.IsZero()) {
 		Mix_SetPosition(i, 0, 0);

@@ -117,7 +117,7 @@ class ParticleSystem : public IDeviceLossHandler
 {
 public:
 	ParticleSystem();
-	~ParticleSystem();
+	virtual ~ParticleSystem();
 
 	class IRegion {
 	public:

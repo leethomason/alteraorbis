@@ -109,7 +109,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, MeleeWeapon* weapo
 	ChitBag* chitBag = src->Context()->chitBag;
 	GLASSERT( chitBag );
 
-	U32 absTime = chitBag->AbsTime();
+//	U32 absTime = chitBag->AbsTime();
 	
 	// Get origin and direction of melee attack,
 	// then send messages to everyone hit. Everything
@@ -296,10 +296,10 @@ void BattleMechanics::Shoot(ChitBag* bag, Chit* src, const grinliz::Vector3F& _t
 	float radAt1 = ComputeRadAt1(src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), targetMoving);
 	Vector3F dir = FuzzyAim(p0, aimAt, radAt1);
 
-	Bolt* bolt = bag->ToLumos()->NewBolt(p0, dir, weapon->Effects(), src->ID(),
-										 weapon->Damage(),
-										 weapon->BoltSpeed(),
-										 (weapon->flags & GameItem::RENDER_TRAIL) ? true : false);
+	bag->ToLumos()->NewBolt(p0, dir, weapon->Effects(), src->ID(),
+							weapon->Damage(),
+							weapon->BoltSpeed(),
+							(weapon->flags & GameItem::RENDER_TRAIL) ? true : false);
 }
 
 

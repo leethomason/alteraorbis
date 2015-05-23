@@ -26,7 +26,7 @@
 #include "shadermanager.h"
 #include "engine.h"
 #include "loosequadtree.h"
-#include "renderQueue.h"
+#include "renderqueue.h"
 #include "surface.h"
 #include "texture.h"
 #include "particle.h"

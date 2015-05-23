@@ -13,6 +13,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if 0
+
 #include "gamesettings.h"
 #include "../tinyxml/tinyxml.h"
 #include "../engine/serialize.h"
@@ -107,3 +109,5 @@ void GameSettingsManager::SetAllowDrag( bool allow )
 		Save();
 	}
 }
+
+#endif

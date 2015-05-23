@@ -1,4 +1,6 @@
+#ifdef _MSC_VER
 #pragma warning (disable:4530)
+#endif
 #include "../shared/lodepng.h"
 
 #include "livepreviewscene.h"
@@ -114,8 +116,8 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	const ModelResource* modelResource = 0;
 	modelResource = ModelResourceManager::Instance()->GetModelResource( resName[currentType] );
 
-	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
-	float rowMult = 1.0f / (float)srcRows;
+//	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
+//	float rowMult = 1.0f / (float)srcRows;
 
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		if ( model[i] ) {
@@ -145,7 +147,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 {
 	static const float DELTA  = 0.3f;
-	static const float DIST   = 3.0f;
+//	static const float DIST   = 3.0f;
 
 	engine->lighting.direction.Set( -1, 1, -1 );
 	engine->lighting.direction.Normalize();
@@ -168,8 +170,8 @@ void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 
 	modelResource = ModelResourceManager::Instance()->GetModelResource( resName );
 
-	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
-	float rowMult = 1.0f / (float)srcRows;
+//	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
+//	float rowMult = 1.0f / (float)srcRows;
 
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		if ( model[i] ) {
@@ -182,7 +184,7 @@ void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 		int col = i - row*COLS;
 		float x = float(col) * DELTA;
 		float y = float(ROWS-1-row) * DELTA;
-		float current = 1.0f - rowMult * (float)(mainRow);
+//		float current = 1.0f - rowMult * (float)(mainRow);
 
 		static const int FLAGS[COLS] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_FIRE | GameItem::EFFECT_EXPLOSIVE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
 

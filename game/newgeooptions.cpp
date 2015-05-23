@@ -1,3 +1,4 @@
+#if 0
 #include "newgeooptions.h"
 
 #include "../engine/engine.h"
@@ -83,7 +84,4 @@ void NewGeoOptions::Tap(	int action,
 		game->PopScene( difficulty );
 	}
 }
-
-
-
-
+#endif

@@ -10,7 +10,7 @@ class TutorialWidget : public gamui::IWidget
 {
 public:
 	TutorialWidget();
-	~TutorialWidget();
+	virtual ~TutorialWidget();
 
 	void Init(gamui::Gamui* gamui, const gamui::ButtonLook& look, const gamui::LayoutCalculator& calculator );
 
