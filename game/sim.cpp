@@ -339,12 +339,12 @@ void Sim::SpawnDenizens()
 			// Kamakiri tend to be very successful when paired whith green mantis.
 			// was: float odds[NUM] = { 100.f, 80.f, 80.f };
 			float odds[NUM] = { 100.f, 50.f, 80.f };
-			IString denizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
+			IString iDenizen[NUM] = { ISC::gobman, ISC::kamakiri, ISC::human };
 
 			const Census& census = context.chitBag->census;
 			const grinliz::CDynArray<Census::MOBItem>& items = census.MOBItems();
 			for (int i = 0; i < NUM; ++i) {
-				Census::MOBItem item(denizen[i]);
+				Census::MOBItem item(iDenizen[i]);
 				int index = items.Find(item);
 				if (index >= 0) {
 					odds[i] /= float(items[index].count);
@@ -354,7 +354,7 @@ void Sim::SpawnDenizens()
 			int index = random.Select(odds, NUM);
 
 			for (int i = 0; i < NSPAWN; ++i) {
-				IString ispawn = denizen[index];
+				IString ispawn = iDenizen[index];
 				int team = Team::GetTeam(ispawn);
 				GLASSERT(team != TEAM_NEUTRAL);
 
@@ -419,11 +419,11 @@ void Sim::SpawnGreater()
 		if (sp.IsValid()) {
 
 			static const int NUM_GREATER = 3;
-			static const char* greater[NUM_GREATER] = { "cyclops", "fireCyclops", "shockCyclops" };
+			static const char*greaterNames[NUM_GREATER] = { "cyclops", "fireCyclops", "shockCyclops" };
 			static const float odds[NUM_GREATER] = { 0.50f, 0.35f, 0.15f };
 			int index = random.Select(odds, 3);
 
-			IString ispawn = StringPool::Intern(greater[index], true);
+			IString ispawn = StringPool::Intern(greaterNames[index], true);
 			int team = Team::GetTeam(ispawn);
 			GLASSERT(team != TEAM_NEUTRAL);
 
@@ -454,8 +454,8 @@ void Sim::CreateTruulgaCore()
 	if (team != TEAM_TROLL) {
 		// Need a new core for Truulga.
 		Vector2I newSector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
-		CoreScript* cs = CoreScript::GetCore(newSector);
-		if (cs && cs->ParentChit()->Team() == 0) {
+		CoreScript* trollCS = CoreScript::GetCore(newSector);
+		if (trollCS && trollCS->ParentChit()->Team() == 0) {
 			CoreScript* troll = CoreScript::CreateCore(newSector, TEAM_TROLL, &context);
 			troll->ParentChit()->Add(new TrollDomainAI());
 			truulga->SetPosition(troll->ParentChit()->Position());
@@ -545,7 +545,8 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 
 		if (!sc) {
 			if (   data.wantsTakeover 
-				&& data.conqueringTeam 
+				&& data.conqueringTeam
+				&& Team::IsDenizen(data.conqueringTeam)
 				&& (Team::Instance()->SuperTeam(data.conqueringTeam) == data.conqueringTeam)) 
 			{
 				// The case where this domain is conquered. Switch to a sub-domain team ID,
