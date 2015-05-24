@@ -126,20 +126,18 @@ public:
 	}
 
 	static bool IsRogue(int team) {
-		return (team & 0xffffff00) == 0;
+		return IsDenizen(team) && (team & 0xffffff00) == 0;
 	}
 
 	static bool IsDenizen(int team) {
 		int group = Group(team);
-		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_HOUSE) || (group == TEAM_KAMAKIRI);
+		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_KAMAKIRI);
 	}
 
 	static bool IsDeityCore(int team) {
 		int group = Group(team);
 		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
 	}
-
-	static bool IsDefault(const grinliz::IString& name, int team);
 
 private:
 	enum {

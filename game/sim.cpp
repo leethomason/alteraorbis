@@ -544,6 +544,9 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 		Vector2I sector = data.sector;
 
 		if (!sc) {
+			// FIXME: last criteria "must be super team" isn't correct. Sub-teams
+			// should be able to conquor for super teams.
+
 			if (   data.wantsTakeover 
 				&& data.conqueringTeam
 				&& Team::IsDenizen(data.conqueringTeam)

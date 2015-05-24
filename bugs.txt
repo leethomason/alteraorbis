@@ -23,6 +23,7 @@ x peace button
 		- fall of super-domain: means integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 	- enemy/neutral/friend messages: don't show (core) show the domain name
+	- DOMAIN_TAKEOVER message not correct
 
 x remove industrial from switches
 - top down: can’t tell on switch from off switch. 

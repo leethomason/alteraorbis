@@ -97,6 +97,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::DOMAIN_DESTROYED:
 			case NewsEvent::GREATER_SUMMON_TECH:
 			case NewsEvent::DOMAIN_CONQUER:
+			case NewsEvent::DOMAIN_TAKEOVER:
 			ne.Console(&str, chitBag, 0);
 			break;
 

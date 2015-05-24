@@ -101,6 +101,19 @@ grinliz::IString Team::TeamName(int team)
 	SplitID(team, &group, &id);
 
 	switch (group) {
+		case TEAM_NEUTRAL:		GLASSERT(0);	name = StringPool::Intern("neutral");		break;
+		case TEAM_CHAOS:		GLASSERT(0);	name = StringPool::Intern("chaos");			break;
+		case TEAM_RAT:			GLASSERT(0);	name = ISC::trilobyte;						break;
+		case TEAM_GREEN_MANTIS:	GLASSERT(0);	name = ISC::mantis;							break;
+		case TEAM_RED_MANTIS:	GLASSERT(0);	name = ISC::redMantis;						break;
+
+		case TEAM_TROLL:
+		// Since Trolls can't build anything,
+		// any troll core is by definition
+		// Truulga. (At least at this point.)
+		name = ISC::Truulga;
+		break;
+
 		case TEAM_HOUSE:
 		case TEAM_GOB:
 		case TEAM_KAMAKIRI:
@@ -117,16 +130,16 @@ grinliz::IString Team::TeamName(int team)
 			}
 		}
 		else {
-			str = "House";
+			if (group == TEAM_HOUSE) str = "House";
+			else if (group == TEAM_GOB) str = "Gobmen";
+			else if (group == TEAM_KAMAKIRI) str = "Kamakiri";
 			name = StringPool::Intern(str.c_str());
 		}
 		break;
 
-		case TEAM_TROLL:
-		// Since Trolls can't build anything,
-		// any troll core is by definition
-		// Truulga. (At least at this point.)
-		name = ISC::Truulga;
+		case TEAM_VISITOR:
+		GLASSERT(0);	
+		name = StringPool::Intern("Visitor");
 		break;
 
 		case TEAM_DEITY:
@@ -135,10 +148,6 @@ grinliz::IString Team::TeamName(int team)
 			case DEITY_MOTHER_CORE:	name = ISC::MotherCore; break;
 			default: GLASSERT(0);
 		}
-		break;
-
-		case TEAM_CHAOS:
-		case TEAM_NEUTRAL:
 		break;
 
 		default:
@@ -186,13 +195,6 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	}
 	GLASSERT(0);
 	return TEAM_NEUTRAL;
-}
-
-
-bool Team::IsDefault(const IString& str, int team)
-{
-	if (team == TEAM_NEUTRAL || team == TEAM_CHAOS) return true;
-	return GetTeam(str) == Group(team);
 }
 
 

@@ -2720,10 +2720,9 @@ void AIComponent::EnterNewGrid()
 	}
 
 	// Domain Takeover.
-	if (gameItem->MOB() == ISC::denizen
+	if (   gameItem->MOB() == ISC::denizen
 		&& Team::IsRogue(parentChit->Team())
-		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS
-		&& Team::IsDefault(gameItem->IName(), parentChit->Team()))
+		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS )
 	{
 		// FIXME: refactor this to somewhere. Part of CoreScript?
 		Vector2I sector = ToSector(pos2i);
@@ -2738,7 +2737,6 @@ void AIComponent::EnterNewGrid()
 			ItemNameFilter filter(ISC::gobman);
 			Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(inner), parentChit, &filter);
 
-			//GL_ARRAY_FILTER(arr, (ele->GetItem() && Team::IsRogue(ele->GetItem()->Team())));
 			arr.Filter(0, [](int, Chit* ele) {
 				return Team::IsRogue(ele->Team());
 			});
