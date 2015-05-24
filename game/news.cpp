@@ -92,14 +92,19 @@ const NewsEvent** NewsHistory::FindItem( int firstItemID, int secondItemID, int*
 
 
 
-NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, int first, int second, int team)
+NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, int firstID, int secondID)
 {
 	Clear();
 	this->what = what;
 	this->pos = pos;
-	this->firstItemID = first;
-	this->secondItemID = second;
-	this->team = team;
+	this->firstItemID = firstID;
+	this->secondItemID = secondID;
+
+	const GameItem* first  = ItemDB::Instance()->Active(firstID);
+	const GameItem* second = ItemDB::Instance()->Active(secondID);
+
+	this->firstTeam  = first ? first->Team() : 0;
+	this->secondTeam = second ? second->Team() : 0;
 }
 
 
@@ -171,7 +176,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	const GameItem* first  = ItemDB::Instance()->Active(firstItemID);
-	//const GameItem* second = ItemDB::Instance()->Active(secondItemID);
+	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
 
 	IString firstName  = IDToName(firstItemID,  firstItemID == shortNameID);
 	IString secondName = IDToName(secondItemID, secondItemID == shortNameID);
@@ -185,7 +190,8 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		domain = sd.name;
 	}
 
-	IString teamName = Team::Instance()->TeamName(team);
+	IString firstTeamName  = Team::Instance()->TeamName(firstTeam);
+	IString secondTeamName = Team::Instance()->TeamName(secondTeam);
 
 	switch (what) {
 		case DENIZEN_CREATED:

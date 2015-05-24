@@ -21,7 +21,7 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem, int team );
+	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem );
 
 	void Serialize( XStream* xs );
 
@@ -69,7 +69,8 @@ public:
 	int	FirstItemID() const		{ return firstItemID; }
 	int SecondItemID() const	{ return secondItemID; }
 
-	int Team() const			{ return team; }
+	int FirstTeam() const		{ return firstTeam; }
+	int SecondTeam() const		{ return secondTeam; }
 
 	static grinliz::IString IDToName( int id, bool shortName );
 
@@ -78,16 +79,18 @@ private:
 	grinliz::Vector2F	pos;			// where it happened
 	int					firstItemID;
 	int					secondItemID;
+	int					firstTeam;		// teams change; the team info needs to be stored separate from the item.
+	int					secondTeam;
 	U32					date;			// when it happened, in msec
-	int					team;			// team of the primary item
 
 	void Clear() {
 		what = 0;
 		pos.Zero();
 		firstItemID = 0;
 		secondItemID = 0;
+		firstTeam = 0;
+		secondTeam = 0;
 		date = 0;
-		team = 0;
 	}
 };
 
