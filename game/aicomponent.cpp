@@ -2620,12 +2620,12 @@ void AIComponent::DoMoraleZero(  )
 	switch ( option ) {
 	case STARVE:
 		gameItem->hp = 0;
-		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::STARVATION, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
+		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::STARVATION, pos2, parentChit->GetItemID(), 0));
 		break;
 
 	case BLOODRAGE:
 		gameItem->SetChaos();
-		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
+		Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit->GetItemID(), 0));
 		break;
 
 	case VISION_QUEST:
@@ -2650,7 +2650,7 @@ void AIComponent::DoMoraleZero(  )
 					}
 				}
 				this->Move( sectorPort, true );
-				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit->GetItemID(), 0, parentChit->Team()));
+				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit->GetItemID(), 0));
 				gameItem->SetRogue();
 			}
 		}
@@ -2755,7 +2755,7 @@ void AIComponent::EnterNewGrid()
 					}
 
 					NewsEvent news(NewsEvent::DOMAIN_CONQUER, ToWorld2F(newCS->ParentChit()->Position()),
-								   newCS->ParentChit()->GetItemID(), parentChit->GetItemID(), newCS->ParentChit()->Team());
+								   newCS->ParentChit()->GetItemID(), parentChit->GetItemID());
 					Context()->chitBag->GetNewsHistory()->Add(news);
 				}
 			}
@@ -3182,7 +3182,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				&& cs && (cs->GetTech() >= TECH_ATTRACTS_GREATER))
 			{
 				Vector2I target = ToWorld2I(cs->ParentChit()->Position());
-				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit->GetItemID(), 0, parentChit->Team()));
+				Context()->chitBag->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit->GetItemID(), 0));
 			}
 		}
 		break;

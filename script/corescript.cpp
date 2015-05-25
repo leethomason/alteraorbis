@@ -533,7 +533,7 @@ bool CoreScript::RecruitNeutral()
 				GLASSERT(chit->GetItem()->Significant());
 
 				NewsEvent news(NewsEvent::ROGUE_DENIZEN_JOINS_TEAM, ToWorld2F(chit->Position()),
-							   chit->GetItemID(), 0, chit->Team());
+							   chit->GetItemID(), 0);
 							   
 				Context()->chitBag->GetNewsHistory()->Add(news);
 				return true;
@@ -907,7 +907,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit->GetItemID(), 0, chit->Team());
+			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit->GetItemID(), 0);
 			context->chitBag->GetNewsHistory()->Add(news);
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());

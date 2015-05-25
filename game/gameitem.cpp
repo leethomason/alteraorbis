@@ -862,7 +862,7 @@ void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int cre
 	if (creator && team == 0) {
 		team = creator->Team();
 	}
-	NewsEvent news(creationMsg, pos, this->ID(), creator ? creator->GetItemID() : 0, this->team);
+	NewsEvent news(creationMsg, pos, this->ID(), creator ? creator->GetItemID() : 0);
 	history->Add(news);
 }
 

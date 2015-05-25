@@ -40,14 +40,15 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	currentNews = Max(currentNews, history->NumNews() - 40);
 	GLString str;
 	Vector2I homeSector = { 0, 0 };
+	int homeCoreTeam = 0;
 	if (homeCore) {
 		homeSector = ToSector(homeCore->ParentChit()->Position());
+		homeCoreTeam = homeCore->ParentChit()->Team();
 	}
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
 
 	RenderAtom atom;
-	//Vector2F pos2 = { 0, 0 };
 
 	for (; currentNews < history->NumNews(); ++currentNews) {
 		const NewsEvent& ne = history->News(currentNews);
@@ -59,7 +60,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 		switch (ne.What()) {
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::ROGUE_DENIZEN_JOINS_TEAM:
-			if (homeCore && (homeCore->ParentChit()->Team() == ne.Team())) {
+			if (homeCore && (homeCore->ParentChit()->Team() == ne.FirstTeam())) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
@@ -69,7 +70,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::STARVATION:
 			case NewsEvent::BLOOD_RAGE:
 			case NewsEvent::VISION_QUEST:
-			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team()))) {
+			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.FirstTeam()))) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("warning");
 			}

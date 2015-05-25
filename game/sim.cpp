@@ -291,13 +291,13 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				if (superTeam) {
 					CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
 					coreCreateList.Push(data);
-					NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID(), deleter->Team());
+					NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID());
 					context.chitBag->GetNewsHistory()->Add(news);
 				}
 				else {
 					CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
 					coreCreateList.Push(data);
-					NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0, chit->Team());
+					NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
 					context.chitBag->GetNewsHistory()->Add(news);
 				}
 			}
@@ -1028,8 +1028,7 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, E
 				NewsEvent newsEvent(eventID,
 									ToWorld2F(originCore->ParentChit()->Position()),
 									originCore->ParentChit()->GetItemID(),
-									cs->ParentChit()->GetItemID(),
-									originCore->ParentChit()->Team());
+									cs->ParentChit()->GetItemID());
 				context.chitBag->GetNewsHistory()->Add(newsEvent);
 			}
 
