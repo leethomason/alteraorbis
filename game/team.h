@@ -139,6 +139,10 @@ public:
 		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
 	}
 
+	static bool IsCoreController(int team) {
+		return IsDeityCore(team) || IsDenizen(team);
+	}
+
 private:
 	enum {
 		TREATY_TIME = 10*60*1000	// minutes of game time.

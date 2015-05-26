@@ -36,7 +36,7 @@ private:
 	float				width = 100.0f;
 	float				height = 100.0f;
 	gamui::TextLabel	textLabel;
-	gamui::TextLabel	dScore;
+	//gamui::TextLabel	dScore;
 
 	enum {
 		SUPER_TEAM_COLOR,
@@ -52,6 +52,8 @@ private:
 		CIV_TECH_IMAGE,
 		GOLD_IMAGE,
 		DIPLOMACY_IMAGE,
+		ATTITUDE_IMAGE,
+
 		NUM_IMAGES,
 
 		NUM_FACE_IMAGES = 3,

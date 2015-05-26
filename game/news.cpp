@@ -190,8 +190,8 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		domain = sd.name;
 	}
 
-	IString firstTeamName  = Team::Instance()->TeamName(firstTeam);
-	IString secondTeamName = Team::Instance()->TeamName(secondTeam);
+	IString firstTeamName = Team::IsCoreController(firstTeam) ? Team::Instance()->TeamName(firstTeam) : IString();
+	IString secondTeamName = Team::IsCoreController(secondTeam) ? Team::Instance()->TeamName(secondTeam) : IString();
 
 	switch (what) {
 		case DENIZEN_CREATED:

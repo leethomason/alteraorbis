@@ -251,12 +251,12 @@ void MapScene::DrawMap()
 
 	Rectangle2I subBounds = MapBounds2();
 	float map2X = float(subBounds.min.x) / float(NUM_SECTORS);
-	float map2Y = float(subBounds.min.x) / float(NUM_SECTORS);
+	float map2Y = float(subBounds.min.y) / float(NUM_SECTORS);
 	RenderAtom subAtom = mapImage.GetRenderAtom();
 	subAtom.tx0 = map2X;
-	subAtom.ty0 = map2Y;
+	subAtom.ty1 = map2Y;
 	subAtom.tx1 = map2X + float(MAP2_SIZE) / float(NUM_SECTORS);
-	subAtom.ty1 = map2Y + float(MAP2_SIZE) / float(NUM_SECTORS);
+	subAtom.ty0 = map2Y + float(MAP2_SIZE) / float(NUM_SECTORS);
 	mapImage2.SetAtom(subAtom);
 
 	for (Rectangle2IIterator it(subBounds); !it.Done(); it.Next()) {

@@ -21,7 +21,6 @@ MapGridWidget::MapGridWidget()
 void MapGridWidget::Init(Gamui* gamui2D)
 {
 	textLabel.Init(gamui2D);
-	dScore.Init(gamui2D);
 
 	for (int i = 0; i < NUM_IMAGES; ++i) {
 		image[i].Init(gamui2D, RenderAtom(), true);
@@ -35,6 +34,7 @@ void MapGridWidget::Init(Gamui* gamui2D)
 	image[FACE_IMAGE_1].SetLevel(layer);
 	image[FACE_IMAGE_2].SetLevel(layer);
 	image[CIV_TECH_IMAGE].SetLevel(layer);
+	image[ATTITUDE_IMAGE].SetLevel(layer);
 
 	layer = Gamui::LEVEL_FOREGROUND + 3;
 	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
@@ -124,9 +124,7 @@ void MapGridWidget::DoLayout()
 	float fx = compact ? x + dw : x + dw*2.0f;
 	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
 
-	if (!compact) {
-		dScore.SetPos(x + dw, y + dh * 2);
-	}
+	image[ATTITUDE_IMAGE].SetCenterPos(x + dw*1.5f, y + dh * 2.5f);
 }
 
 
@@ -263,6 +261,8 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
 
+	RenderAtom attitudeAtom;
+
 	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeityCore(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
 		ERelate relate = Team::Instance()->GetRelationship(coreScript->ParentChit(), home->ParentChit());
@@ -273,15 +273,19 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
 
-		if (web && (home != coreScript)) {
+		if (web && (home != coreScript) && !compact) {
 			// Print out how THEY feel about US.
 			int attitude = Team::Instance()->Attitude(coreScript, home);
-			CStr<32> str;
-			str.Format("%+d", attitude);
-			dScore.SetText(str.safe_str());
+			if (attitude <= -4)	attitudeAtom = LumosGame::CalcUIIconAtom("attMinus4");
+			else if (attitude == -3) attitudeAtom = LumosGame::CalcUIIconAtom("attMinus3");
+			else if (attitude == -2) attitudeAtom = LumosGame::CalcUIIconAtom("attMinus2");
+			else if (attitude == -1) attitudeAtom = LumosGame::CalcUIIconAtom("attMinus1");
+			else if (attitude == 0)  attitudeAtom = LumosGame::CalcUIIconAtom("attZero");
+			else if (attitude == 1)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus1");
+			else if (attitude == 2)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus2");
+			else if (attitude == 3)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus3");
+			else if (attitude >= 4)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus4");
 		}
 	}
-	else {
-		dScore.SetText("");
-	}
+	image[ATTITUDE_IMAGE].SetAtom(attitudeAtom);
 }

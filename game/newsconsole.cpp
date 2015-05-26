@@ -61,7 +61,8 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::ROGUE_DENIZEN_JOINS_TEAM:
 
-			GLASSERT(Team::ID(ne.FirstTeam()));	// id of team should be set when this is called.
+			GLASSERT(   ne.What() == NewsEvent::DENIZEN_CREATED	// usually does NOT have team - random gen.
+					 || Team::ID(ne.FirstTeam()));				// but Rogue should have team
 			if (homeCore && (homeCoreTeam == ne.FirstTeam())) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
