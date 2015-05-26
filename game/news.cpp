@@ -195,11 +195,14 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 
 	switch (what) {
 		case DENIZEN_CREATED:
-		str->Format("%.2f: Denizen %s " MOB_created " at %s.", age, firstName.c_str(), domain.c_str());
+		str->Format("%.2f: Denizen %s " MOB_created " at %s with team %s.", age, firstName.c_str(), domain.c_str(), firstTeamName.safe_str());
 		break;
 
 		case DENIZEN_KILLED:
-		str->Format("%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, firstName.c_str(), domain.c_str(), secondName.c_str());
+		if (firstTeamName.empty()) 
+			str->Format("%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, firstName.c_str(), domain.c_str(), secondName.c_str());
+		else
+			str->Format("%.2f: Denizen %s (%s) " MOB_destroyed " at %s by %s.", age, firstName.c_str(), firstTeamName.safe_str(), domain.c_str(), secondName.c_str());
 		break;
 
 		case GREATER_MOB_CREATED:
@@ -213,7 +216,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case ROGUE_DENIZEN_JOINS_TEAM:
-		str->Format("%.2f: Denizen %s joins %s at %s.", age, firstName.c_str(), teamName.safe_str(), domain.c_str());
+		str->Format("%.2f: Denizen %s joins %s at %s.", age, firstName.safe_str(), firstTeamName.safe_str(), domain.safe_str());
 		break;
 
 		case GREATER_MOB_KILLED:
@@ -221,20 +224,16 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case DOMAIN_DESTROYED:
-		if (team) {
-			str->Format("%.2f: %s domain %s " MOB_destroyed " by %s.", age, teamName.safe_str(), domain.safe_str(), secondName.safe_str());
-		}
-		else {
-			str->Format("%.2f: %s " MOB_destroyed ".", age, domain.c_str());
-		}
+		GLASSERT(firstTeam);	// how is a neutral destroyed??
+		str->Format("%.2f: %s domain %s " MOB_destroyed " by %s.", age, firstTeamName.safe_str(), domain.safe_str(), secondName.safe_str());
 		break;
 
 		case DOMAIN_TAKEOVER:
-		if (team) {
-			str->Format("%.2f: %s domain %s " "conquered" " by %s.", age, teamName.safe_str(), domain.safe_str(), secondName.safe_str());
+		if (secondTeam) {
+			str->Format("%.2f: %s domain %s " "conquered" " by %s of %s.", age, firstTeamName.safe_str(), domain.safe_str(), secondName.safe_str(), secondTeamName.safe_str());
 		}
 		else {
-			str->Format("%.2f: %s " "conquered" ".", age, domain.c_str());
+			str->Format("%.2f: %s " "conquered" ".", age, domain.safe_str());
 		}
 		break;
 
@@ -273,7 +272,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case DOMAIN_CONQUER:
-		str->Format("%.2f: %s is occupied by %s.", age, domain.safe_str(), teamName.safe_str() );
+		str->Format("%.2f: %s is occupied by %s.", age, domain.safe_str(), firstTeamName.safe_str() );
 		break;
 
 		case ATTITUDE_FRIEND:
@@ -302,7 +301,8 @@ void NewsEvent::Serialize(XStream* xs)
 	XARC_SER(xs, firstItemID);
 	XARC_SER(xs, secondItemID);
 	XARC_SER(xs, date);
-	XARC_SER(xs, team);
+	XARC_SER(xs, firstTeam);
+	XARC_SER(xs, secondTeam);
 	XarcClose(xs);
 }
 

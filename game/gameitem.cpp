@@ -796,64 +796,6 @@ IString GameItem::IFullName() const
 }
 
 
-#if 0
-IString GameItem::INameAndTitle() const
-{
-	//IString title = ITitle();
-	CStr<128> str;
-	if (!ITitle().empty())
-		str.Format("%s %s", IFullName().safe_str(), ITitle().safe_str());
-	else
-		str.Format("%s", IFullName().safe_str());
-
-	return StringPool::Intern( str.c_str() );
-}
-
-
-IString GameItem::ITitle() const
-{
-	// Bane Greater
-	// Slayer Greater
-	// Bane Lesser
-
-	// The title code is working, but doesn't generate a good title.
-	// And how does this work with multiple achievements? Almost
-	// like icons better.
-	/*
-	static const int LESSER_BANE = 100;
-	static const int GREATER_BANE = 4;
-
-	const grinliz::CDynArray< grinliz::IString >& greaterMOBs = ItemDefDB::Instance()->GreaterMOBs();
-	const grinliz::CDynArray< grinliz::IString >& lesserMOBs  = ItemDefDB::Instance()->LesserMOBs();
-	CStr<64> str;
-
-	// Check the greater
-	for( int pass=0; pass<2; ++pass ) {
-		int high = 0;
-		IString highStr;
-	
-		const grinliz::CDynArray< grinliz::IString >& mobs = (pass==0) ? greaterMOBs : lesserMOBs;
-		int bane = (pass==0) ? GREATER_BANE : LESSER_BANE;
-
-		for( int i=0; i<mobs.Size(); ++i ) {
-			str.Format( "Kills: %s", mobs[i].c_str() );
-			int count = 0;
-			historyDB.Get( str.c_str(), &count );
-			if ( count > bane && count > high ) { 
-				high = count;
-				highStr = mobs[i];
-			}
-		}
-		if ( high ) {
-			str.Format( "%s %s", highStr.c_str(), high >= bane ? "Bane" : "Slayer" );
-			return StringPool::Intern( str.c_str() );
-		}
-	}
-	*/
-	return IString();
-}
-#endif
-
 void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator)
 {
 	// Mark this item as important with a destroyMsg:

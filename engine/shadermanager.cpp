@@ -415,6 +415,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "SATURATION",			flags & SATURATION );
 	AppendFlag( &header, "BONE_XFORM",			flags & BONE_XFORM );
 	AppendFlag( &header, "LIGHTING",			flags & LIGHTING);
+	AppendFlag( &header, "INSTANCE",			flags & INSTANCE);
 
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 

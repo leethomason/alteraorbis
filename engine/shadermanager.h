@@ -51,26 +51,27 @@ public:
 	enum {				
 		// Texture state.
 		TEXTURE0			= (1<<1),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
-		TEXTURE0_XFORM		= (1<<3),		// u' = u*x + z, v' = v*.y + w	(instanced, vec4)
-		TEXTURE0_CLIP		= (1<<4),		// clip to (x0,y0), (x1,y1) (instanced, vec4)
-		TEXTURE0_COLORMAP	= (1<<5),		// remap colors (instanced, matrix)
+		TEXTURE0_XFORM		= (1<<2),		// u' = u*x + z, v' = v*.y + w	(instanced, vec4)
+		TEXTURE0_CLIP		= (1<<3),		// clip to (x0,y0), (x1,y1) (instanced, vec4)
+		TEXTURE0_COLORMAP	= (1<<4),		// remap colors (instanced, matrix)
 
 		// Colors and Lighting
-		COLORS				= (1<<6),		// Per-vertex colors.
-		LIGHTING			= (1<<7),		// Lighting. Requires per vertex normals, 
+		COLORS				= (1<<5),		// Per-vertex colors.
+		LIGHTING			= (1<<6),		// Lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
 
 		// Color features.
-		PREMULT				= (1<<9),		// convert to pre-multiplied in the fragment shader
-		EMISSIVE			= (1<<10),		// interpret the alpha channel as emission.
-		EMISSIVE_EXCLUSIVE  = (1<<11),		// everything not emissive is black
+		PREMULT				= (1<<7),		// convert to pre-multiplied in the fragment shader
+		EMISSIVE			= (1<<8),		// interpret the alpha channel as emission.
+		EMISSIVE_EXCLUSIVE  = (1<<9),		// everything not emissive is black
 
-		COLOR_PARAM			= (1<<12),		// Apply per model color.
-		BONE_FILTER			= (1<<13),		// Apply per model bone filtering
-		SATURATION			= (1<<14),		// Per pixel saturation effect. Uses control.y
+		COLOR_PARAM			= (1<<11),		// Apply per model color.
+		BONE_FILTER			= (1<<11),		// Apply per model bone filtering
+		SATURATION			= (1<<12),		// Per pixel saturation effect. Uses control.y
 
 		// Features:
-		BONE_XFORM			= (1<<15),
+		BONE_XFORM			= (1<<13),
+		INSTANCE			= (1<<14)
 	};
 
 	void DeviceLoss();

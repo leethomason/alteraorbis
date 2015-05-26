@@ -794,8 +794,7 @@ int TrollDomainAI::DoTick(U32 delta)
 				market->GetItemComponent()->AddToInventory(item);
 
 				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED,
-										Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
 			}
 		}
 	}

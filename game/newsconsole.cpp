@@ -40,7 +40,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 	currentNews = Max(currentNews, history->NumNews() - 40);
 	GLString str;
 	Vector2I homeSector = { 0, 0 };
-	int homeCoreTeam = 0;
+	int homeCoreTeam = -1;
 	if (homeCore) {
 		homeSector = ToSector(homeCore->ParentChit()->Position());
 		homeCoreTeam = homeCore->ParentChit()->Team();
@@ -60,7 +60,9 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 		switch (ne.What()) {
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::ROGUE_DENIZEN_JOINS_TEAM:
-			if (homeCore && (homeCore->ParentChit()->Team() == ne.FirstTeam())) {
+
+			GLASSERT(Team::ID(ne.FirstTeam()));	// id of team should be set when this is called.
+			if (homeCore && (homeCoreTeam == ne.FirstTeam())) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");
 			}
@@ -70,7 +72,8 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::STARVATION:
 			case NewsEvent::BLOOD_RAGE:
 			case NewsEvent::VISION_QUEST:
-			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.FirstTeam()))) {
+
+			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCoreTeam == ne.FirstTeam()))) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("warning");
 			}
@@ -79,9 +82,9 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::FORGED:
 			case NewsEvent::UN_FORGED:
 			case NewsEvent::PURCHASED:
-			if ( (    homeCore 
-				  && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCore->ParentChit()->Team() == ne.Team())))
-				|| (sector == homeSector))
+
+			if (   (homeCoreTeam == ne.FirstTeam())		// actually refers to the forged thing team - the forger is more complex.
+				|| (sector == homeSector))				// probably the more useful check.
 			{
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("greeninfo");

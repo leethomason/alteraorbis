@@ -532,9 +532,7 @@ bool CoreScript::RecruitNeutral()
 				this->AddCitizen( chit );
 				GLASSERT(chit->GetItem()->Significant());
 
-				NewsEvent news(NewsEvent::ROGUE_DENIZEN_JOINS_TEAM, ToWorld2F(chit->Position()),
-							   chit->GetItemID(), 0);
-							   
+				NewsEvent news(NewsEvent::ROGUE_DENIZEN_JOINS_TEAM, ToWorld2F(chit->Position()), chit->GetItemID(), 0);
 				Context()->chitBag->GetNewsHistory()->Add(news);
 				return true;
 			}

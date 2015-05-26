@@ -101,11 +101,11 @@ grinliz::IString Team::TeamName(int team)
 	SplitID(team, &group, &id);
 
 	switch (group) {
-		case TEAM_NEUTRAL:		GLASSERT(0);	name = StringPool::Intern("neutral");		break;
-		case TEAM_CHAOS:		GLASSERT(0);	name = StringPool::Intern("chaos");			break;
-		case TEAM_RAT:			GLASSERT(0);	name = ISC::trilobyte;						break;
-		case TEAM_GREEN_MANTIS:	GLASSERT(0);	name = ISC::mantis;							break;
-		case TEAM_RED_MANTIS:	GLASSERT(0);	name = ISC::redMantis;						break;
+		//case TEAM_NEUTRAL:		GLASSERT(0);	name = StringPool::Intern("neutral");		break;
+		//case TEAM_CHAOS:		GLASSERT(0);	name = StringPool::Intern("chaos");			break;
+		//case TEAM_RAT:			GLASSERT(0);	name = ISC::trilobyte;						break;
+		//case TEAM_GREEN_MANTIS:	GLASSERT(0);	name = ISC::mantis;							break;
+		//case TEAM_RED_MANTIS:	GLASSERT(0);	name = ISC::redMantis;						break;
 
 		case TEAM_TROLL:
 		// Since Trolls can't build anything,
@@ -151,8 +151,8 @@ grinliz::IString Team::TeamName(int team)
 		break;
 
 		default:
-		GLOUTPUT(("Invalid team: %d\n", team));
-		GLASSERT(0);
+		//GLOUTPUT(("Invalid team: %d\n", team));
+		//GLASSERT(0);
 		break;
 	}
 

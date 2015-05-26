@@ -32,7 +32,10 @@ uniform vec4 u_colorMult;			// Overall Color, if specified.
 
 // IN: ins
 in vec3		a_pos;				// vertex position
+
+#if INSTANCE == 1
 in float 	a_instanceID;		// instanceID (gets converted to an int)
+#endif
 
 #if COLORS == 1
 	in 	vec4 a_color;			// vertex color
@@ -76,7 +79,12 @@ out vec4 v_color;
 out vec4 v_control;
 
 void main() {
+#if INSTANCE == 1
 	int instanceID = int(a_instanceID);
+#else
+	int instanceID = 0;
+#endif
+
 	vec4 controlParam 	= u_controlParamArr[instanceID];
 	v_control = controlParam;
 

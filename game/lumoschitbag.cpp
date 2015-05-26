@@ -461,7 +461,6 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->Add( new HealthComponent());
 	chit->SetPosition( (float)pos.x+0.5f, 0, (float)pos.y+0.5f );
 
-//	Vector2I sector = ToSector( pos );
 	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
 
 	if (XenoAudio::Instance()) {

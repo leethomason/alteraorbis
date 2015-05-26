@@ -362,6 +362,7 @@ void GPUDevice::Weld( const GPUState& state, const GPUStream& stream, const GPUS
 
 	// Stream Flags
 	flags |= stream.HasColor() ? ShaderManager::COLORS : 0;
+	flags |= stream.HasInstanceID() ? ShaderManager::INSTANCE : 0;
 
 	// Actual shader option flags:
 	flags |= state.ShaderFlags();	
