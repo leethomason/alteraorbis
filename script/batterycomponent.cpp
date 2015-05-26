@@ -12,6 +12,8 @@
 using namespace grinliz;
 using namespace gamui;
 
+static const float YSIZE = 0.2f;
+
 void BatteryComponent::Serialize(XStream* xs)
 {
 	this->BeginSerialize(xs, Name());
@@ -26,9 +28,12 @@ void BatteryComponent::OnAdd(Chit* chit, bool initialize)
 	RenderAtom higher = LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
 	RenderAtom lower = LumosGame::CalcPaletteAtom(PAL_GREEN * 2, PAL_GREEN);
 
+	higher.renderState = (const void*) Map::RENDERSTATE_MAP_TRANSLUCENT;
+	lower.renderState = (const void*) Map::RENDERSTATE_MAP_TRANSLUCENT;
+
 	bar.Init(&Context()->worldMap->overlay0, lower, higher);
-	bar.SetSize(1.0f, 1.0f);
-	bar.SetPos(chit->Position().x + 2, chit->Position().y);
+	bar.SetSize(2.0f, YSIZE);
+	bar.SetPos(chit->Position().x - 1.0f, chit->Position().z + (1.0f - YSIZE));
 }
 
 
@@ -61,6 +66,6 @@ int BatteryComponent::DoTick(U32 delta)
 void BatteryComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (chit == ParentChit() && msg.ID() == ChitMsg::CHIT_POS_CHANGE) {
-		bar.SetPos(chit->Position().x + 2, chit->Position().y);
+		bar.SetPos(chit->Position().x - 1.0f, chit->Position().z + (1.0f - YSIZE));
 	}
 }

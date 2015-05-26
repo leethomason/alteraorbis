@@ -1,5 +1,5 @@
 - are the shader uniform counts being computed correctly?
-- do I need to switch on no instancing?
+x do I need to switch on no instancing?
 x war button
 x peace button
 - more diplomacy testing
