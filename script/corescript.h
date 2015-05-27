@@ -169,6 +169,7 @@ private:
 	bool RecruitNeutral();
 	void DoTickNeutral(int delta, int nSpawnTicks);
 	void DoTickInUse(int delta, int nSpawnTicks);
+	bool SquadAtRest(int squadID);
 	void AssignToSquads();
 	void DoStrategicTick();
 	void NewWaypointChits(int squadID);

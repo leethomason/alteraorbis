@@ -1,4 +1,4 @@
-- are the shader uniform counts being computed correctly?
+x are the shader uniform counts being computed correctly?
 x do I need to switch on no instancing?
 x war button
 x peace button
@@ -26,19 +26,19 @@ x peace button
 	- DOMAIN_TAKEOVER message not correct
 
 x remove industrial from switches
-- top down: can’t tell on switch from off switch. 
 t switch should fire if avatar goes there
 d flag - for local control - awkward. just click switches to go there
 x kiosks higher on recommendation list
-- name of buildings - pop up? info?
 x weapon stats: write units
-- detail view of building w/ mouse down
-- temple charge: show differently? bar?
-- don’t build up a squad if deployed
-- auto-pickup loot? obnoxious, but list isn’t great either
-- make sure domain takeover works in next version
+x temple charge: show differently? bar?
+x don’t build up a squad if deployed
+x auto-pickup loot? obnoxious, but list isn’t great either
 x shield value over-accounts for reload time
+- make sure domain takeover works in next version
+- top down: can’t tell on switch from off switch. 
 
+- detail view of building w/ mouse down
+- name of buildings - pop up? info?
 - cross swords on map: fighting there? confusing icons
 - detector beam
 - teleport out on war switch

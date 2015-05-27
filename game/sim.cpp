@@ -994,7 +994,7 @@ const Web& Sim::CalcWeb()
 }
 
 
-void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, ERelate relate, grinliz::CArray<CoreScript*, 32> *stateArr)
+void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, grinliz::CArray<CoreScript*, 32> *stateArr)
 {
 	stateArr->Clear();
 
@@ -1031,10 +1031,7 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, E
 									cs->ParentChit()->GetItemID());
 				context.chitBag->GetNewsHistory()->Add(newsEvent);
 			}
-
-			if (newRelate == relate) {
-				stateArr->Push(cs);
-			}
+			stateArr->Push(cs);
 		}
 	}
 }

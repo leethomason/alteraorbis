@@ -253,8 +253,8 @@ void CoreScript::AssignToSquads()
 
 	for (int n = nExpected - nSquaddies; n > 0; --n) {
 		for (int i = 0; i < MAX_SQUADS; ++i) {
-			if (squads[i].Size() < SQUAD_SIZE
-				&& GetWaypoint(i).IsZero())			// don't add to a squad while it's in use!
+			if (   (squads[i].Size() < SQUAD_SIZE)
+				&& SquadAtRest(i))
 			{
 				Chit* chit = recruits.Pop();
 				squads[i].Push(chit->ID());
@@ -356,6 +356,25 @@ int CoreScript::SquadID(int chitID)
 }
 
 
+bool CoreScript::SquadAtRest(int squadID)
+{
+	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
+	if (!waypoints[squadID].Empty()) {
+		return false;
+	}
+
+	Vector2I sector = ToSector(ParentChit()->Position());
+	for (int i = 0; i < squads[squadID].Size(); ++i) {
+		int chitID = squads[squadID][i];
+		Chit* chit = Context()->chitBag->GetChit(chitID);
+		if (chit && ToSector(chit->Position()) != sector) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
 Chit* CoreScript::PrimeCitizen()
 {
 	for (int i = 0; i < citizens.Size(); ++i) {
@@ -384,7 +403,6 @@ Chit* CoreScript::CitizenFilter(int chitID)
 int CoreScript::Citizens(CChitArray* arr)
 {
 	int i=0;
-//	const int team = parentChit->Team();
 
 	while (i < citizens.Size()) {
 		int id = citizens[i];
@@ -1100,17 +1118,11 @@ int CoreScript::CoreWealth()
 void CoreScript::DoStrategicTick()
 {
 	// Look around for someone to attack. They should be:
-	//	- an enemy FIXME: or neutral
-	//	- weaker
-	//	- compete for visitors OR have crystal
+	//	- someone we have a negative attitude about (accounts for lots of things)
+	//	- weaker overall
 	//
 	// We should:
-	//	- have squads ready to go
-
-	// 1. Check for squads available & ready
-	// 2. Run through diplomacy list, look for enemies
-	// 3. Score on: strength & wealth/visitors
-	// 4. Attack
+	//	- have a reasonably armed squad
 
 	bool squadReady[MAX_SQUADS] = { false };
 	CChitArray squaddies;
@@ -1120,20 +1132,25 @@ void CoreScript::DoStrategicTick()
 		this->Squaddies(i, &squaddies);
 		if (squaddies.Size() < SQUAD_SIZE) 
 			continue;
+		if (!SquadAtRest(i))
+			continue;
 
-		bool okay = true;
-		for (int k = 0; okay && k < squaddies.Size(); ++k) {
+		// Do we have enough guns? Seems to be
+		// the best / easiest metric.
+
+		int nGuns = 0;
+		for (int k = 0; k < squaddies.Size(); ++k) {
 			Chit* chit = squaddies[k];
-			if (this->IsSquaddieOnMission(chit->ID(), nullptr)) {
-				okay = false;
-				break;
-			}
-			else if (chit->GetItem()->HPFraction() < 0.8f) {
-				okay = false;
-				break;
+			ItemComponent* ic = chit->GetItemComponent();
+			if (   chit->GetItem() 
+				&& chit->GetItem()->HPFraction() > 0.75f 
+				&& ic 
+				&& ic->QuerySelectRanged()) 
+			{
+				nGuns++;
 			}
 		}
-		squadReady[i] = okay;
+		squadReady[i] = nGuns >= SQUAD_SIZE - 1;
 	}
 
 	int nReady = 0;
@@ -1148,7 +1165,7 @@ void CoreScript::DoStrategicTick()
 
 	Vector2I sector = ToSector(ParentChit()->Position());
 	CCoreArray stateArr;
-	sim->CalcStrategicRelationships(sector, 3, ERelate::ENEMY, &stateArr);
+	sim->CalcStrategicRelationships(sector, 3, &stateArr);
 
 	// The strategic relationships need to be calculated, but after that,
 	// there's no point in computing further if we don't have a squad to 
@@ -1157,28 +1174,25 @@ void CoreScript::DoStrategicTick()
 		return;
 
 	int myPower = this->CorePower();
-//	int myWealth = this->CoreWealth();
 
 	CoreScript* target = 0;
 	for (int i = 0; i < stateArr.Size(); ++i) {
 		CoreScript* cs = stateArr[i];
 		if (cs->NumTemples() == 0)		// Ignore starting out domains so it isn't a complete wasteland out there.
 			continue;
-
-		int power = cs->CorePower();
-//		int wealth   = cs->CoreWealth();
-
-		if (power < myPower / 2) {
-			// Assuming this is actually so rare that it doesn't matter to select the best.
-			target = cs;
-			break;
+		if (Team::Instance()->GetRelationship(cs->ParentChit(), this->ParentChit()) == ERelate::ENEMY) {
+			int power = cs->CorePower();
+			if (power < myPower * 0.75f) {
+				// Assuming this is actually so rare that it doesn't matter to select the best.
+				target = cs;
+				break;
+			}
 		}
 	}
 
 	if (!target) return;
 
 	// Attack!!!
-	sim->DeclareWar(target, this);
 	bool first = true;
 	Vector2F targetCorePos2 = ToWorld2F(target->ParentChit()->Position());
 	Vector2I targetCorePos = ToWorld2I(target->ParentChit()->Position());;

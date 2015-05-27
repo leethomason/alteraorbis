@@ -102,8 +102,7 @@ public:
 	const Web& GetCachedWeb();
 	const Web& CalcWeb();
 
-	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, ERelate relate, grinliz::CArray<CoreScript*, 32> *stateArr);
-	void DeclareWar(CoreScript* target, CoreScript* src)	{}	// does nothing, yet
+	void CalcStrategicRelationships(const grinliz::Vector2I& sector, int radius, grinliz::CArray<CoreScript*, 32> *stateArr);
 
 private:
 	void CreateCores();
