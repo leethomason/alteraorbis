@@ -3,13 +3,9 @@
 #include "../script/buildscript.h"
 #include "../script/corescript.h"
 
-#include "../grinliz/glstringutil.h"
-
 #include "../game/wallet.h"
 #include "../game/gameitem.h"
 #include "../game/lumosgame.h"
-
-#include "../engine/uirendering.h"
 
 using namespace grinliz;
 using namespace gamui;

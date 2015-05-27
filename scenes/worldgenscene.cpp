@@ -67,7 +67,7 @@ WorldGenScene::WorldGenScene(LumosGame* game) : Scene(game)
 WorldGenScene::~WorldGenScene()
 {
 	TextureManager::Instance()->TextureCreatorInvalid(this);
-	delete[] worldMap;
+	delete worldMap;
 	delete[] pix16;
 	delete worldGen;
 	delete rockGen;

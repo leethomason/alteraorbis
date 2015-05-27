@@ -24,6 +24,8 @@ x peace button
 	- rules for sub-teams (must be adjacent? near?)
 	- enemy/neutral/friend messages: don't show (core) show the domain name
 	- DOMAIN_TAKEOVER message not correct
+	- NanoTel domain Mares (F12) conquered by mantis of . *sigh*
+	- TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
 
 x remove industrial from switches
 t switch should fire if avatar goes there
@@ -34,6 +36,11 @@ x temple charge: show differently? bar?
 x don’t build up a squad if deployed
 x auto-pickup loot? obnoxious, but list isn’t great either
 x shield value over-accounts for reload time
+- Linux: where are the save files? Where should they be?
+- Profiler not working on Linux
+- CoreScript attacking should account for Attitude
+- Attitude and Diplomacy display strange (integrate to one??)
+- Should I pull out Domain names?
 - make sure domain takeover works in next version
 - top down: can’t tell on switch from off switch. 
 
