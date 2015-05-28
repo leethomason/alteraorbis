@@ -77,7 +77,6 @@ WorldGenScene::~WorldGenScene()
 
 void WorldGenScene::Resize()
 {
-//	const Screenport& port = game->GetScreenport();
 	PositionStd(&okay, &cancel);
 
 	float size = gamui2D.Height() * 0.75f;
@@ -92,9 +91,6 @@ void WorldGenScene::Resize()
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
 	newsConsole.consoleWidget.SetSize(400, okay.Y() + okay.Height() - newsConsole.consoleWidget.Y());
-
-	//	RenderAtom gray = LumosGame::CalcPaletteAtom(4, 4);// PAL_GRAY * 2, PAL_GRAY);
-	//	newsConsole.consoleWidget.SetBackground(gray);
 
 	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(),
 					worldImage.Y());
@@ -256,9 +252,11 @@ void WorldGenScene::DoTick(U32 delta)
 			headerText.SetText("");
 
 			clock_t start = clock();
-			while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
-				for (int i = 0; i < 16; ++i) {
-					worldGen->DoLandAndWater(genState.y++);
+			if (clock() - start < CLOCK_MSEC(30)) {
+				while (genState.y < WorldGen::SIZE) {
+					for (int i = 0; i < 16; ++i) {
+						worldGen->DoLandAndWater(genState.y++);
+					}
 				}
 			}
 			CStr<32> str;
@@ -322,7 +320,7 @@ void WorldGenScene::DoTick(U32 delta)
 		case GenState::ROCKGEN:
 		{
 			clock_t start = clock();
-			while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
+			while ((genState.y < WorldGen::SIZE) && (clock() - start < CLOCK_MSEC(30))) {
 				for (int i = 0; i < 16; ++i) {
 					rockGen->DoCalc(genState.y);
 					genState.y++;
@@ -377,7 +375,7 @@ void WorldGenScene::DoTick(U32 delta)
 		case GenState::SIM_TICK:
 		{
 			clock_t start = clock();
-			while (clock() - start < 100) {
+			while (clock() - start < CLOCK_MSEC(100)) {
 				for (int i = 0; i < 10; ++i) {
 					sim->DoTick(100, false);
 					newsConsole.DoTick(100, 0);

@@ -89,7 +89,7 @@ target_link_libraries(alteraorbis ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETY
 
 if(CMAKE_C_COMPILER_ID )
 	add_definitions(-Wno-int-to-pointer-cast -Wall -std=c++11)
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -DUFO_LINUX_SDL")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -DUFO_LINUX_SDL -DGRINLIZ_PROFILE")
 endif(CMAKE_C_COMPILER_ID )
 
 

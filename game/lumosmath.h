@@ -8,6 +8,8 @@
 #include "../grinliz/glgeometry.h"
 #include "gamelimits.h"
 
+#define CLOCK_MSEC(msec) ((msec) * CLOCKS_PER_SEC / 1000)
+
 inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
 	grinliz::Vector3F v = { float(pos2i.x) + 0.5f, 0.0f, float(pos2i.y) + 0.5f };
 	return v;
