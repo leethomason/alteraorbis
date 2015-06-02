@@ -24,8 +24,8 @@ x peace button
 	- rules for sub-teams (must be adjacent? near?)
 	- enemy/neutral/friend messages: don't show (core) show the domain name
 	- DOMAIN_TAKEOVER message not correct
-	- NanoTel domain Mares (F12) conquered by mantis of . *sigh*
-	- TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
+	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
 
 x remove industrial from switches
 t switch should fire if avatar goes there
@@ -36,11 +36,11 @@ x temple charge: show differently? bar?
 x don’t build up a squad if deployed
 x auto-pickup loot? obnoxious, but list isn’t great either
 x shield value over-accounts for reload time
+x CoreScript attacking should account for Attitude
+t Attitude and Diplomacy display strange (integrate to one??)
+t Should I pull out Domain names?
 - Linux: where are the save files? Where should they be?
 - Profiler not working on Linux
-- CoreScript attacking should account for Attitude
-- Attitude and Diplomacy display strange (integrate to one??)
-- Should I pull out Domain names?
 - make sure domain takeover works in next version
 - top down: can’t tell on switch from off switch. 
 
@@ -164,18 +164,6 @@ x AI take over mode?
 - plants look repetetive
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
-
-- Long Game
-	x Documentation
-	x Long game: 
-		x squad control
-			x flags reflect squads
-		t greater travel
-		- diplomacy
-	x New promo assets
-	x IndieDB
-		x Tutorial
-		x assets
 
 - Beta3
 	- Android
@@ -326,6 +314,17 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Long Game
+	x Documentation
+	x Long game: 
+		x squad control
+			x flags reflect squads
+		t greater travel
+		x diplomacy
+	x New promo assets
+	x IndieDB
+		x Tutorial
+		x assets
 x namegen: re-use too common. switch to loop
 x [Reenen] Circuits are way complex... (see post)
 x [Reenen] Circuit rendering bug: http://grinninglizard.com/altera/forum/index.php?topic=90.msg625#msg625

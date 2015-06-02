@@ -14,6 +14,7 @@
 #include "../script/worldgen.h"
 #include "../game/worldgrid.h"
 #include "../game/gamelimits.h"
+#include "../game/lumosmath.h"
 
 using namespace grinliz;
 

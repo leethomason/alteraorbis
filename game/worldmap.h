@@ -48,6 +48,8 @@ class GameItem;
 class ChitContext;
 class PhysicsSims;
 
+#define WORLDMAP_THREADS
+
 /*
 	Remembering Y is up and we are in the xz plane:
 
@@ -259,7 +261,6 @@ public:
 	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
 	const SectorData& GetSectorData( int mapx, int mapy ) const;
 	const SectorData& GetSectorData( const grinliz::Vector2I& sector ) const;
-	//void SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name);
 
 	// Find random land on the largest continent
 	grinliz::Color4U8 Pixel( int x, int y )	{ 

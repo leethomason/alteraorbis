@@ -653,15 +653,15 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 	int nGrid = N_PER_MSEC * delta;
 	effectCache.Clear();
 
-#if WORLDMAP_THREADS
+#if defined(WORLDMAP_THREADS)
 	{
 	    std::future<int> results[NJOBS];
+		nGrid = Min(nGrid, MAP2 - processIndex);	// fixme: handle edge case
 		int n = nGrid / NJOBS;
-		static const int OFFSET = MAP2 / NJOBS;
 		
 		for (int i = 0; i < NJOBS; ++i) {
 			subEffectCache[i].Clear();
-			results[i] = threadPool->enqueue(WorldMap::ScanEffects, &subEffectCache[i], processIndex + i*OFFSET, n, this);
+			results[i] = threadPool->enqueue(WorldMap::ScanEffects, &subEffectCache[i], processIndex + i*n, n, this);
 		}
 		for (int i = 0; i < NJOBS; ++i) {
 			results[i].get();
@@ -669,7 +669,7 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 				effectCache.Push(subEffectCache[i][k]);
 			}
 		}
-		processIndex = (processIndex + n) % MAP2;
+		processIndex = (processIndex + nGrid) % MAP2;
 	}
 #else
 	ScanEffects(&effectCache, processIndex, nGrid, this);

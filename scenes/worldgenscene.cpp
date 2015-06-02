@@ -290,7 +290,7 @@ void WorldGenScene::DoTick(U32 delta)
 								name = n.safe_str();
 							}
 							postfix = "";
-							postfix.Format(" (%c%d)", 'A' + i, j + 1);
+							postfix.Format(":%c%d", 'A' + i, j + 1);
 							name += postfix;
 							sectorData[j*NUM_SECTORS + i].name = StringPool::Intern(name.c_str());
 						}

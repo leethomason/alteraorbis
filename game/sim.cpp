@@ -282,6 +282,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			int superTeam = 0;
 			if (   deleter 
 				&& (deleter->Team() == Team::Instance()->SuperTeam(deleter->Team())) 
+				&& Team::IsDenizen(deleter->Team())
 				&& Team::IsDenizen(chit->Team())) 
 			{
 				superTeam = deleter->Team();

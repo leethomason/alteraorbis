@@ -95,28 +95,11 @@ void relprintf( const char* format, ... );
 		}
 
 		void TrackMalloc( const void*, size_t size );
-		//void TrackRealloc( const void*, size_t newSize );
 		void TrackFree( const void* );
 
-		inline void* Malloc( size_t size ) {
-			void* v = malloc( size );
-			TrackMalloc( v, size );
-			return v;
-		}
-
-		inline void* Realloc( void* v, size_t size ) {
-			if ( v ) {
-				TrackFree( v );
-			}
-			v = realloc( v, size );
-			TrackMalloc( v, size );
-			return v;
-		}
-
-		inline void Free( void* v ) {
-			TrackFree( v );
-			free( v );
-		}
+		void* Malloc(size_t size);
+		void* Realloc(void* v, size_t size);
+		void  Free(void* v);
 
 		void MemLeakCheck();
 		void MemStartCheck();
