@@ -12,6 +12,7 @@ class ThreadPool
 {
 public:
 	typedef int(*FUNC_PTR)(void*, void*, void*, void*);
+	enum {NTHREAD = 4};
 
 	ThreadPool() {
 		for (int i = 0; i < NTHREAD; ++i) {
@@ -87,7 +88,6 @@ public:
 	}
 
 private:
-	enum {NTHREAD = 4};
 	std::thread threads[NTHREAD];
 	std::mutex taskMutex;
 	std::mutex todoMutex;
