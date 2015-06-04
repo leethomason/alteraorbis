@@ -36,9 +36,9 @@ x temple charge: show differently? bar?
 x don’t build up a squad if deployed
 x auto-pickup loot? obnoxious, but list isn’t great either
 x shield value over-accounts for reload time
+x CoreScript attacking should account for Attitude
 - Linux: where are the save files? Where should they be?
 - Profiler not working on Linux
-- CoreScript attacking should account for Attitude
 - Attitude and Diplomacy display strange (integrate to one??)
 - Should I pull out Domain names?
 - make sure domain takeover works in next version
