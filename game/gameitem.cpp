@@ -788,8 +788,13 @@ IString GameItem::IFullName() const
 		}
 		else {
 			GLString n;
-			n.Format( "%s (%s)", properName.c_str(), name.c_str() );
-			fullName = StringPool::Intern( n.c_str() );
+			if (IName() == ISC::core && Team::IsDenizen(team)) {
+				n.Format("%s (%s)", properName.safe_str(), Team::Instance()->TeamName(team).safe_str());
+			}
+			else {
+				n.Format("%s (%s)", properName.safe_str(), name.safe_str());
+			}
+			fullName = StringPool::Intern(n.safe_str());
 		}
 	}
 	return fullName;

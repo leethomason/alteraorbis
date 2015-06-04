@@ -284,6 +284,7 @@ void WorldGenScene::DoTick(U32 delta)
 						for (int i = 0; i < NUM_SECTORS; ++i) {
 							name = "sector";
 							// Keep the names a little short, so that they don't overflow UI.
+							/*
 							IString n = LumosChitBag::StaticNameGen(database, "sector", random.Rand());
 							GLASSERT(!n.empty());
 							if (!n.empty()) {
@@ -292,6 +293,8 @@ void WorldGenScene::DoTick(U32 delta)
 							postfix = "";
 							postfix.Format(":%c%d", 'A' + i, j + 1);
 							name += postfix;
+							*/
+							name.Format("%c%d", 'A' + i, j + 1);
 							sectorData[j*NUM_SECTORS + i].name = StringPool::Intern(name.c_str());
 						}
 					}

@@ -667,7 +667,14 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 			data[i].start = processIndex + i*QUARTER;
 			data[i].n = n;
 			data[i].worldMap = this;
-			threadPool.Add(WorldMap::ScanEffects, (void*)&data[i]);
+
+			// Fire off 3 threads, use the main thread for the
+			// end. There are only 4 threads on my system anyway,
+			// no point having the main thread wait.
+			if (i != ThreadPool::NTHREAD - 1)
+				threadPool.Add(WorldMap::ScanEffects, (void*)&data[i]);
+			else
+				ScanEffects((void*)&data[i], nullptr, nullptr, nullptr);
 		}
 		threadPool.Wait(0);
 		for (int i = 0; i < ThreadPool::NTHREAD; ++i) {
