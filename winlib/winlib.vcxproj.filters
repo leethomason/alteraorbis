@@ -240,5 +240,8 @@
     <ClInclude Include="..\FastLZ\fastlz.h">
       <Filter>Source Files\fastlz</Filter>
     </ClInclude>
+    <ClInclude Include="..\grinliz\glthreadpool.h">
+      <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

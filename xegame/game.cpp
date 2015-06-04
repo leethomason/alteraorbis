@@ -579,18 +579,6 @@ void Game::DoTick( U32 _currentTime )
 #endif
 
 #ifdef GRINLIZ_PROFILE
-
-	/*
-	if ( GetPerfLevel() ) {
-		Performance::EndFrame();
-		if ( ++perfFrameCount == 10 ) {
-			perfFrameCount = 0;
-			Performance::Process();
-		}
-		perfY = 0;
-		Performance::Walk( this );
-	}
-	*/
 	PROFILE_UPDATE();
 
 	if ( perfText ) {

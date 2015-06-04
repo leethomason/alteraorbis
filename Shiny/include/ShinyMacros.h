@@ -147,11 +147,17 @@ extern "C" {
 /* public preprocessors */
 
 #ifdef __cplusplus
+#ifdef __GNUC__
+#define PROFILE_FUNC()															\
+	_PROFILE_BLOCK_DEFINE(_PROFILE_ID_BLOCK());									\
+	static _PROFILE_ZONE_DEFINE(_PROFILE_ID_ZONE_FUNC(), __PRETTY_FUNCTION__);	\
+	_PROFILE_ZONE_BEGIN(_PROFILE_ID_ZONE_FUNC())
+#else
 #define PROFILE_FUNC()														\
-																			\
 	_PROFILE_BLOCK_DEFINE(_PROFILE_ID_BLOCK());								\
 	static _PROFILE_ZONE_DEFINE(_PROFILE_ID_ZONE_FUNC(), __FUNCTION__);		\
 	_PROFILE_ZONE_BEGIN(_PROFILE_ID_ZONE_FUNC())
+#endif
 #endif
 
 /*---------------------------------------------------------------------------*/

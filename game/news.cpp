@@ -172,11 +172,10 @@ grinliz::IString NewsEvent::IDToName( int id, bool shortName )
 void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 {
 	*str = "";
-	//IString wstr = GetWhat();
 	Vector2I sector = ToSector(ToWorld2I(pos));
 
 	const GameItem* first  = ItemDB::Instance()->Active(firstItemID);
-	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
+//	const GameItem* second = ItemDB::Instance()->Active(secondItemID);
 
 	IString firstName  = IDToName(firstItemID,  firstItemID == shortNameID);
 	IString secondName = IDToName(secondItemID, secondItemID == shortNameID);
@@ -248,7 +247,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		case PURCHASED:
 		if (first) {
 			str->Format("%.2f: %s purchased %s at %s for %d (%d tax).", age, secondName.c_str(), firstName.c_str(), domain.c_str(),
-						first->GetValue(), int(float(first->GetValue() * SALES_TAX)));
+						first->GetValue(), int(first->GetValue() * SALES_TAX));
 		}
 		else {
 			str->Format("%.2f: %s purchased %s at %s.", age, secondName.c_str(), firstName.c_str(), domain.c_str());

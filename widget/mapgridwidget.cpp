@@ -34,13 +34,14 @@ void MapGridWidget::Init(Gamui* gamui2D)
 	image[FACE_IMAGE_1].SetLevel(layer);
 	image[FACE_IMAGE_2].SetLevel(layer);
 	image[CIV_TECH_IMAGE].SetLevel(layer);
-	image[ATTITUDE_IMAGE].SetLevel(layer);
+	image[DIPLOMACY_IMAGE].SetLevel(layer);
 
 	layer = Gamui::LEVEL_FOREGROUND + 3;
 	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
 	image[GOLD_IMAGE].SetLevel(layer);
+	image[ATTITUDE_IMAGE].SetLevel(layer);
 }
 
 
@@ -125,6 +126,7 @@ void MapGridWidget::DoLayout()
 	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
 
 	image[ATTITUDE_IMAGE].SetCenterPos(x + dw*1.5f, y + dh * 2.5f);
+	//image[ATTITUDE_IMAGE].SetPos(fx, fy);
 }
 
 

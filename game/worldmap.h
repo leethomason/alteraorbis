@@ -32,10 +32,10 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glmemorypool.h"
 #include "../grinliz/glbitarray.h"
+#include "../grinliz/glthreadpool.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
-class ThreadPool;
 class Texture;
 class WorldInfo;
 class Model;
@@ -47,6 +47,8 @@ class NewsHistory;
 class GameItem;
 class ChitContext;
 class PhysicsSims;
+
+#define WORLDMAP_THREADS
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -259,7 +261,6 @@ public:
 	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
 	const SectorData& GetSectorData( int mapx, int mapy ) const;
 	const SectorData& GetSectorData( const grinliz::Vector2I& sector ) const;
-	//void SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name);
 
 	// Find random land on the largest continent
 	grinliz::Color4U8 Pixel( int x, int y )	{ 
@@ -397,14 +398,24 @@ private:
 		const grinliz::Vector3F& origin, const grinliz::Vector3F& dir, float length, grinliz::Vector3F* at);
 	grinliz::Vector2I FindPassable(int x, int y);	// if we are blocked, find something "near and good"
 
-	static const int NJOBS = 4;
 	struct EffectRecord {
 		grinliz::Vector2I pos;
 		int	effect;
 	};
 	void ProcessEffect(ChitBag* chitBag, int delta);
-	static int ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, int n, WorldMap* thisMap );
 
+	struct ScanEffectsData {
+		grinliz::Random random;
+		grinliz::CDynArray<EffectRecord>* effects;
+		int start;
+		int n;
+		WorldMap* worldMap;
+	};
+#if defined(WORLDMAP_THREADS)
+	static int ScanEffects(void*, void*, void*, void*);
+#else
+	static int ScanEffects(ScanEffectsData* data);
+#endif
 	Engine*						engine;
 	IMapGridBlocked*			iMapGridUse;
 	PhysicsSims*				physics;
@@ -441,13 +452,12 @@ private:
 	int								nTrees;	// we don't necessarily use all the trees in the treePool
 	int								processIndex;
 
-	ThreadPool*						threadPool;
-
 	// List of interesting things that need to be processed each frame.
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
 	grinliz::CDynArray< EffectRecord > effectCache;
 #ifdef WORLDMAP_THREADS
-	grinliz::CDynArray< EffectRecord > subEffectCache[NJOBS];
+	grinliz::CDynArray< EffectRecord > subEffectCache[grinliz::ThreadPool::NTHREAD];
+	grinliz::ThreadPool	threadPool;
 #endif
 
 	// Memory pool of models to use for tree rendering.

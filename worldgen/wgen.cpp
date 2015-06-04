@@ -14,6 +14,7 @@
 #include "../script/worldgen.h"
 #include "../game/worldgrid.h"
 #include "../game/gamelimits.h"
+#include "../game/lumosmath.h"
 
 using namespace grinliz;
 
@@ -74,7 +75,7 @@ int main(int argc, const char* argv[])
 		worldGen.ProcessSectors( seed0, sectorData );
 
 		clock_t endTime = clock();
-		printf( "loop %d: %dms\n", i, endTime - loopTime );
+		printf( "loop %d: %dms\n", i, CLOCK_MSEC(endTime - loopTime));
 		loopTime = endTime;
 
 		CStr<32> fname, fnameP;
@@ -133,7 +134,7 @@ int main(int argc, const char* argv[])
 		delete [] pixels;
 		delete [] sectorData;
 	}
-	printf( "total time %dms\n", clock()-startTime );
+	printf( "total time %dms\n", CLOCK_MSEC(clock()-startTime) );
 	return 0;
 }
 

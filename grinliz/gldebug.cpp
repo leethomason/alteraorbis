@@ -36,7 +36,7 @@ distribution.
 #include <android/log.h>
 #endif
 
-
+#include <mutex>
 #include "gldebug.h"
 #include <stdio.h>
 #include <time.h>
@@ -45,6 +45,7 @@ distribution.
 #define GRINLIZ_STACKTRACE
 
 bool gDebugging = true;
+std::recursive_mutex allocatorMutex;
 
 void SetCheckGLError(bool error)
 {
@@ -53,11 +54,6 @@ void SetCheckGLError(bool error)
 
 
 #ifdef DEBUG
-
-#if defined(_MSC_VER)
-	#define GRINLIZ_DEBUG_MEM
-#endif
-//#define GRINLIZ_DEBUG_MEM_DEEP
 
 #ifdef GRINLIZ_DEBUG_MEM
 
@@ -124,8 +120,35 @@ U32 logBase2( U32 v )
 
 #ifdef GRINLIZ_DEBUG_MEM
 
+void* Malloc( size_t size ) {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
+	void* v = malloc( size );
+	TrackMalloc( v, size );
+	return v;
+}
+
+
+void* Realloc( void* v, size_t size ) {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
+	if ( v ) {
+		TrackFree( v );
+	}
+	v = realloc( v, size );
+	TrackMalloc( v, size );
+	return v;
+}
+
+
+void Free( void* v ) {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
+	TrackFree( v );
+	free( v );
+}
+
+
 void TrackMalloc( const void* mem, size_t size )
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 	if ( nMTrack == mTrackAlloc ) {
 		mTrackAlloc += 64;
 		mtrackRoot = (MTrack*)realloc( mtrackRoot, mTrackAlloc*sizeof(MTrack) );
@@ -147,6 +170,7 @@ void TrackMalloc( const void* mem, size_t size )
 
 void TrackFree( const void* mem )	
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 	for( unsigned long i=0; i<nMTrack; ++i ) {
 		if ( mtrackRoot[i].mem == mem ) {
 			memTotal -= mtrackRoot[i].size;
@@ -193,6 +217,8 @@ void PrintStack()
 #ifdef GRINLIZ_STACKTRACE
 void GetAllocator(char* name, int n)
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
+
 	void         * stack[100];
 	unsigned short frames;
 	U8				symbolMem[sizeof(SYMBOL_INFO)+256];
@@ -221,6 +247,7 @@ void GetAllocator(char* name, int n)
 
 void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 	void* mem = 0;
 	if ( size == 0 )
 		size = 1;
@@ -287,6 +314,7 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 
 void DebugDelete( void* mem, bool arrayType )
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 #ifdef GRINLIZ_DEBUG_MEM_DEEP
 	MemHeapCheck();
 #endif
@@ -350,6 +378,7 @@ void operator delete( void* mem )
 
 void MemLeakCheck()
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 	GLOUTPUT((	"MEMORY REPORT: watermark=%dk =%dM new count=%d. delete count=%d. %d allocations leaked.\n",
 				(int)(memWatermark/1024), (int)(memWatermark/(1024*1024)),
 				(int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
@@ -404,6 +433,7 @@ void MemLeakCheck()
 
 void MemHeapCheck()
 {
+	std::lock_guard<std::recursive_mutex> lock(allocatorMutex);
 	// FIXME: add in walk of malloc/free list
 	unsigned long size = 0;
 	for ( MemCheckHead* head = root; head; head=head->next )

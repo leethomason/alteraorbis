@@ -25,9 +25,6 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
 #include "../Shiny/include/Shiny.h"
-#ifdef WORLDMAP_THREADS
-#include "../threadpool/ThreadPool.h"
-#endif
 #include "../grinliz/glperformance.h"
 
 #include "../xarchive/glstreamer.h"
@@ -134,11 +131,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height)
 	magmaGrids.Reserve(1000);
 	treePool.Reserve(1000);
 
-	threadPool = 0;
-#ifdef WORLDMAP_THREADS
-	threadPool = new ThreadPool(4);
-#endif
-
 	memset(grid, 0, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
@@ -162,10 +154,6 @@ WorldMap::~WorldMap()
 
 	delete voxelVertexVBO;
 	delete gridVertexVBO;
-
-#ifdef WORLDMAP_THREADS
-	delete threadPool;
-#endif
 }
 
 
@@ -577,16 +565,21 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 	pv[3].tex.Set( (float)w, (float)h );
 }
 
-
-int WorldMap::ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, int nGrid, WorldMap* thisMap)
+#if defined(WORLDMAP_THREADS)
+int WorldMap::ScanEffects(void* p1, void*, void*, void*)
 {
+	ScanEffectsData* data = (ScanEffectsData*)p1;
+#else
+int WorldMap::ScanEffects(ScanEffectsData* data)
+{
+#endif
 	static const int MAP2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
-	Rectangle2I b = thisMap->Bounds();
+	Rectangle2I b = data->worldMap->Bounds();
 	b.Outset(-1);
 
-	for (int i = 0; i < nGrid; ++i) {
-		const int index = (start + i) & (MAP2 - 1);
-		WorldGrid* wg = &thisMap->grid[index];
+	for (int i = 0; i < data->n; ++i) {
+		const int index = (data->start + i) & (MAP2 - 1);
+		WorldGrid* wg = &data->worldMap->grid[index];
 		if (!wg->IsLand()) continue;
 
 		const int y = (index >> EL_MAP_Y_SHIFT);
@@ -601,11 +594,11 @@ int WorldMap::ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, 
 
 		if (wg->PlantOnFire()) {
 			bool underWater = wg->FluidHeight() && (wg->FluidType() == WorldGrid::FLUID_WATER);
-			if (underWater || (thisMap->random.Uniform() < CHANCE_FIRE_OUT)) {
+			if (underWater || (data->random.Uniform() < CHANCE_FIRE_OUT)) {
 				wg->SetPlantOnFire(false);
 			}
 		}
-		if (wg->PlantOnShock() && thisMap->random.Uniform() < CHANCE_FIRE_OUT) {
+		if (wg->PlantOnShock() && data->random.Uniform() < CHANCE_FIRE_OUT) {
 			wg->SetPlantOnShock(false);
 		}
 
@@ -621,10 +614,10 @@ int WorldMap::ScanEffects(grinliz::CDynArray<EffectRecord>* effects, int start, 
 
 		if (effect) {
 			EffectRecord r = { pos2i, effect };
-			effects->Push(r);
+			data->effects->Push(r);
 		}
 	}
-	return nGrid;
+	return data->n;
 }
 
 /*
@@ -653,26 +646,54 @@ void WorldMap::ProcessEffect(ChitBag* chitBag, int delta)
 	int nGrid = N_PER_MSEC * delta;
 	effectCache.Clear();
 
-#if WORLDMAP_THREADS
+	// Threaded: 27ms
+	// Single:   50ms
+#if defined(WORLDMAP_THREADS)
 	{
-	    std::future<int> results[NJOBS];
-		int n = nGrid / NJOBS;
-		static const int OFFSET = MAP2 / NJOBS;
-		
-		for (int i = 0; i < NJOBS; ++i) {
+		// Carefully spread out the threads to be as far apart
+		// in memory as possible. Try to give the processor
+		// cache some room.
+		const static int QUARTER = MAP2 / ThreadPool::NTHREAD;
+		int n = nGrid / ThreadPool::NTHREAD;
+		GLASSERT(processIndex < QUARTER);
+		n = Min(n, QUARTER - processIndex);
+
+		ScanEffectsData data[ThreadPool::NTHREAD];
+
+		for (int i = 0; i < ThreadPool::NTHREAD; ++i) {
 			subEffectCache[i].Clear();
-			results[i] = threadPool->enqueue(WorldMap::ScanEffects, &subEffectCache[i], processIndex + i*OFFSET, n, this);
+			data[i].random.SetSeed(random.Rand() + i*1000);
+			data[i].effects = &subEffectCache[i];
+			data[i].start = processIndex + i*QUARTER;
+			data[i].n = n;
+			data[i].worldMap = this;
+
+			// Fire off 3 threads, use the main thread for the
+			// end. There are only 4 threads on my system anyway,
+			// no point having the main thread wait.
+			if (i != ThreadPool::NTHREAD - 1)
+				threadPool.Add(WorldMap::ScanEffects, (void*)&data[i]);
+			else
+				ScanEffects((void*)&data[i], nullptr, nullptr, nullptr);
 		}
-		for (int i = 0; i < NJOBS; ++i) {
-			results[i].get();
+		threadPool.Wait(0);
+		for (int i = 0; i < ThreadPool::NTHREAD; ++i) {
 			for (int k = 0; k < subEffectCache[i].Size(); ++k) {
 				effectCache.Push(subEffectCache[i][k]);
 			}
 		}
-		processIndex = (processIndex + n) % MAP2;
+		processIndex += n;
+		if (processIndex >= QUARTER) processIndex = 0;
 	}
 #else
-	ScanEffects(&effectCache, processIndex, nGrid, this);
+	ScanEffectsData data;
+	data.random.SetSeed(random.Rand());
+	data.effects = &effectCache;
+	data.start = processIndex;
+	data.n = nGrid;
+	data.worldMap = this;
+
+	ScanEffects(&data);
 	processIndex = (processIndex + nGrid) % MAP2;
 #endif
 
