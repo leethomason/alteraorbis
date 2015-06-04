@@ -43,6 +43,7 @@ t Should I pull out Domain names?
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - top down: can’t tell on switch from off switch. 
+- core click through broken
 
 - detail view of building w/ mouse down
 - name of buildings - pop up? info?
