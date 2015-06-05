@@ -316,16 +316,8 @@ Vector3F AIComponent::EnemyPos(int id, bool target)
 void AIComponent::ProcessFriendEnemyLists(bool tick)
 {
 	Vector2F center = ToWorld2F(parentChit->Position());
-	//Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
-	int saveTarget = 0;
-	if (tick) {
-		friendList2.Clear();
-		saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
-		enemyList2.Clear();
-		if (saveTarget) enemyList2.Push(saveTarget);
-	}
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
 		return FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(parentChit, id);
@@ -342,62 +334,65 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		}
 	}
 
-	// Compute the area for the query.
-	Rectangle2F zone;
-	zone.min = zone.max = center;
-	zone.Outset( fullSectorAware ? SECTOR_SIZE : NORMAL_AWARENESS );
-
-	if ( Context()->worldMap->UsingSectors() ) {
-		Rectangle2F rf = ToWorld2F(SectorData::InnerSectorBounds(center.x, center.y));
-		zone.DoIntersection( rf );
-	}
-
 	if (tick) {
-		CChitArray chitArr;
+		// Compute the area for the query.
+		Rectangle2I zone;
+		zone.min = zone.max = ToWorld2I(parentChit->Position());
+		zone.Outset(fullSectorAware ? SECTOR_SIZE : int(NORMAL_AWARENESS));
+
+		if (Context()->worldMap->UsingSectors()) {
+			zone.DoIntersection(SectorData::InnerSectorBounds(center.x, center.y));
+		}
+		else {
+			zone.DoIntersection(Context()->worldMap->Bounds());
+		}
+
+		friendList2.Clear();
+		int saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
+		enemyList2.Clear();
+		if (saveTarget) enemyList2.Push(saveTarget);
 
 		MOBIshFilter mobFilter;
 		BuildingFilter buildingFilter;
 		ItemNameFilter coreFilter(ISC::core);
+
 		// Order matters: prioritize mobs, then a core, then buildings.
-		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
+		static const int NFILTER = 3;
+		IChitAccept* filters[NFILTER] = { &mobFilter, &coreFilter, &buildingFilter };
 
-		MultiFilter all(MultiFilter::MATCH_ANY);
-		all.filters.Push(&mobFilter);
-		all.filters.Push(&coreFilter);
-		all.filters.Push(&buildingFilter);
-
+		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
 
-		for (int pass = 0; pass < 3; ++pass) {
-			// Add extra friends or enemies into the list.
-			for (int i = 0; i < chitArr.Size(); ++i) {
-				Chit* chit = chitArr[i];
-				if (!chit || !filters[pass]->Accept(chit)) continue;
-				GLASSERT(chit->GetItem());	// else should have been filtered, above.
-				if (chit->GetItem()->flags & GameItem::AI_NOT_TARGET) {
-					chitArr[i] = nullptr;
-					continue;
-				}
+		CChitArray arr[NFILTER];
 
-				ERelate status = Team::Instance()->GetRelationship(parentChit, chit);
-				int id = chit->ID();
+		// Add extra friends or enemies into the list.
+		for (int i = 0; i < chitArr.Size(); ++i) {
+			Chit* chit = chitArr[i];
+			GLASSERT(chit);
+			if (!chit) continue;
+			const GameItem* item = chit->GetItem();
+			if (!item) continue;
+			if (item->flags & GameItem::AI_NOT_TARGET) continue;
 
-				if (status == ERelate::ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
-					if (   fullSectorAware 
-						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()))) 
-					{
-						if (FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, id)) {
-							enemyList2.Push(id);
-							chitArr[i] = nullptr;
-						}
-					}
-				}
-				else if (pass == 0 && status == ERelate::FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
-					if (FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, id)) {
-						friendList2.Push(id);
-						chitArr[i] = nullptr;
-					}
-				}
+			bool path = fullSectorAware
+				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()));
+						
+			if (mobFilter.Accept(chit)) {
+				if (path && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID()))
+					arr[0].PushIfCap(chit);
+				else if (FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, chit->ID()))
+					friendList2.PushIfCap(chit->ID());
+			}
+			else if (path && coreFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
+				arr[1].PushIfCap(chit);
+			}
+			else if (path && buildingFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
+				arr[2].PushIfCap(chit);
+			}
+		}
+		for (int k = 0; k < NFILTER; ++k) {
+			for (int i = 0; i < arr[k].Size(); ++i) {
+				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
 		}
 	}

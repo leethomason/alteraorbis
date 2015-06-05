@@ -101,9 +101,9 @@ Sim::~Sim()
 	delete visitors;
 	delete weather;
 	delete reserveBank;
-	delete teamInfo;
 	delete context.chitBag;
 	context.chitBag = 0;
+	delete teamInfo;
 	delete context.engine;
 	context.engine = 0;
 	delete context.worldMap;

@@ -65,7 +65,7 @@ public:
 	Team(const gamedb::Reader* database);
 	~Team();
 
-	static Team* Instance() { return instance; }
+	static Team* Instance() { GLASSERT(instance);  return instance; }
 
 	void Serialize(XStream* xs);
 	void DoTick(int delta);
