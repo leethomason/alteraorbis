@@ -593,6 +593,17 @@ int CoreScript::DoTick(U32 delta)
 		}
 	}
 
+	RenderComponent* rc = parentChit->GetRenderComponent();
+	if (rc) {
+		int team = parentChit->Team();
+		CStr<40> str = "";
+		if (this->InUse() && Team::IsDenizen(team)) {
+			IString teamName = Team::Instance()->TeamName(team);
+			str.Format("%s", teamName.safe_str());
+		}
+		rc->SetDecoText(str.safe_str());
+	}
+
 	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
 }
 

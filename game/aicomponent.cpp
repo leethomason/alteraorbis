@@ -319,10 +319,13 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	//Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
-	// Enemy list: not sure the best polity. Right now keeps.
-	// Friend list: clear and focus on near.
-	//int target = enemyList2.Empty() ? -1 : enemyList2[0];
-	if (tick) friendList2.Clear();
+	int saveTarget = 0;
+	if (tick) {
+		friendList2.Clear();
+		saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
+		enemyList2.Clear();
+		if (saveTarget) enemyList2.Push(saveTarget);
+	}
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
 		return FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(parentChit, id);
@@ -358,7 +361,11 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		// Order matters: prioritize mobs, then a core, then buildings.
 		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
 
-		ChitAcceptAll all;
+		MultiFilter all(MultiFilter::MATCH_ANY);
+		all.filters.Push(&mobFilter);
+		all.filters.Push(&coreFilter);
+		all.filters.Push(&buildingFilter);
+
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
 
 		for (int pass = 0; pass < 3; ++pass) {
