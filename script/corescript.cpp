@@ -160,6 +160,7 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 	workQueue->InitSector( parentChit, sector );
 
 	int index = sector.y*NUM_SECTORS + sector.x;
+	GLASSERT(index);
 	GLASSERT(coreInfoArr[index].coreScript == 0);
 	coreInfoArr[index].coreScript = this;
 	coreList.Push(this);

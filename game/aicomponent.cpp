@@ -318,7 +318,6 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	Vector2F center = ToWorld2F(parentChit->Position());
 
 	// Clean the lists we have.
-
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
 		return FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(parentChit, id);
 	});
@@ -1118,47 +1117,47 @@ void AIComponent::ThinkRampage(  )
 }
 
 
-Vector2F AIComponent::GetWanderOrigin(  )
+Vector2F AIComponent::GetWanderOrigin()
 {
 	Vector2F pos = ToWorld2F(parentChit->Position());
-	Vector2I m = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
+	Vector2I m = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };
 	const ChitContext* context = Context();
-	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector( m );
-	Vector2F center = { (float)(sd.x+SECTOR_SIZE/2), (float)(sd.y+SECTOR_SIZE/2) };
-	if ( sd.HasCore() )	{
-		center.Set( (float)sd.core.x + 0.5f, (float)sd.core.y + 0.5f );
+	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(m);
+	Vector2F center = { (float)(sd.x + SECTOR_SIZE / 2), (float)(sd.y + SECTOR_SIZE / 2) };
+	if (sd.HasCore())	{
+		center.Set((float)sd.core.x + 0.5f, (float)sd.core.y + 0.5f);
 	}
 	return center;
 }
 
 
-Vector2F AIComponent::ThinkWanderCircle(  )
+Vector2F AIComponent::ThinkWanderCircle()
 {
 	// In a circle?
 	// This turns out to be creepy. Worth keeping for something that is,
 	// in fact, creepy.
-	Vector2F dest = GetWanderOrigin( );
-	Random random( parentChit->ID() );
+	Vector2F dest = GetWanderOrigin();
+	Random random(parentChit->ID());
 
 	float angleUniform = random.Uniform();
-	float lenUniform   = 0.25f + 0.75f*random.Uniform();
+	float lenUniform = 0.25f + 0.75f*random.Uniform();
 
-	static const U32 PERIOD = 40*1000;
+	static const U32 PERIOD = 40 * 1000;
 	U32 t = wanderTime % PERIOD;
 	float timeUniform = (float)t / (float)PERIOD;
 
 	angleUniform += timeUniform;
 	float angle = angleUniform * 2.0f * PI;
 	Vector2F v = { cosf(angle), sinf(angle) };
-		
+
 	v = v * (lenUniform * WANDER_RADIUS);
 
-	dest = GetWanderOrigin(  ) + v;
+	dest = GetWanderOrigin() + v;
 	return dest;
 }
 
 
-Vector2F AIComponent::ThinkWanderRandom(  )
+Vector2F AIComponent::ThinkWanderRandom()
 {
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
@@ -1169,7 +1168,7 @@ Vector2F AIComponent::ThinkWanderRandom(  )
 	// See also the EnterGrid(), where it takes over a neutral core.
 	// Workers stay close to home, as 
 	// do denizens trying to find a new home core.
-	if (   (gameItem->flags & GameItem::AI_DOES_WORK )														
+	if ((gameItem->flags & GameItem::AI_DOES_WORK)
 		|| (gameItem->MOB() == ISC::denizen && Team::IsRogue(parentChit->Team()) && cs && !cs->InUse()))
 	{
 		Vector2F dest = GetWanderOrigin();
@@ -1179,8 +1178,8 @@ Vector2F AIComponent::ThinkWanderRandom(  )
 	}
 
 	Vector2F dest = { 0, 0 };
-	dest.x = (float)(sector.x*SECTOR_SIZE + 1 + parentChit->random.Rand( SECTOR_SIZE-2 )) + 0.5f;
-	dest.y = (float)(sector.y*SECTOR_SIZE + 1 + parentChit->random.Rand( SECTOR_SIZE-2 )) + 0.5f;
+	dest.x = (float)(sector.x*SECTOR_SIZE + 1 + parentChit->random.Rand(SECTOR_SIZE - 2)) + 0.5f;
+	dest.y = (float)(sector.y*SECTOR_SIZE + 1 + parentChit->random.Rand(SECTOR_SIZE - 2)) + 0.5f;
 	return dest;
 }
 
@@ -1264,7 +1263,7 @@ void AIComponent::GoSectorHerd(bool focus)
 }
 
 
-bool AIComponent::SectorHerd( bool focus)
+bool AIComponent::SectorHerd(bool focus)
 {
 	/*
 		Depending on the MOB and tech level,
@@ -1273,25 +1272,17 @@ bool AIComponent::SectorHerd( bool focus)
 		be the CoreScript
 
 		The current rules are in corescript.cpp
-	*/
-	static const int NDELTA = 8;
-	static const Vector2I initDelta[NDELTA] = {
+		*/
+	static const int NDELTA = 12;
+	static const Vector2I delta[NDELTA] = {
 		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
-		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 },
+		{ -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 },
 	};
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	IString mob = gameItem->keyValues.GetIString(ISC::mob);
-	CArray<Vector2I, NDELTA * 2> delta, rinit;
-	for (int i = 0; i < NDELTA; ++i) {
-		rinit.Push(initDelta[i]);
-	}
-	if (mob == ISC::greater) {
-		for (int i = 0; i < NDELTA; ++i) {
-			rinit.Push(initDelta[i]*2);	// greaters have a larger move range
-		}
-	}
+	CArray<Vector2I, NDELTA> dest;
 
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
@@ -1318,7 +1309,7 @@ bool AIComponent::SectorHerd( bool focus)
 				// Should we visit Truulga? Check for a little gold, too.
 				// FIXME: needs tuning!
 				if (gameItem->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
-					return DoSectorHerd(focus, truulgaSector );
+					return DoSectorHerd(focus, truulgaSector);
 				}
 			}
 		}
@@ -1328,9 +1319,10 @@ bool AIComponent::SectorHerd( bool focus)
 	// This is game difficulty logic!
 	Rectangle2I sectorBounds;
 	sectorBounds.Set(0, 0, NUM_SECTORS - 1, NUM_SECTORS - 1);
+	IString mob = gameItem->keyValues.GetIString(ISC::mob);
 
-	for (int i = 0; i < rinit.Size(); ++i) {
-		Vector2I destSector = start.sector + rinit[i];
+	for (int i = 0; i < NDELTA; ++i) {
+		Vector2I destSector = start.sector + delta[i];
 
 		if (sectorBounds.Contains(destSector)) {
 			CoreScript* cs = CoreScript::GetCore(destSector);
@@ -1343,35 +1335,35 @@ bool AIComponent::SectorHerd( bool focus)
 				if (mob == ISC::lesser) {
 					if (nTemples <= TEMPLES_REPELS_LESSER) {
 						if (parentChit->random.Rand(2) == 0) {
-							delta.Push(rinit[i]);
+							dest.Push(destSector);
 						}
 					}
 					else {
-						delta.Push(rinit[i]);
+						dest.Push(destSector);
 					}
 				}
 				else if (mob == ISC::greater) {
 					if (nTemples <= TEMPLES_REPELS_GREATER) {
 						if (parentChit->random.Rand(2) == 0) {
-							delta.Push(rinit[i]);
+							dest.Push(destSector);
 						}
 					}
 					else {
-						delta.Push(rinit[i]);
+						dest.Push(destSector);
 					}
 				}
 			}
 			else if (cs) {
-				delta.Push(rinit[i]);
+				dest.Push(destSector);
 			}
 		}
 	}
 
 	// 2nd pass: look for 1st match
 	if (start.IsValid()) {
-		parentChit->random.ShuffleArray(delta.Mem(), delta.Size());
-		for (int i = 0; i < delta.Size(); ++i) {
-			if (DoSectorHerd(focus, start.sector + delta[i])) {
+		parentChit->random.ShuffleArray(dest.Mem(), dest.Size());
+		for (int i = 0; i < dest.Size(); ++i) {
+			if (DoSectorHerd(focus, dest[i])) {
 				return true;
 			}
 		}
@@ -1390,35 +1382,35 @@ bool AIComponent::DoSectorHerd( bool focus, const grinliz::Vector2I& sector)
 }
 
 
-bool AIComponent::DoSectorHerd( bool focus, const SectorPort& dest)
+bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 {
 	if (dest.IsValid()) {
 		//const ChitContext* context = Context();
 		GLASSERT(dest.port);
 
 		RenderComponent* rc = parentChit->GetRenderComponent();
-		if ( rc ) {
-			rc->AddDeco( "horn", 10*1000 );
+		if (rc) {
+			rc->AddDeco("horn", 10 * 1000);
 		}
 		const GameItem* gameItem = parentChit->GetItem();
 		if (!gameItem) return false;
 
 		// Trolls herd *all the time*
-		if ( gameItem->IName() != ISC::troll ) {
+		if (gameItem->IName() != ISC::troll) {
 			CStr<32> str;
 			str.Format("%s\nSectorHerd", gameItem->Name());
 			ChitBag::CurrentNews news = { StringPool::Intern(str.c_str()), ToWorld2F(parentChit->Position()), parentChit->ID() };
 			Context()->chitBag->PushCurrentNews(news);
 		}
 
-		ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );
-		for( int i=0; i<friendList2.Size(); ++i ) {
-			Chit* c = Context()->chitBag->GetChit( friendList2[i] );
-			if ( c ) {
-				c->SendMessage( msg );
+		ChitMsg msg(ChitMsg::CHIT_SECTOR_HERD, focus ? 1 : 0, &dest);
+		for (int i = 0; i < friendList2.Size(); ++i) {
+			Chit* c = Context()->chitBag->GetChit(friendList2[i]);
+			if (c) {
+				c->SendMessage(msg);
 			}
 		}
-		parentChit->SendMessage( msg );
+		parentChit->SendMessage(msg);
 		return true;
 	}
 	return false;
@@ -3088,7 +3080,7 @@ int AIComponent::DoTick( U32 deltaTime )
 
 void AIComponent::DebugStr( grinliz::GLString* str )
 {
-	str->AppendFormat( "[AI] %s %s ", MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)] );
+	str->AppendFormat( "[AI] %s %s nF=%d nE=%d ", MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)], friendList2.Size(), enemyList2.Size() );
 }
 
 
