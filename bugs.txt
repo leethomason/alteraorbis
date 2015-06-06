@@ -50,6 +50,7 @@ x map glow not always correct
 - where are all the crystals???
 - elixir and fruit need to get picked up
 - elixir needs to decay
+- core click through broken
 
 - detail view of building w/ mouse down
 - name of buildings - pop up? info?
