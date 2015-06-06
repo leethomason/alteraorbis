@@ -26,6 +26,9 @@ x peace button
 	- DOMAIN_TAKEOVER message not correct
 	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
 	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+- tests
+	- console output
+	- spatial hash query
 
 x remove industrial from switches
 t switch should fire if avatar goes there
