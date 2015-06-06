@@ -112,6 +112,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	fireTestGun = false;
 
 	context.game = game;
+	new Team(game->GetDatabase());
 	InitStd( &gamui2D, &okay, 0 );
 	LayoutCalculator layout = DefaultLayout();
 
@@ -156,6 +157,7 @@ BattleTestScene::~BattleTestScene()
 	delete context.chitBag;
 	delete context.engine;
 	delete context.worldMap;
+	delete Team::Instance();
 }
 
 

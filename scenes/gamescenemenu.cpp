@@ -307,7 +307,7 @@ void GameSceneMenu::SetCanTeleport(bool t)
 
 bool GameSceneMenu::CircuitMode() const
 {
-	return (UIMode() == UI_BUILD
+	return (   UIMode() == UI_BUILD
 			&& modeButton[BUILD_CATEGORY_CIRCUIT].Down());
 }
 

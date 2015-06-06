@@ -49,19 +49,15 @@ using namespace std;
 using namespace grinliz;
 using namespace tinyxml2;
 
-string inputDirectory;
-string inputFullPath;
-string outputPath;
+string* inputDirectory;
+string* inputFullPath;
+string* outputPath;
 
 int totalModelMem = 0;
 int totalTextureMem = 0;
 int totalDataMem = 0;
 
 gamedb::Writer* writer;
-
-//static const int MAX_ATLAS = 4;
-//Atlas atlasArr[MAX_ATLAS];
-
 
 void ExitError( const char* tag, 
 				const char* pathName,
@@ -269,12 +265,12 @@ void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _ful
 	AssignIf( assetName, element, "modelName" );
 	AssignIf( assetName, element, "assetName" );
 
-	GLString fullIn = inputDirectory.c_str();
+	GLString fullIn = inputDirectory->c_str();
 	fullIn += filename.c_str();	
 
 	GLString fullIn2;
 	if ( filename2.size() > 0 ) {
-		fullIn2 = inputDirectory.c_str();
+		fullIn2 = inputDirectory->c_str();
 		fullIn2 += filename2.c_str();
 	}
 
@@ -491,7 +487,7 @@ void ProcessData( XMLElement* data )
 
 	string filename;
 	AssignIf( filename, data, "filename" );
-	string fullIn = inputDirectory + filename;
+	string fullIn = *inputDirectory + filename;
 
 	GLString assetName, pathName;
 	ParseNames( data, &assetName, &pathName, 0 );
@@ -858,7 +854,7 @@ void ProcessTexture( XMLElement* texture )
 		gamedb::WItem* table = witem->FetchChild( "table" );
 
 		XMLDocument doc;
-		std::string tpath = inputDirectory + tableName;
+		std::string tpath = *inputDirectory + tableName;
 		doc.LoadFile( tpath.c_str() );
 		if ( doc.Error() ) {
 			ExitError( "ProcessTexture", tableName, 0, "Failed to load texture table." );
@@ -1161,8 +1157,12 @@ int main( int argc, char* argv[] )
 
     SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER );
 
-	inputFullPath = argv[1];
-	outputPath = argv[2];
+	inputDirectory = new string();
+	inputFullPath = new string();
+	outputPath = new string();
+
+	*inputFullPath = argv[1];
+	*outputPath = argv[2];
 	bool printDatabase = false;
 	for( int i=3; i<argc; ++i ) {
 		if ( StrEqual( argv[i], "-d" ) ) {
@@ -1173,17 +1173,17 @@ int main( int argc, char* argv[] )
 		}
 	}
 
-	GLString _inputFullPath( inputFullPath.c_str() ), _inputDirectory, name, extension;
+	GLString _inputFullPath( inputFullPath->c_str() ), _inputDirectory, name, extension;
 	grinliz::StrSplitFilename( _inputFullPath, &_inputDirectory, &name, &extension );
-	inputDirectory = _inputDirectory.c_str();
+	*inputDirectory = _inputDirectory.c_str();
 
 //	const char* xmlfile = argv[2];
-	printf( "Opening, path: '%s' filename: '%s'\n", inputDirectory.c_str(), inputFullPath.c_str() );
+	printf( "Opening, path: '%s' filename: '%s'\n", inputDirectory->c_str(), inputFullPath->c_str() );
 	
 	// Test:
 	
 	{
-		string testInput = inputDirectory + "Lenna.png";
+		string testInput = *inputDirectory + "Lenna.png";
 		SDL_Surface* surface = LoadImage( testInput.c_str() );
 		BTexture btexture;
 		btexture.Create( surface->w, surface->h, TEX_RGB16 );
@@ -1196,7 +1196,7 @@ int main( int argc, char* argv[] )
 			SDL_Surface* newSurf = SDL_CreateRGBSurface( 0, surface->w, surface->h, 16, 0xf000, 0x0f00, 0x00f0, 0x000f );
 			GLASSERT( newSurf->pitch == surface->w*2 );
 			memcpy( newSurf->pixels, btexture.pixelBuffer, surface->w*surface->h*2 );
-			string out = inputDirectory + "Lenna4440.bmp";
+			string out = *inputDirectory + "Lenna4440.bmp";
 			SDL_SaveBMP( newSurf, out.c_str() );
 			
 			SDL_FreeSurface( newSurf );
@@ -1206,7 +1206,7 @@ int main( int argc, char* argv[] )
 			newSurf = SDL_CreateRGBSurface(	0, surface->w, surface->h, 16, 0xf800, 0x07e0, 0x001f, 0 );
 			GLASSERT( newSurf->pitch == surface->w*2 );
 			memcpy( newSurf->pixels, btexture.pixelBuffer, surface->w*surface->h*2 );
-			string out1 = inputDirectory + "Lenna565.bmp";
+			string out1 = *inputDirectory + "Lenna565.bmp";
 			SDL_SaveBMP( newSurf, out1.c_str() );
 
 			SDL_FreeSurface( newSurf );
@@ -1229,7 +1229,7 @@ int main( int argc, char* argv[] )
 	
 
 	XMLDocument xmlDoc;
-	xmlDoc.LoadFile( inputFullPath.c_str() );
+	xmlDoc.LoadFile( inputFullPath->c_str() );
 	if ( xmlDoc.Error() || !xmlDoc.FirstChildElement() ) {
 		xmlDoc.PrintError();
 		exit( 2 );
@@ -1292,16 +1292,19 @@ int main( int argc, char* argv[] )
 	printf( "All done.\n" );
 	SDL_Quit();
 
-	writer->Save( outputPath.c_str() );
+	writer->Save( outputPath->c_str() );
 	delete writer;
 
 	if ( printDatabase ) {
 		gamedb::Reader reader;
-		reader.Init( 0, outputPath.c_str(), 0 );
+		reader.Init( 0, outputPath->c_str(), 0 );
 		reader.RecWalk( reader.Root(), 0 );
 		reader.Manifest(2);
 	}
 
+	delete inputDirectory;
+	delete inputFullPath;
+	delete outputPath;
 	delete StringPool::Instance();
 	return 0;
 }

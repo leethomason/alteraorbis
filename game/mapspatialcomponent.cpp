@@ -118,24 +118,6 @@ void MapSpatialComponent::SyncWithSpatial()
 		}
 
 	}
-	CoreScript* cs = CoreScript::GetCore(ToSector(ToWorld2I(pos)));
-
-	if (needsCorePower) {
-		if (cs && cs->InUse()) {
-			glowTarget = 1;
-			if (ebs) {
-				glowTarget = ebs->Reachable() ? 1.0f : 0.0f;
-			}
-		}
-		else {
-			glowTarget = 0;
-		}
-	}
-	else {
-		glowTarget = 1;
-		glow = 1;
-	}
-
 	// And the porches / circuits: (rotation doesn't change bounds);
 	Rectangle2I oldOutset = oldBounds, outset = bounds;
 	oldOutset.Outset(1);
@@ -150,6 +132,32 @@ void MapSpatialComponent::SyncWithSpatial()
 
 int MapSpatialComponent::DoTick(U32 delta)
 {
+	if (slowTick.Delta(delta)) {
+		CoreScript* cs = CoreScript::GetCore(ToSector(parentChit->Position()));
+		glowTarget = 0;
+
+		if (needsCorePower) {
+			if (cs && cs->InUse()) {
+				Rectangle2I porch = this->PorchPos();
+				if (porch.min.IsZero()) {
+					// No porch. Just need core.
+					glowTarget = 1;
+				}
+				else {
+					Vector2F start = ToWorld2F(porch.min);
+					Vector2F end = ToWorld2F(cs->ParentChit()->Position());
+					if (Context()->worldMap->CalcPath(start, end, 0, 0, false)) {
+						glowTarget = 1;
+					}
+				}
+			}
+		}
+		else {
+			glowTarget = 1;
+			glow = 1;
+		}
+	}
+
 	if (glow != glowTarget) {
 		glow = TravelTo(0.7f, delta, glow, glowTarget);
 	}
@@ -221,16 +229,6 @@ void MapSpatialComponent::SetBuilding( int size, bool p, int circuit )
 			porchType = msc->PorchType();
 		}
 		worldMap->SetPorch(it.Pos().x, it.Pos().y, porchType);
-
-//		float yRotation = 0;
-//
-//		Chit* chit = chitBag->QueryBuilding(IString(), it.Pos(), 0);
-//		if (chit) {
-//			MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
-//			if (msc) {
-//				yRotation = YRotation(chit->Rotation());
-//			}
-//		}
 	}
 }
 
@@ -239,6 +237,8 @@ void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 {
 	super::OnAdd( chit, init );
 	SyncWithSpatial();
+	slowTick.SetPeriod(800 + parentChit->random.Rand(400));
+	slowTick.SetReady();
 }
 
 
@@ -290,23 +290,4 @@ Rectangle2I MapSpatialComponent::CalcPorchPos(const Vector2I& pos, int size, flo
 {
 	int rot0_3 = LRint(NormalizeAngleDegrees(rotation) / 90.0f);
 	return BuildData::PorchBounds(size, pos, rot0_3);
-	/*
-	Rectangle2I b;
-	b.min = b.max = pos;
-	b.max.x += (size - 1);
-	b.max.y += (size - 1);
-
-	int r = LRintf(rotation / 90.0f);
-	Rectangle2I v = b;
-
-	switch (r) {
-		case 0:		v.min.y = v.max.y = b.max.y + 1;	break;
-		case 1:		v.min.x = v.max.x = b.max.x + 1;	break;
-		case 2:		v.min.y = v.max.y = b.min.y - 1;	break;
-		case 3:		v.min.x = v.max.x = b.min.x - 1;	break;
-		default:	GLASSERT(0);	break;
-	}
-
-	return v;
-	*/
 }

@@ -49,8 +49,7 @@ static const int MAX_WILD_FRUIT		= 300;
 static const int TEMPLES_REPELS_LESSER = 0;	// repels *some* but not all lesser
 static const int TEMPLES_REPELS_GREATER = 1;
 
-// In terms of current tech:
-static const float TECH_ATTRACTS_GREATER = 3.2f;
+static const float TECH_ATTRACTS_GREATER = 2.5f;
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 120;

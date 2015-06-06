@@ -75,7 +75,7 @@ static const float	WANDER_RADIUS				=  5.0f;
 static const float	EAT_HP_PER_SEC				=  2.0f;
 static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 static const float  CORE_HP_PER_SEC				=  8.0f;
-static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
+static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
@@ -316,13 +316,8 @@ Vector3F AIComponent::EnemyPos(int id, bool target)
 void AIComponent::ProcessFriendEnemyLists(bool tick)
 {
 	Vector2F center = ToWorld2F(parentChit->Position());
-	//Vector2I sector = ToSector(center);
 
 	// Clean the lists we have.
-	// Enemy list: not sure the best polity. Right now keeps.
-	// Friend list: clear and focus on near.
-	//int target = enemyList2.Empty() ? -1 : enemyList2[0];
-	if (tick) friendList2.Clear();
 
 	enemyList2.Filter(parentChit, [](Chit* parentChit, int id) {
 		return FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(parentChit, id);
@@ -339,58 +334,65 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		}
 	}
 
-	// Compute the area for the query.
-	Rectangle2F zone;
-	zone.min = zone.max = center;
-	zone.Outset( fullSectorAware ? SECTOR_SIZE : NORMAL_AWARENESS );
-
-	if ( Context()->worldMap->UsingSectors() ) {
-		Rectangle2F rf = ToWorld2F(SectorData::InnerSectorBounds(center.x, center.y));
-		zone.DoIntersection( rf );
-	}
-
 	if (tick) {
-		CChitArray chitArr;
+		// Compute the area for the query.
+		Rectangle2I zone;
+		zone.min = zone.max = ToWorld2I(parentChit->Position());
+		zone.Outset(fullSectorAware ? SECTOR_SIZE : int(NORMAL_AWARENESS));
+
+		if (Context()->worldMap->UsingSectors()) {
+			zone.DoIntersection(SectorData::InnerSectorBounds(center.x, center.y));
+		}
+		else {
+			zone.DoIntersection(Context()->worldMap->Bounds());
+		}
+
+		friendList2.Clear();
+		int saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
+		enemyList2.Clear();
+		if (saveTarget) enemyList2.Push(saveTarget);
 
 		MOBIshFilter mobFilter;
 		BuildingFilter buildingFilter;
 		ItemNameFilter coreFilter(ISC::core);
+
 		// Order matters: prioritize mobs, then a core, then buildings.
-		IChitAccept* filters[3] = { &mobFilter, &coreFilter, &buildingFilter };
+		static const int NFILTER = 3;
+		IChitAccept* filters[NFILTER] = { &mobFilter, &coreFilter, &buildingFilter };
 
 		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
 
-		for (int pass = 0; pass < 3; ++pass) {
-			// Add extra friends or enemies into the list.
-			for (int i = 0; i < chitArr.Size(); ++i) {
-				Chit* chit = chitArr[i];
-				if (!chit || !filters[pass]->Accept(chit)) continue;
-				GLASSERT(chit->GetItem());	// else should have been filtered, above.
-				if (chit->GetItem()->flags & GameItem::AI_NOT_TARGET) {
-					chitArr[i] = nullptr;
-					continue;
-				}
+		CChitArray arr[NFILTER];
 
-				ERelate status = Team::Instance()->GetRelationship(parentChit, chit);
-				int id = chit->ID();
+		// Add extra friends or enemies into the list.
+		for (int i = 0; i < chitArr.Size(); ++i) {
+			Chit* chit = chitArr[i];
+			GLASSERT(chit);
+			if (!chit) continue;
+			const GameItem* item = chit->GetItem();
+			if (!item) continue;
+			if (item->flags & GameItem::AI_NOT_TARGET) continue;
 
-				if (status == ERelate::ENEMY  && enemyList2.HasCap() && (enemyList2.Find(id) < 0))  {
-					if (   fullSectorAware 
-						|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()))) 
-					{
-						if (FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, id)) {
-							enemyList2.Push(id);
-							chitArr[i] = nullptr;
-						}
-					}
-				}
-				else if (pass == 0 && status == ERelate::FRIEND && friendList2.HasCap() && (friendList2.Find(id) < 0)) {
-					if (FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, id)) {
-						friendList2.Push(id);
-						chitArr[i] = nullptr;
-					}
-				}
+			bool path = fullSectorAware
+				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()));
+						
+			if (mobFilter.Accept(chit)) {
+				if (path && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID()))
+					arr[0].PushIfCap(chit);
+				else if (FEFilter<ERelate::FRIEND, ERelate::FRIEND>(parentChit, chit->ID()))
+					friendList2.PushIfCap(chit->ID());
+			}
+			else if (path && coreFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
+				arr[1].PushIfCap(chit);
+			}
+			else if (path && buildingFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
+				arr[2].PushIfCap(chit);
+			}
+		}
+		for (int k = 0; k < NFILTER; ++k) {
+			for (int i = 0; i < arr[k].Size(); ++i) {
+				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
 		}
 	}
@@ -1271,7 +1273,7 @@ bool AIComponent::SectorHerd( bool focus)
 		be the CoreScript
 
 		The current rules are in corescript.cpp
-		*/
+	*/
 	static const int NDELTA = 8;
 	static const Vector2I initDelta[NDELTA] = {
 		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
@@ -1290,19 +1292,15 @@ bool AIComponent::SectorHerd( bool focus)
 			rinit.Push(initDelta[i]*2);	// greaters have a larger move range
 		}
 	}
-	parentChit->random.ShuffleArray(rinit.Mem(), rinit.Size());
 
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
-	//const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
 	const SectorPort start = context->worldMap->NearestPort(pos);
+
 	//Sometimes we can't path to any port. Hopefully rampage cuts in.
-	//GLASSERT(start.IsValid());
 	if (!start.IsValid()) {
 		return false;
 	}
-
-	//Vector2I sector = ToSector(ToWorld2I(pos));
 
 	if (gameItem->IName() == ISC::troll) {
 		// Visit Truulga every now and again. And if leaving truuga...go far.
@@ -1338,43 +1336,32 @@ bool AIComponent::SectorHerd( bool focus)
 			CoreScript* cs = CoreScript::GetCore(destSector);
 
 			// Check repelled / attracted.
-			if (cs && cs->ParentChit()->Team()) {
-				ERelate relate = Team::Instance()->GetRelationship(cs->ParentChit(), parentChit);
+			if (cs && cs->InUse() && Team::Instance()->GetRelationship(cs->ParentChit(), parentChit) == ERelate::ENEMY) {
 				int nTemples = cs->NumTemples();
-				float tech = cs->GetTech();
 
 				// For enemies, apply rules to make the gameplay smoother.
-				if (relate == ERelate::ENEMY) {
-					if (mob == ISC::lesser) {
-						if (nTemples <= TEMPLES_REPELS_LESSER) {
-							if (parentChit->random.Rand(2) == 0) {
-								delta.Push(rinit[i]);
-							}
-						}
-						else {
+				if (mob == ISC::lesser) {
+					if (nTemples <= TEMPLES_REPELS_LESSER) {
+						if (parentChit->random.Rand(2) == 0) {
 							delta.Push(rinit[i]);
-						}
-					}
-					else if (mob == ISC::greater) {
-						if (tech >= TECH_ATTRACTS_GREATER) 
-							delta.Insert(0, rinit[i]);
-						else if (nTemples > TEMPLES_REPELS_GREATER)
-							delta.Push(rinit[i]);
-						else {
-							// else push nothing
 						}
 					}
 					else {
 						delta.Push(rinit[i]);
 					}
 				}
-				else {
-					delta.Push(rinit[i]);
+				else if (mob == ISC::greater) {
+					if (nTemples <= TEMPLES_REPELS_GREATER) {
+						if (parentChit->random.Rand(2) == 0) {
+							delta.Push(rinit[i]);
+						}
+					}
+					else {
+						delta.Push(rinit[i]);
+					}
 				}
 			}
 			else if (cs) {
-				// FIXME: is the cs check needed?
-				// But we don't want the MOBs herding to the outland
 				delta.Push(rinit[i]);
 			}
 		}
@@ -1382,6 +1369,7 @@ bool AIComponent::SectorHerd( bool focus)
 
 	// 2nd pass: look for 1st match
 	if (start.IsValid()) {
+		parentChit->random.ShuffleArray(delta.Mem(), delta.Size());
 		for (int i = 0; i < delta.Size(); ++i) {
 			if (DoSectorHerd(focus, start.sector + delta[i])) {
 				return true;
@@ -2233,7 +2221,7 @@ void AIComponent::ThinkNormal(  )
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
 							&& (itemFlags & GameItem::AI_SECTOR_HERD)
-							&& (friendList2.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
+							&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
 							&& (parentChit->random.Rand(WANDER_ODDS) == 0)
 							&& (CoreScript::GetCoreFromTeam(parentChit->Team()) == 0);
 		bool sectorWander =		pmc

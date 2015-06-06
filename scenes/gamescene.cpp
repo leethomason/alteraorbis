@@ -1052,8 +1052,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	menu->ItemTapped(item);
 	tutorial->ItemTapped(item);
 
-	sim->Context()->physicsSims->GetCircuitSim(GetHomeSector())->EnableOverlay(menu->CircuitMode());
-
 	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
 		startGameWidget.ItemTapped(item);
 	}
@@ -1265,6 +1263,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
+	sim->Context()->physicsSims->GetCircuitSim(GetHomeSector())->EnableOverlay(menu->CircuitMode());
 	if ( !dest.IsZero() ) {
 		DoDestTapped( dest );
 	}

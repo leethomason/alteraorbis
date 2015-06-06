@@ -82,13 +82,12 @@ public:
 		MATCH_ANY,
 		MATCH_ALL
 	};
-	MultiFilter( int anyAllMatch ) : type(-1), anyAll(anyAllMatch) {}
-
+	MultiFilter( int anyAllMatch ) : anyAll(anyAllMatch) {}
 	virtual bool Accept( Chit* chit );
 
+	// Remember: Up to 4 filters causes no memory allocation.
 	grinliz::CDynArray< IChitAccept* > filters;
 private:
-	int type;
 	int anyAll;
 };
 

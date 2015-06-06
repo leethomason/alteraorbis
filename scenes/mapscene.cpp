@@ -226,6 +226,13 @@ void MapScene::EnableButtons()
 	CoreScript* cs = CoreScript::GetCore(v);
 	CoreScript* homeCore = lumosChitBag->GetHomeCore();
 
+	if (!homeCore) {
+		warButton.SetEnabled(false);
+		peaceButton.SetEnabled(false);
+		peaceButton.SetText("Peace Treaty");
+		return;
+	}
+
 	warButton.SetEnabled(Team::Instance()->War(cs, homeCore, false, &lumosChitBag->GetSim()->GetCachedWeb()));
 	int peace = Team::Instance()->Peace(cs, homeCore, false, &lumosChitBag->GetSim()->GetCachedWeb());
 	const Wallet* wallet = homeCore->ParentChit()->GetWallet();

@@ -42,10 +42,17 @@ x shield value over-accounts for reload time
 x CoreScript attacking should account for Attitude
 t Attitude and Diplomacy display strange (integrate to one??)
 t Should I pull out Domain names?
+x domain name above core
+x top down: can’t tell on switch from off switch. 
+x map glow not always correct
 - Linux: where are the save files? Where should they be?
 - Profiler not working on Linux
 - make sure domain takeover works in next version
-- top down: can’t tell on switch from off switch. 
+- AI not attacking buildings
+- lesser mobs not distributing enough
+- where are all the crystals???
+- elixir and fruit need to get picked up
+- elixir needs to decay
 - core click through broken
 
 - detail view of building w/ mouse down

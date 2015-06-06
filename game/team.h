@@ -65,7 +65,7 @@ public:
 	Team(const gamedb::Reader* database);
 	~Team();
 
-	static Team* Instance() { return instance; }
+	static Team* Instance() { GLASSERT(instance);  return instance; }
 
 	void Serialize(XStream* xs);
 	void DoTick(int delta);
@@ -179,7 +179,13 @@ private:
 			else return a.t1 < b.t1;
 		}
 		static U32 Hash(const TeamKey& t) {
-			return t.t0 + t.t1;
+			// Shifter2
+			U32 x = t.t0 ^ t.t1;
+			x += ( x << 10u );
+			x ^= ( x >>  6u );
+			x += ( x <<  3u );
+			x ^= ( x >> 11u );
+			return x;
 		}
 
 		int T0() const { return t0; }
