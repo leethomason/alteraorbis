@@ -262,6 +262,7 @@ void Sim::CreateCores()
 			}
 			if (cs) {
 				++ncores;
+				GLASSERT(CoreScript::GetCore(sector) == cs);
 			}
 		}
 	}
@@ -561,6 +562,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
 				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
 				CoreScript::CreateCore(sector, teamID, &context);
+				GLASSERT(CoreScript::GetCore(sector));
 
 				CChitArray arr;
 				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.

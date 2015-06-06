@@ -2727,6 +2727,8 @@ void AIComponent::EnterNewGrid()
 					GLASSERT(Team::IsRogue(gameItem->Team()));
 					int newCoreTeam = Team::Instance()->GenTeam(gameItem->Team());
 					CoreScript* newCS = CoreScript::CreateCore(sector, newCoreTeam, Context());
+					GLASSERT(CoreScript::GetCore(sector) == newCS);
+
 					newCS->ParentChit()->Add(ai);
 					newCS->AddCitizen(parentChit);
 
