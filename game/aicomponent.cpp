@@ -75,7 +75,7 @@ static const float	WANDER_RADIUS				=  5.0f;
 static const float	EAT_HP_PER_SEC				=  2.0f;
 static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 static const float  CORE_HP_PER_SEC				=  8.0f;
-static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
+static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
@@ -1273,7 +1273,7 @@ bool AIComponent::SectorHerd( bool focus)
 		be the CoreScript
 
 		The current rules are in corescript.cpp
-		*/
+	*/
 	static const int NDELTA = 8;
 	static const Vector2I initDelta[NDELTA] = {
 		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
@@ -1292,19 +1292,15 @@ bool AIComponent::SectorHerd( bool focus)
 			rinit.Push(initDelta[i]*2);	// greaters have a larger move range
 		}
 	}
-	parentChit->random.ShuffleArray(rinit.Mem(), rinit.Size());
 
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
-	//const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(ToSector(pos));
 	const SectorPort start = context->worldMap->NearestPort(pos);
+
 	//Sometimes we can't path to any port. Hopefully rampage cuts in.
-	//GLASSERT(start.IsValid());
 	if (!start.IsValid()) {
 		return false;
 	}
-
-	//Vector2I sector = ToSector(ToWorld2I(pos));
 
 	if (gameItem->IName() == ISC::troll) {
 		// Visit Truulga every now and again. And if leaving truuga...go far.
@@ -1340,43 +1336,32 @@ bool AIComponent::SectorHerd( bool focus)
 			CoreScript* cs = CoreScript::GetCore(destSector);
 
 			// Check repelled / attracted.
-			if (cs && cs->ParentChit()->Team()) {
-				ERelate relate = Team::Instance()->GetRelationship(cs->ParentChit(), parentChit);
+			if (cs && cs->InUse() && Team::Instance()->GetRelationship(cs->ParentChit(), parentChit) == ERelate::ENEMY) {
 				int nTemples = cs->NumTemples();
-				float tech = cs->GetTech();
 
 				// For enemies, apply rules to make the gameplay smoother.
-				if (relate == ERelate::ENEMY) {
-					if (mob == ISC::lesser) {
-						if (nTemples <= TEMPLES_REPELS_LESSER) {
-							if (parentChit->random.Rand(2) == 0) {
-								delta.Push(rinit[i]);
-							}
-						}
-						else {
+				if (mob == ISC::lesser) {
+					if (nTemples <= TEMPLES_REPELS_LESSER) {
+						if (parentChit->random.Rand(2) == 0) {
 							delta.Push(rinit[i]);
-						}
-					}
-					else if (mob == ISC::greater) {
-						if (tech >= TECH_ATTRACTS_GREATER) 
-							delta.Insert(0, rinit[i]);
-						else if (nTemples > TEMPLES_REPELS_GREATER)
-							delta.Push(rinit[i]);
-						else {
-							// else push nothing
 						}
 					}
 					else {
 						delta.Push(rinit[i]);
 					}
 				}
-				else {
-					delta.Push(rinit[i]);
+				else if (mob == ISC::greater) {
+					if (nTemples <= TEMPLES_REPELS_GREATER) {
+						if (parentChit->random.Rand(2) == 0) {
+							delta.Push(rinit[i]);
+						}
+					}
+					else {
+						delta.Push(rinit[i]);
+					}
 				}
 			}
 			else if (cs) {
-				// FIXME: is the cs check needed?
-				// But we don't want the MOBs herding to the outland
 				delta.Push(rinit[i]);
 			}
 		}
@@ -1384,6 +1369,7 @@ bool AIComponent::SectorHerd( bool focus)
 
 	// 2nd pass: look for 1st match
 	if (start.IsValid()) {
+		parentChit->random.ShuffleArray(delta.Mem(), delta.Size());
 		for (int i = 0; i < delta.Size(); ++i) {
 			if (DoSectorHerd(focus, start.sector + delta[i])) {
 				return true;
@@ -2235,7 +2221,7 @@ void AIComponent::ThinkNormal(  )
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
 							&& (itemFlags & GameItem::AI_SECTOR_HERD)
-							&& (friendList2.Size() >= (MAX_TRACK * 3 / 4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
+							&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
 							&& (parentChit->random.Rand(WANDER_ODDS) == 0)
 							&& (CoreScript::GetCoreFromTeam(parentChit->Team()) == 0);
 		bool sectorWander =		pmc

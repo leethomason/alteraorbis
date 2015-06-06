@@ -17,6 +17,7 @@
 #define MAP_SPATIAL_COMPONENT
 
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/cticker.h"
 
 class WorldMap;
 class CircuitSim;
@@ -65,7 +66,7 @@ public:
 	static grinliz::Rectangle2I CalcPorchPos(const grinliz::Vector2I& pos, int size, float rotation);
 
 	bool NeedsCorePower() const { return needsCorePower; }
-	void SetNeedsCorePower(bool v) { needsCorePower = v; }
+	void SetNeedsCorePower(bool v) { needsCorePower = v; }	// used to debug, so we don't have to create a core in the test scene
 
 private:
 	void SyncWithSpatial();
@@ -79,6 +80,7 @@ private:
 	float					glow;
 	bool					needsCorePower;
 	grinliz::Rectangle2I	bounds;
+	CTicker					slowTick;
 };
 
 
