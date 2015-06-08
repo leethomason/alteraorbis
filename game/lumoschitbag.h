@@ -298,6 +298,14 @@ public:
 	}
 	Chit* QueryBuilding( const grinliz::IString& name, const grinliz::Rectangle2I& bounds, CChitArray* arr );
 
+	struct CreateCoreData {
+		grinliz::Vector2I sector;
+		bool wantsTakeover;
+		int defeatedTeam;
+		int conqueringTeam;
+	};
+	grinliz::CDynArray< CreateCoreData > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
+
 	// Why the duplicate? This is for components to request
 	// a new scene because of a player action. Both queues,
 	// and doesn't allow multiple scenes to queue.

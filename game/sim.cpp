@@ -291,14 +291,14 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 			if (chit->Team() != TEAM_NEUTRAL) {
 				if (superTeam) {
-					CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
-					coreCreateList.Push(data);
+					LumosChitBag::CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
+					context.chitBag->coreCreateList.Push(data);
 					NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID());
 					context.chitBag->GetNewsHistory()->Add(news);
 				}
 				else {
-					CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
-					coreCreateList.Push(data);
+					LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
+					context.chitBag->coreCreateList.Push(data);
 					NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
 					context.chitBag->GetNewsHistory()->Add(news);
 				}
@@ -540,8 +540,8 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	// From the CHIT_DESTROYED_START we have a list of
 	// Cores that will be going away...check them here,
 	// so that we replace as soon as possible.
-	while (!coreCreateList.Empty()) {
-		CreateCoreData data = coreCreateList.Pop();
+	while (!context.chitBag->coreCreateList.Empty()) {
+		LumosChitBag::CreateCoreData data = context.chitBag->coreCreateList.Pop();
 		CoreScript* sc = CoreScript::GetCore(data.sector);
 		Vector2I sector = data.sector;
 

@@ -135,15 +135,7 @@ private:
 	int cachedWebAge;
 	Web web;
 
-	struct CreateCoreData {
-		grinliz::Vector2I sector;
-		bool wantsTakeover;
-		int defeatedTeam;
-		int conqueringTeam;
-	};
-
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
-	grinliz::CDynArray< CreateCoreData > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
 };
 
