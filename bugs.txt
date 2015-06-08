@@ -20,7 +20,8 @@ x peace button
 	- news events of 
 		- aquisition, 
 		- loss, and 
-		- fall of super-domain: means integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
+		- fall of super-domain
+		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 	- enemy/neutral/friend messages: don't show (core) show the domain name
 	- DOMAIN_TAKEOVER message not correct
@@ -45,11 +46,12 @@ t Should I pull out Domain names?
 x domain name above core
 x top down: can’t tell on switch from off switch. 
 x map glow not always correct
+t lesser mobs not distributing enough
+- move coreCreateList to LumosChitBag virtual doTick()
 - Linux: where are the save files? Where should they be?
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
-- lesser mobs not distributing enough
 - where are all the crystals???
 - elixir and fruit need to get picked up
 - elixir needs to decay

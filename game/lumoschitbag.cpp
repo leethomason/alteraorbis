@@ -1233,3 +1233,48 @@ void LumosChitBag::NamePoolID::Serialize(XStream* xs)
 	XARC_SER(xs, this->id);
 	XarcClose(xs);
 }
+
+
+void LumosChitBag::DoTick(U32 delta)
+{
+	// From the CHIT_DESTROYED_START we have a list of
+	// Cores that will be going away...check them here,
+	// so that we replace as soon as possible.
+	while (!coreCreateList.Empty()) {
+		CreateCoreData data = coreCreateList.Pop();
+		CoreScript* sc = CoreScript::GetCore(data.sector);
+		Vector2I sector = data.sector;
+
+		if (!sc) {
+			// FIXME: last criteria "must be super team" isn't correct. Sub-teams
+			// should be able to conquor for super teams.
+
+			if (data.wantsTakeover
+				&& data.conqueringTeam
+				&& Team::IsDenizen(data.conqueringTeam)
+				&& (Team::Instance()->SuperTeam(data.conqueringTeam) == data.conqueringTeam))
+			{
+				// The case where this domain is conquered. Switch to a sub-domain team ID,
+				// and switch the existing team over. Intentionally limit to CChitArray items so there
+				// isn't a full switch over.
+				// Also, remember by the time this code is executed, the team will be Rogue.
+
+				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
+				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
+				CoreScript::CreateCore(sector, teamID, Context());
+				GLASSERT(CoreScript::GetCore(sector));
+
+				CChitArray arr;
+				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.
+				Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
+				for (Chit* c : arr) {
+					c->GetItem()->SetTeam(teamID);
+				}
+			}
+			else {
+				CoreScript::CreateCore(sector, TEAM_NEUTRAL, Context());
+			}
+		}
+	}
+	super::DoTick(delta);
+}

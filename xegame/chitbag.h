@@ -119,7 +119,7 @@ public:
 	int NumBolts() const { return bolts.Size(); }
 
 	// Calls every chit that has a tick.
-	void DoTick( U32 delta );	
+	virtual void DoTick( U32 delta );	
 	U32 AbsTime() const { return bagTime; }
 
 	int NumChits() const { return chitID.Size(); }

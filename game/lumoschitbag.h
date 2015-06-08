@@ -201,6 +201,8 @@ public:
 	// Can be null - not required
 	Sim* GetSim() const { return sim; }
 
+	virtual void DoTick( U32 delta );
+
 	// Buildings can't move - no update.
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
 	void RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y );
