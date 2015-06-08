@@ -2016,47 +2016,44 @@ void GameScene::DrawDebugText()
 {
 	static const int x = 0;
 	int y = 200;
-	DrawDebugTextDrawCalls( x, y, sim->GetEngine() );
+	DrawDebugTextDrawCalls(x, y, sim->GetEngine());
 	y += 16;
 
 	UFOText* ufoText = UFOText::Instance();
 	Chit* chit = GetPlayerChit();
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
-	Vector3F at = { 0, 0, 0 };
 	WorldMap* worldMap = sim->GetWorldMap();
 
-	if ( chit  ) {
+	if (GetPlayerChit()) {
 		const Vector3F& v = chit->Position();
-		at = v;
-		ufoText->Draw( x, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
-			           v.x, v.y, v.z,
-					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
+		ufoText->Draw(x, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f",
+					  v.x, v.y, v.z,
+					  engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z);
 		y += 16;
 	}
-	else {
-		engine->CameraLookingAt( &at );
-	}
+	Vector3F at = { 0, 0, 0 };
+	engine->CameraLookingAt(&at);
 
 	const Wallet& w = ReserveBank::Instance()->wallet;
 	double fractionTicked = 0;
 	if (chitBag->NumChits()) fractionTicked = double(chitBag->NumTicked()) / double(chitBag->NumChits());
-	ufoText->Draw( x, y,	"ticks=%02d%% (%d) Reserve Au=%d G=%d R=%d B=%d V=%d", 
-							LRint(fractionTicked*100.0), chitBag->NumChits(),
-							w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3) ); 
+	ufoText->Draw(x, y, "ticks=%02d%% (%d) Reserve Au=%d G=%d R=%d B=%d V=%d",
+				  LRint(fractionTicked*100.0), chitBag->NumChits(),
+				  w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3));
 	y += 16;
 
 	int typeCount[NUM_PLANT_TYPES];
-	for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 		typeCount[i] = 0;
-		for( int j=0; j<MAX_PLANT_STAGES; ++j ) {
+		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			typeCount[i] += worldMap->plantCount[i][j];
 		}
 	}
 	int stageCount[MAX_PLANT_STAGES];
-	for( int i=0; i<MAX_PLANT_STAGES; ++i ) {
+	for (int i = 0; i < MAX_PLANT_STAGES; ++i) {
 		stageCount[i] = 0;
-		for( int j=0; j<NUM_PLANT_TYPES; ++j ) {
+		for (int j = 0; j < NUM_PLANT_TYPES; ++j) {
 			stageCount[i] += worldMap->plantCount[j][i];
 		}
 	}
@@ -2064,30 +2061,38 @@ void GameScene::DrawDebugText()
 	int lesser = 0, greater = 0, denizen = 0;
 	chitBag->census.NumByType(&lesser, &greater, &denizen);
 
-	ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: lesser=%d greater=%d denizen=%d", 
-									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-									stageCount[0], stageCount[1], stageCount[2], stageCount[3],
-									lesser, greater, denizen );
+	//ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: lesser=%d greater=%d denizen=%d", 
+	//								typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
+	//								stageCount[0], stageCount[1], stageCount[2], stageCount[3],
+	//								lesser, greater, denizen );
+	//y += 16;
+
+	CoreScript* cs = CoreScript::GetCore(ToSector(at));
+	int teamID = 0, teamGroup = 0;
+	if (cs) {
+		Team::SplitID(cs->ParentChit()->Team(), &teamGroup, &teamID);
+	}
+	ufoText->Draw(x, y, "CoreScript: %p inUse=%d team=%d,%d", cs, cs && cs->InUse() ? 1 : 0, teamGroup, teamID);
 	y += 16;
 
 	micropather::CacheData cacheData;
-	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
-	sim->GetWorldMap()->PatherCacheHitMiss( sector, &cacheData );
-	ufoText->Draw( x, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
-						  sector.x, sector.y,
-						  cacheData.nBytesUsed/1024,
-						  cacheData.nBytesAllocated/1024,
-						  cacheData.memoryFraction,
-						  cacheData.hit,
-						  cacheData.miss,
-						  cacheData.hitFraction );
+	Vector2I sector = { (int)at.x / SECTOR_SIZE, (int)at.z / SECTOR_SIZE };
+	sim->GetWorldMap()->PatherCacheHitMiss(sector, &cacheData);
+	ufoText->Draw(x, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f",
+				  sector.x, sector.y,
+				  cacheData.nBytesUsed / 1024,
+				  cacheData.nBytesAllocated / 1024,
+				  cacheData.memoryFraction,
+				  cacheData.hit,
+				  cacheData.miss,
+				  cacheData.hitFraction);
 	y += 16;
 
-	Chit* info = sim->GetChitBag()->GetChit( infoID );
-	if ( info ) {
+	Chit* info = sim->GetChitBag()->GetChit(infoID);
+	if (info) {
 		GLString str;
-		info->DebugStr( &str );
-		ufoText->Draw( x, y, "id=%d: %s", infoID, str.c_str() );
+		info->DebugStr(&str);
+		ufoText->Draw(x, y, "id=%d: %s", infoID, str.c_str());
 		y += 16;
 	}
 	if (!voxelInfoID.IsZero()) {

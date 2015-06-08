@@ -931,6 +931,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		
 		CoreScript* cs = new CoreScript();
 		chit->Add(cs);
+		GLASSERT(CoreScript::GetCore(ToSector(sd.core)) == cs);
 
 		chit->GetItem()->SetProperName(sd.name);
 

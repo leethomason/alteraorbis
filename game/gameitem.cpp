@@ -954,7 +954,8 @@ void GameItem::SetTeam(int newTeam)
 	GLASSERT(IName() != ISC::core);
 
 	GLASSERT(    (Team::IsDenizen(team) && Team::IsDenizen(newTeam))
-			  || (!Team::IsDenizen(team) && !Team::IsDenizen(newTeam)));
+			  || (!Team::IsDenizen(team) && !Team::IsDenizen(newTeam))
+			  || (team == TEAM_TROLL));
 
 	if (IsDenizen()) {
 		GLASSERT(Team::IsDenizen(team));
