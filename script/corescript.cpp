@@ -200,6 +200,41 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 		Team::Instance()->RemoveSuperTeam(chit->Team());
+
+		Vector2I pos2i = ToWorld2I(chit->Position());
+		Vector2I sector = ToSector(pos2i);
+
+		int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
+		Chit* deleter = Context()->chitBag->GetChit(deleterID);
+		int superTeam = 0;
+		if (deleter
+			&& (deleter->Team() == Team::Instance()->SuperTeam(deleter->Team()))
+			&& Team::IsDenizen(deleter->Team())
+			&& Team::IsDenizen(chit->Team()))
+		{
+			superTeam = deleter->Team();
+		}
+
+		if (chit->Team() != TEAM_NEUTRAL) {
+			if (superTeam) {
+				LumosChitBag::CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
+				Context()->chitBag->coreCreateList.Push(data);
+				NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID());
+				Context()->chitBag->GetNewsHistory()->Add(news);
+			}
+			else {
+				LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
+				Context()->chitBag->coreCreateList.Push(data);
+				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
+				Context()->chitBag->GetNewsHistory()->Add(news);
+			}
+		}
+		else {
+			// Neutral cores are taken over by wandering over them
+			// with enough friend units to have critical mass.
+			LumosChitBag::CreateCoreData data = { sector, false, 0, 0 };
+			Context()->chitBag->coreCreateList.Push(data);
+		}
 	}
 }
 

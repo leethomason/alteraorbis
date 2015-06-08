@@ -272,39 +272,6 @@ void Sim::CreateCores()
 
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
-		// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
-		if (chit->GetComponent("CoreScript")) {
-			Vector2I pos2i = ToWorld2I(chit->Position());
-			Vector2I sector = ToSector(pos2i);
-
-			int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
-			Chit* deleter = context.chitBag->GetChit(deleterID);
-			int superTeam = 0;
-			if (   deleter 
-				&& (deleter->Team() == Team::Instance()->SuperTeam(deleter->Team())) 
-				&& Team::IsDenizen(deleter->Team())
-				&& Team::IsDenizen(chit->Team())) 
-			{
-				superTeam = deleter->Team();
-			}
-
-			if (chit->Team() != TEAM_NEUTRAL) {
-				if (superTeam) {
-					LumosChitBag::CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
-					context.chitBag->coreCreateList.Push(data);
-					NewsEvent news(NewsEvent::DOMAIN_TAKEOVER, ToWorld2F(pos2i), chit->GetItemID(), deleter->GetItemID());
-					context.chitBag->GetNewsHistory()->Add(news);
-				}
-				else {
-					LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
-					context.chitBag->coreCreateList.Push(data);
-					NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
-					context.chitBag->GetNewsHistory()->Add(news);
-				}
-			}
-		}
-	}
 }
 
 
@@ -579,7 +546,6 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	CreateTruulgaCore();
 
 	int minuteTick = minuteClock.Delta( delta );
-//	int secondTick = secondClock.Delta( delta );
 	int volcano    = volcTimer.Delta( delta );
 
 #if SPAWN_MOBS > 0
