@@ -1282,8 +1282,6 @@ bool AIComponent::SectorHerd(bool focus)
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	CArray<Vector2I, NDELTA> dest;
-
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
 	const SectorPort start = context->worldMap->NearestPort(pos);
@@ -1321,49 +1319,54 @@ bool AIComponent::SectorHerd(bool focus)
 	sectorBounds.Set(0, 0, NUM_SECTORS - 1, NUM_SECTORS - 1);
 	IString mob = gameItem->keyValues.GetIString(ISC::mob);
 
+	float rank[NDELTA] = { 0 };
+	int possible = 0;
 	for (int i = 0; i < NDELTA; ++i) {
 		Vector2I destSector = start.sector + delta[i];
+		if (!sectorBounds.Contains(destSector)) continue;
+		CoreScript* cs = CoreScript::GetCore(destSector);
 
-		if (sectorBounds.Contains(destSector)) {
-			CoreScript* cs = CoreScript::GetCore(destSector);
+		// Check repelled / attracted.
+		if (cs && cs->InUse() && Team::Instance()->GetRelationship(cs->ParentChit(), parentChit) == ERelate::ENEMY) {
+			int nTemples = cs->NumTemples();
 
-			// Check repelled / attracted.
-			if (cs && cs->InUse() && Team::Instance()->GetRelationship(cs->ParentChit(), parentChit) == ERelate::ENEMY) {
-				int nTemples = cs->NumTemples();
-
-				// For enemies, apply rules to make the gameplay smoother.
-				if (mob == ISC::lesser) {
-					if (nTemples <= TEMPLES_REPELS_LESSER) {
-						if (parentChit->random.Rand(2) == 0) {
-							dest.Push(destSector);
-						}
-					}
-					else {
-						dest.Push(destSector);
-					}
+			// For enemies, apply rules to make the gameplay smoother.
+			if (mob == ISC::lesser) {
+				if (nTemples <= TEMPLES_REPELS_LESSER) {
+					rank[i] = 0.5f;
+					++possible;
 				}
-				else if (mob == ISC::greater) {
-					if (nTemples <= TEMPLES_REPELS_GREATER) {
-						if (parentChit->random.Rand(2) == 0) {
-							dest.Push(destSector);
-						}
-					}
-					else {
-						dest.Push(destSector);
-					}
+				else {
+					rank[i] = 0;
 				}
 			}
-			else if (cs) {
-				dest.Push(destSector);
+			else if (mob == ISC::greater) {
+				if (nTemples < TEMPLES_REPELS_GREATER) {
+					rank[i] = 0;
+				}
+				else if (nTemples == TEMPLES_REPELS_GREATER) {
+					rank[i] = 0.5;
+					++possible;
+				}
+				else {
+					rank[i] = float(nTemples - TEMPLES_REPELS_GREATER);
+					++possible;
+				}
 			}
 		}
+		else if (cs) {
+			++possible;
+			rank[i] = 1;
+		}
+
 	}
 
 	// 2nd pass: look for 1st match
-	if (start.IsValid()) {
-		parentChit->random.ShuffleArray(dest.Mem(), dest.Size());
-		for (int i = 0; i < dest.Size(); ++i) {
-			if (DoSectorHerd(focus, dest[i])) {
+	if (start.IsValid() && possible) {
+		int destIdx = parentChit->random.Select(rank, NDELTA);
+		if (rank[destIdx] > 0) {
+			Vector2I dest = start.sector + delta[destIdx];
+			if (DoSectorHerd(focus, dest)) {
 				return true;
 			}
 		}
@@ -1494,14 +1497,20 @@ void AIComponent::ThinkVisitor(  )
 }
 
 
-bool AIComponent::ThinkWanderEat()
+bool AIComponent::ThinkCollectNearFruit()
 {
+	if (parentChit->PlayerControlled()) return false;
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+	ItemComponent* ic = parentChit->GetItemComponent();
+	if (!ic) return false;
+
+	int count = ic->NumItems(ISC::fruit) + ic->NumItems(ISC::elixir);
 
 	// Plant eater
-	if (gameItem->HPFraction() < EAT_WILD_FRUIT) {
-		//Vector2I pos2i = ToWorld2I(parentChit->Position());
+	if (gameItem->HPFraction() < EAT_WILD_FRUIT
+		|| (ic->CanAddToInventory() && count < 2))
+	{
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 
 		// Are we near fruit?
@@ -1700,39 +1709,38 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 
 
 
-bool AIComponent::ThinkFruitCollect(  )
+bool AIComponent::ThinkFruitCollect()
 {
 	// Some buildings provide food - that happens in ThinkNeeds.
 	// This is for picking up food on the group.
 
-	if ( parentChit->PlayerControlled() ) {
+	if (parentChit->PlayerControlled()) {
 		return false;
 	}
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
 	double need = 1;
-	if ( gameItem->flags & GameItem::HAS_NEEDS ) {
+	if (gameItem->flags & GameItem::HAS_NEEDS) {
 		const ai::Needs& needs = GetNeeds();
-		need = needs.Value( Needs::FOOD );
+		need = needs.Value(Needs::FOOD);
 	}
 
 	// workers carrying fruit seemed weird for some reason.
 	//bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
 
 	// It is the duty of every citizen to take fruit to the distillery.
-	if ( AtHomeCore() ) {
-		if (    gameItem->GetPersonality().Botany() != Personality::DISLIKES
-			 || need < NEED_CRITICAL * 2.0 )
+	if (AtHomeCore()) {
+		if (gameItem->GetPersonality().Botany() != Personality::DISLIKES
+			|| need < NEED_CRITICAL * 2.0)
 		{
 			// Can we go pick something up?
-			if ( parentChit->GetItemComponent() && parentChit->GetItemComponent()->CanAddToInventory() ) {
+			if (parentChit->GetItemComponent() && parentChit->GetItemComponent()->CanAddToInventory()) {
 				Vector2F fruitPos = { 0, 0 };
 				CChitArray fruit;
 				bool nearPath = false;
-				FindFruit( ToWorld2F(parentChit->Position()), &fruitPos, &fruit, &nearPath );
-				if ( fruit.Size() ) {
-					//GameItem* gi = fruit[0]->GetItem();
+				FindFruit(ToWorld2F(parentChit->Position()), &fruitPos, &fruit, &nearPath);
+				if (fruit.Size()) {
 					Vector2I fruitPos2i = ToWorld2I(fruitPos);
 					Vector2I sector = ToSector(fruitPos2i);
 					CoreScript* cs = CoreScript::GetCore(sector);
@@ -1807,18 +1815,21 @@ bool AIComponent::ThinkHungry()
 	bool carrying = fruit || elixir;
 
 	// Are we carrying fruit?? If so, eat if hungry!
-	if (carrying && (gameItem->flags & GameItem::HAS_NEEDS)) {
-		const ai::Needs& needs = GetNeeds();
-		if (needs.Value(Needs::FOOD) < NEED_CRITICAL) {
+	if (carrying && () {
+		if (((gameItem->flags & GameItem::HAS_NEEDS) && needs.Value(Needs::FOOD) < NEED_CRITICAL)	// hungry
+			|| (gameItem->HPFraction() < 0.4f))														// hurt
+		{
 			if (elixir) {
 				GameItem* item = thisIC->RemoveFromInventory(elixir);
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+				parentChit->GetItem()->FullHeal();
 			}
 			else if (fruit) {
 				GameItem* item = thisIC->RemoveFromInventory(fruit);
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
+				parentChit->GetItem()->FullHeal();
 			}
 			return true;	// did something...?
 		}
@@ -1827,9 +1838,9 @@ bool AIComponent::ThinkHungry()
 }
 
 
-bool AIComponent::ThinkDelivery(  )
+bool AIComponent::ThinkDelivery()
 {
-	if ( parentChit->PlayerControlled() ) {
+	if (parentChit->PlayerControlled()) {
 		return false;
 	}
 
@@ -1839,39 +1850,39 @@ bool AIComponent::ThinkDelivery(  )
 	if (!thisIC) return false;
 
 	bool usesBuilding = (gameItem->flags & GameItem::AI_USES_BUILDINGS) != 0;
-	bool worker       = (gameItem->flags & GameItem::AI_DOES_WORK) != 0;
+	bool worker = (gameItem->flags & GameItem::AI_DOES_WORK) != 0;
 
-	if ( worker ) {
+	if (worker) {
 		bool needVaultRun = false;
 
-		if ( !thisIC->GetItem(0)->wallet.IsEmpty() ) {
+		if (!thisIC->GetItem(0)->wallet.IsEmpty()) {
 			needVaultRun = true;
 		}
 
-		if ( needVaultRun == false ) {
-			for( int i=1; i<thisIC->NumItems(); ++i ) {
-				const GameItem* item = thisIC->GetItem( i );
-				if ( item->Intrinsic() )
+		if (needVaultRun == false) {
+			for (int i = 1; i < thisIC->NumItems(); ++i) {
+				const GameItem* item = thisIC->GetItem(i);
+				if (item->Intrinsic())
 					continue;
-				if ( item->ToRangedWeapon() || item->ToMeleeWeapon() || item->ToShield() )
+				if (item->ToRangedWeapon() || item->ToMeleeWeapon() || item->ToShield())
 				{
 					needVaultRun = true;
 					break;
 				}
 			}
 		}
-		if ( needVaultRun ) {
+		if (needVaultRun) {
 			Vector2I sector = ToSector(parentChit->Position());
 			Vector2F pos = ToWorld2F(parentChit->Position());
-			Chit* vault = Context()->chitBag->FindBuilding(	ISC::vault, 
-															sector, 
-															&pos,
-															LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
-			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
-				GLASSERT( msc );
+			Chit* vault = Context()->chitBag->FindBuilding(ISC::vault,
+														   sector,
+														   &pos,
+														   LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
+			if (vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory()) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(vault, SpatialComponent, MapSpatialComponent);
+				GLASSERT(msc);
 				CoreScript* coreScript = CoreScript::GetCore(ToSector(msc->MapPosition()));
-				if ( msc && coreScript ) {
+				if (msc && coreScript) {
 					Rectangle2I porch = msc->PorchPos();
 					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
 						if (!coreScript->HasTask(it.Pos())) {
@@ -1888,8 +1899,8 @@ bool AIComponent::ThinkDelivery(  )
 	if (worker || usesBuilding)
 	{
 		for (int pass = 0; pass < 2; ++pass) {
-			const IString iItem     = (pass == 0) ? ISC::elixir : ISC::fruit;
-			const IString iBuilding = (pass == 0) ? ISC::bar    : ISC::distillery;
+			const IString iItem = (pass == 0) ? ISC::elixir : ISC::fruit;
+			const IString iBuilding = (pass == 0) ? ISC::bar : ISC::distillery;
 
 			const GameItem* item = thisIC->FindItem(iItem);
 			if (item) {
@@ -2178,11 +2189,11 @@ void AIComponent::ThinkNormal(  )
 	if (ThinkWaypoints())
 		return;
 
-	if (ThinkWanderEat())
-		return;
 	if (ThinkLoot())
 		return;
 	if (ThinkHungry())
+		return;
+	if (ThinkCollectNearFruit())
 		return;
 
 	// Be sure to deliver before collecting!
@@ -2258,10 +2269,12 @@ void AIComponent::ThinkBattle()
 	}
 	const Vector3F pos = parentChit->Position();
 	Vector2F pos2 = { pos.x, pos.z };
-	//Vector2I sector = ToSector(pos2);
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
+
+	// Call out to eat food, if we have it.
+	ThinkHungry();
 
 	// Use the current or reserve - switch out later if we need to.
 	const RangedWeapon* rangedWeapon = thisIC->QuerySelectRanged();
@@ -2664,22 +2677,21 @@ void AIComponent::EnterNewGrid()
 	}
 
 
-	// Is there food to eat?
-	if (gameItem->HPFraction() < EAT_WILD_FRUIT) {
+	// Is there food to eat or collect?
+	// Here, just collect. There is another
+	// bit of logic (ThinkHungry) to eat fruit.
+	// (Too much duplicated logic in the AI code!)
+	if (thisIC->CanAddToInventory()) {
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 		CChitArray arr;
 		Context()->chitBag->QuerySpatialHash(&arr, pos2, 0.7f, 0, &fruitFilter);
 
-		for (int i = 0; i < arr.Size(); ++i) {
-			//const GameItem* item = arr[i]->GetItem();
-			gameItem->hp = gameItem->TotalHP();
-			RenderComponent* rc = parentChit->GetRenderComponent();
-			if (rc) {
-				parentChit->GetRenderComponent()->AddDeco("fruit", STD_DECO);
-			}
+		for (int i = 0; i < arr.Size() && thisIC->CanAddToInventory(); ++i) {
+			ItemComponent* ic = arr[i]->GetItemComponent();
+			arr[i]->Remove(ic);
+			thisIC->AddToInventory(ic);
 			Context()->chitBag->DeleteChit(arr[i]);
-			break;
 		}
 	}
 

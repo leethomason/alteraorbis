@@ -1281,3 +1281,16 @@ void ItemComponent::ApplyLootLimits()
 		}
 	}
 }
+
+
+int ItemComponent::NumItems(const grinliz::IString& istr)
+{
+	int count = 0;
+	for (int i = 0; i < itemArr.Size(); ++i) {
+		const GameItem* gameItem = itemArr[i];
+		if (gameItem && gameItem->IName() == istr) {
+			++count;
+		}
+	}
+	return count;
+}

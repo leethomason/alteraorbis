@@ -162,7 +162,7 @@ private:
 	grinliz::Vector3F EnemyPos(int id, bool target);
 
 	// Returns true if this action was actually taken.
-	bool ThinkWanderEat();
+	bool ThinkCollectNearFruit();
 	bool ThinkCriticalShopping();
 	bool ThinkNeeds();
 	bool ThinkLoot();

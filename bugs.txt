@@ -27,12 +27,8 @@ x peace button
 	- DOMAIN_TAKEOVER message not correct
 	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
 	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
-- tests
-	- console output
-	- spatial hash query
 
 x remove industrial from switches
-t switch should fire if avatar goes there
 d flag - for local control - awkward. just click switches to go there
 x kiosks higher on recommendation list
 x weapon stats: write units
@@ -41,31 +37,36 @@ x don’t build up a squad if deployed
 x auto-pickup loot? obnoxious, but list isn’t great either
 x shield value over-accounts for reload time
 x CoreScript attacking should account for Attitude
-t Attitude and Diplomacy display strange (integrate to one??)
-t Should I pull out Domain names?
+x Should I pull out Domain names?
 x domain name above core
 x top down: can’t tell on switch from off switch. 
 x map glow not always correct
+x move coreCreateList to LumosChitBag virtual doTick()
+x test fruit collect / delivery cycle
+x GT: new rotation UI (2/20/2015)
+t Attitude and Diplomacy display strange (integrate to one??)
+t elixir needs to decay
 t lesser mobs not distributing enough
-- move coreCreateList to LumosChitBag virtual doTick()
+t switch should fire if avatar goes there
+t elixir and fruit need to get picked up
+t GT: food as medkit
+t Make sure cyclops eat food
 - Linux: where are the save files? Where should they be?
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
 - where are all the crystals???
-- elixir and fruit need to get picked up
-- elixir needs to decay
-- core click through broken
 
+- core click through broken
+- unit tests
+	- console output
+	- spatial hash query
 - detail view of building w/ mouse down
 - name of buildings - pop up? info?
 - cross swords on map: fighting there? confusing icons
 - detector beam
 - teleport out on war switch
 - world gen too slow in debug
-- GT: food as medkit
-- GT: suggestion - pick up and use food as medkit
-- GT: new rotation UI (2/20/2015)
 - GT: player portrait size should match enemy portrait size (2/20/2015)
 
 - attack focus needs tweaking. attack ground needs tweaking.

@@ -189,7 +189,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		domain = sd.name;
 	}
 
-	IString firstTeamName = Team::IsCoreController(firstTeam) ? Team::Instance()->TeamName(firstTeam) : IString();
+	IString firstTeamName  = Team::IsCoreController(firstTeam) ? Team::Instance()->TeamName(firstTeam) : IString();
 	IString secondTeamName = Team::IsCoreController(secondTeam) ? Team::Instance()->TeamName(secondTeam) : IString();
 
 	switch (what) {
@@ -305,3 +305,19 @@ void NewsEvent::Serialize(XStream* xs)
 	XarcClose(xs);
 }
 
+
+// Want to unit test the NewsEvent messages without a ton of 
+// code. Maybe a lesson that in needs the entire item structure.
+void NewsEvent::Test()
+{
+	/*
+	ItemDefDB* itemDefDB = new ItemDefDB();
+	itemDefDB->Load("res/itemdef.xml");
+
+	ItemDB* itemDB = new ItemDB();
+
+
+	delete itemDB;
+	delete itemDefDB;
+	*/
+}

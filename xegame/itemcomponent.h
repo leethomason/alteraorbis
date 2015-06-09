@@ -50,6 +50,7 @@ public:
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	int NumItems() const							{ return itemArr.Size(); }
+	int NumItems(const grinliz::IString& istr);
 	GameItem* GetItem()								{ return itemArr[0]; }
 	const GameItem* GetItem( int index=0 ) const	{ return ( index < itemArr.Size()) ? itemArr[index] : 0; }
 

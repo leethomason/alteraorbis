@@ -73,6 +73,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 #ifdef DEBUG
 	Matrix4::Test();
 	ChitBag::Test();
+	NewsEvent::Test();
 #endif
 
 	scenePopQueued = false;

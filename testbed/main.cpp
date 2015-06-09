@@ -4,6 +4,8 @@
 #include "../grinliz/glspatialhash.h"
 #include "../grinliz/glthreadpool.h"
 
+#include "../game/news.h"
+
 #include <chrono>
 #include <thread>
 

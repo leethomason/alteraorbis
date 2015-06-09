@@ -426,6 +426,10 @@ public:
 		return f;
 	} 
 
+	void FullHeal() {
+		hp = TotalHP();
+	}
+
 	void AbsorbDamage( const DamageDesc& dd );
 
 	static int idPool;

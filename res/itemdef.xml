@@ -776,6 +776,7 @@
         flags="CLICK_THROUGH FLAMMABLE SHOCKABLE"
         mass="8"
         baseHP="10"
+        selfDestruct="120"
         />
 
 </items>

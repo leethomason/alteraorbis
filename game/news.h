@@ -74,6 +74,8 @@ public:
 
 	static grinliz::IString IDToName( int id, bool shortName );
 
+	static void Test();
+
 private:
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened
