@@ -1815,7 +1815,7 @@ bool AIComponent::ThinkHungry()
 	bool carrying = fruit || elixir;
 
 	// Are we carrying fruit?? If so, eat if hungry!
-	if (carrying && () {
+	if (carrying) {
 		if (((gameItem->flags & GameItem::HAS_NEEDS) && needs.Value(Needs::FOOD) < NEED_CRITICAL)	// hungry
 			|| (gameItem->HPFraction() < 0.4f))														// hurt
 		{
