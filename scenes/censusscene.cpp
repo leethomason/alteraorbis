@@ -223,7 +223,8 @@ void CensusScene::Scan()
 		nChits += arr.Size();
 
 		for (int i = 0; i < arr.Size(); ++i) {
-			ItemComponent* ic = arr[i]->GetItemComponent();
+			Chit* chit = arr[i];
+			ItemComponent* ic = chit->GetItemComponent();
 			if (!ic) continue;
 
 			for (int j = 0; j < ic->NumItems(); ++j) {

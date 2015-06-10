@@ -2681,7 +2681,7 @@ void AIComponent::EnterNewGrid()
 	// Here, just collect. There is another
 	// bit of logic (ThinkHungry) to eat fruit.
 	// (Too much duplicated logic in the AI code!)
-	if (thisIC->CanAddToInventory()) {
+	if (thisIC->CanAddToInventory() && visitorIndex < 0) {
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 		CChitArray arr;

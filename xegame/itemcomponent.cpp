@@ -85,14 +85,17 @@ void ItemComponent::InitFrom(const GameItem* items[], int nItems)
 }
 
 
-void ItemComponent::DebugStr( grinliz::GLString* str )
+void ItemComponent::DebugStr(grinliz::GLString* str)
 {
 	const GameItem* item = itemArr[0];
 	int group = 0, id = 0;
 	Team::SplitID(item->Team(), &group, &id);
-	str->AppendFormat( "[Item] %s hp=%.1f/%d tm=%d,%d ", 
-		item->Name(), item->hp, item->TotalHP(),
-		group, id );
+	str->AppendFormat("[Item] %s hp%%=%.1f W=%d,%d/%d/%d/%d team=%d,%d ",
+					  item->Name(),
+					  item->HPFraction(),
+					  item->wallet.Gold(),
+					  item->wallet.Crystal(0), item->wallet.Crystal(1), item->wallet.Crystal(2), item->wallet.Crystal(3),
+					  group, id);
 }
 
 

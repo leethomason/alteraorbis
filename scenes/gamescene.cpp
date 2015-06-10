@@ -397,15 +397,17 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	// --- Info and debugging info. ---
 	Vector3F at = { 0, 0, 0 };
 	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, Model::MODEL_CLICK_THROUGH, 0, &at );
-
 	MoveModel( mv.model ? mv.model->userData : 0 );
 
-	if ( mv.model && mv.model->userData ) {
-		infoID = mv.model->userData->ID();
-	}
-	voxelInfoID = ToWorld2I(at);
-
 	SetSelectionModel( view );
+
+	// Debugging output:
+	ModelVoxel mv2 = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
+	voxelInfoID = ToWorld2I(at);
+	if ( mv2.model && mv2.model->userData ) {
+		infoID = mv2.model->userData->ID();
+	}
+
 }
 
 

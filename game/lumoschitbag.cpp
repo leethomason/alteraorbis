@@ -636,7 +636,7 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& _pos, Wallet* src, 
 	Vector3F pos = _pos;
 	if ( fuzz ) {
 		pos.x = floorf(_pos.x) + random.Uniform();
-		pos.z = floorf(_pos.y) + random.Uniform();
+		pos.z = floorf(_pos.z) + random.Uniform();
 	}
 
 	int crystal = -1;

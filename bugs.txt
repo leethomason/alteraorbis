@@ -44,6 +44,7 @@ x map glow not always correct
 x move coreCreateList to LumosChitBag virtual doTick()
 x test fruit collect / delivery cycle
 x GT: new rotation UI (2/20/2015)
+x where are all the crystals???
 t Attitude and Diplomacy display strange (integrate to one??)
 t elixir needs to decay
 t lesser mobs not distributing enough
@@ -55,7 +56,6 @@ t Make sure cyclops eat food
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
-- where are all the crystals???
 
 - core click through broken
 - unit tests
