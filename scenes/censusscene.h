@@ -108,6 +108,7 @@ private:
 		GROUP_ITEMS,
 		GROUP_CRAFTING,
 		GROUP_DOMAINS,
+		GROUP_ACTIVE_DOMAINS,
 		GROUP_DATA,
 		NUM_GROUPS
 	};
@@ -123,7 +124,7 @@ private:
 	gamui::PushButton	link[MAX_ROWS];
 	gamui::TextLabel	label[MAX_ROWS];
 	gamui::ToggleButton	radio[NUM_GROUPS];
-	gamui::TextLabel	censusData;
+	gamui::TextLabel	censusData, censusDomains;
 
 	grinliz::HashTable<int, Chit*>	itemIDToChitMap;
 

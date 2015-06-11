@@ -31,13 +31,14 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 		label[i].SetTab(100);
 	}
 	for (int i = 0; i < NUM_GROUPS; ++i) {
-		static const char* NAME[NUM_GROUPS] = { "Notable", MOB_KILLS, "Greater\n" MOB_KILLS, "Items", "Crafting", "Domains", "Data" };
+		static const char* NAME[NUM_GROUPS] = { "Notable", MOB_KILLS, "Greater\n" MOB_KILLS, "Items", "Crafting", "Domains", "Active\nDomains", "Data" };
 		radio[i].Init(&gamui2D, game->GetButtonLook(0));
 		radio[i].SetText(NAME[i]);
 		radio[0].AddToToggleGroup(&radio[i]);
 	}
 	radio[0].SetDown();
 	censusData.Init(&gamui2D);
+	censusDomains.Init(&gamui2D);
 
 	Scan();
 
@@ -84,11 +85,43 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 	const Wallet& reserveWallet = *ReserveBank::Instance()->GetWallet();
 	simStr.AppendFormat("Au\t%d\nGreen\t%d\nRed\t%d\nBlue\t%d\nViolet\t%d\n", reserveWallet.Gold(), reserveWallet.Crystal(1), reserveWallet.Crystal(1), reserveWallet.Crystal(2), reserveWallet.Crystal(3));
 
-
 	simStr.append("\n\n");
 
 	censusData.SetText(simStr.safe_str());
 	censusData.SetVisible(false);
+
+	GLString domainStr;
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			Vector2I sector = { i, j };
+			CoreScript* cs = CoreScript::GetCore(sector);
+			if (cs && cs->InUse()) {
+				int team = cs->ParentChit()->Team();
+				int superTeam = Team::Instance()->SuperTeam(team);
+				IString teamName = Team::Instance()->TeamName(team);
+
+				if (team == superTeam) {
+					// If super-team, print.
+					IString groupName = Team::Instance()->TeamName(Team::Group(team));
+
+					domainStr.AppendFormat("%c%d\t%s\t%s\n", 'A' + sector.x, 1 + sector.y, teamName.safe_str(), groupName.safe_str());
+					// And then print the sub-teams.
+					for (int c = 0; c < Team::Instance()->NumControl(); ++c) {
+						const Team::Control& control = Team::Instance()->GetControl(c);
+						if (control.super == superTeam) {
+							CoreScript* subCS = CoreScript::GetCoreFromTeam(control.sub);
+							GLASSERT(subCS);
+							Vector2I subSector = ToSector(subCS->ParentChit()->Position());
+							IString subTeamName = Team::Instance()->TeamName(control.sub);
+							domainStr.AppendFormat("    %c%d %s\n", 'A' + subSector.x, 1 + subSector.y, subTeamName.safe_str());
+						}
+					}
+				}
+			}
+		}
+	}
+	censusDomains.SetText(domainStr.safe_str());
+	censusDomains.SetVisible(false);
 
 	DoLayout(true);
 }
@@ -115,8 +148,10 @@ void CensusScene::Resize()
 	}
 
 	layout.PosAbs(&censusData, 3, 0);
-	//censusData.SetBounds(port.UIWidth() / 2, 0);
 	censusData.SetTab(layout.Width()*2.0f);
+
+	layout.PosAbs(&censusDomains, 3, 0);
+	censusDomains.SetTab(layout.Width()*2.0f);
 }
 
 
@@ -282,7 +317,6 @@ void CensusScene::DoLayout(bool first)
 {
 	ReserveBank* reserve = ReserveBank::Instance();
 	const Wallet& reserveWallet = reserve->wallet;
-//	NewsHistory* history = chitBag->GetNewsHistory();
 	GLString str;
 
 	if (first) {
@@ -372,6 +406,7 @@ void CensusScene::DoLayout(bool first)
 		}
 	}
 	censusData.SetVisible(radio[GROUP_DATA].Down());
+	censusDomains.SetVisible(radio[GROUP_ACTIVE_DOMAINS].Down());
 }
 
 

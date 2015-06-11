@@ -104,6 +104,13 @@ public:
 	bool War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
 	int  Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
 
+	struct Control {
+		int super;
+		int sub;
+	};
+	int NumControl() const { return control.Size(); }
+	const Control& GetControl(int i) const { return control[i]; }
+
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)
 			*group = (t & 0xff);
@@ -221,10 +228,6 @@ private:
 
 	grinliz::CDynArray<SymmetricTK> treaties;
 
-	struct Control {
-		int super;
-		int sub;
-	};
 	grinliz::CDynArray<Control> control;
 
 	static Team* instance;
