@@ -473,3 +473,12 @@ int Team::SuperTeam(int team) const
 	return team;
 }
 
+
+int Team::IsController(int team) const
+{
+	for (int i = 0; i < control.Size(); ++i) {
+		if (control[i].super == team)
+			return true;
+	}
+	return false;
+}

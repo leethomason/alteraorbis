@@ -236,6 +236,11 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		}
 		break;
 
+		case SUPERTEAM_DELETED:
+		GLASSERT(firstTeam);
+		str->Format("%.2f: %s super domain %s " MOB_destroyed ". Sub-domains are now self controlled.", age, firstTeamName.safe_str(), domain.safe_str());
+		break;
+
 		case FORGED:
 		str->Format("%.2f: %s forged %s at %s.", age, secondName.safe_str(), firstName.c_str(), domain.safe_str());
 		break;

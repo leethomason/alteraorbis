@@ -148,9 +148,14 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 	if (!compact) {
 		const char* owner = "";
 		if (coreScript->InUse()) {
-			owner = Team::Instance()->TeamName(coreScript->ParentChit()->Team()).safe_str();
+			int team = coreScript->ParentChit()->Team();
+			int superTeam = Team::Instance()->SuperTeam(team);
+			owner = Team::Instance()->TeamName(team).safe_str();
 			Vector2I base = { 0, 0 };
-			TeamGen::TeamBuildColors(coreScript->ParentChit()->Team(), &base, 0, 0);
+
+			// Use the team colors from the super team on the map,
+			// so we can tell who controls whom
+			TeamGen::TeamBuildColors(superTeam, &base, 0, 0);
 			RenderAtom atom = LumosGame::CalcPaletteAtom(base.x, base.y);
 			image[SUPER_TEAM_COLOR].SetAtom(atom);
 		}

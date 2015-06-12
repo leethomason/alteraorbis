@@ -55,6 +55,7 @@ private:
 	void SetMapBright(bool bright);
 	void BlendLine( int y );
 
+	bool		debugFPS;
 	WorldGen*	worldGen;
 	RockGen*	rockGen;
 	WorldMap*	worldMap;

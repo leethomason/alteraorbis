@@ -110,6 +110,7 @@ public:
 	};
 	int NumControl() const { return control.Size(); }
 	const Control& GetControl(int i) const { return control[i]; }
+	int IsController(int team) const;
 
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)

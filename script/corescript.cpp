@@ -190,7 +190,7 @@ void CoreScript::OnRemove()
 void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	// Logic split between Sim::OnChitMsg and CoreScript::OnChitMsg
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED && (chit == parentChit)) {
 		while (!citizens.Empty()) {
 			int citizenID = citizens.Pop();
 			Chit* citizen = Context()->chitBag->GetChit(citizenID);
@@ -199,10 +199,15 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				citizen->GetItem()->SetRogue();
 			}
 		}
-		Team::Instance()->RemoveSuperTeam(chit->Team());
 
 		Vector2I pos2i = ToWorld2I(chit->Position());
 		Vector2I sector = ToSector(pos2i);
+
+		if (Team::Instance()->IsController(chit->Team())) {
+			NewsEvent news(NewsEvent::SUPERTEAM_DELETED, ToWorld2F(pos2i), chit->GetItemID(), 0);
+			Context()->chitBag->GetNewsHistory()->Add(news);
+			Team::Instance()->RemoveSuperTeam(chit->Team());
+		}
 
 		int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
 		Chit* deleter = Context()->chitBag->GetChit(deleterID);

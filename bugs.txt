@@ -20,10 +20,10 @@ x peace button
 	- news events of 
 		- aquisition, 
 		- loss, and 
-		- fall of super-domain
+		x fall of super-domain
 		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
-	- enemy/neutral/friend messages: don't show (core) show the domain name
+	x enemy/neutral/friend messages: don't show (core) show the domain name
 	- DOMAIN_TAKEOVER message not correct
 	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
 	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
@@ -39,12 +39,12 @@ x shield value over-accounts for reload time
 x CoreScript attacking should account for Attitude
 x Should I pull out Domain names?
 x domain name above core
-x top down: can’t tell on switch from off switch. 
 x map glow not always correct
 x move coreCreateList to LumosChitBag virtual doTick()
 x test fruit collect / delivery cycle
 x GT: new rotation UI (2/20/2015)
 x where are all the crystals???
+t top down: can’t tell on switch from off switch. 
 t Attitude and Diplomacy display strange (integrate to one??)
 t elixir needs to decay
 t lesser mobs not distributing enough
@@ -56,6 +56,7 @@ t Make sure cyclops eat food
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
+- House -> Human
 
 - core click through broken
 - unit tests
