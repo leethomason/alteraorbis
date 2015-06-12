@@ -30,13 +30,16 @@ void MapGridWidget::Init(Gamui* gamui2D)
 	image[SUPER_TEAM_COLOR].SetLevel(layer);
 
 	layer = Gamui::LEVEL_FOREGROUND + 2;
+	image[SUPER_TEAM_ALT_COLOR].SetLevel(layer);
+
+	layer = Gamui::LEVEL_FOREGROUND + 3;
 	image[FACE_IMAGE_0].SetLevel(layer);
 	image[FACE_IMAGE_1].SetLevel(layer);
 	image[FACE_IMAGE_2].SetLevel(layer);
 	image[CIV_TECH_IMAGE].SetLevel(layer);
 	image[DIPLOMACY_IMAGE].SetLevel(layer);
 
-	layer = Gamui::LEVEL_FOREGROUND + 3;
+	layer = Gamui::LEVEL_FOREGROUND + 4;
 	image[MOB_COUNT_IMAGE_0].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_1].SetLevel(layer);
 	image[MOB_COUNT_IMAGE_2].SetLevel(layer);
@@ -109,6 +112,9 @@ void MapGridWidget::DoLayout()
 
 	image[SUPER_TEAM_COLOR].SetSize(w, dh);
 	image[SUPER_TEAM_COLOR].SetPos(x, y);
+	static const float ALT_SIZE = 0.33f;
+	image[SUPER_TEAM_ALT_COLOR].SetSize(w, dh*ALT_SIZE);
+	image[SUPER_TEAM_ALT_COLOR].SetPos(x, y + (1.0f - ALT_SIZE)*dh);
 
 	for (int i = 0; i < NUM_FACE_IMAGES; ++i) {
 		float fy = compact ? y : y + dh;
@@ -151,16 +157,20 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 			int team = coreScript->ParentChit()->Team();
 			int superTeam = Team::Instance()->SuperTeam(team);
 			owner = Team::Instance()->TeamName(team).safe_str();
-			Vector2I base = { 0, 0 };
 
+			Vector2I base = { 0, 0 };
+			Vector2I contrast = { 0, 0 };
 			// Use the team colors from the super team on the map,
 			// so we can tell who controls whom
-			TeamGen::TeamBuildColors(superTeam, &base, 0, 0);
-			RenderAtom atom = LumosGame::CalcPaletteAtom(base.x, base.y);
-			image[SUPER_TEAM_COLOR].SetAtom(atom);
+			TeamGen::TeamBuildColors(superTeam, &base, &contrast, 0);
+			RenderAtom atomBase = LumosGame::CalcPaletteAtom(base.x, base.y);
+			RenderAtom atomContrast = LumosGame::CalcPaletteAtom(contrast.x, contrast.y);
+			image[SUPER_TEAM_COLOR].SetAtom(atomBase);
+			image[SUPER_TEAM_ALT_COLOR].SetAtom(atomContrast);
 		}
 		else {
 			image[SUPER_TEAM_COLOR].SetAtom(RenderAtom());
+			image[SUPER_TEAM_ALT_COLOR].SetAtom(RenderAtom());
 		}
 		str.Format("%s\n%s", sd.name.c_str(), owner);
 		textLabel.SetText(str.safe_str());

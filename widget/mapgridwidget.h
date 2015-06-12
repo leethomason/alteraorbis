@@ -36,10 +36,10 @@ private:
 	float				width = 100.0f;
 	float				height = 100.0f;
 	gamui::TextLabel	textLabel;
-	//gamui::TextLabel	dScore;
 
 	enum {
 		SUPER_TEAM_COLOR,
+		SUPER_TEAM_ALT_COLOR,
 
 		FACE_IMAGE_0,
 		FACE_IMAGE_1,

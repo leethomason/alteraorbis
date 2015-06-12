@@ -56,8 +56,8 @@ t Make sure cyclops eat food
 - Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
-- House -> Human
 
+- House -> Human
 - core click through broken
 - unit tests
 	- console output
