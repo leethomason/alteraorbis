@@ -666,12 +666,11 @@ int CoreScript::NumTemples()
 
 int CoreScript::MaxCitizens()
 {
-//	int team = parentChit->Team();
-
 	CChitArray chitArr;
 	Context()->chitBag->FindBuildingCC( ISC::bed, sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, 0 );
 	int nBeds = chitArr.Size();
 	int nTemples = NumTemples();
+	GLASSERT(nTemples >= 0);
 
 	int n = CoreScript::MaxCitizens(nTemples);
 	return Min(n, nBeds);
@@ -690,7 +689,7 @@ void CoreScript::DoTickInUse(int /*delta*/, int nSpawnTicks)
 	Vector2I pos2i = ms->MapPosition();
 	//Vector2I sector = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 
-	if (nSpawnTicks && Team::Group(parentChit->Team())) {
+	if (nSpawnTicks && Team::IsDenizen(parentChit->Team())) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
 		int nCitizens = this->Citizens(0);
