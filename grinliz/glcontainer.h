@@ -740,8 +740,10 @@ private:
 				GetValue( 0 );	// trick to copy the hashtable
 			}
 
+			int oldNItems = nItems;
 			int n = CeilPowerOf2( nItems*3 );
 			if ( n < 16 ) n = 16;
+			if (n < oldNItems) n = oldNItems;	// because nDeleted may be the driving number.
 
 			// Don't need to reallacote if n <= nBuckets,
 			// but DO need to re-initialize.
