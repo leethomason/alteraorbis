@@ -422,7 +422,7 @@ Chit* CoreScript::PrimeCitizen()
 		int id = citizens[i];
 		Chit* chit = CitizenFilter(id);
 		if (chit && chit->GetItem()) {
-			if (chit->GetItem()->keyValues.Has("prime")) {
+			if (chit->GetItem()->keyValues.Has(ISC::prime)) {
 				return chit;
 			}
 		}

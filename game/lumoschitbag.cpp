@@ -733,7 +733,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 	chit->SetPosition( pos );
 	chit->Add( new HealthComponent());
 
-	if (!selfDestructTimer && orphanItem->keyValues.Has("selfDestruct")) {
+	if (!selfDestructTimer && orphanItem->keyValues.Has(ISC::selfDestruct)) {
 		orphanItem->keyValues.Get("selfDestruct", &selfDestructTimer);
 		selfDestructTimer *= 1000;
 	}

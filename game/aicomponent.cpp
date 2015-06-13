@@ -364,8 +364,12 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 
 		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
-
+		
 		CChitArray arr[NFILTER];
+
+		// Don't attack buildings if there isn't a central core.
+		CoreScript* cs = CoreScript::GetCore(ToSector(center));
+		bool inUse = (cs && cs->InUse());
 
 		// Add extra friends or enemies into the list.
 		for (int i = 0; i < chitArr.Size(); ++i) {
@@ -375,6 +379,11 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			const GameItem* item = chit->GetItem();
 			if (!item) continue;
 			if (item->flags & GameItem::AI_NOT_TARGET) continue;
+
+			// REMEMBER: because I've made this miskake 20 times, the
+			//			 path to a building will always fail, because the building
+			//			 is blocking the path. So the return value of 'path' needs
+			//			 to keep that in mind.
 
 			bool path = fullSectorAware
 				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()));
@@ -388,8 +397,16 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			else if (path && coreFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
 				arr[1].PushIfCap(chit);
 			}
-			else if (path && buildingFilter.Accept(chit) && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID())) {
-				arr[2].PushIfCap(chit);
+			else if (   inUse 
+					 && buildingFilter.Accept(chit) 
+					 && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID()))
+			{
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+				GLASSERT(msc);
+				Rectangle2I buildingBounds = msc->Bounds();
+				if (Context()->worldMap->HasStraightPathBeside(center, buildingBounds)) {
+					arr[2].PushIfCap(chit);
+				}
 			}
 		}
 		for (int k = 0; k < NFILTER; ++k) {
