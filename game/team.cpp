@@ -266,6 +266,10 @@ ERelate Team::GetRelationship(Chit* chit0, Chit* chit1)
 
 ERelate Team::GetRelationship(int t0, int t1)
 {
+	if (t0 == t1) {
+		return t0 == TEAM_CHAOS ? ERelate::ENEMY : ERelate::FRIEND;
+	}
+
 	TeamKey tk0(t0, t1);
 	TeamKey tk1(t1, t0);
 	int d0 = 0, d1 = 0;

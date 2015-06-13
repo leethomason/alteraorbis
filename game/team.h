@@ -188,7 +188,7 @@ private:
 		}
 		static U32 Hash(const TeamKey& t) {
 			// Shifter2
-			U32 x = t.t0 ^ t.t1;
+			U32 x = t.t0 + t.t1;
 			x += ( x << 10u );
 			x ^= ( x >>  6u );
 			x += ( x <<  3u );
