@@ -121,5 +121,5 @@ bool SettingsManager::DebugUI() const
 
 bool SettingsManager::DebugFPS() const
 {
-	return Read("Debug", "", false);
+	return Read("Debug", "debugFPS", false);
 }

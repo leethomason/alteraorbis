@@ -357,6 +357,8 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 	stack.Push(start);
 	flag.Set(start.x - outerBounds.min.x, start.y - outerBounds.min.y);
 
+	Rectangle2I mapBounds = worldMap->Bounds();
+
 	int nFalls = 0;
 
 	while (!stack.Empty() && fill.HasCap()) {
@@ -376,6 +378,8 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 
 		for (int k = 0; k < NDIR; ++k) {
 			Vector2I q = p + DIR[k];
+			if (!mapBounds.Contains(q)) continue;
+
 			Vector2I qLoc = { q.x - outerBounds.min.x, q.y - outerBounds.min.y };
 
 			int qIndex = worldMap->INDEX(q);

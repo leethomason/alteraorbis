@@ -1,6 +1,8 @@
 #include "census.h"
 
+#include "../grinliz/glstringutil.h"
 #include "../script/itemscript.h"
+#include "../game/team.h"
 
 
 void Census::AddMOB(const grinliz::IString& name)
@@ -75,3 +77,15 @@ void Census::NumByType(int *lesser, int *greater, int *denizen)
 	}
 }
 
+
+int Census::NumCoresOfTeam(int group) const
+{
+	grinliz::IString name = Team::Instance()->TeamName(Team::Group(group));
+	int count = 0;
+	for (int i = 0; i < coreItems.Size(); ++i) {
+		if (coreItems[i].name == name) {
+			count += coreItems[i].count;
+		}
+	}
+	return count;
+}

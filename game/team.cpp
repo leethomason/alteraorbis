@@ -6,6 +6,7 @@
 #include "../xegame/istringconst.h"
 #include "../xegame/chit.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/chitcontext.h"
 #include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
@@ -368,6 +369,14 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 			d += treaties[idx].peaceTimer * 10 / TREATY_TIME;
 		}
 	}
+
+	// Too much of one group.
+	const Census& census = center->ParentChit()->Context()->chitBag->census;	// FIXME clearly a path out of scope
+	int numCores = census.NumCoresOfTeam(Team::Group(evalTeam));
+	if (numCores >= TYPICAL_AI_DOMAINS / 2)
+		d--;
+	if (numCores >= TYPICAL_AI_DOMAINS * 3 / 4)
+		d--;
 
 	// Control!
 	if ((evalTeam == SuperTeam(centerTeam)) || (centerTeam == SuperTeam(evalTeam))) {
