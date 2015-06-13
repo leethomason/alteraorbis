@@ -349,7 +349,10 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		friendList2.Clear();
 		int saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
 		enemyList2.Clear();
-		if (saveTarget) enemyList2.Push(saveTarget);
+		// FIXME: will keep structure targets (<0) over MOB targets (>0).
+		//        but filtering below makes this a little tricky to fix
+		if (saveTarget) 
+			enemyList2.Push(saveTarget);
 
 		MOBIshFilter mobFilter;
 		BuildingFilter buildingFilter;
@@ -2681,7 +2684,7 @@ void AIComponent::EnterNewGrid()
 	// Here, just collect. There is another
 	// bit of logic (ThinkHungry) to eat fruit.
 	// (Too much duplicated logic in the AI code!)
-	if (thisIC->CanAddToInventory() && visitorIndex < 0) {
+	if (thisIC->CanAddToInventory() && visitorIndex < 0 && !parentChit->PlayerControlled()) {
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 		CChitArray arr;
@@ -2708,6 +2711,29 @@ void AIComponent::EnterNewGrid()
 				thisIC->AddToInventory(ic);
 				Context()->chitBag->DeleteChit(arr[i]);
 			}
+		}
+	}
+
+	// Auto-pickup for avatar.
+	if (parentChit->PlayerControlled()) {
+		// ONLY check this one grid. If we drop something,
+		// don't want to immediately pick back up.
+		Rectangle2I b;
+		b.min = b.max = pos2i;
+		LootFilter filter;
+		CChitArray arr;
+		Context()->chitBag->QuerySpatialHash(&arr, b, 0, &filter);
+		// Pick up the most valuable stuff first. We'll pull off
+		// the end, so sort to increasing value.
+		arr.Sort([](Chit* a, Chit* b) {
+			return a->GetItem()->GetValue() < b->GetItem()->GetValue();
+		});
+		while (!arr.Empty() && thisIC->CanAddToInventory()) {
+			Chit* loot = arr.Pop();
+			ItemComponent* ic = loot->GetItemComponent();
+			loot->Remove(ic);
+			thisIC->AddToInventory(ic);
+			Context()->chitBag->DeleteChit(loot);
 		}
 	}
 
@@ -3105,7 +3131,6 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	   */
 
 	Vector2I mapPos = ToWorld2I(parentChit->Position());
-	//Vector2I sector = ToSector(mapPos);
 
 	switch (msg.ID()) {
 		case ChitMsg::CHIT_DAMAGE:

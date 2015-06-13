@@ -137,13 +137,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	chitTracking = GetPlayerChitID();
 
+#if 0
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 	}
+#endif
 
-//	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
-//	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
 	dateLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
@@ -291,9 +291,11 @@ void GameScene::Resize()
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
 
+#if 0
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
+#endif
 
 	layout.PosAbs(&startGameWidget, 2, 2, 5, 5);
 	layout.PosAbs(&endGameWidget, 2, 2, 5, 5);
@@ -1242,6 +1244,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
+#if 0
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		if ( i < pickupData.Size() && item == &pickupButton[i] ) {
 			Chit* playerChit = GetPlayerChit();
@@ -1253,6 +1256,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+#endif
 
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
 		if (item == &menu->squadBar[i].hitBounds) {
@@ -1578,6 +1582,7 @@ void GameScene::SetBuildButtons(const int* arr)
 }
 #endif
 
+#if 0
 void GameScene::SetPickupButtons()
 {
 	Chit* player = GetPlayerChit();
@@ -1625,7 +1630,7 @@ void GameScene::SetPickupButtons()
 			pickupButton[i].SetVisible( false );
 	}
 }
-
+#endif
 
 void GameScene::DoTick( U32 delta )
 {
@@ -1636,7 +1641,7 @@ void GameScene::DoTick( U32 delta )
 		sim->DoTick(delta);
 	}
 	menu->DoTick(GetHomeCore(), buildingCounts, BuildScript::NUM_PLAYER_OPTIONS);
-	SetPickupButtons();
+//	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		const auto& current = sim->GetChitBag()->GetCurrentNews();

@@ -132,7 +132,6 @@ void MapGridWidget::DoLayout()
 	image[DIPLOMACY_IMAGE].SetPos(fx, fy);
 
 	image[ATTITUDE_IMAGE].SetCenterPos(x + dw*1.5f, y + dh * 2.5f);
-	//image[ATTITUDE_IMAGE].SetPos(fx, fy);
 }
 
 

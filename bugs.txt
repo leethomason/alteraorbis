@@ -24,9 +24,9 @@ x peace button
 		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	- rules for sub-teams (must be adjacent? near?)
 	x enemy/neutral/friend messages: don't show (core) show the domain name
-	- DOMAIN_TAKEOVER message not correct
 	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
 	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+	- DOMAIN_TAKEOVER message not correct
 
 x remove industrial from switches
 d flag - for local control - awkward. just click switches to go there
@@ -52,11 +52,15 @@ t switch should fire if avatar goes there
 t elixir and fruit need to get picked up
 t GT: food as medkit
 t Make sure cyclops eat food
+t Profiler not working on Linux
+x avatar shouldn't pick up food and elixir
 - Linux: where are the save files? Where should they be?
-- Profiler not working on Linux
 - make sure domain takeover works in next version
 - AI not attacking buildings
+- bug where awareness lost re-introduced
+- shrink crystal a bit (3d model)
 
+- Avatar gives up on movement path too easily (if hits obstruction)
 - House -> Human
 - core click through broken
 - unit tests

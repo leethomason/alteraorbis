@@ -84,7 +84,7 @@ private:
 	void ClearTargetFlags();
 	void SetBars(Chit* chit, bool isAvatar);
 
-	void SetPickupButtons();	// if the avatar can pick things up
+//	void SetPickupButtons();	// if the avatar can pick things up
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
@@ -205,7 +205,7 @@ private:
 	StartGameWidget		startGameWidget;
 	EndGameWidget		endGameWidget;
 
-	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
+	//gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 
 	grinliz::CDynArray< Chit* >			chitQuery;
 	grinliz::CDynArray< PickupData >	pickupData;
