@@ -35,6 +35,8 @@ IString IStringConst::useKiosk;
 IString IStringConst::repair;
 IString IStringConst::control;
 IString IStringConst::power;
+IString IStringConst::selfDestruct;
+IString IStringConst::prime;
 IString IStringConst::human;
 IString IStringConst::humanFemale;
 IString IStringConst::humanMale;
@@ -156,6 +158,8 @@ void IStringConst::Init()
 	repair = StringPool::Intern( "repair", true );
 	control = StringPool::Intern( "control", true );
 	power = StringPool::Intern( "power", true );
+	selfDestruct = StringPool::Intern( "selfDestruct", true );
+	prime = StringPool::Intern( "prime", true );
 	human = StringPool::Intern( "human", true );
 	humanFemale = StringPool::Intern( "humanFemale", true );
 	humanMale = StringPool::Intern( "humanMale", true );

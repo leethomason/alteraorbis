@@ -175,6 +175,10 @@ public:
 	bool HasStraightPath( const grinliz::Vector2F& start, 
 						  const grinliz::Vector2F& end );
 
+	// Checks if there is a staight path to stand beside a building.
+	bool HasStraightPathBeside( const grinliz::Vector2F& start,
+								const grinliz::Rectangle2I& bounds);
+
 	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
 	SectorPort NearestPort( const grinliz::Vector2F& pos );
 	SectorPort RandomPort( grinliz::Random* random );
