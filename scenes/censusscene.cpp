@@ -91,12 +91,16 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 	censusData.SetVisible(false);
 
 	GLString domainStr;
+	CDynArray<int> subTeamArr;
+
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
 			Vector2I sector = { i, j };
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && cs->InUse()) {
 				int team = cs->ParentChit()->Team();
+				bool isController = Team::Instance()->IsController(team, &subTeamArr);
+
 				int superTeam = Team::Instance()->SuperTeam(team);
 				IString teamName = Team::Instance()->TeamName(team);
 

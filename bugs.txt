@@ -55,14 +55,16 @@ t Make sure cyclops eat food
 t Profiler not working on Linux
 x avatar shouldn't pick up food and elixir
 x shrink crystal a bit (3d model)
+x AI not attacking buildings
+x large numbers of domains of the same kind de-stabilize?
 - Linux: where are the save files? Where should they be?
 - make sure domain takeover works in next version
-- AI not attacking buildings
 - bug where awareness lost re-introduced
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)
-- large numbers of domains of the same kind de-stabilize?
 
 - Avatar gives up on movement path too easily (if hits obstruction)
+- AI should clear farmland
+- AI should build industrial zones
 - House -> Human
 - core click through broken
 - unit tests

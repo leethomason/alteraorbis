@@ -206,7 +206,6 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		if (Team::Instance()->IsController(chit->Team())) {
 			NewsEvent news(NewsEvent::SUPERTEAM_DELETED, ToWorld2F(pos2i), chit->GetItemID(), 0);
 			Context()->chitBag->GetNewsHistory()->Add(news);
-			Team::Instance()->RemoveSuperTeam(chit->Team());
 		}
 
 		int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
@@ -240,6 +239,7 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			LumosChitBag::CreateCoreData data = { sector, false, 0, 0 };
 			Context()->chitBag->coreCreateList.Push(data);
 		}
+		Team::Instance()->CoreDestroyed(parentChit->Team());
 	}
 }
 

@@ -448,8 +448,11 @@ int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 }
 
 
-void Team::AddSubteam(int super, int sub)
+bool Team::AddSubteam(int super, int sub)
 {
+	GLASSERT(Team::ID(super));
+	GLASSERT(Team::ID(sub));
+
 	// Removes all existing treaties:
 	SymmetricTK stk(super, sub);
 	treaties.Filter(stk, [](const SymmetricTK& stk, const SymmetricTK& item) {
@@ -459,18 +462,28 @@ void Team::AddSubteam(int super, int sub)
 	// Run the array; make sure that 'sub' isn't a super.
 	// Do nothing if exists, etc.
 	for (const Control& c : control) {
-		GLASSERT(c.super != sub);	// oops.
-		if (c.super == super && c.sub == sub) return;
+		if (c.super == sub) {
+			// already a sub-team.
+			return false;
+		}
+		if (c.super == super && c.sub == sub) {
+			// redundant
+			return true;
+		}
 	}
 	Control c = { super, sub };
 	control.Push(c);
+	return true;
 }
 
 
-void Team::RemoveSuperTeam(int super)
+void Team::CoreDestroyed(int team)
 {
-	control.Filter(super, [](int super, const Control& c) {
-		return c.super != super;
+	GLASSERT(Team::ID(team));
+
+	// Filter out all the existing control structures for the deleting core.
+	control.Filter(team, [](int team, const Control& c) {
+		return c.sub != team && c.super != team;
 	});
 }
 
@@ -487,11 +500,19 @@ int Team::SuperTeam(int team) const
 }
 
 
-int Team::IsController(int team) const
+int Team::IsController(int team, grinliz::CDynArray<int>* subTeams) const
 {
+	GLASSERT(Team::ID(team));
+
+	if (subTeams) subTeams->Clear();
+	bool rc = false;
 	for (int i = 0; i < control.Size(); ++i) {
-		if (control[i].super == team)
-			return true;
+		if (control[i].super == team) {
+			rc = true;
+			if (subTeams) {
+				subTeams->Push(control[i].sub);
+			}
+		}
 	}
-	return false;
+	return rc;
 }

@@ -82,11 +82,6 @@ public:
 		return team;
 	}
 
-	// Returns the team, or itself, that is the controlling team.
-	int SuperTeam(int team) const;
-	void AddSubteam(int super, int sub);
-	void RemoveSuperTeam(int super);
-
 	// A base relationship is symmetric (both parties feel the same way)
 	// and based on species.
 	static ERelate BaseRelationship(int team0, int team1);
@@ -104,13 +99,12 @@ public:
 	bool War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
 	int  Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web);
 
-	struct Control {
-		int super;
-		int sub;
-	};
-	int NumControl() const { return control.Size(); }
-	const Control& GetControl(int i) const { return control[i]; }
-	int IsController(int team) const;
+	// Returns the team, or itself, that is the controlling team.
+	int SuperTeam(int team) const;
+	// Returns true on success.
+	bool AddSubteam(int super, int sub);
+	int IsController(int team, grinliz::CDynArray<int>* subTeams = nullptr) const;
+	void CoreDestroyed(int team);
 
 	static void SplitID(int t, int* group, int* id)	{
 		if (group)
@@ -229,6 +223,10 @@ private:
 
 	grinliz::CDynArray<SymmetricTK> treaties;
 
+	struct Control {
+		int super;
+		int sub;
+	};
 	grinliz::CDynArray<Control> control;
 
 	static Team* instance;
