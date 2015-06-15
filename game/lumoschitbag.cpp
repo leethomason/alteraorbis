@@ -1265,14 +1265,22 @@ void LumosChitBag::DoTick(U32 delta)
 
 				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
 				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
-				CoreScript::CreateCore(sector, teamID, Context());
+				CoreScript* newCore = CoreScript::CreateCore(sector, teamID, Context());
 				GLASSERT(CoreScript::GetCore(sector));
 
 				CChitArray arr;
 				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.
 				Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
 				for (Chit* c : arr) {
-					c->GetItem()->SetTeam(teamID);
+					if (c->PlayerControlled()) continue;
+
+					if (c->GetItem()->IsDenizen()) {
+						c->GetItem()->SetRogue();
+						newCore->AddCitizen(c);
+					}
+					else {
+						c->GetItem()->SetTeam(teamID);
+					}
 				}
 			}
 			else {

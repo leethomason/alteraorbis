@@ -452,6 +452,8 @@ bool Team::AddSubteam(int super, int sub)
 {
 	GLASSERT(Team::ID(super));
 	GLASSERT(Team::ID(sub));
+	GLASSERT(Team::IsDenizen(super));
+	GLASSERT(Team::IsDenizen(sub));
 
 	// Removes all existing treaties:
 	SymmetricTK stk(super, sub);
@@ -479,6 +481,9 @@ bool Team::AddSubteam(int super, int sub)
 
 void Team::CoreDestroyed(int team)
 {
+	if (!Team::IsDenizen(team)) {
+		return;
+	}
 	GLASSERT(Team::ID(team));
 
 	// Filter out all the existing control structures for the deleting core.
@@ -500,10 +505,8 @@ int Team::SuperTeam(int team) const
 }
 
 
-int Team::IsController(int team, grinliz::CDynArray<int>* subTeams) const
+bool Team::IsController(int team, grinliz::CDynArray<int>* subTeams) const
 {
-	GLASSERT(Team::ID(team));
-
 	if (subTeams) subTeams->Clear();
 	bool rc = false;
 	for (int i = 0; i < control.Size(); ++i) {

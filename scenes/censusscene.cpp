@@ -105,20 +105,17 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 				IString teamName = Team::Instance()->TeamName(team);
 
 				if (team == superTeam) {
-					// If super-team, print.
+					// If super-team, print. And print sub-teams.
 					IString groupName = Team::Instance()->TeamName(Team::Group(team));
 
 					domainStr.AppendFormat("%c%d\t%s\t%s\n", 'A' + sector.x, 1 + sector.y, teamName.safe_str(), groupName.safe_str());
-					// And then print the sub-teams.
-					for (int c = 0; c < Team::Instance()->NumControl(); ++c) {
-						const Team::Control& control = Team::Instance()->GetControl(c);
-						if (control.super == superTeam) {
-							CoreScript* subCS = CoreScript::GetCoreFromTeam(control.sub);
-							GLASSERT(subCS);
-							Vector2I subSector = ToSector(subCS->ParentChit()->Position());
-							IString subTeamName = Team::Instance()->TeamName(control.sub);
-							domainStr.AppendFormat("    %c%d %s\n", 'A' + subSector.x, 1 + subSector.y, subTeamName.safe_str());
-						}
+
+					for (int sub : subTeamArr) {
+						CoreScript* subCS = CoreScript::GetCoreFromTeam(sub);
+						GLASSERT(subCS);
+						Vector2I subSector = ToSector(subCS->ParentChit()->Position());
+						IString subTeamName = Team::Instance()->TeamName(sub);
+						domainStr.AppendFormat("    %c%d %s\n", 'A' + subSector.x, 1 + subSector.y, subTeamName.safe_str());
 					}
 				}
 			}

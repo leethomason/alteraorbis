@@ -61,6 +61,7 @@ x large numbers of domains of the same kind de-stabilize?
 - make sure domain takeover works in next version
 - bug where awareness lost re-introduced
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)
+- search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
 
 - Avatar gives up on movement path too easily (if hits obstruction)
 - AI should clear farmland

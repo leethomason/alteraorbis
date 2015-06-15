@@ -103,7 +103,7 @@ public:
 	int SuperTeam(int team) const;
 	// Returns true on success.
 	bool AddSubteam(int super, int sub);
-	int IsController(int team, grinliz::CDynArray<int>* subTeams = nullptr) const;
+	bool IsController(int team, grinliz::CDynArray<int>* subTeams = nullptr) const;
 	void CoreDestroyed(int team);
 
 	static void SplitID(int t, int* group, int* id)	{
