@@ -69,16 +69,10 @@ void LumosGame::InitButtonLooks()
 
 	for( int i=0; i<1; ++i ) {
 		RenderAtom blueUp = LumosGame::CalcUIIconAtom( UP[i], true );
-		//RenderAtom blueUp(	(const void*)UIRenderer::RENDERSTATE_UI_NORMAL, 
-		//					(const void*)tm->GetTexture( "icons" ), 
-		//					0.125f, 0, 0.250f, 0.250f );
 		RenderAtom blueUpD = blueUp;
 		blueUpD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
 
 		RenderAtom blueDown = LumosGame::CalcUIIconAtom( DOWN[i], true );
-		//RenderAtom blueDown((const void*)UIRenderer::RENDERSTATE_UI_NORMAL, 
-		//					(const void*)tm->GetTexture( "icons" ), 
-		//					0.125f, 0.250f, 0.250f, 0.500f );
 		RenderAtom blueDownD = blueDown;
 		blueDownD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
 

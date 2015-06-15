@@ -287,57 +287,57 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 }
 
 
-void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
+void ItemComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	const ChitContext* context = Context();
 	GameItem* mainItem = itemArr[0];
-	GLASSERT( !mainItem->IName().empty() );
+	GLASSERT(!mainItem->IName().empty());
 
-	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
+	if (msg.ID() == ChitMsg::CHIT_DAMAGE) {
 		parentChit->SetTickNeeded();
 
-		const ChitDamageInfo* info = (const ChitDamageInfo*) msg.Ptr();
-		GLASSERT( info );
+		const ChitDamageInfo* info = (const ChitDamageInfo*)msg.Ptr();
+		GLASSERT(info);
 		const DamageDesc ddorig = info->dd;
 
 		// Scale damage to distance, if explosion. And check for impact.
-		if ( info->isExplosion ) {
+		if (info->isExplosion) {
 			RenderComponent* rc = parentChit->GetRenderComponent();
-			if ( rc ) {
+			if (rc) {
 				// First scale damage.
 				Vector3F target;
-				rc->CalcTarget( &target );
-				Vector3F v = (target - info->originOfImpact); 
-//				float len = v.Length();
+				rc->CalcTarget(&target);
+				Vector3F v = (target - info->originOfImpact);
+				//				float len = v.Length();
 				v.Normalize();
 
 				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
 				bool knockback = ddorig.damage > (mainItem->TotalHP() *0.25f);
 
 				// Ony apply for phyisics or pathmove
-				PhysicsMoveComponent* physics  = GET_SUB_COMPONENT( parentChit, MoveComponent, PhysicsMoveComponent );
+				PhysicsMoveComponent* physics = GET_SUB_COMPONENT(parentChit, MoveComponent, PhysicsMoveComponent);
 				MoveComponent* move = parentChit->GetMoveComponent();
 
-				if ( knockback && (physics || move) ) {
-					rc->PlayAnimation( ANIM_IMPACT );
+				if (knockback && (physics || move)) {
+					rc->PlayAnimation(ANIM_IMPACT);
 
 					// Rotation
-					float r = -300.0f + (float)chit->random.Rand( 600 );
+					float r = -300.0f + (float)chit->random.Rand(600);
 
-					if ( !physics ) {
+					if (!physics) {
 						physics = new PhysicsMoveComponent();
-						parentChit->Add( physics );	// move components can be stacked (unlike any other component)
+						parentChit->Add(physics);	// move components can be stacked (unlike any other component)
 					}
 					static const float FORCE = 4.0f;
-					physics->Add( v*FORCE, r );
+					physics->Add(v*FORCE, r);
 				}
 			}
 		}
 
-//		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
-//		if (parentChit->PlayerControlled()) {
-//			int debug = 1;
-//		}
+		//		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
+		//		if (parentChit->PlayerControlled()) {
+		//			int debug = 1;
+		//		}
 
 		DamageDesc dd = ddorig;
 		Shield* shield = this->GetShield();
@@ -361,43 +361,43 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 
-		itemArr[0]->AbsorbDamage( dd );
+		itemArr[0]->AbsorbDamage(dd);
 
 		// report XP back to what hit us.
 		int originID = info->originID;
-		Chit* origin = Context()->chitBag->GetChit( originID );
-		if ( origin && origin->GetItemComponent() ) {
-			origin->GetItemComponent()->AddBattleXP( mainItem, false ); 
+		Chit* origin = Context()->chitBag->GetChit(originID);
+		if (origin && origin->GetItemComponent()) {
+			origin->GetItemComponent()->AddBattleXP(mainItem, false);
 		}
 		lastDamageID = originID;
 
 		parentChit->SetTickNeeded();
 	}
-	else if ( msg.ID() == ChitMsg::CHIT_HEAL ) {
+	else if (msg.ID() == ChitMsg::CHIT_HEAL) {
 		parentChit->SetTickNeeded();
 		float heal = msg.dataF;
-		GLASSERT( heal >= 0 );
+		GLASSERT(heal >= 0);
 
 		mainItem->hp += heal;
-		if ( mainItem->hp > double(mainItem->TotalHP()) ) {
+		if (mainItem->hp > double(mainItem->TotalHP())) {
 			mainItem->hp = double(mainItem->TotalHP());
 		}
 
 		Vector3F v = parentChit->Position();
-		context->engine->particleSystem->EmitPD( ISC::heal, v, V3F_UP, 30 );
+		context->engine->particleSystem->EmitPD(ISC::heal, v, V3F_UP, 30);
 	}
-	else if ( msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED ) {
+	else if (msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED) {
 		Chit* gold = (Chit*)msg.Ptr();
 		GoldCrystalFilter filter;
-		if (    filter.Accept( gold )		// it really is gold/crystal
-			 && gold->GetItem()	)			// it has an item component
+		if (filter.Accept(gold)		// it really is gold/crystal
+			&& gold->GetItem())			// it has an item component
 		{
 			mainItem->wallet.Deposit(gold->GetWallet(), gold->GetWallet()->Gold(), gold->GetWallet()->Crystal());
 			// Need to delete the gold, else it will track to us again!
 			gold->DeRez();
 
-			if ( parentChit->GetRenderComponent() ) {
-				parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+			if (parentChit->GetRenderComponent()) {
+				parentChit->GetRenderComponent()->AddDeco("loot", STD_DECO);
 			}
 		}
 	}
@@ -411,7 +411,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			Vector3F pos = parentChit->Position();
 
-			DamageDesc dd( MASS_TO_EXPLOSION_DAMAGE * float(mainItem->mass), effect );
+			DamageDesc dd(MASS_TO_EXPLOSION_DAMAGE * float(mainItem->mass), effect);
 			BattleMechanics::GenerateExplosion(dd, pos, parentChit->ID(), Context()->engine, Context()->chitBag, Context()->worldMap);
 		}
 
@@ -428,7 +428,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		   The NewsHistory is the series of events, including the creation and destruction
 		   of the item. All the dates get inferred from that.
-		*/
+		   */
 		NewsDestroy(mainItem);
 
 		// Drop our wallet on the ground or send to the Reserve?
@@ -438,13 +438,13 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		Vector3F pos = parentChit->Position();
 
-		while( itemArr.Size() > 1 ) {
+		while (itemArr.Size() > 1) {
 			const GameItem* remove = itemArr[itemArr.Size() - 1];
 			if (remove->Intrinsic())
 				break;
 			GameItem* item = this->RemoveFromInventory(remove);
-			GLASSERT( !item->IName().empty() );
-			Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
+			GLASSERT(!item->IName().empty());
+			Context()->chitBag->NewItemChit(pos, item, true, true, 0);
 		}
 
 		// Mobs drop gold and crystal. (Should cores as well?)
@@ -453,7 +453,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Context()->chitBag->NewCrystalChit(pos, parentChit->GetWallet(), true);
 		}
 
-		if ( mobFilter.Accept( parentChit )) {
+		if (mobFilter.Accept(parentChit)) {
 			if (!parentChit->GetWallet()->IsEmpty()) {
 				Context()->chitBag->NewWalletChits(pos, parentChit->GetWallet());
 			}
@@ -465,7 +465,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		parentChit->GetWallet()->SetClosed();
 	}
 	else {
-		super::OnChitMsg( chit, msg );
+		super::OnChitMsg(chit, msg);
 	}
 	Validate();
 }

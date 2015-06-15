@@ -20,6 +20,8 @@
 #include "lumosgame.h"	// FIXME: namegen should be in script
 #include "circuitsim.h"
 
+#include "../ai/domainai.h"
+
 #include "../scenes/characterscene.h"
 
 #include "../xegame/rendercomponent.h"
@@ -1248,6 +1250,7 @@ void LumosChitBag::DoTick(U32 delta)
 		CreateCoreData data = coreCreateList.Pop();
 		CoreScript* sc = CoreScript::GetCore(data.sector);
 		Vector2I sector = data.sector;
+		CoreScript* conqueringCore = CoreScript::GetCoreFromTeam(data.conqueringTeam);
 
 		if (!sc) {
 			// FIXME: last criteria "must be super team" isn't correct. Sub-teams
@@ -1255,6 +1258,7 @@ void LumosChitBag::DoTick(U32 delta)
 
 			if (data.wantsTakeover
 				&& data.conqueringTeam
+				&& conqueringCore
 				&& Team::IsDenizen(data.conqueringTeam)
 				&& (Team::Instance()->SuperTeam(data.conqueringTeam) == data.conqueringTeam))
 			{
@@ -1266,7 +1270,8 @@ void LumosChitBag::DoTick(U32 delta)
 				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
 				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
 				CoreScript* newCore = CoreScript::CreateCore(sector, teamID, Context());
-				GLASSERT(CoreScript::GetCore(sector));
+				GLASSERT(CoreScript::GetCore(sector) == newCore);
+				newCore->ParentChit()->Add(DomainAI::Factory(teamID));
 
 				CChitArray arr;
 				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.
@@ -1282,6 +1287,11 @@ void LumosChitBag::DoTick(U32 delta)
 						c->GetItem()->SetTeam(teamID);
 					}
 				}
+				// Finally, give this new core a chance. 
+				// Transferm money from Conquering domain.
+				int gold = conqueringCore->ParentChit()->GetWallet()->Gold() / 4;
+				gold = Min(gold, 500);
+				newCore->ParentChit()->GetWallet()->Deposit(conqueringCore->ParentChit()->GetWallet(), gold);
 			}
 			else {
 				CoreScript::CreateCore(sector, TEAM_NEUTRAL, Context());
