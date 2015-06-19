@@ -52,12 +52,21 @@ void Team::SymmetricTK::Serialize(XStream* xs)
 	XarcClose(xs);
 }
 
+void Team::Control::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "Control");
+	XARC_SER(xs, super);
+	XARC_SER(xs, sub);
+	XarcClose(xs);
+}
+
 
 void Team::Serialize(XStream* xs)
 {
 	XarcOpen(xs,"Team");
 	XARC_SER(xs, idPool);
 	XARC_SER_CARRAY(xs, treaties);
+	XARC_SER_CARRAY(xs, control);
 
 	XarcOpen(xs, "attitude");
 	if (xs->Saving()) {
@@ -518,4 +527,16 @@ bool Team::IsController(int team, grinliz::CDynArray<int>* subTeams) const
 		}
 	}
 	return rc;
+}
+
+
+bool Team::IsControlled(int team, int* super) const
+{
+	for (const Control& c : control) {
+		if (c.sub == team) {
+			if (super) *super = c.super;
+			return true;
+		}
+	}
+	return false;
 }

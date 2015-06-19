@@ -104,6 +104,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::DOMAIN_CONQUER:
 			case NewsEvent::DOMAIN_TAKEOVER:
 			case NewsEvent::SUPERTEAM_DELETED:
+			case NewsEvent::SUBTEAM_DELETED:
 			ne.Console(&str, chitBag, 0);
 			break;
 

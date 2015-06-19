@@ -207,6 +207,15 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			NewsEvent news(NewsEvent::SUPERTEAM_DELETED, ToWorld2F(pos2i), chit->GetItemID(), 0);
 			Context()->chitBag->GetNewsHistory()->Add(news);
 		}
+		int controllerTeam = 0;
+		if (Team::Instance()->IsControlled(chit->Team(), &controllerTeam)) {
+			CoreScript* controller = CoreScript::GetCoreFromTeam(controllerTeam);
+			GLASSERT(controller);
+			if (controller) {
+				NewsEvent news(NewsEvent::SUBTEAM_DELETED, ToWorld2F(pos2i), chit->GetItemID(), controller->ParentChit()->GetItemID());
+				Context()->chitBag->GetNewsHistory()->Add(news);
+			}
+		}
 
 		int deleterID = chit->GetItemComponent() ? chit->GetItemComponent()->LastDamageID() : 0;
 		Chit* deleter = Context()->chitBag->GetChit(deleterID);

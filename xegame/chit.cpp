@@ -138,6 +138,8 @@ bool Chit::StackedMoveComponent() const
 
 void Chit::Add( Component* c, bool loading )
 {
+	if (!c) return;
+
 	if ( c->ToSpatialComponent()) {
 		GLASSERT( spatialComponent == 0 );
 		spatialComponent = c->ToSpatialComponent();

@@ -311,7 +311,6 @@ void ItemComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				//				float len = v.Length();
 				v.Normalize();
 
-				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
 				bool knockback = ddorig.damage > (mainItem->TotalHP() *0.25f);
 
 				// Ony apply for phyisics or pathmove
@@ -377,11 +376,7 @@ void ItemComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		parentChit->SetTickNeeded();
 		float heal = msg.dataF;
 		GLASSERT(heal >= 0);
-
-		mainItem->hp += heal;
-		if (mainItem->hp > double(mainItem->TotalHP())) {
-			mainItem->hp = double(mainItem->TotalHP());
-		}
+		mainItem->Heal(int(heal));
 
 		Vector3F v = parentChit->Position();
 		context->engine->particleSystem->EmitPD(ISC::heal, v, V3F_UP, 30);

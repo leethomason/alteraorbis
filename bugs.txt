@@ -2,9 +2,9 @@ x are the shader uniform counts being computed correctly?
 x do I need to switch on no instancing?
 x war button
 x peace button
-- more diplomacy testing
-- diplomacy art (for map)
-- domain takeover
+x more diplomacy testing
+x diplomacy art (for map)
+x domain takeover
 	x super / sub team infrastructure
 	x sub team names
 	x clean up console: don't need "team TechHub"
@@ -17,16 +17,14 @@ x peace button
 		x show sub-domain
 		x replace orange "home" color
 		d small map rep?
-	- news events of 
-		- aquisition, 
-		- loss, and 
+	x news events of 
+		x aquisition, 
+		x loss, and 
 		x fall of super-domain
 		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
-	- rules for sub-teams (must be adjacent? near?)
 	x enemy/neutral/friend messages: don't show (core) show the domain name
 	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
 	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
-	- DOMAIN_TAKEOVER message not correct
 
 x remove industrial from switches
 d flag - for local control - awkward. just click switches to go there
@@ -57,12 +55,17 @@ x avatar shouldn't pick up food and elixir
 x shrink crystal a bit (3d model)
 x AI not attacking buildings
 x large numbers of domains of the same kind de-stabilize?
+x search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
+x control / teams not saved! (doh!)
+x make sure domain takeover works in next version
 - Linux: where are the save files? Where should they be?
-- make sure domain takeover works in next version
-- bug where awareness lost re-introduced
-- assert in RoadAI::AddRoad() (that it seems benign is even stranger)
-- search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
 
+- rules for sub-teams (must be adjacent? near?)
+- DOMAIN_TAKEOVER message not correct
+- assert in RoadAI::AddRoad() (that it seems benign is even stranger)
+- core needs to target the center of model, as do some plants
+- awareness / target picking still terrible
+- at awareness, workers should move to core before attacking
 - Avatar gives up on movement path too easily (if hits obstruction)
 - AI should clear farmland
 - AI should build industrial zones

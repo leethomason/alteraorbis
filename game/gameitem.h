@@ -351,7 +351,6 @@ public:
 
 		AI_SECTOR_HERD		= (1<<17),		// will herd across sectors, as a group
 		AI_SECTOR_WANDER	= (1<<18),		// will wander between sectors, as an individual
-		AI_DOES_WORK		= (1<<19),
 		AI_USES_BUILDINGS	= (1<<20),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
 		AI_NOT_TARGET		= (1<<21),		// won't be targeted in battle	
 
@@ -378,7 +377,6 @@ public:
 private:
 	int		team;			// which team this item is aligned with (or created it, for items.)
 public:
-	bool	IsDenizen() const{ return keyValues.GetIString(ISC::mob) == ISC::denizen; }
 	int		Team() const	{ return team; }
 	void	SetRogue();
 	void	SetChaos();
@@ -399,6 +397,8 @@ public:
 
 	bool Intrinsic() const			{ return (flags & INTRINSIC) != 0; }
 	grinliz::IString MOB() const	{ return keyValues.GetIString(ISC::mob); }
+	bool IsDenizen() const			{ return keyValues.GetIString(ISC::mob) == ISC::denizen; }
+	bool IsWorker() const			{ return name == ISC::worker; }
 
 	virtual MeleeWeapon*	ToMeleeWeapon()		{ return 0; }
 	virtual RangedWeapon*	ToRangedWeapon()	{ return 0; }
@@ -428,6 +428,18 @@ public:
 
 	void FullHeal() {
 		hp = TotalHP();
+	}
+
+	void Heal(double h) {
+		GLASSERT(h >= 0);
+		hp += h;
+		hp = grinliz::Min(double(TotalHP()), hp);
+	}
+
+	void Heal(int h) {
+		GLASSERT(h >= 0);
+		hp += (double)h;
+		hp = grinliz::Min(double(TotalHP()), hp);
 	}
 
 	void AbsorbDamage( const DamageDesc& dd );

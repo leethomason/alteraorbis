@@ -37,6 +37,7 @@ public:
 		DOMAIN_DESTROYED,			//  domain		killer	
 		DOMAIN_TAKEOVER,			//	domain		conqueror
 		SUPERTEAM_DELETED,			//  domain
+		SUBTEAM_DELETED,			//  subTeam		superTeam
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
 
 		FORGED,						//	item		maker

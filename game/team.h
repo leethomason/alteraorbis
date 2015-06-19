@@ -104,6 +104,7 @@ public:
 	// Returns true on success.
 	bool AddSubteam(int super, int sub);
 	bool IsController(int team, grinliz::CDynArray<int>* subTeams = nullptr) const;
+	bool IsControlled(int team, int* controller) const;
 	void CoreDestroyed(int team);
 
 	static void SplitID(int t, int* group, int* id)	{
@@ -226,6 +227,7 @@ private:
 	struct Control {
 		int super;
 		int sub;
+		void Serialize(XStream* xs);
 	};
 	grinliz::CDynArray<Control> control;
 

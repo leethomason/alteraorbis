@@ -209,7 +209,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 					if (b.Contains(pos2i)) {
 						GameItem* item = building->GetItem();
 						if (item) {
-							item->hp = double(item->TotalHP());
+							item->FullHeal();
 						}
 						RenderComponent* rc = building->GetRenderComponent();
 						if (rc) {
@@ -476,10 +476,7 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 			// Also heal.
 			GameItem* item = chit->GetItem();
 			GLASSERT(item);
-			item->hp += buildingNeeds.X(Needs::ENERGY) * item->TotalHP();
-			if (item->hp > item->TotalHP()) {
-				item->hp = item->TotalHP();
-			}
+			item->Heal(buildingNeeds.X(Needs::ENERGY) * item->TotalHP());
 		}
 		else if (buildingName == ISC::bar) {
 			// Apply the needs as is...if there is Elixir.

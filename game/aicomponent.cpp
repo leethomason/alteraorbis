@@ -414,6 +414,14 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
 		}
+		// Don't shoot at buildings if we have a non-building target!
+		if (   focus != FOCUS_TARGET 
+			&& enemyList2.Size() >= 2 
+			&& enemyList2[0] < 0 
+			&& enemyList2[1] > 0) 
+		{
+			Swap(&enemyList2[0], &enemyList2[1]);
+		}
 	}
 }
 
@@ -747,11 +755,6 @@ bool AIComponent::DoStand( U32 time )
 	MoveComponent* thisMove = parentChit->GetMoveComponent();
 	if (!thisMove) return false;
 
-	//int itemFlags			= item->flags;
-	//double totalHP			= double(item->TotalHP());
-	//int tick = 400;
-	//const ChitContext* context = Context();
-
 	if (visitorIndex >= 0 && !thisMove->IsMoving())
 	{
 		// Visitors at a kiosk.
@@ -985,7 +988,7 @@ WorkQueue* AIComponent::GetWorkQueue()
 		return 0;
 
 	// Again, bitten: workers aren't citizens. Grr.
-	if ((parentChit->GetItem()->flags & GameItem::AI_DOES_WORK)
+	if ((parentChit->GetItem()->IsWorker())
 		|| coreScript->IsCitizen(parentChit->ID()))
 	{
 		WorkQueue* workQueue = coreScript->GetWorkQueue();
@@ -1032,7 +1035,7 @@ bool AIComponent::ThinkDoRampage()
 	if (!thisItem) return false;
 
 	// Workers teleport. Rampaging was annoying.
-	if (thisItem->flags & GameItem::AI_DOES_WORK) {
+	if (thisItem->IsWorker()) {
 		Vector2I pos2i = ToWorld2I(parentChit->Position());
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs) {
@@ -1188,7 +1191,7 @@ Vector2F AIComponent::ThinkWanderRandom()
 	// See also the EnterGrid(), where it takes over a neutral core.
 	// Workers stay close to home, as 
 	// do denizens trying to find a new home core.
-	if ((gameItem->flags & GameItem::AI_DOES_WORK)
+	if ((gameItem->IsWorker())
 		|| (gameItem->MOB() == ISC::denizen && Team::IsRogue(parentChit->Team()) && cs && !cs->InUse()))
 	{
 		Vector2F dest = GetWanderOrigin();
@@ -1238,7 +1241,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 	}
 
 	// For a worker, add in the wander origin.
-	if (gameItem->flags & GameItem::AI_DOES_WORK) {
+	if (gameItem->IsWorker()) {
 		pos.Push(GetWanderOrigin());
 	}
 
@@ -1739,15 +1742,13 @@ bool AIComponent::ThinkFruitCollect()
 	}
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+	if (gameItem->IsWorker()) return false;	// workers carrying fruit seemed strange
 
 	double need = 1;
 	if (gameItem->flags & GameItem::HAS_NEEDS) {
 		const ai::Needs& needs = GetNeeds();
 		need = needs.Value(Needs::FOOD);
 	}
-
-	// workers carrying fruit seemed weird for some reason.
-	//bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
 
 	// It is the duty of every citizen to take fruit to the distillery.
 	if (AtHomeCore()) {
@@ -1822,13 +1823,14 @@ bool AIComponent::ThinkFlag()
 
 bool AIComponent::ThinkHungry()
 {
-	if (parentChit->PlayerControlled()) {
-		return false;
-	}
+	if (parentChit->PlayerControlled()) return false;
+
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return false;
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+
+	if (gameItem->IsWorker()) return false;
 
 	const GameItem* fruit = thisIC->FindItem(ISC::fruit);
 	const GameItem* elixir = thisIC->FindItem(ISC::elixir);
@@ -1843,13 +1845,13 @@ bool AIComponent::ThinkHungry()
 				GameItem* item = thisIC->RemoveFromInventory(elixir);
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
-				parentChit->GetItem()->FullHeal();
+				parentChit->GetItem()->Heal(100);
 			}
 			else if (fruit) {
 				GameItem* item = thisIC->RemoveFromInventory(fruit);
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
-				parentChit->GetItem()->FullHeal();
+				parentChit->GetItem()->Heal(100);
 			}
 			return true;	// did something...?
 		}
@@ -1870,7 +1872,7 @@ bool AIComponent::ThinkDelivery()
 	if (!thisIC) return false;
 
 	bool usesBuilding = (gameItem->flags & GameItem::AI_USES_BUILDINGS) != 0;
-	bool worker = (gameItem->flags & GameItem::AI_DOES_WORK) != 0;
+	bool worker = gameItem->IsWorker();
 
 	if (worker) {
 		bool needVaultRun = false;
@@ -1959,7 +1961,7 @@ bool AIComponent::ThinkRepair()
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	bool worker = (gameItem->flags & GameItem::AI_DOES_WORK) != 0;
+	bool worker = gameItem->IsWorker();
 	if (!worker) return false;
 
 	BuildingRepairFilter filter;
@@ -2960,8 +2962,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	if (focus != FOCUS_MOVE &&  !taskList.UsingBuilding()) {
 		CoreScript* cs = CoreScript::GetCore(ToSector(parentChit->Position()));
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
-		bool goesToBattle = (gameItem->IName() != ISC::worker)
-			|| (cs && cs->Citizens(0) <= 4);
+		bool goesToBattle = !gameItem->IsWorker() || (cs && cs->Citizens(0) <= 4);
 
 		if (    aiMode != AIMode::BATTLE_MODE 
 			 && goesToBattle
@@ -3052,8 +3053,8 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	// Is there work to do?
 	if (aiMode == AIMode::NORMAL_MODE
-		 && (gameItem->flags & GameItem::AI_DOES_WORK)
-		 && taskList.Empty() ) 
+		&& gameItem->IsWorker()
+		&& taskList.Empty())
 	{
 		WorkQueueToTask();
 	}
