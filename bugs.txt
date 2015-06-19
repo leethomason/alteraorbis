@@ -23,8 +23,8 @@ x domain takeover
 		x fall of super-domain
 		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
 	x enemy/neutral/friend messages: don't show (core) show the domain name
-	t NanoTel domain Mares (F12) conquered by mantis of . *sigh*
-	t TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+	x NanoTel domain Mares (F12) conquered by mantis of . *sigh*
+	x TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
 
 x remove industrial from switches
 d flag - for local control - awkward. just click switches to go there
@@ -42,15 +42,11 @@ x move coreCreateList to LumosChitBag virtual doTick()
 x test fruit collect / delivery cycle
 x GT: new rotation UI (2/20/2015)
 x where are all the crystals???
-t top down: can’t tell on switch from off switch. 
-t Attitude and Diplomacy display strange (integrate to one??)
-t elixir needs to decay
-t lesser mobs not distributing enough
-t switch should fire if avatar goes there
-t elixir and fruit need to get picked up
-t GT: food as medkit
-t Make sure cyclops eat food
-t Profiler not working on Linux
+x Attitude and Diplomacy display strange (integrate to one??)
+x elixir needs to decay
+x lesser mobs not distributing enough
+x elixir and fruit need to get picked up
+x GT: food as medkit
 x avatar shouldn't pick up food and elixir
 x shrink crystal a bit (3d model)
 x AI not attacking buildings
@@ -58,7 +54,12 @@ x large numbers of domains of the same kind de-stabilize?
 x search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
 x control / teams not saved! (doh!)
 x make sure domain takeover works in next version
+
 - Linux: where are the save files? Where should they be?
+t top down: can’t tell on switch from off switch. 
+t switch should fire if avatar goes there
+t Make sure cyclops eat food
+t Profiler not working on Linux
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
