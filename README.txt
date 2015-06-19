@@ -1,5 +1,5 @@
 ﻿Altera Orbis 
-Beta 3
+Beta
 
 Thanks for playing Altera Orbis!
 grinninglizard.com/altera
