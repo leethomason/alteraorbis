@@ -356,7 +356,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			if (!item) continue;
 			if (item->flags & GameItem::AI_NOT_TARGET) continue;
 
-			// REMEMBER: because I've made this miskake 20 times, the
+			// REMEMBER: because I've made this mistake 20 times, the
 			//			 path to a building will always fail, because the building
 			//			 is blocking the path. So the return value of 'path' needs
 			//			 to keep that in mind.
