@@ -18,6 +18,8 @@
 
 #include "../grinliz/gltypes.h"
 
+#define ALTERA_MINI
+
 // Cross-everything constant. How big can the base
 // of a Chit be? Impacts pathing, collision, map,
 // etc. Can't be >= 0.5f since the chit could get
@@ -26,7 +28,11 @@ static const float	MAX_BASE_RADIUS = 0.4f;
 
 // What is the maximum map size? Used to allocate
 // the spatial cache. Power of 2, of course.
+#ifdef ALTERA_MINI
+static const int	MAX_MAP_SIZE = 512;
+#else
 static const int	MAX_MAP_SIZE = 1024;
+#endif
 
 static const U32	CROSS_FADE_TIME = 300;		// time to blend animations
 

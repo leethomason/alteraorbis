@@ -753,7 +753,19 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 						And an occasional greater spawn: cyclops variants, dragon
 						All cores scan spawn trilobyte.
 						*/
-					static const char* SPAWN[NUM_SECTORS] = {
+#ifdef ALTERA_MINI
+						static const char* SPAWN[NUM_SECTORS] = {
+						"trilobyte",
+						"trilobyte",
+						"mantis",
+						"mantis",
+						"troll",
+						"redMantis",
+						"troll",
+						"redMantis"
+					};
+#else
+						static const char* SPAWN[NUM_SECTORS] = {
 						"trilobyte",
 						"trilobyte",
 						"trilobyte",
@@ -771,6 +783,7 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 						"troll",
 						"redMantis"
 					};
+#endif
 					defaultSpawn = StringPool::Intern(SPAWN[outland]);
 				}
 
