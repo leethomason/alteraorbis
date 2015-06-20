@@ -628,7 +628,7 @@ void ItemComponent::DoSlowTick()
 		for (int i = 0; i < arr.Size(); ++i) {
 			Chit* gold = arr[i];
 			GLASSERT(parentChit != gold);
-			TrackingMoveComponent* tc = GET_SUB_COMPONENT(gold, MoveComponent, TrackingMoveComponent);
+			TrackingMoveComponent* tc = (TrackingMoveComponent*)gold->GetComponent("TrackingMoveComponent");
 			if (!tc) {
 				tc = new TrackingMoveComponent();
 				tc->SetTarget(parentChit->ID());

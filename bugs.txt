@@ -54,10 +54,11 @@ x large numbers of domains of the same kind de-stabilize?
 x search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
 x control / teams not saved! (doh!)
 x make sure domain takeover works in next version
+x top down: can’t tell on switch from off switch. 
+x switch should fire if avatar goes there
 
 - Linux: where are the save files? Where should they be?
-t top down: can’t tell on switch from off switch. 
-t switch should fire if avatar goes there
+- static link freetype
 t Make sure cyclops eat food
 t Profiler not working on Linux
 

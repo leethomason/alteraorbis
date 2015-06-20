@@ -72,8 +72,9 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 
 	note.Init( &gamui2D );
-	note.SetText( "Thanks for playing this beta of Altera! "
-				  "Please see the README.txt for information and a link to the 'how to play' wiki. You can now toggle (in the upper right on this screen) between Mouse+Keyboard or Touch controls." );
+	note.SetText("Thanks for playing this beta of Altera! "
+				 "Please see the README.txt for information and a link to the 'how to play' wiki.");
+	//You can now toggle(in the upper right on this screen) between Mouse + Keyboard or Touch controls." );
 
 	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	SetAudioButton();

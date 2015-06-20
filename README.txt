@@ -1,24 +1,21 @@
-﻿Altera Orbis 
-Beta
+﻿# Altera Orbis 
 
 Thanks for playing Altera Orbis!
 grinninglizard.com/altera
 
-How to Play
------------
+# How to Play
+
 http://alteraorbis.wikispaces.com/
 
 
-About
------
+# About
+
 Altera is a simulation of an alternate world; a world inside
 the computer. You play as a Domain Core trying to grow and
 survive in an ever changing digital world.
 
-Altera Orbis started as Syndicate reimagined to be a a 
-Dungeon-Keeperish / Dwarf Fortressy sort of game set in a 
-Star Wars-ian & Tron-esqe world. It keeps changing and 
-developing.
+Altera Orbis is a Dungeon-Keeperish / Dwarf Fortressy sort of game set in a 
+Star Wars-ian & Tron-esqe world. It keeps changing and developing.
 
 Altera Orbis is in long term playable Beta. The game is playable, the game 
 mechanics are in place, and there is a lot to do and explore. But it keeps
@@ -26,15 +23,48 @@ changing and growing. Thanks for playing and checking the game out.
 Feedback on the forums is appreciated!
 
 
-Changes in Beta4a
-------------------
-- simpler and more useful circuit system for you to build traps and defenses
-- support for both mouse and touch interfaces
-- build UI improvements
-- improved name generation
+# Installing
 
-FAQ
----
+## Windows
+
+Run the installer; it will install the game into your Program Files (x86) and 
+save files into the Documents/AlteraOrbis directory. The Microsoft 
+Visual Studio redistributables will be installed as well. You can skip the 
+redistributable installation if you already have them, but if in doubt a 
+re-install of the redistributables is harmless. You can safely install over 
+previous Altera Orbis game installations.
+
+## Linux
+
+Linux is more experimental. It works on the dev Ubuntu box, and your mileage may
+vary. Please feel free to bring up any bugs on the forums or an issue in 
+Github.
+
+You need the SDL and SDL-mixer runtimes to run Altera Orbis. They are at:
+
+https://www.libsdl.org/
+
+On the dev Ubuntu machine, these commands will automatically install SDL and
+the mixer:
+
+```
+sudo apt-get install libsdl2-2.0
+sudo apt-get install libsdl2-mixer
+```
+
+# Changes in Beta5a
+
+- Support back to OpenGL 3.0
+- Basic Diplomacy
+  - Relationships between teams account for strategic & technical relationship
+  - War and Peace treaties
+  - Both player & AI can conquor other domains
+- UI tweaks
+- MOBs will collect fruit, and keep it to eat and heal HP
+- Avatar now automatically picks up items
+
+# FAQ
+
 Why do denizens just stand there or get stuck?
 
 	Make sure you don't have a porch that isn't accessible. They may be 
@@ -51,8 +81,7 @@ Why is a strange blocky flag thing on my core?
 	Someone is attacking you.
 
 
-Controls
---------
+# Controls
 
 'Tab' key toggles between top down and isometric views.
 'Home' key centers the camera on your core.
@@ -77,18 +106,7 @@ a building), then left-click & drag rotates buildings.
 F11 toggles full screen.
 F3 saves a screenshots. (In Documents/Altera Orbis)
 
-
-Install
--------
-
-Run the installer; it will install the game into your Program Files (x86) and 
-save files into the Documents directory. The redistributables will be installed
-as well. (If in doubt, re-install of the redistributables is harmless.) You can 
-safely install over old game installations.
-
-
-Important Notes
----------------
+# Important Notes
 
 1. I try to keep save game compatibility in major release #s. (So Beta2a-2c
    all have compatible save games.) This hasn't gone so well with Beta3.
@@ -100,8 +118,7 @@ Important Notes
    is intended to make touch as seamless as possible.
 
 
-Filing a Bug
-------------
+# Filing a Bug
 
 If you find an issue,
 1. Make sure your graphics drivers are up to date. I know, it's annoying, and 
@@ -128,8 +145,7 @@ it's part of the glow rendering.
 5: bolt
 
 
-Known Issues:
-------------
+# Known Issues:
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt

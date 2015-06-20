@@ -62,7 +62,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.000184538 0.35 -0.0155515
+loc -0.000184538 0.25 -0.0155515
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -120,7 +120,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.000307515 0.35 0.434001
+loc -0.000307515 0.25 0.434001
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -178,7 +178,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.000307515 0.35 0.434001
+loc -0.000307515 0.25 0.434001
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -236,7 +236,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 0.45 0.35 0
+loc 0.45 0.25 0
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -294,18 +294,18 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc 9.31323e-009 0.25 -2.65427e-008
+loc 9.31323e-009 0.15 -2.65427e-008
 texture "structure.png"
 crease 45.000000
 numvert 8
--0.5 -0.15 -0.5
-0.5 -0.15 -0.5
-0.5 -0.15 0.5
--0.5 -0.15 0.5
--0.5 0.15 0.5
-0.5 0.15 0.5
-0.5 0.15 -0.5
--0.5 0.15 -0.5
+-0.5 -0.05 -0.5
+0.5 -0.05 -0.5
+0.5 -0.05 0.5
+-0.5 -0.05 0.5
+-0.5 0.05 0.5
+0.5 0.05 0.5
+0.5 0.05 -0.5
+-0.5 0.05 -0.5
 numsurf 6
 SURF 0x30
 mat 0
@@ -352,7 +352,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -0.45 0.35 0
+loc -0.45 0.25 0
 texture "structure.png"
 crease 45.000000
 numvert 8
