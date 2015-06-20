@@ -1556,7 +1556,6 @@ bool WorldMap::HasStraightPath( const Vector2F& start, const Vector2F& end )
 
 bool WorldMap::HasStraightPathBeside(const Vector2F& start, const Rectangle2I& rect)
 {
-	Vector2I start2i = ToWorld2I(start);
 	if (start.x < rect.min.x) {
 		for (int y = rect.min.y; y <= rect.max.y; ++y) {
 			Vector2I end2i = { rect.min.x - 1, y };
@@ -1574,13 +1573,13 @@ bool WorldMap::HasStraightPathBeside(const Vector2F& start, const Rectangle2I& r
 	if (start.y < rect.min.y) {
 		for (int x = rect.min.x; x <= rect.max.x; ++x) {
 			Vector2I end2i = { x, rect.min.y - 1 };
-			bool path = GridPath(start, ToWorld2F(end2i));
+			GridPath(start, ToWorld2F(end2i));
 		}
 	}
 	if (start.y > rect.max.y) {
 		for (int x = rect.min.x; x <= rect.max.x; ++x) {
 			Vector2I end2i = { x, rect.max.y + 1 };
-			bool path = GridPath(start, ToWorld2F(end2i));
+			GridPath(start, ToWorld2F(end2i));
 		}
 	}
 	return false;

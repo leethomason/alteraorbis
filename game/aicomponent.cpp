@@ -15,22 +15,17 @@
 
 #include "aicomponent.h"
 #include "worldmap.h"
-#include "gamelimits.h"
 #include "pathmovecomponent.h"
 #include "gameitem.h"
 #include "lumoschitbag.h"
 #include "mapspatialcomponent.h"
 #include "gridmovecomponent.h"
-#include "sectorport.h"
 #include "workqueue.h"
-#include "team.h"
 #include "circuitsim.h"
 #include "reservebank.h"
-#include "sim.h"	// FIXME: where shourd the Web live??
+#include "sim.h"
 #include "physicssims.h"
 
-// move to tasklist file
-#include "lumoschitbag.h"
 #include "lumosgame.h"
 
 #include "../scenes/characterscene.h"
@@ -43,24 +38,15 @@
 #include "../script/itemscript.h"
 #include "../script/buildscript.h"
 
-#include "../engine/engine.h"
 #include "../engine/particle.h"
 
 #include "../audio/xenoaudio.h"
 
-#include "../xegame/chitbag.h"
-#include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/istringconst.h"
-
-#include "../grinliz/glrectangle.h"
-#include "../grinliz/glarrayutil.h"
 
 #include "../Shiny/include/Shiny.h"
-#include <climits>
 
-#include "../ai/tasklist.h"
 #include "../ai/marketai.h"
 #include "../ai/domainai.h"
 
@@ -69,12 +55,8 @@ using namespace ai;
 
 static const float	NORMAL_AWARENESS			= 10.0f;
 static const float	LOOSE_AWARENESS = LONGEST_WEAPON_RANGE;
-static const float	SHOOT_ANGLE					= 10.0f;	// variation from heading that we can shoot
 static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
-static const float	EAT_HP_PER_SEC				=  2.0f;
-static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
-static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
@@ -87,7 +69,6 @@ static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must
 static const int	GUARD_RANGE					= 1;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
-static const int	BUILD_TIME					= 1000;
 static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
@@ -256,10 +237,7 @@ bool AIComponent::LineOfSight(const grinliz::Vector2I& mapPos )
 
 	// A little tricky; we hit the 'mapPos' if nothing is hit (which gets to the center)
 	// or if voxel at that pos is hit.
-	if ( !mv.Hit() || ( mv.Hit() && mv.Voxel2() == mapPos )) {
-		return true;
-	}
-	return false;
+    return !mv.Hit() || ( mv.Hit() && mv.Voxel2() == mapPos );
 }
 
 
@@ -360,12 +338,10 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 
 		// Order matters: prioritize mobs, then a core, then buildings.
 		static const int NFILTER = 3;
-		IChitAccept* filters[NFILTER] = { &mobFilter, &coreFilter, &buildingFilter };
+		CChitArray arr[NFILTER];
 
 		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
-		
-		CChitArray arr[NFILTER];
 
 		// Don't attack buildings if there isn't a central core.
 		CoreScript* cs = CoreScript::GetCore(ToSector(center));
@@ -450,34 +426,6 @@ public:
 private:
 	Vector3F origin;
 };
-
-Chit* AIComponent::Closest(Chit* arr[], int n, Vector2F* outPos, float* distance )
-{
-	float best = FLT_MAX;
-	Chit* chit = 0;
-	Vector3F pos = parentChit->Position();
-
-	for (int i = 0; i < n; ++i) {
-		Chit* c = arr[i];
-		float len2 = (c->Position() - pos).LengthSquared();
-		if (len2 < best) {
-			best = len2;
-			chit = c;
-		}
-	}
-	if ( distance ) {
-		*distance = chit ? sqrtf( best ) : 0;
-	}
-	if ( outPos ) {
-		if ( chit ) {
-			*outPos = ToWorld2F(chit->Position());
-		}
-		else {
-			outPos->Zero();
-		}
-	}
-	return chit;
-}
 
 
 void AIComponent::DoMove()

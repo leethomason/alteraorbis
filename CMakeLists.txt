@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (alteraorbis)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gamui")
-include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/freetype/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/freetype/include")
 
 ### Package setup. ###
 include(FindPkgConfig)
@@ -10,18 +10,17 @@ find_package(OpenGL REQUIRED)
 pkg_search_module(SDL2 REQUIRED sdl2)
 pkg_search_module(SDL2 REQUIRED sdl2)
 pkg_search_module(SDL2_MIXER REQUIRED SDL2_mixer)
-find_package(Freetype REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_MIXER_INCLUDE_DIRS})
-include_directories(${FREETYPE_INCLUDE_DIRS})
 
 ### GamuiTest ###
 
 file(GLOB GAMUITEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/gamui/*.cpp")
 add_executable(gamuitest ${GAMUITEST_SOURCES})
-target_link_libraries(gamuitest ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+target_link_libraries(gamuitest ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} )
+target_link_libraries(gamuitest "${CMAKE_CURRENT_SOURCE_DIR}/freetype/libfreetype.a")
 
 ### Builder ###
 
@@ -42,7 +41,7 @@ file(GLOB BUILDER_SOURCES   "${CMAKE_CURRENT_SOURCE_DIR}/builder/*.cpp"
 )
 
 add_executable(builder ${BUILDER_SOURCES})
-target_link_libraries(builder ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+target_link_libraries(builder ${SDL2_LIBRARIES} )
 
 ### GameDB Reader ###
 
@@ -55,7 +54,7 @@ file(GLOB DBREADER_SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/gamedbreader/*.cpp"
 )
 
 add_executable(dbreader ${DBREADER_SOURCES})
-#target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} )
+#target_link_libraries(builder ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} )
 
 ### Altera ###
 
@@ -83,7 +82,8 @@ file(GLOB ALTERA_SOURCES    "${CMAKE_CURRENT_SOURCE_DIR}/ai/*.cpp"
 )
 
 add_executable(alteraorbis ${ALTERA_SOURCES})
-target_link_libraries(alteraorbis ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL2_MIXER_LIBRARIES})
+target_link_libraries(alteraorbis ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2_MIXER_LIBRARIES})
+target_link_libraries(alteraorbis "${CMAKE_CURRENT_SOURCE_DIR}/freetype/libfreetype.a")
 
 ### General Config ###
 
