@@ -90,15 +90,5 @@ target_link_libraries(alteraorbis "${CMAKE_CURRENT_SOURCE_DIR}/freetype/libfreet
 if(CMAKE_C_COMPILER_ID )
 	add_definitions(-Wno-int-to-pointer-cast -Wall -std=c++11)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -DUFO_LINUX_SDL -DGRINLIZ_PROFILE")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DUFO_LINUX_SDL -DGRINLIZ_PROFILE")
 endif(CMAKE_C_COMPILER_ID )
-
-
-### reference:
-#file(GLOB_RECURSE MY_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/gamui/*.h")
-#set (Foo_INCLUDE_DIRS "")
-#foreach (_headerFile ${Foo_HEADERS})
-#    get_filename_component(_dir ${_headerFile} PATH)
-#    list (APPEND Foo_INCLUDE_DIRS ${_dir})
-#endforeach()
-#list(REMOVE_DUPLICATES Foo_INCLUDE_DIRS)
-#include_directories(${Foo_INCLUDE_DIRS})
