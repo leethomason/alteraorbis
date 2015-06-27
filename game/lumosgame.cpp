@@ -232,13 +232,15 @@ void LumosGame::CopyFile( const char* src, const char* target )
 		if ( fp && tp ) {
 			CDynArray<U8> buf;
 			fseek( fp, 0, SEEK_END );
-			int size = ftell( fp );
+			size_t size = ftell( fp );
 			buf.PushArr( size );
 
 			fseek( fp, 0, SEEK_SET );
-			fread( &buf[0], 1, size, fp );
-
-			fwrite( buf.Mem(), 1, size, tp );
+			size_t didRead = fread( &buf[0], 1, size, fp );
+			GLASSERT(didRead == size);
+			if (didRead == size) {
+				fwrite(buf.Mem(), 1, size, tp);
+			}
 
 			fclose( tp );
 		}

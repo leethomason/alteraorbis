@@ -158,5 +158,6 @@ void  WorldInfo::PrintStateInfo( void* state )
 {
 	GridBlock v = FromState( state );
 	GLOUTPUT(( "%d,%d ", v.x, v.y ));
+	(void)v;
 }
 

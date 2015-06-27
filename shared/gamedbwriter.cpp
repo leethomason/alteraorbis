@@ -136,6 +136,7 @@ void Writer::Save(const char* filename)
 		}
 	}
 	unsigned totalSize = ftell(fp);
+	(void)totalSize;
 
 	// --- Data Description, revisited --- //
 	fseek(fp, headerStruct.offsetToDataDesc, SEEK_SET);

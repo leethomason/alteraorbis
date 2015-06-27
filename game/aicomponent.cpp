@@ -1077,6 +1077,7 @@ void AIComponent::ThinkRampage(  )
 
 		const GameItem* melee = thisIC->SelectWeapon(ItemComponent::SELECT_MELEE);
 		GLASSERT(melee);
+		(void)melee;
 	} 
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
@@ -2484,6 +2485,7 @@ void AIComponent::ThinkBattle()
 			utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 			optionName[index],
 			enemyList2[0]));
+		(void)optionName;
 	}
 
 	// And finally, do a swap if needed!

@@ -399,6 +399,7 @@ void WorldMap::DumpRegions()
 					const WorldGrid& gs = grid[INDEX(i,j)];
 					GLOUTPUT(( "Region %d,%d size=%d", i, j, gs.ZoneSize() ));
 					GLOUTPUT(( "\n" ));
+					(void)gs;
 				}
 			}
 		}
@@ -1292,7 +1293,8 @@ void WorldMap::PrintStateInfo( void* state )
 	Vector2I vec;
 	WorldGrid* g = ToGrid( state, &vec );
 	int size = g->ZoneSize();
-	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
+	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));
+	(void)size;
 }
 
 int WorldMap::IntersectPlantAtVoxel(const grinliz::Vector3I& voxel,

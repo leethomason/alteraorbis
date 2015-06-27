@@ -369,6 +369,7 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 
 		int wgRockHeight = nominal ? wg.NominalRockHeight() : wg.RockHeight();
 		GLASSERT(wgRockHeight < h);
+		(void)wgRockHeight;
 		if (wg.FluidSink()) {
 			return 0;
 		}

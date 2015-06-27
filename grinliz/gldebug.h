@@ -64,10 +64,8 @@ void relprintf( const char* format, ... );
 	#endif
 #else
 	#define GLOUTPUT( x )
-	#define GLLOG( x )
-	#define GLOUTPUT_REL( x )	relprintf x
+	#define GLOUTPUT_REL( x )	printf x
 	#define GLASSERT( x )
-//#define GLASSERT( x )		if ( gDebugging && (!(x))) { relprintf( "ASSERT in '%s' at %d.\n", __FILE__, __LINE__ ); relprintf( "ASSERT: %s\n", #x ); }
 #endif
 
 #define	GLTEST(x)															\

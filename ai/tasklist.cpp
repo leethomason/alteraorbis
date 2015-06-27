@@ -699,6 +699,7 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 			gameItem->BestName(),
 			item->BestName(),
 			sector.x, sector.y));
+		(void)sector;
 
 		item->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
 							 ToWorld2F(chit->Position()),

@@ -195,6 +195,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				eval,
 				nRays,
 				hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
+			(void)pos;
 		}
 	}
 	return eval;

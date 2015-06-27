@@ -37,6 +37,7 @@ public:
 			++h;
 			if (h == nBuckets) h = 0;
 			GLASSERT(hStart != h);
+			(void)hStart;
 		}
 	}
 

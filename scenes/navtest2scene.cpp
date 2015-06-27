@@ -122,6 +122,8 @@ void NavTest2Scene::LoadMap()
 	clock_t end = clock();
 	GLOUTPUT(( "Create chit startup: %d msec\n", int(end - start) ));
 	context.engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
+	(void) start;
+	(void) end;
 }
 
 
