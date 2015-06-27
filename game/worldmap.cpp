@@ -339,7 +339,6 @@ void WorldMap::Load( const char* filename )
 		worldInfo->Serialize( &reader );
 		XarcClose( &reader );
 
-		//fread( grid, sizeof(WorldGrid), width*height, fp );
 		Squisher squisher;
 		squisher.StreamDecode( grid, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE, fp );
 

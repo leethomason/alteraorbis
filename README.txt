@@ -1,14 +1,17 @@
-﻿# Altera Orbis 
+﻿Altera Orbis 
+------------
 
 Thanks for playing Altera Orbis!
 grinninglizard.com/altera
 
-# How to Play
+How to Play
+-----------
 
 http://alteraorbis.wikispaces.com/
 
 
-# About
+About
+-----
 
 Altera is a simulation of an alternate world; a world inside
 the computer. You play as a Domain Core trying to grow and
@@ -23,9 +26,10 @@ changing and growing. Thanks for playing and checking the game out.
 Feedback on the forums is appreciated!
 
 
-# Installing
+Installing
+----------
 
-## Windows
+# Windows
 
 Run the installer; it will install the game into your Program Files (x86) and 
 save files into the Documents/AlteraOrbis directory. The Microsoft 
@@ -34,7 +38,7 @@ redistributable installation if you already have them, but if in doubt a
 re-install of the redistributables is harmless. You can safely install over 
 previous Altera Orbis game installations.
 
-## Linux
+# Linux
 
 Linux is more experimental. It works on the dev Ubuntu box, and your mileage may
 vary. Please feel free to bring up any bugs on the forums or an issue in 
@@ -52,7 +56,23 @@ sudo apt-get install libsdl2-2.0
 sudo apt-get install libsdl2-mixer
 ```
 
-# Changes in Beta5a
+Download and install the linux AlteraOrbisLinx_<version>.tar.gz file. You can
+extract it with:
+
+```
+tar -zxvf AlteraOrbisLinx_<version>.tar.gz
+```
+
+And then to run:
+```
+cd AlteraOrbis
+./alteraorbis
+```
+
+Save and log files will be placed in the "save" subdirectory.
+
+Changes in Beta5a
+-----------------
 
 - Support back to OpenGL 3.0
 - Basic Diplomacy
@@ -63,7 +83,8 @@ sudo apt-get install libsdl2-mixer
 - MOBs will collect fruit, and keep it to eat and heal HP
 - Avatar now automatically picks up items
 
-# FAQ
+FAQ
+---
 
 Why do denizens just stand there or get stuck?
 
@@ -81,7 +102,8 @@ Why is a strange blocky flag thing on my core?
 	Someone is attacking you.
 
 
-# Controls
+Controls
+--------
 
 'Tab' key toggles between top down and isometric views.
 'Home' key centers the camera on your core.
@@ -106,7 +128,8 @@ a building), then left-click & drag rotates buildings.
 F11 toggles full screen.
 F3 saves a screenshots. (In Documents/Altera Orbis)
 
-# Important Notes
+Important Notes
+---------------
 
 1. I try to keep save game compatibility in major release #s. (So Beta2a-2c
    all have compatible save games.) This hasn't gone so well with Beta3.
@@ -118,7 +141,8 @@ F3 saves a screenshots. (In Documents/Altera Orbis)
    is intended to make touch as seamless as possible.
 
 
-# Filing a Bug
+Filing a Bug
+------------
 
 If you find an issue,
 1. Make sure your graphics drivers are up to date. I know, it's annoying, and 
@@ -145,12 +169,11 @@ it's part of the glow rendering.
 5: bolt
 
 
-# Known Issues:
+Known Issues
+------------
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt
 
 And reported issues:
 https://code.google.com/p/alteraorbis/issues/list
-
-

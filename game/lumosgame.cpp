@@ -215,7 +215,7 @@ RenderAtom LumosGame::CalcIconAtom( const char* asset )
 
 
 
-void LumosGame::CopyFile( const char* src, const char* target )
+void LumosGame::CopyFile(const char* src, const char* target)
 {
 	GLString srcPath;
 	GetSystemPath(GAME_APP_DIR, src, &srcPath);
@@ -224,27 +224,27 @@ void LumosGame::CopyFile( const char* src, const char* target )
 	GetSystemPath(GAME_SAVE_DIR, target, &targetPath);
 
 	FILE* fp = fopen(srcPath.c_str(), "rb");
-	GLASSERT( fp );
-	if ( fp ) {
-		FILE* tp = fopen( targetPath.c_str(), "wb" );
-		GLASSERT( tp );
+	GLASSERT(fp);
+	if (fp) {
+		FILE* tp = fopen(targetPath.c_str(), "wb");
+		GLASSERT(tp);
 
-		if ( fp && tp ) {
+		if (fp && tp) {
 			CDynArray<U8> buf;
-			fseek( fp, 0, SEEK_END );
-			size_t size = ftell( fp );
-			buf.PushArr( size );
+			fseek(fp, 0, SEEK_END);
+			size_t size = ftell(fp);
+			buf.PushArr(size);
 
-			fseek( fp, 0, SEEK_SET );
-			size_t didRead = fread( &buf[0], 1, size, fp );
-			GLASSERT(didRead == size);
-			if (didRead == size) {
+			fseek(fp, 0, SEEK_SET);
+			size_t didRead = fread(&buf[0], 1, size, fp);
+			GLASSERT(didRead == 1);
+			if (didRead == 1) {
 				fwrite(buf.Mem(), 1, size, tp);
 			}
 
-			fclose( tp );
+			fclose(tp);
 		}
-		fclose( fp );
+		fclose(fp);
 	}
 }
 

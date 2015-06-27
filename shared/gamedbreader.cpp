@@ -201,7 +201,7 @@ bool Reader::Init( int id, const char* filename, int _offset )
 
 	GLOUTPUT(( "Reading '%s' from offset=%d\n", filename, offset ));
 	size_t  didRead = fread( mem, memSize, 1, fp );
-	GLASSERT(didRead == size_t(memSize));
+	GLASSERT(didRead == 1);
 	(void)didRead;
 
 	root = (const Item*)( (U8*)mem + header.offsetToItems );
@@ -359,7 +359,7 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 		// no compression.
 		GLASSERT( dataDesc.size == (U32)memSize );
 		size_t didRead = fread( target, memSize, 1, fp );
-		GLASSERT(didRead == size_t(memSize));
+		GLASSERT(didRead == 1);
 		(void)didRead;
 	}
 	else {
@@ -373,7 +373,7 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 				buffer = Malloc( bufferSize );
 		}
 		size_t didRead = fread( buffer, dataDesc.compressedSize, 1, fp );
-		GLASSERT(didRead == dataDesc.compressedSize);
+		GLASSERT(didRead == 1);
 		(void)didRead;
 
 		int resultSize = fastlz_decompress(buffer, dataDesc.compressedSize, target, dataDesc.size);

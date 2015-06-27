@@ -162,7 +162,7 @@ const char* StreamReader::ReadString()
 		strBuf.Clear();
 		char* p = strBuf.PushArr( len );
 		size_t didRead = fread( p, len, 1, fp );
-		GLASSERT(didRead == size_t(len));
+		GLASSERT(didRead == 1);
 		(void)didRead;
 		strBuf.Push(0);
 
@@ -267,14 +267,14 @@ double StreamReader::ReadReal()
 	else if (enc == ENC_FLOAT) {
 		float v = 0;
 		size_t didRead = fread(&v, sizeof(v), 1, fp);
-		GLASSERT(didRead == sizeof(v));
+		GLASSERT(didRead == 1);
 		(void)didRead;
 		return v;
 	}
 	// ENC_DOUBLE
 	double v = 0;
 	size_t didRead = fread(&v, sizeof(v), 1, fp);
-	GLASSERT(didRead == sizeof(v));
+	GLASSERT(didRead == 1);
 	(void)didRead;
 	return v;
 }
