@@ -1,17 +1,15 @@
-﻿Altera Orbis 
-------------
+﻿#Altera Orbis 
 
 Thanks for playing Altera Orbis!
+
 grinninglizard.com/altera
 
-How to Play
------------
+# How to Play
 
-http://alteraorbis.wikispaces.com/
+http://http://grinninglizard.com/altera/wiki/
 
 
-About
------
+# About
 
 Altera is a simulation of an alternate world; a world inside
 the computer. You play as a Domain Core trying to grow and
@@ -26,10 +24,9 @@ changing and growing. Thanks for playing and checking the game out.
 Feedback on the forums is appreciated!
 
 
-Installing
-----------
+# Installing
 
-# Windows
+## Windows
 
 Run the installer; it will install the game into your Program Files (x86) and 
 save files into the Documents/AlteraOrbis directory. The Microsoft 
@@ -38,7 +35,7 @@ redistributable installation if you already have them, but if in doubt a
 re-install of the redistributables is harmless. You can safely install over 
 previous Altera Orbis game installations.
 
-# Linux
+## Linux
 
 Linux is more experimental. It works on the dev Ubuntu box, and your mileage may
 vary. Please feel free to bring up any bugs on the forums or an issue in 
@@ -71,8 +68,7 @@ cd AlteraOrbis
 
 Save and log files will be placed in the "save" subdirectory.
 
-Changes in Beta5a
------------------
+# Changes in Beta5a
 
 - Support back to OpenGL 3.0
 - Basic Diplomacy
@@ -83,8 +79,7 @@ Changes in Beta5a
 - MOBs will collect fruit, and keep it to eat and heal HP
 - Avatar now automatically picks up items
 
-FAQ
----
+# FAQ
 
 Why do denizens just stand there or get stuck?
 
@@ -102,34 +97,32 @@ Why is a strange blocky flag thing on my core?
 	Someone is attacking you.
 
 
-Controls
---------
+# Controls
 
-'Tab' key toggles between top down and isometric views.
-'Home' key centers the camera on your core.
-'End' key centers the camera on your avatar; if already centered, the
-  end key teleports the avatar home.
-'Escape' key backs out of the menus back to 'view' mode.
-'Space' pauses the game.
+- 'Tab' key toggles between top down and isometric views.
+- 'Home' key centers the camera on your core.
+- 'End' key centers the camera on your avatar; if already centered, the
+   end key teleports the avatar home.
+- 'Escape' key backs out of the menus back to 'view' mode.
+- 'Space' pauses the game.
 
-Left-click moves the avatar, selects things, builds.
-Left-click & drag builds lots of pavement or ice at once, or clears an area.
-Shift-left-click on rock or plants attack the rock/plants.
+- Left-click moves the avatar, selects things, builds.
+- Left-click & drag builds lots of pavement or ice at once, or clears an area.
+- Left-click on rock or plants attack the rock/plants.
 
-Right-click & drag moves the camera.
-Ctrl-Right-click & drag rotates and zooms the camera.
+- Right-click & drag moves the camera.
+- Ctrl-Right-click & drag rotates and zooms the camera.
 
-The arrow keys or WASD moves the camera.
-Ctrl-Arrow keys or ctrl-WASD rotates and zooms.
+- The arrow keys move the camera.
+- Ctrl-Arrow keys rotates and zooms.
 
 If in build mode, but no building selected (so click "Build" but don't select
 a building), then left-click & drag rotates buildings.
 
-F11 toggles full screen.
-F3 saves a screenshots. (In Documents/Altera Orbis)
+- F11 toggles full screen.
+- F3 saves a screenshots. (In Documents/Altera Orbis)
 
-Important Notes
----------------
+# Important Notes
 
 1. I try to keep save game compatibility in major release #s. (So Beta2a-2c
    all have compatible save games.) This hasn't gone so well with Beta3.
@@ -141,8 +134,7 @@ Important Notes
    is intended to make touch as seamless as possible.
 
 
-Filing a Bug
-------------
+# Filing a Bug
 
 If you find an issue,
 1. Make sure your graphics drivers are up to date. I know, it's annoying, and 
@@ -162,15 +154,13 @@ example, if you spot the "blue wall" rendering bug, you can tap (1) to turn off
 glow, then (1) to turn glow back on. If the "blue wall" goes away then returns,
 it's part of the glow rendering.
 
-1: glow
-2: particles
-3: voxel
-4: shadow
-5: bolt
+1. glow
+2. particles
+3. voxel
+4. shadow
+5. bolt
 
-
-Known Issues
-------------
+# Known Issues
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt
