@@ -162,7 +162,7 @@ const char* StreamReader::ReadString()
 		strBuf.Clear();
 		char* p = strBuf.PushArr( len );
 		size_t didRead = fread( p, len, 1, fp );
-		GLASSERT(didRead == len);
+		GLASSERT(didRead == size_t(len));
 		(void)didRead;
 		strBuf.Push(0);
 

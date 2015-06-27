@@ -1474,6 +1474,7 @@ bool AIComponent::ThinkCollectNearFruit()
 	if (parentChit->PlayerControlled()) return false;
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+	if (gameItem->IsWorker()) return false;
 	ItemComponent* ic = parentChit->GetItemComponent();
 	if (!ic) return false;
 

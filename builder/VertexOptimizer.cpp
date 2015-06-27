@@ -1,3 +1,4 @@
+#if 0
 #include "VertexOptimizer.h"
 #include <assert.h>
 #include <math.h>
@@ -513,5 +514,4 @@ void VertexOptimizer::Optimize()
 	ASSERT( nextTargetIndex == nIndex );
 	memcpy( indexBuffer, targetIndexBuffer, sizeof( uint16_t )*nIndex );
 }
-
-
+#endif

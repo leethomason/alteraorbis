@@ -78,7 +78,7 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 		p = SkipWhiteSpace( p );
 		if ( memcmp( p, "OFFSET", strlen( "OFFSET" ) ) == 0) {
 			p += strlen( "OFFSET" );
-			float x, y, z;
+			float x=0, y=0, z=0;
 			p = ScanFloat( &x, p );
 			p = ScanFloat( &y, p );
 			p = ScanFloat( &z, p );

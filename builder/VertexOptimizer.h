@@ -1,3 +1,4 @@
+#if 0
 #ifndef VERTEX_OPTIMIZER_INCLUDED
 #define VERTEX_OPTIMIZER_INCLUDED
 
@@ -175,3 +176,4 @@ private:
 };	// vertexoptimizer
 
 #endif //  VERTEX_OPTIMIZER_INCLUDED
+#endif
