@@ -327,10 +327,6 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		friendList2.Clear();
 		int saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
 		enemyList2.Clear();
-		// FIXME: will keep structure targets (<0) over MOB targets (>0).
-		//        but filtering below makes this a little tricky to fix
-		if (saveTarget) 
-			enemyList2.Push(saveTarget);
 
 		MOBIshFilter mobFilter;
 		BuildingFilter buildingFilter;
@@ -385,18 +381,27 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 				}
 			}
 		}
+		Chit* saveTargetChit = Context()->chitBag->GetChit(saveTarget);
 		for (int k = 0; k < NFILTER; ++k) {
+			if (saveTargetChit) {
+				// Move the save target to the front of the appropriate array.
+				int idx = arr[k].Find(saveTarget, [](int saveTargetID, Chit* chit) {
+					return chit->ID() == saveTargetID;
+				});
+				if (idx >= 0) {
+					Swap(&arr[k][0], &arr[k][idx]);
+				}
+				else if (k == 0 && mobFilter.Accept(saveTargetChit)) {
+					arr[k].Insert(0, saveTargetChit);
+				}
+			}
+
 			for (int i = 0; i < arr[k].Size(); ++i) {
 				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
 		}
-		// Don't shoot at buildings if we have a non-building target!
-		if (   focus != FOCUS_TARGET 
-			&& enemyList2.Size() >= 2 
-			&& enemyList2[0] < 0 
-			&& enemyList2[1] > 0) 
-		{
-			Swap(&enemyList2[0], &enemyList2[1]);
+		if (saveTarget < 0 && enemyList2.Empty()) {
+			enemyList2.Push(saveTarget);
 		}
 	}
 }
