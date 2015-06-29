@@ -58,13 +58,13 @@ void relprintf( const char* format, ... );
 	#else
 		#include <assert.h>
         #include <stdio.h>
-		#define GLASSERT		assert
-		#define GLOUTPUT( x )	printf x	
-		#define GLOUTPUT_REL( x )	printf x
+		#define GLASSERT			assert
+		#define GLOUTPUT( x )		printf x
+		#define GLOUTPUT_REL( x )	relprintf x
 	#endif
 #else
 	#define GLOUTPUT( x )
-	#define GLOUTPUT_REL( x )	printf x
+	#define GLOUTPUT_REL( x )		relprintf x
 	#define GLASSERT( x )
 #endif
 

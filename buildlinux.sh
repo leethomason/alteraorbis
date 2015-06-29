@@ -1,3 +1,4 @@
+#!/bin/bash
 # Initial build
 mkdir build
 cd build
@@ -17,9 +18,15 @@ mkdir AlteraOrbis/res
 
 cp res/* AlteraOrbis/res
 cp build/alteraorbis AlteraOrbis
-cp README.txt AlteraOrbis
+cp README.md AlteraOrbis
 
-tar czf AlteraOrbisLinux_$1.tar.gz AlteraOrbis
+# Go StackOverflow. Don't know how I would have ever
+# figured this out without you.
+ALTERA_VERSION=`awk '/define/ {print $3}' version.h | tr -d '"\r'`
+echo "Version: $ALTERA_VERSION"
+
+rm AlteraOrbisLinux_$ALTERA_VERSION.tar.gz
+tar czf AlteraOrbisLinux_$ALTERA_VERSION.tar.gz AlteraOrbis
 
 # tar -zxvf AlteraOrbisLinux.tar.gz
 
