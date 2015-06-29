@@ -19,13 +19,13 @@ PhysicsSims::PhysicsSims(const ChitContext* _context) : context(_context)
 		Vector2I sector = { 0, 0 };
 		// 0,0 used by the test scenes. The other border sims not needed.
 		circuitSim[0] = new CircuitSim(context, sector);
-		fluidSim[0] = new FluidSim(context->worldMap, InnerSectorBounds(sector));
+		fluidSim[0] = new FluidSim(context->worldMap, sector);
 	}
 	for (int j = 1; j < NUM_SECTORS - 1; ++j) {
 		for (int i = 1; i < NUM_SECTORS - 1; ++i) {
 			Vector2I sector = { i, j };
 			circuitSim[j*NUM_SECTORS + i] = new CircuitSim(context, sector);
-			fluidSim[j*NUM_SECTORS + i] = new FluidSim(context->worldMap, InnerSectorBounds(sector));
+			fluidSim[j*NUM_SECTORS + i] = new FluidSim(context->worldMap, sector);
 		}
 	}
 	fluidTicker.SetPeriod(600 / (NUM_SECTORS*NUM_SECTORS));

@@ -59,8 +59,8 @@ x switch should fire if avatar goes there
 x Linux: where are the save files? Where should they be?
 x static link freetype
 x Profiler not working on Linux
-- linux build script
-- linux install & run notes
+x linux build script
+x linux install & run notes
 
 t Make sure cyclops eat food
 - rules for sub-teams (must be adjacent? near?)
