@@ -1522,59 +1522,57 @@ Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool ex
 }
 
 
-bool AIComponent::ThinkGuard(  )
-{
-	const GameItem* gameItem = parentChit->GetItem();
+bool AIComponent::ThinkGuard(  ) {
+	const GameItem *gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	if (    !(gameItem->flags & GameItem::AI_USES_BUILDINGS )
-		 || !(gameItem->flags & GameItem::HAS_NEEDS )
-		 || parentChit->PlayerControlled() 
-		 || !AtHomeCore() )
-	{
+	if (!(gameItem->flags & GameItem::AI_USES_BUILDINGS)
+		|| !(gameItem->flags & GameItem::HAS_NEEDS)
+		|| parentChit->PlayerControlled()
+		|| !AtHomeCore()) {
 		return false;
 	}
 
-	if ( gameItem->GetPersonality().Guarding() == Personality::DISLIKES ) {
+	if (gameItem->GetPersonality().Guarding() == Personality::DISLIKES) {
 		return false;
 	}
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
-	Vector2I sector = ToSector( pos2i );
-	Rectangle2I bounds = InnerSectorBounds( sector );
+	Vector2I sector = ToSector(pos2i);
+	Rectangle2I bounds = InnerSectorBounds(sector);
 
-	CoreScript* coreScript = CoreScript::GetCore( sector );
+	CoreScript *coreScript = CoreScript::GetCore(sector);
 
-	if ( !coreScript ) return false;
+	if (!coreScript) return false;
 
 	ItemNameFilter filter(ISC::guardpost);
-	Context()->chitBag->FindBuilding( IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter );
+	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
-	if ( chitArr.Empty() ) return false;
+	if (chitArr.Empty()) return false;
 
 	// Are we already guarding??
-	for( int i=0; i<chitArr.Size(); ++i ) {
+	for (int i = 0; i < chitArr.Size(); ++i) {
 		Rectangle2I guardBounds;
 
 		guardBounds.min = guardBounds.max = ToWorld2I(chitArr[i]->Position());
-		guardBounds.Outset( GUARD_RANGE );
-		guardBounds.DoIntersection( bounds );
+		guardBounds.Outset(GUARD_RANGE);
+		guardBounds.DoIntersection(bounds);
 
-		if ( guardBounds.Contains( pos2i )) {
-			taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-			taskList.Push( Task::StandTask( GUARD_TIME ));
+		if (guardBounds.Contains(pos2i)) {
+			taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
+			taskList.Push(Task::StandTask(GUARD_TIME));
 			return true;
 		}
 	}
 
-	int post = parentChit->random.Rand( chitArr.Size() );
+	int post = parentChit->random.Rand(chitArr.Size());
 	Rectangle2I guardBounds;
 	guardBounds.min = guardBounds.max = ToWorld2I(chitArr[post]->Position());
-	guardBounds.Outset( GUARD_RANGE );
-	guardBounds.DoIntersection( bounds );
+	guardBounds.Outset(GUARD_RANGE);
+	guardBounds.DoIntersection(bounds);
 
-	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-	taskList.Push( Task::StandTask( GUARD_TIME ));
+	taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
+	taskList.Push(Task::StandTask(GUARD_TIME));
 	return true;
 }
 
