@@ -29,7 +29,7 @@ struct WorldGrid;
 class FluidSim
 {
 public:
-	FluidSim(WorldMap* worldMap, const grinliz::Rectangle2I& bounds);
+	FluidSim(WorldMap* worldMap, const grinliz::Vector2I& sector);
 	~FluidSim();
 
 	// Call every 600ms (?)
@@ -64,7 +64,7 @@ private:
 	enum { PRESSURE = 25 };
 
 	WorldMap* worldMap;
-	grinliz::Rectangle2I innerBounds, outerBounds;
+	grinliz::Rectangle2I outerBounds, innerBounds;
 	bool settled;
 
 	grinliz::CDynArray<grinliz::Vector2I> waterfalls;
