@@ -329,12 +329,13 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		enemyList2.Clear();
 
 		MOBIshFilter mobFilter;
-		BuildingFilter buildingFilter;
 		ItemNameFilter coreFilter(ISC::core);
+		BuildingFilter buildingFilter;
 
 		// Order matters: prioritize mobs, then a core, then buildings.
 		static const int NFILTER = 3;
 		CChitArray arr[NFILTER];
+		IChitAccept* filters[NFILTER] = {&mobFilter, &coreFilter, &buildingFilter};
 
 		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
@@ -381,21 +382,26 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 				}
 			}
 		}
+
 		Chit* saveTargetChit = Context()->chitBag->GetChit(saveTarget);
-		for (int k = 0; k < NFILTER; ++k) {
-			if (saveTargetChit) {
+		if (saveTargetChit) {
+			for (int k = 0; k < NFILTER; ++k) {
 				// Move the save target to the front of the appropriate array.
-				int idx = arr[k].Find(saveTarget, [](int saveTargetID, Chit* chit) {
-					return chit->ID() == saveTargetID;
-				});
+				int idx = arr[k].Find(saveTargetChit);
 				if (idx >= 0) {
 					Swap(&arr[k][0], &arr[k][idx]);
+					break;
 				}
-				else if (k == 0 && mobFilter.Accept(saveTargetChit)) {
-					arr[k].Insert(0, saveTargetChit);
+				else if (filters[k]->Accept(saveTargetChit)) {
+					if (arr[k].HasCap()) {
+						arr[k].Insert(0, saveTargetChit);
+					}
+					break;
 				}
 			}
+		}
 
+		for (int k = 0; k < NFILTER; ++k) {
 			for (int i = 0; i < arr[k].Size(); ++i) {
 				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
