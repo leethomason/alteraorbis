@@ -576,6 +576,7 @@ void CoreScript::UpdateAI()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	CoreInfo* info = &coreInfoArr[index];
 	GLASSERT(info->coreScript == this);
+	(void)info;
 }
 
 

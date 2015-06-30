@@ -51,6 +51,8 @@ void XenoAudio::SetAudio(bool on)
 		GLASSERT(error == 0);
 		int channels = Mix_AllocateChannels(CHANNELS);
 		GLASSERT(channels == CHANNELS);
+		(void)channels;
+		(void)error;
 	}
 	else {
 		Mix_CloseAudio();
@@ -180,6 +182,7 @@ void XenoAudio::SetChannelPos(int i)
 
 		int result = Mix_SetPosition(i, degi, d);
 		GLASSERT(result != 0);
+		(void)result;
 	}
 }
 

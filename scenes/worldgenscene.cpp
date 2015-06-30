@@ -280,7 +280,7 @@ void WorldGenScene::DoTick(U32 delta)
 					GLString name;
 					GLString postfix;
 
-					const gamedb::Reader* database = game->GetDatabase();
+//					const gamedb::Reader* database = game->GetDatabase();
 					for (int j = 0; j < NUM_SECTORS; ++j) {
 						for (int i = 0; i < NUM_SECTORS; ++i) {
 							name = "sector";

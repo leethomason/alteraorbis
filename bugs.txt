@@ -56,12 +56,13 @@ x control / teams not saved! (doh!)
 x make sure domain takeover works in next version
 x top down: can’t tell on switch from off switch. 
 x switch should fire if avatar goes there
+x Linux: where are the save files? Where should they be?
+x static link freetype
+x Profiler not working on Linux
+x linux build script
+x linux install & run notes
 
-- Linux: where are the save files? Where should they be?
-- static link freetype
 t Make sure cyclops eat food
-t Profiler not working on Linux
-
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)

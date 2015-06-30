@@ -113,6 +113,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				gi->BestName(),
 				cost,
 				'A' + sector.x, 1 + sector.y));
+			(void)sector;
 
 			if (salesTax && ReserveBank::Instance()) {
 				int tax = LRint(float(cost) * SALES_TAX);

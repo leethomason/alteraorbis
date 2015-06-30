@@ -20,8 +20,10 @@ S8 FluidSim::pressure[SECTOR_SIZE*SECTOR_SIZE];
 grinliz::CArray<grinliz::Vector2I, FluidSim::PRESSURE> FluidSim::fill;
 
 
-FluidSim::FluidSim(WorldMap* wm, const Rectangle2I& b) : worldMap(wm), outerBounds(b), settled(false)
+FluidSim::FluidSim(WorldMap* wm, const Vector2I& s) : worldMap(wm), settled(false)
 {
+	outerBounds = SectorBounds(s);
+	outerBounds.DoIntersection(worldMap->Bounds());
 	innerBounds = outerBounds;
 	innerBounds.Outset(-1);
 }
@@ -369,6 +371,7 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 
 		int wgRockHeight = nominal ? wg.NominalRockHeight() : wg.RockHeight();
 		GLASSERT(wgRockHeight < h);
+		(void)wgRockHeight;
 		if (wg.FluidSink()) {
 			return 0;
 		}

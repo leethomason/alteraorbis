@@ -106,6 +106,7 @@ int StreamReader::PeekByte()
 	int sign = (lead & (1<<7)) ? 1 : -1;
 	int nBytes = (lead & 0x70)>>4;
 	GLASSERT( nBytes == 0 );
+	(void)nBytes;
 
 	value = lead & 0xf;
 	ungetc( lead, fp );
@@ -160,7 +161,9 @@ const char* StreamReader::ReadString()
 		int len = ReadInt();
 		strBuf.Clear();
 		char* p = strBuf.PushArr( len );
-		fread( p, len, 1, fp );
+		size_t didRead = fread( p, len, 1, fp );
+		GLASSERT(didRead == 1);
+		(void)didRead;
 		strBuf.Push(0);
 
 		IString istr = StringPool::Intern( strBuf.Mem() );
@@ -263,12 +266,16 @@ double StreamReader::ReadReal()
 	}
 	else if (enc == ENC_FLOAT) {
 		float v = 0;
-		fread(&v, sizeof(v), 1, fp);
+		size_t didRead = fread(&v, sizeof(v), 1, fp);
+		GLASSERT(didRead == 1);
+		(void)didRead;
 		return v;
 	}
 	// ENC_DOUBLE
 	double v = 0;
-	fread(&v, sizeof(v), 1, fp);
+	size_t didRead = fread(&v, sizeof(v), 1, fp);
+	GLASSERT(didRead == 1);
+	(void)didRead;
 	return v;
 }
 
@@ -479,6 +486,7 @@ const char* StreamReader::OpenElement()
 
 	int node = ReadInt();
 	GLASSERT( node == BEGIN_ELEMENT );
+	(void)node;
 	const char* elementName = ReadString();
 
 	attributes.Clear();
@@ -556,6 +564,7 @@ void StreamReader::CloseElement()
 {
 	int node = ReadInt();
 	GLASSERT( node == END_ELEMENT );
+	(void)node;
 }
 
 

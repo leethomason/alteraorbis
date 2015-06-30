@@ -368,6 +368,7 @@ void ItemDB::Update( const GameItem* gi )
 {
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
+	(void)id;
 
 	if ( gi->Significant() ) {
 		ItemHistory h;

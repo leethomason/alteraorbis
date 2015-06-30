@@ -1,6 +1,6 @@
 ** Releasing **
 - set version: both version name and file version
-- update README.txt
+- update README.md
 - update title screen text
 - build assets
 - debug test:

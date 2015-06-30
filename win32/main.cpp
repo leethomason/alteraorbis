@@ -198,6 +198,7 @@ int main(int argc, char **argv)
 	glewExperimental = GL_TRUE;
 	int r = glewInit();
 	GLASSERT(r == GL_NO_ERROR);
+	(void)r;
 
 	while (glGetError() != GL_NO_ERROR) {
 		// around again

@@ -100,6 +100,7 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 		if ( gDebugging ) {
 			int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			GLASSERT( status == GL_FRAMEBUFFER_COMPLETE);
+			(void)status;
 		}
 	}
 	else {

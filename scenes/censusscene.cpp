@@ -99,7 +99,7 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 			CoreScript* cs = CoreScript::GetCore(sector);
 			if (cs && cs->InUse()) {
 				int team = cs->ParentChit()->Team();
-				bool isController = Team::Instance()->IsController(team, &subTeamArr);
+//				bool isController = Team::Instance()->IsController(team, &subTeamArr);
 
 				int superTeam = Team::Instance()->SuperTeam(team);
 				IString teamName = Team::Instance()->TeamName(team);

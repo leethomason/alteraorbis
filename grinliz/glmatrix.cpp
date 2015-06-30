@@ -780,11 +780,13 @@ void Matrix4::Test()
 		m0.Invert(&m0Inv);
 		Matrix4 ident0 = m0 * m0Inv;
 		GLASSERT(Equal(ident0, identity));
+		(void)ident0;
 
 		Matrix4 rInv;
 		r.InvertRotationMat(&rInv);
 		Matrix4 ident1 = r * rInv;
 		GLASSERT(Equal(ident1, identity));
+		(void)ident1;
 	}
 
 	GLOUTPUT(("Matrix test complete.\n"));

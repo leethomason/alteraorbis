@@ -26,6 +26,7 @@ void RoadAI::AddRoad(const grinliz::Vector2I* v, int n)
 			for (int k = 0; k < road[i].Size() - 1; ++k) {
 				Vector2I d = road[i][k] - road[i][k + 1];
 				GLASSERT(d.LengthSquared() == 1);
+				(void)d;
 			}
 			return;
 		}

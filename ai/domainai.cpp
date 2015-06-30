@@ -918,8 +918,8 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0, plaza1;
-	plaza0.FromPair(c.x - 3, c.y - 1, c.x + 3, c.y + 1);
-	plaza1.FromPair(c.x - 1, c.y - 3, c.x + 1, c.y + 3);
+	plaza0.min.Set(c.x - 3, c.y - 1);	plaza0.max.Set(c.x + 3, c.y + 1);
+	plaza1.min.Set(c.x - 1, c.y - 3);	plaza1.max.Set(c.x + 1, c.y + 3);
 
 	roads->AddPlaza(plaza0);
 	roads->AddPlaza(plaza1);

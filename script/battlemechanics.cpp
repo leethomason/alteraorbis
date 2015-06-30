@@ -430,6 +430,7 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, float 
 
 	GameItem* item = origin->GetItem();
 	GLASSERT( item );
+	(void)item;
 
 	if ( origin->GetRenderComponent() ) {
 		RenderComponent* rc = origin->GetRenderComponent();

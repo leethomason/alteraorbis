@@ -197,6 +197,7 @@ inline void XarcOpen( XStream* stream, const char* name ) {
 	else {
 		const char* n = stream->Loading()->OpenElement();
 		GLASSERT( grinliz::StrEqual( name, n ));
+		(void)n;
 	}
 }
 

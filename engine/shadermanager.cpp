@@ -130,23 +130,23 @@ ShaderManager* ShaderManager::Instance()
 }
 
 
-void ShaderManager::LoadProgram( const char* name, GLString* str ) 
+void ShaderManager::LoadProgram(const char* name, GLString* str)
 {
 	CStr<256> path;
-	path.Format( "res/%s", name );
+	path.Format("res/%s", name);
 	GLString fullPath;
 	GetSystemPath(GAME_APP_DIR, path.c_str(), &fullPath);
 
-	FILE* fp = fopen( fullPath.c_str(), "r" );
-	GLASSERT( fp );
+	FILE* fp = fopen(fullPath.c_str(), "r");
+	GLASSERT(fp);
 
 	static const int SIZE = 100;
 	char buf[SIZE];
 	int count = 0;
-	while( (count = fread( buf, 1, SIZE, fp )) > 0 ) {
-		str->append( buf, count );
+	while ((count = fread(buf, 1, SIZE, fp)) > 0) {
+		str->append(buf, count);
 	}
-	fclose( fp );
+	fclose(fp);
 }
 
 
