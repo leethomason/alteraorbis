@@ -57,7 +57,7 @@ Download and install the linux AlteraOrbisLinx_<version>.tar.gz file. You can
 extract it with:
 
 ```
-tar -zxvf AlteraOrbisLinx_<version>.tar.gz
+tar -zxvf AlteraOrbisLinux_<version>.tar.gz
 ```
 
 And then to run:
