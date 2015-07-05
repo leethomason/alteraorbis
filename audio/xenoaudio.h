@@ -48,7 +48,7 @@ private:
 	};
 
 	const gamedb::Reader* database;
-	bool audioOn;
+	bool audioOn = true;
 	grinliz::Vector3F listenerPos;
 	grinliz::Vector3F listenerDir;
 	grinliz::GLString glString;		// don't want to re-allocate.
