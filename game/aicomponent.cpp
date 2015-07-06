@@ -129,6 +129,7 @@ AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 	rampageTarget = 0;
 	destinationBlocked = 0;
 	lastTargetID = 0;
+	lastGrid.Zero();
 }
 
 
