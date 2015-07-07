@@ -17,12 +17,14 @@
 #define LUMOS_WORLDINFO_INCLUDED
 
 #include "gamelimits.h"
+#include "lumosmath.h"
 #include "../xarchive/glstreamer.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../micropather/micropather.h"
 #include "../engine/enginelimits.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glrectangle.h"
 
 struct WorldGrid;
 namespace micropather {
@@ -32,8 +34,9 @@ namespace micropather {
 class SectorData
 {
 public:
-	SectorData() : x(0), y(0), ports(0), area(0), pather(0) {
+	SectorData() : ports(0), area(0), pather(0) {
 		core.Zero();
+		sector.Zero();
 	}
 	~SectorData();
 
@@ -45,14 +48,15 @@ public:
 		NEG_Y	= 4,		
 		POS_Y	= 8 
 	};
-	int							x, y;		// grid position (not sector position)
+	grinliz::Vector2I			sector;
 	int							ports;		// if attached to the grid, has ports. 
 	grinliz::Vector2I			core;		// core location, in map coordinates
 	int							area;
 	micropather::MicroPather*	pather;
 	grinliz::IString			name;
 
-	bool HasCore() const	{ return core.x > 0 && core.y > 0; }
+	bool HasCore() const				{ return core.x > 0 && core.y > 0; }
+	grinliz::Vector2I CoreLoc() const	{ return SectorBounds(sector).Center(); }
 
 	// Nearest port to 'pos'. There are no limits on pos.
 	int NearestPort( const grinliz::Vector2I& pos ) const;	
@@ -67,23 +71,6 @@ public:
 	grinliz::Rectangle2I InnerBounds() const;
 
 	// ------- Utility -------- //
-	static grinliz::Vector2I SectorID( float x, float y ) {
-		grinliz::Vector2I v = { (int)x/SECTOR_SIZE, (int)y/SECTOR_SIZE };
-		return v;
-	}
-	// Get the bounds of the sector from an arbitrary coordinate
-	static grinliz::Rectangle2I	SectorBounds( float x, float y );
-	static grinliz::Rectangle3F	SectorBounds3( float x, float y ) {
-		grinliz::Rectangle2I r = SectorBounds( x, y );
-		grinliz::Rectangle3F r3;
-		r3.Set( (float)r.min.x, 0, (float)r.min.y, (float)r.max.x, MAP_HEIGHT, (float)r.max.y );
-		return r3;
-	}
-	static grinliz::Rectangle2I InnerSectorBounds( float x, float y ) {
-		grinliz::Rectangle2I r = SectorBounds( x, y );
-		r.Outset( -1 );
-		return r;
-	}
 	static grinliz::Vector2F PortPos( const grinliz::Rectangle2I portBounds, U32 seed );
 };
 

@@ -20,8 +20,8 @@ using namespace grinliz;
 
 static const int COUNT = 5;
 static const float FRACTION_LAND = 0.3f;
-static const int WIDTH  = WorldGen::SIZE;
-static const int HEIGHT = WorldGen::SIZE;
+static const int WIDTH  = MAX_MAP_SIZE;
+static const int HEIGHT = MAX_MAP_SIZE;
 
 
 int main(int argc, const char* argv[])
@@ -83,7 +83,7 @@ int main(int argc, const char* argv[])
 		printf( "Writing %s\n", fname.c_str() );
 		fnameP.Format( "worldgen-path%02d.png", i );
 		
-		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
+		static const int SIZE2 = MAX_MAP_SIZE*MAX_MAP_SIZE;
 		Color4U8* pixels = new Color4U8[SIZE2];
 
 		for( int i=0; i<SIZE2; ++i ) {
@@ -111,7 +111,7 @@ int main(int argc, const char* argv[])
 			}
 			pixels[i] = grid.ToColor();
 		}
-		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
+		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, MAX_MAP_SIZE, MAX_MAP_SIZE );
 
 		for( int i=0; i<SIZE2; ++i ) {
 			int path = *(worldGen.Path() + i);
@@ -129,7 +129,7 @@ int main(int argc, const char* argv[])
 				pixels[i].Set( 0, 0, 0, 255 );
 			}
 		}
-		lodepng_encode32_file( fnameP.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
+		lodepng_encode32_file( fnameP.c_str(), (const unsigned char*)pixels, MAX_MAP_SIZE, MAX_MAP_SIZE );
 
 		delete [] pixels;
 		delete [] sectorData;

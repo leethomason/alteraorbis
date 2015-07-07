@@ -65,8 +65,8 @@ public:
 	};
 
 	void SetHeight( int x, int y, int h ) {
-		int index = y*SIZE+x;
-		GLASSERT( x >= 0 && x < SIZE && y >= 0 && y < SIZE );
+		int index = y*MAX_MAP_SIZE+x;
+		GLASSERT( x >= 0 && x < MAX_MAP_SIZE && y >= 0 && y < MAX_MAP_SIZE );
 		GLASSERT( h >= WATER && h < NUM_TYPES );
 		land[index] = h;
 	}
@@ -89,26 +89,22 @@ public:
 	};
 	const U16*	Path() const						{ return path; }
 
-	enum {
-		SIZE			= MAX_MAP_SIZE
-	};
-
 	grinliz::Vector2I FromState( void* s ) {
 		int i = int(intptr_t(s));
-		int y = i / SIZE;
-		int x = i - y*SIZE;
+		int y = i / MAX_MAP_SIZE;
+		int x = i - y*MAX_MAP_SIZE;
 		grinliz::Vector2I v = { x, y };
 		return v;
 	}
 
 	void* ToState( const grinliz::Vector2I& v ) {
-		int i = v.y*SIZE + v.x;
+		int i = v.y*MAX_MAP_SIZE + v.x;
 		return (void*)i;
 	}
 
 private:
-	int INDEX( int x, int y ) const					{ return y*SIZE + x; }
-	int INDEX( const grinliz::Vector2I& v ) const	{ return v.y*SIZE + v.x; }
+	int INDEX( int x, int y ) const					{ return y*MAX_MAP_SIZE + x; }
+	int INDEX( const grinliz::Vector2I& v ) const	{ return v.y*MAX_MAP_SIZE + v.x; }
 
 	int  CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
 	void Draw( const grinliz::Rectangle2I& r, int land );

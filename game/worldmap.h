@@ -21,6 +21,7 @@
 #include "sectorport.h"
 
 #include "../xegame/cticker.h"
+#include "../xegame/xegamelimits.h"
 
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
@@ -283,7 +284,7 @@ public:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SHIFT  = 4,
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-		NUM_ZONES	= EL_MAP_SIZE/ZONE_SIZE,
+		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
 		MAX_VOXEL_QUADS  = 16000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
@@ -302,7 +303,7 @@ public:
 private:
 	int INDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height ); 
-		return (y<<EL_MAP_Y_SHIFT) | x; 
+		return (y<<MAP_Y_SHIFT) | x; 
 	}
 	int INDEX( grinliz::Vector2I v ) const { return INDEX( v.x, v.y ); }
 
@@ -382,8 +383,8 @@ private:
 
 	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec ) {
 		int v = (int)(intptr_t(state));
-		int x = v & EL_MAP_X_MASK;
-		int y = v >> EL_MAP_Y_SHIFT;
+		int x = v & MAP_X_MASK;
+		int y = v >> MAP_Y_SHIFT;
 		GLASSERT(x >= 0 && x < width);
 		GLASSERT(y >= 0 && y < height);
 
@@ -469,7 +470,7 @@ private:
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
 
 	// Big memory: the actual map.
-	WorldGrid grid[EL_MAP_SIZE*EL_MAP_SIZE];
+	WorldGrid grid[MAX_MAP_SIZE*MAX_MAP_SIZE];
 
 	// Temporary - big one - last in class
 	grinliz::CArray< Vertex, MAX_VOXEL_QUADS*4 > voxelBuffer;

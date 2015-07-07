@@ -92,9 +92,8 @@ void PlantScript::DoTick(U32 delta)
 	for (int i = 0; i < n; ++i) {
 		index += PRIME;
 
-		GLASSERT(MAX_MAP_SIZE == 1024);
-		int x = index & 1023;
-		int y = (index >> 10) & 1023;
+		int x = IndexToMapX(index);
+		int y = IndexToMapY(index);
 
 		const WorldGrid& wg = worldMap->GetWorldGrid(x, y);
 		if (!wg.Plant()) continue;

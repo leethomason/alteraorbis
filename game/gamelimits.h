@@ -52,12 +52,14 @@ static const int TEMPLES_REPELS_GREATER = 1;
 static const float TECH_ATTRACTS_GREATER = 2.5f;
 
 // General guidelines to the # of things in the world.
-static const int TYPICAL_DOMAINS	= 120;
-static const int TYPICAL_AI_DOMAINS = 40;
-static const int TYPICAL_DENIZENS	= 800;
-static const int TYPICAL_LESSER		= 1500;
-static const int TYPICAL_GREATER	= 10;						// These guys get overwhelming fast - they can clear a domain.
-static const int TYPICAL_PLANTS		= 50 * 1000;
+static const int MAP_SCALE_FACTOR = (1024 * 1024) / (MAX_MAP_SIZE*MAX_MAP_SIZE);
+
+static const int TYPICAL_DOMAINS	= 120		/ MAP_SCALE_FACTOR;
+static const int TYPICAL_AI_DOMAINS = 40		/ MAP_SCALE_FACTOR;
+static const int TYPICAL_DENIZENS	= 800		/ MAP_SCALE_FACTOR;
+static const int TYPICAL_LESSER		= 1500		/ MAP_SCALE_FACTOR;
+static const int TYPICAL_GREATER	= 10		/ MAP_SCALE_FACTOR;		// These guys get overwhelming fast - they can clear a domain.
+static const int TYPICAL_PLANTS		= 50 * 1000 / MAP_SCALE_FACTOR;
 
 static const int GOLD_PER_DENIZEN  = 100;
 static const int GOLD_PER_LESSER   =  10;

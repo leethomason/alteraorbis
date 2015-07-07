@@ -164,7 +164,11 @@ public:
 				memcpy( mem, cache, size*sizeof(T) );
 			}
 			else {
+				void* oldMem = mem;
 				mem = (T*)realloc( mem, capacity*sizeof(T) );
+				if (!mem) {
+					free(oldMem);
+				}
 			}
 		}
 	}

@@ -696,7 +696,6 @@ void CoreScript::DoTickInUse(int /*delta*/, int nSpawnTicks)
 	MapSpatialComponent* ms = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 	GLASSERT(ms);
 	Vector2I pos2i = ms->MapPosition();
-	//Vector2I sector = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 
 	if (nSpawnTicks && Team::IsDenizen(parentChit->Team())) {
 		// Warning: essentially caps the #citizens to the capacity of CChitArray (32)
@@ -723,20 +722,23 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	Vector2I sector = ToSector(pos2i);
 
 	if ( nSpawnTicks && lesserPossible)
 	{
 #if SPAWN_MOBS > 0
 		int spawnEnabled = Context()->chitBag->GetSim()->SpawnEnabled() & Sim::SPAWN_LESSER;
 		if (Context()->chitBag->GetSim() && spawnEnabled) {
-			// spawn stuff.
 
-			// 0->NUM_SECTORS
+			static const int NSPAWN = 16;
+			static const int FUZZ = 4;
+
 			int outland = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-			GLASSERT(NUM_SECTORS == 16);	// else tweak constants 
-			outland += Random::Hash8(sector.x + sector.y * 256) % 4;
+			outland += Random::Hash8(sector.x + sector.y * 256) % FUZZ;
 			outland = Clamp(outland, 0, NUM_SECTORS - 1);
+
+			int spawn = outland * NSPAWN / (NUM_SECTORS + FUZZ / 2);
+			spawn = Clamp(spawn, 0, NSPAWN - 1);
 
 			Rectangle2F r;
 			r.Set((float)pos2i.x, (float)(pos2i.y), (float)(pos2i.x + 1), (float)(pos2i.y + 1));
@@ -750,27 +752,14 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 					/*
 						What to spawn?
 						A core has its "typical spawn": mantis, redManis, trilobyte.
-						And an occasional greater spawn: cyclops variants, dragon
 						All cores scan spawn trilobyte.
-						*/
-#ifdef ALTERA_MINI
-						static const char* SPAWN[NUM_SECTORS] = {
-						"trilobyte",
-						"trilobyte",
-						"mantis",
-						"mantis",
-						"troll",
-						"redMantis",
-						"troll",
-						"redMantis"
-					};
-#else
-						static const char* SPAWN[NUM_SECTORS] = {
-						"trilobyte",
+					*/
+					static const char* SPAWN[NSPAWN] = {
 						"trilobyte",
 						"trilobyte",
 						"trilobyte",
 						"mantis",
+						"trilobyte",
 						"mantis",
 						"mantis",
 						"redMantis",
@@ -783,7 +772,6 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 						"troll",
 						"redMantis"
 					};
-#endif
 					defaultSpawn = StringPool::Intern(SPAWN[outland]);
 				}
 

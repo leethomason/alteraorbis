@@ -61,8 +61,9 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		Bolt& b = (*bolts)[i];
  
 		if ( usingSectors ) {
-			// Get bounds before moving, so it can't "tunnel" through.
-			bounds = SectorData::SectorBounds3( b.head.x, b.head.z );
+			Vector2I sector = ToSector(b.head.x, b.head.z);
+			Rectangle2I inner = InnerSectorBounds(sector);
+			bounds.Set(float(inner.min.x), 0, float(inner.min.y), float(inner.max.x + 1), MAP_HEIGHT, float(inner.max.y + 1));
 		}
 		
 		float distance = b.speed * timeSlice;

@@ -340,7 +340,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		zone.Outset(fullSectorAware ? SECTOR_SIZE : int(NORMAL_AWARENESS));
 
 		if (Context()->worldMap->UsingSectors()) {
-			zone.DoIntersection(SectorData::InnerSectorBounds(center.x, center.y));
+			zone.DoIntersection(InnerSectorBounds(ToSector(center.x, center.y)));
 		}
 		else {
 			zone.DoIntersection(Context()->worldMap->Bounds());
@@ -1143,14 +1143,8 @@ void AIComponent::ThinkRampage(  )
 Vector2F AIComponent::GetWanderOrigin()
 {
 	Vector2F pos = ToWorld2F(parentChit->Position());
-	Vector2I m = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };
-	const ChitContext* context = Context();
-	const SectorData& sd = context->worldMap->GetWorldInfo().GetSector(m);
-	Vector2F center = { (float)(sd.x + SECTOR_SIZE / 2), (float)(sd.y + SECTOR_SIZE / 2) };
-	if (sd.HasCore())	{
-		center.Set((float)sd.core.x + 0.5f, (float)sd.core.y + 0.5f);
-	}
-	return center;
+	Vector2I sector = ToSector(pos);
+	return ToWorld2F(SectorBounds(sector).Center());
 }
 
 
@@ -2702,7 +2696,6 @@ void AIComponent::EnterNewGrid()
 	// Is there food to eat or collect?
 	// Here, just collect. There is another
 	// bit of logic (ThinkHungry) to eat fruit.
-	// (Too much duplicated logic in the AI code!)
 	if (thisIC->CanAddToInventory() && visitorIndex < 0 && !parentChit->PlayerControlled()) {
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
@@ -2756,6 +2749,9 @@ void AIComponent::EnterNewGrid()
 		}
 	}
 
+#ifdef ALTERA_MINI
+	// No domain takeover in mini mode.
+#else
 	// Domain Takeover.
 	if (   gameItem->MOB() == ISC::denizen
 		&& Team::IsRogue(parentChit->Team())
@@ -2800,6 +2796,7 @@ void AIComponent::EnterNewGrid()
 			}
 		}
 	}
+#endif
 
 	// Check for morale-changing items (tombstones, at this writing.)
 	if (aiMode == AIMode::NORMAL_MODE) {
@@ -2947,11 +2944,8 @@ int AIComponent::DoTick( U32 deltaTime )
 		return 0;
 	}
 
-//	wanderTime += deltaTime;
 	AIAction oldAction = currentAction;
 
-	//ChitBag* chitBag = this->Context()->chitBag;
-	//const ChitContext* context = Context();
 	GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return VERY_LONG_TICK;
 

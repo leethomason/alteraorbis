@@ -714,12 +714,12 @@ void Sim::CreateRockInOutland()
 			Vector2I sector = { si, sj };
 			const SectorData& sd = context.worldMap->GetSectorData(sector);
 			if (!sd.HasCore()) {
-				for (int j = sd.y; j < sd.y + SECTOR_SIZE; ++j) {
-					for (int i = sd.x; i < sd.x + SECTOR_SIZE; ++i) {
-						if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
-							context.worldMap->SetPlant(i, j, 0, 0);
-							context.worldMap->SetRock(i, j, -1, false, 0);
-						}
+				for (Rectangle2IIterator it(sd.InnerBounds()); !it.Done(); it.Next()) {
+					int i = it.Pos().x;
+					int j = it.Pos().y;
+					if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
+						context.worldMap->SetPlant(i, j, 0, 0);
+						context.worldMap->SetRock(i, j, -1, false, 0);
 					}
 				}
 			}

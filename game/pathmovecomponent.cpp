@@ -168,9 +168,9 @@ void PathMoveComponent::ComputeDest()
 
 	const Vector2F& posVec = ToWorld2F(parentChit->Position());
 	bool sameSector = true;
-	if ( context->worldMap->UsingSectors() ) {
-		Vector2I v0 = SectorData::SectorID( posVec.x, posVec.y );
-		Vector2I v1 = SectorData::SectorID( queued.pos.x, queued.pos.y );
+	if (context->worldMap->UsingSectors()) {
+		Vector2I v0 = ToSector(posVec.x, posVec.y);
+		Vector2I v1 = ToSector(queued.pos.x, queued.pos.y);
 		sameSector = (v0 == v1);
 	}
 
@@ -464,7 +464,7 @@ int PathMoveComponent::DoTick( U32 delta )
 			Vector2I pos2i = { (int)pos.x, (int)pos.y };
 
 			// Sector and Port of departure:
-			Vector2I departureSector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+			Vector2I departureSector = ToSector(pos2i);
 			const SectorData& sd = context->worldMap->GetWorldInfo().GetSector( departureSector );
 			int departurePort = sd.NearestPort( dest.pos );
 

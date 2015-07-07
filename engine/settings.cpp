@@ -100,7 +100,7 @@ float SettingsManager::DenizenDate() const
 
 float SettingsManager::SpawnDate() const
 {
-	return Read("Game", "spawDate", 0.5f);
+	return Read("Game", "spawDate", 0.3f);
 }
 
 float SettingsManager::WorldGenDone() const

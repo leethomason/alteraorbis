@@ -39,10 +39,6 @@ enum {
 	EL_MAX_BONES			= 16,		// There is shader uniform memory allocated to: MAX_BONES*MAX_INSTANCE, so be careful with those constants.
 	EL_MAX_ANIM_FRAMES		= 24,
 
-	EL_MAP_SIZE				= 1024,		// used for allocating hash tables and lookup structures
-	EL_MAP_Y_SHIFT			= 10,
-	EL_MAP_X_MASK			= 1023,	
-
 	// performance tuning
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.
 };

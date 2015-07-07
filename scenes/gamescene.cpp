@@ -1287,8 +1287,8 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 
 		Vector2F pos = ToWorld2F(chit->Position());
 		// Is this grid travel or normal travel?
-		Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
-		Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+		Vector2I currentSector = ToSector(pos.x, pos.y );
+		Vector2I destSector    = ToSector( dest.x, dest.y );
 		SectorPort sectorPort;
 
 		if ( currentSector != destSector )
@@ -1444,7 +1444,7 @@ void GameScene::HandleHotKey( int mask )
 		else {
 			Vector3F at;
 			sim->GetEngine()->CameraLookingAt( &at );
-			Vector2I sector = { (int)at.x / SECTOR_SIZE, (int)at.z / SECTOR_SIZE };
+			Vector2I sector = ToSector(at.x, at.z);
 			r.Set( sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE, (sector.x+1)*SECTOR_SIZE-1, (sector.y+1)*SECTOR_SIZE-1 );
 		}
 		sim->GetWorldMap()->ShowRegionOverlay( r );
@@ -1661,7 +1661,7 @@ void GameScene::DoTick( U32 delta )
 
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
-	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
+	Vector2I viewingSector = ToSector(lookAt.x, lookAt.z);
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
 	CoreScript* homeCoreScript = GetHomeCore();
@@ -1927,7 +1927,7 @@ void GameScene::CheckGameStage(U32 delta)
 		for (Rectangle2IIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSectorData(it.Pos());
 			if (sd->HasCore() && arr.HasCap()) {
-				Vector2I sector = ToSector(sd->x, sd->y);
+				Vector2I sector = sd->sector;
 				CoreScript* cs = CoreScript::GetCore(sector);
 				if (cs && cs->ParentChit()->Team() == TEAM_NEUTRAL) {
 					Rectangle2I bi = sd->InnerBounds();
@@ -1975,12 +1975,12 @@ void GameScene::DialogResult(const char* name, void* data)
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		int team = Team::Instance()->GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
-		CoreScript::CreateCore(ToSector(sd->x, sd->y), team, sim->Context());
-		ForceHerd(ToSector(sd->x, sd->y));
+		CoreScript::CreateCore(sd->sector, team, sim->Context());
+		ForceHerd(sd->sector);
 
 		ReserveBank* bank = ReserveBank::Instance();
 		if (bank) {
-			CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
+			CoreScript* cs = CoreScript::GetCore(sd->sector);
 			GLASSERT(cs);
 			Chit* parent = cs->ParentChit();
 			GLASSERT(parent);
@@ -2083,7 +2083,7 @@ void GameScene::DrawDebugText()
 	y += 16;
 
 	micropather::CacheData cacheData;
-	Vector2I sector = { (int)at.x / SECTOR_SIZE, (int)at.z / SECTOR_SIZE };
+	Vector2I sector = ToSector(at.x, at.z);
 	sim->GetWorldMap()->PatherCacheHitMiss(sector, &cacheData);
 	ufoText->Draw(x, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f",
 				  sector.x, sector.y,

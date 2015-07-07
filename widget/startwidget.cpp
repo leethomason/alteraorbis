@@ -48,7 +48,7 @@ void StartGameWidget::SetSectorData(const SectorData** sdArr, int n, Engine* e, 
 	currentSector = 0;
 	SetBodyText();
 	const SectorData* sd = sectors[currentSector];
-	Vector2I pos2i = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+	Vector2I pos2i = sd->Bounds().Center();
 	Vector3F pos = ToWorld3F(pos2i);
 	engine->CameraLookAt(pos.x, pos.z);
 }
@@ -89,7 +89,7 @@ void StartGameWidget::SetBodyText()
 
 	const SectorData* sd = sectors[currentSector];
 	Weather* weather = Weather::Instance();
-	Vector2I pos = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+	Vector2I pos = sd->CoreLoc();
 	Vector2F pos2 = ToWorld2F(pos);
 	GLASSERT(weather);
 	const float AREA = float(SECTOR_SIZE*SECTOR_SIZE);
@@ -197,7 +197,7 @@ void StartGameWidget::ItemTapped(const gamui::UIItem* item)
 		SetBodyText();
 
 		const SectorData* sd = sectors[currentSector];
-		Vector2I pos2i = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+		Vector2I pos2i = sd->CoreLoc();
 		Vector3F pos = ToWorld3F(pos2i);
 		//pos.y = 10.0f;	// FIXME...and fix camera handling
 	

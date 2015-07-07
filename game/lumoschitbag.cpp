@@ -87,15 +87,12 @@ void LumosChitBag::Serialize( XStream* xs )
 void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
 	if (x == 0 && y == 0) return; // sentinel
-
-	int sx = x / SECTOR_SIZE;
-	int sy = y / SECTOR_SIZE;
-	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
-	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
+	Vector2I sector = ToSector(x, y);
 	GLASSERT( chit->nextBuilding == 0 );
 
-	chit->nextBuilding = mapSpatialHash[sy*NUM_SECTORS+sx];
-	mapSpatialHash[sy*NUM_SECTORS+sx] = chit;
+	int index = sector.y * NUM_SECTORS + sector.x;
+	chit->nextBuilding = mapSpatialHash[index];
+	mapSpatialHash[index] = chit;
 }
 
 
@@ -103,21 +100,18 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 {
 	if (x == 0 && y == 0) return; // sentinel
 
-	int sx = x / SECTOR_SIZE;
-	int sy = y / SECTOR_SIZE;
-	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
-	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
-
-	GLASSERT( mapSpatialHash[sy*NUM_SECTORS+sx] );
+	Vector2I sector = ToSector(x, y);
+	int index = sector.y * NUM_SECTORS + sector.x;
+	GLASSERT( mapSpatialHash[index] );
 
 	MapSpatialComponent* prev = 0;
-	for( MapSpatialComponent* it = mapSpatialHash[sy*NUM_SECTORS+sx]; it; prev = it, it = it->nextBuilding ) {
+	for( MapSpatialComponent* it = mapSpatialHash[index]; it; prev = it, it = it->nextBuilding ) {
 		if ( it == chit ) {
 			if ( prev ) {
 				prev->nextBuilding = it->nextBuilding;
 			}
 			else {
-				mapSpatialHash[sy*NUM_SECTORS+sx] = it->nextBuilding;
+				mapSpatialHash[index] = it->nextBuilding;
 			}
 			it->nextBuilding = 0;
 			return;

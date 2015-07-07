@@ -72,13 +72,18 @@ inline grinliz::Vector2I ToSector( const grinliz::Vector2I& pos2i ) {
 	return v;
 }
 
-inline grinliz::Vector2I ToSector( int x, int y ) {
+inline grinliz::Vector2I ToSector(int x, int y) {
 	grinliz::Vector2I pos2i = { x, y };
-	return ToSector( pos2i );
+	return ToSector(pos2i);
 }
 
 inline grinliz::Vector2I ToSector(const grinliz::Vector2F& pos2) {
 	grinliz::Vector2I v = ToWorld2I(pos2);
+	return ToSector(v);
+}
+
+inline grinliz::Vector2I ToSector(float x, float y) {
+	grinliz::Vector2F v = { x, y };
 	return ToSector(v);
 }
 

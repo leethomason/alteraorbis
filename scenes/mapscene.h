@@ -60,7 +60,12 @@ private:
 	void					DrawMap();
 	void					EnableButtons();
 
-	enum {	MAP2_RAD	= 2,
+	enum {	
+#ifdef ALTERA_MINI		
+			MAP2_RAD	= 1,
+#else
+			MAP2_RAD	= 2,
+#endif
 			MAP2_SIZE	= MAP2_RAD*2+1,
 			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE,
 			MAX_COL		= 3,

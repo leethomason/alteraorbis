@@ -39,8 +39,8 @@ struct SDL_RWops;
 struct ModelGroup
 {
 	grinliz::CStr<EL_FILE_STRING_LEN> textureName;
-	U16						nVertex;
-	U16						nIndex;
+	U16						nVertex = 0;
+	U16						nIndex = 0;
 
 	void Set( const char* textureName, int nVertex, int nIndex );
 	void Load( const gamedb::Item* item );
