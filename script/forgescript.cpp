@@ -190,7 +190,7 @@ GameItem* ForgeScript::Build(	int type,			// GUN
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 	if ( doRandom ) {
 		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-			roll[i] = random.Dice(3, 6);
+			roll[i] = random.WeightedDice(3, 6, 1, 1);
 		}
 	}
 	static const int COMPETENCE = 4;
