@@ -32,13 +32,19 @@ using namespace grinliz;
 DomainAI* DomainAI::Factory(int team)
 {
 	switch (Team::Group(team)) {
-		case TEAM_TROLL:	return new TrollDomainAI();
 		case TEAM_GOB:		return new GobDomainAI();
 		case TEAM_KAMAKIRI:	return new KamakiriDomainAI();
 		case TEAM_HOUSE:	return new HumanDomainAI();
+
+		case DEITY_Q:
+		case DEITY_R1K:
+		case DEITY_TRUULGA:
+		return new ForgeDomainAI();
+
 		default:
 		break;
 	}
+
 	//	GLASSERT(0); lots of reasons the team can be CHAOS, or changed, or whatever.
 	// caller has to handle null return.
 	return 0;
@@ -698,19 +704,17 @@ void DeityDomainAI::DoBuild()
 }
 
 
-TrollDomainAI::TrollDomainAI()
+ForgeDomainAI::ForgeDomainAI()
 {
-
 }
 	
 
-TrollDomainAI::~TrollDomainAI()
+ForgeDomainAI::~ForgeDomainAI()
 {
-
 }
 
 
-void TrollDomainAI::Serialize( XStream* xs )
+void ForgeDomainAI::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
 	super::Serialize( xs );
@@ -718,10 +722,10 @@ void TrollDomainAI::Serialize( XStream* xs )
 }
 
 
-void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
+void ForgeDomainAI::OnAdd(Chit* chit, bool initialize)
 {
 	super::OnAdd(chit, initialize);
-	forgeTicker.SetPeriod(20 * 1000 + chit->random.Rand(1000));
+	forgeTicker.SetPeriod(60 * 1000 + chit->random.Rand(1000));
 
 	Vector2I sector = ToSector(parentChit->Position());
 	const SectorData& sectorData = Context()->worldMap->GetSectorData(sector);
@@ -733,23 +737,25 @@ void TrollDomainAI::OnAdd(Chit* chit, bool initialize)
 }
 
 
-void TrollDomainAI::OnRemove()
+void ForgeDomainAI::OnRemove()
 {
 	return super::OnRemove();
 }
 
 
-int TrollDomainAI::DoTick(U32 delta)
+int ForgeDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
 	GameItem* item = parentChit->GetItem();
 	if (item->hp == 0) return 0;
 
-	if (item->wallet.Gold() < 500 && ReserveBank::GetWallet()->Gold() > 500) {
-		item->wallet.Deposit(ReserveBank::GetWallet(), 500);
+	// Move in money to fund construction.
+	static const int GOLD = 200;
+	if (item->wallet.Gold() < GOLD && ReserveBank::GetWallet()->Gold() > GOLD) {
+		item->wallet.Deposit(ReserveBank::GetWallet(), GOLD);
 	}
 
-	// Build stuff for the trolls to buy.
+	// Build stuff for the trolls/denizens to buy.
 	if (forgeTicker.Delta(delta)) {
 		Vector2I sector = ToSector(parentChit->Position());
 
@@ -761,40 +767,29 @@ int TrollDomainAI::DoTick(U32 delta)
 		if (market && market->GetItemComponent() && market->GetItemComponent()->CanAddToInventory()) {
 
 			int group = 0, id = 0;
-			int itemType = ForgeScript::GUN;
-			int partsMask = 0xff;
-			int effectsMask = GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK;
-			int tech = 0;
-			int level = 0;
-			int seed = parentChit->random.Rand();
-
 			Team::SplitID(parentChit->Team(), &group, &id);
 
-			switch (group) {
-				case TEAM_TROLL:
-				{
-					itemType = parentChit->random.Rand(ForgeScript::NUM_ITEM_TYPES);
-					if (itemType == ForgeScript::RING) partsMask = WeaponGen::TROLL_RING_PART_MASK;
-					effectsMask = 0;
-					tech = 0;
-					level = 4;
-				}
-				break;
+			ForgeScript::ForgeData forgeData;
+			forgeData.type = parentChit->random.Rand(ForgeScript::NUM_ITEM_TYPES);
+			forgeData.subType = 0;
+			forgeData.tech = (group == DEITY_R1K) ? 1 : 0;
+			forgeData.level = (group == DEITY_Q) ? 0 : 3;
+			forgeData.team = parentChit->Team();
 
-				default:
-				GLASSERT(0);
-				break;
-			}
+			int seed = parentChit->random.Rand();
+
+			ForgeScript::TeamLimitForgeData(&forgeData);
+			ForgeScript::BestSubItem(&forgeData, seed);
 
 			TransactAmt cost;
-			GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, partsMask, effectsMask, tech, level, seed, parentChit->Team());
+			GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, seed);
 			if (item) {
 				GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
 				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 				market->GetItemComponent()->AddToInventory(item);
 
 				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA));
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit);
 			}
 		}
 	}
@@ -802,7 +797,7 @@ int TrollDomainAI::DoTick(U32 delta)
 }
 
 
-void TrollDomainAI::DoBuild()
+void ForgeDomainAI::DoBuild()
 {
 	Vector2I sector = { 0, 0 };
 	CoreScript* cs = 0;

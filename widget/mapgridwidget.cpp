@@ -279,7 +279,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	RenderAtom attitudeAtom;
 
-	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeityCore(coreScript->ParentChit()->Team())) {
+	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeity(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
 		ERelate relate = Team::Instance()->GetRelationship(coreScript->ParentChit(), home->ParentChit());
 

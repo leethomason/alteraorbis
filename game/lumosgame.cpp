@@ -184,6 +184,19 @@ RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled, float* rat
 }
 
 
+RenderAtom LumosGame::CalcDeityAtom(int team)
+{
+	switch (team) {
+		case DEITY_MOTHER_CORE:		return CalcUIIconAtom("motherCore");
+		case DEITY_Q:				return CalcUIIconAtom("qcore");
+		case DEITY_R1K:				return CalcUIIconAtom("r1kcore");
+		case DEITY_TRUULGA:			return CalcUIIconAtom("truulgacore");
+		default: GLASSERT(0); break;
+	}
+	return RenderAtom();
+}
+
+
 RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 {
 	const Game::Palette* p = Game::GetMainPalette();

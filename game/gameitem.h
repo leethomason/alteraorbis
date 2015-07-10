@@ -378,6 +378,8 @@ private:
 	int		team;			// which team this item is aligned with (or created it, for items.)
 public:
 	int		Team() const	{ return team; }
+	int		Deity() const;
+
 	void	SetRogue();
 	void	SetChaos();
 	void	SetTeam(int team);

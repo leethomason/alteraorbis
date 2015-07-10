@@ -27,8 +27,8 @@ class Web;
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
 	TEAM_CHAOS,
-	
-	TEAM_RAT,	
+
+	TEAM_RAT,
 	TEAM_GREEN_MANTIS,
 	TEAM_RED_MANTIS,
 	TEAM_TROLL,
@@ -37,13 +37,16 @@ enum {
 	TEAM_GOB,
 	TEAM_KAMAKIRI,
 	TEAM_VISITOR,
-	TEAM_DEITY,
-	
-	NUM_TEAMS
-};
 
-enum {
-	DEITY_MOTHER_CORE = 1
+	DEITY_MOTHER_CORE,
+	DEITY_Q,
+	DEITY_R1K,
+	DEITY_TRUULGA,
+
+	NUM_TEAMS,
+	NUM_MOB_TEAMS = DEITY_MOTHER_CORE,
+	NUM_DEITY = DEITY_TRUULGA + 1 - DEITY_MOTHER_CORE,
+	DEITY_END = DEITY_TRUULGA + 1
 };
 
 enum {
@@ -137,13 +140,13 @@ public:
 		return (group == TEAM_HOUSE) || (group == TEAM_GOB) || (group == TEAM_KAMAKIRI);
 	}
 
-	static bool IsDeityCore(int team) {
+	static bool IsDeity(int team) {
 		int group = Group(team);
-		return (group == TEAM_TROLL) || (group == TEAM_DEITY);
+		return (group >= DEITY_MOTHER_CORE);
 	}
 
 	static bool IsCoreController(int team) {
-		return IsDeityCore(team) || IsDenizen(team);
+		return IsDeity(team) || IsDenizen(team);
 	}
 
 private:

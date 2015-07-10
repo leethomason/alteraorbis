@@ -4,19 +4,12 @@
 #include "procedural.h"
 #include "../game/wallet.h"
 #include "../game/gameitem.h"
+#include "../game/team.h"
 #include "../xegame/itemcomponent.h"
 #include "itemscript.h"
 #include "../grinliz/glutil.h"
 
 using namespace grinliz;
-
-
-ForgeScript::ForgeScript( int seed, int userLevel, int techLevel )
-{
-	this->seed = seed;
-	this->userLevel = userLevel;
-	this->techLevel = techLevel;
-}
 
 
 const char* ForgeScript::ItemName( int item )
@@ -38,13 +31,13 @@ const char* ForgeScript::GunType( int type )
 const char* ForgeScript::ItemPart( int item, int part )
 {
 	if ( item == RING ) {
-		GLASSERT( part >= 0 && part < NUM_RING_PARTS );
-		static const char* name[NUM_RING_PARTS] = { "Main", "Guard", "Triad", "Blade" };
+		GLASSERT( part >= 0 && part < WeaponGen::NUM_PARTS );
+		static const char* name[WeaponGen::NUM_PARTS] = { "Main", "Guard", "Triad", "Blade" };
 		return name[part];
 	}
 	else if ( item == GUN ) {
-		GLASSERT( part >= 0 && part < NUM_GUN_PARTS );
-		static const char* name[NUM_GUN_PARTS] = { "Body", "Cell", "Driver", "Scope" };
+		GLASSERT( part >= 0 && part < WeaponGen::NUM_PARTS );
+		static const char* name[WeaponGen::NUM_PARTS] = { "Body", "Cell", "Driver", "Scope" };
 		return name[part];				
 	}
 	else {
@@ -63,165 +56,123 @@ const char* ForgeScript::Effect( int effect )
 }
 
 
-
-GameItem* ForgeScript::DoForge(int itemType,		// GUN, etc.
-							   int subItemType,
-							   const Wallet& avail,
-							   TransactAmt* cost,	// in/out
-							   int partsMask,
-							   int effectsMask,
-							   int tech,
-							   int level,
-							   int seed,
-							   int team)
+GameItem* ForgeScript::ForgeRandomItem(const ForgeData& forgeData, const Wallet& avail, TransactAmt* cost, int seed)
 {
 	// Guarentee we can build something:
 	if (avail.Crystal(0) == 0) {
 		return 0;
 	}
 
-	int subType = 0;
-	int parts = 1;		// always have body.
 	Random random(seed);
+	CArray<int, 8> partsArr;
+	CArray<int, 4> effectsArr;
 
-	int partsArr[] = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
-	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK };	// don't allow explosive to be manufactured, yet: , GameItem::EFFECT_EXPLOSIVE
+	// 0
+	partsArr.Push(WeaponGen::GUN_CELL | WeaponGen::GUN_DRIVER | WeaponGen::GUN_SCOPE);
+	// 1-3
+	partsArr.Push(WeaponGen::GUN_DRIVER | WeaponGen::GUN_SCOPE);
+	partsArr.Push(WeaponGen::GUN_CELL | WeaponGen::GUN_SCOPE);
+	partsArr.Push(WeaponGen::GUN_CELL | WeaponGen::GUN_DRIVER);
+	// 4-6
+	partsArr.Push(WeaponGen::GUN_CELL );
+	partsArr.Push(WeaponGen::GUN_DRIVER);
+	partsArr.Push(WeaponGen::GUN_SCOPE);
+	// 7
+	partsArr.Push(0);
 
-	// Get the inital to "everything"
-	int effects = 0;
-	for (int i = 0; i < int(GL_C_ARRAY_SIZE(effectsArr)); ++i) {
-		effects |= effectsArr[i];
-	}
-	effects = effects & effectsMask;
+	// Mix up the equivalent values.
+	random.ShuffleArray(&partsArr[1], 3);
+	random.ShuffleArray(&partsArr[4], 3);
 
-	if (itemType == ForgeScript::GUN) {
-		if (subItemType >= 0) {
-			subType = subItemType;
-		}
-		else {
-			if (tech == 0)
-				subType = random.Rand(ForgeScript::NUM_TECH0_GUNS);
-			else
-				subType = random.Rand(ForgeScript::NUM_GUN_TYPES);
-			parts = WeaponGen::PART_MASK & partsMask;
-		}
-	}
-	else if (itemType == ForgeScript::RING) {
-		parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;
-		parts = parts & partsMask;
-	}
+	effectsArr.Push(GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK);
+	effectsArr.Push(GameItem::EFFECT_SHOCK);
+	effectsArr.Push(GameItem::EFFECT_FIRE);
+	effectsArr.Push(0);
 
-	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
-	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
-
-	ForgeScript forge(random.Rand(), level, tech);
-
-	int cp = 0;
-	int ce = 0;
-
-	// Given we have a crystal, we should always be able to build something.
-	// Remove sub-parts and effects until we succeed. As the forge 
-	// changes, this is no longer a hard rule.
-	int maxIt = 10;
 	GameItem* item = 0;
-	while (maxIt) {
-		delete item; item = 0;
 
-		cost->Clear();
-		int techRequired = 0;
-		item = forge.Build(itemType, subType, parts, effects, cost, &techRequired, true, team);
+	for (int j = 0; j < partsArr.Size(); ++j) {
+		for (int i = 0; i < effectsArr.Size(); ++i) {
+			int parts = partsArr[j];
+			int effects = effectsArr[i];
+			if ((~forgeData.partsMask) & parts) continue;
+			if ((~forgeData.effectsMask) & effects) continue;
 
-		if (avail.CanWithdraw(*cost) && techRequired <= tech) {
-			break;
-		}
+			ForgeData fd = forgeData;
+			fd.partsMask = parts;
+			fd.effectsMask = effects;
 
-		bool didSomething = false;
-		if (avail.CanWithdraw(*cost) && ce < int(GL_C_ARRAY_SIZE(effectsArr))) {
-			effects &= ~(effectsArr[ce++]);
-			didSomething = true;
-		}
-		if (techRequired > tech && cp < int(GL_C_ARRAY_SIZE(partsArr))) {
-			parts &= ~(partsArr[cp++]);
-			didSomething = true;
-		}
-
-		// The equations between cost are more complex; the
-		// model above doesn't capture all the combos any more.
-		// Make sure something changes every loop.
-		if (!didSomething) {
-			if (ce < int(GL_C_ARRAY_SIZE(effectsArr))) {
-				effects &= ~(effectsArr[ce++]);
+			int tech = 0;
+			item = ForgeScript::Build(fd, cost, &tech, seed);
+			if (item && avail.CanWithdraw(*cost) && tech <= forgeData.tech) {
+				return item; // success!
 			}
-			if (cp < int(GL_C_ARRAY_SIZE(partsArr))) {
-				parts &= ~(partsArr[cp++]);
-			}
+			delete item;
+			item = 0;
 		}
-		--maxIt;
 	}
-	if (!item) {
-		GLOUTPUT(("Warning. Item not created in forgescript.\n"));
-	}
-	return item;
+
+	GLOUTPUT(("Warning. Item not created in forgescript.\n"));
+	return 0;
 }
 
 
-GameItem* ForgeScript::Build(	int type,			// GUN
-								int subType,		// BLASTER
-								int partsFlags,		
-								int effectFlags,
-								TransactAmt* required,
-								int *techRequired,
-								bool doRandom,
-								int team)
+GameItem* ForgeScript::Build(const ForgeData& forgeData,
+							 TransactAmt* required,
+							 int* techRequired,
+							 int seed)
 {
 	*techRequired = 0;
 	required->Clear();
 	required->AddCrystal(CRYSTAL_GREEN, 1);
 
+	GLASSERT(forgeData.type >= 0);
+	GLASSERT(forgeData.subType >= 0);
+
 	// Random, but can't leave forge and come back
 	// to get different numbers.
 	Random random;
-	random.SetSeed(   seed
-					^ (type) );	// do NOT include parts - should not change on parts changing
-								// not changing on sub-type either
+	random.SetSeed(seed
+				   ^ (forgeData.type));	// do NOT include parts - should not change on parts changing
+	// not changing on sub-type either
 
 	const char* typeName = "pistol";
 
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
-	if ( doRandom ) {
-		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
+	if (seed) {
+		for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
 			roll[i] = random.Dice(3, 6);
 		}
 	}
 	static const int COMPETENCE = 4;
 	for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
-		roll[i] = Clamp(roll[i] - COMPETENCE + userLevel, 3, 18);
+		roll[i] = Clamp(roll[i] - COMPETENCE + forgeData.level, 3, 18);
 	}
 
 	static const int BONUS = 2;
 
 	int features = 0;
-	if ( type == ForgeScript::GUN ) {
-		if      ( subType == BLASTER )	{ typeName = "blaster"; }
-		else if ( subType == PULSE )	{ typeName = "pulse";   *techRequired += 1; }
-		else if ( subType == BEAMGUN )	{ typeName = "beamgun"; *techRequired += 1; }
+	if (forgeData.type == ForgeScript::GUN) {
+		if (forgeData.subType == BLASTER)		{ typeName = "blaster"; }
+		else if (forgeData.subType == PULSE)	{ typeName = "pulse";   *techRequired += 1; }
+		else if (forgeData.subType == BEAMGUN)	{ typeName = "beamgun"; *techRequired += 1; }
 
 		int nParts = 0;
-		if ( partsFlags & WeaponGen::GUN_CELL )		{ 
-			features |= WeaponGen::GUN_CELL;		
-			roll[GameTrait::ALT_CAPACITY] += BONUS*2; 
+		if (forgeData.partsMask & WeaponGen::GUN_CELL)		{
+			features |= WeaponGen::GUN_CELL;
+			roll[GameTrait::ALT_CAPACITY] += BONUS * 2;
 			*techRequired += 1;
 			++nParts;
 		}
-		if ( partsFlags & WeaponGen::GUN_DRIVER )		{ 
-			features |= WeaponGen::GUN_DRIVER;	
-			roll[GameTrait::ALT_DAMAGE]   += BONUS;	
+		if (forgeData.partsMask & WeaponGen::GUN_DRIVER)	{
+			features |= WeaponGen::GUN_DRIVER;
+			roll[GameTrait::ALT_DAMAGE] += BONUS;
 			*techRequired += 1;
 			++nParts;
 		}
-		if ( partsFlags & WeaponGen::GUN_SCOPE )		{ 
-			features |= WeaponGen::GUN_SCOPE;		
-			roll[GameTrait::ALT_ACCURACY] += BONUS; 
+		if (forgeData.partsMask & WeaponGen::GUN_SCOPE)		{
+			features |= WeaponGen::GUN_SCOPE;
+			roll[GameTrait::ALT_ACCURACY] += BONUS;
 			*techRequired += 1;
 			++nParts;
 		}
@@ -229,57 +180,101 @@ GameItem* ForgeScript::Build(	int type,			// GUN
 			required->AddCrystal(0, (nParts - 1)*(nParts - 1));
 		}
 	}
-	else if ( type == ForgeScript::RING ) {
+	else if (forgeData.type == ForgeScript::RING) {
 		typeName = "ring";
 
-		if ( partsFlags & WeaponGen::RING_GUARD )		{ 
-			features |= WeaponGen::RING_GUARD;	
-			roll[GameTrait::CHR] += BONUS; 
-			*techRequired += 1;
-		}	
-		if ( partsFlags & WeaponGen::RING_TRIAD )		{ 
-			features |= WeaponGen::RING_TRIAD;	
-			roll[GameTrait::ALT_DAMAGE] += BONUS/2; 
+		if (forgeData.partsMask & WeaponGen::RING_GUARD)		{
+			features |= WeaponGen::RING_GUARD;
+			roll[GameTrait::CHR] += BONUS;
 			*techRequired += 1;
 		}
-		if ( partsFlags & WeaponGen::RING_BLADE )		{ 
-			features |= WeaponGen::RING_BLADE;	
-			roll[GameTrait::CHR] -= BONUS; 
-			roll[GameTrait::ALT_DAMAGE] += BONUS; 
-		}	
+		if (forgeData.partsMask & WeaponGen::RING_TRIAD)		{
+			features |= WeaponGen::RING_TRIAD;
+			roll[GameTrait::ALT_DAMAGE] += BONUS / 2;
+			*techRequired += 1;
+		}
+		if (forgeData.partsMask & WeaponGen::RING_BLADE)		{
+			features |= WeaponGen::RING_BLADE;
+			roll[GameTrait::CHR] -= BONUS;
+			roll[GameTrait::ALT_DAMAGE] += BONUS;
+		}
 	}
-	else if ( type == ForgeScript::SHIELD ) {
+	else if (forgeData.type == ForgeScript::SHIELD) {
 		typeName = "shield";
 	}
 
 	for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
-		roll[i] = Clamp(roll[i], 1, 20);
+		roll[i] = Clamp(roll[i], 3, 18);
 	}
 
-	
-	const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
+	const GameItem& itemDef = ItemDefDB::Instance()->Get(typeName);
 	GameItem* item = itemDef.Clone();
-	item->Roll(team, roll);
+	item->Roll(forgeData.team, roll);
 
-	if ( effectFlags & GameItem::EFFECT_FIRE ) {
+	if (forgeData.effectsMask & GameItem::EFFECT_FIRE) {
 		required->AddCrystal(CRYSTAL_RED, 1);
 	}
-	if ( effectFlags & GameItem::EFFECT_SHOCK ) {
+	if (forgeData.effectsMask & GameItem::EFFECT_SHOCK) {
 		required->AddCrystal(CRYSTAL_BLUE, 1);
 	}
-	if ( effectFlags & GameItem::EFFECT_EXPLOSIVE ) {
+	if (forgeData.effectsMask & GameItem::EFFECT_EXPLOSIVE) {
 		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 	// 2 effects adds a 2nd violet crystal
-	if ( int(FloorPowerOf2( effectFlags )) != effectFlags ) {
+	if (int(FloorPowerOf2(forgeData.effectsMask)) != forgeData.effectsMask) {
 		required->AddCrystal(CRYSTAL_VIOLET, 1);
 	}
 
-	if ( item ) {
-		item->keyValues.Set( "features", features );
+	if (item) {
+		item->keyValues.Set("features", features);
 		item->flags &= ~GameItem::EFFECT_MASK;
-		item->flags |= effectFlags;
+		item->flags |= forgeData.effectsMask;
 	}
 	return item;
 }
 
+
+void ForgeScript::TeamLimitForgeData(ForgeScript::ForgeData* data)
+{
+	int group = 0, id = 0;
+	Team::SplitID(data->team, &group, &id);
+
+	// Only trolls use blades.
+	if (data->type == RING) {
+		if (group == TEAM_TROLL || group == DEITY_TRUULGA) {
+			// don't limit.
+		}
+		else {
+			data->partsMask &= (~WeaponGen::RING_BLADE);
+		}
+	}
+	// Q core very cheap weapons
+	if (group == DEITY_Q) {
+		data->effectsMask = 0;
+		data->partsMask   = 0;
+	}
+}
+
+
+void ForgeScript::BestSubItem(ForgeScript::ForgeData* data, int seed)
+{
+	if (data->type != GUN) {
+		data->subType = 0;
+		return;
+	}
+	Random random(seed);
+	int group = 0, id = 0;
+	Team::SplitID(data->team, &group, &id);
+
+	if (data->tech) {
+		data->subType = random.Bit() ? BEAMGUN : PULSE;
+	}
+	else {
+		data->subType = random.Bit() ? PISTOL : BLASTER;
+	}
+
+	if (data->tech == 0 && group == TEAM_GOB)
+		data->subType = PISTOL;
+	else if (data->tech > 0 && group == TEAM_KAMAKIRI)
+		data->subType = BEAMGUN;
+}

@@ -1308,24 +1308,25 @@ bool AIComponent::SectorHerd(bool focus)
 		return false;
 	}
 
-	if (gameItem->IName() == ISC::troll) {
+	int deityTeam = gameItem->Deity();
+	CoreScript* deityCS = deityTeam ? CoreScript::GetCoreFromTeam(deityTeam) : 0;
+
+	if (deityCS && deityCS->ParentChit()->GetComponent("ForgeDomainAI")) {
 		// Visit Truulga every now and again. And if leaving truuga...go far.
-		Chit* truulga = Context()->chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
-		if (truulga) {
-			Vector2I truulgaSector = ToSector(truulga->Position());
-			if (ToSector(parentChit->Position()) == truulgaSector) {
-				// At Truulga - try to go far.
-				Vector2I destSector = { int(parentChit->random.Rand(NUM_SECTORS)), int(parentChit->random.Rand(NUM_SECTORS)) };
-				if (DoSectorHerd(focus, destSector))
-					return true;
-				// Else drop out and use code below to go to a neighbor.
-			}
-			else {
-				// Should we visit Truulga? Check for a little gold, too.
-				// FIXME: needs tuning!
-				if (gameItem->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
-					return DoSectorHerd(focus, truulgaSector);
-				}
+		Chit* deityChit = deityCS->ParentChit();
+		Vector2I deitySector = ToSector(deityChit->Position());
+		if (ToSector(parentChit->Position()) == deitySector) {
+			// At Truulga - try to go far.
+			Vector2I destSector = { int(parentChit->random.Rand(NUM_SECTORS)), int(parentChit->random.Rand(NUM_SECTORS)) };
+			if (DoSectorHerd(focus, destSector))
+				return true;
+			// Else drop out and use code below to go to a neighbor.
+		}
+		else {
+			// Should we visit Deity? Check for a little gold, too.
+			// FIXME: needs tuning!
+			if (gameItem->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
+				return DoSectorHerd(focus, deitySector);
 			}
 		}
 	}

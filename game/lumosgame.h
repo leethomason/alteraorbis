@@ -75,6 +75,7 @@ public:
 	static gamui::RenderAtom CalcIconAtom( const char* name );
 	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
 	static gamui::RenderAtom CalcUIIconAtom(const char* name, bool enabled = true, float* ratio = 0);
+	static gamui::RenderAtom CalcDeityAtom(int team);
 
 	grinliz::IString SoundName(const grinliz::IString& name, int seed);
 

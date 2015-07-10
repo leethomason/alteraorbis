@@ -964,3 +964,20 @@ void GameItem::SetTeam(int newTeam)
 	}
 	team = newTeam;
 }
+
+
+int GameItem::Deity() const
+{
+	switch (Team::Group(Team())) {
+		case TEAM_TROLL:	
+		return DEITY_TRUULGA;
+		
+		case TEAM_HOUSE:	
+		return DEITY_R1K;
+
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		return DEITY_Q;
+	}
+	return 0;
+}

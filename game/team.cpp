@@ -152,17 +152,25 @@ grinliz::IString Team::TeamName(int team)
 		name = StringPool::Intern("Visitor");
 		break;
 
-		case TEAM_DEITY:
-		switch (id) {
-			case 0: name = ISC::deity; break;
-			case DEITY_MOTHER_CORE:	name = ISC::MotherCore; break;
-			default: GLASSERT(0);
-		}
+		case DEITY_MOTHER_CORE:
+		name = ISC::MotherCore;
+		break;
+
+		case DEITY_Q:
+		name = ISC::QCore;
+		break;
+
+		case DEITY_R1K:
+		name = ISC::R1k;
+		break;
+
+		case DEITY_TRUULGA:
+		name = ISC::Truulga;
 		break;
 
 		default:
-		//GLOUTPUT(("Invalid team: %d\n", team));
-		//GLASSERT(0);
+		GLOUTPUT(("Invalid team: %d\n", team));
+		GLASSERT(0);
 		break;
 	}
 
@@ -190,8 +198,17 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	else if (itemName == ISC::kamakiri) {
 		return TEAM_KAMAKIRI;
 	}
-	else if (itemName == ISC::deity || itemName == ISC::MotherCore){
-		return TEAM_DEITY;
+	else if (itemName == ISC::MotherCore) {
+		return DEITY_MOTHER_CORE;
+	}
+	else if (itemName == ISC::QCore) {
+		return DEITY_Q;
+	}
+	else if (itemName == ISC::R1k) {
+		return DEITY_R1K;
+	}
+	else if (itemName == ISC::Truulga) {
+		return DEITY_TRUULGA;
 	}
 	else if (    itemName == ISC::cyclops
 		      || itemName == ISC::fireCyclops
@@ -227,6 +244,14 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
 		return ERelate::ENEMY;
 
+	// Deity exception:
+	if (t1 == DEITY_TRUULGA)
+		return BaseRelationship(t0, TEAM_TROLL);
+
+	// Other deities neutral:
+	if (t1 >= DEITY_MOTHER_CORE)
+		return ERelate::NEUTRAL;
+
 	GLASSERT(t0 >= TEAM_RAT && t0 < NUM_TEAMS);
 	GLASSERT(t1 >= TEAM_RAT && t1 < NUM_TEAMS);
 
@@ -234,18 +259,17 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 	static const int E = int(ERelate::ENEMY);
 	static const int N = int(ERelate::NEUTRAL);
 	static const int OFFSET = TEAM_RAT;
-	static const int NUM = NUM_TEAMS - OFFSET;
+	static const int NUM = NUM_MOB_TEAMS - OFFSET;
 
 	static const int relate[NUM][NUM] = {
-		{ F, E, E, E, E, E, E, E, N },		// rat
-		{ 0, F, E, N, E, E, F, N, N },		// green
-		{ 0, 0, F, N, E, E, E, E, N },		// red
-		{ 0, 0, 0, F, E, N, N, N, N },		// troll 
-		{ 0, 0, 0, 0, F, N, E, F, N },		// house
-		{ 0, 0, 0, 0, 0, F, E, F, N },		// gobmen
-		{ 0, 0, 0, 0, 0, 0, F, N, N },		// kamakiri
-		{ 0, 0, 0, 0, 0, 0, 0, F, F },		// visitor
-		{ 0, 0, 0, 0, 0, 0, 0, 0, N },		// deity
+		{ F, E, E, E, E, E, E, E },		// rat
+		{ 0, F, E, N, E, E, F, N },		// green
+		{ 0, 0, F, N, E, E, E, E },		// red
+		{ 0, 0, 0, F, E, N, N, N },		// troll 
+		{ 0, 0, 0, 0, F, N, E, F },		// house
+		{ 0, 0, 0, 0, 0, F, E, F },		// gobmen
+		{ 0, 0, 0, 0, 0, 0, F, N },		// kamakiri
+		{ 0, 0, 0, 0, 0, 0, 0, F }		// visitor
 	};
 	GLASSERT(t0 - OFFSET >= 0 && t0 - OFFSET < NUM);
 	GLASSERT(t1 - OFFSET >= 0 && t1 - OFFSET < NUM);
@@ -321,7 +345,7 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 	// Species 
 	int centerTeam = center->ParentChit()->Team();
 	int evalTeam = eval->ParentChit()->Team();
-	if (Team::IsDeityCore(centerTeam)) return 0;
+	if (Team::IsDeity(centerTeam)) return 0;
 
 	const bool ENVIES_WEALTH = (centerTeam == TEAM_GOB);
 	const bool ENVIES_TECH = (centerTeam == TEAM_KAMAKIRI);
@@ -407,7 +431,11 @@ int Team::CalcAttitude(CoreScript* center, CoreScript* eval, const Web* web)
 
 bool Team::War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 {
-	if (c0 && c1 && (c0 != c1) && c0->InUse() && c1->InUse() && !Team::IsDeityCore(c0->ParentChit()->Team()) && !Team::IsDeityCore(c1->ParentChit()->Team())) {
+	if (c0 && c1 && (c0 != c1) 
+		&& c0->InUse() && c1->InUse() 
+		&& !Team::IsDeity(c0->ParentChit()->Team()) 
+		&& !Team::IsDeity(c1->ParentChit()->Team())) 
+	{
 		ERelate relate = GetRelationship(c0->ParentChit(), c1->ParentChit());
 		if (relate != ERelate::ENEMY) {
 			SymmetricTK stk(c0->ParentChit()->Team(), c1->ParentChit()->Team());
@@ -430,7 +458,11 @@ bool Team::War(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 
 int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 {
-	if (c0 && c1 && (c0 != c1) && c0->InUse() && c1->InUse() && !Team::IsDeityCore(c0->ParentChit()->Team()) && !Team::IsDeityCore(c1->ParentChit()->Team())) {
+	if (c0 && c1 && (c0 != c1) 
+		&& c0->InUse() && c1->InUse() 
+		&& !Team::IsDeity(c0->ParentChit()->Team()) 
+		&& !Team::IsDeity(c1->ParentChit()->Team())) 
+	{
 		ERelate relate = GetRelationship(c0->ParentChit(), c1->ParentChit());
 		if (relate == ERelate::ENEMY) {
 			SymmetricTK stk(c0->ParentChit()->Team(), c1->ParentChit()->Team());

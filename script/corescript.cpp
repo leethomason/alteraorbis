@@ -896,11 +896,9 @@ CoreScript** CoreScript::GetCoreList(int *n)
 
 CoreScript* CoreScript::GetCoreFromTeam(int team)
 {
-	if (!teamToCoreInfo) return 0;	// happens on tear down
-
-	int group = 0, id = 0;
-	Team::SplitID(team, &group, &id);
-	if (id == 0) 
+	if (!teamToCoreInfo)
+		return 0;	// happens on tear down
+	if (team == 0)
 		return 0;
 
 	int index = 0;
@@ -964,7 +962,7 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		// Lots of trouble with this code. Used to assert,
 		// but always seemed to be another case. White list
 		// groups that *can* take over a core.
-		if (team == TEAM_NEUTRAL || team == TEAM_TROLL || group == TEAM_DEITY || Team::IsDenizen(team)) {
+		if (team == TEAM_NEUTRAL || team == TEAM_TROLL || Team::IsDeity(team) || Team::IsDenizen(team)) {
 			// Okay! take over.
 			GLASSERT(!Team::IsDenizen(team) || id);		// make sure rogues got filtered out.
 		}

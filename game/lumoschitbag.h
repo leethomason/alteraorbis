@@ -229,19 +229,6 @@ public:
 
 	void BuildingCounts(const grinliz::Vector2I& sector, int* counts, int n);
 
-	enum {
-		DEITY_MOTHER_CODE,	// master control
-		DEITY_Q_CORE,		// logistics, infrastructure
-		DEITY_R1K_CORE,		// adventures
-		DEITY_TRUULGA,		// troll deity
-
-		// in progress:
-		DEITY_BEAST_CORE,	// beast-man core. name TBD
-		DEITY_SHOG_SCRIFT,	// the great evil
-		NUM_DEITY
-	};
-	Chit* GetDeity(int id);
-
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, Wallet* src );		// consumes the gold!
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, Wallet* src, bool fuzzPos );	// consumes the 1st crystal!
@@ -325,7 +312,6 @@ private:
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	int							homeTeam;	
 	Sim*						sim;	// if part of a simulation. can be null.
-	int							deityID[NUM_DEITY];
 
 	struct NamePoolID {
 		grinliz::IString dataset;
