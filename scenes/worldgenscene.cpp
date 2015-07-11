@@ -27,7 +27,7 @@ WorldGenScene::WorldGenScene(LumosGame* game) : Scene(game)
 	InitStd(&gamui2D, &okay, &cancel);
 	sim = 0;
 
-	worldMap = new WorldMap(WorldGen::SIZE, WorldGen::SIZE);
+	worldMap = new WorldMap(MAX_MAP_SIZE, MAX_MAP_SIZE);
 	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
@@ -36,7 +36,7 @@ WorldGenScene::WorldGenScene(LumosGame* game) : Scene(game)
 	worldGen = new WorldGen();
 	worldGen->LoadFeatures("./res/features.png");
 
-	rockGen = new RockGen(WorldGen::SIZE);
+	rockGen = new RockGen(MAX_MAP_SIZE);
 
 	RenderAtom atom((const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture("worldGenPreview"),
 					0, 1, 1, 0);	// y-flip: image to texture coordinate conversion
@@ -86,7 +86,6 @@ void WorldGenScene::Resize()
 	LayoutCalculator layout = DefaultLayout();
 
 	const float DY = 16.0f;
-	//const float CONSOLE_HEIGHT = DY * 16.0f;
 
 	headerText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	newsConsole.consoleWidget.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
@@ -95,14 +94,12 @@ void WorldGenScene::Resize()
 	statText.SetPos(worldImage.X() + worldImage.Width() + layout.GutterX(),
 					worldImage.Y());
 	footerText.SetPos(headerText.X(), headerText.Y() + gamui2D.TextHeightVirtual());
-	//footerText.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + DY);
 
 	headerText.SetTab(worldImage.Width() / 5.0f);
 	statText.SetTab(worldImage.Width() / 5.0f);
 	footerText.SetTab(worldImage.Width() / 5.0f);
 
 	debugFPS = SettingsManager::Instance()->DebugFPS();
-	//statText.SetVisible(SettingsManager::Instance()->DebugFPS());
 
 	for (int j = 0; j < NUM_SECTORS; ++j) {
 		for (int i = 0; i < NUM_SECTORS; ++i) {
@@ -150,21 +147,19 @@ void WorldGenScene::CreateTexture(Texture* t)
 {
 	if (StrEqual(t->Name(), "worldGenPreview")) {
 
-		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
-
 		if (!pix16) {
-			pix16 = new U16[SIZE2];
+			pix16 = new U16[MAX_MAP_SIZE_2];
 		}
 		// Must also set SectorData, which is done elsewhere.
 		worldMap->MapInit(worldGen->Land(), worldGen->Path());
 
 		int i = 0;
-		for (int y = 0; y < WorldGen::SIZE; ++y) {
-			for (int x = 0; x < WorldGen::SIZE; ++x) {
+		for (int y = 0; y < MAX_MAP_SIZE; ++y) {
+			for (int x = 0; x < MAX_MAP_SIZE; ++x) {
 				pix16[i++] = Surface::CalcRGB16(worldMap->Pixel(x, y));
 			}
 		}
-		t->Upload(pix16, SIZE2*sizeof(U16));
+		t->Upload(pix16, MAX_MAP_SIZE_2*sizeof(U16));
 	}
 	else {
 		GLASSERT(0);
@@ -174,9 +169,9 @@ void WorldGenScene::CreateTexture(Texture* t)
 
 void WorldGenScene::BlendLine(int y)
 {
-	for (int x = 0; x < WorldGen::SIZE; ++x) {
-		int h = *(worldGen->Land() + y*WorldGen::SIZE + x);
-		int r = *(rockGen->Height() + y*WorldGen::SIZE + x);
+	for (int x = 0; x < MAX_MAP_SIZE; ++x) {
+		int h = *(worldGen->Land() + y*MAX_MAP_SIZE + x);
+		int r = *(rockGen->Height() + y*MAX_MAP_SIZE + x);
 
 		if (h >= WorldGen::LAND0 && h <= WorldGen::LAND3) {
 			if (r) {
@@ -254,18 +249,18 @@ void WorldGenScene::DoTick(U32 delta)
 
 			clock_t start = clock();
 			if (clock() - start < CLOCK_MSEC(30)) {
-				while (genState.y < WorldGen::SIZE) {
+				while (genState.y < MAX_MAP_SIZE) {
 					for (int i = 0; i < 16; ++i) {
 						worldGen->DoLandAndWater(genState.y++);
 					}
 				}
 			}
 			CStr<32> str;
-			str.Format("Stage 1/3 Land: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+			str.Format("Stage 1/3 Land: %d%%", (int)(100.0f*(float)genState.y / (float)MAX_MAP_SIZE));
 			footerText.SetText(str.c_str());
 			GLString name;
 
-			if (genState.y == WorldGen::SIZE) {
+			if (genState.y == MAX_MAP_SIZE) {
 				SetMapBright(true);
 				bool okay = worldGen->EndLandAndWater(0.4f);
 				if (okay) {
@@ -324,24 +319,24 @@ void WorldGenScene::DoTick(U32 delta)
 		case GenState::ROCKGEN:
 		{
 			clock_t start = clock();
-			while ((genState.y < WorldGen::SIZE) && (clock() - start < CLOCK_MSEC(30))) {
+			while ((genState.y < MAX_MAP_SIZE) && (clock() - start < CLOCK_MSEC(30))) {
 				for (int i = 0; i < 16; ++i) {
 					rockGen->DoCalc(genState.y);
 					genState.y++;
 				}
 			}
 			CStr<32> str;
-			str.Format("Stage 2/3 Rock: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+			str.Format("Stage 2/3 Rock: %d%%", (int)(100.0f*(float)genState.y / (float)MAX_MAP_SIZE));
 			footerText.SetText(str.c_str());
 
-			if (genState.y == WorldGen::SIZE) {
+			if (genState.y == MAX_MAP_SIZE) {
 				rockGen->EndCalc();
 
 				Random random;
 				random.SetSeedFromTime();
 
 				rockGen->DoThreshold(random.Rand(), 0.35f, RockGen::NOISE_HEIGHT);
-				for (int y = 0; y < WorldGen::SIZE; ++y) {
+				for (int y = 0; y < MAX_MAP_SIZE; ++y) {
 					BlendLine(y);
 				}
 				sendTexture = true;

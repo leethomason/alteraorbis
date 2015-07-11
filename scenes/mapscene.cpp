@@ -407,12 +407,8 @@ void MapScene::DrawMap()
 				diplomacy[j*NUM_SECTORS + i].SetSize(scale*0.8f, scale*0.8f);
 			}
 
-			if (core && core->InUse() && core->ParentChit()->Team() == Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE)) {
-				atom = LumosGame::CalcUIIconAtom("motherCore");
-				diplomacy[j*NUM_SECTORS + i].SetSize(scale, scale);
-			}
-			else if (core && core->InUse() && Team::Group(core->ParentChit()->Team()) == TEAM_TROLL) {
-				atom = LumosGame::CalcUIIconAtom("truulgacore");
+			if (core && core->InUse() && Team::IsDeity(core->ParentChit()->Team())) {
+				atom = LumosGame::CalcDeityAtom(core->ParentChit()->Team());
 				diplomacy[j*NUM_SECTORS + i].SetSize(scale, scale);
 			}
 

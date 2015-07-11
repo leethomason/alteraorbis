@@ -141,9 +141,10 @@ void ShaderManager::LoadProgram(const char* name, GLString* str)
 	GLASSERT(fp);
 
 	static const int SIZE = 100;
-	char buf[SIZE];
+	char buf[SIZE] = {0};
 	int count = 0;
-	while ((count = fread(buf, 1, SIZE, fp)) > 0) {
+	while ((count = fread(buf, 1, SIZE-1, fp)) > 0) {
+		buf[count] = 0;
 		str->append(buf, count);
 	}
 	fclose(fp);

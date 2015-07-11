@@ -9,9 +9,11 @@
   <GameItem name="humanFemale"
         resource="humanFemale"
         uiIcon="humanFemale"
-	    flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+	      flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         mob="denizen"
+        startTrack="DENIZEN_CREATED"
+        endTrack="DENIZEN_KILLED"
         nameGen="humanFemaleNames"
         cooldown="1500"
         baseHP="60"
@@ -34,6 +36,8 @@
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
+        startTrack="DENIZEN_CREATED"
+        endTrack="DENIZEN_KILLED"
         baseHP="60"
         mass ="70">
     <intrinsics>
@@ -53,6 +57,8 @@
         flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="gobnames"
         mob="denizen"
+        startTrack="DENIZEN_CREATED"
+        endTrack="DENIZEN_KILLED"
         baseHP="40"
         mass ="50">
     <intrinsics>
@@ -71,6 +77,8 @@
         flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="kamakirinames"
         mob="denizen"
+        startTrack="DENIZEN_CREATED"
+        endTrack="DENIZEN_KILLED"
         baseHP="50"
         mass ="50">
     <intrinsics>
@@ -106,11 +114,6 @@
         speed="1.0"
         baseHP="25"
         mass="10" >
-  </GameItem>
-
-  <GameItem name="deity"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
-        mass="1000" >
   </GameItem>
 
   <GameItem name="gold"
@@ -155,6 +158,8 @@
         flags="CLICK_THROUGH PATH_NON_BLOCKING"
         baseHP="300"
         mass="100"
+        startTrack="DOMAIN_CREATED"
+        endTrack="DOMAIN_DESTROYED"
         />
 
   <GameItem name="ruins"
@@ -480,6 +485,8 @@
         flags="GOLD_PICKUP AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
         nameGen="monster"
+        startTrack="GREATER_MOB_CREATED"
+        endTrack="GREATER_MOB_KILLED"
         baseHP="400"
         mass="400">
     <intrinsics>
@@ -496,6 +503,8 @@
         resource="firecyclops"
         flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
+        startTrack="GREATER_MOB_CREATED"
+        endTrack="GREATER_MOB_KILLED"
         nameGen="monster"
         baseHP="350"
         mass="400">
@@ -523,6 +532,8 @@
         resource="shockcyclops"
         flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_SECTOR_WANDER DAMAGE_UNDER_WATER"
         mob="greater"
+        startTrack="GREATER_MOB_CREATED"
+        endTrack="GREATER_MOB_KILLED"
         nameGen="monster"
         baseHP="350"
         mass="400">
@@ -557,6 +568,8 @@
         uiIcon="ring"
         flags="MELEE_WEAPON CLICK_THROUGH FLOAT"
 		    procedural="ring"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="16"
@@ -584,6 +597,8 @@
         procedural="gun"
         nameGen="vikingMale"
         sound="pistolWAV"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         >
   </RangedWeapon>
 
@@ -603,6 +618,8 @@
         procedural="gun"
         nameGen="vikingMale"
         sound="blasterWAV"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         >
   </RangedWeapon>
 
@@ -622,6 +639,8 @@
         procedural="gun"
         nameGen="vikingMale"
         sound="pulseWAV"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         >
   </RangedWeapon>
 
@@ -641,6 +660,8 @@
         procedural="gun"
         nameGen="vikingMale"
         sound="beamgunWAV"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         >
   </RangedWeapon>
 
@@ -654,6 +675,8 @@
         procedural="shield"
         capacity="40"
         cooldown="2000"
+        startTrack="FORGED"
+        endTrack="UN_FORGED"
         >
   </Shield>
 

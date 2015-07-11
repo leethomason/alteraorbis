@@ -74,7 +74,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::BLOOD_RAGE:
 			case NewsEvent::VISION_QUEST:
 
-			if (homeCore && (homeCore->IsCitizenItemID(ne.FirstItemID()) || (homeCoreTeam == ne.FirstTeam()))) {
+			if (sector == homeSector) {
 				ne.Console(&str, chitBag, 0);
 				atom = LumosGame::CalcUIIconAtom("warning");
 			}

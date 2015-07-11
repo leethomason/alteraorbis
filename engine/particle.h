@@ -91,8 +91,8 @@ struct ParticleDef
 	int alignment;
 
 	int count;
-	int config;		// "sphere" "hemi" "ray"
 	enum { SPHERE, SMOKE_0, SMOKE_1, SQUARE, BOLT, NUM_TEX=8 };
+	int config;		// "sphere" "hemi" "ray"
 	int texMin, texMax;	// min and max texture index
 	float posFuzz;
 	float velocity;
@@ -105,6 +105,22 @@ struct ParticleDef
 	grinliz::Vector4F colorVelocity0;
 	grinliz::Vector4F colorVelocity1;
 	grinliz::Vector4F colorFuzz;
+
+	ParticleDef() {
+		time = ONCE;
+		spread = SPREAD_POINT;
+		alignment = ALIGN_CAMERA;
+		count = 0;
+		config = SPHERE;
+		texMin = texMax = 0;
+		posFuzz = velocity = velocityFuzz = 0;
+		size.Zero();
+		sizeVelocity.Zero();
+		color.Zero();
+		colorVelocity0.Zero();
+		colorVelocity1.Zero();
+		colorFuzz.Zero();
+	}
 
 	void Load( const tinyxml2::XMLElement* element );
 };

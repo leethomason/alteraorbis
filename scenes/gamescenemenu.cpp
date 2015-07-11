@@ -36,6 +36,10 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	avatarUnit.SetText("Avatar");
 	avatarUnit.SetVisible(false);
 
+	teleportAvatar.Init(gamui2D, game->GetButtonLook(0));
+	teleportAvatar.SetText("Teleport");
+	teleportAvatar.SetVisible(false);
+
 	static const char* modeButtonText[NUM_BUILD_CATEGORIES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
 	};
@@ -73,7 +77,7 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	buildDescription.Init(gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "View", "Build", "Control" };
+		static const char* TEXT[NUM_UI_MODES] = { "Avatar", "View", "Build", "Control" };
 		uiMode[i].Init( gamui2D, game->GetButtonLook(0));
 		uiMode[i].SetText( TEXT[i] );
 		uiMode[0].AddToToggleGroup( &uiMode[i] );
@@ -83,7 +87,7 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
 	uiBackground.Init(gamui2D, darkPurple, false);
 
-	uiMode[UI_VIEW].SetDown();
+	uiMode[UI_AVATAR].SetDown();
 
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		static const char* NAMES[NUM_SQUAD_BUTTONS] = { "Local", "Alpha", "Beta", "Delta", "Omega" };
@@ -104,10 +108,13 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 void GameSceneMenu::Resize(const Screenport& port, const gamui::LayoutCalculator& layout)
 {
 	layout.PosAbs(&useBuildingButton, 0, 2);
-	layout.PosAbs(&prevUnit, 1, 1);
-	layout.PosAbs(&avatarUnit, 2, 1);
-	layout.PosAbs(&nextUnit, 3, 1);
 	layout.PosAbs(&cameraHomeButton, 0, 1);
+
+	layout.PosAbs(&prevUnit, 1, 1);
+	layout.PosAbs(&nextUnit, 2, 1);
+
+	layout.PosAbs(&avatarUnit, 1, 1);
+	layout.PosAbs(&teleportAvatar, 2, 1);
 
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		layout.PosAbs(&squadButton[i], i, 1);
@@ -197,11 +204,12 @@ void GameSceneMenu::ItemTapped(const gamui::UIItem* item)
 		if (item == &uiMode[i]) {
 			int uiMode = UIMode();
 
-			cameraHomeButton.SetVisible(uiMode == UI_VIEW);
+			cameraHomeButton.SetVisible(uiMode == UI_VIEW || uiMode == UI_AVATAR);
 			prevUnit.SetVisible(uiMode == UI_VIEW);
-			avatarUnit.SetVisible(uiMode == UI_VIEW);
+			avatarUnit.SetVisible(uiMode == UI_AVATAR);
+			teleportAvatar.SetVisible(uiMode == UI_AVATAR);
 			nextUnit.SetVisible(uiMode == UI_VIEW);
-			useBuildingButton.SetVisible(uiMode == UI_VIEW && useBuilding);
+			useBuildingButton.SetVisible(uiMode == UI_AVATAR && useBuilding);
 			tabBar0.SetVisible(false);
 			tabBar1.SetVisible(false);
 			createWorkerButton.SetVisible(uiMode == UI_BUILD);
@@ -300,7 +308,8 @@ void GameSceneMenu::SetCanTeleport(bool t)
 {
 	if (t != canTeleport) {
 		canTeleport = t; 
-		avatarUnit.SetText(canTeleport ? "Teleport\nAvatar" : "Avatar");
+//		avatarUnit.SetText(canTeleport ? "Teleport\nAvatar" : "Avatar");
+		teleportAvatar.SetEnabled(canTeleport);
 	}
 }
 
@@ -411,14 +420,18 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 void GameSceneMenu::DoEscape(bool fullEscape)
 {
 	int mode = UIMode();
-	if (mode == UI_VIEW) {
-		// no sub-options. do nothing.
+	if (mode == UI_AVATAR) {
+		// do nothing.
 	}
-	else if (mode == UI_CONTROL) {
-		// Back to view.
-		uiMode[UI_VIEW].SetDown();
-		ItemTapped(&uiMode[UI_VIEW]);
+	else if (mode == UI_VIEW || mode == UI_CONTROL) {
+		uiMode[UI_AVATAR].SetDown();
+		ItemTapped(&uiMode[UI_AVATAR]);
 	}
+//	else if (mode == UI_CONTROL) {
+//		// Back to view.
+//		uiMode[UI_VIEW].SetDown();
+//		ItemTapped(&uiMode[UI_VIEW]);
+//	}
 	else if (mode == UI_BUILD) {
 		// How far down are we?
 		int buildActive = BuildActive();

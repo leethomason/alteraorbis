@@ -2,18 +2,15 @@
 #define FORGE_SCRIPT_INCLUDED
 
 #include "../grinliz/glrandom.h"
+#include "../game/gameitem.h"
 
 class ItemComponent;
 class Wallet;
-class GameItem;
 class TransactAmt;
 
 class ForgeScript
 {
 public:
-	// seed should be stable: GetItem()->ID() ^ forgeUser->GetItem()->Traits().Experience()
-	ForgeScript( int seed, int userLevel, int techLevel );
-
 	enum {
 		RING,
 		GUN,
@@ -27,53 +24,42 @@ public:
 		PULSE,
 		BEAMGUN,
 		NUM_GUN_TYPES,
-		NUM_TECH0_GUNS = 2
-	};
-
-	enum {
-		NUM_RING_PARTS = 4,
-		NUM_GUN_PARTS = 4
 	};
 
 	// gun parts and ring parts are in WeaponGen
 	enum {
 		EFFECT_FIRE,
 		EFFECT_SHOCK,
-//		EFFECT_EXPLOSIVE,
 		NUM_EFFECTS
 	};
 
-	static const char* ItemName( int item );
-	static const char* GunType( int type );
-	static const char* ItemPart( int item, int part );	// part from 0-3, matches WeaponGen order, but index not flag
-	static const char* Effect( int effect );
+	static const char* ItemName(int item);
+	static const char* GunType(int type);
+	static const char* ItemPart(int item, int part);	// part from 0-3, matches WeaponGen order, but index not flag
+	static const char* Effect(int effect);
 
-	static GameItem* DoForge(	int itemType,		// GUN, etc.
-								int subItem,		// -1 for any
-								const Wallet& avail,
-								TransactAmt* cost,
-								int partsMask,
-								int effectsMask,
-								int tech,
-								int level,
-								int seed,
-								int team);
+	struct ForgeData {
+		int type = GUN;				// GUN, etc.
+		int subType = PISTOL; 		// if GUN, then: PISTOL, BLASTER, etc. (else ignored)
+		int partsMask = 0xff;		// allowed parts (0xff for all)
+		int effectsMask = GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK;		// allowed effects
+		int tech = 0;
+		int level = 0;
+		int team = 0;
+	};
 
+	// Some teams have special restrictions on effects & parts.
+	static void TeamLimitForgeData(ForgeData* data);
+	// Some teams prefer some guns to another.
+	static void BestSubItem(ForgeData* data, int seed);
 
-	GameItem* Build(	int itemType,		// GUN
-				int subItemType,	// BLASTER
-				int partsFlags,		// WeaponGen::GUN_CELL, etc.	
-				int effectsFlags,	// GameItem effect flags, not enumeration above. GameItem::EFFECT_FIRE, etc.
-				TransactAmt* required,
-				int* techRequired,
-				bool randomTraits,
-				int team);			
+	// seed=0 is special! creates the "average" weapon
+	static GameItem* ForgeRandomItem(const ForgeData& forgeData, const Wallet& availabe, TransactAmt* cost, int seed);
 
-private:
-	int seed;
-	int userLevel;
-	int techLevel;
+	static GameItem* Build(const ForgeData& forgeData,
+						   TransactAmt* required,
+						   int* techRequired,
+						   int seed);
 };
-
 
 #endif // FORGE_AI_INCLUDED

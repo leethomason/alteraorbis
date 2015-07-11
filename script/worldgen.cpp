@@ -32,8 +32,7 @@ SectorData::~SectorData()
 void SectorData::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "SectorData" );
-	XARC_SER( xs, x );
-	XARC_SER( xs, y );
+	XARC_SER( xs, sector );
 	XARC_SER( xs, ports );
 	XARC_SER( xs, core );
 	XARC_SER( xs, area );
@@ -43,19 +42,17 @@ void SectorData::Serialize( XStream* xs )
 	if ( xs->Loading() ) {
 		delete pather;
 		pather = 0;
-
-//		GLASSERT( !name.empty() );
 	}
 }
 
 
 WorldGen::WorldGen()
 {
-	land = new U8[SIZE*SIZE];
-	memset( land, 0, SIZE*SIZE*sizeof(*land) );
-	color = new U16[SIZE*SIZE];
-	path = new U16[SIZE*SIZE];
-	memset( path, 0, sizeof(*path)*SIZE*SIZE );
+	land = new U8[MAX_MAP_SIZE_2];
+	memset(land, 0, MAX_MAP_SIZE_2*sizeof(*land));
+	color = new U16[MAX_MAP_SIZE_2];
+	path = new U16[MAX_MAP_SIZE_2];
+	memset(path, 0, sizeof(*path)*MAX_MAP_SIZE_2);
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
@@ -82,34 +79,34 @@ void WorldGen::LoadFeatures( const char* path )
 
 void WorldGen::StartLandAndWater( U32 seed0, U32 seed1 )
 {
-	flixels = new float[SIZE*SIZE];
+	flixels = new float[MAX_MAP_SIZE*MAX_MAP_SIZE];
 
 	noise0 = new PerlinNoise( seed0 );
 	noise1 = new PerlinNoise( seed1 );
 }
 
 
-void WorldGen::DoLandAndWater( int j )
+void WorldGen::DoLandAndWater(int j)
 {
-	GLASSERT( j >= 0 && j < SIZE );
-	for( int i=0; i<SIZE; ++i ) {
-		float nx = (float)i/(float)SIZE;
-		float ny = (float)j/(float)SIZE;
+	GLASSERT(j >= 0 && j < MAX_MAP_SIZE);
+	for (int i = 0; i < MAX_MAP_SIZE; ++i) {
+		float nx = (float)i / (float)MAX_MAP_SIZE;
+		float ny = (float)j / (float)MAX_MAP_SIZE;
 
 		// Noise layer.
-		float n0 = noise0->Noise2( BASE0*nx, BASE0*ny );
-		float n1 = noise1->Noise2( BASE1*nx, BASE1*ny );
+		float n0 = noise0->Noise2(BASE0*nx, BASE0*ny);
+		float n1 = noise1->Noise2(BASE1*nx, BASE1*ny);
 
 		float n = n0 + n1*OCTAVE;
-		n = PerlinNoise::Normalize( n );
+		n = PerlinNoise::Normalize(n);
 
 		// Water at the edges.
-		float dEdge = Min( nx, 1.0f-nx );
-		if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
-		dEdge = Min( ny, 1.0f-ny );
-		if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
+		float dEdge = Min(nx, 1.0f - nx);
+		if (dEdge < EDGE)		n = Lerp(0.f, n, dEdge / EDGE);
+		dEdge = Min(ny, 1.0f - ny);
+		if (dEdge < EDGE)		n = Lerp(0.f, n, dEdge / EDGE);
 
-		flixels[j*SIZE+i] = n;
+		flixels[j*MAX_MAP_SIZE + i] = n;
 	}
 }
 
@@ -117,11 +114,11 @@ void WorldGen::DoLandAndWater( int j )
 bool WorldGen::EndLandAndWater( float fractionLand )
 {
 	float cutoff = fractionLand;
-	int target = (int)((float)(SIZE*SIZE)*fractionLand);
+	int target = (int)((float)(MAX_MAP_SIZE*MAX_MAP_SIZE)*fractionLand);
 	float high = 1.0f;
 	int highCount = 0;
 	float low = 0.0f;
-	int lowCount = SIZE*SIZE;
+	int lowCount = MAX_MAP_SIZE*MAX_MAP_SIZE;
 	int iteration=0;
 	static const int MAX_ITERATION = 10;
 	float maxh = 1.0f;
@@ -144,17 +141,17 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 		++iteration;
 	}
 
-	for( int j=0; j<SIZE; ++j ) {
-		for( int i=0; i<SIZE; ++i ) {
-			if ( flixels[j*SIZE+i] > cutoff ) {
-				float flix = (flixels[j*SIZE+i] - cutoff) / (maxh-cutoff);
+	for( int j=0; j<MAX_MAP_SIZE; ++j ) {
+		for( int i=0; i<MAX_MAP_SIZE; ++i ) {
+			if ( flixels[j*MAX_MAP_SIZE+i] > cutoff ) {
+				float flix = (flixels[j*MAX_MAP_SIZE+i] - cutoff) / (maxh-cutoff);
 				GLASSERT( flix >= 0 && flix <= 1 );
 				int h = LAND0 + (int)(flix*3.5f);
 				GLASSERT( h > 0 && h <= 4 );
-				land[j*SIZE+i] = h;
+				land[j*MAX_MAP_SIZE+i] = h;
 			}
 			else {
-				land[j*SIZE+i] = 0;
+				land[j*MAX_MAP_SIZE+i] = 0;
 			}
 		}
 	}
@@ -172,10 +169,10 @@ void WorldGen::WriteMarker()
 	for ( int y=0; y<S; ++y ) {
 		for( int x=0; x<S; ++x ) {
 			if ( y==0 || y==(S-1) || x==0 || x==(S-1) ) {
-				land[y*SIZE+x] = 0;
+				land[y*MAX_MAP_SIZE+x] = 0;
 			}
 			else {
-				land[y*SIZE+x] = 1;
+				land[y*MAX_MAP_SIZE+x] = 1;
 			}
 		}
 	}
@@ -186,9 +183,9 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 {
 	int count = 0;
 	*maxh = 0.0f;
-	for( int j=0; j<SIZE; ++j ) {
-		for( int i=0; i<SIZE; ++i ) {
-			float f = flixels[j*SIZE+i];
+	for( int j=0; j<MAX_MAP_SIZE; ++j ) {
+		for( int i=0; i<MAX_MAP_SIZE; ++i ) {
+			float f = flixels[j*MAX_MAP_SIZE+i];
 			if ( f > cutoff ) {
 				++count;
 				if ( f > *maxh ) *maxh = f;
@@ -225,7 +222,7 @@ int WorldGen::Color( const Rectangle2I& bounds, const Vector2I& origin )
 	int c = 1;
 	CDynArray<Vector2I> stack;
 
-	GLASSERT( land[origin.y*SIZE+origin.x] );
+	GLASSERT( land[origin.y*MAX_MAP_SIZE+origin.x] );
 
 	stack.Push( origin );
 	color[INDEX(origin.x, origin.y)] = 1;
@@ -273,8 +270,8 @@ void WorldGen::RemoveUncoloredLand( SectorData* s )
 
 	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-			if ( color[y*SIZE+x] == 0 ) {
-				land[y*SIZE+x] = 0;
+			if ( color[y*MAX_MAP_SIZE+x] == 0 ) {
+				land[y*MAX_MAP_SIZE+x] = 0;
 			}
 		}
 	}
@@ -289,11 +286,11 @@ void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 	// Inset one more, so that checks can be in all directions.
 	for( int y=bounds.min.y+1; y<=bounds.max.y-1; ++y ) {
 		for( int x=bounds.min.x+1; x<=bounds.max.x-1; ++x ) {
-			if (    land[y*SIZE+x]		// is land
-			     && (    land[y*SIZE+x+1] == 0
-					  || land[y*SIZE+x-1] == 0
-					  || land[(y+1)*SIZE+x] == 0
-					  || land[(y-1)*SIZE+x] == 0 ))
+			if (    land[y*MAX_MAP_SIZE+x]		// is land
+			     && (    land[y*MAX_MAP_SIZE+x+1] == 0
+					  || land[y*MAX_MAP_SIZE+x-1] == 0
+					  || land[(y+1)*MAX_MAP_SIZE+x] == 0
+					  || land[(y-1)*MAX_MAP_SIZE+x] == 0 ))
 			{
 				Vector2I v = { x, y };
 				stack.Push( v );
@@ -312,13 +309,13 @@ void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 		int d = Min( 4, stack.Size()-1 );
 		int index = d > 1 ? (stack.Size()-1-random.Rand(d)) : (stack.Size()-1);
 		Vector2I origin = stack[index];
-		GLASSERT( land[origin.y*SIZE+origin.x] );
+		GLASSERT( land[origin.y*MAX_MAP_SIZE+origin.x] );
 
 		bool deposit = false;
 		for( int i=0; i<4; ++i ) {
 			Vector2I c = origin + dir[i];
-			if ( bounds.Contains(c) && land[c.y*SIZE+c.x] == 0 ) {
-				land[c.y*SIZE+c.x] = LAND0;
+			if ( bounds.Contains(c) && land[c.y*MAX_MAP_SIZE+c.x] == 0 ) {
+				land[c.y*MAX_MAP_SIZE+c.x] = LAND0;
 				deposit = true;
 				stack.Push( c );
 				--n;
@@ -335,11 +332,11 @@ void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 
 void WorldGen::Draw( const Rectangle2I& r, int isLand )
 {
-	GLASSERT( r.min.x >= 0 && r.max.x < SIZE );
-	GLASSERT( r.min.y >= 0 && r.max.y < SIZE );
+	GLASSERT( r.min.x >= 0 && r.max.x < MAX_MAP_SIZE );
+	GLASSERT( r.min.y >= 0 && r.max.y < MAX_MAP_SIZE );
 	for( int y=r.min.y; y<=r.max.y; ++y ) {
 		for( int x=r.min.x; x<=r.max.x; ++x ) {
-			land[y*SIZE+x] = isLand;
+			land[y*MAX_MAP_SIZE+x] = isLand;
 		}
 	}
 }
@@ -358,7 +355,7 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 		for( int j=0; j<NUM_SECTORS-1; ++j ) {
 			Rectangle2I r;
 			r.Set( 0,	   (j+1)*SECTOR_SIZE-1, 
-				   SIZE-1, (j+1)*SECTOR_SIZE );
+				   MAX_MAP_SIZE-1, (j+1)*SECTOR_SIZE );
 			if ( pass == 1 ) {
 				Swap( &r.min.x, &r.min.y );
 				Swap( &r.max.x, &r.max.y );
@@ -376,7 +373,7 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 	Vector2I center = { NUM_SECTORS/2, NUM_SECTORS/2 };
 	int rad = NUM_SECTORS/2;
 
-	for( int j=1; j<NUM_SECTORS-2; ++j ) {
+	for( int j=1; j<NUM_SECTORS-1; ++j ) {
 		int dy = j - center.x;
 		int d2 = rad*rad - dy*dy;
 		int dx = d2 ? LRintf( sqrt( (float)(d2) )) : 1;
@@ -397,6 +394,8 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 		x1 = Clamp( x1, 1, NUM_SECTORS-2 );
 
 		Rectangle2I r;
+		GLASSERT(x0 > 0 && x0 < NUM_SECTORS / 2);
+		GLASSERT(x1 > x0 && x1 < NUM_SECTORS - 1);
 		r.Set( x0, j, x1, j );
 		sectors.SetRect( r );
 	}
@@ -476,7 +475,7 @@ int WorldGen::CalcSectorArea( int sx, int sy )
 			 i < (sx+1)*SECTOR_SIZE-1;
 			 ++i )
 		{
-			if ( land[j*SIZE+i] ) {
+			if ( land[j*MAX_MAP_SIZE+i] ) {
 				++area;
 			}
 		}
@@ -486,25 +485,12 @@ int WorldGen::CalcSectorArea( int sx, int sy )
 
 
 Rectangle2I SectorData::Bounds() const { 
-	grinliz::Rectangle2I r; 
-	r.Set( x, y, x+SECTOR_SIZE-1, y+SECTOR_SIZE-1 ); 
-	return r; 
+	return SectorBounds(sector);
 }
 
 
 Rectangle2I SectorData::InnerBounds() const { 
-	grinliz::Rectangle2I r = Bounds();
-	r.Outset( -1 );
-	return r;
-}
-
-
-/*static*/ Rectangle2I SectorData::SectorBounds( float fx, float fy )
-{
-	Vector2I s = SectorID( fx, fy );
-	Rectangle2I r;
-	r.Set( s.x*SECTOR_SIZE, s.y*SECTOR_SIZE, (s.x+1)*SECTOR_SIZE-1, (s.y+1)*SECTOR_SIZE-1 );
-	return r;
+	return InnerSectorBounds(sector);
 }
 
 
@@ -548,6 +534,9 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 //	static const int LONG  = 4;
 	static const int SHORT = 2;
 	static const int HALF  = SECTOR_SIZE/2;
+
+	int x = Bounds().min.x;
+	int y = Bounds().min.y;
 
 	if ( port == NEG_X ) {
 		r.Set( x+1,			y+HALF-SHORT, 
@@ -622,9 +611,7 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	for( int j=0; j<NUM_SECTORS; ++j ) {
 		for( int i=0; i<NUM_SECTORS; ++i ) {
 			SectorData* s = &sectorData[j*NUM_SECTORS+i];
-			s->x = i*SECTOR_SIZE;
-			s->y = j*SECTOR_SIZE;
-
+			s->sector.Set(i, j);
 			if ( s->ports ) {
 				AddPorts( s );
 				sectors.Push( s );
@@ -645,13 +632,13 @@ void WorldGen::Filter( const Rectangle2I& bounds )
 {
 	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-			if (    land[y*SIZE+x] == WATER 
-				 && land[(y-1)*SIZE+x] != WATER
-				 && land[(y+1)*SIZE+x] != WATER
-				 && land[y*SIZE+(x+1)] != WATER
-				 && land[y*SIZE+(x-1)] != WATER )
+			if (    land[y*MAX_MAP_SIZE+x] == WATER 
+				 && land[(y-1)*MAX_MAP_SIZE+x] != WATER
+				 && land[(y+1)*MAX_MAP_SIZE+x] != WATER
+				 && land[y*MAX_MAP_SIZE+(x+1)] != WATER
+				 && land[y*MAX_MAP_SIZE+(x-1)] != WATER )
 			{
-				land[y*SIZE+x] = LAND0;
+				land[y*MAX_MAP_SIZE+x] = LAND0;
 			}
 		}
 	}
@@ -665,19 +652,21 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	Random random( seed );
 
 	// Place core
-	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
-					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
-	Vector2I sector = { s->x/SECTOR_SIZE, s->y/SECTOR_SIZE };
-
+	// Random core placement doesn't really add anything.
+	//Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
+	//				s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	Vector2I c = s->Bounds().Center();
 	s->core = c;
+	Vector2I sector = s->sector;
 
+	// Make sure there is a land patch around the core.
+	// Want it to be reasonably connected.
 	Rectangle2I r;
 	r.max = r.min = c;
 	r.Outset( 2 );
-
 	Draw( r, LAND0 );
 
-	land[c.y*SIZE+c.x]	= CORE;
+	land[c.y*MAX_MAP_SIZE+c.x]	= CORE;
 	int  a				= Color( s->InnerBounds(), s->core );
 	int portsColored	= PortsColored( s );
 	int	featurePlaced	= random.Rand( 2 );
@@ -710,7 +699,7 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	RemoveUncoloredLand( s );
 
 	s->area = a;
-	int checkArea = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
+	int checkArea = CalcSectorArea(s->sector.x, s->sector.y);
 	GLASSERT( a == checkArea );
 	(void)checkArea;
 }
@@ -724,7 +713,6 @@ void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int r
 	rot.SetRotation( rotation );
 
 	int cx = featuresSize.x / SECTOR_SIZE;
-//	int cy = featuresSize.y / SECTOR_SIZE;
 	int fy = feature / cx;
 	int fx = feature - fy*cx;
 

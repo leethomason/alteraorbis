@@ -295,6 +295,20 @@ inline void XarcSet( XStream* stream, const char* key, U32 value ) {
 	XarcSet( stream, key, (int)value );
 }
 
+inline bool XarcGet( XStream* stream, const char* key, U16 &value ) {
+	int v = 0;
+	if ( XarcGet( stream, key, v )) {
+		value = (U16)v;
+		return true;
+	}
+	return false;
+}
+
+inline void XarcSet( XStream* stream, const char* key, U16 value ) {
+	XarcSet( stream, key, (int)value );
+}
+
+
 // Strings
 // Can serialize a null string.
 bool XarcGet( XStream* xs, const char* key, grinliz::IString& i );

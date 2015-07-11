@@ -58,7 +58,7 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-1), sceneData(0), sim(s)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
-	memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
+	//memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
 	homeTeam = 0;
 }
 
@@ -78,7 +78,6 @@ void LumosChitBag::Serialize( XStream* xs )
 
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeTeam );
-	XARC_SER_ARR(xs, deityID, NUM_DEITY);
 	XARC_SER_CARRAY(xs, namePool);
 	XarcClose( xs );
 }
@@ -87,15 +86,12 @@ void LumosChitBag::Serialize( XStream* xs )
 void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
 	if (x == 0 && y == 0) return; // sentinel
-
-	int sx = x / SECTOR_SIZE;
-	int sy = y / SECTOR_SIZE;
-	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
-	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
+	Vector2I sector = ToSector(x, y);
 	GLASSERT( chit->nextBuilding == 0 );
 
-	chit->nextBuilding = mapSpatialHash[sy*NUM_SECTORS+sx];
-	mapSpatialHash[sy*NUM_SECTORS+sx] = chit;
+	int index = sector.y * NUM_SECTORS + sector.x;
+	chit->nextBuilding = mapSpatialHash[index];
+	mapSpatialHash[index] = chit;
 }
 
 
@@ -103,21 +99,18 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 {
 	if (x == 0 && y == 0) return; // sentinel
 
-	int sx = x / SECTOR_SIZE;
-	int sy = y / SECTOR_SIZE;
-	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
-	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
-
-	GLASSERT( mapSpatialHash[sy*NUM_SECTORS+sx] );
+	Vector2I sector = ToSector(x, y);
+	int index = sector.y * NUM_SECTORS + sector.x;
+	GLASSERT( mapSpatialHash[index] );
 
 	MapSpatialComponent* prev = 0;
-	for( MapSpatialComponent* it = mapSpatialHash[sy*NUM_SECTORS+sx]; it; prev = it, it = it->nextBuilding ) {
+	for( MapSpatialComponent* it = mapSpatialHash[index]; it; prev = it, it = it->nextBuilding ) {
 		if ( it == chit ) {
 			if ( prev ) {
 				prev->nextBuilding = it->nextBuilding;
 			}
 			else {
-				mapSpatialHash[sy*NUM_SECTORS+sx] = it->nextBuilding;
+				mapSpatialHash[index] = it->nextBuilding;
 			}
 			it->nextBuilding = 0;
 			return;
@@ -368,24 +361,6 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
 	}
 
-	return chit;
-}
-
-
-Chit* LumosChitBag::GetDeity(int id)
-{
-	GLASSERT(id >= 0 && id < NUM_DEITY);
-	Chit* chit = GetChit(deityID[id]);
-	
-	if (!chit) {
-		const ChitContext* context = Context();
-		chit = NewChit();
-		deityID[id] = chit->ID();
-
-		const char* NAME[NUM_DEITY] = { "MotherCore", "QCore", "R1kCore", "Truulga", "BeastCore", "ShogScrift" };
-		AddItem("deity", chit, context->engine, 0, 0);
-		chit->GetItem()->SetProperName(NAME[id]);
-	}
 	return chit;
 }
 

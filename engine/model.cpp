@@ -265,6 +265,7 @@ void Model::Init(const ModelResource* resource, SpaceTree* st)
 	this->auxBone = 0;
 	this->auxTex = 0;
 	this->userData = 0;
+	this->flags = 0;
 
 	color.Set(1, 1, 1, 1);
 	boneFilter.Set(0, 0, 0, 0);

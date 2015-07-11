@@ -130,7 +130,7 @@ int GridMoveComponent::DoTick( U32 delta )
 			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y );
 			int port = sd.NearestPort( pos );
 			GLASSERT(port);
-			Vector2I sector = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
+			Vector2I sector = sd.sector;
 			GridBlock gridBlock = worldInfo.GetGridBlock( sector, port );
 			GLASSERT(!gridBlock.IsZero());
 

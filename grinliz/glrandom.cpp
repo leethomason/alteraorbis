@@ -403,38 +403,25 @@ int Random::Select( const float* scores, int nItems )
 }
 
 
-#if 0
-U32 Random::WeightedDice( U32 nDice, U32 sides, int weight )
+int Random::WeightedDice(int nDice, int side, int nHigh, int nLow)
 {
-	int n = (int)nDice + abs(weight);
+	static const int MAX = 12;
+	int rolls[MAX] = { 0 };
+	int totalDice = nDice + nHigh + nLow;
 
-	static const int ARR = 16;
-	int arr[ARR];
-	if ( n > ARR ) 
-		n = ARR;
-
-	// Roll the dice.
-	for( int i=0; i<n; ++i ) {
-		arr[i] = 1 + Rand(sides);
+	GLASSERT( totalDice <= MAX);
+	if (totalDice > MAX) {
+		return Dice(nDice, side);
 	}
 
-	// Sort to the high/low rolls.
-	if ( weight > 0 ) {
-		// Highest to lowest.
-		Sort< int, CompValueDescending >( arr, n );
+	for (int i = 0; i < totalDice; ++i) {
+		rolls[i] = 1 + Rand(side);
 	}
-	else {
-		// Lowest to highest.
-		Sort< int, CompValue >(arr, n );
-	}
+	Sort(rolls, totalDice);
 
-	// And finally sum. Should always be in range.
-	int sum = 0;
-	for( U32 i=0; i<nDice; ++i ) {
-		sum += arr[i];
+	int result = 0;
+	for (int i = nLow; i < nLow + nDice; ++i) {
+		result += rolls[i];
 	}
-
-	GLASSERT( sum >= int(nDice) && sum <= int(nDice*sides) );
-	return sum;
+	return result;
 }
-#endif

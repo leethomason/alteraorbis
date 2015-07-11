@@ -30,7 +30,8 @@
 
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glrectangle.h"
-//#include "../grinliz/glperformance.h"
+
+#include "../xegame/xegamelimits.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -45,8 +46,8 @@ Map::Map(int w, int h)
 	width = w;
 	height = h;
 	texture = 0;
-	GLASSERT(w <= EL_MAP_SIZE);
-	GLASSERT(h <= EL_MAP_SIZE);
+	GLASSERT(w <= MAX_MAP_SIZE);
+	GLASSERT(h <= MAX_MAP_SIZE);
 	GLOUTPUT(("Map created. %dK\n", int(sizeof(*this)) / 1024));
 	saturation = 1.0f;
 

@@ -193,6 +193,30 @@ void GameItem::Serialize( XStream* xs )
 	XarcClose( xs );
 }
 
+
+int GameItem::ToMessage(const char* m)
+{
+	static const char* names[] = {
+		"NONE",
+		"DENIZEN_CREATED",
+		"DENIZEN_KILLED",
+		"GREATER_MOB_CREATED",
+		"GREATER_MOB_KILLED",
+		"DOMAIN_CREATED",
+		"DOMAIN_DESTROYED",
+		"FORGED",
+		"UN_FORGED",
+		0
+	};
+
+	if (!m) return 0;
+	for (int i = 0; names[i]; ++i) {
+		if (StrEqual(names[i], m))
+			return i;
+	}
+	return 0;
+}
+
 	
 void GameItem::Load(const tinyxml2::XMLElement* ele)
 {
@@ -201,6 +225,12 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 	resource = StringPool::Intern(ele->Attribute("resource"));
 
 	GLASSERT(!name.empty());
+
+//	const char* cMsg = ele->Attribute("startTrack");
+//	const char* dMsg = ele->Attribute("endTrack");
+//	GLASSERT((!cMsg && !dMsg) || (cMsg && dMsg));
+//	createMsg = ToMessage(cMsg);
+//	destroyMsg = ToMessage(dMsg);
 
 	id = 0;
 	flags = 0;
@@ -787,7 +817,10 @@ IString GameItem::IFullName() const
 		}
 		else {
 			GLString n;
-			if (IName() == ISC::core && Team::IsDenizen(team)) {
+			if (Team::IsDeity(team)) {
+				n.Format("%s", properName.safe_str());
+			}
+			else if (IName() == ISC::core && Team::IsDenizen(team)) {
 				n.Format("%s (%s)", properName.safe_str(), Team::Instance()->TeamName(team).safe_str());
 			}
 			else {
@@ -800,7 +833,7 @@ IString GameItem::IFullName() const
 }
 
 
-void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator)
+void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int creationMsg, int destructionMsg, const GameItem* creator)
 {
 	// Mark this item as important with a destroyMsg:
 	keyValues.Set(ISC::destroyMsg, destructionMsg);
@@ -808,7 +841,7 @@ void GameItem::SetSignificant(NewsHistory* history, const Vector2F& pos, int cre
 	if (creator && team == 0) {
 		team = creator->Team();
 	}
-	NewsEvent news(creationMsg, pos, this->ID(), creator ? creator->GetItemID() : 0);
+	NewsEvent news(creationMsg, pos, this->ID(), creator ? creator->ID() : 0);
 	history->Add(news);
 }
 
@@ -963,4 +996,21 @@ void GameItem::SetTeam(int newTeam)
 		GLASSERT(Team::ID(newTeam) != 0);
 	}
 	team = newTeam;
+}
+
+
+int GameItem::Deity() const
+{
+	switch (Team::Group(Team())) {
+		case TEAM_TROLL:	
+		return DEITY_TRUULGA;
+		
+		case TEAM_HOUSE:	
+		return DEITY_R1K;
+
+		case TEAM_GOB:
+		case TEAM_KAMAKIRI:
+		return DEITY_Q;
+	}
+	return 0;
 }

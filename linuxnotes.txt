@@ -12,6 +12,10 @@ Debug vs. Release:
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake -DCMAKE_BUILD_TYPE=Release ..
 
+Valgrind
+valgrind --leak-check=yes --track-origins=yes build/alteraorbis 2>out.txt
+(If only suppressions would work...)
+
 
 
 

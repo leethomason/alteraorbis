@@ -663,29 +663,23 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 	}
 
 	int seed = chit->ID() ^ gameItem->Traits().Experience();
-	int level = gameItem->Traits().Level();
 	TransactAmt cost;
-	int partsMask = 0xffffffff;
-	int team = Team::Group(chit->Team());
-	int subItem = -1;
-	//const char* altRes = "";
+
+	ForgeScript::ForgeData forgeData;
+	forgeData.type = itemType;
+	forgeData.subType = 0;
+	forgeData.tech = tech;
+	forgeData.level = gameItem->Traits().Level();
+	forgeData.team = chit->Team();
 
 	// Special rules.
-	if (itemType == ForgeScript::RING) {
-		// Only trolls and gobs use the blades.
-		if (team == TEAM_TROLL || team == TEAM_GOB) 
-			partsMask &= (~WeaponGen::RING_TRIAD);
-		else 
-			partsMask &= (~WeaponGen::RING_BLADE);
-	}
+	ForgeScript::TeamLimitForgeData(&forgeData);
+	ForgeScript::BestSubItem(&forgeData, seed);
 
-	// FIXME: the parts mask (0xff) is set for denizen domains.
-	GameItem* item = ForgeScript::DoForge(itemType, subItem, 
-										  gameItem->wallet, &cost, 
-										  0xffffffff, 0xffffffff, 
-										  tech, level, seed, chit->Team());
+	GameItem* item = ForgeScript::ForgeRandomItem(forgeData, gameItem->wallet, &cost, seed);
+
 	if (item) {
-		if (team == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
+		if (Team::Group(forgeData.team) == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
 			item->SetResource("kamabeamgun");
 		}
 
@@ -703,7 +697,7 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 
 		item->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
 							 ToWorld2F(chit->Position()),
-							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
+							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		return true;
 	}
 	return false;

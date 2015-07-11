@@ -102,15 +102,15 @@ private:
 };
 
 
-class TrollDomainAI : public DomainAI
+class ForgeDomainAI : public DomainAI
 {
 	typedef DomainAI super;
 
 public:
-	TrollDomainAI();
-	~TrollDomainAI();
+	ForgeDomainAI();
+	~ForgeDomainAI();
 
-	virtual const char* Name() const { return "TrollDomainAI"; }
+	virtual const char* Name() const { return "ForgeDomainAI"; }
 	virtual void Serialize(XStream* xs);
 
 	virtual void OnAdd(Chit* chit, bool initialize);
@@ -121,8 +121,8 @@ public:
 private:
 
 	CTicker forgeTicker;	// every tick builds something
-
 };
+
 
 class GobDomainAI : public DomainAI
 {

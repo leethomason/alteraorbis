@@ -248,7 +248,7 @@ void Sim::CreateCores()
 			int team = TEAM_NEUTRAL;
 			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
 				// Mother Core. Always at the center: spawn point of the Visitors.
-				team = Team::CombineID(TEAM_DEITY, DEITY_MOTHER_CORE);
+				team = DEITY_MOTHER_CORE;
 			}
 			CoreScript* cs = CoreScript::CreateCore(sector, team, &context);
 			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
@@ -338,16 +338,26 @@ void Sim::SpawnDenizens()
 					case 3: itemType = ForgeScript::SHIELD;	break;
 					default: break;
 				}
-				if (itemType >= 0) {
+				CoreScript* qCore = CoreScript::GetCoreFromTeam(DEITY_Q);
+
+				if (qCore && itemType >= 0) {
+					ForgeScript::ForgeData forgeData;
+					forgeData.type = itemType;
+					forgeData.subType = ForgeScript::PISTOL;
+					forgeData.partsMask = 0;
+					forgeData.effectsMask = 0;
+					forgeData.tech = 0;
+					forgeData.level = 0;
+					forgeData.team = DEITY_Q;
+
 					TransactAmt cost;
-					GameItem* item = ForgeScript::DoForge(itemType, -1, ReserveBank::Instance()->wallet, &cost, 0, 0, 0, 0, chit->ID(), team);
+					GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, random.Rand());
 					if (item) {
-						GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
 						item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 						chit->GetItemComponent()->AddToInventory(item);
 
 						// Mark this item as important with a destroyMsg:
-						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE));
+						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, qCore->ParentChit()->GetItem());
 					}
 				}
 
@@ -408,27 +418,20 @@ void Sim::SpawnGreater()
 
 void Sim::CreateTruulgaCore()
 {
-	Chit* truulga = context.chitBag->GetDeity(LumosChitBag::DEITY_TRUULGA);
-	if (!truulga) return;
+	for (int deityGroup = DEITY_MOTHER_CORE + 1; deityGroup < DEITY_END; ++deityGroup) {
+		CoreScript* coreScript = CoreScript::GetCoreFromTeam(deityGroup);
 
-	Vector2I sector = ToSector(truulga->Position());
-	CoreScript* cs = CoreScript::GetCore(sector);
+		if (coreScript)	// already built!
+			continue;
 
-	int team = 0;
-	if (cs) {
-		team = cs->ParentChit()->Team();
-		team = Team::Group(team);
-	}
-
-	if (team != TEAM_TROLL) {
 		// Need a new core for Truulga.
 		Vector2I newSector = { random.Rand(NUM_SECTORS), random.Rand(NUM_SECTORS) };
-		CoreScript* trollCS = CoreScript::GetCore(newSector);
-		if (trollCS && trollCS->ParentChit()->Team() == 0) {
-			CoreScript* troll = CoreScript::CreateCore(newSector, TEAM_TROLL, &context);
-			troll->ParentChit()->Add(new TrollDomainAI());
-			truulga->SetPosition(troll->ParentChit()->Position());
-			GLOUTPUT(("Truulga domain created at %c%d\n", 'A' + newSector.x, 1 + newSector.y));
+		CoreScript* cs = CoreScript::GetCore(newSector);
+		if (cs && cs->ParentChit()->Team() == 0) {
+			CoreScript* deity = CoreScript::CreateCore(newSector, deityGroup, &context);
+			deity->ParentChit()->Add(new ForgeDomainAI());
+			IString name = Team::Instance()->TeamName(deityGroup);
+			GLOUTPUT(("Deity %s domain created at %c%d\n", name.safe_str(), 'A' + newSector.x, 1 + newSector.y));
 		}
 	}
 }
@@ -450,9 +453,12 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	items[2] = context.chitBag->AddItem( "ring", chit, context.engine, 0, 0 );
 
 	NewsHistory* history = context.chitBag->GetNewsHistory();
-	Chit* deity = context.chitBag->GetDeity(LumosChitBag::DEITY_Q_CORE);
-	for (int i = 0; i < 3; i++) {
-		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
+	CoreScript* deityCore = CoreScript::GetCoreFromTeam(DEITY_Q);
+	if (deityCore) {
+		Chit* deity = deityCore->ParentChit();
+		for (int i = 0; i < 3; i++) {
+			items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity->GetItem());
+		}
 	}
 
 	chit->SetPosition((float)pos.x + 0.5f, 0, (float)pos.y + 0.5f);
@@ -714,12 +720,12 @@ void Sim::CreateRockInOutland()
 			Vector2I sector = { si, sj };
 			const SectorData& sd = context.worldMap->GetSectorData(sector);
 			if (!sd.HasCore()) {
-				for (int j = sd.y; j < sd.y + SECTOR_SIZE; ++j) {
-					for (int i = sd.x; i < sd.x + SECTOR_SIZE; ++i) {
-						if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
-							context.worldMap->SetPlant(i, j, 0, 0);
-							context.worldMap->SetRock(i, j, -1, false, 0);
-						}
+				for (Rectangle2IIterator it(sd.InnerBounds()); !it.Done(); it.Next()) {
+					int i = it.Pos().x;
+					int j = it.Pos().y;
+					if (context.worldMap->GetWorldGrid(i, j).IsLand()) {
+						context.worldMap->SetPlant(i, j, 0, 0);
+						context.worldMap->SetRock(i, j, -1, false, 0);
 					}
 				}
 			}

@@ -1,68 +1,21 @@
-x are the shader uniform counts being computed correctly?
-x do I need to switch on no instancing?
-x war button
-x peace button
-x more diplomacy testing
-x diplomacy art (for map)
-x domain takeover
-	x super / sub team infrastructure
-	x sub team names
-	x clean up console: don't need "team TechHub"
-	x DOMAIN_TAKEOVER message should give 2nd team name.
-	x sub teams "released" on super-domain loss
-	x sub-team advantages
-		x tech?
-		d gold?
-	x map
-		x show sub-domain
-		x replace orange "home" color
-		d small map rep?
-	x news events of 
-		x aquisition, 
-		x loss, and 
-		x fall of super-domain
-		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
-	x enemy/neutral/friend messages: don't show (core) show the domain name
-	x NanoTel domain Mares (F12) conquered by mantis of . *sigh*
-	x TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+- Micro-Game
+	t How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+	- View mode
+		x tap a MOB to select it
+		x tap anything to select it
+	- Avatar mode
+		x only move mode?
+		- test teleport
+		- 'end' should go to avatar mode
+		- 'teleport' should be always active
+	- character scene
+		- current team
+		- weapon effects
+	- Basic Director: rate of Lesser and Greater attack
+	- art for R1k and Q
+- markets: unlimited? sell to core? trade?
+- new inventory UI
 
-x remove industrial from switches
-d flag - for local control - awkward. just click switches to go there
-x kiosks higher on recommendation list
-x weapon stats: write units
-x temple charge: show differently? bar?
-x don’t build up a squad if deployed
-x auto-pickup loot? obnoxious, but list isn’t great either
-x shield value over-accounts for reload time
-x CoreScript attacking should account for Attitude
-x Should I pull out Domain names?
-x domain name above core
-x map glow not always correct
-x move coreCreateList to LumosChitBag virtual doTick()
-x test fruit collect / delivery cycle
-x GT: new rotation UI (2/20/2015)
-x where are all the crystals???
-x Attitude and Diplomacy display strange (integrate to one??)
-x elixir needs to decay
-x lesser mobs not distributing enough
-x elixir and fruit need to get picked up
-x GT: food as medkit
-x avatar shouldn't pick up food and elixir
-x shrink crystal a bit (3d model)
-x AI not attacking buildings
-x large numbers of domains of the same kind de-stabilize?
-x search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
-x control / teams not saved! (doh!)
-x make sure domain takeover works in next version
-x top down: can’t tell on switch from off switch. 
-x switch should fire if avatar goes there
-x Linux: where are the save files? Where should they be?
-x static link freetype
-x Profiler not working on Linux
-x linux build script
-x linux install & run notes
-
-t Make sure cyclops eat food
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)
@@ -345,6 +298,67 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Profiler not working on Linux
+x Linux: where are the save files? Where should they be?
+x static link freetype
+x are the shader uniform counts being computed correctly?
+x do I need to switch on no instancing?
+x war button
+x peace button
+x more diplomacy testing
+x diplomacy art (for map)
+x domain takeover
+	x super / sub team infrastructure
+	x sub team names
+	x clean up console: don't need "team TechHub"
+	x DOMAIN_TAKEOVER message should give 2nd team name.
+	x sub teams "released" on super-domain loss
+	x sub-team advantages
+		x tech?
+		d gold?
+	x map
+		x show sub-domain
+		x replace orange "home" color
+		d small map rep?
+	x news events of 
+		x aquisition, 
+		x loss, and 
+		x fall of super-domain
+		x integrating 2 ChitDestroyed messages (Sim, CoreScript) into CoreScript. A good thing!
+	x enemy/neutral/friend messages: don't show (core) show the domain name
+	x NanoTel domain Mares (F12) conquered by mantis of . *sigh*
+	x TekHub domain Bestine (N6) conquered by Edcr (kamakiri) of . *sigh, again*
+
+x remove industrial from switches
+d flag - for local control - awkward. just click switches to go there
+x kiosks higher on recommendation list
+x weapon stats: write units
+x temple charge: show differently? bar?
+x don’t build up a squad if deployed
+x auto-pickup loot? obnoxious, but list isn’t great either
+x shield value over-accounts for reload time
+x CoreScript attacking should account for Attitude
+x Should I pull out Domain names?
+x domain name above core
+x map glow not always correct
+x move coreCreateList to LumosChitBag virtual doTick()
+x test fruit collect / delivery cycle
+x GT: new rotation UI (2/20/2015)
+x where are all the crystals???
+x Attitude and Diplomacy display strange (integrate to one??)
+x elixir needs to decay
+x lesser mobs not distributing enough
+x elixir and fruit need to get picked up
+x GT: food as medkit
+x avatar shouldn't pick up food and elixir
+x shrink crystal a bit (3d model)
+x AI not attacking buildings
+x large numbers of domains of the same kind de-stabilize?
+x search for Team::IsDenizen() and make sure it shouldn't being using the item/mob version
+x control / teams not saved! (doh!)
+x make sure domain takeover works in next version
+x top down: can’t tell on switch from off switch. 
+x switch should fire if avatar goes there
 x Long Game
 	x Documentation
 	x Long game: 

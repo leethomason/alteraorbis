@@ -29,10 +29,24 @@ static const float	MAX_BASE_RADIUS = 0.4f;
 // What is the maximum map size? Used to allocate
 // the spatial cache. Power of 2, of course.
 #ifdef ALTERA_MINI
-static const int	MAX_MAP_SIZE = 512;
+static const int	MAX_MAP_SIZE	= 512;
+static const int	MAP_Y_SHIFT		= 9;
+static const int	MAP_X_MASK		= 511;
 #else
 static const int	MAX_MAP_SIZE = 1024;
+static const int	MAP_SHIFT		= 10;
+static const int	MAP_MASK		= 1023;	
 #endif
+
+inline int IndexToMapX(int index) {
+	return index & MAP_X_MASK;
+}
+
+inline int IndexToMapY(int index) {
+	return (index >> MAP_Y_SHIFT) & MAP_X_MASK;
+}
+
+static const int	MAX_MAP_SIZE_2 = MAX_MAP_SIZE * MAX_MAP_SIZE;
 
 static const U32	CROSS_FADE_TIME = 300;		// time to blend animations
 

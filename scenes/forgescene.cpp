@@ -190,21 +190,21 @@ void ForgeScene::SetModel( bool randomTraits )
 
 	if ( effects[ForgeScript::EFFECT_FIRE].Down() )			effectFlags |= GameItem::EFFECT_FIRE;
 	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
-	//if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
 
 	const GameItem* mainItem = forgeData->itemComponent->GetItem();
 	int seed = mainItem->ID() ^ mainItem->Traits().Experience();
-	ForgeScript forgeScript(seed,
-							mainItem->Traits().Level(),
-							forgeData->tech);
 
-//	int team = forgeData->itemComponent->ParentChit() ? forgeData->itemComponent->ParentChit()->Team() : 0;
+	ForgeScript::ForgeData fd;
+	fd.type = type;
+	fd.subType = subType;
+	fd.partsMask = partsFlags;
+	fd.effectsMask = effectFlags;
+	fd.tech = forgeData->tech;
+	fd.level = mainItem->Traits().Level();
+	fd.team = mainItem->Team();
 
-	GameItem* newItem = forgeScript.Build( type, subType, 
-						partsFlags, effectFlags, 
-						&crystalRequired, &techRequired, randomTraits, 0 );
 	delete item;
-	item = newItem;
+	item = ForgeScript::Build( fd, &crystalRequired, &techRequired, randomTraits ? seed : 0 );
 
 	Chit* parentChit = forgeData->itemComponent->ParentChit();;
 	LumosChitBag* chitBag = 0;
@@ -273,7 +273,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.
 		if (chit && history) {
 			Vector2F pos = ToWorld2F(chit->Position());
-			item->SetSignificant(history, pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
+			item->SetSignificant(history, pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		}
 
 		logText.AppendFormat("%s forged! Value=%d.\n", item->Name(), item->GetValue());

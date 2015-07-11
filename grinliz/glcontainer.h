@@ -493,6 +493,9 @@ public:
 	T* end() { return mem + size; }
 	const T* end() const { return mem + size; }
 
+	const T& Front() const { return (*this)[0]; }
+	const T& Back() const { return (*this)[this->Size() - 1]; }
+
 	// Push on
 	void Push( const T& t ) {
 		GLASSERT( size < CAPACITY );
@@ -577,6 +580,12 @@ public:
 		GLASSERT( i >= 0 && i < (int)size );
 		mem[i] = mem[size-1];
 		Pop();
+	}
+
+	void Reverse() {
+		for (int i = 0; i < size / 2; ++i) {
+			Swap(&mem[i], &mem[size - 1 - i]);
+		}
 	}
 
 	template<typename Context, typename Func>

@@ -150,8 +150,10 @@ public:
 	static grinliz::IString gate;
 
 	static grinliz::IString deity;
-	static grinliz::IString Truulga;
 	static grinliz::IString MotherCore;
+	static grinliz::IString QCore;
+	static grinliz::IString R1k;
+	static grinliz::IString Truulga;
 
 	// double underscore -> '.'
 	static grinliz::IString need__food;

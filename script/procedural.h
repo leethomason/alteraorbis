@@ -93,6 +93,11 @@ class WeaponGen
 public:
 
 	enum {
+		// ForgeScript::ForgeRandomItem depends
+		// on GUN_ and RING_ having the same
+		// number of bits. Also note that 0x01
+		// is the _BODY and always present.
+
 		GUN_CELL	= 0x02,	// boosts clip capacity
 		GUN_DRIVER	= 0x04,	// boosts power/damage
 		GUN_SCOPE	= 0x08,	// boosts accuracy
@@ -101,10 +106,13 @@ public:
 		RING_TRIAD	= 0x04,	// boosts damage
 		RING_BLADE	= 0x08,	// boosts damage, decrease shield coupling
 
-		DENIZEN_RING_PART_MASK = RING_GUARD | RING_TRIAD,
-		TROLL_RING_PART_MASK   = RING_BLADE,
+		HUMAN_RING_PART_MASK	= RING_GUARD | RING_TRIAD,
+		TROLL_RING_PART_MASK	= RING_BLADE,
+		Q_RING_PART_MASK		= 0,
+		R1K_RING_PARK_MASK		= RING_TRIAD,
 
-		PART_MASK   = 0x0f
+		PART_MASK   = 0x0f,
+		NUM_PARTS = 4		// includes body	
 	};
 
 	WeaponGen(U32 _seed, int _team, int _effectFlags, int _features);

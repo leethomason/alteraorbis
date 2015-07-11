@@ -36,6 +36,8 @@
 
 #include "../game/layout.h"
 
+#include "../xegame/xegamelimits.h"
+
 /*
 	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
 	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
@@ -319,7 +321,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		engineShaders.Push( EngineShaders::EMISSIVE, em );
 		engineShaders.Push( EngineShaders::BLEND, blend );
 	}
-	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
+	Rectangle2I mapBounds( 0, 0, MAX_MAP_SIZE-1, MAX_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}

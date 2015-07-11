@@ -131,7 +131,7 @@ WorldMap::WorldMap(int width, int height) : Map(width, height)
 	magmaGrids.Reserve(1000);
 	treePool.Reserve(1000);
 
-	memset(grid, 0, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE);
+	memset(grid, 0, sizeof(WorldGrid)*MAX_MAP_SIZE*MAX_MAP_SIZE);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
@@ -313,7 +313,7 @@ void WorldMap::Save( const char* filename )
 
 		// This works very well; about 3:1 compression.
 		Squisher squisher;
-		squisher.StreamEncode( grid, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE, fp );
+		squisher.StreamEncode( grid, sizeof(WorldGrid)*MAX_MAP_SIZE*MAX_MAP_SIZE, fp );
 		squisher.StreamEncode( 0, 0, fp );
 
 		fclose( fp );
@@ -340,7 +340,7 @@ void WorldMap::Load( const char* filename )
 		XarcClose( &reader );
 
 		Squisher squisher;
-		squisher.StreamDecode( grid, sizeof(WorldGrid)*EL_MAP_SIZE*EL_MAP_SIZE, fp );
+		squisher.StreamDecode( grid, sizeof(WorldGrid)*MAX_MAP_SIZE*MAX_MAP_SIZE, fp );
 
 		fclose( fp );
 		
@@ -425,7 +425,7 @@ void WorldMap::Init( int w, int h )
 	DeleteAllRegions();
 	this->width = w;
 	this->height = h;
-	memset( grid, 0, EL_MAP_SIZE*EL_MAP_SIZE*sizeof(WorldGrid) );
+	memset( grid, 0, MAX_MAP_SIZE*MAX_MAP_SIZE*sizeof(WorldGrid) );
 	
 	delete worldInfo;
 	worldInfo = new WorldInfo( grid, width, height );
@@ -434,7 +434,7 @@ void WorldMap::Init( int w, int h )
 
 void WorldMap::InitCircle()
 {
-	memset( grid, 0, EL_MAP_SIZE*EL_MAP_SIZE*sizeof(WorldGrid) );
+	memset( grid, 0, MAX_MAP_SIZE*MAX_MAP_SIZE*sizeof(WorldGrid) );
 
 	const int R = Min( width, height )/2-1;
 	const int R2 = R * R;
@@ -582,8 +582,8 @@ int WorldMap::ScanEffects(ScanEffectsData* data)
 		WorldGrid* wg = &data->worldMap->grid[index];
 		if (!wg->IsLand()) continue;
 
-		const int y = (index >> EL_MAP_Y_SHIFT);
-		const int x = (index & EL_MAP_X_MASK);
+		const int y = (index >> MAP_Y_SHIFT);
+		const int x = (index & MAP_X_MASK);
 		const Vector2I pos2i = { x, y };
 
 		if (!b.Contains(pos2i)) continue;
@@ -982,7 +982,7 @@ void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count
 
 void WorldMap::ResetPather( int x, int y )
 {
-	Vector2I sector = { x/SECTOR_SIZE, y/SECTOR_SIZE };
+	Vector2I sector = ToSector(x, y);
 	micropather::MicroPather* pather = PushPather( sector );
 	pather->Reset();
 	zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT);
@@ -1501,7 +1501,7 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 		const SectorData& sd = GetSectorData( sector );
 		if ( sd.HasCore() ) {
 			GLASSERT( sd.ports );
-			sp.sector.Set( sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE );
+			sp.sector = sd.sector;
 			for( int i=0; i<4; ++i ) {
 				int port = 1 << i;
 				if ( sd.ports & port ) {
@@ -1682,7 +1682,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 	Vector2I starti = { (int)start.x, (int)start.y };
 	Vector2I endi   = { (int)end.x,   (int)end.y };
-	Vector2I sector = { starti.x/SECTOR_SIZE, starti.y/SECTOR_SIZE };
+	Vector2I sector = ToSector(starti);
 
 	// Flush out regions that aren't valid.
 	// Don't do this. Use the AdjacentCost for this.
@@ -1806,7 +1806,7 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 
 	void* start = ToState( (int)x0, (int)y0 );
 	void* end   = ToState( (int)x1, (int)y1 );
-	Vector2I sector = { (int)x0/SECTOR_SIZE, (int)y0/SECTOR_SIZE };
+	Vector2I sector = ToSector(x0, y0);
 	
 	if ( start && end ) {
 		float cost=0;

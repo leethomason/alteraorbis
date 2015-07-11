@@ -80,10 +80,15 @@ class Random
 		return total;
 	}
 
-	// Weight one way or the other. 
-	// 3d6 -1 roll 4 dice, and remove the highest.
-	// 3d6 +2 roll 5 dice, keep the 3 highest 
-	//U32 WeightedDice( U32 nDice, U32 sides, int weight );
+	/**
+		Roll dice - this version rolls extra dice as well (nHigh, nLow)
+		and throws out nHigh highest and nLow lowest. This weighs
+		the result of (for example) 
+		- 3D6 to the higher range (nHigh==1, nLow==0)
+		- 3D6 to the lower range (nHigh==0, nLow==1)
+		- 3D6 to the center (nHigh==1, nLow==1)
+	*/
+	int WeightedDice(int nDice, int side, int nHigh, int nLow);
 
 	/** Like Dice, but returns a value between 0 and 1.
 	*/

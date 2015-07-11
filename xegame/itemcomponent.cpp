@@ -128,6 +128,8 @@ void ItemComponent::Serialize( XStream* xs )
 
 void ItemComponent::NameItem(GameItem* item)
 {
+	if (!parentChit) return;	// should only happen in test bed. and it will get names later anyway, if there is some edge case.
+
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
 	if (item->GetValue() >= VALUE_OF_NAMING) {
 		shouldHaveName = true;
