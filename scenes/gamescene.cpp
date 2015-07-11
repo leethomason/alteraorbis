@@ -1354,7 +1354,6 @@ void GameScene::HandleHotKey( int mask )
 		paused = !paused;
 	}
 	else if (mask == GAME_HK_DEBUG_ACTION) {
-//		Chit* playerChit = GetPlayerChit();
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
 

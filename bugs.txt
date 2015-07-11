@@ -1,11 +1,13 @@
 - Micro-Game
 	t How are weapons given to MOBs? Need a 2nd / 3rd supplier?
 	- View mode
-		- tap a MOB to select it
-		- tap anything to select it
+		x tap a MOB to select it
+		x tap anything to select it
 	- Avatar mode
-		- only move mode?
+		x only move mode?
 		- test teleport
+		- 'end' should go to avatar mode
+		- 'teleport' should be always active
 	- Basic Director: rate of Lesser and Greater attack
 	- art for R1k and Q
 - markets: unlimited? sell to core? trade?

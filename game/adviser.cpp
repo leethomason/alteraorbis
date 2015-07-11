@@ -66,8 +66,8 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 
 	static const int BUILD_ADVISOR[] = {
 		BuildScript::FARM,
-		BuildScript::SLEEPTUBE,
 		BuildScript::DISTILLERY,
+		BuildScript::SLEEPTUBE,
 		BuildScript::BAR,
 		BuildScript::MARKET,
 		BuildScript::FORGE,

@@ -420,14 +420,18 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 void GameSceneMenu::DoEscape(bool fullEscape)
 {
 	int mode = UIMode();
-	if (mode == UI_VIEW) {
-		// no sub-options. do nothing.
+	if (mode == UI_AVATAR) {
+		// do nothing.
 	}
-	else if (mode == UI_CONTROL) {
-		// Back to view.
-		uiMode[UI_VIEW].SetDown();
-		ItemTapped(&uiMode[UI_VIEW]);
+	else if (mode == UI_VIEW || mode == UI_CONTROL) {
+		uiMode[UI_AVATAR].SetDown();
+		ItemTapped(&uiMode[UI_AVATAR]);
 	}
+//	else if (mode == UI_CONTROL) {
+//		// Back to view.
+//		uiMode[UI_VIEW].SetDown();
+//		ItemTapped(&uiMode[UI_VIEW]);
+//	}
 	else if (mode == UI_BUILD) {
 		// How far down are we?
 		int buildActive = BuildActive();
