@@ -701,6 +701,7 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	s->area = a;
 	int checkArea = CalcSectorArea(s->sector.x, s->sector.y);
 	GLASSERT( a == checkArea );
+	(void)checkArea;
 }
 
 

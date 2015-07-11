@@ -518,6 +518,8 @@ void logprintf( const char* format, ... )
 	fprintf( logFP, "%s", buffer );
 }
 
+#endif
+
 void relprintf( const char* format, ... )
 {
     va_list     va;
@@ -540,7 +542,6 @@ void relprintf( const char* format, ... )
 	fprintf( relFP, "%s", buffer );
 	fflush( relFP );
 }
-#endif
 
 
 #if defined(DEBUG) && defined(ANDROID_NDK)

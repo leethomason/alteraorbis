@@ -15,22 +15,17 @@
 
 #include "aicomponent.h"
 #include "worldmap.h"
-#include "gamelimits.h"
 #include "pathmovecomponent.h"
 #include "gameitem.h"
 #include "lumoschitbag.h"
 #include "mapspatialcomponent.h"
 #include "gridmovecomponent.h"
-#include "sectorport.h"
 #include "workqueue.h"
-#include "team.h"
 #include "circuitsim.h"
 #include "reservebank.h"
-#include "sim.h"	// FIXME: where shourd the Web live??
+#include "sim.h"
 #include "physicssims.h"
 
-// move to tasklist file
-#include "lumoschitbag.h"
 #include "lumosgame.h"
 
 #include "../scenes/characterscene.h"
@@ -43,24 +38,15 @@
 #include "../script/itemscript.h"
 #include "../script/buildscript.h"
 
-#include "../engine/engine.h"
 #include "../engine/particle.h"
 
 #include "../audio/xenoaudio.h"
 
-#include "../xegame/chitbag.h"
-#include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/istringconst.h"
-
-#include "../grinliz/glrectangle.h"
-#include "../grinliz/glarrayutil.h"
 
 #include "../Shiny/include/Shiny.h"
-#include <climits>
 
-#include "../ai/tasklist.h"
 #include "../ai/marketai.h"
 #include "../ai/domainai.h"
 
@@ -69,12 +55,8 @@ using namespace ai;
 
 static const float	NORMAL_AWARENESS			= 10.0f;
 static const float	LOOSE_AWARENESS = LONGEST_WEAPON_RANGE;
-static const float	SHOOT_ANGLE					= 10.0f;	// variation from heading that we can shoot
 static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
-static const float	EAT_HP_PER_SEC				=  2.0f;
-static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
-static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
@@ -87,7 +69,6 @@ static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must
 static const int	GUARD_RANGE					= 1;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
-static const int	BUILD_TIME					= 1000;
 static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
@@ -148,6 +129,7 @@ AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 	rampageTarget = 0;
 	destinationBlocked = 0;
 	lastTargetID = 0;
+	lastGrid.Zero();
 }
 
 
@@ -256,10 +238,7 @@ bool AIComponent::LineOfSight(const grinliz::Vector2I& mapPos )
 
 	// A little tricky; we hit the 'mapPos' if nothing is hit (which gets to the center)
 	// or if voxel at that pos is hit.
-	if ( !mv.Hit() || ( mv.Hit() && mv.Voxel2() == mapPos )) {
-		return true;
-	}
-	return false;
+    return !mv.Hit() || ( mv.Hit() && mv.Voxel2() == mapPos );
 }
 
 
@@ -349,23 +328,18 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		friendList2.Clear();
 		int saveTarget = enemyList2.Empty() ? 0 : enemyList2[0];
 		enemyList2.Clear();
-		// FIXME: will keep structure targets (<0) over MOB targets (>0).
-		//        but filtering below makes this a little tricky to fix
-		if (saveTarget) 
-			enemyList2.Push(saveTarget);
 
 		MOBIshFilter mobFilter;
-		BuildingFilter buildingFilter;
 		ItemNameFilter coreFilter(ISC::core);
+		BuildingFilter buildingFilter;
 
 		// Order matters: prioritize mobs, then a core, then buildings.
 		static const int NFILTER = 3;
-		IChitAccept* filters[NFILTER] = { &mobFilter, &coreFilter, &buildingFilter };
+		CChitArray arr[NFILTER];
+		IChitAccept* filters[NFILTER] = {&mobFilter, &coreFilter, &buildingFilter};
 
 		ChitAcceptAll all;
 		Context()->chitBag->QuerySpatialHash(&chitArr, zone, parentChit, &all);
-		
-		CChitArray arr[NFILTER];
 
 		// Don't attack buildings if there isn't a central core.
 		CoreScript* cs = CoreScript::GetCore(ToSector(center));
@@ -380,7 +354,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			if (!item) continue;
 			if (item->flags & GameItem::AI_NOT_TARGET) continue;
 
-			// REMEMBER: because I've made this miskake 20 times, the
+			// REMEMBER: because I've made this mistake 20 times, the
 			//			 path to a building will always fail, because the building
 			//			 is blocking the path. So the return value of 'path' needs
 			//			 to keep that in mind.
@@ -409,18 +383,32 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 				}
 			}
 		}
+
+		Chit* saveTargetChit = Context()->chitBag->GetChit(saveTarget);
+		if (saveTargetChit) {
+			for (int k = 0; k < NFILTER; ++k) {
+				// Move the save target to the front of the appropriate array.
+				int idx = arr[k].Find(saveTargetChit);
+				if (idx >= 0) {
+					Swap(&arr[k][0], &arr[k][idx]);
+					break;
+				}
+				else if (filters[k]->Accept(saveTargetChit)) {
+					if (arr[k].HasCap()) {
+						arr[k].Insert(0, saveTargetChit);
+					}
+					break;
+				}
+			}
+		}
+
 		for (int k = 0; k < NFILTER; ++k) {
 			for (int i = 0; i < arr[k].Size(); ++i) {
 				enemyList2.PushIfCap(arr[k][i]->ID());
 			}
 		}
-		// Don't shoot at buildings if we have a non-building target!
-		if (   focus != FOCUS_TARGET 
-			&& enemyList2.Size() >= 2 
-			&& enemyList2[0] < 0 
-			&& enemyList2[1] > 0) 
-		{
-			Swap(&enemyList2[0], &enemyList2[1]);
+		if (saveTarget < 0 && enemyList2.Empty()) {
+			enemyList2.Push(saveTarget);
 		}
 	}
 }
@@ -450,34 +438,6 @@ public:
 private:
 	Vector3F origin;
 };
-
-Chit* AIComponent::Closest(Chit* arr[], int n, Vector2F* outPos, float* distance )
-{
-	float best = FLT_MAX;
-	Chit* chit = 0;
-	Vector3F pos = parentChit->Position();
-
-	for (int i = 0; i < n; ++i) {
-		Chit* c = arr[i];
-		float len2 = (c->Position() - pos).LengthSquared();
-		if (len2 < best) {
-			best = len2;
-			chit = c;
-		}
-	}
-	if ( distance ) {
-		*distance = chit ? sqrtf( best ) : 0;
-	}
-	if ( outPos ) {
-		if ( chit ) {
-			*outPos = ToWorld2F(chit->Position());
-		}
-		else {
-			outPos->Zero();
-		}
-	}
-	return chit;
-}
 
 
 void AIComponent::DoMove()
@@ -1129,6 +1089,7 @@ void AIComponent::ThinkRampage(  )
 
 		const GameItem* melee = thisIC->SelectWeapon(ItemComponent::SELECT_MELEE);
 		GLASSERT(melee);
+		(void)melee;
 	} 
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
@@ -1520,6 +1481,7 @@ bool AIComponent::ThinkCollectNearFruit()
 	if (parentChit->PlayerControlled()) return false;
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+	if (gameItem->IsWorker()) return false;
 	ItemComponent* ic = parentChit->GetItemComponent();
 	if (!ic) return false;
 
@@ -1562,59 +1524,57 @@ Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool ex
 }
 
 
-bool AIComponent::ThinkGuard(  )
-{
-	const GameItem* gameItem = parentChit->GetItem();
+bool AIComponent::ThinkGuard(  ) {
+	const GameItem *gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
-	if (    !(gameItem->flags & GameItem::AI_USES_BUILDINGS )
-		 || !(gameItem->flags & GameItem::HAS_NEEDS )
-		 || parentChit->PlayerControlled() 
-		 || !AtHomeCore() )
-	{
+	if (!(gameItem->flags & GameItem::AI_USES_BUILDINGS)
+		|| !(gameItem->flags & GameItem::HAS_NEEDS)
+		|| parentChit->PlayerControlled()
+		|| !AtHomeCore()) {
 		return false;
 	}
 
-	if ( gameItem->GetPersonality().Guarding() == Personality::DISLIKES ) {
+	if (gameItem->GetPersonality().Guarding() == Personality::DISLIKES) {
 		return false;
 	}
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
-	Vector2I sector = ToSector( pos2i );
-	Rectangle2I bounds = InnerSectorBounds( sector );
+	Vector2I sector = ToSector(pos2i);
+	Rectangle2I bounds = InnerSectorBounds(sector);
 
-	CoreScript* coreScript = CoreScript::GetCore( sector );
+	CoreScript *coreScript = CoreScript::GetCore(sector);
 
-	if ( !coreScript ) return false;
+	if (!coreScript) return false;
 
 	ItemNameFilter filter(ISC::guardpost);
-	Context()->chitBag->FindBuilding( IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter );
+	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
-	if ( chitArr.Empty() ) return false;
+	if (chitArr.Empty()) return false;
 
 	// Are we already guarding??
-	for( int i=0; i<chitArr.Size(); ++i ) {
+	for (int i = 0; i < chitArr.Size(); ++i) {
 		Rectangle2I guardBounds;
 
 		guardBounds.min = guardBounds.max = ToWorld2I(chitArr[i]->Position());
-		guardBounds.Outset( GUARD_RANGE );
-		guardBounds.DoIntersection( bounds );
+		guardBounds.Outset(GUARD_RANGE);
+		guardBounds.DoIntersection(bounds);
 
-		if ( guardBounds.Contains( pos2i )) {
-			taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-			taskList.Push( Task::StandTask( GUARD_TIME ));
+		if (guardBounds.Contains(pos2i)) {
+			taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
+			taskList.Push(Task::StandTask(GUARD_TIME));
 			return true;
 		}
 	}
 
-	int post = parentChit->random.Rand( chitArr.Size() );
+	int post = parentChit->random.Rand(chitArr.Size());
 	Rectangle2I guardBounds;
 	guardBounds.min = guardBounds.max = ToWorld2I(chitArr[post]->Position());
-	guardBounds.Outset( GUARD_RANGE );
-	guardBounds.DoIntersection( bounds );
+	guardBounds.Outset(GUARD_RANGE);
+	guardBounds.DoIntersection(bounds);
 
-	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-	taskList.Push( Task::StandTask( GUARD_TIME ));
+	taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
+	taskList.Push(Task::StandTask(GUARD_TIME));
 	return true;
 }
 
@@ -2531,6 +2491,7 @@ void AIComponent::ThinkBattle()
 			utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 			optionName[index],
 			enemyList2[0]));
+		(void)optionName;
 	}
 
 	// And finally, do a swap if needed!

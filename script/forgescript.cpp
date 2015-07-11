@@ -141,7 +141,7 @@ GameItem* ForgeScript::Build(const ForgeData& forgeData,
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 	if (seed) {
 		for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
-			roll[i] = random.Dice(3, 6);
+			roll[i] = random.WeightedDice(3, 6, 1, 1);
 		}
 	}
 	static const int COMPETENCE = 4;

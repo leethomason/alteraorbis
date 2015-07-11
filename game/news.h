@@ -27,21 +27,22 @@ public:
 
 public:
 	// Be sure to update GetWhat() when this list chnages.
+	// Be sure to update ToMessage()
 	enum {							//	FIRST		SECOND
 		NONE,
-		DENIZEN_CREATED ,			//	created
+		DENIZEN_CREATED,			//	created
 		DENIZEN_KILLED,				//  killed		killer
 		GREATER_MOB_CREATED,		//  created				
 		GREATER_MOB_KILLED,			//  killed		killer
 		DOMAIN_CREATED,				//  domain
 		DOMAIN_DESTROYED,			//  domain		killer	
+		FORGED,						//	item		maker
+		UN_FORGED,					//  item		killer
+
 		DOMAIN_TAKEOVER,			//	domain		conqueror
 		SUPERTEAM_DELETED,			//  domain
 		SUBTEAM_DELETED,			//  subTeam		superTeam
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
-
-		FORGED,						//	item		maker
-		UN_FORGED,					//  item		killer
 
 		PURCHASED,					//	purchaser	item
 		STARVATION,					//  victim				

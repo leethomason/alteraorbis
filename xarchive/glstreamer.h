@@ -197,6 +197,7 @@ inline void XarcOpen( XStream* stream, const char* name ) {
 	else {
 		const char* n = stream->Loading()->OpenElement();
 		GLASSERT( grinliz::StrEqual( name, n ));
+		(void)n;
 	}
 }
 
@@ -293,6 +294,20 @@ inline bool XarcGet( XStream* stream, const char* key, U32 &value ) {
 inline void XarcSet( XStream* stream, const char* key, U32 value ) {
 	XarcSet( stream, key, (int)value );
 }
+
+inline bool XarcGet( XStream* stream, const char* key, U16 &value ) {
+	int v = 0;
+	if ( XarcGet( stream, key, v )) {
+		value = (U16)v;
+		return true;
+	}
+	return false;
+}
+
+inline void XarcSet( XStream* stream, const char* key, U16 value ) {
+	XarcSet( stream, key, (int)value );
+}
+
 
 // Strings
 // Can serialize a null string.

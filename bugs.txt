@@ -1,11 +1,9 @@
 - Micro-Game
-	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+	t How are weapons given to MOBs? Need a 2nd / 3rd supplier?
 	- Basic Director: rate of Lesser and Greater attack
+	- art for R1k and Q
 - markets: unlimited? sell to core? trade?
 - new inventory UI
-
-
-t Make sure cyclops eat food
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct

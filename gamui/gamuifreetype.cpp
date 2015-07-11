@@ -70,6 +70,7 @@ bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h)
 			FT_UInt glyphIndex = FT_Get_Char_Index(face, ccode);
 			FT_Error error = FT_Load_Glyph(face, glyphIndex, 0);
 			GAMUIASSERT(error == 0);
+			(void)error;
 			// http://www.freetype.org/freetype2/docs/glyphs/glyphs-7.html
 			error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 

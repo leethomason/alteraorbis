@@ -246,6 +246,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type,  "Vector2I" ));
+			(void)type;
 			ele->QueryAttribute( "x", &vec.x );
 			ele->QueryAttribute( "y", &vec.y );
 		}
@@ -266,6 +267,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 		GLASSERT( ele );
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
+			(void)type;
 			GLASSERT( type && StrEqual( type,  "Vector3F" ));
 			ele->QueryFloatAttribute( "x", &vec.x );
 			ele->QueryFloatAttribute( "y", &vec.y );
@@ -296,6 +298,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type,  "Vector4F" ));
+			(void)type;
 			ele->QueryFloatAttribute( "x", &vec.x );
 			ele->QueryFloatAttribute( "y", &vec.y );
 			ele->QueryFloatAttribute( "z", &vec.z );
@@ -324,6 +327,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type,  "Quaternion" ));
+			(void)type;
 			ele->QueryFloatAttribute( "x", &q.x );
 			ele->QueryFloatAttribute( "y", &q.y );
 			ele->QueryFloatAttribute( "z", &q.z );
@@ -348,6 +352,7 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type, "Matrix4" ));
+			(void)type;
 			for( int i=0; i<16; ++i ) {
 				CStr<10> str;
 				str.Format( "x%0d", i );

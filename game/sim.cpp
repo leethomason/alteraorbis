@@ -357,7 +357,7 @@ void Sim::SpawnDenizens()
 						chit->GetItemComponent()->AddToInventory(item);
 
 						// Mark this item as important with a destroyMsg:
-						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, qCore->ParentChit());
+						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, qCore->ParentChit()->GetItem());
 					}
 				}
 
@@ -453,9 +453,12 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	items[2] = context.chitBag->AddItem( "ring", chit, context.engine, 0, 0 );
 
 	NewsHistory* history = context.chitBag->GetNewsHistory();
-	Chit* deity = context.chitBag->GetChit(DEITY_Q);
-	for (int i = 0; i < 3; i++) {
-		items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity);
+	CoreScript* deityCore = CoreScript::GetCoreFromTeam(DEITY_Q);
+	if (deityCore) {
+		Chit* deity = deityCore->ParentChit();
+		for (int i = 0; i < 3; i++) {
+			items[i]->SetSignificant(history, ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, deity->GetItem());
+		}
 	}
 
 	chit->SetPosition((float)pos.x + 0.5f, 0, (float)pos.y + 0.5f);

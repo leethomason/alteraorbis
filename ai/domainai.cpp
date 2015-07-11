@@ -789,7 +789,7 @@ int ForgeDomainAI::DoTick(U32 delta)
 				market->GetItemComponent()->AddToInventory(item);
 
 				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit);
+				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit->GetItem());
 			}
 		}
 	}
@@ -806,18 +806,19 @@ void ForgeDomainAI::DoBuild()
 	if (!Preamble(&sector, &cs, &workQueue, &pave))
 		return;
 
+	int team = parentChit->Team();
 	int arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
 	Context()->chitBag->BuildingCounts(sector, arr, BuildScript::NUM_TOTAL_OPTIONS);
-	int nBraziers = 4 + (parentChit->ID() % 4);
+	int nBraziers = team == DEITY_TRUULGA ? 4 : 0;
 
 	do {
 		if (BuyWorkers()) break;
 		if (ClearDisconnected()) break;
 		if (ClearRoadsAndPorches()) break;
 		if (BuildPlaza()) break;
-		if (arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
+		if (team == DEITY_TRUULGA && arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
-		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
+		if (team == DEITY_TRUULGA && (arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
@@ -913,8 +914,8 @@ void KamakiriDomainAI::OnAdd(Chit* chit, bool initialize)
 
 	Vector2I c = sectorData.core;
 	Rectangle2I plaza0, plaza1;
-	plaza0.FromPair(c.x - 3, c.y - 1, c.x + 3, c.y + 1);
-	plaza1.FromPair(c.x - 1, c.y - 3, c.x + 1, c.y + 3);
+	plaza0.min.Set(c.x - 3, c.y - 1);	plaza0.max.Set(c.x + 3, c.y + 1);
+	plaza1.min.Set(c.x - 1, c.y - 3);	plaza1.max.Set(c.x + 1, c.y + 3);
 
 	roads->AddPlaza(plaza0);
 	roads->AddPlaza(plaza1);

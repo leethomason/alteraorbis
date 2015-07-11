@@ -124,8 +124,6 @@ private:
 	void Target( int id, bool focused );
 	// Process the lists, makes sure they only include valid targets.
 	void ProcessFriendEnemyLists(bool tick);
-	Chit* Closest( Chit* arr[], int n, 
-				   grinliz::Vector2F* pos, float* distance );
 
 	// Compute the line of site
 	bool LineOfSight(Chit* target, const RangedWeapon* weapon );

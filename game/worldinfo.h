@@ -123,12 +123,13 @@ private:
 	int INDEX(const GridBlock& gb) const { return gb.y*mapWidth + gb.x; }
 
 	GridBlock FromState( void* state ) {
-		GLASSERT( sizeof(GridBlock) <= sizeof(void*) );
-		GridBlock v = *((GridBlock*)&state);
+		intptr_t iState = reinterpret_cast<intptr_t >(state);
+		GridBlock v = { S16(iState & 0xffff), S16((iState >> 16) & 0xffff) };
 		return v;
 	}
 	void* ToState( GridBlock v ) {
-		void* r = (void*)(*((U32*)&v));
+		intptr_t iState = v.x | (v.y << 16);
+		void* r = reinterpret_cast<void*>(iState);
 		return r;
 	}
 	micropather::MPVector< void* > patherVector;

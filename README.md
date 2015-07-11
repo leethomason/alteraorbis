@@ -1,11 +1,12 @@
-﻿# Altera Orbis 
+﻿#Altera Orbis 
 
 Thanks for playing Altera Orbis!
+
 grinninglizard.com/altera
 
 # How to Play
 
-http://alteraorbis.wikispaces.com/
+http://http://grinninglizard.com/altera/wiki/
 
 
 # About
@@ -52,6 +53,21 @@ sudo apt-get install libsdl2-2.0
 sudo apt-get install libsdl2-mixer
 ```
 
+Download and install the linux AlteraOrbisLinx_<version>.tar.gz file. You can
+extract it with:
+
+```
+tar -zxvf AlteraOrbisLinux_<version>.tar.gz
+```
+
+And then to run:
+```
+cd AlteraOrbis
+./alteraorbis
+```
+
+Save and log files will be placed in the "save" subdirectory.
+
 # Changes in Beta5a
 
 - Support back to OpenGL 3.0
@@ -83,28 +99,28 @@ Why is a strange blocky flag thing on my core?
 
 # Controls
 
-'Tab' key toggles between top down and isometric views.
-'Home' key centers the camera on your core.
-'End' key centers the camera on your avatar; if already centered, the
-  end key teleports the avatar home.
-'Escape' key backs out of the menus back to 'view' mode.
-'Space' pauses the game.
+- 'Tab' key toggles between top down and isometric views.
+- 'Home' key centers the camera on your core.
+- 'End' key centers the camera on your avatar; if already centered, the
+   end key teleports the avatar home.
+- 'Escape' key backs out of the menus back to 'view' mode.
+- 'Space' pauses the game.
 
-Left-click moves the avatar, selects things, builds.
-Left-click & drag builds lots of pavement or ice at once, or clears an area.
-Shift-left-click on rock or plants attack the rock/plants.
+- Left-click moves the avatar, selects things, builds.
+- Left-click & drag builds lots of pavement or ice at once, or clears an area.
+- Left-click on rock or plants attack the rock/plants.
 
-Right-click & drag moves the camera.
-Ctrl-Right-click & drag rotates and zooms the camera.
+- Right-click & drag moves the camera.
+- Ctrl-Right-click & drag rotates and zooms the camera.
 
-The arrow keys or WASD moves the camera.
-Ctrl-Arrow keys or ctrl-WASD rotates and zooms.
+- The arrow keys move the camera.
+- Ctrl-Arrow keys rotates and zooms.
 
 If in build mode, but no building selected (so click "Build" but don't select
 a building), then left-click & drag rotates buildings.
 
-F11 toggles full screen.
-F3 saves a screenshots. (In Documents/Altera Orbis)
+- F11 toggles full screen.
+- F3 saves a screenshots. (In Documents/Altera Orbis)
 
 # Important Notes
 
@@ -138,19 +154,16 @@ example, if you spot the "blue wall" rendering bug, you can tap (1) to turn off
 glow, then (1) to turn glow back on. If the "blue wall" goes away then returns,
 it's part of the glow rendering.
 
-1: glow
-2: particles
-3: voxel
-4: shadow
-5: bolt
+1. glow
+2. particles
+3. voxel
+4. shadow
+5. bolt
 
-
-# Known Issues:
+# Known Issues
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt
 
 And reported issues:
 https://code.google.com/p/alteraorbis/issues/list
-
-

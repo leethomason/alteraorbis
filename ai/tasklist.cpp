@@ -693,10 +693,11 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 			gameItem->BestName(),
 			item->BestName(),
 			sector.x, sector.y));
+		(void)sector;
 
 		item->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
 							 ToWorld2F(chit->Position()),
-							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
+							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		return true;
 	}
 	return false;

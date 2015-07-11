@@ -235,7 +235,8 @@ void GameAddDatabase( const char* path )
 }
 
 
-static char prefPath[256] = { 0 };
+static const int PREF_PATH_SIZE = 300;
+static char prefPath[PREF_PATH_SIZE] = { 0 };
 
 void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 {
@@ -269,7 +270,7 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 			*q = 0;
 			CreateDirectory(buffer, NULL);
 
-			int n = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, prefPath, 256, 0, 0);
+			int n = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, prefPath, PREF_PATH_SIZE, 0, 0);
 			prefPath[255] = 0;
 			if (n && n < 255) {
 				prefPath[n-1] = '\\';
@@ -278,11 +279,7 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 			CoTaskMemFree(static_cast<void*>(pwstr));
 #elif defined(UFO_LINUX_SDL)
 			mkdir("save", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-//			char* p = SDL_GetPrefPath("GrinningLizard", "AlteraOrbis");
-//			GLASSERT(p);
-//			grinliz::StrNCpy(prefPath, p, 256);
-//			SDL_free(p);
-			*out = "save";
+			strcpy(prefPath, "save/");
 #else
 	#error Platform undefined.
 #endif

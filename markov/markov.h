@@ -31,9 +31,9 @@ public:
 		Triplet() {
 			value[0] = value[1] = value[2] = value[3] = 0;
 		}
-		U32 All() const { return *((U32*)value); }
+		U32 All() const { return value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24); }
 
-		char value[4];	// a,b,c,0
+		unsigned char value[4];	// a,b,c,0
 	};
 
 	MarkovBuilder()		{}

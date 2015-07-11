@@ -19,14 +19,6 @@ class LumosChitBag;
 class XStream;
 class ChitContext;
 
-/*
-	on switch
-	off switch
-	temple (battery)
-	gate / silica creator (how to do this???)
-	enemy detector
-*/
-
 
 class CircuitSim
 {

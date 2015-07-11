@@ -259,6 +259,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 		const WorldGrid& wg = context->worldMap->GetWorldGrid(it.Pos());
 		GLASSERT(wg.IsLand());
+		(void)wg;
 		context->worldMap->SetRock(it.Pos().x, it.Pos().y, 0, false, 0);
 		context->worldMap->SetPlant(it.Pos().x, it.Pos().y, 0, 0);
 	}

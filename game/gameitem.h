@@ -325,7 +325,7 @@ public:
 
 	// Sets this item to be tracked. Also records the team that created it, 
 	// for generating colors when applicable.
-	void SetSignificant(NewsHistory* history, const grinliz::Vector2F& pos, int creationMsg, int destructionMsg, Chit* creator);
+	void SetSignificant(NewsHistory* history, const grinliz::Vector2F& pos, int creationMsg, int destructionMsg, const GameItem* creator);
 
 	enum {
 		// Type(s) of the item
@@ -461,6 +461,8 @@ protected:
 	GameItem* CloneFrom(GameItem* item) const;
 
 private:
+	int ToMessage(const char*);
+
 	GameTrait	traits;
 	Personality personality;
 

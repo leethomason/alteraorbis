@@ -273,7 +273,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.
 		if (chit && history) {
 			Vector2F pos = ToWorld2F(chit->Position());
-			item->SetSignificant(history, pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, chit);
+			item->SetSignificant(history, pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		}
 
 		logText.AppendFormat("%s forged! Value=%d.\n", item->Name(), item->GetValue());

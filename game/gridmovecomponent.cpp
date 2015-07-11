@@ -1,13 +1,8 @@
 #include "gridmovecomponent.h"
-#include "worldinfo.h"
-#include "gamelimits.h"
 #include "worldmap.h"
 #include "pathmovecomponent.h"
 #include "lumoschitbag.h"
 
-#include "../xegame/spatialcomponent.h"
-#include "../xegame/rendercomponent.h"
-#include "../xegame/chitbag.h"
 #include "../xegame/chitcontext.h"
 
 using namespace grinliz;
@@ -78,6 +73,10 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 	case TRAVELLING:
 		path.Clear();
 		break;
+
+		default:
+			GLASSERT(false);
+			break;
 	}
 
 	destSectorPort = sp;
@@ -145,7 +144,7 @@ int GridMoveComponent::DoTick( U32 delta )
 			GLASSERT( destSectorPort.IsValid() );
 			const SectorData& sd = worldInfo.GetSector( destSectorPort.sector );
 			Rectangle2I portBounds = sd.GetPortLoc( destSectorPort.port );
-			dest = SectorData::PortPos( portBounds, parentChit->ID() );
+			dest = SectorData::PortPos( portBounds, (U32) parentChit->ID());
 			stateIfDestReached = DONE;
 		}
 		break;
@@ -223,6 +222,7 @@ int GridMoveComponent::DoTick( U32 delta )
 		}
 		break;
 
+		default: GLASSERT(false); break;
 	};
 
 	if ( goToDest ) {

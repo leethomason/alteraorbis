@@ -59,6 +59,11 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 	while ( i < bolts->Size() ) {
 		Bolt& b = (*bolts)[i];
+
+		if (!bounds.Contains(b.head)) {
+			bolts->SwapRemove(i);
+			continue;
+		}
  
 		if ( usingSectors ) {
 			Vector2I sector = ToSector(b.head.x, b.head.z);

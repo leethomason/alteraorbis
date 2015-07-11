@@ -238,8 +238,8 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			else {
 				LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
 				Context()->chitBag->coreCreateList.Push(data);
-				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
-				Context()->chitBag->GetNewsHistory()->Add(news);
+				//NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
+				//Context()->chitBag->GetNewsHistory()->Add(news);
 			}
 		}
 		else {
@@ -576,6 +576,7 @@ void CoreScript::UpdateAI()
 	int index = sector.y*NUM_SECTORS + sector.x;
 	CoreInfo* info = &coreInfoArr[index];
 	GLASSERT(info->coreScript == this);
+	(void)info;
 }
 
 
@@ -980,11 +981,17 @@ CoreScript* CoreScript::CreateCore( const Vector2I& sector, int team, const Chit
 		chit->Add(cs);
 		GLASSERT(CoreScript::GetCore(ToSector(sd.core)) == cs);
 
-		chit->GetItem()->SetProperName(sd.name);
+		if (Team::IsDeity(team))
+			chit->GetItem()->SetProperName(Team::Instance()->TeamName(team));
+		else
+			chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
-			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit->GetItemID(), 0);
-			context->chitBag->GetNewsHistory()->Add(news);
+			chit->GetItem()->SetSignificant(context->chitBag->GetNewsHistory(), 
+											ToWorld2F(chit->Position()), 
+											NewsEvent::DOMAIN_CREATED, NewsEvent::DOMAIN_DESTROYED, 0);
+
+
 			// Make the dwellers defend the core.
 			chit->Add(new GuardScript());
 
