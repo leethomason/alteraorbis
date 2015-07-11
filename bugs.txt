@@ -8,6 +8,9 @@
 		- test teleport
 		- 'end' should go to avatar mode
 		- 'teleport' should be always active
+	- character scene
+		- current team
+		- weapon effects
 	- Basic Director: rate of Lesser and Greater attack
 	- art for R1k and Q
 - markets: unlimited? sell to core? trade?

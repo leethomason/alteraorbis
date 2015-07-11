@@ -1018,7 +1018,7 @@ bool GameScene::AvatarSelected()
 {
 	bool button = menu->UIMode() == GameSceneMenu::UI_AVATAR;
 	Chit* playerChit = GetPlayerChit();
-	if (button && playerChit) { // && playerChit->ID() == chitTracking) {
+	if (button && playerChit) {
 		return true;
 	}
 	return false;
@@ -1512,7 +1512,7 @@ void GameScene::HandleHotKey( int mask )
 		Vector3F at;
 		sim->GetEngine()->CameraLookingAt( &at );
 		Vector2I sector = ToSector( ToWorld2I( at ));
-		ForceHerd(sector);
+		ForceHerd(sector, 0);
 	}
 	else {
 		super::HandleHotKey( mask );
@@ -1520,7 +1520,7 @@ void GameScene::HandleHotKey( int mask )
 }
 
 
-void GameScene::ForceHerd(const grinliz::Vector2I& sector)
+void GameScene::ForceHerd(const grinliz::Vector2I& sector, int team)
 {
 	CDynArray<Chit*> arr;
 	MOBKeyFilter filter;
@@ -1529,24 +1529,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 
 	for (int i = 0; i<arr.Size(); ++i) {
 		IString mob = arr[i]->GetItem()->keyValues.GetIString(ISC::mob);
-		if (mob == ISC::lesser || mob == ISC::greater) {
-
-			/*
-			// Move the MOB to the port first, if possible, so they don't 
-			// turn around and attack the new core.
-			PathMoveComponent* pmc = GET_SUB_COMPONENT(arr[i], MoveComponent, PathMoveComponent);
-			if (pmc) {
-				pmc->Stop();
-				GLASSERT(sc);
-				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
-				
-				int port = sd.NearestPort(sc->GetPosition2D());
-				if (port) {
-					Vector2F v = SectorData::PortPos(sd.GetPortLoc(port), arr[i]->ID());
-					sc->SetPosition(v.x, 0, v.y);
-				}
-			}
-			*/
+		if (!mob.empty() && Team::Instance()->GetRelationship(team, arr[i]->Team()) == ERelate::ENEMY) {
 			AIComponent* ai = arr[i]->GetAIComponent();
 			ai->GoSectorHerd(true);
 		}
@@ -1604,55 +1587,6 @@ void GameScene::SetBuildButtons(const int* arr)
 }
 #endif
 
-#if 0
-void GameScene::SetPickupButtons()
-{
-	Chit* player = GetPlayerChit();
-	if ( AvatarSelected() ) {
-		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
-		// Query items on the ground in a radius of the player.
-		LootFilter lootFilter;
-		static const float LOOT_RAD = 10.0f;
-		Vector2F pos = ToWorld2F(player->Position());
-
-		sim->GetChitBag()->QuerySpatialHash( &chitQuery, 
-											 pos, LOOT_RAD,
-											 0, &lootFilter );
-		
-		// Remove things that aren't pathable.
-		pickupData.Clear();
-		for( int i=0; i<chitQuery.Size(); i++ ) {
-			float cost = 0;
-			bool hasPath = sim->GetWorldMap()->CalcPath( pos, ToWorld2F(chitQuery[i]->Position()),
-														 0, &cost, false );
-			if ( hasPath ) {
-				PickupData pd = { chitQuery[i]->ID(), cost };
-				pickupData.Push( pd );
-			}
-		}
-
-		// Sort near to far.
-		pickupData.Sort();
-
-		int i=0;
-		for( ; i<pickupData.Size() && i < NUM_PICKUP_BUTTONS; ++i ) {
-			Chit* chit = sim->GetChitBag()->GetChit( pickupData[i].chitID );
-			if ( chit && chit->GetItem() ) {
-				pickupButton[i].SetVisible( true );
-				pickupButton[i].SetEnabled( canAdd );
-				lumosGame->ItemToButton( chit->GetItem(), &pickupButton[i] );
-			}
-		}
-		for( ; i < NUM_PICKUP_BUTTONS; ++i ) {
-			pickupButton[i].SetVisible( false );
-		}
-	}
-	else {
-		for( int i=0; i<NUM_PICKUP_BUTTONS; ++i )
-			pickupButton[i].SetVisible( false );
-	}
-}
-#endif
 
 void GameScene::DoTick(U32 delta)
 {
@@ -1842,7 +1776,7 @@ void GameScene::DoTick(U32 delta)
 		}
 	}
 	menu->SetUseBuilding(useBuildingVisible);
-	menu->SetCanTeleport(AvatarSelected() && CameraTrackingAvatar());
+	menu->SetCanTeleport(playerChit != 0);
 	sim->GetEngine()->RestrictCamera(0);
 
 	// The game will open scenes - say the CharacterScene for the
@@ -1998,7 +1932,7 @@ void GameScene::DialogResult(const char* name, void* data)
 		int team = Team::Instance()->GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
 		CoreScript::CreateCore(sd->sector, team, sim->Context());
-		ForceHerd(sd->sector);
+		ForceHerd(sd->sector, team);
 
 		ReserveBank* bank = ReserveBank::Instance();
 		if (bank) {

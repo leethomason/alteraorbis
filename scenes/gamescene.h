@@ -87,7 +87,7 @@ private:
 
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
-	void ForceHerd(const grinliz::Vector2I& sector);
+	void ForceHerd(const grinliz::Vector2I& sector, int team);
 	bool AvatarSelected();
 	bool CameraTrackingAvatar();
 	bool DragBuildArea(gamui::RenderAtom* atom);
