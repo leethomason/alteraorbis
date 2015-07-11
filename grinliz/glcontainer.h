@@ -614,7 +614,7 @@ class CompCharPtr {
 public:
 	template <class T>
 	static U32 Hash( T& _p) {
-		const char* p = _p;
+		const unsigned char* p = (const unsigned char*)_p;
 		U32 hash = 2166136261UL;
 		for( ; *p; ++p ) {
 			hash ^= *p;
