@@ -80,11 +80,11 @@ private:
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
+	void ViewModel(Chit* target);
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
 	void SetBars(Chit* chit, bool isAvatar);
 
-//	void SetPickupButtons();	// if the avatar can pick things up
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
