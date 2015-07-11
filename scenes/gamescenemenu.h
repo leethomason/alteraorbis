@@ -27,6 +27,7 @@ public:
 	};
 
 	enum {
+		UI_AVATAR,
 		UI_VIEW,
 		UI_BUILD,
 		UI_CONTROL,
@@ -49,7 +50,7 @@ public:
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 
 	gamui::PushButton	cameraHomeButton;
-	gamui::PushButton	nextUnit, avatarUnit, prevUnit;
+	gamui::PushButton	nextUnit, avatarUnit, prevUnit, teleportAvatar;
 	gamui::PushButton	useBuildingButton;
 	gamui::Image		tabBar0, tabBar1;
 	gamui::PushButton	createWorkerButton;

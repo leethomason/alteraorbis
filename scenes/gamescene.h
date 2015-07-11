@@ -106,6 +106,7 @@ private:
 
 	void DoCameraHome();
 	void DoAvatarButton();
+	void DoTeleportButton();
 	void DoCameraToggle();
 
 	Chit* GetPlayerChit();	// wraps up the call to account for being attached to any domain.

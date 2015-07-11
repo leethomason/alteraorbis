@@ -1000,9 +1000,9 @@ bool GameScene::CameraTrackingAvatar()
 
 bool GameScene::AvatarSelected()
 {
-	bool button = menu->UIMode() == GameSceneMenu::UI_VIEW;
+	bool button = menu->UIMode() == GameSceneMenu::UI_AVATAR;
 	Chit* playerChit = GetPlayerChit();
-	if (button && playerChit && playerChit->ID() == chitTracking) {
+	if (button && playerChit) { // && playerChit->ID() == chitTracking) {
 		return true;
 	}
 	return false;
@@ -1028,23 +1028,27 @@ void GameScene::DoAvatarButton()
 {
 	CoreScript* coreScript = GetHomeCore();
 
-	if (AvatarSelected() && CameraTrackingAvatar()) {
-		// Teleport.
-		if (coreScript && GetPlayerChit()) {
-			SpatialComponent::Teleport(GetPlayerChit(), coreScript->ParentChit()->Position());
-		}
+	// Select.
+	chitTracking = GetPlayerChitID();
+	Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	if (cc && chit) {
+		chitTracking = chit->ID();
+		cc->SetTrack(chitTracking);
 	}
-	else {
-		// Select.
-		chitTracking = GetPlayerChitID();
-		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-		if (cc && chit) {
-			chitTracking = chit->ID();
-			cc->SetTrack(chitTracking);
-		}
-	}
+
 	menu->DoEscape(true);
+}
+
+
+void GameScene::DoTeleportButton()
+{
+	CoreScript* coreScript = GetHomeCore();
+
+	// Teleport.
+	if (coreScript && GetPlayerChit()) {
+		SpatialComponent::Teleport(GetPlayerChit(), coreScript->ParentChit()->Position());
+	}
 }
 
 
@@ -1148,6 +1152,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &menu->avatarUnit ) {
 		DoAvatarButton();
+	}
+	else if (item == &menu->teleportAvatar) {
+		DoTeleportButton();
 	}
 	else if ( item == &menu->prevUnit || item == &menu->nextUnit ) {
 		CoreScript* coreScript = GetHomeCore();
