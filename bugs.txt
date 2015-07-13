@@ -7,7 +7,10 @@
 		x only move mode?
 		- test teleport
 		- 'end' should go to avatar mode
-		- 'teleport' should be always active
+		x 'teleport' should be always active
+	- spawn
+		- new strategy
+		- "rat spawn" to contain too many lessers
 	- character scene
 		- current team
 		- weapon effects
