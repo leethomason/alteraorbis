@@ -406,8 +406,9 @@ public:
 
 private:
 	static int SortItems( const void* a, const void* b );
-	unsigned Hash(const char* p)
+	unsigned Hash(const char* _p)
 	{
+		const unsigned char* p = (const unsigned char*)_p;
 		unsigned h = 2166136261U;
 		for (; *p; ++p) {
 			h ^= *p;

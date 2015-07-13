@@ -85,13 +85,13 @@ void Map::CreateTexture( Texture* t )
 void Map::DrawOverlay( int id )
 {
 	if ( id == 0 ) {
-		vbo = GPUDevice::Instance()->GetUIVBO( GPUDevice::OVERLAY0 );
-		ibo = GPUDevice::Instance()->GetUIIBO( GPUDevice::OVERLAY0 );
+		overlayVBO = GPUDevice::Instance()->GetUIVBO( GPUDevice::OVERLAY0 );
+		overlayIBO = GPUDevice::Instance()->GetUIIBO( GPUDevice::OVERLAY0 );
 		overlay0.Render();
 	}
 	else {
-		vbo = GPUDevice::Instance()->GetUIVBO( GPUDevice::OVERLAY1 );
-		ibo = GPUDevice::Instance()->GetUIIBO( GPUDevice::OVERLAY1 );
+		overlayVBO = GPUDevice::Instance()->GetUIVBO( GPUDevice::OVERLAY1 );
+		overlayIBO = GPUDevice::Instance()->GetUIIBO( GPUDevice::OVERLAY1 );
 		overlay1.Render();
 	}
 }
@@ -99,8 +99,8 @@ void Map::DrawOverlay( int id )
 
 void Map::BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
 {
-	ibo->Upload( index, nIndex, 0 );
-	vbo->Upload( vertex, nVertex*sizeof(*vertex), 0 );
+	overlayIBO->Upload( index, nIndex, 0 );
+	overlayVBO->Upload( vertex, nVertex*sizeof(*vertex), 0 );
 
 	GPUDevice::Instance()->PushMatrix( GPUDevice::MODELVIEW_MATRIX );
 
@@ -161,7 +161,7 @@ void Map::Render( const void* renderState, const void* textureHandle, int start,
 	GPUStream stream( GPUStream::kGamuiType );
 	GPUStreamData data;
 	data.texture0 = (Texture*)textureHandle;
-	data.indexBuffer  = ibo->ID();
-	data.vertexBuffer = vbo->ID();
+	data.indexBuffer  = overlayIBO->ID();
+	data.vertexBuffer = overlayVBO->ID();
 	device->Draw( gamuiShader, stream, data, start, count, 1 );
 }

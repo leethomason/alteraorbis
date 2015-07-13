@@ -61,7 +61,7 @@ private:
 	void					EnableButtons();
 
 	enum {	
-#ifdef ALTERA_MINI		
+#ifdef ALTERA_MICRO
 			MAP2_RAD	= 1,
 #else
 			MAP2_RAD	= 2,

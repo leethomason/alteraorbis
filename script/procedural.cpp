@@ -438,8 +438,8 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		{10, 3}, {1, 3}, {10, 3}
 	};
 
-	const Vector2I* colors = 0;
-	int nColors = 0;
+	const Vector2I* colors = HUMAN_COLORS;
+	int nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
 	int teamGroup = 0;
 	int teamID = 0;
 
@@ -480,8 +480,6 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 
 		default:
 		GLASSERT(0);	// team not implemented? may be fine; just need to check.
-		colors = HUMAN_COLORS;
-		nColors = GL_C_ARRAY_SIZE(HUMAN_COLORS) / 3;
 		break;
 	}
 
@@ -515,8 +513,8 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 		{6,4}, {5,4}
 	};
 
-	const Vector2I* colors = 0;
-	int nColors = 0;
+	const Vector2I* colors = GENERAL_COLORS;
+	int nColors = GL_C_ARRAY_SIZE(GENERAL_COLORS) / 2;
 	int teamGroup = 0;
 	int teamID = 0;
 
@@ -542,8 +540,6 @@ void TeamGen::TeamWeaponColors(int team, grinliz::Vector2I* base, grinliz::Vecto
 		case TEAM_NEUTRAL:
 		default:
 		GLASSERT(0);	// team not implemented? unexpected?
-		colors = GENERAL_COLORS;
-		nColors = GL_C_ARRAY_SIZE(GENERAL_COLORS) / 2;
 		break;
 	}
 

@@ -2711,7 +2711,7 @@ void AIComponent::EnterNewGrid()
 		}
 	}
 
-#ifdef ALTERA_MINI
+#ifdef ALTERA_MICRO
 	// No domain takeover in mini mode.
 #else
 	// Domain Takeover.

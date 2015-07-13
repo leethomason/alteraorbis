@@ -90,7 +90,7 @@ void Team::Serialize(XStream* xs)
 		XARC_SER_KEY(xs, "size", size);
 		for (int i = 0; i < size; ++i) {
 			XarcOpen(xs, "teamkey");
-			int t0, t1, a;
+			int t0=0, t1=0, a=0;
 			XARC_SER_KEY(xs, "t0", t0);
 			XARC_SER_KEY(xs, "t1", t1);
 			XARC_SER_KEY(xs, "a", a);

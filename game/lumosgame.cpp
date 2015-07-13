@@ -242,7 +242,7 @@ void LumosGame::CopyFile(const char* src, const char* target)
 		FILE* tp = fopen(targetPath.c_str(), "wb");
 		GLASSERT(tp);
 
-		if (fp && tp) {
+		if (tp) {
 			CDynArray<U8> buf;
 			fseek(fp, 0, SEEK_END);
 			size_t size = ftell(fp);

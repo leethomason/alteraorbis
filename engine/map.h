@@ -113,8 +113,8 @@ protected:
 	int					height;
 	CompositingShader	gamuiShader;
 	Texture*			texture;
-	GPUVertexBuffer*	vbo;
-	GPUIndexBuffer*		ibo;
+	GPUVertexBuffer*	overlayVBO;
+	GPUIndexBuffer*		overlayIBO;
 	grinliz::Random		random;
 
 private:

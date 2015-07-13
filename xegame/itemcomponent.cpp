@@ -198,7 +198,7 @@ void ItemComponent::AddCraftXP( int nCrystals )
 }
 
 
-void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
+void ItemComponent::AddBattleXP(const GameItem* loser, bool killshot)
 {
 	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
 	if (loser->keyValues.GetIString(ISC::mob) == IString()) {
@@ -208,16 +208,16 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->Traits().Level();
 	int killshotLevel = killshot ? 0 : loser->Traits().Level();
-	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
+	mainItem->GetTraitsMutable()->AddBattleXP(killshotLevel);
 
-	bool isGreater = (loser->keyValues.GetIString( ISC::mob ) == ISC::greater);
+	bool isGreater = (loser->keyValues.GetIString(ISC::mob) == ISC::greater);
 
-	if ( mainItem->Traits().Level() > level ) {
+	if (mainItem->Traits().Level() > level) {
 		// Level up!
 		mainItem->hp = double(mainItem->TotalHP());
-		NameItem( mainItem );
-		if ( parentChit->GetRenderComponent() ) {
-			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
+		NameItem(mainItem);
+		if (parentChit->GetRenderComponent()) {
+			parentChit->GetRenderComponent()->AddDeco("levelup", STD_DECO);
 		}
 	}
 
@@ -239,11 +239,11 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 		}
 	}
 
-	if ( killshot ) {
+	if (killshot) {
 		// Credit the main item and weapon. (But not the shield.)
-		mainItem->historyDB.Increment( "Kills" );
-		if ( isGreater )
-			mainItem->historyDB.Increment( "Greater" );
+		mainItem->historyDB.Increment("Kills");
+		if (isGreater)
+			mainItem->historyDB.Increment("Greater");
 
 		for (int i = 0; i < NUM; ++i) {
 			if (weapon[i]) {
@@ -252,15 +252,13 @@ void ItemComponent::AddBattleXP( const GameItem* loser, bool killshot )
 					weapon[i]->historyDB.Increment("Greater");
 			}
 		}
-		if ( loser ) {
-			CStr< 64 > str;
-			str.Format( "Kills: %s", loser->Name() );
+		CStr< 64 > str;
+		str.Format("Kills: %s", loser->Name());
 
-			mainItem->historyDB.Increment( str.c_str() );
-			for (int i = 0; i < NUM; ++i) {
-				if (weapon[i]) {
-					weapon[i]->historyDB.Increment(str.c_str());
-				}
+		mainItem->historyDB.Increment(str.c_str());
+		for (int i = 0; i < NUM; ++i) {
+			if (weapon[i]) {
+				weapon[i]->historyDB.Increment(str.c_str());
 			}
 		}
 	}

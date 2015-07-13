@@ -319,7 +319,7 @@ int FluidSim::FindEmitter(const grinliz::Vector2I& pos2i, bool nominal, bool mag
 {
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
 	int h = nominal ? wg.NominalRockHeight() : wg.RockHeight();
-	*area = 0;
+	if (area) *area = 0;
 	if (h) return 0;	// emitter is covered.
 
 	int result = 0;
