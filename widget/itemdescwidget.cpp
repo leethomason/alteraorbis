@@ -91,6 +91,17 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		textBuffer += str.c_str();
 	}
 
+	if ((meleeWeapon || rangedWeapon || shield)) {
+		str.Clear();
+		if ((item->flags & GameItem::EFFECT_FIRE) && (item->flags & GameItem::EFFECT_SHOCK))
+			str.Format("Effect\tShock + Fire\n");
+		else if (item->flags & GameItem::EFFECT_SHOCK)
+			str.Format("Effect\tShock\n");
+		else if (item->flags & GameItem::EFFECT_FIRE)
+			str.Format("Effect\tFire\n");
+		textBuffer += str.c_str();
+	}
+
 	if ( !(meleeWeapon || rangedWeapon || shield)) {
 		str.Format( "Strength\t%d\n", item->Traits().Strength() );
 		textBuffer += str.c_str();

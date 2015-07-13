@@ -1,5 +1,14 @@
 - Micro-Game
-	t How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+	- world gen
+		- canyon? river & pool walk?
+		- no-limit fluidSim
+		- combine with terrain displacement?
+	- spawn
+		- make sure a little bit of everything spawns
+		- trilobyte zerg spawning
+	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+		- cut back initial allocation
+		- make sure weapons are getting to denizens
 	- View mode
 		x tap a MOB to select it
 		x tap anything to select it
@@ -9,8 +18,8 @@
 		- 'end' should go to avatar mode
 		- 'teleport' should be always active
 	- character scene
-		- current team
-		- weapon effects
+		x current team
+		x weapon effects
 	- Basic Director: rate of Lesser and Greater attack
 	- art for R1k and Q
 - markets: unlimited? sell to core? trade?

@@ -184,21 +184,24 @@ void CharacterScene::Resize()
 }
 
 
-void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
+void CharacterScene::SetItemInfo(const GameItem* item, const GameItem* user)
 {
-	if ( !item )
+	if (!item)
 		return;
 
 	CStr< 128 > str;
-
-	str.Format( "%s\nLevel: %d  XP: %d / %d", item->ProperName() ? item->ProperName() : item->Name(), 
-										 item->Traits().Level(),
-										 item->Traits().Experience(),
-										 GameTrait::LevelToExperience( item->Traits().Level()+1 ));
-	desc.SetText( str.c_str() );
+	str.Format("%s", item->ProperName() ? item->ProperName() : item->Name());
+	if (item->IsDenizen()) {
+		str.AppendFormat(" (%s)", Team::Instance()->TeamName(item->Team()));
+	}
+	str.AppendFormat("\nLevel: %d  XP: %d / %d",
+					 item->Traits().Level(),
+					 item->Traits().Experience(),
+					 GameTrait::LevelToExperience(item->Traits().Level() + 1));
+	desc.SetText(str.c_str());
 
 	ChitBag* chitBag = data->itemComponent->ParentChit() ? data->itemComponent->ParentChit()->Context()->chitBag : 0;
-	itemDescWidget.SetInfo( item, user, nStorage==1, chitBag );
+	itemDescWidget.SetInfo(item, user, nStorage == 1, chitBag);
 }
 
 
@@ -249,7 +252,6 @@ void CharacterScene::SetButtonText(const GameItem* select)
 
 		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
-//		const GameItem* mainItem		= ic->GetItem(0);
 		const RangedWeapon* rangedItem = ic->QuerySelectRanged();
 		const MeleeWeapon* meleeItem = ic->QuerySelectMelee();
 		const Shield* shieldItem = ic->GetShield();
@@ -311,7 +313,6 @@ void CharacterScene::SetButtonText(const GameItem* select)
 				Quaternion q;
 				Matrix4 m;
 				m.ConcatRotation(90.0f, 0);
-				//m.ConcatRotation(90.0f, 1);
 				q.FromRotationMatrix(m);
 				model->SetRotation(q);
 			}
@@ -327,8 +328,6 @@ void CharacterScene::SetButtonText(const GameItem* select)
 			float d = 2.0f + size;
 			float y = aabb.SizeY() * 0.7f;
 			engine->camera.SetPosWC( 0, y, d );
-//			Vector3F lookAt = aabb.Center();
-//			lookAt.y = y;
 			engine->CameraLookAt( engine->camera.PosWC(), aabb.Center() );
 
 			IString proc = down->keyValues.GetIString( "procedural" );
