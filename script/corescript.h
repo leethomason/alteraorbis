@@ -173,6 +173,8 @@ private:
 	void AssignToSquads();
 	void DoStrategicTick();
 	void NewWaypointChits(int squadID);
+	void AssignDefaultSpawns();
+
 	Chit* CitizenFilter(int id);
 
 	WorkQueue*	workQueue;

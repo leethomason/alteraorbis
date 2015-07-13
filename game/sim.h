@@ -109,6 +109,7 @@ private:
 	void CreateRockInOutland();
 	void DoWeatherEffects( U32 delta );
 	void DumpModel();
+	void AssignDefaultSpawns();
 
 	void SpawnGreater();
 	void SpawnDenizens();

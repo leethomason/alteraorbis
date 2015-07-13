@@ -267,6 +267,62 @@ void Sim::CreateCores()
 		}
 	}
 	GLOUTPUT(( "nCores=%d\n", ncores ));
+	AssignDefaultSpawns();
+}
+
+
+void Sim::AssignDefaultSpawns()
+{
+	int nCores = 0;
+	CoreScript** coreScriptArr = CoreScript::GetCoreList(&nCores);
+
+	static const int NSPAWNS = 4;
+	static const char* spawns[NSPAWNS] = {
+		"trilobyte",
+		"mantis",
+		"troll",
+		"redMantis"
+	};
+	static const float factor[NSPAWNS] = {
+		0.20f,
+		0.40f,
+		0.20f,
+		0.20f
+	};
+	int count[NSPAWNS] = { 0 };
+	for (int i = 0; i < NSPAWNS; ++i) {
+		count[i] = int(factor[i] * nCores);
+	}
+	int subTotal = 0;
+	for (int i = 1; i < NSPAWNS; ++i) {
+		subTotal += count[i];
+	}
+	count[0] = nCores - subTotal;
+
+	// A little bit of mixing up.
+	CDynArray<const char*> list;
+	for (int i = 0; i < NSPAWNS; ++i) {
+		for (int k = 0; k < count[i]; ++k) {
+			list.Push(spawns[i]);
+		}
+	}
+	static const int FUZZ = 3;
+	for (int i = 0; i < list.Size() - FUZZ; ++i) {
+		Swap(&list[i], &list[i + random.Rand(FUZZ)]);
+	}
+	
+	list.Reverse();
+	for (int i = 0; i < NUM_SECTORS / 2; ++i) {
+		Rectangle2I rect;
+		rect.Set(NUM_SECTORS / 2 - i - 1, NUM_SECTORS / 2 - i - 1, NUM_SECTORS / 2 + i, NUM_SECTORS / 2 + i);
+		for (Rectangle2IEdgeIterator it(rect); !it.Done(); it.Next()) {
+			CoreScript* cs = CoreScript::GetCore(it.Pos());
+			if (cs) {
+				cs->SetDefaultSpawn(StringPool::Intern(list.Pop()));
+			}
+		}
+	}
+	GLASSERT(list.Empty());
 }
 
 
