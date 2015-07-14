@@ -47,7 +47,7 @@ public:
 
 	int ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const;
 	
-	int FindEmitter(const grinliz::Vector2I& start, bool nominal, bool magma, int* area);
+	//int FindEmitter(const grinliz::Vector2I& start, bool nominal, bool magma, int* area);
 	grinliz::Rectangle2I Bounds() const { return outerBounds; }
 
 private:
@@ -55,13 +55,16 @@ private:
 	bool HasWaterfall(const WorldGrid& origin, const WorldGrid& adjacent, int* type);
 	void PressureStep();
 
+	bool FloodFill(const grinliz::Vector2I& start, int h,
+				   grinliz::CDynArray<grinliz::Vector2I>* emitters, 
+				   grinliz::CDynArray<grinliz::Vector2I>* waterfalls);
+	bool MoveFluid();
+
 	// Both bounds check set 'flag' to tell where the pressureized parts should be.
 	// if 'waterfalls' is set, it only needs to be mostly enclosed at h >= 2
 	int BoundCheck(const grinliz::Vector2I& start, int h, bool nominal, bool magma);
 
 	grinliz::Vector2I MaxAdjacentWater(int i, int j);
-
-	enum { PRESSURE = 25 };
 
 	WorldMap* worldMap;
 	grinliz::Rectangle2I outerBounds, innerBounds;
@@ -70,14 +73,11 @@ private:
 	grinliz::CDynArray<grinliz::Vector2I> waterfalls;
 
 	grinliz::CDynArray<grinliz::Vector2I> emitters, pools;
-	grinliz::CDynArray<grinliz::Vector2I> stack;	// cache (local mem)
 
 	// can be shared - scratch memory.
-	static S8 water[SECTOR_SIZE*SECTOR_SIZE];
-	static S8 pressure[SECTOR_SIZE*SECTOR_SIZE];
-	static grinliz::CArray<grinliz::Vector2I, PRESSURE> fill;
-
-	grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> flag;
+	static U8 floodDepth[SECTOR_SIZE_2];
+	static grinliz::CArray<grinliz::Vector2I, SECTOR_SIZE_2> fillStack;
+	static grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> bitFlags;
 };
 
 #endif // WORLDMAP_FLUID_SIM_INCLUDED

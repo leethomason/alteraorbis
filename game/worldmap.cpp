@@ -2442,7 +2442,11 @@ void WorldMap::GenerateEmitters(U32 seed)
 							if (physics) {
 								FluidSim* fluidSim = physics->GetFluidSim(sector);
 								if (fluidSim) {
+#if 0
 									h = fluidSim->FindEmitter(it.Pos(), true, fluidType > 0, &area);
+#else
+									h = 0;
+#endif
 								}
 							}
 							grid[INDEX(it.Pos())].SetNominalRockHeight(savedHeight);
@@ -2455,6 +2459,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 					}
 
 					if (bestArea) {
+#if 0
 						// Before this code, the algorithm wasn't generating enough 
 						// pools. So go in there and make more pools! Uses 2 random
 						// walks to try to cut more pools into the world.
@@ -2508,7 +2513,7 @@ void WorldMap::GenerateEmitters(U32 seed)
 								area = a;
 							}
 						}
-
+#endif
 					}
 					else {
 						// ---- If that doesn't work out, lay down random emitters.

@@ -4,7 +4,8 @@
 		- no-limit fluidSim
 		- combine with terrain displacement?
 	- spawn
-		- make sure a little bit of everything spawns
+		x new strategy
+		x make sure a little bit of everything spawns
 		- trilobyte zerg spawning
 	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
 		- cut back initial allocation
@@ -17,9 +18,6 @@
 		- test teleport
 		- 'end' should go to avatar mode
 		x 'teleport' should be always active
-	- spawn
-		- new strategy
-		- "rat spawn" to contain too many lessers
 	- character scene
 		x current team
 		x weapon effects

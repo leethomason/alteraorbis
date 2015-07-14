@@ -15,9 +15,9 @@ static const int WATERFALL_HEIGHT = 3;
 static const int NDIR = 4;
 static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
-S8 FluidSim::water[SECTOR_SIZE*SECTOR_SIZE];
-S8 FluidSim::pressure[SECTOR_SIZE*SECTOR_SIZE];
-grinliz::CArray<grinliz::Vector2I, FluidSim::PRESSURE> FluidSim::fill;
+U8 FluidSim::floodDepth[SECTOR_SIZE_2];
+grinliz::CArray<grinliz::Vector2I, SECTOR_SIZE_2> FluidSim::fillStack;
+grinliz::BitArray<SECTOR_SIZE, SECTOR_SIZE, 1> FluidSim::bitFlags;
 
 
 FluidSim::FluidSim(WorldMap* wm, const Vector2I& s) : worldMap(wm), settled(false)
@@ -106,7 +106,7 @@ int FluidSim::ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const
 	return count;
 }
 
-
+/*
 grinliz::Vector2I FluidSim::MaxAdjacentWater(int i, int j)
 {
 	Vector2I v = { i, j };
@@ -126,20 +126,137 @@ grinliz::Vector2I FluidSim::MaxAdjacentWater(int i, int j)
 	}
 	return v;
 }
-
+*/
 
 bool FluidSim::DoStep()
 {
 	if (settled) return true;
 
-	memset(pressure, 0, SECTOR_SIZE*SECTOR_SIZE*sizeof(pressure[0]));
+	memset(floodDepth, 0, SECTOR_SIZE_2*sizeof(floodDepth[0]));
 
 	emitters.Clear();
 	pools.Clear();
 	waterfalls.Clear();
 	settled = true;
-//	U32 startHash = Hash();
 
+	for (int d = 1; d <= MAX_ROCK_HEIGHT; ++d) {
+		bitFlags.ClearAll();
+		for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
+
+			// Check for land.
+			// Check for flag clear.
+			// Do flood fill: max bound, min bound, etc.
+			// Mark flag set
+			// if bounded
+			//		fill with water or lava (depending on emitter)
+			// else if !bounded
+			//		remove water and lava
+			// ---
+			// if did nothing, settled.
+
+			Vector2I pos2i = it.Pos();
+			Vector2I loc2i = pos2i - outerBounds.min;
+
+			const WorldGrid& wg = worldMap->grid[worldMap->INDEX(pos2i)];
+
+			if (wg.IsWater() || wg.IsPort() || wg.IsGrid()) continue;
+			if (wg.RockHeight() >= d) continue;
+			if (bitFlags.IsSet(loc2i.x, loc2i.y, 0)) continue;
+			// Depth 1 builds on depth 0, depth 2 on depth 1, etc.
+			// But it can be rock or water.
+			int depth = Max(int(floodDepth[loc2i.y*SECTOR_SIZE + loc2i.x]), int(wg.RockHeight()));
+			if (depth != (d - 1)) continue;
+
+			int emitterStart = emitters.Size();
+			int waterfallStart = waterfalls.Size();
+			bool bounded = FloodFill(pos2i, d, &emitters, &waterfalls);
+			if (bounded) {
+				for (int i = 0; i < fillStack.Size(); ++i) {
+					Vector2I loc = fillStack[i];
+					floodDepth[loc.y * SECTOR_SIZE + loc.x] = d;
+				}
+			}
+		}
+	}
+	// Waterfalls!
+
+	settled = MoveFluid();
+	return settled;
+}
+
+
+bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinliz::Vector2I>* emitters, grinliz::CDynArray<grinliz::Vector2I>* waterfalls)
+{
+	fillStack.Clear();
+	Vector2I locStart = start - outerBounds.min;
+
+	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(start)];
+	GLASSERT(wg.IsLand() && (!wg.IsPort()) && (!wg.IsGrid()));
+	GLASSERT(wg.RockHeight() < d);
+	GLASSERT(floodDepth[locStart.y*SECTOR_SIZE + locStart.x] < d);
+	fillStack.Push(start);
+	floodDepth[locStart.y*SECTOR_SIZE + locStart.x] = d;
+
+	int work = 0;
+	int gridPort = 0;
+	int water = 0;
+
+	while (work < fillStack.Size()) {
+		Vector2I p0 = fillStack[work];
+
+		for (int i = 0; i < NDIR; ++i) {
+			Vector2I p1 = p0 + DIR[i];
+			Vector2I loc1 = p1 - outerBounds.min;
+			const WorldGrid& wg1 = worldMap->grid[worldMap->INDEX(p1)];
+			int index1 = loc1.y*SECTOR_SIZE + loc1.x;
+			int depth1 = floodDepth[index1];
+
+			if (outerBounds.Contains(p1)
+				&& !bitFlags.IsSet(loc1.x, loc1.y)
+				&& wg1.RockHeight() < d)
+			{
+				if (!wg1.IsLand()) {
+					++water;
+				}
+				else if (wg.IsPort() || wg.IsGrid()) {
+					++gridPort;
+				}
+				else {
+					fillStack.Push(p1);
+					bitFlags.Set(loc1.x, loc1.y);
+				}
+			}
+		}
+		++work;
+	}
+	bool valid = (fillStack.Size() > 4) && (water == 0) && (gridPort == 0);
+	return valid;
+}
+
+
+bool FluidSim::MoveFluid()
+{
+	bool thisSettled = true;
+	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
+		Vector2I p = it.Pos();
+		Vector2I loc2i = p - outerBounds.min;
+
+		WorldGrid* wg = &worldMap->grid[worldMap->INDEX(p)];
+		int d = floodDepth[loc2i.y * SECTOR_SIZE + loc2i.x];
+
+		if (wg->fluidHeight < unsigned(d * FLUID_PER_ROCK)) {
+			wg->fluidHeight++;
+			thisSettled = false;
+		}
+		else if (wg->fluidHeight > unsigned(d * FLUID_PER_ROCK)) {
+			wg->fluidHeight--;
+			thisSettled = false;
+		}
+	}
+	return thisSettled;
+}
+
+#if 0
 	// First pass: find all the emitters, and if they are bounded.
 	// Generates a potential height map for everything.
 
@@ -239,8 +356,9 @@ bool FluidSim::DoStep()
 //	settled = (startHash == endHash);
 	return settled;
 }
+#endif
 
-
+#if 0
 void FluidSim::PressureStep()
 {
 	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
@@ -422,3 +540,4 @@ int FluidSim::BoundCheck(const Vector2I& start, int h, bool nominal, bool magma 
 		return area;
 	return 0;
 }
+#endif

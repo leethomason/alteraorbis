@@ -27,6 +27,7 @@ static const float GRID_SPEED			= DEFAULT_MOVE_SPEED * 6.0f;
 static const float ROTATION_SPEED		= 360.f;		// degrees/second
 
 static const int SECTOR_SIZE		= 64;
+static const int SECTOR_SIZE_2		= SECTOR_SIZE * SECTOR_SIZE;
 static const int INNER_SECTOR_SIZE	= (SECTOR_SIZE-2);
 static const int NUM_SECTORS		= MAX_MAP_SIZE / SECTOR_SIZE;
 
