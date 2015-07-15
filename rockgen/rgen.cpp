@@ -19,7 +19,6 @@ int main(int argc, const char* argv[])
 	static const int NUM_TESTS  = 1;
 	bool applyThreshold			= true;
 	const float FRACTION_CLEAR	= 0.55f;
-	const int style				= RockGen::CAVEY;
 	const int height			= RockGen::NOISE_HEIGHT;
 
 	Color4U8* pixels = new Color4U8[ DOMAIN_SIZE*DOMAIN_SIZE ];

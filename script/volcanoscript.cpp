@@ -1,3 +1,18 @@
+/*
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "volcanoscript.h"
 
 #include "../engine/serialize.h"
@@ -19,45 +34,48 @@ using namespace tinyxml2;
 
 static const U32 SPREAD_RATE = 4000;
 
-VolcanoScript::VolcanoScript() : spreadTicker(SPREAD_RATE)
+VolcanoScript::VolcanoScript(int _maxRad, bool _round, EVolcanoType _type) : maxRad(_maxRad), round(_round), type(_type), spreadTicker(SPREAD_RATE)
 {
 	size = 0;
 	rad = 0;
 }
 
 
-void VolcanoScript::Serialize( XStream* xs )
+void VolcanoScript::Serialize(XStream* xs)
 {
 	BeginSerialize(xs, Name());
-	XARC_SER( xs, size );
+	XARC_SER(xs, maxRad);
+	XARC_SER(xs, round);
+	XARC_SER_ENUM(xs, EVolcanoType, type);
+	XARC_SER(xs, size);
 	XARC_SER(xs, rad);
 	spreadTicker.Serialize(xs, "SpreadTicker");
 	EndSerialize(xs);
 }
 
 
-int VolcanoScript::DoTick( U32 delta )
+int VolcanoScript::DoTick(U32 delta)
 {
 	WorldMap* worldMap = Context()->worldMap;
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 
 	int n = spreadTicker.Delta(delta);
-	for (int i = 0; i<n; ++i) {
+	for (int i = 0; i < n; ++i) {
 		Rectangle2I b = worldMap->Bounds();
 		++rad;
 
 		// Cool (and set) the inner rectangle, make the new rectangle magma.
 		// The origin stays magma until we're done.
-		size = Min( rad, (int)MAX_RAD );
-		
+		size = Min(rad, maxRad);
+
 		Rectangle2I r;
 		r.min = r.max = pos2i;
-		r.Outset( size );
+		r.Outset(size);
 
 		r.DoIntersection(b);
 
-		if (rad > MAX_RAD) {
+		if (rad > maxRad) {
 			// Everything off.
 			for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 				worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
@@ -69,10 +87,6 @@ int VolcanoScript::DoTick( U32 delta )
 			// Inner off.
 			// Center on.
 			// Edge on.
-
-			// FIXME: check for buildings
-
-			// Inner off.
 			Rectangle2I rSmall = r;
 			r.Outset(-1);
 			for (Rectangle2IIterator it(rSmall); !it.Done(); it.Next()) {
@@ -91,7 +105,7 @@ int VolcanoScript::DoTick( U32 delta )
 			}
 		}
 	}
-	
+
 	return spreadTicker.Next();
 }
 
@@ -105,27 +119,4 @@ void VolcanoScript::OnAdd(Chit* chit, bool init)
 void VolcanoScript::OnRemove()
 {
 	super::OnRemove();
-	// spatial component already deleted. *sigh*
-	/*
-	// Defensive programming. Volcanoes are leaving
-	// magma all around the world. The next step
-	// is to track each volcano, not let them overlap,
-	// and check against the magma.
-	const ChitContext* context = scriptContext->chitBag->GetContext();
-	WorldMap* worldMap = context->worldMap;
-
-	Vector2I pos2i = sc->GetPosition2DI();
-
-	Rectangle2I r;
-	r.min = r.max = pos2i;
-	r.Outset(MAX_RAD);
-
-	Rectangle2I b = worldMap->Bounds();
-	r.DoIntersection(b);
-
-	// Everything off.
-	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-		worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
-	}
-	*/
 }

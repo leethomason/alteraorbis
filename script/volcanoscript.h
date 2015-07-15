@@ -22,12 +22,19 @@
 
 class WorldMap;
 
+enum class EVolcanoType
+{
+	VOLCANO,	// standard, restores nominal rock heights
+	MOUNTAIN,	// creates a mountain, ignores nominal
+	CRATER		// creates a pool, ignores nominal
+};
+
 class VolcanoScript : public Component
 {
 	typedef Component super;
 
 public:
-	VolcanoScript();
+	VolcanoScript(int maxRad = 6, bool round = false, EVolcanoType type = EVolcanoType::VOLCANO);
 	virtual ~VolcanoScript()			{}
 
 	virtual void Serialize( XStream* xs );
@@ -37,11 +44,10 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual const char* Name() const { return "VolcanoScript"; }
 
-	enum {
-		MAX_RAD = 6
-	};
-
 private:
+	int			maxRad;
+	bool		round;
+	EVolcanoType type;
 	CTicker		spreadTicker;
 	int			rad;
 	int			size;
