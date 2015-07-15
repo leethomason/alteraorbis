@@ -25,6 +25,7 @@
 	- art for R1k and Q
 - markets: unlimited? sell to core? trade?
 - new inventory UI
+- fix text size
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
