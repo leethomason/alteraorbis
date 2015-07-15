@@ -827,19 +827,6 @@ void WorldMap::SetPlant(int x, int y, int typeBase1, int stage)
 }
 
 
-void WorldMap::SetEmitter(int x, int y, bool on, int type) {
-	int index = INDEX(x, y);
-	grid[index].SetFluidEmitter(on, type);
-	if (physics) {
-		FluidSim* fluidSim = physics->GetFluidSim(ToSector(x,y));
-		if (fluidSim) {
-			fluidSim->Unsettle();
-		}
-	}
-}
-
-
-
 void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 {
 	Vector2I vec	= { x, y };
@@ -2035,14 +2022,11 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
 		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
 		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
-		{ BLACKMAG_X(0), BLACKMAG_Y(5) },	// emitter - water
-		{ BLACKMAG_X(1), BLACKMAG_Y(5) },	// emitter - lava
 	};
 	//static const int NUM = GL_C_ARRAY_SIZE(UV);
 
 	static const int PORCH = 7;
 	static const int PAVE = 4;
-	static const int EMITTER = 14;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -2064,13 +2048,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Land();
-					if (wg.IsFluidEmitter()) {
-						if (wg.FluidType() == WorldGrid::FLUID_WATER)
-							layer = EMITTER;
-						else
-							layer = EMITTER + 1;	// lava
-					}
-					else if ( layer == WorldGrid::LAND ) {
+					if ( layer == WorldGrid::LAND ) {
 						if (wg.Porch()) {
 							layer = PORCH + wg.Porch() - 1;
 						}
@@ -2381,169 +2359,4 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, boo
 	}
 }
 
-
-void WorldMap::GenerateEmitters(U32 seed)
-{
-	Random random(seed);
-	random.Rand();
-	random.Rand();
-	int nPoolEmitters = 0;
-	int nRandomEmitters = 0;
-
-	for (int j = 0; j < NUM_SECTORS; ++j) {
-		for (int i = 0; i < NUM_SECTORS; ++i) {
-
-			Vector2I sector = { i, j };
-			Rectangle2I bounds = InnerSectorBounds(sector);
-			if (!Bounds().Contains(bounds)) continue;
-
-			// At this point, don't put emitters in the outland.
-			if (!GetSectorData(sector).HasCore()) continue;
-
-			static const int PATCH_SIZE = 8;
-			static const int NUM_PATCHES = SECTOR_SIZE / PATCH_SIZE;
-
-			// Inset by 1 unit; keep emitters away from the world edge.
-
-			for (int py = 1; py < NUM_PATCHES-1; ++py) {
-				for (int px = 1; px < NUM_PATCHES-1; ++px) {
-					Rectangle2I r;
-					r.Set(px*PATCH_SIZE + i*SECTOR_SIZE + 1, py*PATCH_SIZE + j*SECTOR_SIZE + 1,
-						(px + 1)*PATCH_SIZE + i*SECTOR_SIZE - 2, (py + 1)*PATCH_SIZE + j*SECTOR_SIZE - 2);
-					
-					// Don't up emitters too close to Cores. It's annoying.
-					if (r.Contains(GetSectorData(sector).core)) continue;
-
-					// ----- Find "good" emitters ---- //
-					int bestArea = 0;
-					Vector2I bestPos = { 0, 0 };
-					int bestHeight = 0;
-					int manDist = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-					int fluidType = (int)random.Rand(NUM_SECTORS) < manDist ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER;
-
-					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
-						// Also annoying: emitters beside water. (Can only
-						// happen with diagonals, but it's a fine early-out.)
-						bool besideWater = false;
-						for(int k = 0; k < 8; ++k) {
-							if (grid[INDEX(it.Pos() + DIR_I8[k])].FluidSink()) {
-								besideWater = true;
-								break;
-							}
-						}
-
-						static const int AREA = 2;
-
-						if (!besideWater && !grid[INDEX(it.Pos())].FluidSink()) {
-							int area = 0;
-							int savedHeight = grid[INDEX(it.Pos())].NominalRockHeight();
-							grid[INDEX(it.Pos())].SetNominalRockHeight(0);
-							int h = 0;
-							if (physics) {
-								FluidSim* fluidSim = physics->GetFluidSim(sector);
-								if (fluidSim) {
-#if 0
-									h = fluidSim->FindEmitter(it.Pos(), true, fluidType > 0, &area);
-#else
-									h = 0;
-#endif
-								}
-							}
-							grid[INDEX(it.Pos())].SetNominalRockHeight(savedHeight);
-							if (h && (area > AREA)) {
-								bestPos = it.Pos();
-								bestHeight = h;
-								bestArea = area;
-							}
-						}
-					}
-
-					if (bestArea) {
-#if 0
-						// Before this code, the algorithm wasn't generating enough 
-						// pools. So go in there and make more pools! Uses 2 random
-						// walks to try to cut more pools into the world.
-						GLASSERT(!bestPos.IsZero());
-						SetEmitter(bestPos.x, bestPos.y, true, fluidType);
-						++nPoolEmitters;
-						grid[INDEX(bestPos)].SetNominalRockHeight(0);
-
-						static const int STEPS = 8;
-						CArray<Vector2I, STEPS> steps;
-						CArray<int, STEPS> stepH;
-
-						int area = bestArea;
-						int attempt = 0;
-						if (area < 8 && attempt < 4) {
-							++attempt; 
-							Vector2I v = bestPos;
-							int heading = random.Rand(4);
-							for (int k = 0; k < STEPS; ++k) {
-								if (attempt < 2) {
-									v += DIR_I4[random.Rand(4)];
-								}
-								else {
-									heading = (heading + 3 + random.Rand(3)) % 4;
-									v += DIR_I4[heading];
-								}
-								if (r.Contains(v)) {
-									WorldGrid* mwg = &grid[INDEX(v)];
-									if (!mwg->FluidSink() && mwg->NominalRockHeight() >= bestHeight) {
-										steps.Push(v);
-										stepH.Push(mwg->NominalRockHeight());
-										mwg->SetNominalRockHeight(0);
-									}
-								}
-							}
-							int a = 0;
-							int h = 0;
-							if (physics) {
-								FluidSim* fluidSim = physics->GetFluidSim(sector);
-								if (fluidSim) {
-									h = fluidSim->FindEmitter(bestPos, true, fluidType > 0, &a);
-								}
-							}
-							if (!h || a <= area) {
-								// rewind
-								for (int k = 0; k < steps.Size(); ++k) {
-									grid[INDEX(steps[k])].SetNominalRockHeight(stepH[k]);
-								}
-							}
-							else {
-								area = a;
-							}
-						}
-#endif
-					}
-					else {
-						// ---- If that doesn't work out, lay down random emitters.
-						if (random.Rand(3)==0) {
-							bool okay = true;
-							int x = r.min.x + random.Rand(r.Width());
-							int y = r.min.y + random.Rand(r.Height());
-
-							Rectangle2I r2;
-							r2.Set(x, y, x, y);
-							r2.Outset(3);
-
-							for (Rectangle2IIterator it(r2); !it.Done(); it.Next()) {
-								const WorldGrid& wg = grid[INDEX(it.Pos())];
-								if (wg.FluidSink()) {
-									okay = false;
-									break;
-								}
-							}
-							if (okay) {
-								//WorldGrid* wg = &grid[INDEX(x, y)];
-								SetEmitter(x, y, true, WorldGrid::FLUID_WATER);
-								++nRandomEmitters;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	GLOUTPUT(("Emitters created. pool=%d random=%d total=%d\n", nPoolEmitters, nRandomEmitters, nPoolEmitters + nRandomEmitters));
-}
 

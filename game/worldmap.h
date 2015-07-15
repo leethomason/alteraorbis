@@ -118,7 +118,6 @@ public:
 		WorldGrid wg = grid[index];
 		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
 	}
-	void SetEmitter(int x, int y, bool on, int type);
 
 	void SetPave( int x, int y, int pave ) {
 		int index = INDEX(x,y);
@@ -243,10 +242,6 @@ public:
 
 	// Map information, debugging of pools and waterfalls:
 	void FluidStats(PhysicsSims* context, int* pools, int* waterfalls);
-
-	// This is sort of "left over" from worldGen & rockGen. The generation step
-	// should proably place the emitters, but hard to do with the limited info there.
-	void GenerateEmitters( U32 seed );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );

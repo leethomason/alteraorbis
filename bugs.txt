@@ -1,8 +1,9 @@
 - Micro-Game
 	- world gen
 		- canyon? river & pool walk?
-		- no-limit fluidSim
 		- combine with terrain displacement?
+		- fluid: water and lava determined by weather & team
+		x no-limit fluidSim
 	- spawn
 		x new strategy
 		x make sure a little bit of everything spawns
@@ -26,6 +27,7 @@
 - markets: unlimited? sell to core? trade?
 - new inventory UI
 - fix text size
+- immediately spawn avatar on core creation
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct

@@ -365,7 +365,6 @@ void WorldGenScene::DoTick(U32 delta)
 			sim->Load(datPath, 0);
 
 			sim->EnableSpawn(0);
-			sim->SeedPlants();
 			genState.mode = GenState::SIM_TICK;
 			newsConsole.AttachChitBag(sim->GetChitBag());
 		}
@@ -381,6 +380,14 @@ void WorldGenScene::DoTick(U32 delta)
 				}
 			}
 			float age = sim->AgeF();
+
+			// Give the volcanos a head start,
+			// but then seed plants.
+			if (age >= 0.1f && !plantsSeeded) {
+				sim->SeedPlants();
+				plantsSeeded = true;
+			}
+
 			int typeCount[NUM_PLANT_TYPES];
 			for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 				typeCount[i] = 0;
@@ -488,11 +495,6 @@ void WorldGenScene::DoTick(U32 delta)
 	if (sendTexture) {
 		Texture* t = TextureManager::Instance()->GetTexture("worldGenPreview");
 		CreateTexture(t);
-		if (generateEmitters) {
-			Random random;
-			random.SetSeedFromTime();
-			worldMap->GenerateEmitters(random.Rand());
-		}
 	}
 }
 

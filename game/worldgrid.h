@@ -84,7 +84,6 @@ private:
 	unsigned plant				: 4;	// plant 1-8 (and potentially 1-15). also uses hp.
 	unsigned stage				: 2;	// 0-3
 
-	unsigned fluidEmitter		: 1;	// is emitter. type determined by 'fluidType'
 	unsigned fluidHeight		: 4;	// 0-ROCK_HEIGHT * FLUID_PER_ROCK, 0-12
 	unsigned fluidType			: 1;	// types of fluids: 0:water, 1:lava
 
@@ -107,7 +106,6 @@ public:
 			isPorch == wg.isPorch &&
 			rockHeight == wg.rockHeight &&
 			magma == wg.magma &&
-			fluidEmitter == wg.fluidEmitter &&
 			fluidHeight == wg.fluidHeight &&
 			fluidType == wg.fluidType &&
 			plantOnFire == wg.plantOnFire &&
@@ -227,18 +225,9 @@ public:
 		return fluidHeight;
 	}
 
-	bool IsFluidEmitter() const { return fluidEmitter ? true : false; }
-	void SetFluidEmitter(bool on, int type) {
-		GLASSERT(!FluidSink());
-		fluidEmitter = on ? 1 : 0;
-		fluidType = type;
-	}
-
 	int FluidType() const { return fluidType; }
 	void SetFluidType(int type) {
-		if (!fluidEmitter) {
-			fluidType = type;
-		}
+		fluidType = type;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

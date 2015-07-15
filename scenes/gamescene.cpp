@@ -1427,7 +1427,7 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Monster swarm
+#if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
 //			sim->GetChitBag()->NewDenizen(ToWorld2I(at), TEAM_GOB);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);

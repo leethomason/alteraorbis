@@ -60,6 +60,7 @@ private:
 	RockGen*	rockGen;
 	WorldMap*	worldMap;
 	U16*		pix16;
+	bool		plantsSeeded = false;
 
 	struct GenState {
 		void Clear() { mode=NOT_STARTED; y=0; }

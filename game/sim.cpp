@@ -587,16 +587,14 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
 
 	int age = AgeI();
-
-	// NOT Age of Fire:
-	volcTimer.SetPeriod( (age > 1 ? MSEC_TO_VOLC*4 : MSEC_TO_VOLC) + random.Rand(1000) );
+	volcTimer.SetPeriod((age >= 1 ? MSEC_TO_VOLC * 4 : MSEC_TO_VOLC / 4) + random.Rand(1000));
 
 	while( volcano-- ) {
 		for( int i=0; i<5; ++i ) {
 			int x = random.Rand(context.worldMap->Width());
 			int y = random.Rand(context.worldMap->Height());
 			if ( context.worldMap->IsLand( x, y ) ) {
-				// Don't destroy opporating domains. Crazy annoying.
+				// Don't destroy domains in use. Crazy annoying.
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
 				CoreScript* cs = CoreScript::GetCore( sector );
@@ -823,18 +821,15 @@ void Sim::SeedPlants()
 {
 	Rectangle2I bounds = context.worldMap->Bounds();
 	bounds.Outset(-SECTOR_SIZE);
-	const int STEP = bounds.Area() / TYPICAL_PLANTS;
 
-	for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
-		if (random.Rand(STEP) == 0) {
-			int x = it.Pos().x;
-			int y = it.Pos().y;
+	for (int i = 0; i < TYPICAL_PLANTS; ++i) {
+		int x = bounds.min.x + random.Rand(bounds.Width());
+		int y = bounds.min.y + random.Rand(bounds.Height());
 
-			int type = random.Rand(NUM_PLANT_TYPES);
-			int stage = random.Rand(MAX_PLANT_STAGES);
+		int type = random.Rand(NUM_PLANT_TYPES);
+		int stage = random.Rand(MAX_PLANT_STAGES);
 
-			CreatePlant(x, y, type, stage);
-		}
+		CreatePlant(x, y, type, stage);
 	}
 }
 

@@ -191,14 +191,6 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 					context.worldMap->SetRock(pos2i.x, pos2i.y, id - BUTTON_ROCK0, false, WorldGrid::ROCK);
 					break;
 
-					case BUTTON_EMITTER:
-					context.worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_WATER);
-					break;
-
-					case BUTTON_LAVA_EMITTER:
-					context.worldMap->SetEmitter(pos2i.x, pos2i.y, true, WorldGrid::FLUID_LAVA);
-					break;
-
 					case BUTTON_SWITCH_ON:
 					chit = context.chitBag->NewBuilding(pos2i, "switchOn", TEAM_HOUSE);
 					break;

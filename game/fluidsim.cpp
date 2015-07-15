@@ -10,7 +10,7 @@
 
 using namespace grinliz;
 
-static const int WATERFALL_HEIGHT = 3;
+static const int WATERFALL_HEIGHT = 1;
 
 static const int NDIR = 4;
 static const Vector2I DIR[NDIR] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
@@ -51,12 +51,12 @@ void FluidSim::EmitWaterfalls(U32 delta, Engine* engine)
 			int type = 0;
 			if (HasWaterfall(wg, altWG, &type)) {
 
-				Vector3F v3 = { (float)wf.x + 0.5f, (float)altWG.FluidHeight(), (float)wf.y + 0.5f };
+				Vector3F v3 = { (float)wf.x + 0.5f, (float)wg.FluidHeight(), (float)wf.y + 0.5f };
 				Vector3F half = { (float)DIR[j].x*0.5f, 0.0f, (float)DIR[j].y*0.5f };
 				Vector3F right = { half.z, 0, half.x };
 
 				Rectangle3F r3;
-				r3.FromPair(v3 + half*0.8f - right, v3 + half*0.8f + right);
+				r3.FromPair(v3 + half - right, v3 + half + right);
 
 				static const Vector3F DOWN = { 0, -1, 0 };
 				if (type == WorldGrid::FLUID_WATER)
@@ -83,9 +83,7 @@ void FluidSim::Reset(int x, int y)
 
 bool FluidSim::HasWaterfall(const WorldGrid& wg, const WorldGrid& altWG, int* type)
 {
-	if (   (altWG.IsFluid() && wg.IsFluid() && altWG.fluidHeight >= wg.fluidHeight + WATERFALL_HEIGHT)
-		|| (wg.IsWater() && altWG.fluidHeight >= WATERFALL_HEIGHT))
-	{
+	if (wg.IsFluid() && altWG.IsWater()) {
 		if (type) {
 			*type = altWG.FluidType();
 		}
@@ -142,7 +140,7 @@ bool FluidSim::DoStep()
 					GLASSERT(loc.x < SECTOR_SIZE && loc.y < SECTOR_SIZE);
 					floodDepth[loc.y * SECTOR_SIZE + loc.x] = d;
 				}
-				if (d == 0) {
+				if (d == 1) {
 					pools.Push(pos2i);
 				}
 			}
@@ -164,9 +162,11 @@ bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinli
 	GLASSERT(locStart.x < SECTOR_SIZE && locStart.y < SECTOR_SIZE);
 
 	const WorldGrid& wg = worldMap->grid[worldMap->INDEX(start)];
+
 	GLASSERT(wg.IsLand() && (!wg.IsPort()) && (!wg.IsGrid()));
 	GLASSERT(wg.RockHeight() < d);
 	GLASSERT(floodDepth[locStart.y*SECTOR_SIZE + locStart.x] < d);
+	GLASSERT(innerBounds.Contains(start));
 
 	fillStack.Push(start);
 	bitFlags.Set(locStart.x, locStart.y);
@@ -183,32 +183,35 @@ bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinli
 			Vector2I loc1 = p1 - outerBounds.min;
 			const WorldGrid& wg1 = worldMap->grid[worldMap->INDEX(p1)];
 			int index1 = loc1.y*SECTOR_SIZE + loc1.x;
-			int depth1 = floodDepth[index1];
+			bool onEdge = (outerBounds.min.x == loc1.x) || (outerBounds.max.x == loc1.x) || (outerBounds.min.y == loc1.y) || (outerBounds.max.y == loc1.y);
 
 			if (outerBounds.Contains(p1)
 				&& !bitFlags.IsSet(loc1.x, loc1.y)
 				&& wg1.RockHeight() < d)
 			{
-				if (!wg1.IsLand()) {
-					++water;
-// NOT HERE! don't know if valid yet
-//					if (waterfalls->Find(p0) < 0)
-//						waterfalls->Push(p0);
-				}
-				else if (wg.IsPort() || wg.IsGrid()) {
+				// Whatever result, we've looked here, so don't look again.
+				bitFlags.Set(loc1.x, loc1.y);
+
+				if (wg1.IsPort() || wg1.IsGrid() || onEdge) {
 					++gridPort;
+				}
+				else if (!wg1.IsLand()) {
+					++water;
+					// Push the waterfall: if this isn't 'valid'
+					// the waterfall will be removed by the caller.
+					if (waterfalls->Find(p0) < 0)
+						waterfalls->Push(p0);
 				}
 				else {
 					fillStack.Push(p1);
-					bitFlags.Set(loc1.x, loc1.y);
 				}
 			}
 		}
 		++work;
 	}
-	bool valid =    (fillStack.Size() > 4)
-				 //&& (water < fillStack.Size() / 20)
-				 && (water == 0)
+	bool valid =    (fillStack.Size() > 3)
+				 && (water < fillStack.Size() / 20)
+				 && (water < 8)
 				 && (gridPort == 0);
 	return valid;
 }
