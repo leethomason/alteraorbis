@@ -587,7 +587,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
 
 	int age = AgeI();
-	volcTimer.SetPeriod((age >= 1 ? MSEC_TO_VOLC * 4 : MSEC_TO_VOLC / 2) + random.Rand(1000));
+	volcTimer.SetPeriod((age >= 1 ? MSEC_TO_VOLC * 4 : MSEC_TO_VOLC) + random.Rand(1000));
 
 	while( volcano-- ) {
 		for( int i=0; i<5; ++i ) {
