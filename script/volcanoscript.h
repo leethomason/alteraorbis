@@ -34,7 +34,7 @@ class VolcanoScript : public Component
 	typedef Component super;
 
 public:
-	VolcanoScript(int maxRad = 6, bool round = false, EVolcanoType type = EVolcanoType::VOLCANO);
+	VolcanoScript(int maxRad = 6, EVolcanoType type = EVolcanoType::VOLCANO);
 	virtual ~VolcanoScript()			{}
 
 	virtual void Serialize( XStream* xs );
@@ -46,7 +46,6 @@ public:
 
 private:
 	int			maxRad;
-	bool		round;
 	EVolcanoType type;
 	CTicker		spreadTicker;
 	int			rad;

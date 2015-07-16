@@ -581,7 +581,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 #endif
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
-	static const int VOLC_RAD = VolcanoScript::MAX_RAD;
+	static const int VOLC_RAD = 6;
 	static const int VOLC_DIAM = VOLC_RAD*2+1;
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
@@ -595,11 +595,13 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 			int y = random.Rand(context.worldMap->Height());
 			if ( context.worldMap->IsLand( x, y ) ) {
 				// Don't destroy domains in use. Crazy annoying.
+				// ...except deities. They can rebuild, and
+				// it keeps from having all flat deity domains.
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
 				CoreScript* cs = CoreScript::GetCore( sector );
-				if ( !cs || !cs->InUse()) {
-					CreateVolcano( x, y );
+				if ( !cs || !cs->InUse() || Team::IsDeity(cs->ParentChit()->Team())) {
+					CreateVolcano( x, y, random.Rand(4) == 0 );
 				}
 				break;
 			}
@@ -798,21 +800,39 @@ void Sim::SetAllRock()
 }
 
 
-void Sim::CreateVolcano( int x, int y )
+void Sim::CreateVolcano(int x, int y, bool variation)
 {
-	const SectorData& sd = context.worldMap->GetSectorData( x, y );
-	if ( sd.ports == 0 ) {
+	const SectorData& sd = context.worldMap->GetSectorData(x, y);
+	if (sd.ports == 0) {
 		// no point to volcanoes in the outland
 		return;
 	}
 
 	Chit* chit = context.chitBag->NewChit();
-	chit->Add( new VolcanoScript());
 
-	chit->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
-	
+	int maxRad = 6;
+	EVolcanoType type = EVolcanoType::VOLCANO;
+	IString newsString = StringPool::Intern("Volcano");
+
+	if (variation) {
+		maxRad = 5 + random.Rand(3);
+		float yFactor = float(y) / float(context.worldMap->Height());
+		if (yFactor < random.Uniform()) {
+			type = EVolcanoType::MOUNTAIN;
+			newsString = StringPool::Intern("Volcano:Mnt");
+		}
+		else {
+			type = EVolcanoType::CRATER;
+			newsString = StringPool::Intern("Volcano:Crt");
+		}
+	}
+
+	chit->Add(new VolcanoScript(maxRad, type));
+
+	chit->SetPosition((float)x + 0.5f, 0.0f, (float)y + 0.5f);
+
 	Vector2F pos = ToWorld2F(chit->Position());
-	ChitBag::CurrentNews news = { StringPool::Intern("Volcano"), pos, 0 };
+	ChitBag::CurrentNews news = { newsString, pos, 0 };
 	context.chitBag->PushCurrentNews(news);
 }
 

@@ -84,7 +84,7 @@ public:
 
 	// Set all rock to the nominal values
 	void SetAllRock();
-	void CreateVolcano( int x, int y );
+	void CreateVolcano( int x, int y, bool variation );
 	// type=-1 will scan for natural plant choice
 	bool CreatePlant( int x, int y, int type, int stage=0 );
 	void SeedPlants();
