@@ -93,7 +93,6 @@ private:
 
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
-											 //|| (fluidHeight >= FLUID_BLOCKING) 
 											 || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 
