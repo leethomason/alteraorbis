@@ -361,7 +361,7 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 				Swap( &r.max.x, &r.max.y );
 			}
 
-			Draw( r, 0 );
+			Draw( r, WorldGrid::WATER );
 		}
 	}
 
@@ -369,35 +369,45 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 	// everything which can be a road is a road.
 	BitArray< NUM_SECTORS, NUM_SECTORS, 1 > sectors;
 	Random random( seed );
-
 	Vector2I center = { NUM_SECTORS/2, NUM_SECTORS/2 };
 	int rad = NUM_SECTORS/2;
 
-	for( int j=1; j<NUM_SECTORS-1; ++j ) {
-		int dy = j - center.x;
-		int d2 = rad*rad - dy*dy;
-		int dx = d2 ? LRintf( sqrt( (float)(d2) )) : 1;
+	// Set the basic:
+	Rectangle2I r;
+	r.Set(1, 1, NUM_SECTORS - 2, NUM_SECTORS - 2);
+	sectors.SetRect(r);
 
-		int dx0 = random.Rand( dx )/2 + dx/2;
-		int dx1 = random.Rand( dx )/2 + dx/2;
+	// Clear corners:
+	sectors.Clear(1, 1);
+	sectors.Clear(1, NUM_SECTORS - 2);
+	sectors.Clear(NUM_SECTORS - 2, 1);
+	sectors.Clear(NUM_SECTORS - 2, NUM_SECTORS - 2);
+	int nCores = (NUM_SECTORS - 2) * (NUM_SECTORS - 2) - 4;
 
-		if ( dx0 == 0 && dx1 == 0 ) {
-			if ( random.Bit() )
-				dx0 = 1;
-			else
-				dx1 = 1;
+	// 16x16 -> 120 domains
+	// 8x8 -> 30 domains
+	static const int NUM_CORES = 120 * NUM_SECTORS_2 / (16 * 16);
+
+	while (nCores > NUM_CORES) {
+		int y = random.Rand(NUM_SECTORS);
+		if (random.Bit()) {
+			for (int x = 0; x < center.x - 2; ++x) {
+				if (sectors.IsSet(x, y)) {
+					sectors.Clear(x, y);
+					nCores--;
+					break;
+				}
+			}
 		}
-
-		int x0 = center.x - dx0;
-		int x1 = center.x + dx1;
-		x0 = Clamp( x0, 1, NUM_SECTORS-2 );
-		x1 = Clamp( x1, 1, NUM_SECTORS-2 );
-
-		Rectangle2I r;
-		GLASSERT(x0 > 0 && x0 < NUM_SECTORS / 2);
-		GLASSERT(x1 > x0 && x1 < NUM_SECTORS - 1);
-		r.Set( x0, j, x1, j );
-		sectors.SetRect( r );
+		else {
+			for (int x = NUM_SECTORS-1; x > center.x + 1; --x) {
+				if (sectors.IsSet(x, y)) {
+					sectors.Clear(x, y);
+					nCores--;
+					break;
+				}
+			}
+		}
 	}
 
 	// Now fill in roads.
@@ -574,9 +584,6 @@ Vector2F SectorData::PortPos( const grinliz::Rectangle2I portRect, U32 seed )
 
 void WorldGen::AddPorts( SectorData* s )
 {
-//	int x = s->x;
-//	int y = s->y;
-
 	for( int i=0; i<4; ++i ) {
 		int port = 1 << i;
 		if ( s->ports & port ) {

@@ -26,6 +26,8 @@ FluidSim::FluidSim(WorldMap* wm, const Vector2I& s) : worldMap(wm), settled(fals
 	outerBounds.DoIntersection(worldMap->Bounds());
 	innerBounds = outerBounds;
 	innerBounds.Outset(-1);
+	type = WorldGrid::FLUID_WATER;
+	nRocks = 0;
 }
 
 
@@ -220,7 +222,9 @@ bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinli
 bool FluidSim::MoveFluid()
 {
 	bool thisSettled = true;
-	for (Rectangle2IIterator it(innerBounds); !it.Done(); it.Next()) {
+	nRocks = 0;
+
+	for (Rectangle2IIterator it(outerBounds); !it.Done(); it.Next()) {
 		Vector2I p = it.Pos();
 		Vector2I loc2i = p - outerBounds.min;
 		GLASSERT(loc2i.x < SECTOR_SIZE && loc2i.y < SECTOR_SIZE);
@@ -235,6 +239,9 @@ bool FluidSim::MoveFluid()
 		else if (wg->fluidHeight > unsigned(d * FLUID_PER_ROCK)) {
 			wg->fluidHeight--;
 			thisSettled = false;
+		}
+		if (wg->RockHeight()) {
+			++nRocks;
 		}
 	}
 	return thisSettled;

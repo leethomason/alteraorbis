@@ -13,6 +13,8 @@
 #include "../game/worldinfo.h"
 #include "../game/reservebank.h"
 #include "../game/healthcomponent.h"
+#include "../game/physicssims.h"
+#include "../game/fluidsim.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -167,6 +169,23 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 
 	aiTicker.Randomize(parentChit->random.Rand());
 	strategicTicker.Randomize(parentChit->random.Rand());
+
+	FluidSim* fluidSim = Context()->physicsSims->GetFluidSim(sector);
+	if (fluidSim) {
+		// Not serialized - needs to be consistent:
+		GLASSERT(parentChit->GetItem());
+		Vector2I center = { NUM_SECTORS / 2, NUM_SECTORS / 2 };
+		Vector2I delta = sector - center;
+		// 200 is fudge #...
+		int len2 = delta.LengthSquared();
+		int len = int(sqrt(double(len2)));
+		int d = len * 200 / NUM_SECTORS;
+		
+		bool lava = d > Random::Hash8(sector.y * NUM_SECTORS + sector.x);
+		if (parentChit->Team() == DEITY_TRUULGA) lava = true;
+
+		fluidSim->SetFluid(lava ? WorldGrid::FLUID_LAVA : WorldGrid::FLUID_WATER);
+	}
 }
 
 

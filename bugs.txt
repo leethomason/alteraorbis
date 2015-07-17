@@ -2,8 +2,9 @@
 	- world gen
 		- canyon? river & pool walk?
 		- combine with terrain displacement?
-		- fluid: water and lava determined by weather & team
+		x fluid: water and lava determined by weather & team
 		x no-limit fluidSim
+		x stable # of domains
 	- spawn
 		x new strategy
 		x make sure a little bit of everything spawns

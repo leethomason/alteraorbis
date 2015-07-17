@@ -43,6 +43,7 @@
 #include "circuitsim.h"
 #include "gridmovecomponent.h"
 #include "physicssims.h"
+#include "fluidsim.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -589,21 +590,42 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	int age = AgeI();
 	volcTimer.SetPeriod((age >= 1 ? MSEC_TO_VOLC * 4 : MSEC_TO_VOLC) + random.Rand(1000));
 
-	while( volcano-- ) {
-		for( int i=0; i<5; ++i ) {
-			int x = random.Rand(context.worldMap->Width());
-			int y = random.Rand(context.worldMap->Height());
-			if ( context.worldMap->IsLand( x, y ) ) {
-				// Don't destroy domains in use. Crazy annoying.
-				// ...except deities. They can rebuild, and
-				// it keeps from having all flat deity domains.
-				Vector2I pos = { x, y };
-				Vector2I sector = ToSector( pos );
-				CoreScript* cs = CoreScript::GetCore( sector );
-				if ( !cs || !cs->InUse() || Team::IsDeity(cs->ParentChit()->Team())) {
-					CreateVolcano( x, y, random.Rand(4) == 0 );
+	if (volcano) {
+		int rock = 0, nSectors = 0;
+		for (int y = 0; y < NUM_SECTORS; ++y) {
+			for (int x = 0; x < NUM_SECTORS; ++x) {
+				Vector2I sector = { x, y };
+				FluidSim* fluidSim = context.physicsSims->GetFluidSim(sector);
+				if (CoreScript::GetCore(sector) && fluidSim && fluidSim->Settled()) {
+					nSectors++;
+					rock += fluidSim->NumRocks();
 				}
-				break;
+			}
+		}
+		const static float ROCK_COVERAGE = 0.35f;
+		if (nSectors > NUM_SECTORS) {
+			float ratio = float(rock) / float(nSectors * SECTOR_SIZE_2);
+			if (ratio > ROCK_COVERAGE) {
+				volcano = 0;
+			}
+		}
+
+		while (volcano--) {
+			for (int i = 0; i < 5; ++i) {
+				int x = random.Rand(context.worldMap->Width());
+				int y = random.Rand(context.worldMap->Height());
+				if (context.worldMap->IsLand(x, y)) {
+					// Don't destroy domains in use. Crazy annoying.
+					// ...except deities. They can rebuild, and
+					// it keeps from having all flat deity domains.
+					Vector2I pos = { x, y };
+					Vector2I sector = ToSector(pos);
+					CoreScript* cs = CoreScript::GetCore(sector);
+					if (!cs || !cs->InUse() || Team::IsDeity(cs->ParentChit()->Team())) {
+						CreateVolcano(x, y, random.Rand(4) == 0);
+					}
+					break;
+				}
 			}
 		}
 	}
