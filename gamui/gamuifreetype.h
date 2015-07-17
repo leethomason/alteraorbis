@@ -15,7 +15,7 @@ public:
 	virtual ~GamuiFreetypeBridge();
 
 	bool Init(const char* facePath);
-	bool Generate(int height, uint8_t* pixels, int w, int h);
+	bool Generate(int height, uint8_t* pixels, int w, int h, bool correctHeight);
 
 	virtual void GamuiGlyph(int c0, int cPrev,	// character, prev character
 		gamui::IGamuiText::GlyphMetrics* metric);

@@ -45,7 +45,7 @@ void GamuiFreetypeBridge::Blit(uint8_t* target, int scanbytes, const FT_Bitmap& 
 }
 
 
-bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h)
+bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h, bool correctHeight)
 {
 	fontHeight = _height + deltaHeight;
 	textureWidth = w;
@@ -66,11 +66,46 @@ bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h)
 		memset(pixels, 0, w*h);
 		memset(glyphs, 0, sizeof(Glyph)*NUM_CODES);
 
+		// Correct for bad heights.
+		// Different fonts are different sizes, and it makes switching
+		// annoying. Do a patch up here, from the notion that 11 point
+		// Roboto returns an 8 pixel height for the test characters.
+		if (scale == 1 && fontHeight > 4 && correctHeight)
+		{
+			int bestFontHeight = fontHeight;
+			float bestError = 10.0f;
+			int bestDelta = 100;
+
+			for (int testHeight = fontHeight - 2; testHeight <= fontHeight + 2; ++testHeight) {
+				FT_Set_Pixel_Sizes(face, 0, testHeight);
+				static const int NTEST = 4;
+				const char test[NTEST] = { 'H', 'I', 'W', 'A' };
+				int height = 0;
+
+				for (int i = 0; i < NTEST; ++i) {
+					FT_UInt glyphIndex = FT_Get_Char_Index(face, 'H');
+					FT_Load_Glyph(face, glyphIndex, 0);
+					const FT_GlyphSlot& slot = face->glyph;
+					height += slot->metrics.height;
+				}
+				height = (height/NTEST) >> 6;
+				float error = fabs(float(height) - float(fontHeight) * 8.0f / 11.0f);
+				int delta = abs(height - fontHeight);
+				if ((error < bestError) || (error == bestError && delta < bestDelta)) {
+					bestError = error;
+					bestFontHeight = testHeight;
+					bestDelta = delta;
+				}
+			}
+			FT_Set_Pixel_Sizes(face, 0, bestFontHeight);
+		}
+
 		for (int ccode = FIRST_CHAR_CODE; ccode < END_CHAR_CODE; ++ccode) {
 			FT_UInt glyphIndex = FT_Get_Char_Index(face, ccode);
 			FT_Error error = FT_Load_Glyph(face, glyphIndex, 0);
 			GAMUIASSERT(error == 0);
 			(void)error;
+
 			// http://www.freetype.org/freetype2/docs/glyphs/glyphs-7.html
 			error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 

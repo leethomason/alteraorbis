@@ -56,7 +56,7 @@ void FontSingleton::CreateTexture(Texture* t)
 		uint8_t* d8 = new uint8_t[w*h];
 		uint16_t* d16 = new uint16_t[w*h];
 
-		Generate(fontHeight, d8, w, h);
+		Generate(fontHeight, d8, w, h, true);
 		for (int j = 0; j < h; ++j) {
 			for (int i = 0; i < w; ++i) {
 				uint8_t c8 = d8[j*w + i];
