@@ -736,82 +736,37 @@ void CoreScript::DoTickInUse(int /*delta*/, int nSpawnTicks)
 void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 {
 	int lesser, greater, denizen;
-	Context()->chitBag->census.NumByType(&lesser, &greater, &denizen);
+	const Census& census = Context()->chitBag->census;
+	census.NumByType(&lesser, &greater, &denizen);
 	bool lesserPossible = lesser < TYPICAL_LESSER;
 
-	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
-	GLASSERT( ms );
-	Vector2I pos2i = ms->MapPosition();
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
 
-	if ( nSpawnTicks && lesserPossible)
-	{
+	if (nSpawnTicks && lesserPossible) {
 #if SPAWN_MOBS > 0
 		int spawnEnabled = Context()->chitBag->GetSim()->SpawnEnabled() & Sim::SPAWN_LESSER;
-		if (Context()->chitBag->GetSim() && spawnEnabled) {
+		if (Context()->chitBag->GetSim() && spawnEnabled && !defaultSpawn.empty()) {
 
-			static const int NSPAWN = 16;
-			static const int FUZZ = 4;
+			Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
 
-			int outland = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
-			outland += Random::Hash8(sector.x + sector.y * 256) % FUZZ;
-			outland = Clamp(outland, 0, NUM_SECTORS - 1);
+			static const float RAT = 0.25f;
+			float roll = parentChit->random.Uniform();
+			IString spawn = defaultSpawn;
+			int nSpawn = 1;
 
-			int spawn = outland * NSPAWN / (NUM_SECTORS + FUZZ / 2);
-			spawn = Clamp(spawn, 0, NSPAWN - 1);
-
-			Rectangle2F r;
-			r.Set((float)pos2i.x, (float)(pos2i.y), (float)(pos2i.x + 1), (float)(pos2i.y + 1));
-			CChitArray arr;
-			ChitHasAIComponent hasAIComponent;
-			Context()->chitBag->QuerySpatialHash(&arr, r, 0, &hasAIComponent);
-			if (arr.Size() < 2) {
-				Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
-
-				if (defaultSpawn.empty()) {
-					/*
-						What to spawn?
-						A core has its "typical spawn": mantis, redManis, trilobyte.
-						All cores scan spawn trilobyte.
-					*/
-					static const char* SPAWN[NSPAWN] = {
-						"trilobyte",
-						"trilobyte",
-						"trilobyte",
-						"mantis",
-						"trilobyte",
-						"mantis",
-						"mantis",
-						"redMantis",
-						"mantis",
-						"troll",
-						"mantis",
-						"redMantis",
-						"mantis",
-						"redMantis",
-						"troll",
-						"redMantis"
-					};
-					defaultSpawn = StringPool::Intern(SPAWN[outland]);
-				}
-
-				static const float rat = 0.25f;
-				const char* spawn = 0;
-
-				float roll = parentChit->random.Uniform();
-
-				if (!spawn && lesserPossible && (roll < rat)) {
-					spawn = "trilobyte";
-				}
-				if (!spawn && lesserPossible) {
-					spawn = defaultSpawn.c_str();
-				}
-				if (spawn) {
-					IString ispawn = StringPool::Intern(spawn, true);
-					int team = Team::GetTeam(ispawn);
-					GLASSERT(team != TEAM_NEUTRAL);
-					Context()->chitBag->NewMonsterChit(pf, spawn, team);
-				}
+			if (roll < RAT) {
+				spawn = ISC::trilobyte;
+				nSpawn = 4;
+//				if ((lesser > TYPICAL_LESSER / 2) && (census.NumOf(ISC::trilobyte) < SPAWN_RATS)) {
+//					nSpawn = 4;
+//				}
+			}
+			int team = Team::GetTeam(spawn);
+			GLASSERT(team != TEAM_NEUTRAL);
+			for (int i = 0; i < nSpawn; ++i) {
+				Context()->chitBag->NewMonsterChit(pf, spawn.safe_str(), team);
+				pf.x += 0.05f;
 			}
 		}
 #endif

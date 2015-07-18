@@ -55,7 +55,7 @@ void Census::RemoveCore(const grinliz::IString& name)
 	}
 }
 
-void Census::NumByType(int *lesser, int *greater, int *denizen)
+void Census::NumByType(int *lesser, int *greater, int *denizen) const
 {
 	*lesser = 0;
 	*greater = 0;
@@ -88,4 +88,15 @@ int Census::NumCoresOfTeam(int group) const
 		}
 	}
 	return count;
+}
+
+
+int Census::NumOf(const grinliz::IString& name) const
+{
+	for (int i = 0; i < mobItems.Size(); ++i) {
+		if (mobItems[i].name == name) {
+			return mobItems[i].count;
+		}
+	}
+	return 0;
 }

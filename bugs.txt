@@ -8,7 +8,7 @@
 	- spawn
 		x new strategy
 		x make sure a little bit of everything spawns
-		- trilobyte zerg spawning
+		x trilobyte zerg spawning
 	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
 		- cut back initial allocation
 		- make sure weapons are getting to denizens
@@ -27,7 +27,7 @@
 	- art for R1k and Q
 - markets: unlimited? sell to core? trade?
 - new inventory UI
-- fix text size
+x fix text size
 - immediately spawn avatar on core creation
 
 - rules for sub-teams (must be adjacent? near?)

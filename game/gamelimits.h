@@ -63,6 +63,8 @@ static const int TYPICAL_LESSER		= 1500		/ MAP_SCALE_FACTOR;
 static const int TYPICAL_GREATER	= 10		/ MAP_SCALE_FACTOR;		// These guys get overwhelming fast - they can clear a domain.
 static const int TYPICAL_PLANTS		= 50 * 1000 / MAP_SCALE_FACTOR;
 
+static const int SPAWN_RATS			= TYPICAL_LESSER / 10;	// below this will aggressively spawn rats
+
 static const int GOLD_PER_DENIZEN  = 100;
 static const int GOLD_PER_LESSER   =  10;
 static const int GOLD_PER_GREATER  = 100;

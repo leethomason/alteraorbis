@@ -403,7 +403,7 @@
 
   <GameItem name="trilobyte"
         resource="arachnoid"
-        flags="AI_WANDER_HERD AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE FLOAT"
+        flags="AI_WANDER_HERD AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE DAMAGE_UNDER_WATER"
         mob="lesser"
         nameGen="monster"
         baseHP="10"

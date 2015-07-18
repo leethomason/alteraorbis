@@ -32,7 +32,8 @@ public:
 	void AddCore(const grinliz::IString& team);
 	void RemoveCore(const grinliz::IString& team);
 
-	void NumByType(int *lesser, int *greater, int *denizen);
+	void NumByType(int *lesser, int *greater, int *denizen) const;
+	int NumOf(const grinliz::IString& name) const;
 
 	struct MOBItem {
 		MOBItem() : count(0) {}
