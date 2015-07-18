@@ -120,7 +120,6 @@ void CoreScript::Serialize(XStream* xs)
 	XARC_SER(xs, autoRebuild);
 	XARC_SER(xs, pave);
 
-	XARC_SER(xs, defaultSpawn);
 	XARC_SER_VAL_CARRAY(xs, citizens);
 	
 	GLASSERT(MAX_SQUADS == 4);
@@ -746,6 +745,8 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	if (nSpawnTicks && lesserPossible) {
 #if SPAWN_MOBS > 0
 		int spawnEnabled = Context()->chitBag->GetSim()->SpawnEnabled() & Sim::SPAWN_LESSER;
+		IString defaultSpawn = Context()->worldMap->GetSectorData(sector).defaultSpawn;
+
 		if (Context()->chitBag->GetSim() && spawnEnabled && !defaultSpawn.empty()) {
 
 			Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };

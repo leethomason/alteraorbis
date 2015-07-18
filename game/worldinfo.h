@@ -54,6 +54,7 @@ public:
 	int							area;
 	micropather::MicroPather*	pather;
 	grinliz::IString			name;
+	grinliz::IString			defaultSpawn;
 
 	bool HasCore() const				{ return core.x > 0 && core.y > 0; }
 	grinliz::Vector2I CoreLoc() const	{ return SectorBounds(sector).Center(); }
@@ -103,17 +104,19 @@ public:
 	int Solve( GridBlock start, GridBlock end, grinliz::CDynArray<GridBlock>* path );
 
 	// Get the current sector from the grid coordinates.
-	const SectorData& GetSector( const grinliz::Vector2I& sector ) const {
+	const SectorData& GetSectorData( const grinliz::Vector2I& sector ) const {
 		GLASSERT( sector.x >= 0 && sector.y >= 0 && sector.x < NUM_SECTORS && sector.y < NUM_SECTORS );
 		return sectorData[NUM_SECTORS*sector.y+sector.x];
+	}
+
+	SectorData* GetSectorDataMutable(const grinliz::Vector2I& sector) {
+		GLASSERT( sector.x >= 0 && sector.y >= 0 && sector.x < NUM_SECTORS && sector.y < NUM_SECTORS );
+		return &sectorData[NUM_SECTORS*sector.y+sector.x];
 	}
 
 	// Get the grid edge from the sector and the port.
 	// Return 0,0 if it doesn't exist.
 	GridBlock GetGridBlock( const grinliz::Vector2I& sector, int port ) const;
-
-	// Get the cx, cy of the sector from an arbitrary coordinate.
-	const SectorData& GetSectorInfo( float x, float y ) const;
 
 	const SectorData* SectorDataMem() const { return sectorData; }
 	SectorData* SectorDataMemMutable()		{ return sectorData; }

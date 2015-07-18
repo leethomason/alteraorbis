@@ -465,7 +465,7 @@ int PathMoveComponent::DoTick( U32 delta )
 
 			// Sector and Port of departure:
 			Vector2I departureSector = ToSector(pos2i);
-			const SectorData& sd = context->worldMap->GetWorldInfo().GetSector( departureSector );
+			const SectorData& sd = context->worldMap->GetWorldInfo().GetSectorData( departureSector );
 			int departurePort = sd.NearestPort( dest.pos );
 
 			Rectangle2I portBounds = sd.GetPortLoc( departurePort );

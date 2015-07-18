@@ -1618,7 +1618,7 @@ void GameScene::DoTick(U32 delta)
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt(&lookAt);
 	Vector2I viewingSector = ToSector(lookAt.x, lookAt.z);
-	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector(viewingSector);
+	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSectorData(viewingSector);
 
 	CoreScript* homeCoreScript = GetHomeCore();
 

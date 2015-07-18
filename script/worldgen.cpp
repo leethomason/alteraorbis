@@ -29,17 +29,18 @@ SectorData::~SectorData()
 	delete pather;
 }
 
-void SectorData::Serialize( XStream* xs )
+void SectorData::Serialize(XStream* xs)
 {
-	XarcOpen( xs, "SectorData" );
-	XARC_SER( xs, sector );
-	XARC_SER( xs, ports );
-	XARC_SER( xs, core );
-	XARC_SER( xs, area );
-	XARC_SER( xs, name );
-	XarcClose( xs );
+	XarcOpen(xs, "SectorData");
+	XARC_SER(xs, sector);
+	XARC_SER(xs, ports);
+	XARC_SER(xs, core);
+	XARC_SER(xs, area);
+	XARC_SER(xs, name);
+	XARC_SER(xs, defaultSpawn);
+	XarcClose(xs);
 
-	if ( xs->Loading() ) {
+	if (xs->Loading()) {
 		delete pather;
 		pather = 0;
 	}

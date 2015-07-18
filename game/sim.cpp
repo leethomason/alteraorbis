@@ -319,7 +319,8 @@ void Sim::AssignDefaultSpawns()
 		for (Rectangle2IEdgeIterator it(rect); !it.Done(); it.Next()) {
 			CoreScript* cs = CoreScript::GetCore(it.Pos());
 			if (cs) {
-				cs->SetDefaultSpawn(StringPool::Intern(list.Pop()));
+				SectorData* sectorData = context.worldMap->GetWorldInfoMutable()->GetSectorDataMutable(it.Pos());
+				sectorData->defaultSpawn = StringPool::Intern(list.Pop());
 			}
 		}
 	}

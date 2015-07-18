@@ -174,13 +174,13 @@ void WorldMap::FreeVBOs()
 const SectorData& WorldMap::GetSectorData( int x, int y ) const
 {
 	Vector2I sector = ToSector(x, y);
-	return worldInfo->GetSector( sector );
+	return worldInfo->GetSectorData( sector );
 }
 
 
 const SectorData& WorldMap::GetSectorData( const Vector2I& sector ) const
 {
-	return worldInfo->GetSector( sector );
+	return worldInfo->GetSectorData( sector );
 }
 
 
@@ -364,7 +364,7 @@ void WorldMap::Load( const char* filename )
 
 void WorldMap::PatherCacheHitMiss( const grinliz::Vector2I& sector, micropather::CacheData* data )
 {
-	const SectorData& sd = worldInfo->GetSector( sector );
+	const SectorData& sd = worldInfo->GetSectorData( sector );
 	if ( sd.pather ) {
 		sd.pather->GetCacheData( data );
 	}
@@ -1506,7 +1506,7 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 SectorPort WorldMap::NearestPort( const Vector2F& pos )
 {
 	Vector2I secPos = ToSector(pos);
-	const SectorData& sd = worldInfo->GetSector( secPos );
+	const SectorData& sd = worldInfo->GetSectorData( secPos );
 
 	int   bestPort = 0;
 	float bestCost = FLT_MAX;

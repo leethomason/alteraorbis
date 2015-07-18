@@ -127,7 +127,7 @@ int GridMoveComponent::DoTick( U32 delta )
 	case ON_BOARD:
 		// Presume we started somewhere rational. Move to grid.
 		{
-			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y );
+			const SectorData& sd = worldInfo.GetSectorData(ToSector(pos));
 			int port = sd.NearestPort( pos );
 			GLASSERT(port);
 			Vector2I sector = sd.sector;
@@ -142,7 +142,7 @@ int GridMoveComponent::DoTick( U32 delta )
 	case OFF_BOARD:
 		{
 			GLASSERT( destSectorPort.IsValid() );
-			const SectorData& sd = worldInfo.GetSector( destSectorPort.sector );
+			const SectorData& sd = worldInfo.GetSectorData( destSectorPort.sector );
 			Rectangle2I portBounds = sd.GetPortLoc( destSectorPort.port );
 			dest = SectorData::PortPos( portBounds, (U32) parentChit->ID());
 			stateIfDestReached = DONE;

@@ -81,15 +81,6 @@ GridBlock WorldInfo::GetGridBlock( const grinliz::Vector2I& sector, int port ) c
 	return g;
 }
 
-
-const SectorData& WorldInfo::GetSectorInfo( float fx, float fy ) const
-{
-	Vector2I v = { (int)fx / SECTOR_SIZE, (int)fy / SECTOR_SIZE };
-	const SectorData& sd = GetSector( v );
-	return sd;
-}
-
-
 float WorldInfo::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
 	GridBlock start = FromState( stateStart );	

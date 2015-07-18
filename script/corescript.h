@@ -130,8 +130,6 @@ public:
 	bool InUse() const;
 
 	WorkQueue* GetWorkQueue()		{ return workQueue; }
-	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
-
 	const CoreAchievement& GetAchievement() const { return achievement; }
 
 	// Current tech:
@@ -155,10 +153,10 @@ public:
 		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
 	}
 
-	static CoreScript* GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
-	static CoreScript* GetCoreFromTeam(int team);
+	static CoreScript*  GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
+	static CoreScript*  GetCoreFromTeam(int team);
 	static CoreScript** GetCoreList(int *n);
-	static CoreScript* CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
+	static CoreScript*  CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
 
 	static void Init();
 	static void Free();
@@ -192,7 +190,6 @@ private:
 	bool		autoRebuild;
 	int			pave;
 
-	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
 	grinliz::CArray<int, SQUAD_SIZE> squads[MAX_SQUADS];
 	grinliz::CDynArray< grinliz::Vector2I > tasks;
