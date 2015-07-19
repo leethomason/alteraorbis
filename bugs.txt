@@ -28,7 +28,9 @@
 - markets: unlimited? sell to core? trade?
 - new inventory UI
 x fix text size
-- immediately spawn avatar on core creation
+d immediately spawn avatar on core creation
+- logic to visit deities
+- damage: items seem to get blow away...crystal not dropped
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
