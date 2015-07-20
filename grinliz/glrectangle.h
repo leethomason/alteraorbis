@@ -290,6 +290,15 @@ struct Rectangle2I : public Rectangle2< int >
 		min.Set( _xmin, _ymin );
 		max.Set( _xmax, _ymax );
 	} 
+	Rectangle2I(const Vector2I& v) {
+		min = max = v;
+	}
+	Rectangle2I(const Vector2I& v0, const Vector2I& v1) {
+		GLASSERT(v0.x <= v1.x);
+		GLASSERT(v0.y <= v1.y);
+		min = v0;
+		max = v1;
+	}
 
 	enum { INVALID = INT_MIN };
 

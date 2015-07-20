@@ -57,8 +57,8 @@ static const float	NORMAL_AWARENESS			= 10.0f;
 static const float	LOOSE_AWARENESS = LONGEST_WEAPON_RANGE;
 static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
-static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
-static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
+static const int	SECTOR_HERD_ODDS			= 50;		// as in 1 in WANDER_ODDS
+static const int	SECTOR_WANDER_ODDS			= 10;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
 static const float	FRUIT_AWARE					=  5.0f;
@@ -1243,14 +1243,6 @@ void AIComponent::GoSectorHerd(bool focus)
 
 bool AIComponent::SectorHerd(bool focus)
 {
-	/*
-		Depending on the MOB and tech level,
-		avoid or be attracted to core
-		locations. Big travel in is implemented
-		be the CoreScript
-
-		The current rules are in corescript.cpp
-		*/
 	static const int NDELTA = 12;
 	static const Vector2I delta[NDELTA] = {
 		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
@@ -1260,6 +1252,7 @@ bool AIComponent::SectorHerd(bool focus)
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
+	const ItemComponent* ic = parentChit->GetItemComponent();
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
 	const SectorPort start = context->worldMap->NearestPort(pos);
@@ -1269,25 +1262,44 @@ bool AIComponent::SectorHerd(bool focus)
 		return false;
 	}
 
-	int deityTeam = gameItem->Deity();
-	CoreScript* deityCS = deityTeam ? CoreScript::GetCoreFromTeam(deityTeam) : 0;
+	// Should be choose a shopping destination?
+	if (gameItem->flags & GameItem::AI_USES_BUILDINGS) {
 
-	if (deityCS && deityCS->ParentChit()->GetComponent("ForgeDomainAI")) {
-		// Visit Truulga every now and again. And if leaving truuga...go far.
-		Chit* deityChit = deityCS->ParentChit();
-		Vector2I deitySector = ToSector(deityChit->Position());
-		if (ToSector(parentChit->Position()) == deitySector) {
-			// At Truulga - try to go far.
+		int deityTeam = gameItem->Deity();
+		CoreScript* deityCS = deityTeam ? CoreScript::GetCoreFromTeam(deityTeam) : 0;
+
+		// Are we at a deity location? If so, travel far.
+		if (deityCS && (ToSector(deityCS->ParentChit()->Position()) == ToSector(parentChit->Position()))) {
 			Vector2I destSector = { int(parentChit->random.Rand(NUM_SECTORS)), int(parentChit->random.Rand(NUM_SECTORS)) };
 			if (DoSectorHerd(focus, destSector))
 				return true;
-			// Else drop out and use code below to go to a neighbor.
 		}
-		else {
-			// Should we visit Deity? Check for a little gold, too.
-			// FIXME: needs tuning!
-			if (gameItem->wallet.Gold() > 15 && parentChit->random.Rand(15) == 0) {
-				return DoSectorHerd(focus, deitySector);
+
+		int reasonToShop = 0;
+		if (!ic->QuerySelectMelee())		reasonToShop++;
+		if (!ic->QuerySelectRanged())		reasonToShop++;
+		if (!ic->GetShield())				reasonToShop++;
+		if (gameItem->wallet.Gold() > 100)	reasonToShop++;
+		if (ic->ItemToSell())				reasonToShop += 4;
+
+		if (gameItem->wallet.Gold() < 20 && !ic->ItemToSell())
+			reasonToShop = 0;
+
+		if (parentChit->random.Rand(16) < reasonToShop) {
+			CArray<Vector2I, 8> markets;
+
+			if (MarketAI::CoreHasMarket(deityCS)) {
+				markets.Push(ToSector(deityCS->ParentChit()->Position()));
+			}
+			Rectangle2I sectors(ToSector(parentChit->Position()));
+			for (Rectangle2IIterator it(sectors); !it.Done(); it.Next()) {
+				if (MarketAI::CoreHasMarket(CoreScript::GetCore(it.Pos()), parentChit)) {
+					markets.PushIfCap(it.Pos());
+				}
+			}
+			if (markets.Size()) {
+				Vector2I destSector = markets[parentChit->random.Rand(markets.Size())];
+				return DoSectorHerd(focus, destSector);			
 			}
 		}
 	}
@@ -2202,13 +2214,13 @@ void AIComponent::ThinkNormal(  )
 		bool sectorHerd = pmc
 							&& (itemFlags & GameItem::AI_SECTOR_HERD)
 							&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
-							&& (parentChit->random.Rand(WANDER_ODDS) == 0)
-							&& (CoreScript::GetCoreFromTeam(parentChit->Team()) == 0);
-		bool sectorWander =		pmc
+							&& (parentChit->random.Rand(SECTOR_HERD_ODDS) == 0)
+							&& (Team::IsRogue(parentChit->Team()));
+		bool sectorWander = pmc
 							&& (itemFlags & GameItem::AI_SECTOR_WANDER)
 							&& gameItem->HPFraction() > 0.80f
-							&& (parentChit->random.Rand( GREATER_WANDER_ODDS ) == 0)
-							&& (CoreScript::GetCoreFromTeam(parentChit->Team()) == 0);
+							&& (parentChit->random.Rand(SECTOR_WANDER_ODDS) == 0)
+							&& (Team::IsRogue(parentChit->Team()));
 
 		if ( sectorHerd || sectorWander ) 
 		{

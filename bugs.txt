@@ -5,12 +5,12 @@
 		x fluid: water and lava determined by weather & team
 		x no-limit fluidSim
 		x stable # of domains
-	- spawn
+	x spawn
 		x new strategy
 		x make sure a little bit of everything spawns
 		x trilobyte zerg spawning
 	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
-		- cut back initial allocation
+		x cut back initial allocation
 		- make sure weapons are getting to denizens
 	- View mode
 		x tap a MOB to select it
@@ -31,6 +31,9 @@ x fix text size
 d immediately spawn avatar on core creation
 - logic to visit deities
 - damage: items seem to get blow away...crystal not dropped
+- workers in deity domains too much stuff - only loot if there is a vault?
+- r1k weapons way to powerful...where are they coming from? (shock + fire)
+- markets in deity domains
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct

@@ -7,6 +7,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chitcontext.h"
 #include "../game/lumoschitbag.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 
@@ -16,29 +17,6 @@ MarketAI::MarketAI( Chit* c ) : chit(c)
 	ic = chit->GetItemComponent();
 	GLASSERT( ic );
 }
-
-
-#if 0
-// Complexity without value.
-int MarketAI::ValueToCost( int value ) 
-{
-	if ( value == 0 ) return 0;
-
-	int cost = int(float(value) * (1.0f + SALES_TAX));
-	return cost > 1 ? cost : 1;
-}
-
-
-int MarketAI::ValueToTrade( int value ) 
-{
-/*	if ( value == 0 ) return 0;
-
-	int cost = int( float(value) * MARKET_COST_MULT );
-	return cost > 1 ? cost : 1;
-	*/
-	return value;
-}
-#endif
 
 
 const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
@@ -129,4 +107,28 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 		return cost;
 	}
 	return 0;
+}
+
+
+/*static*/ bool MarketAI::CoreHasMarket(CoreScript* cs)
+{
+	if (!cs) return false;
+	const ChitContext* context = cs->ParentChit()->Context();
+	GLASSERT(context);
+	Rectangle2I bounds = SectorBounds(ToSector(cs->ParentChit()->Position()));
+	return context->chitBag->QueryBuilding(ISC::market, bounds, nullptr) != 0;
+}
+
+/*static*/ bool MarketAI::CoreHasMarket(CoreScript* cs, Chit* chit)
+{
+	if (!cs) return false;
+	if (!chit) return false;
+
+	const ChitContext* context = cs->ParentChit()->Context();
+	GLASSERT(context);
+	Rectangle2I bounds = SectorBounds(ToSector(cs->ParentChit()->Position()));
+	if (context->chitBag->QueryBuilding(ISC::market, bounds, nullptr) != 0) {
+		return Team::Instance()->GetRelationship(cs->ParentChit(), chit) != ERelate::ENEMY;
+	}
+	return false;
 }
