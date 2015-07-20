@@ -87,8 +87,15 @@ void ReserveBank::WithdrawMonster(Wallet* dst, bool greater)
 	amt.AddGold(gold);
 
 	static const float score[NUM_CRYSTAL_TYPES] = { 100, 50, 10, 1 };
-	int pass = greater ? random.Rand(4) : random.Rand(2);
-
+	int pass = 0;
+	if (greater) {
+		// 1-4 crystals
+		pass = random.Rand(4) + 1;
+	}
+	else {
+		// 1 in 4 chance of a crystal.
+		pass = (random.Rand(4) == 0) ? 1 : 0;
+	}
 	for (int i = 0; i < pass; ++i) {
 		int index = random.Select(score, NUM_CRYSTAL_TYPES);
 		amt.AddCrystal(index, 1);
