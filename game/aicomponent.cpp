@@ -242,16 +242,16 @@ bool AIComponent::LineOfSight(const grinliz::Vector2I& mapPos )
 }
 
 
-void AIComponent::MakeAware( const int* enemyIDs, int n )
+void AIComponent::MakeAware(const int* enemyIDs, int n)
 {
-	for( int i=0; i<n && enemyList2.HasCap(); ++i ) {
+	for (int i = 0; i < n && enemyList2.HasCap(); ++i) {
 		int id = enemyIDs[i];
 		// Be careful to not duplicate list entries:
 		if (enemyList2.Find(id) >= 0) continue;
 
-		Chit* chit = Context()->chitBag->GetChit( enemyIDs[i] );
+		Chit* chit = Context()->chitBag->GetChit(id);
 		if (FEFilter<ERelate::ENEMY, ERelate::NEUTRAL>(chit, 0)) {
-			enemyList2.Push( id );
+			enemyList2.Push(id);
 		}
 	}
 }

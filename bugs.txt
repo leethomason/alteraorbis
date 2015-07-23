@@ -25,8 +25,8 @@
 		x weapon effects
 	- Basic Director: rate of Lesser and Greater attack
 	- art for R1k and Q
-- markets: unlimited? sell to core? trade?
-- new inventory UI
+x markets: unlimited? sell to core? trade? (testing, but seems sound)
+x new inventory UI
 x fix text size
 d immediately spawn avatar on core creation
 - logic to visit deities
@@ -34,6 +34,7 @@ d immediately spawn avatar on core creation
 - workers in deity domains too much stuff - only loot if there is a vault?
 - r1k weapons way to powerful...where are they coming from? (shock + fire)
 - markets in deity domains
+x set "container" in character scene consistently
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct

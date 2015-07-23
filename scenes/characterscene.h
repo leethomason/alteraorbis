@@ -91,8 +91,7 @@ private:
 	void SetItemInfo(const GameItem* item, const GameItem* user);
 
 	enum { 
-		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
-
+		NUM_ITEM_BUTTONS = MAX_CARRIED_ITEMS,
 	};
 	
 	LumosGame*			lumosGame;
@@ -112,6 +111,7 @@ private:
 	ItemDescWidget		itemDescWidget;
 	gamui::TextLabel	helpText;
 	gamui::PushButton	crystalButton[2][NUM_CRYSTAL_TYPES];
+	gamui::Image		dropTarget;
 };
 
 

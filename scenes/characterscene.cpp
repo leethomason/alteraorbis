@@ -40,12 +40,13 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	dropButton.SetText( "Drop" );
 	dropButton.SetVisible( data->IsAvatar() );
 
-	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0, 0 );
+	dropTarget.Init(&gamui2D, RenderAtom() /*LumosGame::CalcPaletteAtom(2, 2)*/, false);
+	//dropTarget.SetCapturesTap(true);		// This works except that Gamui doesn't account for levels, so this caputers everything. Messy.
+	dropTarget.SetLevel(0);
+
+	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), FaceWidget::SHOW_NAME, 0 );
 	const GameItem* mainItem = data->itemComponent->GetItem(0);
 	faceWidget.SetFace( &uiRenderer, mainItem );
-	if (mainItem->keyValues.GetIString(ISC::mob).empty()) {
-		faceWidget.SetVisible(false);
-	}
 
 	desc.Init(&gamui2D);
 	
@@ -159,22 +160,26 @@ void CharacterScene::Resize()
 		layout.PosAbs(&crystalButton[1][i], -4, 1 + i);
 	}
 
+	layout.PosAbs(&dropTarget, -4, 1, 3, 5);
 	if (data->IsAvatarCharacterItem()) {
 		layout.PosAbs(&desc, -4, 0);
 		layout.PosAbs(&itemDescWidget, -4, 1);
+		dropTarget.SetVisible(false);
 	}
 	else if (data->IsMarket()) {
 		layout.PosAbs(&desc, -4, 6);
 		layout.PosAbs(&itemDescWidget, -4, 7);
+		dropTarget.SetVisible(true);
 	}
 	else if (data->IsVault()) {
-		// Vault
 		layout.PosAbs(&desc, -4, 0);
 		layout.PosAbs(&itemDescWidget, -4, 6);
+		dropTarget.SetVisible(true);
 	}
 	else if (data->IsExchange()) {
 		desc.SetVisible(false);
 		itemDescWidget.SetVisible(false);
+		dropTarget.SetVisible(false);
 	}
 	float width = layout.Width() * 4;
 	desc.SetBounds(width, 0);
@@ -191,7 +196,7 @@ void CharacterScene::SetItemInfo(const GameItem* item, const GameItem* user)
 
 	CStr< 128 > str;
 	str.Format("%s", item->ProperName() ? item->ProperName() : item->Name());
-	if (item->IsDenizen()) {
+	if (item->IsDenizen() && Team::Instance()) {
 		str.AppendFormat(" (%s)", Team::Instance()->TeamName(item->Team()));
 	}
 	str.AppendFormat("\nLevel: %d  XP: %d / %d",
@@ -266,10 +271,7 @@ void CharacterScene::SetButtonText(const GameItem* select)
 			// Set the text to the proper name, if we have it.
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
-			if ( data->IsMarket() )
-				lumosGame->ItemToButton( item, &itemButton[j][count] );
-			else
-				lumosGame->ItemToButton( item, &itemButton[j][count] );
+			lumosGame->ItemToButton( item, &itemButton[j][count] );
 			itemButtonIndex[j][count] = src;
 
 			// Set the "active" icons.
@@ -470,6 +472,10 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 				break;
 			}
 		}
+	}
+	if (end == &dropTarget) {
+		endIC = data->storageIC;
+		endIndex = itemButtonIndex[1][0];
 	}
 
 	if (startIC == endIC) {

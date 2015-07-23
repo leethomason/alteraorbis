@@ -817,8 +817,8 @@ void ForgeDomainAI::DoBuild()
 		if (ClearRoadsAndPorches()) break;
 		if (BuildPlaza()) break;
 		if (team == DEITY_TRUULGA && arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
-		if ((arr[BuildScript::MARKET] < 2) && BuildBuilding(BuildScript::MARKET)) break;
-		if (team == DEITY_TRUULGA && (arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
+		if ((arr[BuildScript::MARKET] == 0) && BuildBuilding(BuildScript::MARKET)) break;
+		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }

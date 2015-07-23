@@ -52,12 +52,12 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 	{
 		if (doTrade) {
 			if (!buyer->CanAddToInventory()) {
+				// Make room in the inventory. Give the crystal to the exchange
+				// if there is one, else the reserve bank.
 				const GameItem* sell = buyer->ItemToSell();
 				if (!sell) return 0;
 				GameItem* sold = buyer->RemoveFromInventory(sell);
 
-				// Make room in the inventory. Give the crystal to the exchange
-				// if there is one, else the reserve bank.
 				const ChitContext* context = buyer->ParentChit()->Context();
 				if (context && context->chitBag) {
 					Vector2I sector = ToSector(buyer->ParentChit()->Position());

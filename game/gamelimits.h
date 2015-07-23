@@ -96,15 +96,15 @@ enum {
 // Objects can be 1x1 or 2x2. Simplifies code. Either 1x1 or 2x2 objects can have
 // porches, which essentially adds an extra space at the front door. But that
 // doesn't impact the pather. Plants must be 1x1
-static const int MAX_BUILDING_SIZE	= 2;	
+static const int MAX_BUILDING_SIZE	= 2;
+
+static const int MAX_CARRIED_ITEMS = 15;
 
 static const U32 MINUTES_IN_AGE		= 100;
 static const U32 AGE_IN_MSEC		= MINUTES_IN_AGE * 60 * 1000;
 
 static const float MIN_EFFECTIVE_RANGE	= 2.0f;
 static const float MAX_EFFECTIVE_RANGE	= 25.0f;	
-
-static const int INVERTORY_SLOTS		= 15;
 
 static const int MAX_SQUADS				= 4;
 static const int CITIZEN_BASE			= 8;		// Base # of citizens before squads form

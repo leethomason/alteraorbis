@@ -434,7 +434,7 @@ void ItemComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		Vector3F pos = parentChit->Position();
 
 		while (itemArr.Size() > 1) {
-			const GameItem* remove = itemArr[itemArr.Size() - 1];
+			const GameItem* remove = itemArr[itemArr.Size() - 1];	// don't Pop() - need RemoveFromInventory()
 			if (remove->Intrinsic())
 				break;
 			GameItem* item = this->RemoveFromInventory(remove);
@@ -826,7 +826,7 @@ const GameItem* ItemComponent::ItemToSell() const
 
 bool ItemComponent::CanAddToInventory()
 {
-	return itemArr.Size() < INVERTORY_SLOTS;
+	return NumCarriedItems() < MAX_CARRIED_ITEMS;
 }
 
 
