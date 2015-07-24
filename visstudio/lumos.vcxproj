@@ -299,6 +299,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ai\aineeds.h" />
+    <ClInclude Include="..\ai\director.h" />
     <ClInclude Include="..\ai\domainai.h" />
     <ClInclude Include="..\ai\marketai.h" />
     <ClInclude Include="..\ai\rebuildai.h" />

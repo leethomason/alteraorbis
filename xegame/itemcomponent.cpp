@@ -482,8 +482,6 @@ int ItemComponent::ProcessEffect(int delta)
 	static const float CHANCE_FIRE_HIGH_IC   = CHANCE_FIRE_HIGH * 0.1f;
 	static const float CHANCE_FIRE_SPREAD_IC = CHANCE_FIRE_SPREAD * 0.1f;
 
-//	const float deltaF = float(delta) * 0.001f;
-
 	Vector2F pos2 = ToWorld2F(parentChit->Position());
 	Vector2I pos2i = ToWorld2I(pos2);
 	if (pos2i.IsZero()) return VERY_LONG_TICK;	// if we are at origin, not really for processing.

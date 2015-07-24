@@ -35,6 +35,7 @@ d immediately spawn avatar on core creation
 - r1k weapons way to powerful...where are they coming from? (shock + fire)
 - markets in deity domains
 x set "container" in character scene consistently
+- auto-pickup for everyone?
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

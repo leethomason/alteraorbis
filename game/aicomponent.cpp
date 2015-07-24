@@ -1262,6 +1262,17 @@ bool AIComponent::SectorHerd(bool focus)
 		return false;
 	}
 
+	#if 0
+	Chit* directorChit = Context()->chitBag->GetNamedChit("director");
+	if (directorChit) {
+		Director* director = (Director*)chit->GetComponent("Director");
+		Vector2I destSector = director->SouldSectorHerd();
+		if (!destSector.IsZero() && DoSectorHerd(focus, destSector)) {
+			return true;
+		}
+	}
+#endif
+
 	// Should be choose a shopping destination?
 	if (gameItem->flags & GameItem::AI_USES_BUILDINGS) {
 
@@ -1379,7 +1390,6 @@ bool AIComponent::DoSectorHerd( bool focus, const grinliz::Vector2I& sector)
 bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 {
 	if (dest.IsValid()) {
-		//const ChitContext* context = Context();
 		GLASSERT(dest.port);
 
 		RenderComponent* rc = parentChit->GetRenderComponent();
@@ -2882,10 +2892,6 @@ bool AIComponent::ThinkWaypoints()
 	}
 
 	Vector2F dest2 = ToWorld2F(waypoint);
-	//Vector2F pos2 = ToWorld2F(parentChit->Position());
-
-	//static const float FRIEND_RANGE = 2.0f;
-
 	Vector2I destSector = ToSector(waypoint);
 	Vector2I currentSector = ToSector(parentChit->Position());
 
