@@ -820,9 +820,10 @@ void ForgeDomainAI::DoBuild()
 		if (team == DEITY_TRUULGA && arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] == 0) && BuildBuilding(BuildScript::MARKET)) break;
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
-		if (!arr[BuildScript::EXCHANGE] && BuildBuilding(BuildScript::EXCHANGE))	break;
 		if (!arr[BuildScript::TEMPLE] && BuildBuilding(BuildScript::TEMPLE))		break;
 		if (!arr[BuildScript::KIOSK] && BuildBuilding(BuildScript::KIOSK))			break;
+		if (!arr[BuildScript::EXCHANGE] && BuildBuilding(BuildScript::EXCHANGE))	break;
+		if (!arr[BuildScript::FORGE] && BuildBuilding(BuildScript::FORGE))	break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }

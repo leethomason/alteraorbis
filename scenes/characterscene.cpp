@@ -261,7 +261,7 @@ void CharacterScene::SetButtonText(const GameItem* select)
 		const MeleeWeapon* meleeItem = ic->QuerySelectMelee();
 		const Shield* shieldItem = ic->GetShield();
 
-		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+		for( int i=0; i<NUM_ITEM_BUTTONS; /* increment below */ ) {
 			const GameItem* item = ic->GetItem(src);
 			if ( !item || item->Intrinsic() ) {
 				++src;
@@ -291,6 +291,7 @@ void CharacterScene::SetButtonText(const GameItem* select)
 			}
 			++count;
 			++src;
+			++i;
 		}
 		for( ; count<NUM_ITEM_BUTTONS; ++count ) {
 			itemButton[j][count].SetText( " \n " );
