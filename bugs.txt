@@ -31,14 +31,14 @@ x fix text size
 d immediately spawn avatar on core creation
 x logic to visit deities
 - damage: items seem to get blown away...crystal not dropped
-- workers in deity domains too much stuff - only loot if there is a vault?
+x workers in deity domains too much stuff - only loot if there is a vault?
 x r1k weapons way to powerful...where are they coming from? (shock + fire)
 x markets in deity domains
 - no rock on core location
 - how do deity cores get crystal??
 - deity temples
-- deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
-- containers (vault, bar, etc.) shouldn't have value. 
+x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
+x containers (vault, bar, etc.) shouldn't have value. 
 
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct

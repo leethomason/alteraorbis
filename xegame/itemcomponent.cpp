@@ -620,6 +620,10 @@ void ItemComponent::DoSlowTick()
 	GameItem* mainItem = itemArr[0];
 
 	if (mainItem->flags & GameItem::GOLD_PICKUP) {
+		// Special case. Workers only pick up gold if there is a Vault.
+		Vector2I sector = ToSector(parentChit->Position());
+		if (mainItem->IsWorker() && !Context()->chitBag->QueryBuilding(ISC::vault, SectorBounds(sector), 0)) return;
+
 		CChitArray arr;
 
 		Vector2F pos = ToWorld2F(parentChit->Position());

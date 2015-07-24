@@ -2135,7 +2135,10 @@ bool AIComponent::ThinkLoot()
 		Vector2F goldPos = ToWorld2F(chitArr[i]->Position());
 		if (context->worldMap->HasStraightPath(goldPos, pos2)) {
 			taskList.Push(Task::MoveTask(goldPos));
-			taskList.Push(Task::PickupTask(chitArr[i]->ID()));
+			if (loot.Accept(chitArr[i])) {
+				// Gold is hoovered-up. Only need pickup for loot.
+				taskList.Push(Task::PickupTask(chitArr[i]->ID()));
+			}
 			return true;
 		}
 	}
