@@ -38,6 +38,24 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 }
 
 
+/*static*/ void MarketAI::RecoupAndDeleteOverflowItem(GameItem* item, Chit* market)
+{
+	GLASSERT(item);
+	GLASSERT(market);
+
+	Vector2I sector = ToSector(market->Position());
+	CoreScript* cs = CoreScript::GetCore(sector);
+
+	if (cs && cs->InUse()) {
+		cs->ParentChit()->GetWallet()->Deposit(&item->wallet, item->wallet);
+	}
+	else if (ReserveBank::GetWallet()) {
+		ReserveBank::GetWallet()->Deposit(&item->wallet, item->wallet);
+	}
+	delete item;
+}
+
+
 /*	General "transact" method because this is very tricky code to get right.
 	There's always another case or bit of logic to account for.
 */
@@ -55,26 +73,10 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				// Make room in the inventory. Give the crystal to the exchange
 				// if there is one, else the reserve bank.
 				const GameItem* sell = buyer->ItemToSell();
+				GLASSERT(sell);
 				if (!sell) return 0;
 				GameItem* sold = buyer->RemoveFromInventory(sell);
-
-				const ChitContext* context = buyer->ParentChit()->Context();
-				if (context && context->chitBag) {
-					Vector2I sector = ToSector(buyer->ParentChit()->Position());
-					Chit* exchange = context->chitBag->FindBuilding(ISC::exchange, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
-					Chit* vault = context->chitBag->FindBuilding(ISC::vault, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
-
-					if (exchange && exchange->GetWallet()) {
-						exchange->GetWallet()->Deposit(&sold->wallet, sold->wallet);
-					}
-					else if (vault && vault->GetWallet()) {
-						vault->GetWallet()->Deposit(&sold->wallet, sold->wallet);
-					}
-					else if (ReserveBank::GetWallet()) {
-						ReserveBank::GetWallet()->Deposit(&sold->wallet, sold->wallet);
-					}
-					delete sold;
-				}
+				RecoupAndDeleteOverflowItem(sold, buyer->ParentChit());
 			}
 			GLASSERT(buyer->CanAddToInventory());
 
@@ -97,7 +99,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 				int tax = LRint(float(cost) * SALES_TAX);
 				if (tax > 0) {
 					salesTax->Deposit(ReserveBank::GetWallet(), tax);
-					GLOUTPUT(("  tax paid: %d\n", tax));
+					//GLOUTPUT(("  tax paid: %d\n", tax));
 				}
 			}
 

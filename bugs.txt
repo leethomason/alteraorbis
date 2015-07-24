@@ -36,6 +36,7 @@ d immediately spawn avatar on core creation
 - markets in deity domains
 x set "container" in character scene consistently
 
+- core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)

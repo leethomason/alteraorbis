@@ -31,6 +31,8 @@ public:
 	static bool CoreHasMarket(CoreScript* cs);
 	static bool CoreHasMarket(CoreScript* cs, Chit* forThisChit);
 
+	static void RecoupAndDeleteOverflowItem(GameItem* item, Chit* owner);
+
 private:
 	Chit* chit;
 	ItemComponent* ic;
