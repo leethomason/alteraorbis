@@ -269,8 +269,8 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
 						Chit* building = chitBag->NewBuilding(task->pos2i, buildData.cStructure, chit->Team());
+						ReserveBank::GetWallet()->Deposit(&controllerItem->wallet, buildData.cost);
 
-						building->GetWallet()->Deposit(&controllerItem->wallet, buildData.cost);
 						// 'data' property used to transfer in the rotation.
 						Quaternion q = Quaternion::MakeYRotation(float(task->data));
 						building->SetRotation(q);

@@ -637,6 +637,13 @@ int CoreScript::DoTick(U32 delta)
 	Citizens(0);	// if someone was deleted, the spawn tick will reset.
 	int nSpawnTicks = spawnTick.Delta(delta);
 
+	// Clean rock off the core.
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
+	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+	if (wg.RockHeight()) {
+		Context()->worldMap->SetRock(pos2i.x, pos2i.y, 0, false, 0);
+	}
+
 	if (InUse()) {
 		DoTickInUse(delta, nSpawnTicks);
 		UpdateScore(nScoreTicks);

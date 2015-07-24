@@ -2103,7 +2103,7 @@ bool AIComponent::ThinkNeeds()
 }
 
 
-bool AIComponent::ThinkLoot(  )
+bool AIComponent::ThinkLoot()
 {
 	// Is there stuff around to pick up?
 	const GameItem* gameItem = parentChit->GetItem();
@@ -2113,46 +2113,43 @@ bool AIComponent::ThinkLoot(  )
 
 	int flags = gameItem->flags;
 	const ChitContext* context = Context();
+	Vector2I sector = ToSector(parentChit->Position());
 
-	if(    !parentChit->PlayerControlled() 
-		&& ( flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
-	{
-		// Which filter to use?
-		GoldCrystalFilter	gold;
-		LootFilter			loot;
+	if (parentChit->PlayerControlled()) return false;
+	if ((flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP)) == 0) return false;
+	// RULE: If there isn't a Vault, then the workers shouldn't loot.
+	if (gameItem->IsWorker() && !Context()->chitBag->QueryBuilding(ISC::vault, SectorBounds(sector), 0)) return false;
 
-		MultiFilter filter( MultiFilter::MATCH_ANY );
-		bool canAdd	= thisIC->CanAddToInventory();
+	// Which filter to use?
+	GoldCrystalFilter	gold;
+	LootFilter			loot;
 
-		if ( canAdd && ( flags & GameItem::ITEM_PICKUP)) {
-			filter.filters.Push( &loot );
-		}
-		if ( flags & GameItem::GOLD_PICKUP ) {
-			filter.filters.Push( &gold );
-		}
+	MultiFilter filter(MultiFilter::MATCH_ANY);
+	bool canAdd = thisIC->CanAddToInventory();
 
-		Vector2F pos2 = ToWorld2F(parentChit->Position());
-		CChitArray chitArr;
-		parentChit->Context()->chitBag->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, &filter );
+	if (canAdd && (flags & GameItem::ITEM_PICKUP)) {
+		filter.filters.Push(&loot);
+	}
+	if (flags & GameItem::GOLD_PICKUP) {
+		filter.filters.Push(&gold);
+	}
 
-		ChitDistanceCompare compare(parentChit->Position());
-		SortContext( chitArr.Mem(), chitArr.Size(), compare );
+	Vector2F pos2 = ToWorld2F(parentChit->Position());
+	CChitArray chitArr;
+	parentChit->Context()->chitBag->QuerySpatialHash(&chitArr, pos2, GOLD_AWARE, 0, &filter);
 
-		for( int i=0; i<chitArr.Size(); ++i ) {
-			Vector2F goldPos = ToWorld2F(chitArr[i]->Position());
-			if ( context->worldMap->HasStraightPath( goldPos, pos2 )) {
-				// Pickup and gold use different techniques. (Because of player UI. 
-				// Always want gold - not all items.)
-				if ( loot.Accept( chitArr[i] )) {
-					taskList.Push(Task::MoveTask(goldPos));
-					taskList.Push( Task::PickupTask( chitArr[i]->ID()));
-					return true;
-				}
-				else {
-					this->Move( goldPos, false );
-					return true;
-				}
+	ChitDistanceCompare compare(parentChit->Position());
+	SortContext(chitArr.Mem(), chitArr.Size(), compare);
+
+	for (int i = 0; i < chitArr.Size(); ++i) {
+		Vector2F goldPos = ToWorld2F(chitArr[i]->Position());
+		if (context->worldMap->HasStraightPath(goldPos, pos2)) {
+			taskList.Push(Task::MoveTask(goldPos));
+			if (loot.Accept(chitArr[i])) {
+				// Gold is hoovered-up. Only need pickup for loot.
+				taskList.Push(Task::PickupTask(chitArr[i]->ID()));
 			}
+			return true;
 		}
 	}
 	return false;

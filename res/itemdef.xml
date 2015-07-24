@@ -9,7 +9,7 @@
   <GameItem name="humanFemale"
         resource="humanFemale"
         uiIcon="humanFemale"
-	      flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS AI_SECTOR_HERD HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+	      flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_USES_BUILDINGS AI_SECTOR_HERD HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         mob="denizen"
         startTrack="DENIZEN_CREATED"
@@ -32,7 +32,7 @@
   <GameItem name="humanMale"
         resource="humanMale"
         uiIcon="humanMale"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS AI_SECTOR_HERD HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_USES_BUILDINGS AI_SECTOR_HERD HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
@@ -54,7 +54,7 @@
   <GameItem name="gobman"
         resource="gob"
         uiIcon="gobman"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="gobnames"
         mob="denizen"
         startTrack="DENIZEN_CREATED"
@@ -74,7 +74,7 @@
   <GameItem name="kamakiri"
         resource="mantessa"
         uiIcon="kamakiri"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY DAMAGE_UNDER_WATER"
         nameGen="kamakirinames"
         mob="denizen"
         startTrack="DENIZEN_CREATED"
@@ -91,7 +91,7 @@
     </intrinsics>
   </GameItem>
 
-  <!-- workers are immune to fire and SUBMARINE so that they can build/fix ppols. -->
+  <!-- workers are immune to fire and SUBMARINE so that they can build/fix pools. -->
   <GameItem name="worker"
         resource="worker"
         flags="AI_WANDER_HERD GOLD_PICKUP ITEM_PICKUP SUBMARINE IMMUNE_FIRE"

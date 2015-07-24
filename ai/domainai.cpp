@@ -639,7 +639,6 @@ void DomainAI::DoBuild()
 			if (arr[BuildScript::SLEEPTUBE] < wantedCitizens && BuildBuilding(BuildScript::SLEEPTUBE)) break;
 			if (arr[BuildScript::EXCHANGE] < 1 && BuildBuilding(BuildScript::EXCHANGE)) break;
 			if (arr[BuildScript::KIOSK] < 4 && BuildBuilding(BuildScript::KIOSK)) break;
-			if (arr[BuildScript::VAULT] == 0 && BuildBuilding(BuildScript::VAULT)) break;	// collect Au from workers.
 		}
 	} while (false);
 }
@@ -746,18 +745,20 @@ void ForgeDomainAI::OnRemove()
 int ForgeDomainAI::DoTick(U32 delta)
 {
 	// Skim off the reserve bank:
-	GameItem* item = parentChit->GetItem();
-	if (item->hp == 0) return 0;
+	GameItem* mainItem = parentChit->GetItem();
+	if (mainItem->hp == 0) return 0;
 
 	// Move in money to fund construction.
 	static const int GOLD = 200;
-	if (item->wallet.Gold() < GOLD && ReserveBank::GetWallet()->Gold() > GOLD) {
-		item->wallet.Deposit(ReserveBank::GetWallet(), GOLD);
+	if (mainItem->wallet.Gold() < GOLD && ReserveBank::GetWallet()->Gold() > GOLD) {
+		mainItem->wallet.Deposit(ReserveBank::GetWallet(), GOLD);
 	}
 
 	// Build stuff for the trolls/denizens to buy.
 	if (forgeTicker.Delta(delta)) {
 		Vector2I sector = ToSector(parentChit->Position());
+
+		// Market and exchange provide items...hopefully.
 
 		// find a market.
 		// if has cap, make an item
@@ -782,14 +783,14 @@ int ForgeDomainAI::DoTick(U32 delta)
 			ForgeScript::BestSubItem(&forgeData, seed);
 
 			TransactAmt cost;
-			GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, seed);
-			if (item) {
-				GLASSERT(ReserveBank::GetWallet()->CanWithdraw(cost));
-				item->wallet.Deposit(ReserveBank::GetWallet(), cost);
-				market->GetItemComponent()->AddToInventory(item);
+			GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, mainItem->wallet, &cost, seed);
+			if (loot) {
+				GLASSERT(mainItem->wallet.CanWithdraw(cost));
+				ReserveBank::GetWallet()->Deposit(&mainItem->wallet, cost);
+				market->GetItemComponent()->AddToInventory(loot);
 
 				// Mark this item as important with a destroyMsg:
-				item->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit->GetItem());
+				loot->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit->GetItem());
 			}
 		}
 	}
@@ -819,6 +820,9 @@ void ForgeDomainAI::DoBuild()
 		if (team == DEITY_TRUULGA && arr[BuildScript::TROLL_STATUE] == 0 && BuildBuilding(BuildScript::TROLL_STATUE)) break;
 		if ((arr[BuildScript::MARKET] == 0) && BuildBuilding(BuildScript::MARKET)) break;
 		if ((arr[BuildScript::TROLL_BRAZIER] < nBraziers) && BuildBuilding(BuildScript::TROLL_BRAZIER)) break;
+		if (!arr[BuildScript::EXCHANGE] && BuildBuilding(BuildScript::EXCHANGE))	break;
+		if (!arr[BuildScript::TEMPLE] && BuildBuilding(BuildScript::TEMPLE))		break;
+		if (!arr[BuildScript::KIOSK] && BuildBuilding(BuildScript::KIOSK))			break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
