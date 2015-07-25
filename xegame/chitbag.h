@@ -103,7 +103,7 @@ public:
 	virtual ~ChitBag();
 
 	// Chit creation/query
-	void DeleteAll();
+	void  DeleteAll();
 	Chit* NewChit( int id=0 );
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
@@ -201,7 +201,7 @@ public:
 	CameraComponent* GetCamera( Engine* engine );
 	int GetCameraChitID() const { return activeCamera; }
 	
-	void SetNamedChit(const grinliz::IString& name, Chit* chit);
+	void  SetNamedChit(const grinliz::IString& name, Chit* chit);
 	Chit* GetNamedChit(const grinliz::IString& name);
 
 	virtual LumosChitBag* ToLumos() { return 0; }
@@ -227,11 +227,13 @@ public:
 		GLASSERT(listeners.Find(handler) < 0);
 		listeners.Push(handler);
 	}
+
 	void RemoveListener(IChitListener* handler) {
 		int i = listeners.Find(handler);
 		GLASSERT(i >= 0);
 		if (i >= 0) listeners.SwapRemove(i);
 	}
+
 	void SendMessage(Chit* chit, const ChitMsg& msg) {
 		for (int i = 0; i < listeners.Size(); ++i) {
 			listeners[i]->OnChitMsg(chit, msg);

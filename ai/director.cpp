@@ -15,16 +15,12 @@ void Director::OnAdd(Chit* chit, bool init)
 {
 	super::OnAdd(chit, init);
 	Context()->chitBag->SetNamedChit(StringPool::Intern("Director"), parentChit);
+	Context()->chitBag->AddListener(this);
 }
 
 void Director::OnRemove()
 {
 	super::OnRemove();
-}
-
-void Director::OnChitMsg(Chit* chit, const ChitMsg& msg)
-{
-	super::OnChitMsg(chit, msg);
 }
 
 
@@ -34,6 +30,8 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
 	if (playerSector.IsZero()) return ZERO;
+	if (ToSector(herd) == playerSector) return ZERO;
+
 	int playerTeam = Context()->chitBag->GetHomeTeam();
 	GLASSERT(playerTeam);
 	if (Team::Instance()->GetRelationship(herd->Team(), playerTeam) == ERelate::ENEMY) {
@@ -41,4 +39,20 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 		return playerSector;
 	}
 	return ZERO;
+}
+
+
+void Director::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	if (msg.ID() == ChitMsg::CHIT_ARRIVED) {
+		Vector2I playerSector = Context()->chitBag->GetHomeSector();
+		if (playerSector == ToSector(chit->Position())) {
+			int playerTeam = Context()->chitBag->GetHomeTeam();
+			GLASSERT(playerTeam);
+			if (Team::Instance()->GetRelationship(chit->Team(), playerTeam) == ERelate::ENEMY) {
+				GLOUTPUT(("Enemy arrived.\n"));
+			}
+		}
+	}
+	super::OnChitMsg(chit, msg);
 }

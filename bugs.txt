@@ -35,11 +35,12 @@ x logic to visit deities
 x workers in deity domains too much stuff - only loot if there is a vault?
 x r1k weapons way to powerful...where are they coming from? (shock + fire)
 x markets in deity domains
-- no rock on core location
+x no rock on core location
 - how do deity cores get crystal??
 - deity temples
 x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
 x containers (vault, bar, etc.) shouldn't have value. 
+- rampage instead of sector herd out?
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

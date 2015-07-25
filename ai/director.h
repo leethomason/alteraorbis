@@ -2,8 +2,9 @@
 #define DIRECTOR_INCLUDED
 
 #include "../xegame/component.h"
+#include "../xegame/chit.h"
 
-class Director : public Component
+class Director : public Component, public IChitListener
 {
 private:
 	typedef Component super;
