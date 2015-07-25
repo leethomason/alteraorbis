@@ -27,6 +27,7 @@
 #include "../scenes/forgescene.h"
 
 #include "../ai/domainai.h"
+#include "../ai/director.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -166,6 +167,9 @@ void Sim::Load(const char* mapDAT, const char* gameDAT)
 		// Fresh start
 		CreateRockInOutland();
 		CreateCores();
+
+		Chit* directorChit = context.chitBag->NewChit();
+		directorChit->Add(new Director());
 	}
 	else {
 		//QuickProfile qp( "Sim::Load" );

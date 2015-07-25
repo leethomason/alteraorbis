@@ -154,6 +154,7 @@ public:
 	static grinliz::IString QCore;
 	static grinliz::IString R1k;
 	static grinliz::IString Truulga;
+	static grinliz::IString Director;
 
 	// double underscore -> '.'
 	static grinliz::IString need__food;

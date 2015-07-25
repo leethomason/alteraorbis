@@ -49,6 +49,7 @@
 
 #include "../ai/marketai.h"
 #include "../ai/domainai.h"
+#include "../ai/director.h"
 
 using namespace grinliz;
 using namespace ai;
@@ -1262,16 +1263,14 @@ bool AIComponent::SectorHerd(bool focus)
 		return false;
 	}
 
-	#if 0
-	Chit* directorChit = Context()->chitBag->GetNamedChit("director");
+	Chit* directorChit = Context()->chitBag->GetNamedChit(ISC::Director);
 	if (directorChit) {
-		Director* director = (Director*)chit->GetComponent("Director");
-		Vector2I destSector = director->SouldSectorHerd();
+		Director* director = (Director*)directorChit->GetComponent("Director");
+		Vector2I destSector = director->ShouldSendHerd(parentChit);
 		if (!destSector.IsZero() && DoSectorHerd(focus, destSector)) {
 			return true;
 		}
 	}
-#endif
 
 	// Should be choose a shopping destination?
 	if (gameItem->flags & GameItem::AI_USES_BUILDINGS) {

@@ -81,6 +81,7 @@ public:
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		//			AI message: a lead unit is telling other units to herd to a different sector.
 								//					ptr = &SectorPort
+		CHIT_ARRIVED,			///	Yes		A chit arrived at a new sector (teleport, gridtravel)
 		CHIT_TRACKING_ARRIVED,	//			A tracking component arrived at its target.
 								//					ptr = Chit* that arrived
 		CHIT_POS_CHANGE,
@@ -157,6 +158,8 @@ public:
 	Component* GetComponent( int id );
 	Component* GetComponent( const char* name );
 
+	// FIXME: stacking system is fragile: can all move components
+	// exist together.
 	bool StackedMoveComponent() const;
 
 	const ChitContext* Context() const;

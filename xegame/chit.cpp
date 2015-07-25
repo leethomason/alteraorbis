@@ -310,6 +310,7 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	switch (msg.ID()) {
 		case ChitMsg::CHIT_DESTROYED:
 		case ChitMsg::CHIT_DAMAGE:
+		case ChitMsg::CHIT_ARRIVED:
 		chitBag->SendMessage(this, msg);
 		break;
 

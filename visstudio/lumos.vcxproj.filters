@@ -442,6 +442,9 @@
     <ClCompile Include="..\glew\src\glew.c">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\director.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">

@@ -57,7 +57,12 @@ void SpatialComponent::OnRemove()
 void SpatialComponent::Teleport(Chit* chit, const grinliz::Vector3F& pos)
 {
 	GLASSERT(!GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent));
+	GLASSERT(!chit->GetComponent("GridMoveComponent"));
+
 	if (ToWorld2I(pos) != ToWorld2I(chit->Position())) {
+
+		Vector2I startSector = ToSector(chit->Position());
+		Vector2I endSector = ToSector(pos);
 
 		chit->Context()->engine->particleSystem->EmitPD(ISC::teleport, chit->Position(), V3F_UP, 0);
 		chit->SetPosition(pos);
@@ -72,6 +77,10 @@ void SpatialComponent::Teleport(Chit* chit, const grinliz::Vector3F& pos)
 		GLASSERT(chit->GetMoveComponent());
 		PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 		if (pmc) pmc->Stop();
+
+		if (startSector != endSector) {
+			chit->SendMessage(ChitMsg(ChitMsg::CHIT_ARRIVED));
+		}
 	}
 }
 

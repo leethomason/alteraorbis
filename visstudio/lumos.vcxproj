@@ -166,6 +166,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\ai\aineeds.cpp" />
+    <ClCompile Include="..\ai\director.cpp" />
     <ClCompile Include="..\ai\domainai.cpp" />
     <ClCompile Include="..\ai\marketai.cpp" />
     <ClCompile Include="..\ai\rebuildai.cpp" />

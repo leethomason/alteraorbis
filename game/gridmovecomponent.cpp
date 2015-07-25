@@ -93,6 +93,7 @@ int GridMoveComponent::DoTick( U32 delta )
 	if ( state == DONE ) {
 		GLASSERT(parentChit->StackedMoveComponent());
 		Context()->chitBag->QueueRemoveAndDeleteComponent(this);
+		parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_ARRIVED));
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {

@@ -28,6 +28,7 @@
 
 #include "../ai/rebuildai.h"
 #include "../ai/domainai.h"
+#include "../ai/director.h"
 
 #include "componentfactory.h"
 
@@ -128,6 +129,9 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	}
 	else if (name == "FlagScript") {
 		return new FlagScript();
+	}
+	else if (name == "Director") {
+		return new Director();
 	}
 
 

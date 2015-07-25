@@ -29,8 +29,6 @@
 
 class MapSpatialComponent;
 
-/* Chits with a SpatialComponent are in the map world as there own entity.
-*/
 class SpatialComponent : public Component
 {
 private:
@@ -44,41 +42,12 @@ public:
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* );
-
 	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	static void Teleport(Chit* chit, const grinliz::Vector3F& pos);
 
-#if 0
-	// Position and rotation are absolute (post-transform)
-	void SetPosition( float x, float y, float z )	{ grinliz::Vector3F v = { x, y, z }; SetPosition( v ); }
-	void SetPosition( const grinliz::Vector3F& v )	{ SetPosRot( v, rotation ); }
-	const grinliz::Vector3F& GetPosition() const	{ return position; }
-
-	// yRot=0 is the +z axis
-	void SetYRotation( float yDegrees )				{ SetPosYRot( position, yDegrees ); }
-	float GetYRotation() const;
-	const grinliz::Quaternion& GetRotation() const	{ return rotation; }
-
-	void SetPosYRot( float x, float y, float z, float yRot );
-	void SetPosYRot( const grinliz::Vector3F& v, float yRot ) { SetPosYRot( v.x, v.y, v.z, yRot ); }
-	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
-
-	grinliz::Vector3F GetHeading() const;
-
-	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
-	grinliz::Vector2I GetPosition2DI() const		{ grinliz::Vector2I v = { (int)position.x, (int)position.z }; return v; }
-	grinliz::Vector2F GetHeading2D() const;
-	grinliz::Vector2I GetSector() const				{ 
-		grinliz::Vector2I s = { (int)position.x/SECTOR_SIZE, (int)position.z/SECTOR_SIZE }; 
-		GLASSERT(s.x >= 0 && s.x < NUM_SECTORS && s.y >= 0 && s.y < NUM_SECTORS);
-		return s; 
-	}
-
-	virtual grinliz::Rectangle2I Bounds() const		{ grinliz::Rectangle2I b; b.min = b.max = GetPosition2DI(); return b; }
-#endif
 protected:
 	SpatialComponent() {}
 };

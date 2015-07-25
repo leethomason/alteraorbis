@@ -234,6 +234,24 @@ CameraComponent* ChitBag::GetCamera( Engine* engine )
 }
 
 
+void ChitBag::SetNamedChit(const IString& name, Chit* chit)
+{
+	GLASSERT(chit);
+	GLASSERT(!name.empty());
+	GLASSERT(!namedChits.Query(name, nullptr));
+
+	namedChits.Add(name, chit->ID());
+}
+
+
+Chit* ChitBag::GetNamedChit(const IString& name)
+{
+	int id = 0;
+	namedChits.Query(name, &id);
+	return GetChit(id);
+}
+
+
 int ChitBag::NumBlocks() const
 {
 	return blocks.Size();
