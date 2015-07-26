@@ -73,7 +73,7 @@ static const double	NEED_CRITICAL				= 0.1;
 static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
-const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot", "stand" };
+const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot" };
 
 Vector2I ToWG(int id) {
 	Vector2I v = { 0, 0 };
@@ -139,32 +139,27 @@ AIComponent::~AIComponent()
 }
 
 
-void AIComponent::Serialize( XStream* xs )
+void AIComponent::Serialize(XStream* xs)
 {
-	this->BeginSerialize( xs, Name() );
+	this->BeginSerialize(xs, Name());
 
-	int aiModeI = int(aiMode);
-	int currentActionI = int(currentAction);
-	XARC_SER_KEY( xs, "aiMode", aiModeI );
-	XARC_SER_KEY(xs, "currentAction", currentActionI);
-	aiMode = AIMode(aiModeI);
-	currentAction = AIAction(currentActionI);
-
+	XARC_SER_ENUM(xs, AIMode, aiMode);
+	XARC_SER_ENUM(xs, AIAction, currentAction);
 	XARC_SER(xs, lastTargetID);
-	XARC_SER_DEF( xs, focus, 0 );
-	XARC_SER_DEF( xs, wanderTime, 0 );
-	XARC_SER( xs, rethink );
-	XARC_SER_DEF( xs, fullSectorAware, false );
-	XARC_SER_DEF( xs, visitorIndex, -1 );
-	XARC_SER_DEF( xs, rampageTarget, 0 );
-	XARC_SER_DEF( xs, destinationBlocked, 0 );
-	XARC_SER( xs, lastGrid );
+	XARC_SER_DEF(xs, focus, 0);
+	XARC_SER_DEF(xs, wanderTime, 0);
+	XARC_SER(xs, rethink);
+	XARC_SER_DEF(xs, fullSectorAware, false);
+	XARC_SER_DEF(xs, visitorIndex, -1);
+	XARC_SER_DEF(xs, rampageTarget, 0);
+	XARC_SER_DEF(xs, destinationBlocked, 0);
+	XARC_SER(xs, lastGrid);
 	XARC_SER_VAL_CARRAY(xs, friendList2);
 	XARC_SER_VAL_CARRAY(xs, enemyList2);
-	feTicker.Serialize( xs, "feTicker" );
-	needsTicker.Serialize( xs, "needsTicker" );
-	needs.Serialize( xs );
-	this->EndSerialize( xs );
+	feTicker.Serialize(xs, "feTicker");
+	needsTicker.Serialize(xs, "needsTicker");
+	needs.Serialize(xs);
+	this->EndSerialize(xs);
 }
 
 
@@ -709,6 +704,17 @@ void AIComponent::DoMelee()
 }
 
 
+VisitorData* AIComponent::GetVisitorData()
+{
+	if (visitorIndex >= 0)  {
+		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
+		return vd;
+	}
+	return 0;
+}
+
+
+#if 0
 bool AIComponent::DoStand( U32 time )
 {
 	const GameItem* item	= parentChit->GetItem();
@@ -775,7 +781,7 @@ bool AIComponent::DoStand( U32 time )
 	//	return taskList.DoStanding( thisComp, time );
 	return false;
 }
-
+#endif
 
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
@@ -842,23 +848,10 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 }
 
 
-void AIComponent::Stand()
+void AIComponent::Pickup(Chit* item)
 {
-	if ( aiMode != AIMode::BATTLE_MODE ) {
-		PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-		if ( pmc ) {
-			pmc->Stop();
-		}
-		currentAction = AIAction::STAND;
-		rethink = 0;
-	}
-}
-
-
-void AIComponent::Pickup( Chit* item )
-{
-	taskList.Push( Task::MoveTask( ToWorld2F(item->Position()) ));
-	taskList.Push( Task::PickupTask( item->ID() ));
+	taskList.Push(Task::MoveTask(ToWorld2F(item->Position())));
+	taskList.Push(Task::PickupTask(item->ID()));
 }
 
 
@@ -1424,33 +1417,35 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 
 void AIComponent::ThinkVisitor()
 {
-	// Visitors can:
-	// - go to kiosks, stand, then move on to a different domain
-	// - disconnect
-	// - grid travel to a new domain
-
-	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
-	if (!pmc) return;											// strange state,  can't do anything
-	if (!pmc->Stopped() && !pmc->ForceCountHigh()) return;	// everything is okay. move along.
-
-	bool disconnect = false;
-	const ChitContext* context = Context();
-
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
-	//CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get(visitorIndex);
-	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch(pos2i);
-	if (kiosk && kiosk->GetItem()->IName() == ISC::kiosk) {
-		// all good
-	}
-	else {
-		kiosk = 0;
-	}
 
-	if (vd->visited.Find(sector) >= 0) {
-		// This sector has been added to "visited", so we are done here.
-		// Head out!
+	Chit* temple = Context()->chitBag->FindBuilding(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
+	Chit* kiosk = Context()->chitBag->FindBuilding(ISC::kiosk,
+													sector,
+													0,
+													LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
+
+	bool doneAtThisSector = (vd->visited.Find(sector) >= 0) || !kiosk || !temple;
+	bool disconnect = false;
+
+	if (!doneAtThisSector) {
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(kiosk, SpatialComponent, MapSpatialComponent);
+		GLASSERT(msc);
+		Rectangle2I porch = msc->PorchPos();
+
+		if (Context()->worldMap->CalcPath(ToWorld2F(parentChit->Position()), ToWorld2F(porch.min), 0, 0)) {
+			taskList.Push(Task::MoveTask(porch.min));
+			taskList.Push(Task::StandTask(2000));
+			taskList.Push(Task::UseBuildingTask());
+		}
+		else {
+			// no path; wrap it up.
+			doneAtThisSector = true;
+		}
+	}
+	if (doneAtThisSector) {
 		LumosChitBag* chitBag = Context()->chitBag;
 		const Web& web = chitBag->GetSim()->GetCachedWeb();
 		SectorPort sp = Visitors::Instance()->ChooseDestination(visitorIndex, web, chitBag, Context()->worldMap);
@@ -1460,36 +1455,6 @@ void AIComponent::ThinkVisitor()
 		}
 		else {
 			disconnect = true;
-		}
-	}
-	else if (pmc->Stopped() && kiosk) {
-		currentAction = AIAction::STAND;
-	}
-	else {
-		// Find a kiosk.
-		Chit* temple = Context()->chitBag->FindBuilding(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
-		Vector2F pos = ToWorld2F(parentChit->Position());
-		Chit* kiosk = Context()->chitBag->FindBuilding(ISC::kiosk,
-													   sector,
-													   &pos,
-													   LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
-
-		if (kiosk && temple) {
-			MapSpatialComponent* msc = GET_SUB_COMPONENT(kiosk, SpatialComponent, MapSpatialComponent);
-			GLASSERT(msc);
-			Rectangle2I porch = msc->PorchPos();
-
-			// The porch is a rectangle; go to a particular point based on the ID()
-			if (context->worldMap->CalcPath(ToWorld2F(parentChit->Position()), ToWorld2F(porch.min), 0, 0)) {
-				this->Move(ToWorld2F(porch.min), false);
-			}
-			else {
-				// Can't path!
-				vd->visited.Push(sector);
-			}
-		}
-		else {
-			vd->visited.Push(sector);
 		}
 	}
 	if (disconnect) {
@@ -2157,7 +2122,7 @@ bool AIComponent::ThinkLoot()
 }
 
 
-void AIComponent::ThinkNormal(  )
+void AIComponent::ThinkNormal()
 {
 	// Wander in some sort of directed fashion.
 	// - get close to friends
@@ -2166,18 +2131,18 @@ void AIComponent::ThinkNormal(  )
 	// - occasionally randomly wander about
 
 	Vector2F dest = { 0, 0 };
-	const GameItem* item	= parentChit->GetItem();
-	int itemFlags			= item ? item->flags : 0;
-	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
+	const GameItem* item = parentChit->GetItem();
+	int itemFlags = item ? item->flags : 0;
+	int wanderFlags = itemFlags & GameItem::AI_WANDER_MASK;
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return;
 
-	RangedWeapon* ranged = thisIC->GetRangedWeapon( 0 );
-	if ( ranged && ranged->CanReload() ) {
-		ranged->Reload( parentChit );
+	RangedWeapon* ranged = thisIC->GetRangedWeapon(0);
+	if (ranged && ranged->CanReload()) {
+		ranged->Reload(parentChit);
 	}
 
 	if (ThinkWaypoints())
@@ -2207,49 +2172,48 @@ void AIComponent::ThinkNormal(  )
 		return;
 
 	// Wander....
-	if ( dest.IsZero() ) {
-		if ( parentChit->PlayerControlled() ) {
-			currentAction = AIAction::STAND;
+	if (dest.IsZero()) {
+		if (parentChit->PlayerControlled()) {
+			currentAction = AIAction::NO_ACTION;
 			return;
 		}
-		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
 		int r = parentChit->random.Rand(4);
 
 		// Denizens DO sector herd until they are members of a core.
 		bool sectorHerd = pmc
-							&& (itemFlags & GameItem::AI_SECTOR_HERD)
-							&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
-							&& (parentChit->random.Rand(SECTOR_HERD_ODDS) == 0)
-							&& (Team::IsRogue(parentChit->Team()));
+						&& (itemFlags & GameItem::AI_SECTOR_HERD)
+						&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
+						&& (parentChit->random.Rand(SECTOR_HERD_ODDS) == 0)
+						&& (Team::IsRogue(parentChit->Team()));
 		bool sectorWander = pmc
-							&& (itemFlags & GameItem::AI_SECTOR_WANDER)
-							&& gameItem->HPFraction() > 0.80f
-							&& (parentChit->random.Rand(SECTOR_WANDER_ODDS) == 0)
-							&& (Team::IsRogue(parentChit->Team()));
+						&& (itemFlags & GameItem::AI_SECTOR_WANDER)
+						&& gameItem->HPFraction() > 0.80f
+						&& (parentChit->random.Rand(SECTOR_WANDER_ODDS) == 0)
+						&& (Team::IsRogue(parentChit->Team()));
 
-		if ( sectorHerd || sectorWander ) 
-		{
-			if ( SectorHerd( false ) )
+		if (sectorHerd || sectorWander)	{
+			if (SectorHerd(false))
 				return;
 		}
-		else if ( wanderFlags == 0 || r == 0 ) {
+		else if (wanderFlags == 0 || r == 0) {
 			dest = ThinkWanderRandom();
 		}
-		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
+		else if (wanderFlags == GameItem::AI_WANDER_HERD) {
 			dest = ThinkWanderHerd();
 		}
-		else if ( wanderFlags == GameItem::AI_WANDER_CIRCLE ) {
+		else if (wanderFlags == GameItem::AI_WANDER_CIRCLE) {
 			dest = ThinkWanderCircle();
 		}
 	}
-	if ( !dest.IsZero() ) {
+	if (!dest.IsZero()) {
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
 		// If the move is very near (happens if friendList empty)
 		// don't do the move to avoid jerk.
 		if (dest2i != ToWorld2I(parentChit->Position())) {
 			taskList.Push(Task::MoveTask(dest2i));
 		}
-		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
+		taskList.Push(Task::StandTask(STAND_TIME_WHEN_WANDERING));
 	}
 }
 
@@ -2908,13 +2872,13 @@ bool AIComponent::ThinkWaypoints()
 
 
 
-int AIComponent::DoTick( U32 deltaTime )
+int AIComponent::DoTick(U32 deltaTime)
 {
 	PROFILE_FUNC();
 
 	// If we are in some action, do nothing and return.
-	if (    parentChit->GetRenderComponent() 
-		 && !parentChit->GetRenderComponent()->AnimationReady() ) 
+	if (parentChit->GetRenderComponent()
+		&& !parentChit->GetRenderComponent()->AnimationReady())
 	{
 		return 0;
 	}
@@ -2933,44 +2897,44 @@ int AIComponent::DoTick( U32 deltaTime )
 		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
 		bool goesToBattle = !gameItem->IsWorker() || (cs && cs->Citizens(0) <= 4);
 
-		if (    aiMode != AIMode::BATTLE_MODE 
-			 && goesToBattle
-			 && enemyList2.Size() ) 
+		if (aiMode != AIMode::BATTLE_MODE
+			&& goesToBattle
+			&& enemyList2.Size())
 		{
 			aiMode = AIMode::BATTLE_MODE;
 			currentAction = AIAction::NO_ACTION;
 			taskList.Clear();
 
-			if ( debugLog ) {
-				GLOUTPUT(( "ID=%d Mode to Battle\n", parentChit->ID() ));
+			if (debugLog) {
+				GLOUTPUT(("ID=%d Mode to Battle\n", parentChit->ID()));
 			}
 
-			if ( parentChit->GetRenderComponent() ) {
-				parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+			if (parentChit->GetRenderComponent()) {
+				parentChit->GetRenderComponent()->AddDeco("attention", STD_DECO);
 			}
-			for( int i=0; i<friendList2.Size(); ++i ) {
-				Chit* fr = Context()->chitBag->GetChit( friendList2[i] );
-				if ( fr && fr->GetAIComponent() ) {
-					fr->GetAIComponent()->MakeAware( enemyList2.Mem(), enemyList2.Size() );
+			for (int i = 0; i < friendList2.Size(); ++i) {
+				Chit* fr = Context()->chitBag->GetChit(friendList2[i]);
+				if (fr && fr->GetAIComponent()) {
+					fr->GetAIComponent()->MakeAware(enemyList2.Mem(), enemyList2.Size());
 				}
 			}
 		}
-		else if ( aiMode == AIMode::BATTLE_MODE && enemyList2.Empty() ) {
+		else if (aiMode == AIMode::BATTLE_MODE && enemyList2.Empty()) {
 			aiMode = AIMode::NORMAL_MODE;
 			currentAction = AIAction::NO_ACTION;
-			if ( debugLog ) {
-				GLOUTPUT(( "ID=%d Mode to Normal\n", parentChit->ID() ));
+			if (debugLog) {
+				GLOUTPUT(("ID=%d Mode to Normal\n", parentChit->ID()));
 			}
 		}
 	}
 
-	
-	if ( lastGrid != ToWorld2I(parentChit->Position()) ) {
+
+	if (lastGrid != ToWorld2I(parentChit->Position())) {
 		lastGrid = ToWorld2I(parentChit->Position());
 		EnterNewGrid();
 	}
 
-	if  ( focus == FOCUS_MOVE ) {
+	if (focus == FOCUS_MOVE) {
 		return 0;
 	}
 
@@ -3002,7 +2966,7 @@ int AIComponent::DoTick( U32 deltaTime )
 						DoMoraleZero();
 					}
 					else if (!atHomeCore && needs.Morale() < LOW_MORALE) {
-						bool okay = TravelHome( true);
+						bool okay = TravelHome(true);
 						if (!okay) needs.SetMorale(1.0);
 					}
 				}
@@ -3011,7 +2975,7 @@ int AIComponent::DoTick( U32 deltaTime )
 					if ((gameItem->flags & GameItem::HAS_NEEDS) && !parentChit->PlayerControlled()) {
 						needs.DoTravelTick(deltaTime);
 						if (needs.Morale() == 0) {
-							bool okay = TravelHome( true);
+							bool okay = TravelHome(true);
 							if (!okay) needs.SetMorale(1.0);
 						}
 					}
@@ -3041,46 +3005,42 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	if (aiMode == AIMode::NORMAL_MODE && !taskList.Empty()) {
-		FlushTaskList( deltaTime );
-		if ( taskList.Empty() ) {
+		FlushTaskList(deltaTime);
+		if (taskList.Empty()) {
 			rethink = 0;
 		}
 	}
-	else if ( (currentAction==AIAction::NO_ACTION) || (rethink > RETHINK ) ) {
-		Think(  );
+	else if ((currentAction == AIAction::NO_ACTION) || (rethink > RETHINK)) {
+		Think();
 		rethink = 0;
 	}
 
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
-	switch( currentAction ) {
-		case AIAction::MOVE:		
-			DoMove();
-			break;
-		case AIAction::MELEE:
-			DoMelee();	
-			break;
-		case AIAction::SHOOT:
-			DoShoot();
-			break;
-		case AIAction::STAND:
-			if ( taskList.Empty() ) {				// If there is a tasklist, it will manage standing and re-thinking.
-				DoStand( deltaTime );		// We aren't doing the tasklist stand, so do the component stand
-				rethink += deltaTime;
-			}
-			break;
+	switch (currentAction) {
+		case AIAction::MOVE:
+		DoMove();
+		break;
 
+		case AIAction::MELEE:
+		DoMelee();
+		break;
+		
+		case AIAction::SHOOT:
+		DoShoot();
+		break;
+		
 		case AIAction::NO_ACTION:
-			break;
+		break;
 
 		default:
-			GLASSERT( 0 );
-			currentAction = AIAction::NO_ACTION;
-			break;
+		GLASSERT(0);
+		currentAction = AIAction::NO_ACTION;
+		break;
 	}
 
-	if ( debugLog && (currentAction != oldAction) ) {
-		GLOUTPUT(( "ID=%d mode=%s action=%s\n", parentChit->ID(), MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)] ));
+	if (debugLog && (currentAction != oldAction)) {
+		GLOUTPUT(("ID=%d mode=%s action=%s\n", parentChit->ID(), MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)]));
 	}
 
 	// Without this rethink ticker melee fighters run past

@@ -147,6 +147,7 @@ public:
 
 private:
 	void UseBuilding(Chit* building, const grinliz::IString& buildingName );
+	void VisitorUseKiosk(Chit* kiosk);
 
 	void GoShopping(Chit* market);
 	void GoExchange(Chit* market);
@@ -159,11 +160,11 @@ private:
 	// Remove the 1st task.
 	void Remove();
 
-	Chit* chit;
-	const ChitContext* context;
-	grinliz::IString	buildingsUsed[NUM_BUILDING_USED];
-	CTicker				socialTicker;
-	grinliz::CDynArray<Task> taskList;
+	Chit*						chit;
+	const ChitContext*			context;
+	grinliz::IString			buildingsUsed[NUM_BUILDING_USED];
+	CTicker						socialTicker;
+	grinliz::CDynArray<Task>	taskList;
 };
 
 }; // namespace 'ai'

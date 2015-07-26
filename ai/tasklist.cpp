@@ -145,9 +145,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 	Task* task = &taskList[0];
 	Vector2I pos2i = ToWorld2I(chit->Position());
 	Vector2I sector = ToSector(pos2i);
-	//Vector2F taskPos2 = ToWorld2F(task->pos2i);
-	//Vector3F taskPos3 = ToWorld3F(task->pos2i);
-	//Rectangle2I innerBounds = InnerSectorBounds(sector);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
 
@@ -176,7 +173,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 		case Task::TASK_STAND:
 		if (pmc->Stopped()) {
-			chit->GetAIComponent()->Stand();
 			DoStanding(delta);
 
 			if (taskList.Size() >= 2) {
@@ -227,8 +223,6 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 			// "BUILD" just refers to a BuildScript task. Do some special case handling
 			// up front for rocks. (Which aren't handled by the general code.)
 			// Although a small kludge, way better than things used to be.
-
-			//const WorldGrid& wg = context->worldMap->GetWorldGrid(task->pos2i.x, task->pos2i.y);
 
 			if (task->buildScriptID == BuildScript::CLEAR) {
 				context->worldMap->SetPlant(task->pos2i.x, task->pos2i.y, 0, 0);
@@ -409,9 +403,48 @@ void TaskList::SocialPulse(const Vector2F& origin )
 }
 
 
+void TaskList::VisitorUseKiosk(Chit* kiosk)
+{
+	Vector2I sector = ToSector(chit->Position());
+
+	GLASSERT(chit->GetAIComponent());
+	VisitorData* visitorData = chit->GetAIComponent()->GetVisitorData();
+	GLASSERT(visitorData);
+	if (!visitorData) return;
+
+	visitorData->visited.Push(sector);
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (!cs) return;
+
+	cs->AddTech();
+	if (chit->GetRenderComponent()) {
+		chit->GetRenderComponent()->AddDeco("techxfer", STD_DECO);
+	}
+#if 1			
+	// experimental: visitors add Au & Crystal
+	// Au, when collected, goes to the core.
+	// Crystal, when collected, goes to the Exchange.
+	ReserveBank* bank = ReserveBank::Instance();
+	if (bank->wallet.Gold() && cs->ParentChit()->GetWallet()) {
+		cs->ParentChit()->GetWallet()->Deposit(&bank->wallet, 1);
+	}
+	if (chit->random.Rand(10) == 0) {
+		if (bank->wallet.Crystal(0)) {
+			Chit* exchange = chit->Context()->chitBag->FindBuilding(ISC::exchange, sector, nullptr, LumosChitBag::EFindMode::NEAREST, 0, 0);
+			if (exchange) {
+				const int GREEN[NUM_CRYSTAL_TYPES] = { 1, 0, 0, 0 };
+				exchange->GetItem()->wallet.Deposit(&bank->wallet, 0, GREEN);
+				if (exchange->GetRenderComponent()) {
+					exchange->GetRenderComponent()->AddDeco("loot", STD_DECO);
+				}
+			}
+		}
+	}
+#endif
+}
+
 void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 {
-	//LumosChitBag* chitBag = chit->Context()->chitBag;
 	Vector2I pos2i = ToWorld2I(chit->Position());
 	Vector2I sector = ToSector(pos2i);
 	CoreScript* coreScript = CoreScript::GetCore(sector);
@@ -421,6 +454,10 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 	if (!chit->GetItem()) return;
 
 	// Working buildings. (Not need based.)
+	if (chit->GetAIComponent() && chit->GetAIComponent()->GetVisitorData() && buildingName == ISC::kiosk) {
+		VisitorUseKiosk(building);
+		return;
+	}
 	if (buildingName == ISC::vault) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT(vaultItem);

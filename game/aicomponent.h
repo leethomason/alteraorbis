@@ -22,6 +22,7 @@
 #include "../grinliz/glrectangle.h"
 #include "../ai/aineeds.h"
 #include "../ai/tasklist.h"
+#include "../game/visitor.h"
 
 class WorldMap;
 class Engine;
@@ -67,7 +68,6 @@ public:
 	// Returns true if the move is possible.
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
-	void Stand();
 	void Rampage( int dest );
 	bool Rampaging() const { return aiMode == AIMode::RAMPAGE_MODE;  }
 	void GoSectorHerd(bool focus);	// forces a sector herd
@@ -86,7 +86,9 @@ public:
 	void EnableLog( bool enable )			{ debugLog = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
+
 	int  VisitorIndex() const				{ return visitorIndex; }
+	VisitorData* GetVisitorData();
 
 	const ai::Needs& GetNeeds() const		{ return needs; }
 	ai::Needs* GetNeedsMutable()			{ return &needs; }
@@ -110,7 +112,6 @@ public:
 		MOVE,			// Movement, will reload and run&gun if possible.
 		MELEE,			// Go to the target and hit it. Melee charge.
 		SHOOT,			// Stand ground and shoot.
-		STAND,			// reload
 		NUM_ACTIONS,
 	};
 
@@ -177,7 +178,6 @@ private:
 	void DoMelee();
 	void DoShoot();
 	void DoMove();
-	bool DoStand(U32 since);	// return true if doing something
 	bool SectorHerd(bool focus);	// "upper" function: look for dest, etc.
 	bool DoSectorHerd(bool focus, const grinliz::Vector2I& sector);	// lower function: go
 	bool DoSectorHerd(bool focus, const SectorPort& sectorPort);	// lower function: go
