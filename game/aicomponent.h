@@ -110,9 +110,7 @@ public:
 		MOVE,			// Movement, will reload and run&gun if possible.
 		MELEE,			// Go to the target and hit it. Melee charge.
 		SHOOT,			// Stand ground and shoot.
-
-		WANDER,
-		STAND,			// used to eat plants, reload
+		STAND,			// reload
 		NUM_ACTIONS,
 	};
 

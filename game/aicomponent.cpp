@@ -73,7 +73,7 @@ static const double	NEED_CRITICAL				= 0.1;
 static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
-const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot", "wander", "stand" };
+const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot", "stand" };
 
 Vector2I ToWG(int id) {
 	Vector2I v = { 0, 0 };
@@ -2169,9 +2169,6 @@ void AIComponent::ThinkNormal(  )
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
-	//Vector2F pos2 = ToWorld2F(parentChit->Position());
-	//Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
-	//const ChitContext* context = Context();
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
@@ -2212,7 +2209,7 @@ void AIComponent::ThinkNormal(  )
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( parentChit->PlayerControlled() ) {
-			currentAction = AIAction::WANDER;
+			currentAction = AIAction::STAND;
 			return;
 		}
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
@@ -3076,19 +3073,6 @@ int AIComponent::DoTick( U32 deltaTime )
 		case AIAction::NO_ACTION:
 			break;
 
-		case AIAction::WANDER:
-			{
-				PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-				if ( pmc && !pmc->Stopped() && !pmc->ForceCountHigh() ) {
-					// okay
-				}
-				else {
-					// not actually wandering
-					currentAction = AIAction::STAND;
-				}
-			}
-			break;
-
 		default:
 			GLASSERT( 0 );
 			currentAction = AIAction::NO_ACTION;
@@ -3135,11 +3119,8 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
 		focus = 0;
-		if (currentAction != AIAction::WANDER) {
-			currentAction = AIAction::NO_ACTION;
-			parentChit->SetTickNeeded();
-		}
-
+		currentAction = AIAction::NO_ACTION;
+		parentChit->SetTickNeeded();
 		break;
 
 		case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
@@ -3208,7 +3189,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		break;
 
 		case ChitMsg::WORKQUEUE_UPDATE:
-		if (aiMode == AIMode::NORMAL_MODE && currentAction == AIAction::WANDER) {
+		if (aiMode == AIMode::NORMAL_MODE) {
 			currentAction = AIAction::NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
