@@ -981,8 +981,13 @@ void AIComponent::Rampage( int dest )
 // Function to compute "should we rampage." Rampage logic is in ThinkRampage()
 bool AIComponent::ThinkDoRampage()
 {
-	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
+	Vector2I sector = ToSector(pos2i);
+	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+
+	if ( !wg.IsPort() && destinationBlocked < RAMPAGE_THRESHOLD ) 
 		return false;
+
 	const ChitContext* context = Context();
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
@@ -997,7 +1002,6 @@ bool AIComponent::ThinkDoRampage()
 
 	// Workers teleport. Rampaging was annoying.
 	if (thisItem->IsWorker()) {
-		Vector2I pos2i = ToWorld2I(parentChit->Position());
 		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 		if (cs) {
 			Vector2I csPos2i = ToWorld2I(cs->ParentChit()->Position());
@@ -1016,17 +1020,18 @@ bool AIComponent::ThinkDoRampage()
 	// it's essentially just a random walk.
 	destinationBlocked = 0;
 	const SectorData& sd = context->worldMap->GetSectorData( ToSector( parentChit->Position() ));
-	Vector2I pos2i = ToWorld2I(parentChit->Position());
 
 	CArray< int, 5 > targetArr;
 
 	if (pos2i != sd.core) {
 		targetArr.Push(0);	// always core.
 	}
-	for( int i=0; i<4; ++i ) {
-		int port = 1 << i;
-		if ((sd.ports & port) && !sd.GetPortLoc(port).Contains(pos2i)) {
-			targetArr.Push( i+1 );	// push the port, if it has it.
+	if (!wg.IsPort()) {
+		for (int i = 0; i < 4; ++i) {
+			int port = 1 << i;
+			if ((sd.ports & port) && !sd.GetPortLoc(port).Contains(pos2i)) {
+				targetArr.Push(i + 1);	// push the port, if it has it.
+			}
 		}
 	}
 	GLASSERT(targetArr.Size());
@@ -1060,7 +1065,7 @@ bool AIComponent::RampageDone()
 }
 
 
-void AIComponent::ThinkRampage(  )
+void AIComponent::ThinkRampage()
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
 	if (pmc && pmc->IsMoving())
@@ -1070,13 +1075,12 @@ void AIComponent::ThinkRampage(  )
 
 	// Where are we, and where to next?
 	const ChitContext* context = Context();
-	Vector2I pos2i			= ToWorld2I(parentChit->Position());
-	const WorldGrid& wg0	= context->worldMap->GetWorldGrid( pos2i.x, pos2i.y );
-	Vector2I next			= pos2i + wg0.Path( rampageTarget );
-	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
-//	const SectorData& sd	= context->worldMap->GetSectorData( ToSector( pos2i ));
+	Vector2I pos2i = ToWorld2I(parentChit->Position());
+	const WorldGrid& wg0 = context->worldMap->GetWorldGrid(pos2i.x, pos2i.y);
+	Vector2I next = pos2i + wg0.Path(rampageTarget);
+	const WorldGrid& wg1 = context->worldMap->GetWorldGrid(next.x, next.y);
 
-	if ( RampageDone()) {
+	if (RampageDone()) {
 		aiMode = AIMode::NORMAL_MODE;
 		currentAction = AIAction::NO_ACTION;
 		return;
@@ -1084,16 +1088,14 @@ void AIComponent::ThinkRampage(  )
 
 	// FIXME how to handle buildings?
 
-	if ( wg1.RockHeight() || wg1.BlockingPlant() ) {
+	if (wg1.RockHeight() || wg1.BlockingPlant()) {
 		this->Target(next, false);
 		currentAction = AIAction::MELEE;
 
-		const GameItem* melee = thisIC->SelectWeapon(ItemComponent::SELECT_MELEE);
-		GLASSERT(melee);
-		(void)melee;
-	} 
-	else if ( wg1.IsLand() ) {
-		this->Move( ToWorld2F( next ), false );
+		GLASSERT(thisIC->SelectWeapon(ItemComponent::SELECT_MELEE));
+	}
+	else if (wg1.IsLand()) {
+		this->Move(ToWorld2F(next), false);
 	}
 	else {
 		aiMode = AIMode::NORMAL_MODE;
@@ -1420,16 +1422,16 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 }
 
 
-void AIComponent::ThinkVisitor(  )
+void AIComponent::ThinkVisitor()
 {
 	// Visitors can:
 	// - go to kiosks, stand, then move on to a different domain
 	// - disconnect
 	// - grid travel to a new domain
 
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc ) return;											// strange state,  can't do anything
-	if ( !pmc->Stopped() && !pmc->ForceCountHigh() ) return;	// everything is okay. move along.
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+	if (!pmc) return;											// strange state,  can't do anything
+	if (!pmc->Stopped() && !pmc->ForceCountHigh()) return;	// everything is okay. move along.
 
 	bool disconnect = false;
 	const ChitContext* context = Context();
@@ -1437,16 +1439,16 @@ void AIComponent::ThinkVisitor(  )
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
 	//CoreScript* coreScript = CoreScript::GetCore(sector);
-	VisitorData* vd = Visitors::Get( visitorIndex );
-	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch( pos2i);
-	if ( kiosk && kiosk->GetItem()->IName() == ISC::kiosk ) {
+	VisitorData* vd = Visitors::Get(visitorIndex);
+	Chit* kiosk = Context()->chitBag->ToLumos()->QueryPorch(pos2i);
+	if (kiosk && kiosk->GetItem()->IName() == ISC::kiosk) {
 		// all good
 	}
 	else {
 		kiosk = 0;
 	}
 
-	if ( vd->visited.Find(sector) >= 0) {
+	if (vd->visited.Find(sector) >= 0) {
 		// This sector has been added to "visited", so we are done here.
 		// Head out!
 		LumosChitBag* chitBag = Context()->chitBag;
@@ -1460,25 +1462,25 @@ void AIComponent::ThinkVisitor(  )
 			disconnect = true;
 		}
 	}
-	else if ( pmc->Stopped() && kiosk ) {
+	else if (pmc->Stopped() && kiosk) {
 		currentAction = AIAction::STAND;
 	}
 	else {
 		// Find a kiosk.
 		Chit* temple = Context()->chitBag->FindBuilding(ISC::temple, sector, 0, LumosChitBag::EFindMode::NEAREST, 0, 0);
 		Vector2F pos = ToWorld2F(parentChit->Position());
-		Chit* kiosk = Context()->chitBag->FindBuilding(	ISC::kiosk,
-														sector,
-														&pos,
-														LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0 );
+		Chit* kiosk = Context()->chitBag->FindBuilding(ISC::kiosk,
+													   sector,
+													   &pos,
+													   LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
 
-		if ( kiosk && temple) {
-			MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
-			GLASSERT( msc );
+		if (kiosk && temple) {
+			MapSpatialComponent* msc = GET_SUB_COMPONENT(kiosk, SpatialComponent, MapSpatialComponent);
+			GLASSERT(msc);
 			Rectangle2I porch = msc->PorchPos();
 
 			// The porch is a rectangle; go to a particular point based on the ID()
-			if ( context->worldMap->CalcPath( ToWorld2F(parentChit->Position()), ToWorld2F(porch.min), 0, 0 ) ) {
+			if (context->worldMap->CalcPath(ToWorld2F(parentChit->Position()), ToWorld2F(porch.min), 0, 0)) {
 				this->Move(ToWorld2F(porch.min), false);
 			}
 			else {
@@ -1490,7 +1492,7 @@ void AIComponent::ThinkVisitor(  )
 			vd->visited.Push(sector);
 		}
 	}
-	if ( disconnect ) {
+	if (disconnect) {
 		parentChit->GetItem()->hp = 0;
 		parentChit->SetTickNeeded();
 	}
@@ -3124,7 +3126,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		case ChitMsg::CHIT_DAMAGE:
 		{
 			// If something hits us, make sure we notice.
-			const ChitDamageInfo* info = (const ChitDamageInfo*) msg.Ptr();
+			const ChitDamageInfo* info = (const ChitDamageInfo*)msg.Ptr();
 			GLASSERT(info);
 			this->MakeAware(&info->originID, 1);
 		}
@@ -3157,7 +3159,6 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			focus = 0;
 			currentAction = AIAction::NO_ACTION;
 			parentChit->SetTickNeeded();
-
 
 			// Generally not what we expected.
 			// Do a re-think.get
@@ -3196,7 +3197,10 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 
 		case ChitMsg::CHIT_SECTOR_HERD:
-		if (parentChit->GetItem() && (parentChit->GetItem()->flags & (GameItem::AI_SECTOR_HERD | GameItem::AI_SECTOR_WANDER))) {
+		if ((aiMode == AIMode::NORMAL_MODE)
+			&& parentChit->GetItem()
+			&& (parentChit->GetItem()->flags & (GameItem::AI_SECTOR_HERD | GameItem::AI_SECTOR_WANDER)))
+		{
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();
 			this->Move(*sectorPort, msg.Data() ? true : false);

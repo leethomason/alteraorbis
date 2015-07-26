@@ -30,7 +30,7 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
 	if (playerSector.IsZero()) return ZERO;
-	if (ToSector(herd) == playerSector) return ZERO;
+	if (ToSector(herd->Position()) == playerSector) return ZERO;
 
 	int playerTeam = Context()->chitBag->GetHomeTeam();
 	GLASSERT(playerTeam);
