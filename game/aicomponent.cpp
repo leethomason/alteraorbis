@@ -439,18 +439,16 @@ private:
 void AIComponent::DoMove()
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc || pmc->ForceCountHigh() || pmc->Stopped() ) {
+	ItemComponent* thisIC = parentChit->GetItemComponent();
+	if ( !thisIC || !pmc || pmc->ForceCountHigh() || pmc->Stopped() ) {
 		currentAction = AIAction::NO_ACTION;
 		return;
 	}
 
-	ItemComponent* thisIC = parentChit->GetItemComponent();
-	if (!thisIC) return;
-
 	// Generally speaking, moving is done by the PathMoveComponent. When
 	// not in battle, this is essentially "do nothing." If in battle mode,
 	// we look for opportunity fire and such.
-	if ( aiMode != AIMode::BATTLE_MODE ) {
+	if ( aiMode != AIMode::BATTLE_MODE) {
 		// Check for motion done, stuck, etc.
 		if ( pmc->Stopped() || pmc->ForceCountHigh() ) {
 			currentAction = AIAction::NO_ACTION;
@@ -713,75 +711,6 @@ VisitorData* AIComponent::GetVisitorData()
 	return 0;
 }
 
-
-#if 0
-bool AIComponent::DoStand( U32 time )
-{
-	const GameItem* item	= parentChit->GetItem();
-	if (!item) return false;
-	MoveComponent* thisMove = parentChit->GetMoveComponent();
-	if (!thisMove) return false;
-
-	if (visitorIndex >= 0 && !thisMove->IsMoving())
-	{
-		// Visitors at a kiosk.
-		Vector2I pos2i = ToWorld2I(parentChit->Position());
-		Vector2I sector = ToSector(pos2i);
-		Chit* kioskChit = this->Context()->chitBag->QueryPorch(pos2i);
-		CoreScript* cs = CoreScript::GetCore(sector);
-
-		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
-
-		if (cs && kioskChit && kioskChit->GetItem()->IName() == ISC::kiosk) {
-			vd->kioskTime += time;
-			if (vd->kioskTime > VisitorData::KIOSK_TIME) {
-				vd->visited.Push(sector);
-				cs->AddTech();
-				if (parentChit->GetRenderComponent()) {
-					parentChit->GetRenderComponent()->AddDeco("techxfer", STD_DECO);
-				}
-				vd->kioskTime = 0;
-				currentAction = AIAction::NO_ACTION;	// done here - move on!
-
-#if 1			// experimental: visitors add Au & Crystal
-				// Au, when collected, goes to the core.
-				// Crystal, when collected, goes to the Exchange.
-				ReserveBank* bank = ReserveBank::Instance();
-				if (bank->wallet.Gold() && cs->ParentChit()->GetWallet()) {
-					cs->ParentChit()->GetWallet()->Deposit(&bank->wallet, 1);
-				}
-				if (parentChit->random.Rand(10) == 0) {
-					if (bank->wallet.Crystal(0)) {
-						Chit* exchange = Context()->chitBag->FindBuilding(ISC::exchange, sector, nullptr, LumosChitBag::EFindMode::NEAREST, 0, 0);
-						if (exchange) {
-							const int GREEN[NUM_CRYSTAL_TYPES] = { 1, 0, 0, 0 };
-							exchange->GetItem()->wallet.Deposit(&bank->wallet, 0, GREEN);
-							if (exchange->GetRenderComponent()) {
-								exchange->GetRenderComponent()->AddDeco("loot", STD_DECO);
-							}
-						}
-					}
-				}
-#endif
-				return false;
-			}
-			Context()->engine->particleSystem->EmitPD(ISC::useKiosk, parentChit->Position(), V3F_UP, time);
-			// else keep standing.
-			return true;
-		}
-		else {
-			// Oops...
-			currentAction = AIAction::NO_ACTION;
-			return false;
-		}
-	}
-	// FIXME: there are 2 stand functions. The AIComponent one and
-	// the TaskList one. Need to sort that out. But don't call
-	// DoStanding here.
-	//	return taskList.DoStanding( thisComp, time );
-	return false;
-}
-#endif
 
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
@@ -1417,6 +1346,10 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 
 void AIComponent::ThinkVisitor()
 {
+	if (parentChit->StackedMoveComponent()) {
+		return;	 // grid travel, fixes, etc.
+	}
+
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
 	VisitorData* vd = Visitors::Get(visitorIndex);

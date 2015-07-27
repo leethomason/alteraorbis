@@ -40,8 +40,9 @@ x no rock on core location
 - deity temples
 x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
 x containers (vault, bar, etc.) shouldn't have value. 
-- rampage instead of sector herd out?
-- fix visitor giving tech again...implement useBuilding for visitors
+x rampage instead of sector herd out?
+x fix visitor giving tech again...implement useBuilding for visitors
+- rampage causes switch to battle mode
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

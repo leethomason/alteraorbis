@@ -417,8 +417,8 @@ void TaskList::VisitorUseKiosk(Chit* kiosk)
 	if (!cs) return;
 
 	cs->AddTech();
-	if (chit->GetRenderComponent()) {
-		chit->GetRenderComponent()->AddDeco("techxfer", STD_DECO);
+	if (kiosk->GetRenderComponent()) {
+		kiosk->GetRenderComponent()->AddDeco("techxfer", STD_DECO);
 	}
 #if 1			
 	// experimental: visitors add Au & Crystal
