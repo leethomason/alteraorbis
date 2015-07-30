@@ -1166,7 +1166,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &menu->cameraHomeButton ) {
 		DoCameraHome();
 	}
-	else if ( item == &menu->avatarUnit ) {
+	else if (item == &menu->uiMode[GameSceneMenu::UI_AVATAR]) {
 		DoAvatarButton();
 	}
 	else if (item == &menu->teleportAvatar) {
@@ -1764,7 +1764,7 @@ void GameScene::DoTick(U32 delta)
 	newsConsole.DoTick(delta, sim->GetChitBag()->GetHomeCore());
 
 	bool useBuildingVisible = false;
-	if (AvatarSelected()) {
+	if (playerChit) {
 		Chit* building = sim->GetChitBag()->QueryPorch(ToWorld2I(playerChit->Position()));
 		if (building) {
 			IString name = building->GetItem()->IName();
@@ -2059,9 +2059,13 @@ void GameScene::DrawDebugText()
 		y += 16;
 	}
 	if (!voxelInfoID.IsZero()) {
+		Vector2I sector = ToSector(voxelInfoID);
 		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(voxelInfoID.x, voxelInfoID.y);
-		ufoText->Draw(x, y, "voxel=%d,%d hp=%d/%d pave=%d ",
-					  voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP(), wg.Pave());
+		ufoText->Draw(x, y, "voxel=%d,%d (%d,%d %d) hp=%d/%d pave=%d ",
+					  voxelInfoID.x, voxelInfoID.y, 
+					  sector.x, sector.y,
+					  sector.y * NUM_SECTORS + sector.x,
+					  wg.HP(), wg.TotalHP(), wg.Pave());
 		y += 16;
 	}
 }

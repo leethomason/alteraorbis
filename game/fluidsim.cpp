@@ -26,7 +26,7 @@ FluidSim::FluidSim(WorldMap* wm, const Vector2I& s) : worldMap(wm), settled(fals
 	outerBounds.DoIntersection(worldMap->Bounds());
 	innerBounds = outerBounds;
 	innerBounds.Outset(-1);
-	type = WorldGrid::FLUID_WATER;
+	fluidType = WorldGrid::FLUID_WATER;
 	nRocks = 0;
 }
 
@@ -104,6 +104,12 @@ int FluidSim::ContainsWaterfalls(const grinliz::Rectangle2I& bounds) const
 		}
 	}
 	return count;
+}
+
+
+void FluidSim::Unsettle()
+{
+	settled = false;
 }
 
 
@@ -185,7 +191,10 @@ bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinli
 			Vector2I loc1 = p1 - outerBounds.min;
 			const WorldGrid& wg1 = worldMap->grid[worldMap->INDEX(p1)];
 			int index1 = loc1.y*SECTOR_SIZE + loc1.x;
-			bool onEdge = (outerBounds.min.x == loc1.x) || (outerBounds.max.x == loc1.x) || (outerBounds.min.y == loc1.y) || (outerBounds.max.y == loc1.y);
+			bool onEdge = (outerBounds.min.x == p1.x) 
+				|| (outerBounds.max.x == p1.x) 
+				|| (outerBounds.min.y == p1.y) 
+				|| (outerBounds.max.y == p1.y);
 
 			if (outerBounds.Contains(p1)
 				&& !bitFlags.IsSet(loc1.x, loc1.y)
@@ -212,7 +221,7 @@ bool FluidSim::FloodFill(const Vector2I& start, int d, grinliz::CDynArray<grinli
 		++work;
 	}
 	bool valid =    (fillStack.Size() > 3)
-				 && (water < fillStack.Size() / 20)
+				 && (water <= fillStack.Size() / 20)
 				 && (water < 8)
 				 && (gridPort == 0);
 	return valid;
@@ -234,10 +243,12 @@ bool FluidSim::MoveFluid()
 
 		if (wg->fluidHeight < unsigned(d * FLUID_PER_ROCK)) {
 			wg->fluidHeight++;
+			wg->SetFluidType(fluidType);
 			thisSettled = false;
 		}
 		else if (wg->fluidHeight > unsigned(d * FLUID_PER_ROCK)) {
 			wg->fluidHeight--;
+			wg->SetFluidType(fluidType);
 			thisSettled = false;
 		}
 		if (wg->RockHeight()) {

@@ -1,3 +1,4 @@
+- redistributables...
 - Micro-Game
 	- world gen
 		- canyon? river & pool walk?
@@ -42,7 +43,18 @@ x deities should move items to market, not vault. Remove vault. Or...vault is fr
 x containers (vault, bar, etc.) shouldn't have value. 
 x rampage instead of sector herd out?
 x fix visitor giving tech again...implement useBuilding for visitors
-- rampage causes switch to battle mode
+- rampage causes switch to battle mode - still doesn't rampage correctly
+- "avatar is off the chase"
+- destination icons - still a lingering mark 
+- troll vs. goblin icons too similar
+- reorder squad units
+- cyclops stuck pathing...just standing there.
+- change xp -> effective level cap to 10-12?
+- camera doesn't track avatar
+- turn lava back on for certain areas
+- temples: auto power supply?
+- human shouldn't be able to build blade
+- no flags in water
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

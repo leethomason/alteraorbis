@@ -38,7 +38,7 @@ public:
 	void EmitWaterfalls(U32 delta, Engine* engine);
 
 	bool Settled() const { return settled; }
-	void Unsettle() { settled = false; }
+	void Unsettle();
 
 	int NumWaterfalls() const { return waterfalls.Size(); }
 	int NumPools() const { return pools.Size(); }
@@ -49,7 +49,7 @@ public:
 	grinliz::Rectangle2I Bounds() const { return outerBounds; }
 
 	// WorldGrid::FLUID_WATER or WorldGrid::FLUID_LAVA
-	void SetFluid(int _type) { type = _type; }
+	void SetFluid(int _type) { fluidType = _type; }
 	// Returs the number of rocks counted at the last MoveFluid()
 	int NumRocks() const { return nRocks; }
 
@@ -64,7 +64,7 @@ private:
 	WorldMap* worldMap;
 	grinliz::Rectangle2I outerBounds, innerBounds;
 	bool settled;
-	int type;	// water or lava
+	int fluidType;	// water or lava
 	int nRocks;
 
 	grinliz::CDynArray<grinliz::Vector2I> waterfalls;

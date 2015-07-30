@@ -581,7 +581,7 @@ int main(int argc, char **argv)
 				GameCameraMove(game, keyMoveSpeed, 0);
 		}
 
-		{
+		if (game) {
 			lastTick = thisTick;
 			thisTick = SDL_GetTicks();
 			PROFILE_BLOCK(GameDoTick);

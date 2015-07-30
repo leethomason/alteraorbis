@@ -50,7 +50,7 @@ public:
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 
 	gamui::PushButton	cameraHomeButton;
-	gamui::PushButton	nextUnit, avatarUnit, prevUnit, teleportAvatar;
+	gamui::PushButton	nextUnit, prevUnit, teleportAvatar;
 	gamui::PushButton	useBuildingButton;
 	gamui::Image		tabBar0, tabBar1;
 	gamui::PushButton	createWorkerButton;
@@ -65,7 +65,6 @@ public:
 private:
 	void SetSquadDisplay(CoreScript* core);
 	
-	bool useBuilding;
 	bool canTeleport;
 	int nWorkers;
 };

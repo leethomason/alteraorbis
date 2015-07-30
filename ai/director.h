@@ -3,6 +3,7 @@
 
 #include "../xegame/component.h"
 #include "../xegame/chit.h"
+#include "../xegame/cticker.h"
 
 class Director : public Component, public IChitListener
 {
@@ -19,14 +20,14 @@ public:
 	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual int DoTick(U32 delta);
 
 	grinliz::Vector2I ShouldSendHerd(Chit* herd);
 
-	//void NotifyArrive(from, to, chit);
-	//void NotifyDelete(at, chit);
-
-	//sendTo ShouldSendGreater(from, greater);
-
+private:
+	CTicker attackTicker;
+	bool attractLesser = false;
+	bool attractGreater = false;
 };
 
 #endif // DIRECTOR_INCLUDED

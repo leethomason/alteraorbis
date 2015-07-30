@@ -871,11 +871,11 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
 
 	if (!was.VoxelEqual(wg)) {
-		//		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
 		grid[INDEX(x, y)] = wg;
 
 		if (physics) {
-			FluidSim* fluidSim = physics->GetFluidSim(ToSector(x, y));
+			Vector2I sector = ToSector(x, y);
+			FluidSim* fluidSim = physics->GetFluidSim(sector);
 			if (fluidSim) {
 				fluidSim->Unsettle();
 			}

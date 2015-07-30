@@ -4,6 +4,7 @@
 #include "circuitsim.h"
 #include "fluidsim.h"
 #include "lumosmath.h"
+#include "worldgrid.h"
 #include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
@@ -21,11 +22,21 @@ PhysicsSims::PhysicsSims(const ChitContext* _context) : context(_context)
 		circuitSim[0] = new CircuitSim(context, sector);
 		fluidSim[0] = new FluidSim(context->worldMap, sector);
 	}
+
+	Rectangle2I outer;
+	outer.Set(0, 0, NUM_SECTORS - 1, NUM_SECTORS - 1);
+	Rectangle2I inner = outer;
+	inner.Outset(-2);
+
 	for (int j = 1; j < NUM_SECTORS - 1; ++j) {
 		for (int i = 1; i < NUM_SECTORS - 1; ++i) {
 			Vector2I sector = { i, j };
 			circuitSim[j*NUM_SECTORS + i] = new CircuitSim(context, sector);
 			fluidSim[j*NUM_SECTORS + i] = new FluidSim(context->worldMap, sector);
+
+			if (!inner.Contains(sector) && (Random::Hash8(sector.y * NUM_SECTORS + sector.x) & 1)) {
+				fluidSim[j*NUM_SECTORS + i]->SetFluid(WorldGrid::FLUID_LAVA);
+			}
 		}
 	}
 	fluidTicker.SetPeriod(600 / (NUM_SECTORS*NUM_SECTORS));

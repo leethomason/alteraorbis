@@ -31,9 +31,9 @@ static const int	MAX_MAP_SIZE	= 512;
 static const int	MAP_Y_SHIFT		= 9;
 static const int	MAP_X_MASK		= 511;
 #else
-static const int	MAX_MAP_SIZE = 1024;
-static const int	MAP_SHIFT		= 10;
-static const int	MAP_MASK		= 1023;	
+static const int	MAX_MAP_SIZE    = 1024;
+static const int	MAP_Y_SHIFT		= 10;
+static const int	MAP_X_MASK		= 1023;	
 #endif
 
 inline int IndexToMapX(int index) {

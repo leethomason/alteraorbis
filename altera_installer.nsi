@@ -45,7 +45,7 @@ Section "AlteraOrbis (required)"
   
   ; Put file there
   File /r Altera\*.*
-  File vcredist_x86_2013.exe
+;  File vcredist_x86_2013.exe
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_AlteraOrbis "Install_Dir" "$INSTDIR"

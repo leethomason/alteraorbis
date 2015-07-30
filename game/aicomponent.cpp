@@ -834,12 +834,12 @@ void AIComponent::Target(const Vector2I& pos, bool focused)
 }
 
 
-void AIComponent::Target( int id, bool focused )
+void AIComponent::Target(int id, bool focused)
 {
-	if ( aiMode != AIMode::BATTLE_MODE ) {
+	if (aiMode != AIMode::BATTLE_MODE) {
 		aiMode = AIMode::BATTLE_MODE;
-		if ( parentChit->GetRenderComponent() ) {
-			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+		if (parentChit->GetRenderComponent()) {
+			parentChit->GetRenderComponent()->AddDeco("attention", STD_DECO);
 		}
 	}
 	int idx = enemyList2.Find(id);
@@ -1009,11 +1009,8 @@ void AIComponent::ThinkRampage()
 	}
 
 	// FIXME how to handle buildings?
-
 	if (wg1.RockHeight() || wg1.BlockingPlant()) {
 		this->Target(next, false);
-		currentAction = AIAction::MELEE;
-
 		GLASSERT(thisIC->SelectWeapon(ItemComponent::SELECT_MELEE));
 	}
 	else if (wg1.IsLand()) {
@@ -1403,12 +1400,12 @@ bool AIComponent::ThinkCollectNearFruit()
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 	if (gameItem->IsWorker()) return false;
+
 	ItemComponent* ic = parentChit->GetItemComponent();
 	if (!ic) return false;
 
 	int count = ic->NumItems(ISC::fruit) + ic->NumItems(ISC::elixir);
 
-	// Plant eater
 	if (gameItem->HPFraction() < EAT_WILD_FRUIT
 		|| (ic->CanAddToInventory() && count < 2))
 	{
@@ -2572,7 +2569,11 @@ void AIComponent::EnterNewGrid()
 	// Is there food to eat or collect?
 	// Here, just collect. There is another
 	// bit of logic (ThinkHungry) to eat fruit.
-	if (thisIC->CanAddToInventory() && visitorIndex < 0 && !parentChit->PlayerControlled()) {
+	if (thisIC->CanAddToInventory() 
+		&& visitorIndex < 0 
+		&& !gameItem->IsWorker()
+		&& !parentChit->PlayerControlled()) 
+	{
 		FruitElixirFilter fruitFilter;
 		Vector2F pos2 = ToWorld2F(parentChit->Position());
 		CChitArray arr;
