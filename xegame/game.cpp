@@ -54,6 +54,12 @@ extern long memNewCount;
 
 const Game::Palette* Game::mainPalette = 0;
 
+/*static*/ bool Game::MouseMode()
+{
+	return PlatformHasMouseSupport() && !SettingsManager::Instance()->TouchOn();
+}
+
+
 Game::Game( int width, int height, int rotation, int uiHeight ) :
 	screenport( width, height, uiHeight ),
 	markFrameTime( 0 ),
@@ -627,7 +633,7 @@ void Game::Tap( int action, int wx, int wy, int mod )
 	bool handled = sceneStack.Top()->scene->Tap(action, view, world);
 
 	if (action == GAME_TAP_DOWN) {
-		alsoPan = !handled && !PlatformHasMouseSupport();
+		alsoPan = !handled && Game::TabletMode();
 	}
 	if (alsoPan) {
 		Pan(GAME_PAN_START + (action - GAME_TAP_DOWN), float(wx), float(wy));

@@ -428,7 +428,7 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();
-	if (buildActive && PlatformHasMouseSupport() && !SettingsManager::Instance()->TouchOn()) {
+	if (buildActive && Game::MouseMode()) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
 			//name = "clearMarker1";

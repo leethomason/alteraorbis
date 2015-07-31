@@ -54,9 +54,6 @@ enum SavePathMode {
 };
 
 
-/*
-*/
-
 class Game : public ITextureCreator 
 {
 public:
@@ -147,8 +144,10 @@ public:
 	// get moved out of game to its own thing.
 	static const Palette* GetMainPalette()	{ return mainPalette; }
 
-	//virtual void PrintPerf( int depth, const grinliz::PerfData& data );
 	void PrintPerf();
+
+	static bool MouseMode();
+	static bool TabletMode() { return !Game::MouseMode(); }
 
 protected:
 	void PushPopScene();
