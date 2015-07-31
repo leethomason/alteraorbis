@@ -625,8 +625,9 @@ void Game::Tap( int action, int wx, int wy, int mod )
 	grinliz::Ray world;
 	screenport.ViewToWorld( view, 0, &world );
 	bool handled = sceneStack.Top()->scene->Tap(action, view, world);
+
 	if (action == GAME_TAP_DOWN) {
-		alsoPan = !handled;
+		alsoPan = !handled && !PlatformHasMouseSupport();
 	}
 	if (alsoPan) {
 		Pan(GAME_PAN_START + (action - GAME_TAP_DOWN), float(wx), float(wy));
