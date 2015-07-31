@@ -2118,7 +2118,6 @@ void AIComponent::ThinkNormal()
 						&& (Team::IsRogue(parentChit->Team()));
 		bool sectorWander = pmc
 						&& (itemFlags & GameItem::AI_SECTOR_WANDER)
-						&& gameItem->HPFraction() > 0.80f
 						&& (parentChit->random.Rand(SECTOR_WANDER_ODDS) == 0)
 						&& (Team::IsRogue(parentChit->Team()));
 

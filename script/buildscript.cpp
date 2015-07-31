@@ -37,6 +37,7 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	{ "Detector", "detector",		5, "Sensor to detect enemies" },
 	{ "Turret", "turret",			5, "Fires weapon when charge applied." },
 	{ "Gate", "gate",				5, "Creates and removes silica." },
+	{ "TimedGate", "timedGate",		5, "Creates and removes silica." },
 
 	// Additional:
 	{ "TrollStatue", "trollStatue", 6 },

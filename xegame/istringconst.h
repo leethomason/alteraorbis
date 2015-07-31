@@ -148,6 +148,7 @@ public:
 	static grinliz::IString switchOn;
 	static grinliz::IString switchOff;
 	static grinliz::IString gate;
+	static grinliz::IString timedGate;
 
 	static grinliz::IString deity;
 	static grinliz::IString MotherCore;

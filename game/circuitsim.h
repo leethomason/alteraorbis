@@ -107,6 +107,13 @@ private:
 		NUM_GROUPS
 	};
 
+	struct GateTimer {
+		GateTimer(const grinliz::Vector2I& _pos, int _time = 0) { pos = _pos; time = _time; }
+
+		grinliz::Vector2I pos;
+		int time;
+	};
+
 	// cache/temporaries
 	grinliz::CDynArray<Chit*> queryArr, combinedArr;
 	grinliz::HashTable<grinliz::Vector2I, Chit*, CompValueVector2I> hashTable;	// used in the fill algorithm
@@ -125,6 +132,7 @@ private:
 	grinliz::CDynArray<Connection> connections;
 	grinliz::CDynArray<Particle> particles;
 	grinliz::HashTable<grinliz::Vector2I, int, CompValueVector2I> roundRobbin;	// which device's turn is it to fire? 
+	grinliz::CDynArray<GateTimer> gateTimers;
 };
 
 #endif // CIRCUIT_SIM_INCLUDED

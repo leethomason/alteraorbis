@@ -39,7 +39,7 @@ FluidTestScene::FluidTestScene(LumosGame* game) : Scene(game), fluidTicker(500)
 	static const char* NAME[NUM_BUTTONS] = { 
 		"Rock0", "Rock1", "Rock2", "Rock3", "Water\nEmitter", "Lava\nEmitter", 
 		"Temple", "Detector", "Switch On", "Switch Off", 
-		"Gate", "Turret",
+		"Gate", "TimedGate", "Turret",
 		"Delete", "Rotate" 
 	};
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
@@ -159,13 +159,18 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 
 			bool trigger = false;
 			if (!buildButton[BUTTON_DELETE].Down() && !buildButton[BUTTON_ROTATE].Down()) {
-				Chit* building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
+				Chit* building = context.chitBag->QueryPorch(pos2i);
+				if (!building) {
+					building = context.chitBag->QueryBuilding(IString(), pos2i, 0);
+				}
 				if (building) {
 					if (building->GetItem()->IName() == ISC::detector) {
 						circuitSim->TriggerDetector(pos2i);
 						trigger = true;
 					}
-					else if (building->GetItem()->IName() == ISC::switchOn || building->GetItem()->IName() == ISC::switchOff) {
+					else if (building->GetItem()->IName() == ISC::switchOn 
+							 || building->GetItem()->IName() == ISC::switchOff) 
+					{
 						circuitSim->TriggerSwitch(pos2i);
 						trigger = true;
 					}
@@ -205,6 +210,10 @@ void FluidTestScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& wo
 
 					case BUTTON_GATE:
 					chit = context.chitBag->NewBuilding(pos2i, "gate", TEAM_HOUSE);
+					break;
+
+					case BUTTON_TIMED_GATE:
+					chit = context.chitBag->NewBuilding(pos2i, "timedGate", TEAM_HOUSE);
 					break;
 
 					case BUTTON_DETECTOR:

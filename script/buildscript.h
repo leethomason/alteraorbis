@@ -69,6 +69,7 @@ public:
 		DETECTOR,
 		TURRET,
 		GATE,
+		TIMED_GATE,
 
 		NUM_PLAYER_OPTIONS,
 

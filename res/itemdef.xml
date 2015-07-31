@@ -291,6 +291,16 @@
         baseHP="100"
         cost="10" />
 
+  <GameItem name="timedGate"
+        resource="gate"
+        flags="IMMUNE_FIRE IMMUNE_SHOCK PATH_NON_BLOCKING AI_NOT_TARGET CLICK_THROUGH"
+        porch="0"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="100"
+        cost="10" />
+
   <GameItem name="detector"
         resource="detector"
         flags="IMMUNE_FIRE IMMUNE_SHOCK PATH_NON_BLOCKING AI_NOT_TARGET CLICK_THROUGH"

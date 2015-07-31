@@ -62,6 +62,9 @@ x turn lava back on for certain areas
 - bar -> tavern
 - more ability to track units from census screens
 - tech and au xfer from subdomains to main domains
+- auto-off for pool trap
+- cyclops herding???
+- starting denizens at deities, without weapons??
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

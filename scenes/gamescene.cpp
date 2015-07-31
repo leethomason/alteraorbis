@@ -418,13 +418,8 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	Vector3F at = { 0, 0, 0 };
 	this->ModelAtMouse(view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at);
 
-//	Vector2I pos2i = { (int)at.x, (int)at.z };
-
 	// --- Selection display. (Only in desktop interface.)
-//	Engine* engine = sim->GetEngine();
 	float size = 1.0f;
-	//int height = 1;
-//	const char* name = "";
 	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();

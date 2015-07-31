@@ -41,7 +41,7 @@ public:
 
 	enum {
 		ROCK,
-		ICE,
+		SILICA,
 	};
 
 	enum {
@@ -206,7 +206,7 @@ public:
 
 	int RockType() const { return rockType; }
 	void SetRockType( int type ) {
-		GLASSERT( type >=0 && type <= ICE );
+		GLASSERT( type >=0 && type <= SILICA );
 		rockType = type;
 	}
 

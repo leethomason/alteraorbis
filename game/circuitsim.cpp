@@ -180,6 +180,12 @@ void CircuitSim::DeviceOn(Chit* building)
 		Vector2I pos = ToWorld2I(building->Position());
 		context->worldMap->SetRock(pos.x, pos.y, 1, false, 0);
 	}
+	else if (buildingName == ISC::timedGate) {
+		Vector2I pos = ToWorld2I(building->Position());
+		context->worldMap->SetRock(pos.x, pos.y, 1, false, 0);
+		GateTimer gateTimer(pos, 45 * 1000);
+		gateTimers.Push(gateTimer);
+	}
 }
 
 
@@ -211,6 +217,8 @@ void CircuitSim::ParticleArrived(const Particle& p)
 	static const int POWER_DELAY = 250;
 	int type = 0, index = 0;
 	CChitArray arr;
+	static const int NDEVICES = 3;
+	IString deviceNames[NDEVICES] = { ISC::turret, ISC::gate, ISC::timedGate };
 
 	if (FindGroup(ToWorld2I(p.dest), &type, &index)) {
 		const Group& group = groups[type][index];
@@ -218,8 +226,7 @@ void CircuitSim::ParticleArrived(const Particle& p)
 			Vector2F power = FindPower(group);
 			if (!power.IsZero()) {
 				// request power
-				IString deviceNames[] = { ISC::turret, ISC::gate };
-				ItemNameFilter deviceFilter(deviceNames, 2);
+				ItemNameFilter deviceFilter(deviceNames, NDEVICES);
 
 				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
 				NewParticle(EParticleType::controlOn, arr.Size(), p.pos, power);
@@ -235,8 +242,7 @@ void CircuitSim::ParticleArrived(const Particle& p)
 		}
 		else if (type == DEVICE_GROUP && p.type == EParticleType::power) {
 			// activate device
-			IString deviceNames[] = { ISC::turret, ISC::gate };
-			ItemNameFilter deviceFilter(deviceNames, 2);
+			ItemNameFilter deviceFilter(deviceNames, NDEVICES);
 
 			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
 			if (arr.Size()) {
@@ -334,6 +340,20 @@ void CircuitSim::DoTick(U32 delta)
 		particles.Push(newQueue.Pop());
 	}
 
+	for (int i = 0; i < gateTimers.Size(); ++i) {
+		gateTimers[i].time -= delta;
+		if (gateTimers[i].time <= 0) {
+			Vector2I pos = gateTimers[i].pos;
+			Rectangle2I bounds(pos);
+			Chit* gate = context->chitBag->QueryBuilding(ISC::timedGate, bounds, 0);
+			if (gate) {
+				context->worldMap->SetRock(pos.x, pos.y, 0, false, WorldGrid::SILICA);
+			}
+			gateTimers.SwapRemove(i);
+			--i;
+		}
+	}
+
 	for (int i = 0; i < particles.Size(); ++i) {
 		Particle& p = particles[i];
 		if (p.delay > 0) {
@@ -424,7 +444,7 @@ void CircuitSim::CalcGroups()
 	bool    powerGroups[]  = { false, false };
 	IString sensorNames[]  = { ISC::detector, ISC::switchOn, ISC::switchOff, IString() };
 	bool    sensorGroups[] = { true, false, false, false };
-	IString deviceNames[]  = { ISC::turret, ISC::gate, IString() };
+	IString deviceNames[]  = { ISC::turret, ISC::gate, ISC::timedGate, IString() };
 	bool    deviceGroups[] = { true, true };
 
 	IString* names[NUM_GROUPS] = { powerNames, sensorNames, deviceNames };

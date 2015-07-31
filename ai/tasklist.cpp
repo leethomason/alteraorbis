@@ -253,7 +253,7 @@ void TaskList::DoTasks(Chit* chit, U32 delta)
 
 					// Now build.
 					if (task->buildScriptID == BuildScript::ICE) {
-						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE);
+						context->worldMap->SetRock(task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::SILICA);
 					}
 					else if (task->buildScriptID == BuildScript::PAVE) {
 						context->worldMap->SetPave(task->pos2i.x, task->pos2i.y, coreScript->GetPave());

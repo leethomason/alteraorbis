@@ -116,6 +116,7 @@ IString IStringConst::detector;
 IString IStringConst::switchOn;
 IString IStringConst::switchOff;
 IString IStringConst::gate;
+IString IStringConst::timedGate;
 IString IStringConst::deity;
 IString IStringConst::MotherCore;
 IString IStringConst::QCore;
@@ -243,6 +244,7 @@ void IStringConst::Init()
 	switchOn = StringPool::Intern( "switchOn", true );
 	switchOff = StringPool::Intern( "switchOff", true );
 	gate = StringPool::Intern( "gate", true );
+	timedGate = StringPool::Intern( "timedGate", true );
 	deity = StringPool::Intern( "deity", true );
 	MotherCore = StringPool::Intern( "MotherCore", true );
 	QCore = StringPool::Intern( "QCore", true );

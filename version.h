@@ -1,4 +1,4 @@
-#define VERSION "Beta6a"
+#define VERSION "Beta6c"
 
 //static const int CURRENT_FILE_VERSION = 6;	Beta1
 //static const int CURRENT_FILE_VERSION = 7;	Beta2
