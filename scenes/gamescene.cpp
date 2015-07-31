@@ -528,7 +528,7 @@ void GameScene::TapModel( Chit* target )
 			chitTracking = target->ID();
 			//setTarget = "possibleTarget";
 
-			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			CameraComponent* cc = sim->GetChitBag()->GetCamera();
 			cc->SetTrack( chitTracking );
 		}
 	}
@@ -552,7 +552,7 @@ void GameScene::ViewModel( Chit* target )
 	}
 
 	chitTracking = target->ID();
-	CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+	CameraComponent* cc = sim->GetChitBag()->GetCamera();
 	cc->SetTrack( chitTracking );
 }
 
@@ -560,7 +560,7 @@ void GameScene::ViewModel( Chit* target )
 void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	Process3DTap(action, view, world, sim->GetEngine());
-	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	CameraComponent* cc = sim->GetChitBag()->GetCamera();
 	cc->SetTrack(0);
 }
 
@@ -568,7 +568,7 @@ void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ra
 void GameScene::MoveCamera(float dx, float dy)
 {
 	MoveImpl(dx, dy, sim->GetEngine());
-	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	CameraComponent* cc = sim->GetChitBag()->GetCamera();
 	cc->SetTrack(0);
 }
 
@@ -1006,7 +1006,7 @@ bool GameScene::Tap(int action, const grinliz::Vector2F& view, const grinliz::Ra
 bool GameScene::CameraTrackingAvatar()
 {
 	Chit* playerChit = GetPlayerChit();
-	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	CameraComponent* cc = sim->GetChitBag()->GetCamera();
 	if (playerChit && cc && (playerChit->ID() == cc->Tracking())) {
 		return true;
 	}
@@ -1033,7 +1033,7 @@ void GameScene::DoCameraHome()
 		if (chit ) {
 			Vector3F lookAt = chit->Position();
 			sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.z);
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			CameraComponent* cc = sim->GetChitBag()->GetCamera();
 			cc->SetTrack(0);
 		}
 	}
@@ -1047,7 +1047,7 @@ void GameScene::DoAvatarButton()
 	// Select.
 	chitTracking = GetPlayerChitID();
 	Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
-	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	CameraComponent* cc = sim->GetChitBag()->GetCamera();
 	if (cc && chit) {
 		chitTracking = chit->ID();
 		cc->SetTrack(chitTracking);
@@ -1099,7 +1099,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Engine* engine = sim->GetEngine();
 		x *= float(engine->GetMap()->Width());
 		y *= float(engine->GetMap()->Height());
-		CameraComponent* cc = sim->GetChitBag()->GetCamera(engine);
+		CameraComponent* cc = sim->GetChitBag()->GetCamera();
 		cc->SetTrack(0);
 		engine->CameraLookAt(x, y);
 	}
@@ -1143,7 +1143,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if (item == &abandonConfirmButton) {
 		OpenEndGame();
 		sim->GetChitBag()->SetHomeTeam(TEAM_HOUSE);
-		CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+		CameraComponent* cc = sim->GetChitBag()->GetCamera();
 		if (cc) cc->SetTrack(0);
 		targetFaceWidget.SetFace(&uiRenderer, 0);
 		endTimer = 1;	// open immediate
@@ -1167,6 +1167,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		DoCameraHome();
 	}
 	else if (item == &menu->uiMode[GameSceneMenu::UI_AVATAR]) {
+		DoAvatarButton();
+	}
+	else if (item == &menu->trackAvatar) {
 		DoAvatarButton();
 	}
 	else if (item == &menu->teleportAvatar) {
@@ -1197,7 +1200,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 				chit = citizens[index];
 
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				CameraComponent* cc = sim->GetChitBag()->GetCamera();
 				if (cc && chit) {
 					chitTracking = chit->ID();
 					cc->SetTrack(chitTracking);
@@ -1212,13 +1215,13 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if (item == &coreWarningIcon) {
-		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		CameraComponent* cc = sim->GetChitBag()->GetCamera();
 		if (cc) {
 			cc->SetPanTo(coreWarningPos);
 		}
 	}
 	else if (item == &domainWarningIcon) {
-		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		CameraComponent* cc = sim->GetChitBag()->GetCamera();
 		if (cc) {
 			cc->SetPanTo(domainWarningPos);
 		}
@@ -1227,7 +1230,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	Vector2F pos2 = { 0, 0 };
 	if (newsConsole.consoleWidget.IsItem(item, &pos2)) {
 		if (!pos2.IsZero()) {
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			CameraComponent* cc = sim->GetChitBag()->GetCamera();
 			if (cc) {
 				cc->SetPanTo(pos2);
 			}
@@ -1240,7 +1243,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	if (menu->UIMode() == GameSceneMenu::UI_BUILD) {
 		for (int i = 1; i < BuildScript::NUM_PLAYER_OPTIONS; ++i) {
 			if (&menu->buildButton[i] == item) {
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				CameraComponent* cc = sim->GetChitBag()->GetCamera();
 				cc->SetTrack(0);
 				break;
 			}
@@ -1255,7 +1258,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			int index = current.Size() - 1 - i;
 			if (index >= 0) {
 				const ChitBag::CurrentNews& ne = current[index];
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				CameraComponent* cc = sim->GetChitBag()->GetCamera();
 				if (cc && ne.chitID) {
 					cc->SetTrack(ne.chitID);
 				}
@@ -1284,7 +1287,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	for (int i = 0; i < MAX_CITIZENS; ++i) {
 		if (item == &menu->squadBar[i].hitBounds) {
 			int id = menu->squadBar[i].userItemID;
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			CameraComponent* cc = sim->GetChitBag()->GetCamera();
 			if (cc && id) {
 				chitTracking = id;
 				cc->SetTrack(id);
@@ -1820,7 +1823,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		if (chit->GetComponent("CoreScript")) {
 			if (sim->GetChitBag()->GetHomeTeam() && (chit->Team() == sim->GetChitBag()->GetHomeTeam())) {
 				SetBars(0, false);
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				CameraComponent* cc = sim->GetChitBag()->GetCamera();
 				if (cc) cc->SetTrack(0);
 				OpenEndGame();
 			}
@@ -1914,7 +1917,7 @@ void GameScene::CheckGameStage(U32 delta)
 			startGameWidget.SetSectorData(sdarr.Mem(), sdarr.Size(), sim->GetEngine(), sim->GetChitBag(), this, sim->GetWorldMap());
 			gamui2D.PushDialog(startGameWidget.Name());
 
-			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			CameraComponent* cc = sim->GetChitBag()->GetCamera();
 			cc->SetTrack(0);
 		}
 	}
@@ -2084,7 +2087,7 @@ void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 			Vector2F dest = { float(sector.x*SECTOR_SIZE + SECTOR_SIZE/2), float(sector.y*SECTOR_SIZE + SECTOR_SIZE/2) };
 			if (msd->view) {
 				sim->GetEngine()->CameraLookAt(dest.x, dest.y);
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				CameraComponent* cc = sim->GetChitBag()->GetCamera();
 				cc->SetTrack(0);
 			}
 			else {

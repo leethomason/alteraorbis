@@ -741,13 +741,13 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 
 			Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
 
-			static const float RAT = 0.20f;
-			float roll = parentChit->random.Uniform();
+//			static const float RAT = 0.20f;
+//			float roll = parentChit->random.Uniform();
 			IString spawn = defaultSpawn;
 
-			if (roll < RAT) {
-				spawn = ISC::trilobyte;
-			}
+//			if (roll < RAT) {
+//				spawn = ISC::trilobyte;
+//			}
 			int nSpawn = (spawn == ISC::trilobyte) ? 4 : 1;
 
 			int team = Team::GetTeam(spawn);

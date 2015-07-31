@@ -21,6 +21,7 @@
 #include "../game/gridmovecomponent.h"
 #include "../engine/camera.h"
 #include "../engine/engine.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 
@@ -28,6 +29,7 @@ using namespace grinliz;
 void CameraComponent::OnAdd( Chit* c, bool init )
 {
 	super::OnAdd(c, init);
+	Context()->chitBag->SetNamedChit(ISC::Camera, parentChit);
 }
 
 
@@ -83,11 +85,6 @@ void CameraComponent::SetTrack( int targetID )
 
 int CameraComponent::DoTick(U32 delta)
 {
-	if (Context()->chitBag->GetCameraChitID() != parentChit->ID()) {
-		parentChit->QueueDelete();
-		return VERY_LONG_TICK;
-	}
-
 	float EASE = 0.2f;
 
 	switch (mode) {

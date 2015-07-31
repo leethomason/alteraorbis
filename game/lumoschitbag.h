@@ -272,6 +272,8 @@ public:
 	grinliz::Vector2I GetHomeSector() const;
 	Chit* GetAvatar() const;
 
+	CameraComponent* GetCamera() const;
+
 	Census census;
 
 	// Query the porch at the location.

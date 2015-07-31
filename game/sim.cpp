@@ -170,6 +170,10 @@ void Sim::Load(const char* mapDAT, const char* gameDAT)
 
 		Chit* directorChit = context.chitBag->NewChit();
 		directorChit->Add(new Director());
+
+		Chit* cameraChit = context.chitBag->NewChit();
+		Camera* camera = &context.engine->camera;
+		directorChit->Add(new CameraComponent(camera));
 	}
 	else {
 		//QuickProfile qp( "Sim::Load" );
@@ -524,7 +528,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 
 	chit->SetPosition((float)pos.x + 0.5f, 0, (float)pos.y + 0.5f);
 	chit->SetRotation(Quaternion());
-	context.chitBag->GetCamera( context.engine )->SetTrack( chit->ID() );
+	context.chitBag->GetCamera()->SetTrack( chit->ID() );
 
 	// Player speed boost
 	float boost = 1.5f / 1.2f;

@@ -106,7 +106,7 @@ public:
 	void  DeleteAll();
 	Chit* NewChit( int id=0 );
 	void  DeleteChit( Chit* );
-	Chit* GetChit( int id );
+	Chit* GetChit( int id ) const;
 
 	virtual void Serialize( XStream* xs );
 
@@ -198,11 +198,11 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
 	// There can only be one camera actually in use:
-	CameraComponent* GetCamera( Engine* engine );
-	int GetCameraChitID() const { return activeCamera; }
+//	CameraComponent* GetCamera( Engine* engine );
+//	int GetCameraChitID() const { return activeCamera; }
 	
 	void  SetNamedChit(const grinliz::IString& name, Chit* chit);
-	Chit* GetNamedChit(const grinliz::IString& name);
+	Chit* GetNamedChit(const grinliz::IString& name) const;
 
 	virtual LumosChitBag* ToLumos() { return 0; }
 	const ChitContext* Context() const { return &chitContext; }
@@ -270,7 +270,7 @@ private:
 	U32 bagTime;
 	int nTicked;
 	int frame;
-	int activeCamera;
+//	int activeCamera;
 	NewsHistory* newsHistory;
 	grinliz::Rectangle3F areaOfInterest;
 

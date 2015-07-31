@@ -877,6 +877,19 @@ Vector2I LumosChitBag::GetHomeSector()	const
 }
 
 
+CameraComponent* LumosChitBag::GetCamera() const
+{
+	Chit* chit = GetNamedChit(ISC::Camera);
+	if (chit) {
+		GLASSERT(chit);
+		CameraComponent* cc = (CameraComponent*) chit->GetComponent("CameraComponent");
+		GLASSERT(cc);
+		return cc;
+	}
+	return 0;
+}
+
+
 bool ItemFlagFilter::Accept( Chit* chit )
 {
 	GameItem* item = chit->GetItem();

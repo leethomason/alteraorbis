@@ -41,7 +41,6 @@ ChitBag::ChitBag(const ChitContext& c) : chitContext(c)
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE2 );
 #endif
 	memRoot = 0;
-	activeCamera = 0;
 	newsHistory = new NewsHistory(this);
 	areaOfInterest.Set(0, 0, 0, 0, 0, 0);
 }
@@ -75,7 +74,6 @@ void ChitBag::DeleteAll()
 void ChitBag::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "ChitBag");
-	XARC_SER(xs, activeCamera);
 	XARC_SER(xs, bagTime);
 	newsHistory->Serialize(xs);
 
@@ -161,7 +159,7 @@ void ChitBag::DeleteChit( Chit* chit )
 }
 
 
-Chit* ChitBag::GetChit( int id )
+Chit* ChitBag::GetChit( int id ) const
 {
 	Chit* c = 0;
 	if (id) {
@@ -214,7 +212,7 @@ Bolt* ChitBag::NewBolt()
 	return b;
 }
 
-
+/*
 CameraComponent* ChitBag::GetCamera( Engine* engine )
 {
 	Chit* c = GetChit( activeCamera );
@@ -232,7 +230,7 @@ CameraComponent* ChitBag::GetCamera( Engine* engine )
 	c->Add( cc );
 	return cc;
 }
-
+*/
 
 void ChitBag::SetNamedChit(const IString& name, Chit* chit)
 {
@@ -244,7 +242,7 @@ void ChitBag::SetNamedChit(const IString& name, Chit* chit)
 }
 
 
-Chit* ChitBag::GetNamedChit(const IString& name)
+Chit* ChitBag::GetNamedChit(const IString& name) const
 {
 	int id = 0;
 	namedChits.Query(name, &id);
@@ -333,12 +331,14 @@ void ChitBag::DoTick( U32 delta )
 		}
 	}
 
+	Chit* cameraChit = GetNamedChit(StringPool::Intern("Camera"));
+
 	for( int i=0; i<blocks.Size(); ++i ) {
 		Chit* block = blocks[i];
 		for( int j=0; j<BLOCK_SIZE; ++j ) {
 			Chit* c = block + j;
 			int id = c->ID();
-			if (id && id != activeCamera) {
+			if (id && (c != cameraChit)) {
 
 				c->timeToTick -= delta;
 				c->timeSince += delta;
@@ -379,11 +379,10 @@ void ChitBag::DoTick( U32 delta )
 	// Make sure the camera is updated last so it doesn't "drag"
 	// what it's tracking. The next time this happens I should
 	// put in a priority system.
-	Chit* camera = GetChit( activeCamera );
-	if ( camera ) {
-		camera->timeToTick = 0;
-		camera->timeSince = delta;
-		camera->DoTick();
+	if (cameraChit) {
+		cameraChit->timeToTick = 0;
+		cameraChit->timeSince = delta;
+		cameraChit->DoTick();
 	}
 
 	// Final flush, just to be sure.

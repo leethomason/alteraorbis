@@ -51,10 +51,17 @@ x fix visitor giving tech again...implement useBuilding for visitors
 - cyclops stuck pathing...just standing there.
 - change xp -> effective level cap to 10-12?
 - camera doesn't track avatar
-- turn lava back on for certain areas
+x turn lava back on for certain areas
 - temples: auto power supply?
 - human shouldn't be able to build blade
-- no flags in water
+- no control flags in water
+- rework fonts on title screen
+- character scene: show team affiliation, hostile to core?
+- ai gets stuck walking into things
+- space out money widget better
+- bar -> tavern
+- more ability to track units from census screens
+- tech and au xfer from subdomains to main domains
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

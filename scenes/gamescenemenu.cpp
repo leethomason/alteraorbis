@@ -35,6 +35,10 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	teleportAvatar.SetText("Teleport");
 	teleportAvatar.SetVisible(false);
 
+	trackAvatar.Init(gamui2D, game->GetButtonLook(0));
+	trackAvatar.SetText("Track");
+	trackAvatar.SetVisible(false);
+
 	static const char* modeButtonText[NUM_BUILD_CATEGORIES] = {
 		"Utility", "Denizen", "Agronomy", "Economy", "Visitor", "Circuits"
 	};
@@ -108,7 +112,8 @@ void GameSceneMenu::Resize(const Screenport& port, const gamui::LayoutCalculator
 	layout.PosAbs(&prevUnit, 1, 1);
 	layout.PosAbs(&nextUnit, 2, 1);
 
-	layout.PosAbs(&teleportAvatar, 1, 1);
+	layout.PosAbs(&trackAvatar, 1, 1);
+	layout.PosAbs(&teleportAvatar, 2, 1);
 
 	for (int i = 0; i < NUM_SQUAD_BUTTONS; ++i) {
 		layout.PosAbs(&squadButton[i], i, 1);
@@ -200,10 +205,9 @@ void GameSceneMenu::ItemTapped(const gamui::UIItem* item)
 
 			cameraHomeButton.SetVisible(uiMode == UI_VIEW || uiMode == UI_AVATAR);
 			prevUnit.SetVisible(uiMode == UI_VIEW);
-//			avatarUnit.SetVisible(uiMode == UI_AVATAR);
+			trackAvatar.SetVisible(uiMode == UI_AVATAR);
 			teleportAvatar.SetVisible(uiMode == UI_AVATAR);
 			nextUnit.SetVisible(uiMode == UI_VIEW);
-			//useBuildingButton.SetVisible(uiMode == UI_AVATAR && useBuilding);
 			tabBar0.SetVisible(false);
 			tabBar1.SetVisible(false);
 			createWorkerButton.SetVisible(uiMode == UI_BUILD);
@@ -299,7 +303,6 @@ void GameSceneMenu::SetCanTeleport(bool t)
 {
 	if (t != canTeleport) {
 		canTeleport = t; 
-//		avatarUnit.SetText(canTeleport ? "Teleport\nAvatar" : "Avatar");
 		teleportAvatar.SetEnabled(canTeleport);
 	}
 }

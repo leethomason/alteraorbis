@@ -50,7 +50,7 @@ public:
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 
 	gamui::PushButton	cameraHomeButton;
-	gamui::PushButton	nextUnit, prevUnit, teleportAvatar;
+	gamui::PushButton	nextUnit, prevUnit, teleportAvatar, trackAvatar;
 	gamui::PushButton	useBuildingButton;
 	gamui::Image		tabBar0, tabBar1;
 	gamui::PushButton	createWorkerButton;
