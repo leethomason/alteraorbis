@@ -65,6 +65,7 @@ x temples: auto power supply?
 x auto-off for pool trap
 - cyclops herding???
 - starting denizens at deities, without weapons??
+- reduces named weapon threshold
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)
