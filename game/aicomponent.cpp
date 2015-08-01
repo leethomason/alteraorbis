@@ -72,7 +72,7 @@ static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
 static const int	REPAIR_TIME					= 4000;
 
-const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "rampage", "battle" };
+const char* AIComponent::MODE_NAMES[int(AIMode::NUM_MODES)]     = { "normal", "battle" };
 const char* AIComponent::ACTION_NAMES[int(AIAction::NUM_ACTIONS)] = { "none", "move", "melee", "shoot" };
 
 Vector2I ToWG(int id) {
@@ -120,13 +120,13 @@ bool FEFilter(Chit* parentChit, int id) {
 AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 {
 	currentAction = AIAction::NO_ACTION;
-	focus = 0;
 	aiMode = AIMode::NORMAL_MODE;
+	rampage = NO_RAMPAGE;
+	focus = 0;
 	wanderTime = 0;
 	rethink = 0;
 	fullSectorAware = false;
 	visitorIndex = -1;
-	rampageTarget = 0;
 	destinationBlocked = 0;
 	lastTargetID = 0;
 	lastGrid.Zero();
@@ -144,13 +144,13 @@ void AIComponent::Serialize(XStream* xs)
 
 	XARC_SER_ENUM(xs, AIMode, aiMode);
 	XARC_SER_ENUM(xs, AIAction, currentAction);
+	XARC_SER_DEF(xs, rampage, NO_RAMPAGE);
 	XARC_SER(xs, lastTargetID);
 	XARC_SER_DEF(xs, focus, 0);
 	XARC_SER_DEF(xs, wanderTime, 0);
 	XARC_SER(xs, rethink);
 	XARC_SER_DEF(xs, fullSectorAware, false);
 	XARC_SER_DEF(xs, visitorIndex, -1);
-	XARC_SER_DEF(xs, rampageTarget, 0);
 	XARC_SER_DEF(xs, destinationBlocked, 0);
 	XARC_SER(xs, lastGrid);
 	XARC_SER_VAL_CARRAY(xs, friendList2);
@@ -462,10 +462,11 @@ void AIComponent::DoMove()
 	// not in battle, this is essentially "do nothing." If in battle mode,
 	// we look for opportunity fire and such.
 	if (aiMode != AIMode::BATTLE_MODE) {
-		if (aiMode == AIMode::RAMPAGE_MODE && RampageDone()) {
+		if ((rampage != NO_RAMPAGE) && RampageDone()) {
 			if (Log()) {
 				GLOUTPUT(("AI ID=%d Rampage Done\n", parentChit->ID()));
 			}
+			rampage = NO_RAMPAGE;
 			aiMode = AIMode::NORMAL_MODE;
 			currentAction = AIAction::NO_ACTION;
 			return;
@@ -730,17 +731,10 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 
 void AIComponent::Think()
 {
-	if (visitorIndex >= 0) {
-		ThinkVisitor();
-		return;
-	}
-
-	switch (aiMode) {
-		case AIMode::NORMAL_MODE:		ThinkNormal();	break;
-		case AIMode::BATTLE_MODE:		ThinkBattle();	break;
-		case AIMode::RAMPAGE_MODE:		ThinkRampage();	break;
-		default: GLASSERT(0); break;
-	}
+	if (visitorIndex >= 0)					ThinkVisitor();
+	else if (aiMode == AIMode::BATTLE_MODE)	ThinkBattle();
+	else if (rampage != NO_RAMPAGE)			ThinkRampage();
+	else									ThinkNormal();
 }
 
 
@@ -893,16 +887,8 @@ WorkQueue* AIComponent::GetWorkQueue()
 
 void AIComponent::Rampage(int dest)
 {
-	rampageTarget = dest;
-
-	GLASSERT(!RampageDone());
-	if (RampageDone()) {
-		aiMode = AIMode::NORMAL_MODE;
-		currentAction = AIAction::NO_ACTION;
-		return;
-	}
-
-	aiMode = AIMode::RAMPAGE_MODE;
+	rampage = dest;
+	aiMode = AIMode::NORMAL_MODE;
 	currentAction = AIAction::NO_ACTION;
 
 	ChitBag::CurrentNews news = { StringPool::Intern("Rampage"), ToWorld2F(parentChit->Position()), parentChit->ID() };
@@ -980,18 +966,21 @@ bool AIComponent::ThinkDoRampage()
 
 bool AIComponent::RampageDone()
 {
+	GLASSERT(rampage != NO_RAMPAGE);
+	if (rampage == NO_RAMPAGE) return true;
+
 	const ChitContext* context = Context();
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	const SectorData& sd = context->worldMap->GetSectorData(ToSector(pos2i));
 	Rectangle2I dest;
 
-	switch (rampageTarget) {
-	case WorldGrid::PS_CORE:	dest.min = dest.max = sd.core;				break;
-	case WorldGrid::PS_POS_X:	dest = sd.GetPortLoc(SectorData::POS_X);	break;
-	case WorldGrid::PS_POS_Y:	dest = sd.GetPortLoc(SectorData::POS_Y);	break;
-	case WorldGrid::PS_NEG_X:	dest = sd.GetPortLoc(SectorData::NEG_X);	break;
-	case WorldGrid::PS_NEG_Y:	dest = sd.GetPortLoc(SectorData::NEG_Y);	break;
-	default: GLASSERT(0);	break;
+	switch (rampage) {
+		case WorldGrid::PS_CORE:	dest.min = dest.max = sd.core;				break;
+		case WorldGrid::PS_POS_X:	dest = sd.GetPortLoc(SectorData::POS_X);	break;
+		case WorldGrid::PS_POS_Y:	dest = sd.GetPortLoc(SectorData::POS_Y);	break;
+		case WorldGrid::PS_NEG_X:	dest = sd.GetPortLoc(SectorData::NEG_X);	break;
+		case WorldGrid::PS_NEG_Y:	dest = sd.GetPortLoc(SectorData::NEG_Y);	break;
+		default: GLASSERT(0);	break;
 	}
 
 	if (dest.Contains(pos2i)) {
@@ -1013,7 +1002,7 @@ void AIComponent::ThinkRampage()
 	const ChitContext* context = Context();
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	const WorldGrid& wg0 = context->worldMap->GetWorldGrid(pos2i.x, pos2i.y);
-	Vector2I next = pos2i + wg0.Path(rampageTarget);
+	Vector2I next = pos2i + wg0.Path(rampage);
 	const WorldGrid& wg1 = context->worldMap->GetWorldGrid(next.x, next.y);
 
 	if (RampageDone()) {

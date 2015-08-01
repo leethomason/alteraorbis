@@ -69,7 +69,7 @@ public:
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
 	void Rampage( int dest );
-	bool Rampaging() const { return aiMode == AIMode::RAMPAGE_MODE;  }
+	bool Rampaging() const { return rampage != NO_RAMPAGE;  }
 	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
@@ -100,7 +100,6 @@ public:
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum class AIMode {
 		NORMAL_MODE,
-		RAMPAGE_MODE,		// a MOB that gets stuck can 'rampage', which means cutting a path through the world.
 		BATTLE_MODE,
 		NUM_MODES
 	};
@@ -189,8 +188,11 @@ private:
 		FOCUS_TARGET
 	};
 
+	enum { NO_RAMPAGE = -1 };
+
 	AIMode				aiMode;
 	AIAction			currentAction;
+	int					rampage;
 	int					focus;
 	int					lastTargetID;
 	CTicker				feTicker;
@@ -198,7 +200,6 @@ private:
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
-	int					rampageTarget;
 	int					destinationBlocked;
 	ai::TaskList		taskList;
 	CTicker				needsTicker;
