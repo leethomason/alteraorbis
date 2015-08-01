@@ -18,7 +18,7 @@ class Model;
 class LumosChitBag;
 class XStream;
 class ChitContext;
-
+class Chit;
 
 class CircuitSim
 {
@@ -42,13 +42,9 @@ public:
 	void EnableOverlay(bool enable) { enableOverlay = enable; ticker.SetReady(); }
 
 private:
-	struct Group {
-		grinliz::Rectangle2I bounds;
-	};
 
 	struct Connection {
 		grinliz::Vector2I a, b;		// somewhere in the group bounds
-		int type;
 		const void* sortA;
 		const void* sortB;
 
@@ -84,12 +80,12 @@ private:
 		static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
 	};
 
-	void FillGroup(Group* g, const grinliz::Vector2I& pos, Chit* chit);
+	void FillGroup(grinliz::Rectangle2I* g, const grinliz::Vector2I& pos, Chit* chit);
 	// Connects groups that can be connected.
-	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, Group **groupA, Group** groupB);
+	bool ConnectionValid(const grinliz::Vector2I& a, const grinliz::Vector2I& b, int* type, grinliz::Rectangle2I **groupA, grinliz::Rectangle2I** groupB);
 	bool FindGroup(const grinliz::Vector2I& pos, int* groupType, int* index);
-	void FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *connections);
-	grinliz::Vector2F FindPower(const Group& forGroup);
+	void FindConnections(const grinliz::Rectangle2I& group, grinliz::CDynArray<const Connection*> *connections);
+	Chit* FindPower(const grinliz::Vector2F& device);
 	void CleanConnections();
 	void DoSensor(EParticleType type, const grinliz::Vector2I& pos);
 
@@ -124,7 +120,7 @@ private:
 	CTicker ticker;
 
 	// Data, but not serialized.
-	grinliz::CDynArray<Group> groups[NUM_GROUPS];
+	grinliz::CDynArray<grinliz::Rectangle2I> groups[NUM_GROUPS];
 	gamui::Canvas canvas[2][NUM_GROUPS];
 
 	// Data

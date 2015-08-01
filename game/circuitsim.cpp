@@ -65,7 +65,6 @@ void CircuitSim::Connection::Serialize(XStream* xs)
 	XarcOpen(xs, "Connection");
 	XARC_SER(xs, a);
 	XARC_SER(xs, b);
-	XARC_SER(xs, type);
 	XarcClose(xs);
 }
 
@@ -126,28 +125,40 @@ void CircuitSim::NewParticle(EParticleType type, int powerRequest, const grinliz
 }
 
 
-Vector2F CircuitSim::FindPower(const Group& group)
+Chit* CircuitSim::FindPower(const Vector2F& device)
 {
-	Vector2F pos = { 0, 0 };
-	for (const Connection* c = connections.begin(); c < connections.end(); ++c) {
-		if (c->type == POWER_GROUP && group.bounds.Contains(c->a))  {
-			pos = ToWorld2F(c->b);
-			break;
-		}
-		else if (c->type == POWER_GROUP && group.bounds.Contains(c->b)) {
-			pos = ToWorld2F(c->a);
-			break;
+	Vector2I sector = ToSector(device);
+	CChitArray arr;
+	context->chitBag->QueryBuilding(ISC::temple, SectorBounds(sector), &arr);
+
+	Chit* best = 0;
+	float bestScore = 0;
+
+	for (int i = 0; i < arr.Size(); ++i) {
+		Chit* temple = arr[i];
+		Vector2F d = ToWorld2F(temple->Position()) - device;
+		float len = d.Length();
+		if (len == 0) continue;
+
+		BatteryComponent* battery = (BatteryComponent*)temple->GetComponent("BatteryComponent");
+		GLASSERT(battery);
+		float charge = float(battery->Charge());
+		float score = charge / len;
+		if (score > bestScore) {
+			bestScore = score;
+			best = temple;
 		}
 	}
-	return pos;
+	return best;
 }
 
 
-void CircuitSim::FindConnections(const Group& group, grinliz::CDynArray<const Connection*> *out)
+
+void CircuitSim::FindConnections(const grinliz::Rectangle2I& group, grinliz::CDynArray<const Connection*> *out)
 {
 	out->Clear();
 	for (const Connection& c : connections) {
-		if (group.bounds.Contains(c.a) || group.bounds.Contains(c.b)) {
+		if (group.Contains(c.a) || group.Contains(c.b)) {
 			out->Push(&c);
 		}
 	}
@@ -221,21 +232,21 @@ void CircuitSim::ParticleArrived(const Particle& p)
 	IString deviceNames[NDEVICES] = { ISC::turret, ISC::gate, ISC::timedGate };
 
 	if (FindGroup(ToWorld2I(p.dest), &type, &index)) {
-		const Group& group = groups[type][index];
+		const grinliz::Rectangle2I& group = groups[type][index];
 		if (type == DEVICE_GROUP && p.type == EParticleType::controlOn) {
-			Vector2F power = FindPower(group);
-			if (!power.IsZero()) {
+			Chit* power = FindPower(ToWorld2F(group.Center()));
+			if (power) {
 				// request power
 				ItemNameFilter deviceFilter(deviceNames, NDEVICES);
 
-				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
-				NewParticle(EParticleType::controlOn, arr.Size(), p.pos, power);
+				context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group), 0, &deviceFilter);
+				NewParticle(EParticleType::controlOn, arr.Size(), p.pos, ToWorld2F(power->Position()));
 			}
 		}
 		else if (type == DEVICE_GROUP && p.type == EParticleType::controlOff) {
 			// Doesn't need power for off state.
 			ItemNameFilter filter(ISC::gate);
-			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &filter);
+			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group), 0, &filter);
 			for (int i = 0; i < arr.Size(); ++i) {
 				DeviceOff(arr[i]);
 			}
@@ -244,15 +255,15 @@ void CircuitSim::ParticleArrived(const Particle& p)
 			// activate device
 			ItemNameFilter deviceFilter(deviceNames, NDEVICES);
 
-			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group.bounds), 0, &deviceFilter);
+			context->chitBag->QuerySpatialHash(&arr, ToWorld2F(group), 0, &deviceFilter);
 			if (arr.Size()) {
 				int value = 0;
-				if (!roundRobbin.Query(group.bounds.min, &value)) {
-					roundRobbin.Add(group.bounds.min, 0);
+				if (!roundRobbin.Query(group.min, &value)) {
+					roundRobbin.Add(group.min, 0);
 				}
 				Chit* chit = arr[value % arr.Size()];
 				++value;
-				roundRobbin.Add(group.bounds.min, value);
+				roundRobbin.Add(group.min, value);
 
 				DeviceOn(chit);
 			}
@@ -308,12 +319,12 @@ void CircuitSim::DoSensor(EParticleType particle, const Vector2I& pos)
 {
 	int type = 0, index = 0;
 	if (FindGroup(pos, &type, &index) && type == SENSOR_GROUP) {
-		const Group& group = groups[type][index];
+		const grinliz::Rectangle2I& group = groups[type][index];
 		FindConnections(group, &queryConn);
 		for (const Connection* c : queryConn) {
 			Vector2I a = c->a;
 			Vector2I b = c->b;
-			if (!group.bounds.Contains(a)) {
+			if (!group.Contains(a)) {
 				Swap(&a, &b);
 			}
 
@@ -385,12 +396,12 @@ void CircuitSim::DoTick(U32 delta)
 }
 
 
-void CircuitSim::FillGroup(Group* g, const Vector2I& pos, Chit* chit)
+void CircuitSim::FillGroup(grinliz::Rectangle2I* g, const Vector2I& pos, Chit* chit)
 {
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 	GLASSERT(msc);
 
-	g->bounds.DoUnion(msc->Bounds());
+	g->DoUnion(msc->Bounds());
 	hashTable.Remove(pos);
 	for (int i = 0; i < 4; ++i) {
 		Vector2I nextPos = pos.Adjacent(i);
@@ -411,8 +422,8 @@ void CircuitSim::CleanConnections()
 	for (int i = 0; i < connections.Size(); ++i) {
 		Connection& c = connections[i];
 		int type = 0;
-		Group* groupA = 0;
-		Group* groupB = 0;
+		grinliz::Rectangle2I* groupA = 0;
+		grinliz::Rectangle2I* groupB = 0;
 		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
 			c.sortA = groupA;
 			c.sortB = groupB;
@@ -469,8 +480,8 @@ void CircuitSim::CalcGroups()
 				for (Chit* chit : queryArr) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 					GLASSERT(msc);
-					Group* g = groups[i].PushArr(1);
-					g->bounds = msc->Bounds();
+					grinliz::Rectangle2I* g = groups[i].PushArr(1);
+					*g = msc->Bounds();
 				}
 			}
 		}
@@ -480,10 +491,10 @@ void CircuitSim::CalcGroups()
 			// it is a group.
 			Vector2I pos = ToWorld2I(chit->Position());
 			if (hashTable.Query(pos, 0)) {
-				Group* g = groups[i].PushArr(1);
+				grinliz::Rectangle2I* g = groups[i].PushArr(1);
 				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
 				GLASSERT(msc);
-				g->bounds = msc->Bounds();
+				*g = msc->Bounds();
 				FillGroup(g, pos, chit);
 			}
 		}
@@ -503,12 +514,12 @@ void CircuitSim::DrawGroups()
 
 	for (int i = 0; i < NUM_GROUPS; ++i) {
 		canvas[0][i].Clear();
-		for (const Group& group : groups[i]) {
+		for (const grinliz::Rectangle2I& group : groups[i]) {
 
-			float x0 = float(group.bounds.min.x) + half + gutter;
-			float y0 = float(group.bounds.min.y) + half + gutter;
-			float x1 = float(group.bounds.max.x + 1) - half - gutter;
-			float y1 = float(group.bounds.max.y + 1) - half - gutter;
+			float x0 = float(group.min.x) + half + gutter;
+			float y0 = float(group.min.y) + half + gutter;
+			float x1 = float(group.max.x + 1) - half - gutter;
+			float y1 = float(group.max.y + 1) - half - gutter;
 
 			canvas[0][i].DrawRectangleOutline(x0, y0, x1 - x0, y1 - y0, thickness, arc);
 		}
@@ -516,8 +527,8 @@ void CircuitSim::DrawGroups()
 
 	for (const Connection& c : connections) {
 		// Groups come and go - need to find the group for the connection.
-		Group* groupA = 0;
-		Group* groupB = 0;
+		grinliz::Rectangle2I* groupA = 0;
+		grinliz::Rectangle2I* groupB = 0;
 		int type = 0;
 		if (ConnectionValid(c.a, c.b, &type, &groupA, &groupB)) {
 			Vector2F p0 = ToWorld2F(c.a);
@@ -547,7 +558,7 @@ void CircuitSim::DrawGroups()
 }
 
 
-bool CircuitSim::ConnectionValid(const Vector2I& a, const Vector2I& b, int *type, Group** groupA, Group** groupB)
+bool CircuitSim::ConnectionValid(const Vector2I& a, const Vector2I& b, int *type, grinliz::Rectangle2I** groupA, grinliz::Rectangle2I** groupB)
 {
 	if (a == b) return false;	// can't connect to yourself.
 
@@ -572,7 +583,7 @@ void CircuitSim::Connect(const grinliz::Vector2I& a, const grinliz::Vector2I& b)
 	int type = 0;
 	if (ConnectionValid(a, b, &type, 0, 0)) {
 		// If power, filter out power connection.
-		Connection c = { a, b, type };
+		Connection c = { a, b };
 		connections.Push(c);
 	}
 	else {
@@ -597,7 +608,7 @@ bool CircuitSim::FindGroup(const grinliz::Vector2I& pos, int* groupType, int* in
 {
 	for (int j = 0; j < NUM_GROUPS; ++j) {
 		for (int i = 0; i < groups[j].Size(); ++i) {
-			if (groups[j][i].bounds.Contains(pos)) {
+			if (groups[j][i].Contains(pos)) {
 				if (groupType) *groupType = j;
 				if (index) *index = i;
 				return true;
