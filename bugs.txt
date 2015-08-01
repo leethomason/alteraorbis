@@ -32,27 +32,30 @@ x fix text size
 d immediately spawn avatar on core creation
 x set "container" in character scene consistently
 x logic to visit deities
-- damage: items seem to get blown away...crystal not dropped
 x workers in deity domains too much stuff - only loot if there is a vault?
 x r1k weapons way to powerful...where are they coming from? (shock + fire)
 x markets in deity domains
 x no rock on core location
-- how do deity cores get crystal??
-- deity temples
 x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
 x containers (vault, bar, etc.) shouldn't have value. 
 x rampage instead of sector herd out?
 x fix visitor giving tech again...implement useBuilding for visitors
-- rampage causes switch to battle mode - still doesn't rampage correctly
+x rampage causes switch to battle mode - still doesn't rampage correctly
+x camera doesn't track avatar
+x turn lava back on for certain areas
+x temples: auto power supply?
+x auto-off for pool trap
+x reduces named weapon threshold
+x tech and au xfer from subdomains to main domains. tech looks good.
+- damage: items seem to get blown away...crystal not dropped
+- how do deity cores get crystal??
+- deity temples
 - "avatar is off the chase"
 - destination icons - still a lingering mark 
 - troll vs. goblin icons too similar
 - reorder squad units
 - cyclops stuck pathing...just standing there.
 - change xp -> effective level cap to 10-12?
-x camera doesn't track avatar
-x turn lava back on for certain areas
-x temples: auto power supply?
 - human shouldn't be able to build blade
 - no control flags in water
 - rework fonts on title screen
@@ -61,11 +64,8 @@ x temples: auto power supply?
 - space out money widget better
 - bar -> tavern
 - more ability to track units from census screens
-- tech and au xfer from subdomains to main domains
-x auto-off for pool trap
 - cyclops herding???
 - starting denizens at deities, without weapons??
-- reduces named weapon threshold
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)

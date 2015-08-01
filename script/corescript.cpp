@@ -239,8 +239,6 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			else {
 				LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
 				Context()->chitBag->coreCreateList.Push(data);
-				//NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit->GetItemID(), deleter ? deleter->GetItemID() : 0);
-				//Context()->chitBag->GetNewsHistory()->Add(news);
 			}
 		}
 		else {
@@ -822,6 +820,17 @@ void CoreScript::AddTech()
 		CoreScript* super = CoreScript::GetCoreFromTeam(superTeam);
 		if (super) {
 			super->AddTech();
+
+			// EXPERIMENTAL: also transfer Au
+			Wallet* wallet = parentChit->GetWallet();
+			GLASSERT(wallet);
+			if (wallet 
+				&& super->ParentChit()->GetWallet() 
+				&& (wallet->Gold() > (GOLD_XFER_TAKEOVER *3/2))) 
+			{
+				int gold = GOLD_XFER_TAKEOVER / 10;
+				super->ParentChit()->GetWallet()->Deposit(wallet, gold);
+			}
 		}
 	}
 }

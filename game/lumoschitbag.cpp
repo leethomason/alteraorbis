@@ -1279,7 +1279,7 @@ void LumosChitBag::DoTick(U32 delta)
 				// Finally, give this new core a chance. 
 				// Transferm money from Conquering domain.
 				int gold = conqueringCore->ParentChit()->GetWallet()->Gold() / 4;
-				gold = Min(gold, 500);
+				gold = Min(gold, GOLD_XFER_TAKEOVER);
 				newCore->ParentChit()->GetWallet()->Deposit(conqueringCore->ParentChit()->GetWallet(), gold);
 			}
 			else {

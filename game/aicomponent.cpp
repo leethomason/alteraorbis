@@ -2613,7 +2613,7 @@ void AIComponent::EnterNewGrid()
 		}
 	}
 
-	// Pick up stuff in battle
+	// Pick up stuff - specifically upgrade weapons in battle mode.
 	if (aiMode == AIMode::BATTLE_MODE && (gameItem->flags & GameItem::AI_USES_BUILDINGS)) {
 		LootFilter filter;
 		CChitArray arr;
