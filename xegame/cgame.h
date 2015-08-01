@@ -57,9 +57,10 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_TOGGLE_DEBUG_TEXT		2
 #define GAME_HK_TOGGLE_DEBUG_UI			3
 #define GAME_HK_TOGGLE_PERF				4
-#define GAME_HK_DEBUG_ACTION			5	// general action
-#define GAME_HK_ATTACH_CORE				6
-#define GAME_HK_TOGGLE_PATHING			7
+#define GAME_HK_TOGGLE_AI_DEBUG			5
+#define GAME_HK_DEBUG_ACTION			6	// general action
+#define GAME_HK_ATTACH_CORE				7
+#define GAME_HK_TOGGLE_PATHING			8
 #define GAME_HK_MAP					    9
 #define GAME_HK_CHEAT_GOLD			   10
 #define GAME_HK_CHEAT_CRYSTAL		   11

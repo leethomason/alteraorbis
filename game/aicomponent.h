@@ -83,7 +83,6 @@ public:
 	
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
-	void EnableLog( bool enable )			{ debugLog = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 
@@ -128,6 +127,8 @@ private:
 	bool LineOfSight(Chit* target, const RangedWeapon* weapon );
 	bool LineOfSight(const grinliz::Vector2I& voxel );
 
+	bool Log();
+
 	void Think();	// Choose a new action.
 	void ThinkNormal();
 	void ThinkBattle();
@@ -144,7 +145,6 @@ private:
 	void DoMoraleZero();
 	bool TravelHome(bool focus);
 	void WorkQueueToTask();			// turn a work item into a task
-	void FlushTaskList(U32 delta );	// moves tasks along, mark tasks completed, do special actions
 
 	bool AtHomeCore();
 	bool AtFriendlyOrNeutralCore();
@@ -198,7 +198,6 @@ private:
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
-	bool				debugLog;
 	int					rampageTarget;
 	int					destinationBlocked;
 	ai::TaskList		taskList;

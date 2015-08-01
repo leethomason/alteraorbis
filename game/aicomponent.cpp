@@ -25,7 +25,6 @@
 #include "reservebank.h"
 #include "sim.h"
 #include "physicssims.h"
-
 #include "lumosgame.h"
 
 #include "../scenes/characterscene.h"
@@ -44,6 +43,7 @@
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/cameracomponent.h"
 
 #include "../Shiny/include/Shiny.h"
 
@@ -125,7 +125,6 @@ AIComponent::AIComponent() : feTicker( 750 ), needsTicker( 1000 )
 	wanderTime = 0;
 	rethink = 0;
 	fullSectorAware = false;
-	debugLog = false;
 	visitorIndex = -1;
 	rampageTarget = 0;
 	destinationBlocked = 0;
@@ -160,6 +159,14 @@ void AIComponent::Serialize(XStream* xs)
 	needsTicker.Serialize(xs, "needsTicker");
 	needs.Serialize(xs);
 	this->EndSerialize(xs);
+}
+
+
+bool AIComponent::Log()
+{
+	if (!parentChit) return false;
+	CameraComponent* cc = Context()->chitBag->GetCamera();
+	return Context()->game->AIDebugLog() && (cc->Tracking() == this->ParentChit()->ID());
 }
 
 
@@ -305,6 +312,9 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 	if (focus == FOCUS_TARGET) {
 		if (enemyList2.Empty() || (focus != enemyList2[0])) {
 			focus = FOCUS_NONE;
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d FOCUS_TARGET lost.\n", parentChit->ID()));
+			}
 		}
 	}
 
@@ -438,31 +448,32 @@ private:
 
 void AIComponent::DoMove()
 {
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
 	ItemComponent* thisIC = parentChit->GetItemComponent();
-	if ( !thisIC || !pmc || pmc->ForceCountHigh() || pmc->Stopped() ) {
+	if (!thisIC || !pmc || pmc->ForceCountHigh() || pmc->Stopped()) {
 		currentAction = AIAction::NO_ACTION;
+		if (Log()) {
+			GLOUTPUT(("AI ID=%d Move stopped. PMC=%s forceCount=%d\n", parentChit->ID(), pmc ? "true" : "fals", pmc ? pmc->ForceCount() : 0));
+		}
 		return;
 	}
 
 	// Generally speaking, moving is done by the PathMoveComponent. When
 	// not in battle, this is essentially "do nothing." If in battle mode,
 	// we look for opportunity fire and such.
-	if ( aiMode != AIMode::BATTLE_MODE) {
-		// Check for motion done, stuck, etc.
-		if ( pmc->Stopped() || pmc->ForceCountHigh() ) {
-			currentAction = AIAction::NO_ACTION;
-			return;
-		}
+	if (aiMode != AIMode::BATTLE_MODE) {
 		if (aiMode == AIMode::RAMPAGE_MODE && RampageDone()) {
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d Rampage Done\n", parentChit->ID()));
+			}
 			aiMode = AIMode::NORMAL_MODE;
 			currentAction = AIAction::NO_ACTION;
 			return;
 		}
 		// Reloading is always a good background task.
-		RangedWeapon* rangedWeapon = thisIC->GetRangedWeapon( 0 );
-		if ( rangedWeapon && rangedWeapon->CanReload() ) {
-			rangedWeapon->Reload( parentChit );
+		RangedWeapon* rangedWeapon = thisIC->GetRangedWeapon(0);
+		if (rangedWeapon && rangedWeapon->CanReload()) {
+			rangedWeapon->Reload(parentChit);
 		}
 	}
 	else {
@@ -470,38 +481,38 @@ void AIComponent::DoMove()
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
-		RangedWeapon* rangedWeapon = thisIC->GetRangedWeapon( 0 );
-		if ( rangedWeapon ) {
+		RangedWeapon* rangedWeapon = thisIC->GetRangedWeapon(0);
+		if (rangedWeapon) {
 			Vector3F heading = parentChit->Heading();
 			bool explosive = (rangedWeapon->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
 
-			if ( rangedWeapon->CanShoot() ) {
-				float radAt1 = BattleMechanics::ComputeRadAt1( parentChit->GetItem(), 
-															   rangedWeapon,
-															   true,
-															   true );	// Doesn't matter to utility.
+			if (rangedWeapon->CanShoot()) {
+				float radAt1 = BattleMechanics::ComputeRadAt1(parentChit->GetItem(),
+															  rangedWeapon,
+															  true,
+															  true);	// Doesn't matter to utility.
 
-				for( int k=0; k<enemyList2.Size(); ++k ) {
+				for (int k = 0; k < enemyList2.Size(); ++k) {
 					Chit* enemy = Context()->chitBag->GetChit(enemyList2[k]);
-					if ( !enemy ) {
+					if (!enemy) {
 						continue;
 					}
 					Vector3F p0;
-					Vector3F p1 = BattleMechanics::ComputeLeadingShot( parentChit, enemy, rangedWeapon->BoltSpeed(), &p0 );
+					Vector3F p1 = BattleMechanics::ComputeLeadingShot(parentChit, enemy, rangedWeapon->BoltSpeed(), &p0);
 					Vector3F normal = p1 - p0;
 					normal.Normalize();
-					float range = (p0-p1).Length();
+					float range = (p0 - p1).Length();
 
-					if ( explosive && range < EXPLOSIVE_RANGE*3.0f ) {
+					if (explosive && range < EXPLOSIVE_RANGE*3.0f) {
 						// Don't run & gun explosives if too close.
 						continue;
 					}
 
-					if ( DotProduct( normal, heading ) >= SHOOT_ANGLE_DOT ) {
+					if (DotProduct(normal, heading) >= SHOOT_ANGLE_DOT) {
 						// Wow - can take the shot!
-						float u = BattleMechanics::ChanceToHit( range, radAt1 );
+						float u = BattleMechanics::ChanceToHit(range, radAt1);
 
-						if ( u > utilityRunAndGun ) {
+						if (u > utilityRunAndGun) {
 							utilityRunAndGun = u;
 							targetRunAndGun = enemy;
 						}
@@ -509,29 +520,29 @@ void AIComponent::DoMove()
 				}
 			}
 			float utilityReload = 0.0f;
-			if ( rangedWeapon->CanReload() ) {
+			if (rangedWeapon->CanReload()) {
 				utilityReload = 1.0f - rangedWeapon->RoundsFraction();
 			}
-			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
-				if ( debugLog ) {
-					GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", parentChit->ID(), utilityRunAndGun, utilityReload ));
+			if (utilityReload > 0 || utilityRunAndGun > 0) {
+				if (Log()) {
+					GLOUTPUT(("AI ID=%d Move: RunAndGun=%.2f Reload=%.2f ", parentChit->ID(), utilityRunAndGun, utilityReload));
 				}
-				if ( utilityRunAndGun > utilityReload ) {
-					GLASSERT( targetRunAndGun );
-					Vector3F leading = BattleMechanics::ComputeLeadingShot( parentChit, targetRunAndGun, rangedWeapon->BoltSpeed(), 0 );
-					BattleMechanics::Shoot(	Context()->chitBag, 
-											parentChit,
-											leading, 
-											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
-											rangedWeapon );
-					if ( debugLog ) {
-						GLOUTPUT(( "->RunAndGun\n" ));
+				if (utilityRunAndGun > utilityReload) {
+					GLASSERT(targetRunAndGun);
+					Vector3F leading = BattleMechanics::ComputeLeadingShot(parentChit, targetRunAndGun, rangedWeapon->BoltSpeed(), 0);
+					BattleMechanics::Shoot(Context()->chitBag,
+										   parentChit,
+										   leading,
+										   targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
+										   rangedWeapon);
+					if (Log()) {
+						GLOUTPUT(("->RunAndGun\n"));
 					}
 				}
 				else {
-					rangedWeapon->Reload( parentChit );
-					if ( debugLog ) {
-						GLOUTPUT(( "->Reload\n" ));
+					rangedWeapon->Reload(parentChit);
+					if (Log()) {
+						GLOUTPUT(("->Reload\n"));
 					}
 				}
 			}
@@ -542,7 +553,6 @@ void AIComponent::DoMove()
 
 void AIComponent::DoShoot()
 {
-	//bool pointed = false;
 	Vector3F leading = { 0, 0, 0 };
 	bool isMoving = false;
 
@@ -881,8 +891,8 @@ WorkQueue* AIComponent::GetWorkQueue()
 }
 
 
-void AIComponent::Rampage( int dest ) 
-{ 
+void AIComponent::Rampage(int dest)
+{
 	rampageTarget = dest;
 
 	GLASSERT(!RampageDone());
@@ -892,11 +902,15 @@ void AIComponent::Rampage( int dest )
 		return;
 	}
 
-	aiMode = AIMode::RAMPAGE_MODE; 
+	aiMode = AIMode::RAMPAGE_MODE;
 	currentAction = AIAction::NO_ACTION;
 
 	ChitBag::CurrentNews news = { StringPool::Intern("Rampage"), ToWorld2F(parentChit->Position()), parentChit->ID() };
 	Context()->chitBag->PushCurrentNews(news);
+
+	if (Log()) {
+		GLOUTPUT(("AI ID=%d Rampage to %d\n", parentChit->ID(), dest));
+	}
 }
 
 
@@ -1335,6 +1349,9 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 			}
 		}
 		parentChit->SendMessage(msg);
+		if (Log()) {
+			GLOUTPUT(("AI ID=%d SectorHerd to sector %d,%d\n", parentChit->ID(), dest.sector.x, dest.sector.y));
+		}
 		return true;
 	}
 	return false;
@@ -1419,6 +1436,9 @@ bool AIComponent::ThinkCollectNearFruit()
 		for (int i = 0; i < arr.Size(); ++i) {
 			Vector2I plantPos = ToWorld2I(arr[i]->Position());
 			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos))) {
+				if (Log()) {
+					GLOUTPUT(("AI ID=%d ThinkCollectNearFruit\n", parentChit->ID()));
+				}
 				this->Move(ToWorld2F(plantPos), false);
 				return true;
 			}
@@ -1442,7 +1462,7 @@ Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool ex
 }
 
 
-bool AIComponent::ThinkGuard(  ) {
+bool AIComponent::ThinkGuard() {
 	const GameItem *gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
 
@@ -1481,6 +1501,9 @@ bool AIComponent::ThinkGuard(  ) {
 		if (guardBounds.Contains(pos2i)) {
 			taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
 			taskList.Push(Task::StandTask(GUARD_TIME));
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d ThinkGuard continued.\n", parentChit->ID()));
+			}
 			return true;
 		}
 	}
@@ -1493,6 +1516,9 @@ bool AIComponent::ThinkGuard(  ) {
 
 	taskList.Push(Task::MoveTask(ToWorld2F(RandomPosInRect(guardBounds, true))));
 	taskList.Push(Task::StandTask(GUARD_TIME));
+	if (Log()) {
+		GLOUTPUT(("AI ID=%d ThinkGuard\n", parentChit->ID()));
+	}
 	return true;
 }
 
@@ -1646,6 +1672,9 @@ bool AIComponent::ThinkFruitCollect()
 						for (int i = 0; i < fruit.Size(); ++i) {
 							taskList.Push(Task::PickupTask(fruit[i]->ID()));
 						}
+						if (Log()) {
+							GLOUTPUT(("AI ID=%d ThinkFruitCollect\n", parentChit->ID()));
+						}
 						return true;
 					}
 				}
@@ -1686,6 +1715,9 @@ bool AIComponent::ThinkFlag()
 			if (!homeCoreScript->HasTask(flag)) {
 				taskList.Push(Task::MoveTask(flag));
 				taskList.Push(Task::FlagTask());
+				if (Log()) {
+					GLOUTPUT(("AI ID=%d ThinkFlag\n", parentChit->ID()));
+				}
 				return true;
 			}
 		}
@@ -1725,6 +1757,9 @@ bool AIComponent::ThinkHungry()
 				delete item;
 				this->GetNeedsMutable()->Set(Needs::FOOD, 1);
 				parentChit->GetItem()->Heal(100);
+			}
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d ThinkHungry\n", parentChit->ID()));
 			}
 			return true;	// did something...?
 		}
@@ -1783,6 +1818,9 @@ bool AIComponent::ThinkDelivery()
 						if (!coreScript->HasTask(it.Pos())) {
 							taskList.Push(Task::MoveTask(it.Pos()));
 							taskList.Push(Task::UseBuildingTask());
+							if (Log()) {
+								GLOUTPUT(("AI ID=%d ThinkDelivery\n", parentChit->ID()));
+							}
 							return true;
 						}
 					}
@@ -1814,6 +1852,9 @@ bool AIComponent::ThinkDelivery()
 							if (!coreScript->HasTask(it.Pos())) {
 								taskList.Push(Task::MoveTask(it.Pos()));
 								taskList.Push(Task::UseBuildingTask());
+								if (Log()) {
+									GLOUTPUT(("AI ID=%d ThinkDelivery\n", parentChit->ID()));
+								}
 								return true;
 							}
 						}
@@ -1874,6 +1915,9 @@ bool AIComponent::ThinkRepair()
 			taskList.Push(Task::MoveTask(it.Pos()));
 			taskList.Push(Task::StandTask(REPAIR_TIME));
 			taskList.Push(Task::RepairTask(building->ID()));
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d ThinkRepair\n", parentChit->ID()));
+			}
 			return true;
 		}
 	}
@@ -1966,7 +2010,7 @@ bool AIComponent::ThinkNeeds()
 			}
 		}
 
-		if (debugLog) {
+		if (Log()) {
 			if (!debugBuildingOutput[buildDataID]) {
 				GLASSERT(buildDataID >= 0 && buildDataID < int(GL_C_ARRAY_SIZE(debugBuildingOutput)));
 				debugBuildingOutput[buildDataID] = true;
@@ -1986,7 +2030,7 @@ bool AIComponent::ThinkNeeds()
 
 	if (bestScore >0) {
 		GLASSERT(bestPorch.x > 0);
-		if (debugLog) {
+		if (Log()) {
 			GLOUTPUT(("  --> %s\n", bestBD->structure.c_str()));
 		}
 
@@ -2044,6 +2088,9 @@ bool AIComponent::ThinkLoot()
 			if (loot.Accept(chitArr[i])) {
 				// Gold is hoovered-up. Only need pickup for loot.
 				taskList.Push(Task::PickupTask(chitArr[i]->ID()));
+			}
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d ThinkLoot\n", parentChit->ID()));
 			}
 			return true;
 		}
@@ -2136,6 +2183,9 @@ void AIComponent::ThinkNormal()
 		}
 	}
 	if (!dest.IsZero()) {
+		if (Log()) {
+			GLOUTPUT(("AI ID=%d Dest/Wander\n", parentChit->ID()));
+		}
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
 		// If the move is very near (happens if friendList empty)
 		// don't do the move to avoid jerk.
@@ -2248,7 +2298,7 @@ void AIComponent::ThinkBattle()
 		if ((nMeleeEnemies || nRangedEnemies) && (!enemyChit || buildingFilter.Accept(enemyChit))) {
 			q *= 0.1f;
 		}
-		if (debugLog) {
+		if (Log()) {
 			GLOUTPUT(("  id=%d rng=%.1f ", targetID, range));
 		}
 
@@ -2294,7 +2344,7 @@ void AIComponent::ThinkBattle()
 				if (enemyChit) lineOfSight = LineOfSight(enemyChit, rangedWeapon);
 				else if (!enemyPos2I.IsZero()) lineOfSight = LineOfSight(enemyPos2I);
 
-				if (debugLog) {
+				if (Log()) {
 					GLOUTPUT(("r=%.1f ", u));
 				}
 
@@ -2310,7 +2360,7 @@ void AIComponent::ThinkBattle()
 				// Moving to effective range is less interesting if the gun isn't ready.
 				u *= 0.5f;
 			}
-			if (debugLog) {
+			if (Log()) {
 				GLOUTPUT(("mtr(r)=%.1f ", u));
 			}
 			if (u > utility[OPTION_MOVE_TO_RANGE]) {
@@ -2326,7 +2376,7 @@ void AIComponent::ThinkBattle()
 			}
 			float u = MELEE_RANGE / range;
 			u *= q;
-			if (debugLog) {
+			if (Log()) {
 				GLOUTPUT(("m=%.1f ", u));
 			}
 			if (u > utility[OPTION_MELEE]) {
@@ -2334,7 +2384,7 @@ void AIComponent::ThinkBattle()
 				target[OPTION_MELEE] = targetID;
 			}
 		}
-		if (debugLog) {
+		if (Log()) {
 			GLOUTPUT(("\n"));
 		}
 	}
@@ -2391,7 +2441,7 @@ void AIComponent::ThinkBattle()
 		GLASSERT(0);
 	};
 
-	if (debugLog) {
+	if (Log()) {
 		static const char* optionName[NUM_OPTIONS] = { "none", "mtr", "melee", "shoot" };
 		GLOUTPUT(("ID=%d BTL nEne=%d (m=%d r=%d) mtr=%.2f melee=%.2f shoot=%.2f -> %s [%d]\n",
 			parentChit->ID(),
@@ -2411,18 +2461,6 @@ void AIComponent::ThinkBattle()
 	}
 	else if (currentAction == AIAction::SHOOT) {
 		thisIC->SelectWeapon(ItemComponent::SELECT_RANGED);
-	}
-}
-
-
-void AIComponent::FlushTaskList( U32 delta )
-{
-	if ( !taskList.Empty() ) {
-		//Vector2I pos2i = ToWorld2I(parentChit->Position());
-		//Vector2I sector = ToSector(pos2i);
-
-		//WorkQueue* workQueue = GetWorkQueue();
-		taskList.DoTasks(parentChit, delta);	
 	}
 }
 
@@ -2838,8 +2876,8 @@ int AIComponent::DoTick(U32 deltaTime)
 			currentAction = AIAction::NO_ACTION;
 			taskList.Clear();
 
-			if (debugLog) {
-				GLOUTPUT(("ID=%d Mode to Battle\n", parentChit->ID()));
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d Mode to Battle\n", parentChit->ID()));
 			}
 
 			if (parentChit->GetRenderComponent()) {
@@ -2855,8 +2893,8 @@ int AIComponent::DoTick(U32 deltaTime)
 		else if (aiMode == AIMode::BATTLE_MODE && enemyList2.Empty()) {
 			aiMode = AIMode::NORMAL_MODE;
 			currentAction = AIAction::NO_ACTION;
-			if (debugLog) {
-				GLOUTPUT(("ID=%d Mode to Normal\n", parentChit->ID()));
+			if (Log()) {
+				GLOUTPUT(("AI ID=%d Mode to Normal\n", parentChit->ID()));
 			}
 		}
 	}
@@ -2930,15 +2968,15 @@ int AIComponent::DoTick(U32 deltaTime)
 		RETHINK = 1000;	// so we aren't runnig past targets and such.
 		// And also check for losing our target.
 		if (enemyList2.Size() && (lastTargetID != enemyList2[0])) {
-			if (debugLog) {
-				GLOUTPUT(("BTL retarget.\n"));
+			if (Log()) {
+				GLOUTPUT(("AI BTL retarget.\n"));
 			}
 			rethink += RETHINK;
 		}
 	}
 
 	if (aiMode == AIMode::NORMAL_MODE && !taskList.Empty()) {
-		FlushTaskList(deltaTime);
+		taskList.DoTasks(parentChit, deltaTime);	
 		if (taskList.Empty()) {
 			rethink = 0;
 		}
@@ -2972,8 +3010,8 @@ int AIComponent::DoTick(U32 deltaTime)
 		break;
 	}
 
-	if (debugLog && (currentAction != oldAction)) {
-		GLOUTPUT(("ID=%d mode=%s action=%s\n", parentChit->ID(), MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)]));
+	if (Log() && (currentAction != oldAction)) {
+		GLOUTPUT(("AI ID=%d mode=%s action=%s\n", parentChit->ID(), MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)]));
 	}
 
 	// Without this rethink ticker melee fighters run past

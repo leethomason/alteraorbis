@@ -320,7 +320,6 @@ void BattleTestScene::GoScene()
 		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, Team::CombineID(TEAM_HOUSE, TEAM_ID_LEFT), leftLevel );
 		if ( i==0 ) {
 			if (c->GetAIComponent()) {
-				c->GetAIComponent()->EnableLog(true);
 				c->GetItemComponent()->EnableDebug(true);
 			}
 		}

@@ -1200,12 +1200,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 					chitTracking = chit->ID();
 					cc->SetTrack(chitTracking);
 				}
-				for (int i = 0; i < nCitizens; ++i) {
-					AIComponent* ai = citizens[i]->GetAIComponent();
-					if (ai) {
-						ai->EnableLog(chitTracking == citizens[i]->ID());
-					}
-				}
 			}
 		}
 	}
@@ -1716,7 +1710,6 @@ void GameScene::DoTick(U32 delta)
 		str.Format("Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience(stat.Level() + 1));
 	}
 
-	//	bool debugUiVisible = game->GetDebugUI();
 	bool abandonVisible = (menu->UIMode() == GameSceneMenu::UI_BUILD) && homeCoreScript;
 	abandonButton.SetVisible(abandonVisible);
 	if (!abandonVisible) {

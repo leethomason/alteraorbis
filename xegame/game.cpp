@@ -62,6 +62,7 @@ const Game::Palette* Game::mainPalette = 0;
 
 Game::Game( int width, int height, int rotation, int uiHeight ) :
 	screenport( width, height, uiHeight ),
+	aiDebugLog(false),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
@@ -694,6 +695,9 @@ void Game::HandleHotKey( int key )
 	}
 	else if ( key == GAME_HK_TOGGLE_PERF ) {
 		perfText = !perfText;
+	}
+	else if (key == GAME_HK_TOGGLE_AI_DEBUG) {
+		aiDebugLog = !aiDebugLog;
 	}
 	else {
 		sceneStack.Top()->scene->HandleHotKey( key );

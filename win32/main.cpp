@@ -304,6 +304,7 @@ int main(int argc, char **argv)
 							//case SDLK_d: reserved
 						case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);			break;
 						case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);		break;
+						case SDL_SCANCODE_I:	GameHotKey(game, GAME_HK_TOGGLE_AI_DEBUG);		break;
 						case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);		break;
 						case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);					break;
 						case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);			break;

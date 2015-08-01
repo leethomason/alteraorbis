@@ -96,6 +96,7 @@ public:
 	bool GetDebugText() const			{ return debugText; }
 	bool GetPerfText() const			{ return perfText; }
 	int GetTapMod() const				{ return tapMod; }
+	bool AIDebugLog() const				{ return aiDebugLog;  }
 
 	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
@@ -168,6 +169,7 @@ protected:
 	void LoadModel( const char* name );
 	void LoadPalettes();
 
+	bool aiDebugLog;
 	int tapMod;
 	U32 markFrameTime;
 	U32 frameCountsSinceMark;
