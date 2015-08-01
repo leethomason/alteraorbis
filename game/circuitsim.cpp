@@ -143,7 +143,7 @@ Chit* CircuitSim::FindPower(const Vector2F& device)
 		BatteryComponent* battery = (BatteryComponent*)temple->GetComponent("BatteryComponent");
 		GLASSERT(battery);
 		float charge = float(battery->Charge());
-		float score = charge / len;
+		float score = (charge + 1.0f) / len;
 		if (score > bestScore) {
 			bestScore = score;
 			best = temple;
@@ -534,20 +534,20 @@ void CircuitSim::DrawGroups()
 			Vector2F p0 = ToWorld2F(c.a);
 			Vector2F p1 = ToWorld2F(c.b);
 
-			canvas[0][type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
-			canvas[0][type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
-			canvas[0][type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
+			canvas[0][SENSOR_GROUP].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
+			canvas[0][SENSOR_GROUP].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
+			canvas[0][SENSOR_GROUP].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
 		}
 	}
 
 	if (!dragStart.IsZero()) {
 		int type = 0;
-		if (FindGroup(ToWorld2I(dragStart), &type, 0)) {
+		if (FindGroup(ToWorld2I(dragStart), &type, 0) && (type != POWER_GROUP)) {
 			Vector2F p0 = dragStart;
 			Vector2F p1 = dragCurrent;
-			canvas[0][type].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
-			canvas[0][type].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
-			canvas[0][type].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
+			canvas[0][SENSOR_GROUP].DrawLine(p0.x, p0.y, p1.x, p1.y, thicker);
+			canvas[0][SENSOR_GROUP].DrawRectangle(p0.x - hSquare, p0.y - hSquare, square, square);
+			canvas[0][SENSOR_GROUP].DrawRectangle(p1.x - hSquare, p1.y - hSquare, square, square);
 		}
 	}
 
@@ -565,8 +565,8 @@ bool CircuitSim::ConnectionValid(const Vector2I& a, const Vector2I& b, int *type
 	int indexA = -1, typeA = NUM_GROUPS;
 	int indexB = -1, typeB = NUM_GROUPS;
 	if (FindGroup(a, &typeA, &indexA) && FindGroup(b, &typeB, &indexB)) {
-		if (   (typeA == DEVICE_GROUP && typeB != DEVICE_GROUP)
-			|| (typeA != DEVICE_GROUP && typeB == DEVICE_GROUP)) 
+		if (   (typeA == DEVICE_GROUP && typeB == SENSOR_GROUP)
+			|| (typeA == SENSOR_GROUP && typeB == DEVICE_GROUP)) 
 		{
 			if (type) *type = (typeA == DEVICE_GROUP) ? typeB : typeA;
 			if (groupA) *groupA = &groups[typeA][indexA];
