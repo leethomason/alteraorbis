@@ -106,10 +106,10 @@ public:
 		RING_TRIAD	= 0x04,	// boosts damage
 		RING_BLADE	= 0x08,	// boosts damage, decrease shield coupling
 
-		HUMAN_RING_PART_MASK	= RING_GUARD | RING_TRIAD,
-		TROLL_RING_PART_MASK	= RING_BLADE,
-		Q_RING_PART_MASK		= 0,
-		R1K_RING_PARK_MASK		= RING_TRIAD,
+//		HUMAN_RING_PART_MASK	= RING_GUARD | RING_TRIAD,
+//		TROLL_RING_PART_MASK	= RING_BLADE,
+//		Q_RING_PART_MASK		= 0,
+//		R1K_RING_PARK_MASK		= RING_TRIAD,
 
 		PART_MASK   = 0x0f,
 		NUM_PARTS = 4		// includes body	

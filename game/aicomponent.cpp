@@ -903,6 +903,9 @@ void AIComponent::Rampage(int dest)
 // Function to compute "should we rampage." Rampage logic is in ThinkRampage()
 bool AIComponent::ThinkDoRampage()
 {
+	if (parentChit->PlayerControlled())
+		return false;
+
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
 	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
@@ -986,7 +989,7 @@ bool AIComponent::RampageDone()
 	if (dest.Contains(pos2i)) {
 		return true;
 	}
-	return false;
+	return Context()->worldMap->CalcPath(ToWorld2F(pos2i), ToWorld2F(dest.min), 0, 0, false);
 }
 
 

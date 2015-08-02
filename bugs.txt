@@ -62,6 +62,7 @@ x tech and au xfer from subdomains to main domains. tech looks good.
 - character scene: show team affiliation, hostile to core?
 - ai gets stuck walking into things
 - space out money widget better
+- general spacing
 - bar -> tavern
 - more ability to track units from census screens
 - cyclops herding???

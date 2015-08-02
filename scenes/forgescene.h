@@ -21,7 +21,9 @@ public:
 	ForgeSceneData() : SceneData(), tech(3), itemComponent(0) {}
 
 	int				tech;			// available tech (in)
-	ItemComponent*	itemComponent;	// who is operating this forge?
+	ItemComponent*	itemComponent;	// Who is operating this forge? Note that this means
+									// construction limits (only trolls can use blades, for 
+									// example) are enforced by the USER, not the forge.
 };
 
 

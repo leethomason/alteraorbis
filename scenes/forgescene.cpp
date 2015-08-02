@@ -13,6 +13,7 @@
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
+#include "../script/forgescript.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -160,6 +161,19 @@ void ForgeScene::SetModel( bool randomTraits )
 	int partsFlags = 0;
 	int effectFlags = 0;
 
+	const GameItem* mainItem = forgeData->itemComponent->GetItem();
+
+	ForgeScript::ForgeData fd;
+	fd.type = type;
+	fd.subType = subType;
+	fd.partsMask = partsFlags;
+	fd.effectsMask = effectFlags;
+	fd.tech = forgeData->tech;
+	fd.level = mainItem->Traits().Level();
+	fd.team = mainItem->Team();
+
+	ForgeScript::TeamLimitForgeData(&fd);
+
 	if ( itemType[ForgeScript::GUN].Down() )	type = ForgeScript::GUN;
 	if ( itemType[ForgeScript::SHIELD].Down() )	type = ForgeScript::SHIELD;
 	
@@ -167,10 +181,12 @@ void ForgeScene::SetModel( bool randomTraits )
 		gunType[i].SetVisible( type == ForgeScript::GUN );
 	}
 	for( int i=1; i<NUM_GUN_PARTS; ++i ) {
-		gunParts[i].SetVisible( type == ForgeScript::GUN );
+		int bit = 1 << i;
+		gunParts[i].SetVisible( type == ForgeScript::GUN && (fd.partsMask & bit));
 	}
 	for( int i=1; i<NUM_RING_PARTS; ++i ) {
-		ringParts[i].SetVisible( type == ForgeScript::RING );
+		int bit = 1 << i;
+		ringParts[i].SetVisible( type == ForgeScript::RING  && (fd.partsMask & bit));
 	}
 
 	if ( type == ForgeScript::GUN ) {
@@ -191,17 +207,7 @@ void ForgeScene::SetModel( bool randomTraits )
 	if ( effects[ForgeScript::EFFECT_FIRE].Down() )			effectFlags |= GameItem::EFFECT_FIRE;
 	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
 
-	const GameItem* mainItem = forgeData->itemComponent->GetItem();
 	int seed = mainItem->ID() ^ mainItem->Traits().Experience();
-
-	ForgeScript::ForgeData fd;
-	fd.type = type;
-	fd.subType = subType;
-	fd.partsMask = partsFlags;
-	fd.effectsMask = effectFlags;
-	fd.tech = forgeData->tech;
-	fd.level = mainItem->Traits().Level();
-	fd.team = mainItem->Team();
 
 	delete item;
 	item = ForgeScript::Build( fd, &crystalRequired, &techRequired, randomTraits ? seed : 0 );

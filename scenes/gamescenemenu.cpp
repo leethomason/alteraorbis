@@ -421,11 +421,6 @@ void GameSceneMenu::DoEscape(bool fullEscape)
 		uiMode[UI_AVATAR].SetDown();
 		ItemTapped(&uiMode[UI_AVATAR]);
 	}
-//	else if (mode == UI_CONTROL) {
-//		// Back to view.
-//		uiMode[UI_VIEW].SetDown();
-//		ItemTapped(&uiMode[UI_VIEW]);
-//	}
 	else if (mode == UI_BUILD) {
 		// How far down are we?
 		int buildActive = BuildActive();
@@ -434,8 +429,8 @@ void GameSceneMenu::DoEscape(bool fullEscape)
 			buildDescription.SetText("Tap and drag buildings to rotate them.");
 		}
 		else {
-			uiMode[UI_VIEW].SetDown();
-			ItemTapped(&uiMode[UI_VIEW]);
+			uiMode[UI_AVATAR].SetDown();
+			ItemTapped(&uiMode[UI_AVATAR]);
 		}
 	}
 }

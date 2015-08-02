@@ -36,25 +36,35 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 	if (!herd->GetItem()) return ZERO;
 
 	bool greater = (herd->GetItem()->MOB() == ISC::greater);
+	bool denizen = (herd->GetItem()->MOB() == ISC::denizen);
 
-	if ((attractGreater && greater) || (attractLesser && !greater)) {
+	if (greater && !attractGreater) 
+		return ZERO;
+	if (!greater && !attractLesser) 
+		return ZERO;
 
-		Vector2I playerSector = Context()->chitBag->GetHomeSector();
-		if (playerSector.IsZero()) return ZERO;
-		if (ToSector(herd->Position()) == playerSector) return ZERO;
+	Vector2I playerSector = Context()->chitBag->GetHomeSector();
+	CoreScript* playerCore = Context()->chitBag->GetHomeCore();
+	if (playerSector.IsZero() || !playerCore) 
+		return ZERO;
+	if (ToSector(herd->Position()) == playerSector) 
+		return ZERO;
 
-		int playerTeam = Context()->chitBag->GetHomeTeam();
-		GLASSERT(playerTeam);
-		if (Team::Instance()->GetRelationship(herd->Team(), playerTeam) == ERelate::ENEMY) {
-			GLOUTPUT(("SendHerd to player.\n"));
+	int nTemples = playerCore->NumTemples();
+	if (nTemples == 0 && denizen)
+		return ZERO;	// denizens can be fairly well armed.
 
-			if (greater)
-				attractGreater = false;
-			else
-				attractLesser = false;
+	int playerTeam = Context()->chitBag->GetHomeTeam();
+	GLASSERT(playerTeam);
+	if (Team::Instance()->GetRelationship(herd->Team(), playerTeam) == ERelate::ENEMY) {
+		GLOUTPUT(("SendHerd to player.\n"));
 
-			return playerSector;
-		}
+		if (greater)
+			attractGreater = false;
+		else
+			attractLesser = false;
+
+		return playerSector;
 	}
 	return ZERO;
 }
