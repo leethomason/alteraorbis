@@ -78,9 +78,6 @@ void PathMoveComponent::OnAdd( Chit* chit, bool init )
 
 void PathMoveComponent::OnRemove()
 {
-//	if ( !path.Empty() ) {
-//		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
-//	}
 	super::OnRemove();
 }
 

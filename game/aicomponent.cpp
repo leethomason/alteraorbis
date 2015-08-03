@@ -66,7 +66,7 @@ static const float	FRUIT_AWARE					=  5.0f;
 static const float  EAT_WILD_FRUIT				= 0.70f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
-static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
+static const int	RAMPAGE_THRESHOLD			= 10;		// how many times a destination must be blocked before rampage
 static const int	GUARD_RANGE					= 1;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
@@ -905,12 +905,14 @@ bool AIComponent::ThinkDoRampage()
 {
 	if (parentChit->PlayerControlled())
 		return false;
+	if (destinationBlocked < RAMPAGE_THRESHOLD)
+		return false;
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
 	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
 
-	if ( !wg.IsPort() && destinationBlocked < RAMPAGE_THRESHOLD ) 
+	if (!wg.IsPort())
 		return false;
 
 	const ChitContext* context = Context();
@@ -944,7 +946,7 @@ bool AIComponent::ThinkDoRampage()
 	// Go for a rampage: remember, if the path is clear,
 	// it's essentially just a random walk.
 	destinationBlocked = 0;
-	const SectorData& sd = context->worldMap->GetSectorData( ToSector( parentChit->Position() ));
+	const SectorData& sd = context->worldMap->GetSectorData(ToSector(parentChit->Position()));
 
 	CArray< int, 5 > targetArr;
 
@@ -961,8 +963,8 @@ bool AIComponent::ThinkDoRampage()
 	}
 	GLASSERT(targetArr.Size());
 
-	parentChit->random.ShuffleArray( targetArr.Mem(), targetArr.Size() );
-	this->Rampage( targetArr[0] );
+	parentChit->random.ShuffleArray(targetArr.Mem(), targetArr.Size());
+	this->Rampage(targetArr[0]);
 	return true;
 }
 
@@ -1009,6 +1011,7 @@ void AIComponent::ThinkRampage()
 	const WorldGrid& wg1 = context->worldMap->GetWorldGrid(next.x, next.y);
 
 	if (RampageDone()) {
+		rampage = NO_RAMPAGE;
 		aiMode = AIMode::NORMAL_MODE;
 		currentAction = AIAction::NO_ACTION;
 		return;
@@ -1023,6 +1026,7 @@ void AIComponent::ThinkRampage()
 		this->Move(ToWorld2F(next), false);
 	}
 	else {
+		rampage = NO_RAMPAGE;
 		aiMode = AIMode::NORMAL_MODE;
 		currentAction = AIAction::NO_ACTION;
 	}
@@ -2579,16 +2583,17 @@ void AIComponent::EnterNewGrid()
 	if (!gameItem) return;
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
+	CoreScript* coreScript = CoreScript::GetCore(ToSector(pos2i));
+	Vector2I sector = ToSector(pos2i);
 
 	// Circuits.
 	// FIXME: Not at all clear where this code should be...ItemComponent? MoveComponent?
 	{
-		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
-		if (cs) {
-			if (cs->InUse() && Team::Instance()->GetRelationship(parentChit, cs->ParentChit()) == ERelate::ENEMY) {
+		if (coreScript) {
+			if (coreScript->InUse() && Team::Instance()->GetRelationship(parentChit, coreScript->ParentChit()) == ERelate::ENEMY) {
 				Context()->physicsSims->GetCircuitSim(ToSector(pos2i))->TriggerDetector(pos2i);
 			}
-			else if (!cs->InUse()) {
+			else if (!coreScript->InUse()) {
 				Context()->physicsSims->GetCircuitSim(ToSector(pos2i))->TriggerDetector(pos2i);
 			}
 		}
@@ -2664,11 +2669,9 @@ void AIComponent::EnterNewGrid()
 		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS )
 	{
 		// FIXME: refactor this to somewhere. Part of CoreScript?
-		Vector2I sector = ToSector(pos2i);
-		CoreScript* cs = CoreScript::GetCore(sector);
-		if (cs
-			&& !cs->InUse()
-			&& ToWorld2I(cs->ParentChit()->Position()) == pos2i)
+		if (coreScript
+			&& !coreScript->InUse()
+			&& ToWorld2I(coreScript->ParentChit()->Position()) == pos2i)
 		{
 			// Need some team. And some cash.
 			Rectangle2I inner = InnerSectorBounds(sector);
@@ -2746,6 +2749,11 @@ void AIComponent::EnterNewGrid()
 				}
 			}
 		}
+	}
+
+	// Greaters should sector herd if they wander over a core.
+	if (gameItem->MOB() == ISC::greater && aiMode == AIMode::NORMAL_MODE && coreScript && !coreScript->InUse() && pos2i == ToWorld2I(coreScript->ParentChit()->Position())) {
+		SectorHerd(false);
 	}
 }
 

@@ -47,6 +47,7 @@ x temples: auto power supply?
 x auto-off for pool trap
 x reduces named weapon threshold
 x tech and au xfer from subdomains to main domains. tech looks good.
+x 'destinationBlocked' only set in rare circumstances. Certainly doesn't reflect actual pathing failure.
 - damage: items seem to get blown away...crystal not dropped
 - how do deity cores get crystal??
 - deity temples
@@ -54,19 +55,46 @@ x tech and au xfer from subdomains to main domains. tech looks good.
 - destination icons - still a lingering mark 
 - troll vs. goblin icons too similar
 - reorder squad units
-- cyclops stuck pathing...just standing there.
+x cyclops stuck pathing...just standing there.
 - change xp -> effective level cap to 10-12?
 - human shouldn't be able to build blade
 - no control flags in water
 - rework fonts on title screen
 - character scene: show team affiliation, hostile to core?
-- ai gets stuck walking into things
+x ai gets stuck walking into things
 - space out money widget better
 - general spacing
 - bar -> tavern
 - more ability to track units from census screens
-- cyclops herding???
+x cyclops herding???
 - starting denizens at deities, without weapons??
+- mouse size buttons vs. touch size buttons
+- "founded 0.21 fell 000 lasted 712 cycles"
+x Adviser recommend bar before sleep tubes and distilleries
+- Get to her character screen - why is random denizen attacking, etc?
+- modes confusing
+	- cursor change?
+	- UI reflect moving
+	- pseudo-selected and can't sell things
+	- use: click the building. indicator that building is clickable
+	- "Can't click on front porth in top down"
+x "last slot" bug in inventory
+x do kiosks have zones?
+- partial refund of gold when you clear
+x too much random number in weapon creation
+- Control -> Squads
+x It is confusing that View is self control
+	x New button?
+- Should be able to take over neutral cores
+- Squad should stick together more in hostile or neutral zone
+- Human shields should not have blades
+- Drop anywhere or quick sell button
+- Not seeing bloodrage messages? Not seeing starvation messages.
+- Not honoring nearest port when choosing domains
+- ship money from controlled domain
+- more announcement when core taken over - popup!
+- Beta team never left...all just hanging around at home. Zombie waypoint flags. Couldn't get to #2 - there was no #1.
+- Squads won't "tunnel" through blocked paths.
 
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)
