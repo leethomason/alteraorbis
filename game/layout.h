@@ -27,7 +27,7 @@ static const float TEXT_HEIGHT   = 18.0f;
 #else
 // Laptop/Desktop
 static const float LAYOUT_SQUARE = 35.0f;
-static const float LAYOUT_SIZE_X = 65.0f;
+static const float LAYOUT_SIZE_X = 70.0f;
 static const float LAYOUT_SIZE_Y = LAYOUT_SQUARE;
 static const float TEXT_HEIGHT   = 14.0f;
 static const float LAYOUT_SPACING = 4.0f;

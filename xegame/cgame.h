@@ -70,14 +70,15 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_ESCAPE				   15
 #define GAME_HK_CAMERA_TOGGLE		   16	// 'tab' on windows
 #define GAME_HK_CAMERA_CORE			   17	// camera to core
-#define GAME_HK_CAMERA_AVATAR		   18	// camera to avatar, then avatar to core
-#define GAME_HK_TOGGLE_PAUSE		   19
+#define GAME_HK_CAMERA_AVATAR		   18	// camera to avatar
+#define GAME_HK_TELEPORT_AVATAR		   19
+#define GAME_HK_TOGGLE_PAUSE		   20
 
-#define GAME_HK_TOGGLE_GLOW			   20
-#define GAME_HK_TOGGLE_PARTICLE		   21
-#define GAME_HK_TOGGLE_VOXEL		   22
-#define GAME_HK_TOGGLE_SHADOW		   23
-#define GAME_HK_TOGGLE_BOLT			   24
+#define GAME_HK_TOGGLE_GLOW			   21
+#define GAME_HK_TOGGLE_PARTICLE		   22
+#define GAME_HK_TOGGLE_VOXEL		   23
+#define GAME_HK_TOGGLE_SHADOW		   24
+#define GAME_HK_TOGGLE_BOLT			   25
 
 void GameHotKey( void* handle, int value );
 

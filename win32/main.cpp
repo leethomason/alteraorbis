@@ -297,6 +297,7 @@ int main(int argc, char **argv)
 						case SDL_SCANCODE_TAB:	GameHotKey(game, GAME_HK_CAMERA_TOGGLE);		break;
 						case SDL_SCANCODE_HOME:	GameHotKey(game, GAME_HK_CAMERA_CORE);			break;
 						case SDL_SCANCODE_END:	GameHotKey(game, GAME_HK_CAMERA_AVATAR);		break;
+						case SDL_SCANCODE_PAGEUP:	GameHotKey(game, GAME_HK_TELEPORT_AVATAR);	break;
 
 							//case SDLK_a: reserved
 						case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);			break;

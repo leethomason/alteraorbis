@@ -297,6 +297,8 @@ public:
 	};
 	grinliz::CDynArray< CreateCoreData > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 
+	CoreScript* TakeOverCore(const grinliz::Vector2I& coreSector, Chit* conquerer);
+
 	// Why the duplicate? This is for components to request
 	// a new scene because of a player action. Both queues,
 	// and doesn't allow multiple scenes to queue.

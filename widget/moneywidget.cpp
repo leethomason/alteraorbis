@@ -32,7 +32,7 @@ void MoneyWidget::SetPos( float x, float y )
 	float w = image[0].Width();
 
 	for( int i=0; i<COUNT; ++i ) {
-		image[i].SetPos( x + w * float(i) * 1.0f, y );
+		image[i].SetPos( x + w * float(i) * 1.2f, y );
 		textLabel[i].SetCenterPos( image[i].CenterX(), image[i].CenterY() );
 	}
 }

@@ -69,14 +69,14 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 	tabBar1.Init( gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 
 	createWorkerButton.Init( gamui2D, game->GetButtonLook(0) );
-	createWorkerButton.SetText( "WorkerBot" );
+	createWorkerButton.SetText( "Worker" );
 	nWorkers = -1;
 	SetNumWorkers(0);
 
 	buildDescription.Init(gamui2D);
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "Avatar", "View", "Build", "Control" };
+		static const char* TEXT[NUM_UI_MODES] = { "Avatar", "View", "Build", "Squads" };
 		uiMode[i].Init( gamui2D, game->GetButtonLook(0));
 		uiMode[i].SetText( TEXT[i] );
 		uiMode[0].AddToToggleGroup( &uiMode[i] );
@@ -286,7 +286,7 @@ void GameSceneMenu::SetNumWorkers(int n)
 		nWorkers = n;
 
 		CStr<32> str;
-		str.Format("WorkerBot\n%d %d/%d", WORKER_BOT_COST, nWorkers, MAX_WORKER_BOTS);
+		str.Format("Worker\n%d %d/%d", WORKER_BOT_COST, nWorkers, MAX_WORKER_BOTS);
 		createWorkerButton.SetText( str.c_str() );
 		createWorkerButton.SetEnabled( nWorkers < MAX_WORKER_BOTS );
 	}

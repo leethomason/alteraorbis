@@ -194,19 +194,20 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 
 	switch (what) {
 		case DENIZEN_CREATED:
-		str->Format("%.2f: Denizen %s " MOB_created " at %s with team %s.", age, firstName.c_str(), domain.c_str(), firstTeamName.safe_str());
+		str->Format("%.2f: Denizen %s " MOB_created " at %s with %s.", age, 
+					firstName.c_str(), domain.safe_str(), firstTeamName.safe_str());
 		break;
 
 		case DENIZEN_KILLED:
-		if (firstTeamName.empty()) 
-			str->Format("%.2f: Denizen %s " MOB_destroyed " at %s by %s.", age, firstName.c_str(), domain.c_str(), secondName.c_str());
-		else
-			str->Format("%.2f: Denizen %s (%s) " MOB_destroyed " at %s by %s.", age, firstName.c_str(), firstTeamName.safe_str(), domain.c_str(), secondName.c_str());
+		str->Format("%.2f: Denizen %s (%s) " MOB_destroyed " at %s by %s.", age, 
+					firstName.safe_str(), 
+					firstTeamName.empty() ? "rogue" : firstTeamName.safe_str(), 
+					domain.safe_str(), secondName.safe_str());
 		break;
 
 		case GREATER_MOB_CREATED:
 		// They get created at the center, then sent. So the domain is meaningless.
-		str->Format("%.2f: %s " MOB_created ".", age, firstName.c_str());
+		str->Format("%.2f: %s " MOB_created ".", age, firstName.safe_str());
 		break;
 
 		case DOMAIN_CREATED:
@@ -215,25 +216,29 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		break;
 
 		case ROGUE_DENIZEN_JOINS_TEAM:
-		str->Format("%.2f: Denizen %s joins %s at %s.", age, firstName.safe_str(), firstTeamName.safe_str(), domain.safe_str());
+		str->Format("%.2f: Rogue Denizen %s joins at %s with %s.", age, 
+					firstName.safe_str(), domain.safe_str(), firstTeamName.safe_str() );
 		break;
 
 		case GREATER_MOB_KILLED:
-		str->Format("%.2f: %s " MOB_destroyed " at %s by %s.", age, firstName.c_str(), domain.c_str(), secondName.c_str());
+		str->Format("%.2f: %s " MOB_destroyed " at %s by %s.", age, 
+					firstName.safe_str(), domain.safe_str(), secondName.safe_str());
 		break;
 
 		case DOMAIN_DESTROYED:
 		GLASSERT(firstTeam);	// how is a neutral destroyed??
-		str->Format("%.2f: %s domain %s " MOB_destroyed " by %s.", age, firstTeamName.safe_str(), domain.safe_str(), secondName.safe_str());
+		str->Format("%.2f: %s domain %s " MOB_destroyed " by %s.", age, 
+					firstTeamName.safe_str(), domain.safe_str(), secondName.safe_str());
 		break;
 
+		// Neutral domains are taken over.
+		// Subdomains are conquored.
 		case DOMAIN_TAKEOVER:
-		if (secondTeam) {
-			str->Format("%.2f: %s domain %s " "conquered" " by %s of %s.", age, firstTeamName.safe_str(), domain.safe_str(), secondName.safe_str(), secondTeamName.safe_str());
-		}
-		else {
-			str->Format("%.2f: %s " "conquered" ".", age, domain.safe_str());
-		}
+		str->Format("%.2f: %s occupied by %s.", age, domain.safe_str(), firstTeamName.safe_str());
+		break;
+
+		case DOMAIN_CONQUER:
+		str->Format("%.2f: %s is conquered by %s.", age, domain.safe_str(), firstTeamName.safe_str() );
 		break;
 
 		case SUPERTEAM_DELETED:
@@ -279,10 +284,6 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 
 		case GREATER_SUMMON_TECH:
 		str->Format("%.2f: %s is called to %s by the siren song of Tech.", age, firstName.c_str(), domain.c_str());
-		break;
-
-		case DOMAIN_CONQUER:
-		str->Format("%.2f: %s is occupied by %s.", age, domain.safe_str(), firstTeamName.safe_str() );
 		break;
 
 		case ATTITUDE_FRIEND:

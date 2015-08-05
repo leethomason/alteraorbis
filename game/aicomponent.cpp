@@ -59,7 +59,7 @@ static const float	LOOSE_AWARENESS = LONGEST_WEAPON_RANGE;
 static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
 static const int	SECTOR_HERD_ODDS			= 50;		// as in 1 in WANDER_ODDS
-static const int	SECTOR_WANDER_ODDS			= 10;		// as in 1 in WANDER_ODDS
+static const int	SECTOR_WANDER_ODDS			= 20;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3;
 static const float	GOLD_AWARE					=  5.0f;
 static const float	FRUIT_AWARE					=  5.0f;
@@ -1104,18 +1104,21 @@ Vector2F AIComponent::ThinkWanderHerd()
 	static const int NPLANTS = 4;
 	static const float TOO_CLOSE = 2.0f;
 	// +1 for origin, +4 for plants
-	CArray<Vector2F, MAX_TRACK + 1 + NPLANTS> pos;
+	CArray<Vector2F, MAX_TRACK + 2 + NPLANTS> pos;
 	GLASSERT(MAX_TRACK >= SQUAD_SIZE);
 
 	int squadID = 0;
+	bool addPlants = true;
+
 	CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
-	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID)) {
+	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID, nullptr)) {
 		// Friends are other squaddies.
 		CChitArray arr;
 		myCore->Squaddies(squadID, &arr);
 		for (int i = 0; i < arr.Size(); ++i) {
 			pos.Push(ToWorld2F(arr[i]->Position()));
 		}
+		addPlants = false;
 	}
 	else {
 		// Friends are in the friends list.
@@ -1132,20 +1135,30 @@ Vector2F AIComponent::ThinkWanderHerd()
 		pos.Push(GetWanderOrigin());
 	}
 
-	// And plants are friends. This was originally in place
-	// because some MOBs healed at plants. No longer the
-	// case. But interesting randomizer, so left in place.
-	Rectangle2I r;
-	r.min = r.max = ToWorld2I(origin);
-	r.Outset(int(PLANT_AWARE));
-	r.DoIntersection(Context()->worldMap->Bounds());
+	if (Team::IsRogue(gameItem->Team())) {
+		const SectorData& sd = Context()->worldMap->GetSectorData(ToSector(parentChit->Position()));
+		pos.Push(ToWorld2F(sd.CoreLoc()));
+		if (friendList2.Size() > 3) {
+			addPlants = false;
+		}
+	}
 
-	int nPlants = 0;
-	for (Rectangle2IIterator it(r); !it.Done() && nPlants < NPLANTS; it.Next()) {
-		const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
-		if (wg.Plant() && !wg.BlockingPlant()) {
-			++nPlants;
-			pos.Push(ToWorld2F(it.Pos()));
+	if (addPlants) {
+		// And plants are friends. This was originally in place
+		// because some MOBs healed at plants. No longer the
+		// case. But interesting randomizer, so left in place.
+		Rectangle2I r;
+		r.min = r.max = ToWorld2I(origin);
+		r.Outset(int(PLANT_AWARE));
+		r.DoIntersection(Context()->worldMap->Bounds());
+
+		int nPlants = 0;
+		for (Rectangle2IIterator it(r); !it.Done() && nPlants < NPLANTS; it.Next()) {
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
+			if (wg.Plant() && !wg.BlockingPlant()) {
+				++nPlants;
+				pos.Push(ToWorld2F(it.Pos()));
+			}
 		}
 	}
 
@@ -2168,15 +2181,18 @@ void AIComponent::ThinkNormal()
 			if (SectorHerd(false))
 				return;
 		}
-		else if (wanderFlags == 0 || r == 0) {
-			dest = ThinkWanderRandom();
-		}
-		else if (wanderFlags == GameItem::AI_WANDER_HERD) {
+		else {
 			dest = ThinkWanderHerd();
 		}
-		else if (wanderFlags == GameItem::AI_WANDER_CIRCLE) {
-			dest = ThinkWanderCircle();
-		}
+//		else if (wanderFlags == 0 || r == 0) {
+//			dest = ThinkWanderRandom();
+//		}
+//		else if (wanderFlags == GameItem::AI_WANDER_HERD) {
+//			dest = ThinkWanderHerd();
+//		}
+//		else if (wanderFlags == GameItem::AI_WANDER_CIRCLE) {
+//			dest = ThinkWanderCircle();
+//		}
 	}
 	if (!dest.IsZero()) {
 		if (Log()) {
@@ -2663,46 +2679,37 @@ void AIComponent::EnterNewGrid()
 #ifdef ALTERA_MICRO
 	// No domain takeover in mini mode.
 #else
-	// Domain Takeover.
-	if (   gameItem->MOB() == ISC::denizen
-		&& Team::IsRogue(parentChit->Team())
-		&& Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS )
+	// Domain Takeover of neutral domains.
+	if (gameItem->MOB() == ISC::denizen
+		&& coreScript
+		&& !coreScript->InUse()
+		&& ToWorld2I(coreScript->ParentChit()->Position()) == pos2i)
 	{
-		// FIXME: refactor this to somewhere. Part of CoreScript?
-		if (coreScript
-			&& !coreScript->InUse()
-			&& ToWorld2I(coreScript->ParentChit()->Position()) == pos2i)
-		{
+		bool success = false;
+		Vector2I conquer = { 0, 0 };
+		// Wandering denizens can takeover a neutral core, OR
+		// A squad can takeover a neutral core
+		CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
+
+		if (Team::IsRogue(parentChit->Team()) && Context()->chitBag->census.NumCoresInUse() < TYPICAL_AI_DOMAINS) {
 			// Need some team. And some cash.
 			Rectangle2I inner = InnerSectorBounds(sector);
 			CChitArray arr;
-			ItemNameFilter filter(ISC::gobman);
+			MOBKeyFilter filter;
+			filter.value = ISC::denizen;
 			Context()->chitBag->QuerySpatialHash(&arr, ToWorld2F(inner), parentChit, &filter);
 
-			arr.Filter(0, [](int, Chit* ele) {
-				return Team::IsRogue(ele->Team());
+			arr.Filter(parentChit, [](Chit* parent, Chit* ele) {
+				return Team::IsRogue(ele->Team()) && (Team::Instance()->GetRelationship(ele, parent) != ERelate::ENEMY);
 			});
+			success = arr.Size() > 3;
+		}
+		else if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), nullptr, &conquer) && (conquer == sector)) {
+			success = true;
+		}
 
-			if (arr.Size() > 3) {
-				DomainAI* ai = DomainAI::Factory(gameItem->Team());
-				if (ai) {
-					GLASSERT(Team::IsRogue(gameItem->Team()));
-					int newCoreTeam = Team::Instance()->GenTeam(gameItem->Team());
-					CoreScript* newCS = CoreScript::CreateCore(sector, newCoreTeam, Context());
-					GLASSERT(CoreScript::GetCore(sector) == newCS);
-
-					newCS->ParentChit()->Add(ai);
-					newCS->AddCitizen(parentChit);
-
-					for (int i = 0; i < arr.Size(); ++i) {
-						newCS->AddCitizen(arr[i]);
-					}
-
-					NewsEvent news(NewsEvent::DOMAIN_CONQUER, ToWorld2F(newCS->ParentChit()->Position()),
-								   newCS->ParentChit()->GetItemID(), parentChit->GetItemID());
-					Context()->chitBag->GetNewsHistory()->Add(news);
-				}
-			}
+		if (success) {
+			Context()->chitBag->TakeOverCore(sector, parentChit);
 		}
 	}
 #endif
@@ -2921,7 +2928,7 @@ int AIComponent::DoTick(U32 deltaTime)
 			// Squaddies, on missions, don't have needs. Keeps them 
 			// from running off or falling apart in the middle.
 			// But for the other denizens:
-			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID(), 0)) {
+			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID(), 0, 0)) {
 				static const double LOW_MORALE = 0.25;
 
 				if (AtFriendlyOrNeutralCore()) {

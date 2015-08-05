@@ -285,8 +285,8 @@ void GameScene::Resize()
 	targetFaceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
 	layout.PosAbs( &moneyWidget, 5, -1 );
-	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
-					  moneyWidget.Y() );
+	techLabel.SetPos( moneyWidget.X(),	/* + moneyWidget.Width() + layout.SpacingX(),*/
+					  moneyWidget.Y() + moneyWidget.Height() * 0.8f);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
@@ -1338,6 +1338,9 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
 		DoAvatarButton();
+	}
+	else if (mask == GAME_HK_TELEPORT_AVATAR) {
+		DoTeleportButton();
 	}
 	else if (mask == GAME_HK_CAMERA_CORE) {
 		DoCameraHome();

@@ -91,7 +91,7 @@ public:
 	// 0-3, -1 if not in squad
 	int SquadID(int chitID);
 	int Squaddies(int squadID, CChitArray* arr);
-	bool IsSquaddieOnMission(int chitID, int* squadID);
+	bool IsSquaddieOnMission(int chitID, int* squadID, grinliz::Vector2I* wantToConquer);
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();

@@ -40,6 +40,7 @@ public:
 		UN_FORGED,					//  item		killer
 
 		DOMAIN_TAKEOVER,			//	domain		conqueror
+		DOMAIN_CONQUER,				//	domain		conquerer
 		SUPERTEAM_DELETED,			//  domain
 		SUBTEAM_DELETED,			//  subTeam		superTeam
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
@@ -49,7 +50,6 @@ public:
 		BLOOD_RAGE,					//  victim				
 		VISION_QUEST,				//	victim
 		GREATER_SUMMON_TECH,		//  mob
-		DOMAIN_CONQUER,				//	conquered	conquerer
 		
 		ATTITUDE_FRIEND,			//  origin		opinionOf
 		ATTITUDE_NEUTRAL,

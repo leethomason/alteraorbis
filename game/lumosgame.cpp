@@ -281,8 +281,9 @@ void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
 
 	IString decoName = item->keyValues.GetIString( "uiIcon" );
 	RenderAtom atom  = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
-	atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
+	atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 	RenderAtom atomD = LumosGame::CalcUIIconAtom( decoName.c_str(), false );
+	atomD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
 
 	button->SetDeco( atom, atomD );
 }

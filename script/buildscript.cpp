@@ -23,21 +23,21 @@ BuildData BuildScript::buildData[NUM_TOTAL_OPTIONS] = {
 	// Agronomy
 	{ "Solar Farm", "farm",			2, "Harvests fruit from plants." },
 	{ "Distillery", "distillery",	2, "Converts fruit to elixir.", "Requires a Solar Farm." },
-	{ "Bar", "bar",					2, "Distributes elixir.", "Requires a Distillery." },
+	{ "Tavern", "bar",				2, "Distributes elixir.", "Requires a Distillery." },
 	// Economy
 	{ "Market", "market",			3, "Allows Denizens and Avatar to buy and sell weapons and shields." },
 	{ "Forge", "factory",			3, "Allows Denizens and Avatar to make weapons and shields.", "Requires a Market" },
 	{ "Exchange", "exchange",		3, "Allows Denizens and Avatar convert between Au and Crystal.", "Requires a Market" },
 	{ "Vault", "vault",				3, "Stores items for the Core and Avatar.", "Requires a Market" },
 	// Visitor
-	{ "Kiosk", "kiosk",				4, "Attracts Visitors.", "Requires a Temple" },
+	{ "Kiosk", "kiosk",				4, "Attracts Visitors, generates tech.", "Requires a Temple" },
 	// Circuits
 	{ "Switch On", "switchOn",		5, "Manually turns on devices." },
 	{ "Switch Off", "switchOff",	5, "Manually turns off devices." },
 	{ "Detector", "detector",		5, "Sensor to detect enemies" },
 	{ "Turret", "turret",			5, "Fires weapon when charge applied." },
-	{ "Gate", "gate",				5, "Creates and removes silica." },
-	{ "TimedGate", "timedGate",		5, "Creates and removes silica." },
+	{ "Gate", "gate",				5, "Creates silica when triggered." },
+	{ "TimedGate", "timedGate",		5, "Creates temporary silica when triggered." },
 
 	// Additional:
 	{ "TrollStatue", "trollStatue", 6 },

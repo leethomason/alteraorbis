@@ -1230,6 +1230,60 @@ void LumosChitBag::NamePoolID::Serialize(XStream* xs)
 }
 
 
+CoreScript* LumosChitBag::TakeOverCore(const Vector2I& sector, Chit* conquerer)
+{
+	int conqueringTeam = conquerer->Team();
+	int teamID = Team::Instance()->GenTeam(Team::Group(conqueringTeam));
+	bool isSubDomain = !Team::IsRogue(conqueringTeam);
+
+	if (isSubDomain) {
+		Team::Instance()->AddSubteam(conqueringTeam, teamID);
+	}
+	CoreScript* newCore = CoreScript::CreateCore(sector, teamID, Context());
+	GLASSERT(CoreScript::GetCore(sector) == newCore);
+	newCore->ParentChit()->Add(DomainAI::Factory(teamID));
+
+	CDynArray<Chit*> arr;
+	// After takeover, all the citizens are rogue and buildings are neutral.
+	// As a first pass, simply takeover everything that meets that criteria.
+
+	ChitAcceptAll filter;
+	BuildingFilter buildingFilter;
+	Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
+
+	for (Chit* c : arr) {
+		if (c->PlayerControlled()) 
+			continue;
+		GameItem* mainItem = c->GetItem();
+		if (!mainItem) 
+			continue;
+
+		if (mainItem->IsDenizen() && Team::IsRogue(mainItem->Team())) {
+			newCore->AddCitizen(c);
+		}
+		else if (buildingFilter.Accept(c) && mainItem->IName() != ISC::core) {
+			c->GetItem()->SetTeam(teamID);
+		}
+	}
+	// Finally, give this new core a chance. 
+	// Transfer money from Conquering domain.
+	CoreScript* conqueringCore = CoreScript::GetCoreFromTeam(conquerer->Team());
+	if (conqueringCore) {
+		int gold = conqueringCore->ParentChit()->GetWallet()->Gold() / 4;
+		gold = Min(gold, GOLD_XFER_TAKEOVER);
+		newCore->ParentChit()->GetWallet()->Deposit(conqueringCore->ParentChit()->GetWallet(), gold);
+	}
+
+	NewsEvent news(isSubDomain ? NewsEvent::DOMAIN_CONQUER : NewsEvent::DOMAIN_TAKEOVER,
+				   ToWorld2F(newCore->ParentChit()->Position()),
+				   newCore->ParentChit()->GetItemID(),
+				   conquerer->GetItemID());
+	Context()->chitBag->GetNewsHistory()->Add(news);
+
+	return newCore;
+}
+
+
 void LumosChitBag::DoTick(U32 delta)
 {
 	// From the CHIT_DESTROYED_START we have a list of
@@ -1251,36 +1305,7 @@ void LumosChitBag::DoTick(U32 delta)
 				&& Team::IsDenizen(data.conqueringTeam)
 				&& (Team::Instance()->SuperTeam(data.conqueringTeam) == data.conqueringTeam))
 			{
-				// The case where this domain is conquered. Switch to a sub-domain team ID,
-				// and switch the existing team over. Intentionally limit to CChitArray items so there
-				// isn't a full switch over.
-				// Also, remember by the time this code is executed, the team will be Rogue.
-
-				int teamID = Team::Instance()->GenTeam(Team::Group(data.conqueringTeam));
-				Team::Instance()->AddSubteam(data.conqueringTeam, teamID);
-				CoreScript* newCore = CoreScript::CreateCore(sector, teamID, Context());
-				GLASSERT(CoreScript::GetCore(sector) == newCore);
-				newCore->ParentChit()->Add(DomainAI::Factory(teamID));
-
-				CChitArray arr;
-				TeamFilter filter(Team::Group(data.defeatedTeam));	// use the group since this is a rogue team.
-				Context()->chitBag->QuerySpatialHash(&arr, InnerSectorBounds(sector), 0, &filter);
-				for (Chit* c : arr) {
-					if (c->PlayerControlled()) continue;
-
-					if (c->GetItem()->IsDenizen()) {
-						c->GetItem()->SetRogue();
-						newCore->AddCitizen(c);
-					}
-					else {
-						c->GetItem()->SetTeam(teamID);
-					}
-				}
-				// Finally, give this new core a chance. 
-				// Transferm money from Conquering domain.
-				int gold = conqueringCore->ParentChit()->GetWallet()->Gold() / 4;
-				gold = Min(gold, GOLD_XFER_TAKEOVER);
-				newCore->ParentChit()->GetWallet()->Deposit(conqueringCore->ParentChit()->GetWallet(), gold);
+				TakeOverCore(sector, conqueringCore->ParentChit());
 			}
 			else {
 				CoreScript::CreateCore(sector, TEAM_NEUTRAL, Context());
