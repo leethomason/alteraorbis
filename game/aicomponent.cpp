@@ -1104,7 +1104,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 	static const int NPLANTS = 4;
 	static const float TOO_CLOSE = 2.0f;
 	// +1 for origin, +4 for plants
-	CArray<Vector2F, MAX_TRACK + 2 + NPLANTS> pos;
+	CArray<Vector2F, MAX_TRACK*2> pos;
 	GLASSERT(MAX_TRACK >= SQUAD_SIZE);
 
 	int squadID = 0;
@@ -1116,7 +1116,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 		CChitArray arr;
 		myCore->Squaddies(squadID, &arr);
 		for (int i = 0; i < arr.Size(); ++i) {
-			pos.Push(ToWorld2F(arr[i]->Position()));
+			pos.PushIfCap(ToWorld2F(arr[i]->Position()));
 		}
 		addPlants = false;
 	}
@@ -1125,22 +1125,21 @@ Vector2F AIComponent::ThinkWanderHerd()
 		for (int i = 0; i < friendList2.Size(); ++i) {
 			Chit* c = parentChit->Context()->chitBag->GetChit(friendList2[i]);
 			if (c) {
-				pos.Push(ToWorld2F(c->Position()));
+				pos.PushIfCap(ToWorld2F(c->Position()));
 			}
 		}
 	}
 
 	// For a worker, add in the wander origin.
 	if (gameItem->IsWorker()) {
-		pos.Push(GetWanderOrigin());
+		pos.PushIfCap(GetWanderOrigin());
 	}
 
 	if (Team::IsRogue(gameItem->Team())) {
 		const SectorData& sd = Context()->worldMap->GetSectorData(ToSector(parentChit->Position()));
-		pos.Push(ToWorld2F(sd.CoreLoc()));
-		if (friendList2.Size() > 3) {
-			addPlants = false;
-		}
+		Vector2F loc = ToWorld2F(sd.CoreLoc());
+		pos.PushIfCap(loc);
+		pos.PushIfCap(loc);
 	}
 
 	if (addPlants) {
@@ -1157,7 +1156,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(it.Pos());
 			if (wg.Plant() && !wg.BlockingPlant()) {
 				++nPlants;
-				pos.Push(ToWorld2F(it.Pos()));
+				pos.PushIfCap(ToWorld2F(it.Pos()));
 			}
 		}
 	}
