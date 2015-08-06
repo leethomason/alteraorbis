@@ -1120,7 +1120,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 		}
 		addPlants = false;
 	}
-	else {
+	else if (friendList2.Size()) {
 		// Friends are in the friends list.
 		for (int i = 0; i < friendList2.Size(); ++i) {
 			Chit* c = parentChit->Context()->chitBag->GetChit(friendList2[i]);
@@ -1130,12 +1130,17 @@ Vector2F AIComponent::ThinkWanderHerd()
 		}
 	}
 
+	Rectangle2I inner = InnerSectorBounds(ToSector(parentChit->Position()));
+	inner.Outset(-2);
+	Vector2I p = { inner.min.x + parentChit->random.Rand(inner.Width()), inner.min.y + parentChit->random.Rand(inner.Height()) };
+	pos.PushIfCap(ToWorld2F(p));
+
 	// For a worker, add in the wander origin.
 	if (gameItem->IsWorker()) {
 		pos.PushIfCap(GetWanderOrigin());
 	}
 
-	if (Team::IsRogue(gameItem->Team())) {
+	if (Team::IsDenizen(gameItem->Team()) && Team::IsRogue(gameItem->Team())) {
 		const SectorData& sd = Context()->worldMap->GetSectorData(ToSector(parentChit->Position()));
 		Vector2F loc = ToWorld2F(sd.CoreLoc());
 		pos.PushIfCap(loc);
