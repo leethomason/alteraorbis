@@ -3,11 +3,11 @@ x Control -> Squads
 x bar -> tavern
 x space out money widget better
 x general spacing
-t Should be able to take over neutral cores
-- "founded 0.21 fell 000 lasted 712 cycles"
-- CivTech should increase with sub-domains
+x "founded 0.21 fell 000 lasted 712 cycles"
+x CivTech should increase with sub-domains
 - redistributables...
 - wanderHerd still not correct
+t Should be able to take over neutral cores
 
 - Micro-Game
 	- world gen

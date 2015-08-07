@@ -1147,6 +1147,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 		pos.PushIfCap(loc);
 	}
 
+#if 0
 	if (addPlants) {
 		// And plants are friends. This was originally in place
 		// because some MOBs healed at plants. No longer the
@@ -1165,6 +1166,21 @@ Vector2F AIComponent::ThinkWanderHerd()
 			}
 		}
 	}
+#else
+	if (addPlants) {
+		Rectangle2I r;
+		r.min = r.max = ToWorld2I(origin);
+		r.Outset(int(PLANT_AWARE));
+
+		CChitArray fruit;
+		FruitElixirFilter filter;
+		Context()->chitBag->QuerySpatialHash(&fruit, r, 0, &filter);
+
+		for (Chit* c : fruit) {
+			pos.PushIfCap(ToWorld2F(c->Position()));
+		}
+	}
+#endif
 
 	Vector2F mean = origin;
 	// Get close to friends.

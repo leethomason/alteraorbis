@@ -788,10 +788,24 @@ float CoreScript::CivTech()
 
 void CoreScript::UpdateScore(int n)
 {
+	static const double FACTOR = 0.002;
+
 	if (n) {
 		// Tuned - somewhat sleazily - that basic 4 unit, 0 temple is one point.
-		double score = CivTech() * double(n) * double(scoreTicker.Period()) * 0.002;
+		double score = CivTech() * double(n) * double(scoreTicker.Period()) * FACTOR;
 		achievement.civTechScore += Min(1, int(score));
+
+		int team = ParentChit()->Team();
+		CDynArray<int> subTeams;
+		if (Team::Instance()->IsController(team, &subTeams)) {
+			for (int i = 0; i < subTeams.Size(); ++i) {
+				CoreScript* subCore = CoreScript::GetCoreFromTeam(subTeams[i]);
+				if (subCore) {
+					score += 0.5 * subCore->CivTech() * double(n) * double(scoreTicker.Period()) * FACTOR;
+				}
+			}
+		}
+
 		// Push this to the GameItem, so it can be recorded in the history + census.
 		GameItem* gi = ParentChit()->GetItem();
 		if (gi) {

@@ -70,6 +70,8 @@ const NewsEvent** NewsHistory::FindItem( int firstItemID, int secondItemID, int*
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::GREATER_MOB_CREATED:
 			case NewsEvent::DOMAIN_CREATED:
+			case NewsEvent::DOMAIN_CONQUER:
+			case NewsEvent::DOMAIN_TAKEOVER:
 			case NewsEvent::FORGED:
 				GLASSERT( data->born == 0 );
 				data->born = cache[i]->date;
@@ -86,6 +88,9 @@ const NewsEvent** NewsHistory::FindItem( int firstItemID, int secondItemID, int*
 				break;
 			}
 		}
+	}
+	if (data) {
+		GLASSERT(!data->died || (data->died && data->born));
 	}
 	return cache.Mem();
 }
@@ -201,7 +206,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		case DENIZEN_KILLED:
 		str->Format("%.2f: Denizen %s (%s) " MOB_destroyed " at %s by %s.", age, 
 					firstName.safe_str(), 
-					firstTeamName.empty() ? "rogue" : firstTeamName.safe_str(), 
+					Team::IsRogue(firstTeam) ? "rogue" : firstTeamName.safe_str(), 
 					domain.safe_str(), secondName.safe_str());
 		break;
 
