@@ -912,9 +912,6 @@ bool AIComponent::ThinkDoRampage()
 	Vector2I sector = ToSector(pos2i);
 	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
 
-	if (!wg.IsPort())
-		return false;
-
 	const ChitContext* context = Context();
 
 	ItemComponent* thisIC = parentChit->GetItemComponent();
@@ -1109,6 +1106,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 
 	int squadID = 0;
 	bool addPlants = true;
+	int nRandom = friendList2.Size() >= 4 ? 2 : 1;
 
 	CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
 	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID, nullptr)) {
@@ -1125,15 +1123,21 @@ Vector2F AIComponent::ThinkWanderHerd()
 		for (int i = 0; i < friendList2.Size(); ++i) {
 			Chit* c = parentChit->Context()->chitBag->GetChit(friendList2[i]);
 			if (c) {
-				pos.PushIfCap(ToWorld2F(c->Position()));
+				PathMoveComponent* pmc = GET_SUB_COMPONENT(c, MoveComponent, PathMoveComponent);
+				if (pmc && pmc->IsMoving())
+					pos.PushIfCap(pmc->DestPos());
+				else
+					pos.PushIfCap(ToWorld2F(c->Position()));
 			}
 		}
 	}
 
-	Rectangle2I inner = InnerSectorBounds(ToSector(parentChit->Position()));
-	inner.Outset(-2);
-	Vector2I p = { inner.min.x + parentChit->random.Rand(inner.Width()), inner.min.y + parentChit->random.Rand(inner.Height()) };
-	pos.PushIfCap(ToWorld2F(p));
+	for (int i = 0; i < nRandom; ++i) {
+		Rectangle2I inner = InnerSectorBounds(ToSector(parentChit->Position()));
+		inner.Outset(-2);
+		Vector2I p = { inner.min.x + parentChit->random.Rand(inner.Width()), inner.min.y + parentChit->random.Rand(inner.Height()) };
+		pos.PushIfCap(ToWorld2F(p));
+	}
 
 	// For a worker, add in the wander origin.
 	if (gameItem->IsWorker()) {
@@ -3052,7 +3056,7 @@ int AIComponent::DoTick(U32 deltaTime)
 
 void AIComponent::DebugStr( grinliz::GLString* str )
 {
-	str->AppendFormat( "[AI] %s %s nF=%d nE=%d ", MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)], friendList2.Size(), enemyList2.Size() );
+	str->AppendFormat( "[AI] %s %s nF=%d nE=%d dB=%d ", MODE_NAMES[int(aiMode)], ACTION_NAMES[int(currentAction)], friendList2.Size(), enemyList2.Size(), destinationBlocked );
 }
 
 

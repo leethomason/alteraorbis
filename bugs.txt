@@ -5,7 +5,7 @@ x space out money widget better
 x general spacing
 x "founded 0.21 fell 000 lasted 712 cycles"
 x CivTech should increase with sub-domains
-- redistributables...
+x redistributables...
 - wanderHerd still not correct
 t Should be able to take over neutral cores
 
