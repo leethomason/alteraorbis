@@ -349,8 +349,6 @@ public:
 		AI_WANDER_CIRCLE	= (1<<16),		// creepy circle herding
 		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
 
-		AI_SECTOR_HERD		= (1<<17),		// will herd across sectors, as a group
-		AI_SECTOR_WANDER	= (1<<18),		// will wander between sectors, as an individual
 		AI_USES_BUILDINGS	= (1<<20),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
 		AI_NOT_TARGET		= (1<<21),		// won't be targeted in battle	
 

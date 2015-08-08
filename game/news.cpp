@@ -73,7 +73,7 @@ const NewsEvent** NewsHistory::FindItem( int firstItemID, int secondItemID, int*
 			case NewsEvent::DOMAIN_CONQUER:
 			case NewsEvent::DOMAIN_TAKEOVER:
 			case NewsEvent::FORGED:
-				GLASSERT( data->born == 0 );
+				//GLASSERT( data->born == 0 );
 				data->born = cache[i]->date;
 				break;
 			case NewsEvent::DENIZEN_KILLED:

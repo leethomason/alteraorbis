@@ -1117,6 +1117,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 			pos.PushIfCap(ToWorld2F(arr[i]->Position()));
 		}
 		addPlants = false;
+		nRandom = 1;
 	}
 	else if (friendList2.Size()) {
 		// Friends are in the friends list.
@@ -1145,10 +1146,16 @@ Vector2F AIComponent::ThinkWanderHerd()
 	}
 
 	if (Team::IsDenizen(gameItem->Team()) && Team::IsRogue(gameItem->Team())) {
-		const SectorData& sd = Context()->worldMap->GetSectorData(ToSector(parentChit->Position()));
-		Vector2F loc = ToWorld2F(sd.CoreLoc());
-		pos.PushIfCap(loc);
-		pos.PushIfCap(loc);
+		Vector2I sector = ToSector(parentChit->Position());
+		CoreScript* coreScript = CoreScript::GetCore(sector);
+		if (coreScript && !coreScript->InUse()) {
+			const SectorData& sd = Context()->worldMap->GetSectorData(sector);
+			Vector2F loc = ToWorld2F(sd.CoreLoc());
+			int n = 1 + friendList2.Size() / 2;
+			for (int i = 0; i < n; ++i) {
+				pos.PushIfCap(loc);
+			}
+		}
 	}
 
 #if 0
@@ -1192,14 +1199,16 @@ Vector2F AIComponent::ThinkWanderHerd()
 		mean = mean + pos[i];
 	}
 	Vector2F dest = mean * (1.0f / (float)(1 + pos.Size()));
-	Vector2F heading = parentChit->Heading2D();
-
+	
+#if 0
 	// But not too close.
+	Vector2F heading = parentChit->Heading2D();
 	for (int i = 0; i < pos.Size(); ++i) {
 		if ((pos[i] - dest).LengthSquared() < TOO_CLOSE*TOO_CLOSE) {
 			dest += heading * TOO_CLOSE;
 		}
 	}
+#endif
 	return dest;
 }
 
@@ -1367,12 +1376,12 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 		if (!gameItem) return false;
 
 		// Trolls herd *all the time*
-		if (gameItem->IName() != ISC::troll) {
+//		if (gameItem->IName() != ISC::troll) {
 			CStr<32> str;
 			str.Format("%s\nSectorHerd", gameItem->Name());
 			ChitBag::CurrentNews news = { StringPool::Intern(str.c_str()), ToWorld2F(parentChit->Position()), parentChit->ID() };
 			Context()->chitBag->PushCurrentNews(news);
-		}
+//		}
 
 		ChitMsg msg(ChitMsg::CHIT_SECTOR_HERD, focus ? 1 : 0, &dest);
 		for (int i = 0; i < friendList2.Size(); ++i) {
@@ -1472,7 +1481,8 @@ bool AIComponent::ThinkCollectNearFruit()
 				if (Log()) {
 					GLOUTPUT(("AI ID=%d ThinkCollectNearFruit\n", parentChit->ID()));
 				}
-				this->Move(ToWorld2F(plantPos), false);
+				taskList.Push(Task::MoveTask(plantPos));
+				taskList.Push(Task::PickupTask(arr[i]->ID()));
 				return true;
 			}
 		}
@@ -2188,35 +2198,45 @@ void AIComponent::ThinkNormal()
 			return;
 		}
 		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
-		int r = parentChit->random.Rand(4);
 
 		// Denizens DO sector herd until they are members of a core.
-		bool sectorHerd = pmc
-						&& (itemFlags & GameItem::AI_SECTOR_HERD)
-						&& (friendList2.Size() >= (MAX_TRACK / 2) || pmc->ForceCount() > FORCE_COUNT_STUCK)
-						&& (parentChit->random.Rand(SECTOR_HERD_ODDS) == 0)
-						&& (Team::IsRogue(parentChit->Team()));
-		bool sectorWander = pmc
-						&& (itemFlags & GameItem::AI_SECTOR_WANDER)
-						&& (parentChit->random.Rand(SECTOR_WANDER_ODDS) == 0)
-						&& (Team::IsRogue(parentChit->Team()));
+		int oddsWander = 60;
+		if (item->MOB() == ISC::lesser)  oddsWander = (friendList2.Size() >= MAX_TRACK * 3 / 4) ? 50 : 200;
+		if (item->MOB() == ISC::denizen) oddsWander = 40;
+		if (item->MOB() == ISC::greater) oddsWander = 20;
 
-		if (sectorHerd || sectorWander)	{
+		if (item->IName() == ISC::troll) oddsWander = 20;
+
+		bool sectorHerd = pmc
+			&& (Team::ID(parentChit->Team()) == 0)			// rogue or chaos or etc.
+			&& oddsWander
+			&& (parentChit->random.Rand(oddsWander) == 0);
+
+#if 0
+		bool coreRush = Team::IsDenizen(parentChit->Team());
+		if (coreRush) {
+			CoreScript* cs = CoreScript::GetCore(sector);
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
+			if (cs && !cs->InUse() && wg.IsPort()) {
+				int nComrades = 0;
+				for (int i = 0; i < friendList2.Size(); ++i) {
+					Chit* chit = Context()->chitBag->GetChit(friendList2[i]);
+					if (chit && Team::IsDenizen(chit->Team())) {
+						++nComrades;
+					}
+				}
+				coreRush = nComrades >= 3;
+			}
+		}
+#endif
+
+		if (sectorHerd)	{
 			if (SectorHerd(false))
 				return;
 		}
 		else {
 			dest = ThinkWanderHerd();
 		}
-//		else if (wanderFlags == 0 || r == 0) {
-//			dest = ThinkWanderRandom();
-//		}
-//		else if (wanderFlags == GameItem::AI_WANDER_HERD) {
-//			dest = ThinkWanderHerd();
-//		}
-//		else if (wanderFlags == GameItem::AI_WANDER_CIRCLE) {
-//			dest = ThinkWanderCircle();
-//		}
 	}
 	if (!dest.IsZero()) {
 		if (Log()) {
@@ -3141,8 +3161,7 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 		case ChitMsg::CHIT_SECTOR_HERD:
 		if ((aiMode == AIMode::NORMAL_MODE)
-			&& parentChit->GetItem()
-			&& (parentChit->GetItem()->flags & (GameItem::AI_SECTOR_HERD | GameItem::AI_SECTOR_WANDER)))
+			&& parentChit->GetItem())
 		{
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();

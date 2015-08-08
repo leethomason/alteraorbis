@@ -249,8 +249,6 @@ void GameItem::Load(const tinyxml2::XMLElement* ele)
 		READ_FLAG(flags, f, INDESTRUCTABLE);
 		READ_FLAG(flags, f, AI_WANDER_HERD);
 		READ_FLAG(flags, f, AI_WANDER_CIRCLE);
-		READ_FLAG(flags, f, AI_SECTOR_HERD);
-		READ_FLAG(flags, f, AI_SECTOR_WANDER);
 		READ_FLAG(flags, f, AI_USES_BUILDINGS);
 		READ_FLAG(flags, f, AI_NOT_TARGET);
 		READ_FLAG(flags, f, GOLD_PICKUP);
