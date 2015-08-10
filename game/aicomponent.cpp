@@ -2206,6 +2206,7 @@ void AIComponent::ThinkNormal()
 		if (item->MOB() == ISC::greater) oddsWander = 20;
 
 		if (item->IName() == ISC::troll) oddsWander = 20;
+		if (item->IsWorker()) oddsWander = 0;
 
 		bool sectorHerd = pmc
 			&& (Team::ID(parentChit->Team()) == 0)			// rogue or chaos or etc.
@@ -3161,7 +3162,8 @@ void AIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 
 		case ChitMsg::CHIT_SECTOR_HERD:
 		if ((aiMode == AIMode::NORMAL_MODE)
-			&& parentChit->GetItem())
+			&& parentChit->GetItem()
+			&& !parentChit->GetItem()->IsWorker())
 		{
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*)msg.Ptr();

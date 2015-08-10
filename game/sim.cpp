@@ -397,7 +397,7 @@ void Sim::SpawnDenizens()
 				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
 
 				int itemType = -1;
-				switch (random.Rand(8)) {
+				switch (random.Rand(4)) {
 					case 1: itemType = ForgeScript::GUN;	break;
 					case 2: itemType = ForgeScript::RING;	break;
 					case 3: itemType = ForgeScript::SHIELD;	break;
