@@ -9,7 +9,8 @@ x redistributables...
 x wanderHerd still not correct...but good enough for now
 x Should be able to take over neutral cores
 x shooting bug
-- update tutorial
+x update tutorial
+
 Test:
 	- director
 	- take over neutral cores

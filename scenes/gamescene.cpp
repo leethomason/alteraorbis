@@ -196,12 +196,17 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 					  "and Vault.\n\n"
 					  "All the other denizens of your domain move of their own accord." );
 
-		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_VIEW], 
-					  "View Mode allows you to control the Avatar, follow your denizens, and look around the world.");
+		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_AVATAR], 
+					  "Avatar Mode allows you to control the Avatar, move the camera to the avatar or home core, and teleport the "
+					  "Avatar home.");
+		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_VIEW],
+					  "View Mode allows you follow your denizens, look around the world, and get information on "
+					  "monsters, denizens, and buildings.");
 		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_BUILD], 
 					  "In Build Mode you can construct buildings and defenses.");
 		tutorial->Add(&menu->uiMode[GameSceneMenu::UI_CONTROL], 
-					  "Once our domain is populous, Control Mode gives an overview of our denizens, and allows you to send squads to attack and explore.");
+					  "Once our domain is populous, Squad Mode gives an overview of our denizens, and allows you to "
+					  "send squads on missions to attack and explore.");
 		tutorial->Add(&dateLabel, 
 					  "General information: the current date, the domain you are viewing, and the population (current/max) of our domain.");
 		tutorial->Add(&minimap, 

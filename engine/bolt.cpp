@@ -137,7 +137,7 @@ void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, I
 			bolts->SwapRemove(i);
 		}
 		else if (b->len <= 0) {
-			GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
+			//GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
 			bolts->SwapRemove(i);
 		}
 		else {
