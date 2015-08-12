@@ -51,7 +51,7 @@ void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, I
 	GLASSERT(engine->GetMap());
 	Map* map = engine->GetMap();
 
-	float timeSlice = (float)delta / 1000.0f;
+	const float timeSlice = (float)delta / 1000.0f;
 
 	int i = 0;
 	ParticleSystem* ps = engine->particleSystem;
@@ -67,8 +67,8 @@ void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, I
 			continue;
 		}
 
-		float distance = b->speed * timeSlice;
-		Vector3F travel = b->dir * distance;
+		const float distance = b->speed * timeSlice;
+		const Vector3F travel = b->dir * distance;
 		Vector3F normal = { 0, 1, 0 };
 		ModelVoxel mv;
 		bool wasImpact = b->impact;
@@ -106,7 +106,7 @@ void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, I
 				ParticleDef def = ps->GetPD(ISC::boltImpact);
 				def.color = b->color;
 				ps->EmitPD(def, mv.at, -normal, delta);
-
+	
 				if (b->effect & GameItem::EFFECT_EXPLOSIVE) {
 					def = ps->GetPD(ISC::explosion);
 					def.color = b->color;
@@ -131,7 +131,7 @@ void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, I
 			}
 		}
 
-		Vector3F tail = b->head - b->len * b->dir;
+		const Vector3F tail = b->head - b->len * b->dir;
 		if (!bounds.Contains(b->head) && !bounds.Contains(tail)) {
 			GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
 			bolts->SwapRemove(i);
