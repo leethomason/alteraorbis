@@ -274,14 +274,18 @@ float BattleMechanics::ComputeRadAt1(	const GameItem* shooter,
 void BattleMechanics::Shoot(ChitBag* bag, Chit* src, const grinliz::Vector3F& _target, bool targetMoving, RangedWeapon* weapon)
 {
 	Vector3F aimAt = _target;
+	GLASSERT(weapon);
 	GLASSERT(weapon->CanShoot());
 	bool okay = weapon->Shoot(src);
 	if (!okay) {
+		GLASSERT(okay);
 		return;
 	}
 	Vector3F p0;
 	GLASSERT(src->GetRenderComponent());
 	src->GetRenderComponent()->CalcTrigger(&p0, 0);
+	GLASSERT(p0.y > 0);
+	GLASSERT((p0 - src->Position()).Length() < 1.5f);
 
 	IString sound = weapon->keyValues.GetIString(ISC::sound);
 	if (!sound.empty() && XenoAudio::Instance()) {

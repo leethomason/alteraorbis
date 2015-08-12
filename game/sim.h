@@ -128,7 +128,7 @@ private:
 	CTicker minuteClock, 
 			secondClock, 
 			volcTimer,
-			spawnClock,
+			denizenClock,
 			visitorClock;
 	int currentVisitor;
 	int spawnEnabled;

@@ -212,26 +212,6 @@ Bolt* ChitBag::NewBolt()
 	return b;
 }
 
-/*
-CameraComponent* ChitBag::GetCamera( Engine* engine )
-{
-	Chit* c = GetChit( activeCamera );
-	if( c ) {
-		CameraComponent* cc = GET_GENERAL_COMPONENT( c, CameraComponent );
-		if ( cc )
-			return cc;
-	}
-	if ( c ) { 
-		c->QueueDelete(); 
-	}
-	c = NewChit();
-	activeCamera = c->ID();
-	CameraComponent* cc = new CameraComponent( &engine->camera );
-	c->Add( cc );
-	return cc;
-}
-*/
-
 void ChitBag::SetNamedChit(const IString& name, Chit* chit)
 {
 	GLASSERT(chit);

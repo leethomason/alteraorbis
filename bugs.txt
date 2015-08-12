@@ -6,8 +6,15 @@ x general spacing
 x "founded 0.21 fell 000 lasted 712 cycles"
 x CivTech should increase with sub-domains
 x redistributables...
-- wanderHerd still not correct
-t Should be able to take over neutral cores
+x wanderHerd still not correct...but good enough for now
+x Should be able to take over neutral cores
+x shooting bug
+- update tutorial
+Test:
+	- director
+	- take over neutral cores
+	- take over enemy cores
+	- AI: take over cores
 
 - Micro-Game
 	- world gen

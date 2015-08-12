@@ -1112,17 +1112,23 @@ bool TeamFilter::Accept(Chit* chit)
 
 
 Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
-								Vector3F dir,
+								const Vector3F& _dir,
 								int effectFlags,
 								int chitID,
 								float damage,
 								float speed,
 								bool trail )
 {
+	GLASSERT(pos.y > 0);
+	GLASSERT(pos.y < 4);
+
 	Bolt* bolt = ChitBag::NewBolt();
 
+	Vector3F dir = _dir;
 	dir.Normalize();
-	bolt->head = pos + dir*0.5f;
+	GLASSERT(Equal(dir.Length(), 1.0f));
+
+	bolt->head = pos + dir * 0.5f;
 	bolt->len = 0.5f;
 	bolt->dir = dir;
 
@@ -1130,7 +1136,7 @@ Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 
 	switch( effectFlags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK) ) {
 	case 0:													bolt->color = palette->Get4F( 1, PAL_GREEN );	break;
-	case GameItem::EFFECT_FIRE:								bolt->color = palette->Get4F( 1, PAL_RED );	break;
+	case GameItem::EFFECT_FIRE:								bolt->color = palette->Get4F( 1, PAL_RED );		break;
 	case GameItem::EFFECT_SHOCK:							bolt->color = palette->Get4F( 1, PAL_BLUE );	break;
 	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	bolt->color = palette->Get4F( 1, PAL_PURPLE );	break;
 	default:
@@ -1143,6 +1149,7 @@ Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 	bolt->effect = effectFlags;
 	bolt->particle  = trail;
 	bolt->speed = speed;
+	bolt->frameCount = 0;
 
 	return bolt;
 }

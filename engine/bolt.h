@@ -46,6 +46,7 @@ struct Bolt {
 		color.Set( 1, 1, 1, 1 );
 		speed = 1.0f;
 		particle = false;
+		frameCount = 1000;
 
 		chitID = 0;
 	} 
@@ -60,6 +61,7 @@ struct Bolt {
 	grinliz::Vector4F	color;
 	float				speed;
 	bool				particle;
+	int					frameCount;
 
 	// Userdata follows
 	int		chitID;		// who fired this bolt

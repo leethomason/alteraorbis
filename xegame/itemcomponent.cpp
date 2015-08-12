@@ -1066,12 +1066,12 @@ const GameItem* ItemComponent::QuerySelectWeapon(int type) const
 
 const GameItem* ItemComponent::SelectWeapon(int type)
 {
-	GameItem* weapon = const_cast<GameItem*>(QuerySelectWeapon(type));
+	const GameItem* weapon = QuerySelectWeapon(type);
 	if (weapon && hardpoint[weapon->hardpoint] != weapon) {
 		if (debugEnabled && parentChit) {
 			GLOUTPUT(("Weapon select. chitID=%d weapon=%s\n", parentChit->ID(), weapon ? weapon->Name() : "[none]"));
 		}
-		hardpoint[weapon->hardpoint] = weapon;
+		hardpoint[weapon->hardpoint] = (GameItem*)weapon;
 		hardpointsModified = true;
 	}
 	return weapon;

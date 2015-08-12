@@ -74,6 +74,7 @@ void Director::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
 
+#if 0
 	if (msg.ID() == ChitMsg::CHIT_ARRIVED) {
 		if (playerSector == ToSector(chit->Position())) {
 			int playerTeam = Context()->chitBag->GetHomeTeam();
@@ -83,10 +84,12 @@ void Director::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
+	else 
+#endif
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED) {
 		if (playerSector == ToSector(chit->Position())) {
 			attackTicker.Reset();
-			GLOUTPUT(("Attack ticker reset.\n"));
+			//GLOUTPUT(("Attack ticker reset.\n"));
 		}
 	}
 	super::OnChitMsg(chit, msg);

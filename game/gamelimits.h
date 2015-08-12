@@ -84,6 +84,8 @@ static const int ALL_CRYSTAL_RED    = TYPICAL_DOMAINS * 4;
 static const int ALL_CRYSTAL_BLUE   = TYPICAL_DOMAINS * 2;
 static const int ALL_CRYSTAL_VIOLET = TYPICAL_DOMAINS / 2;
 
+static const int DENIZEN_CLOCK = 5 * 1000;	// how often groups of 4 denizens spawn
+static const int DENIZEN_WEAPON_ODDS = 6;	// 3 in DENIZEN_WEAPON_ODDS is the chance of a weapon
 
 enum {
 	CRYSTAL_GREEN,			// basic weapon crystal

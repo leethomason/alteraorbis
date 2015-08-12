@@ -56,7 +56,7 @@ using namespace tinyxml2;
 
 Weather* Weather::instance	= 0;
 
-Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), spawnClock(10 * 1000), visitorClock(4*1000)
+Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), denizenClock(DENIZEN_CLOCK), visitorClock(4*1000)
 {
 	context.game = g;
 	spawnEnabled = 0xff;
@@ -192,7 +192,7 @@ void Sim::Load(const char* mapDAT, const char* gameDAT)
 			minuteClock.Serialize(&reader, "minuteClock");
 			secondClock.Serialize(&reader, "secondClock");
 			volcTimer.Serialize(&reader, "volcTimer");
-			spawnClock.Serialize(&reader, "spawnClock");
+			denizenClock.Serialize(&reader, "denizenClock");
 			visitorClock.Serialize(&reader, "visitorClock");
 			itemDB->Serialize(&reader);
 			reserveBank->Serialize(&reader);
@@ -229,7 +229,7 @@ void Sim::Save(const char* mapDAT, const char* gameDAT)
 			minuteClock.Serialize(&writer, "minuteClock");
 			secondClock.Serialize(&writer, "secondClock");
 			volcTimer.Serialize(&writer, "volcTimer");
-			spawnClock.Serialize(&writer, "spawnClock");
+			denizenClock.Serialize(&writer, "denizenClock");
 			visitorClock.Serialize(&writer, "visitorClock");
 			itemDB->Serialize(&writer);
 			reserveBank->Serialize(&writer);
@@ -397,7 +397,7 @@ void Sim::SpawnDenizens()
 				Chit* chit = context.chitBag->NewDenizen(ToWorld2I(pos), team);
 
 				int itemType = -1;
-				switch (random.Rand(4)) {
+				switch (random.Rand(DENIZEN_WEAPON_ODDS)) {
 					case 1: itemType = ForgeScript::GUN;	break;
 					case 2: itemType = ForgeScript::RING;	break;
 					case 3: itemType = ForgeScript::SHIELD;	break;
@@ -584,7 +584,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 	if (minuteTick) {
 		SpawnGreater();
 	}
-	if (spawnClock.Delta(delta)) {
+	if (denizenClock.Delta(delta)) {
 		SpawnDenizens();
 	}
 #endif

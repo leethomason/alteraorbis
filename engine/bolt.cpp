@@ -28,125 +28,121 @@
 using namespace grinliz;
 
 
-void Bolt::Serialize( XStream* xs )
+void Bolt::Serialize(XStream* xs)
 {
-	XarcOpen( xs, "bolt" );
-	XARC_SER( xs, len );
-	XARC_SER( xs, impact );
-	XARC_SER( xs, speed );
-	XARC_SER( xs, particle );
-	XARC_SER( xs, chitID );
-	XARC_SER( xs, damage );
-	XARC_SER( xs, effect );
-	XARC_SER( xs, head );
-	XARC_SER( xs, dir );
-	XARC_SER( xs, color );
-	XarcClose( xs );
+	XarcOpen(xs, "bolt");
+	XARC_SER(xs, len);
+	XARC_SER(xs, impact);
+	XARC_SER(xs, speed);
+	XARC_SER(xs, particle);
+	XARC_SER(xs, chitID);
+	XARC_SER(xs, damage);
+	XARC_SER(xs, effect);
+	XARC_SER(xs, head);
+	XARC_SER(xs, dir);
+	XARC_SER(xs, color);
+	XARC_SER(xs, frameCount);
+	XarcClose(xs);
 }
 
 
-void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler )
+void Bolt::TickAll(grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler)
 {
-	GLASSERT( engine->GetMap() );
+	GLASSERT(engine->GetMap());
 	Map* map = engine->GetMap();
 
 	float timeSlice = (float)delta / 1000.0f;
 
-	int i=0;	
+	int i = 0;
 	ParticleSystem* ps = engine->particleSystem;
-	Rectangle3F bounds = map->Bounds3();
-	bool usingSectors = map->UsingSectors();
+	const Rectangle3F bounds = map->Bounds3();
+	const bool usingSectors = map->UsingSectors();
 
-	while ( i < bolts->Size() ) {
-		Bolt& b = (*bolts)[i];
+	while (i < bolts->Size()) {
+		Bolt* b = bolts->Mem() + i;
 
-		if (!bounds.Contains(b.head)) {
+		if (!bounds.Contains(b->head)) {
+			GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
 			bolts->SwapRemove(i);
 			continue;
 		}
- 
-		if ( usingSectors ) {
-			Vector2I sector = ToSector(b.head.x, b.head.z);
-			Rectangle2I inner = InnerSectorBounds(sector);
-			bounds.Set(float(inner.min.x), 0, float(inner.min.y), float(inner.max.x + 1), MAP_HEIGHT, float(inner.max.y + 1));
-		}
-		
-		float distance = b.speed * timeSlice;
-		Vector3F travel = b.dir * distance;
+
+		float distance = b->speed * timeSlice;
+		Vector3F travel = b->dir * distance;
 		Vector3F normal = { 0, 1, 0 };
 		ModelVoxel mv;
-		bool wasImpact = b.impact;
+		bool wasImpact = b->impact;
 
-		if ( !b.impact ) {
+		if (!b->impact) {
 			// Check if we hit something in the world.
-			// FIXME: add ignore list of the shooter, or move head away from model?
-
 			// Check ground hit.
-			if ( (b.head + travel).y <= 0 ) {
-				b.impact = true;
-					
-				if ( b.head.y > 0 ) {
-					mv.at = Lerp( b.head, b.head+travel, (b.head.y) / (travel.y));
+			if ((b->head + travel).y <= 0) {
+				b->impact = true;
+
+				if (b->head.y > 0) {
+					mv.at = Lerp(b->head, b->head + travel, (b->head.y) / (travel.y));
 				}
 				else {
-					mv.at = b.head;	// not really sure how this happened.
+					mv.at = b->head;	// not really sure how this happened.
 				}
 			}
 
 			// Check model hit.
-			if ( !b.impact ) {
-				mv = engine->IntersectModelVoxel( b.head, b.dir, distance, TEST_TRI, 0, 0, 0 );
-				if ( mv.Hit() ) {
-					b.impact = true;
-					normal = b.dir;
+			if (!b->impact) {
+				mv = engine->IntersectModelVoxel(b->head, b->dir, distance, TEST_TRI, 0, 0, 0);
+				if (mv.Hit()) {
+					b->impact = true;
+					normal = b->dir;
 				}
 			}
 
-			if ( b.impact ) {
-				GLASSERT( !mv.at.IsZero() );
-				if ( handler && !wasImpact) {
-					handler->HandleBolt( b, mv );
+			if (b->impact) {
+				GLASSERT(!mv.at.IsZero());
+				if (handler && !wasImpact) {
+					handler->HandleBolt(*b, mv);
 				}
-				b.head = mv.at;
+				b->head = mv.at;
 
-				ParticleDef def = ps->GetPD( ISC::boltImpact );
-				def.color = b.color;
-				ps->EmitPD( def, mv.at, -normal, delta );
+				ParticleDef def = ps->GetPD(ISC::boltImpact);
+				def.color = b->color;
+				ps->EmitPD(def, mv.at, -normal, delta);
 
-				if ( b.effect & GameItem::EFFECT_EXPLOSIVE ) {
-					def = ps->GetPD( ISC::explosion );
-					def.color = b.color;
-					ps->EmitPD( def, mv.at, V3F_UP, delta );
+				if (b->effect & GameItem::EFFECT_EXPLOSIVE) {
+					def = ps->GetPD(ISC::explosion);
+					def.color = b->color;
+					ps->EmitPD(def, mv.at, V3F_UP, delta);
 				}
 			}
 		}
 
-		if ( !b.impact ) {
-			b.head += travel;
-			b.len += distance;
-			if ( b.len > 2.0f )
-				b.len = 2.0f;
+		if (!b->impact) {
+			b->head += travel;
+			b->len += distance;
+			if (b->len > 2.0f)
+				b->len = 2.0f;
 		}
 		else {
-			b.len -= distance;
-		}
-		
-		Vector3F tail = b.head - b.len*b.dir;
-
-		if ( !bounds.Contains( b.head ) && !bounds.Contains( tail ) ) {
-			bolts->SwapRemove( i );
-		}
-		else if ( b.len <= 0 ) {
-			bolts->SwapRemove( i );
-		}
-		else {
-			++i;
+			b->len -= distance;
 		}
 
-		if (!wasImpact && b.impact) {
+		if (!wasImpact && b->impact) {
 			if (XenoAudio::Instance()) {
-				XenoAudio::Instance()->PlayVariation(ISC::boltimpactWAV, i, &b.head);
+				XenoAudio::Instance()->PlayVariation(ISC::boltimpactWAV, i, &b->head);
 			}
+		}
+
+		Vector3F tail = b->head - b->len * b->dir;
+		if (!bounds.Contains(b->head) && !bounds.Contains(tail)) {
+			GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
+			bolts->SwapRemove(i);
+		}
+		else if (b->len <= 0) {
+			GLASSERT(b->frameCount);	// if fires, was created in an invalid state.
+			bolts->SwapRemove(i);
+		}
+		else {
+			b->frameCount++;
+			++i;
 		}
 	}
 }
@@ -188,9 +184,9 @@ void BoltRenderer::DeviceLoss()
 }
 
 
-void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
+void BoltRenderer::DrawAll(const Bolt* bolts, int nBolts, Engine* engine)
 {
-	if ( nBolts == 0 )
+	if (nBolts == 0)
 		return;
 
 	const Vector3F origin = engine->camera.PosWC();
@@ -200,61 +196,58 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	static const float HALF_WIDTH = 0.07f;
 
 	ParticleSystem* ps = engine->particleSystem;
-	ParticleDef def = ps->GetPD( ISC::smoketrail );
+	ParticleDef def = ps->GetPD(ISC::smoketrail);
 
 	int count = 0;
-	for( int i=0; i<nBolts && count<MAX_BOLTS; ++i ) {
-
+	for (int i = 0; i < nBolts && count < MAX_BOLTS; ++i) {
 		Vector3F head = bolts[i].head;
 
-		if ( ( head - origin ).LengthSquared() > RAD2 )
+		if ((head - origin).LengthSquared() > RAD2)
 			continue;
 
-		if ( bolts[i].particle ) {
+		if (bolts[i].particle) {
 			def.color = bolts[i].color;
-			ps->EmitPD( def, bolts[i].head, V3F_UP, 0 );
+			ps->EmitPD(def, bolts[i].head, V3F_UP, 0);
 		}
 		else {
 			Vector3F n;
 			Vector3F tail = head - bolts[i].len*bolts[i].dir;
-			CrossProduct( eyeNormal, head - tail, &n );
+			CrossProduct(eyeNormal, head - tail, &n);
 			n.Normalize();
 
-			int base = count*4;
-			vertex[base+0].pos = tail - HALF_WIDTH*n;
-			vertex[base+1].pos = tail + HALF_WIDTH*n;
-			vertex[base+2].pos = head + HALF_WIDTH*n;
-			vertex[base+3].pos = head - HALF_WIDTH*n;
+			int base = count * 4;
+			vertex[base + 0].pos = tail - HALF_WIDTH*n;
+			vertex[base + 1].pos = tail + HALF_WIDTH*n;
+			vertex[base + 2].pos = head + HALF_WIDTH*n;
+			vertex[base + 3].pos = head - HALF_WIDTH*n;
 
 			Vector4F color = bolts[i].color;
-			vertex[base+0].color = color;
-			vertex[base+1].color = color;
-			vertex[base+2].color = color;
-			vertex[base+3].color = color;
+			vertex[base + 0].color = color;
+			vertex[base + 1].color = color;
+			vertex[base + 2].color = color;
+			vertex[base + 3].color = color;
 
 			++count;
 		}
 	}
+	GLASSERT(count < MAX_BOLTS);	// not dangerous, but will cause rendering errors
+	if (count == 0) return;
 
-	Texture* texture = TextureManager::Instance()->GetTexture( "particle" );
+	Texture* texture = TextureManager::Instance()->GetTexture("particle");
+	vbo->Upload(vertex, count * 4 * sizeof(vertex[0]), 0);
 
-	if ( count ) {
+	GPUStream stream;
+	stream.stride = sizeof(vertex[0]);
+	stream.nPos = 3;
+	stream.posOffset = PTCVertex::POS_OFFSET;
+	stream.texture0Offset = PTCVertex::TEXTURE_OFFSET;
+	stream.nColor = 4;
+	stream.colorOffset = PTCVertex::COLOR_OFFSET;
 
-		vbo->Upload( vertex, count*4*sizeof(vertex[0]), 0 );
-
-		GPUStream stream;
-		stream.stride			= sizeof( vertex[0] );
-		stream.nPos				= 3;
-		stream.posOffset		= PTCVertex::POS_OFFSET;
-		stream.texture0Offset	= PTCVertex::TEXTURE_OFFSET;
-		stream.nColor			= 4;
-		stream.colorOffset		= PTCVertex::COLOR_OFFSET;
-
-		ParticleShader shader;
-		GPUStreamData data;
-		data.texture0 = texture;
-		data.vertexBuffer = vbo->ID();
-		GPUDevice::Instance()->DrawQuads( shader, stream, data, count );
-	}
+	ParticleShader shader;
+	GPUStreamData data;
+	data.texture0 = texture;
+	data.vertexBuffer = vbo->ID();
+	GPUDevice::Instance()->DrawQuads(shader, stream, data, count);
 }
 

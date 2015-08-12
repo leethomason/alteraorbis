@@ -329,40 +329,40 @@ public:
 
 	enum {
 		// Type(s) of the item
-		INTRINSIC			= (1<<3),				// built in item: pinters for example. Always "held".
+		INTRINSIC			= (1<<0),				// built in item: pinters for example. Always "held".
 
-		IMMUNE_FIRE			= (1<<6),				// doesn't burn *at all*
-		FLAMMABLE			= (1<<7),				// burns until gone (wood)
-		IMMUNE_SHOCK		= (1<<8),
-		SHOCKABLE			= (1<<9),
+		IMMUNE_FIRE			= (1<<1),				// doesn't burn *at all*
+		FLAMMABLE			= (1<<2),				// burns until gone (wood)
+		IMMUNE_SHOCK		= (1<<3),
+		SHOCKABLE			= (1<<4),
 
-		EFFECT_EXPLOSIVE	= (1<<10),
-		EFFECT_FIRE			= (1<<11),	
-		EFFECT_SHOCK		= (1<<12),
+		EFFECT_EXPLOSIVE	= (1<<5),
+		EFFECT_FIRE			= (1<<6),	
+		EFFECT_SHOCK		= (1<<7),
 		EFFECT_MASK			= EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
-		RENDER_TRAIL		= (1<<13),		// render a bolt with a 'smoketrail' vs. regular bolt
+		RENDER_TRAIL		= (1<<8),		// render a bolt with a 'smoketrail' vs. regular bolt
 
-		INDESTRUCTABLE		= (1<<14),
+		INDESTRUCTABLE		= (1<<9),
 
-		AI_WANDER_HERD		= (1<<15),		// basic herding
-		AI_WANDER_CIRCLE	= (1<<16),		// creepy circle herding
+		AI_WANDER_HERD		= (1<<10),		// basic herding
+		AI_WANDER_CIRCLE	= (1<<11),		// creepy circle herding
 		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
 
-		AI_USES_BUILDINGS	= (1<<20),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
-		AI_NOT_TARGET		= (1<<21),		// won't be targeted in battle	
+		AI_USES_BUILDINGS	= (1<<12),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
+		AI_NOT_TARGET		= (1<<13),		// won't be targeted in battle	
 
-		GOLD_PICKUP			= (1<<22),
-		ITEM_PICKUP			= (1<<23),		// picks up items. will use if possible.
-		HAS_NEEDS			= (1<<24),		// ai should use needs
+		GOLD_PICKUP			= (1<<14),
+		ITEM_PICKUP			= (1<<15),		// picks up items. will use if possible.
+		HAS_NEEDS			= (1<<16),		// ai should use needs
 
-		DAMAGE_UNDER_WATER  = (1<<25),		// if set, takes damage if submerged
-		FLOAT				= (1<<26),		// floats on water and moves with the water flow
-		SUBMARINE			= (1<<27),		// isn't moved by the fluid when walking.
-		EXPLODES			= (1<<28),		// explodes when destroyed. hell yeah!
+		DAMAGE_UNDER_WATER  = (1<<16),		// if set, takes damage if submerged
+		FLOAT				= (1<<18),		// floats on water and moves with the water flow
+		SUBMARINE			= (1<<19),		// isn't moved by the fluid when walking.
+		EXPLODES			= (1<<20),		// explodes when destroyed. hell yeah!
 
-		CLICK_THROUGH		= (1<<29),		// model is created with flags to ignore world clicking
-		PATH_NON_BLOCKING   = (1<<30),		// doesn't block the pather
+		CLICK_THROUGH		= (1<<21),		// model is created with flags to ignore world clicking
+		PATH_NON_BLOCKING   = (1<<22),		// doesn't block the pather
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.
@@ -530,6 +530,7 @@ public:
 	bool CoolingDown() const		{ return !cooldown.CanUse(); }
 	bool Reloading() const			{ return clipCap > 0 && !reload.CanUse(); }
 	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
+	int Rounds() const				{ return rounds; }
 	bool HasRound() const			{ GLASSERT( rounds <= clipCap );	return rounds || clipCap == 0; }
 	
 	float ReloadFraction() const;

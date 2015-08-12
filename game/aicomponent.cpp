@@ -560,12 +560,16 @@ void AIComponent::DoShoot()
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return;
 
-	RangedWeapon* weapon = thisIC->GetRangedWeapon( 0 );
+	RangedWeapon* weapon = thisIC->GetRangedWeapon(0);
 	// FIXME: real bug here, although maybe minor. serialization in 
 	// ItemComponent() calls UseBestItems(), which can re-order weapons,
 	// which (I think) causes the ranged weapon to be !current.
 	// It will eventually reset. But annoying and may be occasionally visible.
-	//GLASSERT(weapon);
+	if (!weapon) {
+		thisIC->SelectWeapon(ItemComponent::SELECT_RANGED);
+		weapon = thisIC->GetRangedWeapon(0);
+	}
+	GLASSERT(weapon);
 	if (!weapon) return;
 	if (enemyList2.Empty()) return;	// no target
 
@@ -573,53 +577,55 @@ void AIComponent::DoShoot()
 	GLASSERT(targetID != 0);
 	if (targetID == 0) return;
 
-	if ( targetID > 0 ) {
+	if (targetID > 0) {
 		Chit* targetChit = Context()->chitBag->GetChit(targetID);
 		GLASSERT(targetChit);
 		if (!targetChit) return;
 
-		leading = BattleMechanics::ComputeLeadingShot( parentChit, targetChit, weapon->BoltSpeed(), 0 );
+		leading = BattleMechanics::ComputeLeadingShot(parentChit, targetChit, weapon->BoltSpeed(), 0);
 		isMoving = targetChit->GetMoveComponent() ? targetChit->GetMoveComponent()->IsMoving() : false;
 	}
 	else {
 		Vector2I p = ToWG(targetID);
-		leading.Set( (float)p.x + 0.5f, 0.5f, (float)p.y + 0.5f );
+		leading.Set((float)p.x + 0.5f, 0.5f, (float)p.y + 0.5f);
 	}
 
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
 	Vector2F heading = parentChit->Heading2D();
 	Vector2F normalToTarget = leading2D - ToWorld2F(parentChit->Position());
-	//float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
-	float dot = DotProduct( heading, normalToTarget );
+	float dot = DotProduct(heading, normalToTarget);
 
-	if ( dot >= SHOOT_ANGLE_DOT ) {
+	if (dot >= SHOOT_ANGLE_DOT) {
 		// all good.
 	}
 	else {
 		// Rotate to target.
-		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-		if ( pmc ) {
+		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
+		if (pmc) {
 			//float angle = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
-			pmc->QueueDest( ToWorld2F(parentChit->Position()), &normalToTarget );
+			pmc->QueueDest(ToWorld2F(parentChit->Position()), &normalToTarget);
 		}
 		return;
 	}
 
-	if ( weapon ) {
-		if ( weapon->HasRound() ) {
+	if (weapon) {
+		if (weapon->HasRound()) {
 			// Has round. May be in cooldown.
-			if ( weapon->CanShoot() ) {
-				BattleMechanics::Shoot(	Context()->chitBag, 
-										parentChit, 
-										leading,
-										isMoving,
-										weapon );
+			if (weapon->CanShoot()) {
+				if (Log()) {
+					GLOUTPUT(("AI ID=%d shoot rounds=%d\n", parentChit->ID(), weapon->Rounds()));
+				}
+				BattleMechanics::Shoot(Context()->chitBag,
+									   parentChit,
+									   leading,
+									   isMoving,
+									   weapon);
 			}
 		}
 		else {
-			weapon->Reload( parentChit );
+			weapon->Reload(parentChit);
 			// Out of ammo - do something else.
 			currentAction = AIAction::NO_ACTION;
 		}

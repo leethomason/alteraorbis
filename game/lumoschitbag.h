@@ -247,7 +247,7 @@ public:
 						int selfDestructTimer );
 
 	Bolt* NewBolt(	const grinliz::Vector3F& pos,
-					grinliz::Vector3F dir,
+					const grinliz::Vector3F& dir,
 					int effectFlags,
 					int chitID,
 					float damage,

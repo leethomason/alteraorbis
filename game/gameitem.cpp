@@ -478,11 +478,11 @@ bool RangedWeapon::CanShoot() const
 }
 
 
-bool RangedWeapon::Shoot( Chit* parentChit ) {
-	if ( CanShoot() ) {
+bool RangedWeapon::Shoot(Chit* parentChit) {
+	if (CanShoot()) {
 		UseRound();
 		cooldown.Use();
-		if ( parentChit ) {
+		if (parentChit) {
 			parentChit->SetTickNeeded();
 		}
 		return true;
