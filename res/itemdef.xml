@@ -413,7 +413,7 @@
 
   <GameItem name="trilobyte"
         resource="arachnoid"
-        flags="AI_WANDER_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE DAMAGE_UNDER_WATER"
+        flags="AI_WANDER_CIRCLE GOLD_PICKUP FLAMMABLE SHOCKABLE DAMAGE_UNDER_WATER"
         mob="lesser"
         nameGen="monster"
         baseHP="10"

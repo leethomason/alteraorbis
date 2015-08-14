@@ -2219,29 +2219,15 @@ void AIComponent::ThinkNormal()
 			&& oddsWander
 			&& (parentChit->random.Rand(oddsWander) == 0);
 
-#if 0
-		bool coreRush = Team::IsDenizen(parentChit->Team());
-		if (coreRush) {
-			CoreScript* cs = CoreScript::GetCore(sector);
-			const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos2i);
-			if (cs && !cs->InUse() && wg.IsPort()) {
-				int nComrades = 0;
-				for (int i = 0; i < friendList2.Size(); ++i) {
-					Chit* chit = Context()->chitBag->GetChit(friendList2[i]);
-					if (chit && Team::IsDenizen(chit->Team())) {
-						++nComrades;
-					}
-				}
-				coreRush = nComrades >= 3;
-			}
-		}
-#endif
-
 		if (sectorHerd)	{
 			if (SectorHerd(false))
 				return;
 		}
 		else {
+			// ThinkWanderCircle() would be fun, but not working right now.
+//			if (wanderFlags & GameItem::AI_WANDER_CIRCLE)
+//				dest = ThinkWanderCircle();
+//			else 
 			dest = ThinkWanderHerd();
 		}
 	}
