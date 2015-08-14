@@ -12,7 +12,7 @@ x shooting bug
 x update tutorial
 
 Test:
-	- director
+	x director (looks good, at basic. needs more work)
 	- take over neutral cores
 	- take over enemy cores
 	- AI: take over cores
