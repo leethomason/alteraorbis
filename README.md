@@ -1,4 +1,4 @@
-﻿#Altera Orbis 
+﻿# Altera Orbis 
 
 Thanks for playing Altera Orbis!
 
@@ -16,7 +16,7 @@ the computer. You play as a Domain Core trying to grow and
 survive in an ever changing digital world.
 
 Altera Orbis is a Dungeon-Keeperish / Dwarf Fortressy sort of game set in a 
-Star Wars-ian & Tron-esqe world. It keeps changing and developing.
+Star Wars-ian & Tron-esqe world.
 
 Altera Orbis is in long term playable Beta. The game is playable, the game 
 mechanics are in place, and there is a lot to do and explore. But it keeps
@@ -68,16 +68,34 @@ cd AlteraOrbis
 
 Save and log files will be placed in the "save" subdirectory.
 
-# Changes in Beta5a
+# Changes in Beta6
 
-- Support back to OpenGL 3.0
-- Basic Diplomacy
-  - Relationships between teams account for strategic & technical relationship
-  - War and Peace treaties
-  - Both player & AI can conquor other domains
-- UI tweaks
-- MOBs will collect fruit, and keep it to eat and heal HP
-- Avatar now automatically picks up items
+- Much more travelling between domains, and the AI is more aggressive. You
+  won't get bored from you domain not being attacked. The game may be too
+  hard now. Feedback appreciated.
+- There is now a (simple) event Director to make sure battles are waged
+  and denizens move around.
+- New UI mode: Avatar is separate from View. PgUp now teleports the Avatar home.
+- In view mode you can click on any monster, denizen, or building and get 
+  info in the upper right. Tapping the button will take you to the monster/denizen/
+  building info screen.
+- You can now send a squad to take over a neutral core. Make sure you have enough
+  Au - the new core needs a bunch. (The wiki will be updated with advice.)
+- Water pools can be of any size. Any enclosed area will create water. Lava/Water
+  emitters have been removed from the game.
+- Only sensors need to be connected to devices. Temples will automatically supply power.
+- There is a new circuit type: Timed Gate. Silica that will appear, and then automatically
+  remove again. Very useful for pool traps.
+- The Bar is now a Tavern.
+- Squads should stay together better.
+- Other deities (besides Truulga) help followers and make weapons.
+- Camera tracking on avatar fixed
+- Sub-domains (those you have conquered) will now tithe with Au if they are wealthy enough.
+- General AI fixes; greatly simplified AI code.
+- Fix / rewrite Rampage AI.
+- UI tweaks.
+- New font!
+- An evil bug where blaster bolts disappeared has been fixed.
 
 # FAQ
 

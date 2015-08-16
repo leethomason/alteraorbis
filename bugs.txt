@@ -11,12 +11,6 @@ x Should be able to take over neutral cores
 x shooting bug
 x update tutorial
 
-Test:
-	x director (looks good, at basic. needs more work)
-	- take over neutral cores
-	- take over enemy cores
-	- AI: take over cores
-
 - Micro-Game
 	- world gen
 		- canyon? river & pool walk?
