@@ -1503,23 +1503,29 @@ SectorPort WorldMap::RandomPort( grinliz::Random* random )
 }
 
 
-SectorPort WorldMap::NearestPort( const Vector2F& pos )
+SectorPort WorldMap::NearestPort(const Vector2F& pos, const Vector2F* origin)
 {
 	Vector2I secPos = ToSector(pos);
-	const SectorData& sd = worldInfo->GetSectorData( secPos );
+	const SectorData& sd = worldInfo->GetSectorData(secPos);
 
 	int   bestPort = 0;
 	float bestCost = FLT_MAX;
 
-	for( int i=0; i<4; ++i ) {
-		int port = (1<<i);
-		if ( sd.ports & port ) {
-			Vector2I desti = sd.GetPortLoc( port ).Center();
+	for (int i = 0; i < 4; ++i) {
+		int port = (1 << i);
+		if (sd.ports & port) {
+			Vector2I desti = sd.GetPortLoc(port).Center();
 			Vector2F dest = { (float)desti.x, (float)desti.y };
 			float cost = FLT_MAX;
 
-			if ( CalcPath( pos, dest, 0, &cost, false ) ) {
-				if ( cost < bestCost ) {
+			if (CalcPath(pos, dest, 0, &cost, false)) {
+				if (origin) {
+					// Bias towards the side nearest the origin.
+					// Else tends to look a little weird.
+					cost += (*origin - pos).Length() * 0.25f;
+				}
+
+				if (cost < bestCost) {
 					bestCost = cost;
 					bestPort = port;
 				}
@@ -1527,7 +1533,7 @@ SectorPort WorldMap::NearestPort( const Vector2F& pos )
 		}
 	}
 	SectorPort result;
-	if ( bestPort ) {
+	if (bestPort) {
 		result.port = bestPort;
 		result.sector = secPos;
 	}

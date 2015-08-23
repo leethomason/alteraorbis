@@ -749,34 +749,28 @@ bool AIComponent::TravelHome(bool focus)
 	CoreScript* cs = CoreScript::GetCoreFromTeam(parentChit->Team());
 	if (!cs) return false;
 
-	Vector2I dstSector = ToSector(cs->ParentChit()->Position());
-	const SectorData& dstSD = Context()->worldMap->GetSectorData(dstSector);
+	Vector2F dst = ToWorld2F(cs->ParentChit()->Position());
+	Vector2F src = ToWorld2F(parentChit->Position());
 
-	SectorPort dstSP;
-	dstSP.sector = dstSector;
-	dstSP.port = dstSD.NearestPort(ToWorld2F(cs->ParentChit()->Position()));
-
+	SectorPort dstSP = Context()->worldMap->NearestPort(dst, &src);
 	return Move(dstSP, focus);
 }
 
 
-bool AIComponent::Move( const SectorPort& sp, bool focused )
+bool AIComponent::Move(const SectorPort& sp, bool focused)
 {
-	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
 	const ChitContext* context = Context();
 
-	if ( pmc ) {
-		// Read our destination port information:
-		//const SectorData& sd = context->worldMap->GetSectorData( sp.sector );
-				
-		// Read our local get-on-the-grid info
-		SectorPort local = context->worldMap->NearestPort( ToWorld2F(parentChit->Position()) );
+	if (pmc && sp.IsValid()) {
+		// Read our local get-on-the-grid info. Bias to the destination.
+		SectorPort local = context->worldMap->NearestPort(ToWorld2F(parentChit->Position()), 0);
 		// Completely possible this chit can't actually path anywhere.
-		if ( local.IsValid() ) {
-			const SectorData& localSD = context->worldMap->GetSectorData( local.sector );
+		if (local.IsValid()) {
+			const SectorData& localSD = context->worldMap->GetSectorData(local.sector);
 			// Local path to remote dst
-			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
-			pmc->QueueDest( dest2, 0, &sp );
+			Vector2F dest2 = SectorData::PortPos(localSD.GetPortLoc(local.port), parentChit->ID());
+			pmc->QueueDest(dest2, 0, &sp);
 			currentAction = AIAction::MOVE;
 			focus = focused ? FOCUS_MOVE : 0;
 			rethink = 0;
@@ -1239,7 +1233,7 @@ bool AIComponent::SectorHerd(bool focus)
 	const ItemComponent* ic = parentChit->GetItemComponent();
 	const ChitContext* context = Context();
 	const Vector2F pos = ToWorld2F(parentChit->Position());
-	const SectorPort start = context->worldMap->NearestPort(pos);
+	const SectorPort start = context->worldMap->NearestPort(pos, 0);
 
 	//Sometimes we can't path to any port. Hopefully rampage cuts in.
 	if (!start.IsValid()) {
@@ -1361,11 +1355,9 @@ bool AIComponent::SectorHerd(bool focus)
 
 bool AIComponent::DoSectorHerd( bool focus, const grinliz::Vector2I& sector)
 {
-	SectorPort dest;
-	dest.sector = sector;
-	const SectorData& destSD = Context()->worldMap->GetSectorData(dest.sector);
-	dest.port = destSD.NearestPort(ToWorld2F(parentChit->Position()));
-	return DoSectorHerd(focus, dest);
+	Vector2F dst = ToWorld2F(SectorBounds(sector).Center());
+	SectorPort sd = Context()->worldMap->NearestPort(dst, nullptr);
+	return DoSectorHerd(focus, sd);
 }
 
 
@@ -1381,13 +1373,10 @@ bool AIComponent::DoSectorHerd(bool focus, const SectorPort& dest)
 		const GameItem* gameItem = parentChit->GetItem();
 		if (!gameItem) return false;
 
-		// Trolls herd *all the time*
-//		if (gameItem->IName() != ISC::troll) {
-			CStr<32> str;
-			str.Format("%s\nSectorHerd", gameItem->Name());
-			ChitBag::CurrentNews news = { StringPool::Intern(str.c_str()), ToWorld2F(parentChit->Position()), parentChit->ID() };
-			Context()->chitBag->PushCurrentNews(news);
-//		}
+		CStr<32> str;
+		str.Format("%s\nSectorHerd", gameItem->Name());
+		ChitBag::CurrentNews news = { StringPool::Intern(str.c_str()), ToWorld2F(parentChit->Position()), parentChit->ID() };
+		Context()->chitBag->PushCurrentNews(news);
 
 		ChitMsg msg(ChitMsg::CHIT_SECTOR_HERD, focus ? 1 : 0, &dest);
 		for (int i = 0; i < friendList2.Size(); ++i) {
@@ -2873,12 +2862,8 @@ bool AIComponent::ThinkWaypoints()
 		this->Move(dest2, false);
 	}
 	else {
-		SectorPort sp;
-		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
-		int destPort = destSD.NearestPort(dest2);
-
-		sp.sector = destSector;
-		sp.port = destPort;
+		Vector2F pos = ToWorld2F(parentChit->Position());
+		SectorPort sp = Context()->worldMap->NearestPort(dest2, &pos);
 		this->Move(sp, false);
 	}
 	return true;

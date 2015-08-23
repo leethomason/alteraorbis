@@ -37,6 +37,9 @@ CreditsScene::CreditsScene(LumosGame* game) : Scene(game)
 		"Grinning Lizard:\t\tgrinninglizard.com/altera\n"
 		"ShroomArts:\t\tshroomarts.blogspot.com\n"
 		"Justin Prymowicz:\t\tjustinprymowicz.com\n"
+		"\n"
+		"Third Party\n"
+			"\tFont: Cubellan by Jyrki Ihalainen\n"
 		);
 }
 

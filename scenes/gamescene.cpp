@@ -1314,8 +1314,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 		if ( currentSector != destSector )
 		{
 			// Find the nearest port. (Somewhat arbitrary.)
-			sectorPort.sector = destSector;
-			sectorPort.port   = sim->GetWorldMap()->GetSectorData( sectorPort.sector ).NearestPort( pos );
+			sectorPort = sim->GetWorldMap()->NearestPort(dest, &pos);
 		}
 
 		if (gridMove) {

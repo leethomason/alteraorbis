@@ -179,8 +179,10 @@ public:
 	bool HasStraightPathBeside( const grinliz::Vector2F& start,
 								const grinliz::Rectangle2I& bounds);
 
-	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
-	SectorPort NearestPort( const grinliz::Vector2F& pos );
+	// Returns the nearest pathable port to 'pos'. If 'origin' is provided,
+	// will account for the origin as well.
+	// Returns invalid port on failure.
+	SectorPort NearestPort(const grinliz::Vector2F& pos, const grinliz::Vector2F* origin);
 	SectorPort RandomPort( grinliz::Random* random );
 	// Debugging. Makes the 'RandomPort' not random.
 	void SetRandomPort( SectorPort sp ) { randomPortDebug = sp; }

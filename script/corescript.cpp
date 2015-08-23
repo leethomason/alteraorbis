@@ -1081,8 +1081,8 @@ void CoreScript::PopWaypoint(int squadID)
 void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 {
 	GLASSERT(squadID >= 0 && squadID < MAX_SQUADS);
-	if (dest.IsZero() || (waypoints[squadID].Find(dest) >= 0)) {
-		waypoints[squadID].Clear();
+	waypoints[squadID].Clear();
+	if (dest.IsZero()) {
 		return;
 	}
 
@@ -1103,7 +1103,6 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 	}
 
 	Vector2I destSector = ToSector(dest);
-	waypoints[squadID].Clear();
 
 	// - Current port
 	// - grid travel (implies both sector and target port)
@@ -1114,19 +1113,22 @@ void CoreScript::SetWaypoints(int squadID, const grinliz::Vector2I& dest)
 
 	if (startSector != destSector) {
 		Chit* chit = chitArr[0];
-		const SectorData& currentSD = Context()->worldMap->GetSectorData(ToSector(chit->Position()));
-		int currentPort = currentSD.NearestPort(ToWorld2F(chit->Position()));
-
-		const SectorData& destSD = Context()->worldMap->GetSectorData(destSector);
-		int destPort = destSD.NearestPort(ToWorld2F(dest));
-		Vector2I p0 = { 0, 0 };
+		SectorPort sectorPort;
 
 		if (startInSameSector) {
-			p0 = currentSD.GetPortLoc(currentPort).Center();	// meet at the STARTING port
+			// All together, so meet at the STARTING port.
+			sectorPort = Context()->worldMap->NearestPort(ToWorld2F(chit->Position()), &ToWorld2F(dest));
 		}
 		else {
-			p0 = destSD.GetPortLoc(destPort).Center();			// meet at the DESTINATION port
+			// Dispersed; meet at the DESTINATION port.
+			sectorPort = Context()->worldMap->NearestPort(ToWorld2F(dest), &ToWorld2F(chit->Position()));
 		}
+		if (!sectorPort.IsValid()) {
+			GLOUTPUT(("SetWaypoints: no path.\n"));
+			return;
+		}
+		SectorData sectorData = Context()->worldMap->GetSectorData(sectorPort.sector);
+		Vector2I p0 = sectorData.GetPortLoc(sectorPort.port).Center();
 		waypoints[squadID].Push(p0);
 		GLOUTPUT(("%d,%d [s%c%d]  ", p0.x, p0.y, 'A' + p0.x / SECTOR_SIZE, 1 + p0.y / SECTOR_SIZE));
 	}

@@ -416,8 +416,6 @@ void PathMoveComponent::AvoidOthers(U32 delta, grinliz::Vector2F* pos2, grinliz:
 int PathMoveComponent::DoTick( U32 delta )
 {
 	PROFILE_FUNC();
-
-//	int id = parentChit->ID();
 	const ChitContext* context = Context();
 
 	if ( NeedComputeDest() ) {
@@ -435,6 +433,7 @@ int PathMoveComponent::DoTick( U32 delta )
 
 	// Start with the physics move:
 	Vector3F pos3 = parentChit->Position();
+
 	bool fluid = ApplyFluid(delta, &pos3, &floating );
 	if (fluid) {
 		parentChit->SetPosition(pos3);
@@ -445,8 +444,8 @@ int PathMoveComponent::DoTick( U32 delta )
 	}
 
 
-	Vector2F pos, heading;
-	GetPosRot( &pos, &heading );
+	Vector2F pos2, heading;
+	GetPosRot( &pos2, &heading );
 
 	if ( !path.Empty() ) {
 
@@ -454,11 +453,11 @@ int PathMoveComponent::DoTick( U32 delta )
 		time = 0;
 		isMoving = true;
 		
-		bool pathDone = RotationFirst( delta, &pos, &heading );
+		bool pathDone = RotationFirst( delta, &pos2, &heading );
 
 		bool portFound = false;
 		if ( dest.sectorPort.IsValid() ) {
-			Vector2I pos2i = { (int)pos.x, (int)pos.y };
+			Vector2I pos2i = ToWorld2I(pos2);
 
 			// Sector and Port of departure:
 			Vector2I departureSector = ToSector(pos2i);
@@ -489,8 +488,8 @@ int PathMoveComponent::DoTick( U32 delta )
 		}
 	}
 
-	AvoidOthers( delta, &pos, &heading );
-	ApplyBlocks( &pos, &this->blockForceApplied );
+	AvoidOthers( delta, &pos2, &heading );
+	ApplyBlocks( &pos2, &this->blockForceApplied );
 
 	if ( portJump.IsValid() ) {
 		ChitMsg msg(ChitMsg::PATHMOVE_TO_GRIDMOVE, 0, &portJump);
@@ -515,7 +514,7 @@ int PathMoveComponent::DoTick( U32 delta )
 		time = 0;
 	}
 
-	SetPosRot( pos, heading );
+	SetPosRot( pos2, heading );
 	return time;
 }
 

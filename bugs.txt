@@ -1,16 +1,3 @@
-x Squad should stick together more in hostile or neutral zone
-x Control -> Squads
-x bar -> tavern
-x space out money widget better
-x general spacing
-x "founded 0.21 fell 000 lasted 712 cycles"
-x CivTech should increase with sub-domains
-x redistributables...
-x wanderHerd still not correct...but good enough for now
-x Should be able to take over neutral cores
-x shooting bug
-x update tutorial
-
 - Micro-Game
 	- world gen
 		- canyon? river & pool walk?
@@ -18,82 +5,49 @@ x update tutorial
 		x fluid: water and lava determined by weather & team
 		x no-limit fluidSim
 		x stable # of domains
-	x spawn
+	- spawn
 		x new strategy
 		x make sure a little bit of everything spawns
 		x trilobyte zerg spawning
-	- How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+		- core spawns should be capped to a global limit
+	x How are weapons given to MOBs? Need a 2nd / 3rd supplier?
 		x cut back initial allocation
-		- make sure weapons are getting to denizens
-	- View mode
+		x make sure weapons are getting to denizens
+	x View mode
 		x tap a MOB to select it
 		x tap anything to select it
-	- Avatar mode
+	x Avatar mode
 		x only move mode?
-		- test teleport
+		x test teleport
 		- 'end' should go to avatar mode
 		x 'teleport' should be always active
-	- character scene
+	x character scene
 		x current team
 		x weapon effects
-	- Basic Director: rate of Lesser and Greater attack
+	x Basic Director: rate of Lesser and Greater attack
 	- art for R1k and Q
-x markets: unlimited? sell to core? trade? (testing, but seems sound)
-x new inventory UI
-x fix text size
-d immediately spawn avatar on core creation
-x set "container" in character scene consistently
-x logic to visit deities
-x workers in deity domains too much stuff - only loot if there is a vault?
-x r1k weapons way to powerful...where are they coming from? (shock + fire)
-x markets in deity domains
-x no rock on core location
-x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
-x containers (vault, bar, etc.) shouldn't have value. 
-x rampage instead of sector herd out?
-x fix visitor giving tech again...implement useBuilding for visitors
-x rampage causes switch to battle mode - still doesn't rampage correctly
-x camera doesn't track avatar
-x turn lava back on for certain areas
-x temples: auto power supply?
-x auto-off for pool trap
-x reduces named weapon threshold
-x tech and au xfer from subdomains to main domains. tech looks good.
-x 'destinationBlocked' only set in rare circumstances. Certainly doesn't reflect actual pathing failure.
+- Not honoring nearest port when choosing domains
+- character scene: show team affiliation, hostile to core?
+- core needs to target the center of model, as do some plants
+
+- Squads won't "tunnel" through blocked paths.
 - damage: items seem to get blown away...crystal not dropped
 - how do deity cores get crystal??
-- deity temples
 - "avatar is off the chase"
 - destination icons - still a lingering mark 
 - troll vs. goblin icons too similar
 - reorder squad units
-x cyclops stuck pathing...just standing there.
 - change xp -> effective level cap to 10-12?
-x human shouldn't be able to build blade
 - no control flags in water
 - rework fonts on title screen
-- character scene: show team affiliation, hostile to core?
-x ai gets stuck walking into things
 - more ability to track units from census screens
-x cyclops herding???
 - starting denizens at deities, without weapons??
 - mouse size buttons vs. touch size buttons
-x Adviser recommend bar before sleep tubes and distilleries
 - Get to her character screen - why is random denizen attacking, etc?
-x "last slot" bug in inventory
-x do kiosks have zones?
 - partial refund of gold when you clear
-x too much random number in weapon creation
-x It is confusing that View is self control
-	x New button?
-x Human shields should not have blades
 - Drop anywhere or quick sell button
-x Not seeing bloodrage messages? Not seeing starvation messages.
-- Not honoring nearest port when choosing domains
-x ship money from controlled domain
 - more announcement when core taken over - popup!
 - Beta team never left...all just hanging around at home. Zombie waypoint flags. Couldn't get to #2 - there was no #1.
-- Squads won't "tunnel" through blocked paths.
 - modes confusing
 	- cursor change?
 	- UI reflect moving
@@ -105,7 +59,6 @@ x ship money from controlled domain
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
 - assert in RoadAI::AddRoad() (that it seems benign is even stranger)
-- core needs to target the center of model, as do some plants
 - awareness / target picking still terrible
 - at awareness, workers should move to core before attacking
 - Avatar gives up on movement path too easily (if hits obstruction)
@@ -235,10 +188,6 @@ x AI take over mode?
 - rotation of grid and voxel elements (experiment)
 - tune EmitterGenerator - meander length
 
-- Beta3
-	- Android
-	x circuits
-
 - World Gen
 	x less techy, more interesting world gen
 	- use some of the time and space to introduce and explain the game
@@ -349,11 +298,6 @@ x more natural skin tones
 http://weloveiconfonts.com/ : entypo
 Neuropol
 
--- Notes --
-zlib:	5832
-fastLZ:	7373
-
-
 ---------- Defer ----------
 x mobs rush new domains (teleport out? really really sector herd?)
 d different porch color for usable buildings
@@ -384,6 +328,57 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta3
+	x Android
+	x circuits
+x ai gets stuck walking into things
+x human shouldn't be able to build blade
+x deity temples
+x cyclops stuck pathing...just standing there.
+x cyclops herding???
+x Adviser recommend bar before sleep tubes and distilleries
+x "last slot" bug in inventory
+x do kiosks have zones?
+x too much random number in weapon creation
+x It is confusing that View is self control
+	x New button?
+x Human shields should not have blades
+x Not seeing bloodrage messages? Not seeing starvation messages.
+x ship money from controlled domain
+x Squad should stick together more in hostile or neutral zone
+x Control -> Squads
+x bar -> tavern
+x space out money widget better
+x general spacing
+x "founded 0.21 fell 000 lasted 712 cycles"
+x CivTech should increase with sub-domains
+x redistributables...
+x wanderHerd still not correct...but good enough for now
+x Should be able to take over neutral cores
+x shooting bug
+x update tutorial
+x markets: unlimited? sell to core? trade? (testing, but seems sound)
+x new inventory UI
+x fix text size
+d immediately spawn avatar on core creation
+x set "container" in character scene consistently
+x logic to visit deities
+x workers in deity domains too much stuff - only loot if there is a vault?
+x r1k weapons way to powerful...where are they coming from? (shock + fire)
+x markets in deity domains
+x no rock on core location
+x deities should move items to market, not vault. Remove vault. Or...vault is free stuff?
+x containers (vault, bar, etc.) shouldn't have value. 
+x rampage instead of sector herd out?
+x fix visitor giving tech again...implement useBuilding for visitors
+x rampage causes switch to battle mode - still doesn't rampage correctly
+x camera doesn't track avatar
+x turn lava back on for certain areas
+x temples: auto power supply?
+x auto-off for pool trap
+x reduces named weapon threshold
+x tech and au xfer from subdomains to main domains. tech looks good.
+x 'destinationBlocked' only set in rare circumstances. Certainly doesn't reflect actual pathing failure.
 x Profiler not working on Linux
 x Linux: where are the save files? Where should they be?
 x static link freetype
