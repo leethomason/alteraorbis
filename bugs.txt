@@ -1,35 +1,14 @@
-- Micro-Game
-	- world gen
-		- canyon? river & pool walk?
-		- combine with terrain displacement?
-		x fluid: water and lava determined by weather & team
-		x no-limit fluidSim
-		x stable # of domains
-	- spawn
-		x new strategy
-		x make sure a little bit of everything spawns
-		x trilobyte zerg spawning
-		- core spawns should be capped to a global limit
-	x How are weapons given to MOBs? Need a 2nd / 3rd supplier?
-		x cut back initial allocation
-		x make sure weapons are getting to denizens
-	x View mode
-		x tap a MOB to select it
-		x tap anything to select it
-	x Avatar mode
-		x only move mode?
-		x test teleport
-		- 'end' should go to avatar mode
-		x 'teleport' should be always active
-	x character scene
-		x current team
-		x weapon effects
-	x Basic Director: rate of Lesser and Greater attack
-	- art for R1k and Q
-- Not honoring nearest port when choosing domains
-- character scene: show team affiliation, hostile to core?
+x Not honoring nearest port when choosing domains
+x 'end' key switches to avatar mode
+x character scene: show team affiliation, hostile to core?
 - core needs to target the center of model, as do some plants
 
+- Better world gen:
+	- feature: canyon
+	- feature: add terrain displacement.
+- Cap core spawns to global population limits
+- Art for R1K, QCore
+- Kamakiri deity
 - Squads won't "tunnel" through blocked paths.
 - damage: items seem to get blown away...crystal not dropped
 - how do deity cores get crystal??
@@ -328,6 +307,31 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Micro-Game
+	x world gen
+		x fluid: water and lava determined by weather & team
+		x no-limit fluidSim
+		x stable # of domains
+	- spawn
+		x new strategy
+		x make sure a little bit of everything spawns
+		x trilobyte zerg spawning
+	x How are weapons given to MOBs? Need a 2nd / 3rd supplier?
+		x cut back initial allocation
+		x make sure weapons are getting to denizens
+	x View mode
+		x tap a MOB to select it
+		x tap anything to select it
+	x Avatar mode
+		x only move mode?
+		x test teleport
+		x 'end' should go to avatar mode
+		x 'teleport' should be always active
+	x character scene
+		x current team
+		x weapon effects
+	x Basic Director: rate of Lesser and Greater attack
+	x art for R1k and Q
 x Beta3
 	x Android
 	x circuits

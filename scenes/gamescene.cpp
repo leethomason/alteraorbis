@@ -1154,10 +1154,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			chit = GetPlayerChit();
 		}
 		if ( chit && chit->GetItemComponent() ) {			
+			const GameItem* playerCore = 0;
+			if (sim->GetChitBag()->GetHomeCore()) {
+				playerCore = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetItem();
+			}
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
 							 new CharacterSceneData( chit->GetItemComponent(), 0, 
 							 chit == GetPlayerChit() ? CharacterSceneData::AVATAR : CharacterSceneData::CHARACTER_ITEM, 
-							 0 ));
+							 0, playerCore ));
 		}
 	}
 	else if ( item == &menu->useBuildingButton ) {
@@ -1333,7 +1337,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 }
 
 
-
 void GameScene::HandleHotKey( int mask )
 {
 	if (mask == GAME_HK_ESCAPE) {
@@ -1341,6 +1344,7 @@ void GameScene::HandleHotKey( int mask )
 		SetSelectionModel(tapView);
 	}
 	else if (mask == GAME_HK_CAMERA_AVATAR) {
+		menu->DoEscape(true);
 		DoAvatarButton();
 	}
 	else if (mask == GAME_HK_TELEPORT_AVATAR) {

@@ -43,16 +43,21 @@ public:
 		EXCHANGE
 	};
 
-	CharacterSceneData(	ItemComponent* ic,		// character
-						ItemComponent* ic2,		// vault, market, exchange
-						int _type,				// apply markup, costs
-						const GameItem* _select)
-		: SceneData(), itemComponent(ic), storageIC(ic2), type(_type), selectItem(_select) { GLASSERT(ic); }
+	CharacterSceneData(	ItemComponent* ic,			// character
+						ItemComponent* ic2,			// vault, market, exchange
+						int _type,					// apply markup, costs
+						const GameItem* _select,
+						const GameItem* _playerCore) // used to determine relationships
+		: SceneData(), itemComponent(ic), storageIC(ic2), type(_type), selectItem(_select), playerCore(_playerCore) 
+	{ 
+		GLASSERT(ic); 
+	}
 
-	ItemComponent*	itemComponent;
-	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
-	int				type;
+	ItemComponent*		itemComponent;
+	ItemComponent*		storageIC;			// vault, chest, storage, etc.				
+	int					type;
 	const GameItem*		selectItem;
+	const GameItem*		playerCore;
 
 	bool IsAvatar() const					{ return type == AVATAR; }
 	bool IsCharacterItem() const			{ return type == CHARACTER_ITEM; }

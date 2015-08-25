@@ -168,9 +168,12 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 			itemIDToChitMap.Query(itemID, &chit);
 			if (chit && chit->GetItemComponent()) {
 				const GameItem* gi = ItemDB::Instance()->Active(itemID);
+				const GameItem* playerCore = 0;
+				if (chitBag->GetHomeCore()) {
+					playerCore = chitBag->GetHomeCore()->ParentChit()->GetItem();
+				}
 
-
-				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, gi);
+				CharacterSceneData* csd = new CharacterSceneData(chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER_ITEM, gi, playerCore);
 				game->PushScene(LumosGame::SCENE_CHARACTER, csd);
 				break;
 			}

@@ -141,28 +141,28 @@ void DialogScene::Resize()
 }
 
 
-void DialogScene::ItemTapped( const gamui::UIItem* item )
+void DialogScene::ItemTapped(const gamui::UIItem* item)
 {
-	if ( item == &okay ) {
+	if (item == &okay) {
 		game->PopScene();
 	}
-	else if ( item == &sceneButtons[CHARACTER] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::AVATAR, 0 ));
+	else if (item == &sceneButtons[CHARACTER]) {
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, 0, CharacterSceneData::AVATAR, 0, 0));
 	}
-	else if ( item == &sceneButtons[VAULT] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, CharacterSceneData::VAULT, 0 ));
+	else if (item == &sceneButtons[VAULT]) {
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, itemComponent1, CharacterSceneData::VAULT, 0, 0));
 	}
-	else if ( item == &sceneButtons[MARKET] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, CharacterSceneData::MARKET, 0 ));
+	else if (item == &sceneButtons[MARKET]) {
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::MARKET, 0, 0));
 	}
 	else if (item == &sceneButtons[EXCHANGE]) {
-		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::EXCHANGE, 0));
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::EXCHANGE, 0, 0));
 	}
-	else if ( item == &sceneButtons[FORGE] ) {
+	else if (item == &sceneButtons[FORGE]) {
 		ForgeSceneData* data = new ForgeSceneData();
 		data->itemComponent = itemComponent0;
 		data->tech = 3;
-		game->PushScene( LumosGame::SCENE_FORGE, data );
+		game->PushScene(LumosGame::SCENE_FORGE, data);
 	}
 }
 

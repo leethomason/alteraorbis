@@ -196,8 +196,19 @@ void CharacterScene::SetItemInfo(const GameItem* item, const GameItem* user)
 
 	CStr< 128 > str;
 	str.Format("%s", item->ProperName() ? item->ProperName() : item->Name());
-	if (item->IsDenizen() && Team::Instance()) {
-		str.AppendFormat(" (%s)", Team::Instance()->TeamName(item->Team()));
+	if (Team::Instance()) {
+		IString teamName = Team::Instance()->TeamName(item->Team());
+		if (!item->MOB().empty() && !data->IsAvatar() && data->playerCore) {
+			ERelate relate = Team::Instance()->GetRelationship(item->Team(), data->playerCore->Team());
+			const char* r = "friendly";
+			if (relate == ERelate::NEUTRAL)		r = "neutral";
+			else if (relate == ERelate::ENEMY)	r = "enemy";
+
+			str.AppendFormat(" (%s: %s)", teamName.safe_str(), r);
+		}
+		else {
+			str.AppendFormat(" (%s)", teamName.safe_str());
+		}
 	}
 	str.AppendFormat("\nLevel: %d  XP: %d / %d",
 					 item->Traits().Level(),

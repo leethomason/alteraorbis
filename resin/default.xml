@@ -113,7 +113,9 @@
   <model filename="clearMarker3.ac" shading="flat" shadowCaster="true" />
   <model filename="flag.ac" shading="flat" shadowCaster="true" />
 
-  <model filename="core.ac" shading="flat" />
+  <model filename="core.ac" shading="flat">
+    <meta name="target"  pos="0 0.10 0"/>
+  </model>
   <model filename="kiosk.ac" modelName="kiosk.n"    origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.m"    origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.c"    origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
