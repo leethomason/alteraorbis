@@ -33,7 +33,8 @@ public:
 	void RemoveCore(const grinliz::IString& team);
 
 	void NumByType(int *lesser, int *greater, int *denizen) const;
-	int NumOf(const grinliz::IString& name) const;
+	int NumOf(const grinliz::IString& name, int* typical) const;
+	void SetTypical(const grinliz::IString& name, int typicalNum);
 
 	struct MOBItem {
 		MOBItem() : count(0) {}
@@ -62,6 +63,7 @@ public:
 private:
 	grinliz::CDynArray<MOBItem> mobItems;
 	grinliz::CDynArray<MOBItem> coreItems;
+	grinliz::CDynArray<MOBItem> typicalMobs;
 };
 
 #endif 

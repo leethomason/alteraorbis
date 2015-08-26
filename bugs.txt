@@ -1,21 +1,22 @@
 x Not honoring nearest port when choosing domains
 x 'end' key switches to avatar mode
 x character scene: show team affiliation, hostile to core?
-- core needs to target the center of model, as do some plants
+x teleport should work during grid travel
+x core needs to target the center of model, as do some plants
+x Cap core spawns to global population limits
+- Kamakiri deity
+- reorder squad units
+- Art for R1K, QCore
 
 - Better world gen:
 	- feature: canyon
 	- feature: add terrain displacement.
-- Cap core spawns to global population limits
-- Art for R1K, QCore
-- Kamakiri deity
 - Squads won't "tunnel" through blocked paths.
 - damage: items seem to get blown away...crystal not dropped
 - how do deity cores get crystal??
 - "avatar is off the chase"
 - destination icons - still a lingering mark 
 - troll vs. goblin icons too similar
-- reorder squad units
 - change xp -> effective level cap to 10-12?
 - no control flags in water
 - rework fonts on title screen

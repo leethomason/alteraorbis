@@ -735,7 +735,12 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	int lesser, greater, denizen;
 	const Census& census = Context()->chitBag->census;
 	census.NumByType(&lesser, &greater, &denizen);
-	bool lesserPossible = lesser < TYPICAL_LESSER;
+
+	IString defaultSpawn = Context()->worldMap->GetSectorData(sector).defaultSpawn;
+	int typical = 0;
+	int numOf = census.NumOf(defaultSpawn, &typical);
+
+	bool lesserPossible = (lesser < TYPICAL_LESSER) && (!typical || numOf < typical * 2);
 
 	Vector2I pos2i = ToWorld2I(parentChit->Position());
 	Vector2I sector = ToSector(pos2i);
@@ -743,25 +748,16 @@ void CoreScript::DoTickNeutral( int delta, int nSpawnTicks )
 	if (nSpawnTicks && lesserPossible) {
 #if SPAWN_MOBS > 0
 		int spawnEnabled = Context()->chitBag->GetSim()->SpawnEnabled() & Sim::SPAWN_LESSER;
-		IString defaultSpawn = Context()->worldMap->GetSectorData(sector).defaultSpawn;
 
 		if (Context()->chitBag->GetSim() && spawnEnabled && !defaultSpawn.empty()) {
 
 			Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
+			int nSpawn = (defaultSpawn == ISC::trilobyte) ? 4 : 1;
 
-//			static const float RAT = 0.20f;
-//			float roll = parentChit->random.Uniform();
-			IString spawn = defaultSpawn;
-
-//			if (roll < RAT) {
-//				spawn = ISC::trilobyte;
-//			}
-			int nSpawn = (spawn == ISC::trilobyte) ? 4 : 1;
-
-			int team = Team::GetTeam(spawn);
+			int team = Team::GetTeam(defaultSpawn);
 			GLASSERT(team != TEAM_NEUTRAL);
 			for (int i = 0; i < nSpawn; ++i) {
-				Context()->chitBag->NewMonsterChit(pf, spawn.safe_str(), team);
+				Context()->chitBag->NewMonsterChit(pf, defaultSpawn.safe_str(), team);
 				pf.x += 0.05f;
 			}
 		}

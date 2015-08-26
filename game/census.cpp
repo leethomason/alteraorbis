@@ -91,12 +91,33 @@ int Census::NumCoresOfTeam(int group) const
 }
 
 
-int Census::NumOf(const grinliz::IString& name) const
+int Census::NumOf(const grinliz::IString& name, int* typical) const
 {
-	for (int i = 0; i < mobItems.Size(); ++i) {
-		if (mobItems[i].name == name) {
-			return mobItems[i].count;
+	int result = 0;
+	int idx = mobItems.Find(name);
+	if (idx >= 0) {
+		result = mobItems[idx].count;
+	}
+	if (typical) {
+		*typical = 0;
+		idx = typicalMobs.Find(name);
+		if (idx >= 0) {
+			*typical = typicalMobs[idx].count;
 		}
 	}
-	return 0;
+	return result;
+}
+
+
+void Census::SetTypical(const grinliz::IString& name, int typicalNum)
+{
+	int idx = typicalMobs.Find(name);
+	if (idx >= 0) {
+		typicalMobs[idx].count = typicalNum;
+	}
+	else {
+		MOBItem item(name);
+		item.count = typicalNum;
+		typicalMobs.Push(item);
+	}
 }

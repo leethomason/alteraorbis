@@ -298,6 +298,11 @@ void Sim::AssignDefaultSpawns()
 		0.20f,
 		0.20f
 	};
+
+	for (int i = 0; i < NSPAWNS; ++i) {
+		context.chitBag->census.SetTypical(StringPool::Intern(spawns[i]), int(factor[i] * float(TYPICAL_LESSER)));
+	}
+
 	int count[NSPAWNS] = { 0 };
 	for (int i = 0; i < NSPAWNS; ++i) {
 		count[i] = int(factor[i] * nCores);

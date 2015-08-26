@@ -1430,7 +1430,10 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1	// Monster swarm
+#if 1
+		sim->GetChitBag()->NewMonsterChit(at, "shockCyclops", TEAM_CHAOS);
+#endif
+#if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;

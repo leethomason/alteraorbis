@@ -57,7 +57,6 @@ void SpatialComponent::OnRemove()
 void SpatialComponent::Teleport(Chit* chit, const grinliz::Vector3F& pos)
 {
 	GLASSERT(!GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent));
-	GLASSERT(!chit->GetComponent("GridMoveComponent"));
 
 	if (ToWorld2I(pos) != ToWorld2I(chit->Position())) {
 
@@ -75,6 +74,7 @@ void SpatialComponent::Teleport(Chit* chit, const grinliz::Vector3F& pos)
 			delete c;
 		}
 		GLASSERT(chit->GetMoveComponent());
+		GLASSERT(!chit->GetComponent("GridMoveComponent"));
 		PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 		if (pmc) pmc->Stop();
 
