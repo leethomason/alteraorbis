@@ -92,6 +92,7 @@ public:
 	int SquadID(int chitID);
 	int Squaddies(int squadID, CChitArray* arr);
 	bool IsSquaddieOnMission(int chitID, int* squadID, grinliz::Vector2I* wantToConquer);
+	bool ChangeSquad(Chit* chit, int targetSquad);
 
 	static int MaxCitizens(int nTemples);
 	int MaxCitizens();

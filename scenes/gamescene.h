@@ -74,6 +74,9 @@ public:
 	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 	virtual Engine* GetEngine();
 
+	virtual gamui::RenderAtom DragStart(const gamui::UIItem* item);
+	virtual void DragEnd(const gamui::UIItem* start, const gamui::UIItem* end);
+
 private:
 	void Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world);
 	void Load();
@@ -113,6 +116,8 @@ private:
 	int GetPlayerChitID();
 	CoreScript* GetHomeCore();
 	grinliz::Vector2I GetHomeSector();
+
+	bool SquadUI(const grinliz::Vector2F& absolute, grinliz::Vector2F* _relative=0, int* _squad=0, int* _id=0);
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,

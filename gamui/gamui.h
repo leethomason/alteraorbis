@@ -387,7 +387,10 @@ public:
 	/** During (or after) a TapUp, this will return the starting object and ending object of the drag. One
 		or both may be null, and it is commonly the same object.
 	*/
-	void GetDragPair( const UIItem** start, const UIItem** end )		{ *start = m_dragStart; *end = m_dragEnd; }
+	void GetDragPair( const UIItem** start, const UIItem** end )				{ *start = m_dragStart; *end = m_dragEnd; }
+	void GetDragPair(float* startX, float* startY, float* endX, float* endY)	{ 
+		*startX = m_dragStartX; *startY = m_dragStartY; *endX = m_dragEndX; *endY = m_dragEndY;
+	}
 
 	void			SetFocusLook( const RenderAtom& atom, float zRotation );
 	void			AddToFocusGroup( const UIItem* item, int id );
@@ -399,7 +402,6 @@ public:
 
 	void			TransformVirtualToPhysical(Vertex* v, int n) const;
 	float			TransformVirtualToPhysical(float x) const;
-
 	float			TransformPhysicalToVirtual(float x) const;
 
 	static const RenderAtom& NullAtom() { return m_nullAtom; }
@@ -432,6 +434,7 @@ private:
 	PODArray<UIItem*> m_itemArr;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
+	float			m_dragStartX, m_dragStartY, m_dragEndX, m_dragEndY;
 	float			m_relativeX;
 	float			m_relativeY;
 	int				m_focus;

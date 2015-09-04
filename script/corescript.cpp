@@ -362,6 +362,33 @@ bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID, Vector2I* wantToC
 }
 
 
+bool CoreScript::ChangeSquad(Chit* chit, int targetSquad)
+{
+	if (!this->IsCitizen(chit)) return false;
+	int currentSquad = this->SquadID(chit->ID());
+	if (currentSquad == targetSquad) return true;
+
+	// Can always move local:
+	if (targetSquad == -1) {
+		int idx = squads[currentSquad].Find(chit->ID());
+		GLASSERT(idx >= 0);
+		squads[currentSquad].SwapRemove(idx);
+		return true;
+	}
+	
+	int n = this->Squaddies(targetSquad, nullptr);
+	if (n < SQUAD_SIZE) {
+		if (currentSquad >= 0) {
+			int idx = squads[currentSquad].Find(chit->ID());
+			GLASSERT(idx >= 0);
+			squads[currentSquad].SwapRemove(idx);
+		}
+		squads[targetSquad].PushIfCap(chit->ID());
+		return true;
+	}
+	return false;
+}
+
 void CoreScript::AddCitizen( Chit* chit )
 {
 	Citizens(0);	// Filters the current array.

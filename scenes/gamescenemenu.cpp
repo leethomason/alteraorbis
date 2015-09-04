@@ -84,7 +84,7 @@ GameSceneMenu::GameSceneMenu(Gamui* gamui2D, LumosGame* game)
 
 	RenderAtom darkPurple = LumosGame::CalcPaletteAtom( 10, 5 );
 	darkPurple.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO;
-	uiBackground.Init(gamui2D, darkPurple, false);
+	squadUIBackground.Init(gamui2D, darkPurple, false);
 
 	uiMode[UI_AVATAR].SetDown();
 
@@ -171,9 +171,9 @@ void GameSceneMenu::Resize(const Screenport& port, const gamui::LayoutCalculator
 	}
 
 	// --- calculated ----
-	uiBackground.SetPos(squadBar[0].X(), squadBar[0].Y());
-	uiBackground.SetSize(squadBar[MAX_CITIZENS - 1].X() + squadBar[MAX_CITIZENS - 1].Width() - squadBar[0].X(),
-						 squadBar[CITIZEN_BASE - 1].Y() + squadBar[CITIZEN_BASE - 1].Height() - squadBar[0].Y());
+	squadUIBackground.SetPos(	squadBar[0].X(), squadBar[0].Y());
+	squadUIBackground.SetSize(	squadBar[MAX_CITIZENS - 1].X() + squadBar[MAX_CITIZENS - 1].Width() - squadBar[0].X(),
+								squadBar[CITIZEN_BASE - 1].Y() + squadBar[CITIZEN_BASE - 1].Height() - squadBar[0].Y());
 }
 
 
@@ -223,7 +223,7 @@ void GameSceneMenu::ItemTapped(const gamui::UIItem* item)
 			for (int i = 0; i < MAX_CITIZENS; ++i) {
 				squadBar[i].SetVisible(false);	// turned on in the SetSquadDisplay()
 			}
-			uiBackground.SetVisible(uiMode == UI_CONTROL);
+			squadUIBackground.SetVisible(uiMode == UI_CONTROL);
 
 			// Any mode change clears the current build:
 			buildButton[0].SetDown();
@@ -343,7 +343,6 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 		int c = cs->SquadID(citizens[i]->ID()) + 1;
 		GLASSERT(c >= 0 && c < NUM_SQUAD_BUTTONS);
 		if (count[c] < ((c == 0) ? CITIZEN_BASE : SQUAD_SIZE)) {
-//			const GameItem* item = citizens[i]->GetItem();
 			int index = 0;
 			if (c == 0) {
 				index = count[0];
@@ -434,3 +433,4 @@ void GameSceneMenu::DoEscape(bool fullEscape)
 		}
 	}
 }
+

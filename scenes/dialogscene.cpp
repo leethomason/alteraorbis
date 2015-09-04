@@ -92,17 +92,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	marketComponent->AddToInventory( blaster.Clone());
 	marketComponent->AddToInventory( blaster.Clone());
 	marketComponent->AddToInventory( pistol.Clone());
-
-//	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
-//	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
-//	itemComponent0->GetItem()->SetProperName("Worvaka");
 }
 
 DialogScene::~DialogScene()
 {
-//	reserveBank->wallet.Deposit(&itemComponent0->GetItem()->wallet, itemComponent0->GetItem()->wallet);
-//	reserveBank->wallet.Deposit(&itemComponent1->GetItem()->wallet, itemComponent1->GetItem()->wallet);
-//	reserveBank->wallet.Deposit(&marketComponent->GetItem()->wallet, marketComponent->GetItem()->wallet);
 	GameItem::trackWallet = false;
 
 	delete itemComponent0;
@@ -117,7 +110,6 @@ DialogScene::~DialogScene()
 
 void DialogScene::Resize()
 {
-	//const Screenport& port = game->GetScreenport();
 	PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = DefaultLayout();

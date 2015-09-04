@@ -2142,3 +2142,80 @@ grinliz::Vector2I GameScene::GetHomeSector()
 	return z;
 }
 
+
+bool GameScene::SquadUI(const Vector2F& absolute, Vector2F* _relative, int* _squad, int* _id)
+{
+	Vector2F relative = { 0, 0 };
+	relative.x = absolute.x - menu->squadUIBackground.X();
+	relative.y = absolute.y - menu->squadUIBackground.Y();
+
+	Rectangle2F uiBounds;
+	uiBounds.Set(0, 0, menu->squadUIBackground.Width(), menu->squadUIBackground.Height());
+	if (!uiBounds.Contains(relative)) {
+		return false;
+	}
+	Vector2I grid = { 0, 0 };
+	grid.x = int(relative.x * (MAX_SQUADS + 1) / uiBounds.Width());
+	grid.y = int(relative.y * CITIZEN_BASE / uiBounds.Height());
+
+	int id = 0;
+	if (grid.x == 0) {
+		id = menu->squadBar[grid.y].userItemID;
+	}
+	else {
+		if (grid.y < SQUAD_SIZE) {
+			int index = CITIZEN_BASE + SQUAD_SIZE*(grid.x - 1) + grid.y;
+			GLASSERT(index >= 0 && index < MAX_CITIZENS);
+			id = menu->squadBar[index].userItemID;
+		}
+	}
+	if (_relative) *_relative = relative;
+	if (_squad) *_squad = grid.x - 1;
+	if (_id) *_id = id;
+	return id != 0;
+}
+
+gamui::RenderAtom GameScene::DragStart(const gamui::UIItem* item)
+{
+	Vector2F start, end;
+	gamui2D.GetDragPair(&start.x, &start.y, &end.x, &end.y);
+	if (SquadUI(start)) {
+		return LumosGame::CalcIconAtom("happy");
+	}
+	return RenderAtom();
+}
+
+
+void GameScene::DragEnd(const gamui::UIItem* start, const gamui::UIItem* end)
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	if (!cs) return;
+
+	Vector2F startAbs, endAbs;
+	gamui2D.GetDragPair(&startAbs.x, &startAbs.y, &endAbs.x, &endAbs.y);
+
+	int startID = 0, endID = 0;
+	int startSquad = 0, endSquad = 0;
+
+	SquadUI(startAbs, 0, &startSquad, &startID);
+	SquadUI(endAbs, 0, &endSquad, &endID);
+
+	Chit* startChit = sim->GetChitBag()->GetChit(startID);
+	if (!startChit) return;
+	if (startChit->PlayerControlled()) return;
+
+	Chit* endChit = sim->GetChitBag()->GetChit(endID);
+	if (endChit && endChit->PlayerControlled()) return;
+
+	if (startChit && !endChit) {
+		cs->ChangeSquad(startChit, endSquad);
+	}
+	else if (startChit && endChit) {
+		// Move to local:
+		cs->ChangeSquad(startChit, -1);
+		cs->ChangeSquad(endChit, -1);
+		// Move to target
+		cs->ChangeSquad(startChit, endSquad);
+		cs->ChangeSquad(endChit, startSquad);
+	}
+}

@@ -4,9 +4,10 @@ x character scene: show team affiliation, hostile to core?
 x teleport should work during grid travel
 x core needs to target the center of model, as do some plants
 x Cap core spawns to global population limits
-- Kamakiri deity
 - reorder squad units
+- Kamakiri deity
 - Art for R1K, QCore
+- no testing of pop cap - not sure it is working. (Doesn't save...move to non-serialized code.)
 
 - Better world gen:
 	- feature: canyon

@@ -1407,23 +1407,27 @@ void DigitalBar::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex 
 
 
 Gamui::Gamui()
-	:	m_itemTapped( 0 ),
-		m_disabledItemTapped(0),
-		m_iRenderer(0),
-		m_iText( 0 ),
-		m_physicalWidth(800),
-		m_physicalHeight(600),
-		m_virtualHeight(600),
-		m_orderChanged( true ),
-		m_modified( true ),
-		m_dragStart( 0 ),
-		m_dragEnd( 0 ),
-		m_relativeX( 0 ),
-		m_relativeY( 0 ),
-		m_focus( -1 ),
-		m_focusImage( 0 ),
-		m_currentDialog(0),
-		m_pixelSnap(true)
+	: m_itemTapped(0),
+	m_disabledItemTapped(0),
+	m_iRenderer(0),
+	m_iText(0),
+	m_physicalWidth(800),
+	m_physicalHeight(600),
+	m_virtualHeight(600),
+	m_orderChanged(true),
+	m_modified(true),
+	m_dragStart(0),
+	m_dragEnd(0),
+	m_dragStartX(0),
+	m_dragStartY(0),
+	m_dragEndX(0),
+	m_dragEndY(0),
+	m_relativeX(0),
+	m_relativeY(0),
+	m_focus(-1),
+	m_focusImage(0),
+	m_currentDialog(0),
+	m_pixelSnap(true)
 {
 }
 
@@ -1527,6 +1531,8 @@ void Gamui::TapDown( float xPhysical, float yPhysical )
 					m_itemTapped = item;
 					m_relativeX = (x - item->X()) / item->Width();
 					m_relativeY = (y - item->Y()) / item->Height();
+					m_dragStartX = x;
+					m_dragStartY = y;
 					break;
 				}
 			}
@@ -1544,6 +1550,8 @@ const UIItem* Gamui::TapUp( float xPhysical, float yPhysical )
 	float y = TransformPhysicalToVirtual(yPhysical);
 
 	m_dragStart = m_itemTapped;
+	m_dragEndX = x;
+	m_dragEndY = y;
 
 	const UIItem* result = 0;
 	if ( m_itemTapped ) {

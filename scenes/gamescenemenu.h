@@ -60,7 +60,7 @@ public:
 	gamui::ToggleButton	buildButton[BuildScript::NUM_PLAYER_OPTIONS];
 	gamui::ToggleButton	squadButton[NUM_SQUAD_BUTTONS];
 	HPBar				squadBar[MAX_CITIZENS];
-	gamui::Image		uiBackground;
+	gamui::Image		squadUIBackground;
 
 private:
 	void SetSquadDisplay(CoreScript* core);
