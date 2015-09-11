@@ -96,6 +96,9 @@ public:
 											 || (plant && stage >= 2); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 
+	bool IsInternalBlocked() const { return (land == WATER) || (land == GRID) || rockHeight || (plant && stage >= 2); }
+	bool IsInternalPassable() const	{ return !IsInternalBlocked(); }
+
 	bool FluidSink() const			{ return (land == WATER) || (land == GRID) || (land == PORT); }
 	
 	// does this and rhs render the same voxel?

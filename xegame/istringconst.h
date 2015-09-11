@@ -64,6 +64,7 @@ public:
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
 	static grinliz::IString worker;
+	static grinliz::IString visitor;
 	static grinliz::IString mob;
 
 	static grinliz::IString ring;

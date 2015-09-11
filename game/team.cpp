@@ -111,11 +111,11 @@ grinliz::IString Team::TeamName(int team)
 	SplitID(team, &group, &id);
 
 	switch (group) {
-		//case TEAM_NEUTRAL:		GLASSERT(0);	name = StringPool::Intern("neutral");		break;
-		//case TEAM_CHAOS:		GLASSERT(0);	name = StringPool::Intern("chaos");			break;
-		//case TEAM_RAT:			GLASSERT(0);	name = ISC::trilobyte;						break;
-		//case TEAM_GREEN_MANTIS:	GLASSERT(0);	name = ISC::mantis;							break;
-		//case TEAM_RED_MANTIS:	GLASSERT(0);	name = ISC::redMantis;						break;
+		case TEAM_NEUTRAL:			name = StringPool::Intern("neutral");		break;
+		case TEAM_CHAOS:			name = StringPool::Intern("chaos");			break;
+		case TEAM_RAT:				name = ISC::trilobyte;						break;
+		case TEAM_GREEN_MANTIS:		name = ISC::mantis;							break;
+		case TEAM_RED_MANTIS:		name = ISC::redMantis;						break;
 
 		case TEAM_TROLL:
 		// Since Trolls can't build anything,
@@ -148,7 +148,6 @@ grinliz::IString Team::TeamName(int team)
 		break;
 
 		case TEAM_VISITOR:
-		GLASSERT(0);	
 		name = StringPool::Intern("Visitor");
 		break;
 
@@ -287,10 +286,16 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 
 ERelate Team::GetRelationship(Chit* chit0, Chit* chit1)
 {
-	if (chit0->GetItem() && chit1->GetItem()) {
-		ERelate r = GetRelationship(chit0->GetItem()->Team(), chit1->GetItem()->Team());
+	const GameItem* item0 = chit0->GetItem();
+	const GameItem* item1 = chit1->GetItem();
+
+	if (item0 && item1) {
+		const int team0 = item0->Team();
+		const int team1 = item1->Team();
+
+		ERelate r = GetRelationship(team0, team1);
 		// Check symmetry:
-		GLASSERT(r == GetRelationship(chit1->GetItem()->Team(), chit0->GetItem()->Team()));
+		GLASSERT(r == GetRelationship(team1, team0));
 		return r;
 	}
 	return ERelate::NEUTRAL;

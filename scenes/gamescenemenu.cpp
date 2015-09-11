@@ -398,12 +398,17 @@ void GameSceneMenu::SetSquadDisplay(CoreScript* cs)
 		else if (squaddies.Size() && !sector.IsZero() && sector != ToSector(cs->ParentChit()->Position())) {
 			str.Format("%s\nAt %c%d", NAME[i], 'A' + sector.x, 1 + sector.y);
 		}
+		else if (squaddies.Size()) {
+			str.Format("%s\nReady", NAME[i]);
+		}
+		/* Provides detail that doesn't sem to add value. 
 		else if (squaddies.Size() && moraleAve > 0.95) {
 			str.Format("%s\nReady", NAME[i]);
 		}
 		else if (squaddies.Size()) {
 			str.Format("%s\nRest %d%%", NAME[i], int(moraleAve*100.0f));
 		}
+		*/
 		squadButton[i + 1].SetText(str.safe_str());
 	}
 }

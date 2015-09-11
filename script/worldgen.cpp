@@ -26,7 +26,6 @@ static const float OCTAVE = 0.18f;
 
 SectorData::~SectorData()
 {
-	delete pather;
 }
 
 void SectorData::Serialize(XStream* xs)
@@ -39,11 +38,6 @@ void SectorData::Serialize(XStream* xs)
 	XARC_SER(xs, name);
 	XARC_SER(xs, defaultSpawn);
 	XarcClose(xs);
-
-	if (xs->Loading()) {
-		delete pather;
-		pather = 0;
-	}
 }
 
 

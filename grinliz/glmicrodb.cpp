@@ -3,26 +3,33 @@
 
 using namespace grinliz;
 
+// Sorting didn't help much. Generally very small arrays.
+// Basic
+// grinliz::MicroDB::Find	0.29s	0.70s	2.17%	5.30%	lumos	c:\src\alteraorbis\grinliz\glmicrodb.cpp	8	0xf0ae5c
+// Use pointers
+// grinliz::MicroDB::Find	0.23s	0.74s	1.62%	5.14%	lumos	c:\src\alteraorbis\grinliz\glmicrodb.cpp	11	0x3daeb1
+// Split into key and value arrays?
+
 
 const MicroDB::Entry* MicroDB::Find( const IString& key ) const
 {
-	for( int i=0; i<dataArr.Size(); ++i ) {
-		if ( dataArr[i].key == key ) {
-			return &dataArr[i];
+	for (const Entry* e = dataArr.Mem(); e < dataArr.End(); ++e) {
+		if (e->key == key) {
+			return e;
 		}
 	}
 	return 0;	
 }
 
 
-MicroDB::Entry* MicroDB::FindOrCreate( const IString& key )
+MicroDB::Entry* MicroDB::FindOrCreate(const IString& key)
 {
-	for( int i=0; i<dataArr.Size(); ++i ) {
-		if ( dataArr[i].key == key ) {
+	for (int i = 0; i < dataArr.Size(); ++i) {
+		if (dataArr[i].key == key) {
 			return &dataArr[i];
 		}
 	}
-	Entry* e = dataArr.PushArr( 1 );
+	Entry* e = dataArr.PushArr(1);
 	e->key = key;
 	return e;
 }

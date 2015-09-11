@@ -4,10 +4,18 @@ x character scene: show team affiliation, hostile to core?
 x teleport should work during grid travel
 x core needs to target the center of model, as do some plants
 x Cap core spawns to global population limits
-- reorder squad units
+x reorder squad units
+x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to set correct limit values.
+  Not sure it is working. (Doesn't save...move to non-serialized code.)
 - Kamakiri deity
-- Art for R1K, QCore
-- no testing of pop cap - not sure it is working. (Doesn't save...move to non-serialized code.)
+- Art
+	- R1K
+	- QCore
+	- MotherCore
+
+- rework fonts on title screen
+- more announcement when core taken over - popup!
+
 
 - Better world gen:
 	- feature: canyon
@@ -20,14 +28,12 @@ x Cap core spawns to global population limits
 - troll vs. goblin icons too similar
 - change xp -> effective level cap to 10-12?
 - no control flags in water
-- rework fonts on title screen
 - more ability to track units from census screens
 - starting denizens at deities, without weapons??
 - mouse size buttons vs. touch size buttons
 - Get to her character screen - why is random denizen attacking, etc?
 - partial refund of gold when you clear
 - Drop anywhere or quick sell button
-- more announcement when core taken over - popup!
 - Beta team never left...all just hanging around at home. Zombie waypoint flags. Couldn't get to #2 - there was no #1.
 - modes confusing
 	- cursor change?
@@ -58,7 +64,6 @@ x Cap core spawns to global population limits
 - teleport out on war switch
 - world gen too slow in debug
 - GT: player portrait size should match enemy portrait size (2/20/2015)
-
 - attack focus needs tweaking. attack ground needs tweaking.
 - optimize debug
 - autosave
@@ -177,14 +182,6 @@ x AI take over mode?
 	x text report on the rise and fall of other domains (mantis and gob-men. obviously needs to be implemented first)
 	- enhance the text reports with screen shots of the events (which replace the map as it is now)
 	
-- Census
-    - re-do visitor likes to account for the grids they pass through
-	- name / level / health display
-	x money checks optional
-	x needs to feel interactive
-	x browsing of items/people
-	x redo UI layout
-
 - Market
 	- world effects morale/needs: water, tombstones, temples, etc.
 	x proper game start: location, selection of team color, icons
@@ -309,6 +306,14 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+
+x Census
+    d re-do visitor likes to account for the grids they pass through
+	x name / level / health display
+	x money checks optional
+	x needs to feel interactive
+	x browsing of items/people
+	x redo UI layout
 x Micro-Game
 	x world gen
 		x fluid: water and lava determined by weather & team

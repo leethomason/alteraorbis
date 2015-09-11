@@ -399,6 +399,7 @@ public:
 	grinliz::IString MOB() const	{ return keyValues.GetIString(ISC::mob); }
 	bool IsDenizen() const			{ return keyValues.GetIString(ISC::mob) == ISC::denizen; }
 	bool IsWorker() const			{ return name == ISC::worker; }
+	bool IsVisitor() const			{ return name == ISC::visitor; }
 
 	virtual MeleeWeapon*	ToMeleeWeapon()		{ return 0; }
 	virtual RangedWeapon*	ToRangedWeapon()	{ return 0; }

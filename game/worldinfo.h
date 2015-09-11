@@ -34,7 +34,7 @@ namespace micropather {
 class SectorData
 {
 public:
-	SectorData() : ports(0), area(0), pather(0) {
+	SectorData() : ports(0), area(0) {
 		core.Zero();
 		sector.Zero();
 	}
@@ -52,7 +52,6 @@ public:
 	int							ports;		// if attached to the grid, has ports. 
 	grinliz::Vector2I			core;		// core location, in map coordinates
 	int							area;
-	micropather::MicroPather*	pather;
 	grinliz::IString			name;
 	grinliz::IString			defaultSpawn;
 

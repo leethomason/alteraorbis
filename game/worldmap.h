@@ -151,7 +151,7 @@ public:
 	void UpdateBlock( int x, int y );
 	void UpdateBlock(const grinliz::Rectangle2I& rect);	// convenience variation.
 
-	bool IsPassable( int x, int y ) const;
+	bool IsPassable(int x, int y, bool ignoreBuildings = false) const;
 	
 	bool IsLand( int x, int y )		{ 
 		int i = INDEX(x,y);
@@ -173,7 +173,8 @@ public:
 
 	// Uses the very fast straight line pather.
 	bool HasStraightPath( const grinliz::Vector2F& start, 
-						  const grinliz::Vector2F& end );
+						  const grinliz::Vector2F& end,
+						  bool ignoreBuildings);
 
 	// Checks if there is a staight path to stand beside a building.
 	bool HasStraightPathBeside( const grinliz::Vector2F& start,
@@ -340,7 +341,7 @@ private:
 	//	Grid path:		intermediate; a path checked by a step walk between points on the grid
 	//  State path:		the micropather computed region
 
-	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
+	bool GridPath(const grinliz::Vector2F& start, const grinliz::Vector2F& end, bool ignoreBuildings);
 
 	grinliz::Vector2I ZoneOrigin( int x, int y ) const {
 		const WorldGrid& g = grid[INDEX(x,y)];
@@ -428,12 +429,7 @@ private:
 	grinliz::Rectangle2I		debugRegionOverlay;
 	SectorPort					randomPortDebug;
 
-	micropather::MicroPather*	currentPather;
-	micropather::MicroPather* PushPather( const grinliz::Vector2I& sector );
-	void PopPather() {
-		GLASSERT( currentPather );
-		currentPather = 0;
-	}
+	micropather::MicroPather* GetPather(const grinliz::Vector2I& sector, bool createIfNeeded = true);
 
 	MP_VECTOR< void* >						pathRegions;
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;
@@ -465,6 +461,8 @@ private:
 	// Memory pool of models to use for tree rendering.
 	grinliz::CDynArray< Model* > treePool;
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
+
+	micropather::MicroPather*	pathers[NUM_SECTORS_2];
 
 	// Big memory: the actual map.
 	WorldGrid grid[MAX_MAP_SIZE*MAX_MAP_SIZE];

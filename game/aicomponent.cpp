@@ -366,7 +366,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			//			 to keep that in mind.
 
 			bool path = fullSectorAware
-				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()));
+				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()), true);
 						
 			if (mobFilter.Accept(chit)) {
 				if (path && FEFilter<ERelate::ENEMY, ERelate::ENEMY>(parentChit, chit->ID()))
@@ -391,7 +391,7 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 		}
 
 		Chit* saveTargetChit = Context()->chitBag->GetChit(saveTarget);
-		if (saveTargetChit) {
+		if (saveTargetChit && !saveTargetChit->GetItem()->IsVisitor()) {
 			for (int k = 0; k < NFILTER; ++k) {
 				// Move the save target to the front of the appropriate array.
 				int idx = arr[k].Find(saveTargetChit);
@@ -1472,7 +1472,7 @@ bool AIComponent::ThinkCollectNearFruit()
 
 		for (int i = 0; i < arr.Size(); ++i) {
 			Vector2I plantPos = ToWorld2I(arr[i]->Position());
-			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos))) {
+			if (Context()->worldMap->HasStraightPath(pos2, ToWorld2F(plantPos), false)) {
 				if (Log()) {
 					GLOUTPUT(("AI ID=%d ThinkCollectNearFruit\n", parentChit->ID()));
 				}
@@ -1604,7 +1604,7 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 	for (int i = 0; i < chitArr.Size(); ++i) {
 		Chit* chit = chitArr[i];
 		Vector2F fruitPos = ToWorld2F(chit->Position());
-		if (context->worldMap->HasStraightPath(pos2, fruitPos)) {
+		if (context->worldMap->HasStraightPath(pos2, fruitPos, false)) {
 			*dest = fruitPos;
 			arr->Push(chit);
 			// Push other fruit at this same location.
@@ -1622,9 +1622,6 @@ void AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest, CChitArray* a
 	// Now we need to use full pathing for meaningful results.
 	// Only need to check the farm porch - all fruit goes there.
 	for (int pass = 0; pass < 2; ++pass) {
-//		if (pass == 1) {
-//			int debug = 1;
-//		}
 		CChitArray buildingArr;
 		chitBag->FindBuildingCC(pass == 0 ? ISC::farm : ISC::distillery,
 								ToSector(ToWorld2I(pos2)),
@@ -2121,7 +2118,7 @@ bool AIComponent::ThinkLoot()
 
 	for (int i = 0; i < chitArr.Size(); ++i) {
 		Vector2F goldPos = ToWorld2F(chitArr[i]->Position());
-		if (context->worldMap->HasStraightPath(goldPos, pos2)) {
+		if (context->worldMap->HasStraightPath(goldPos, pos2, false)) {
 			taskList.Push(Task::MoveTask(goldPos));
 			if (loot.Accept(chitArr[i])) {
 				// Gold is hoovered-up. Only need pickup for loot.

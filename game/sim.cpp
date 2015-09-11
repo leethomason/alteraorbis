@@ -56,6 +56,23 @@ using namespace tinyxml2;
 
 Weather* Weather::instance	= 0;
 
+static const int NSPAWNS = 4;
+
+static const char* SPAWN_NAME[NSPAWNS] = {
+	"trilobyte",
+	"mantis",
+	"troll",
+	"redMantis"
+};
+
+static const float SPAWN_PERCENT[NSPAWNS] = {
+	0.20f,
+	0.40f,
+	0.20f,
+	0.20f
+};
+
+
 Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10 * 1000), denizenClock(DENIZEN_CLOCK), visitorClock(4*1000)
 {
 	context.game = g;
@@ -207,6 +224,10 @@ void Sim::Load(const char* mapDAT, const char* gameDAT)
 			fclose(fp);
 		}
 	}
+	// Set the spawn limits, try to limit population blowouts.
+	for (int i = 0; i < NSPAWNS; ++i) {
+		context.chitBag->census.SetTypical(StringPool::Intern(SPAWN_NAME[i]), int(SPAWN_PERCENT[i] * float(TYPICAL_LESSER)));
+	}
 }
 
 
@@ -285,27 +306,9 @@ void Sim::AssignDefaultSpawns()
 	int nCores = 0;
 	CoreScript** coreScriptArr = CoreScript::GetCoreList(&nCores);
 
-	static const int NSPAWNS = 4;
-	static const char* spawns[NSPAWNS] = {
-		"trilobyte",
-		"mantis",
-		"troll",
-		"redMantis"
-	};
-	static const float factor[NSPAWNS] = {
-		0.20f,
-		0.40f,
-		0.20f,
-		0.20f
-	};
-
-	for (int i = 0; i < NSPAWNS; ++i) {
-		context.chitBag->census.SetTypical(StringPool::Intern(spawns[i]), int(factor[i] * float(TYPICAL_LESSER)));
-	}
-
 	int count[NSPAWNS] = { 0 };
 	for (int i = 0; i < NSPAWNS; ++i) {
-		count[i] = int(factor[i] * nCores);
+		count[i] = int(SPAWN_PERCENT[i] * nCores);
 	}
 	int subTotal = 0;
 	for (int i = 1; i < NSPAWNS; ++i) {
@@ -317,7 +320,7 @@ void Sim::AssignDefaultSpawns()
 	CDynArray<const char*> list;
 	for (int i = 0; i < NSPAWNS; ++i) {
 		for (int k = 0; k < count[i]; ++k) {
-			list.Push(spawns[i]);
+			list.Push(SPAWN_NAME[i]);
 		}
 	}
 	static const int FUZZ = 3;

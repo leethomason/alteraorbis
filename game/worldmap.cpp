@@ -113,7 +113,6 @@ WorldMap::WorldMap(int width, int height) : Map(width, height)
 
 	engine = 0;
 	physics = 0;
-	currentPather = 0;
 	worldInfo = 0;
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
@@ -132,6 +131,7 @@ WorldMap::WorldMap(int width, int height) : Map(width, height)
 	treePool.Reserve(1000);
 
 	memset(grid, 0, sizeof(WorldGrid)*MAX_MAP_SIZE*MAX_MAP_SIZE);
+	memset(pathers, 0, sizeof(pathers[0]) * NUM_SECTORS_2);
 
 	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
@@ -154,6 +154,11 @@ WorldMap::~WorldMap()
 
 	delete voxelVertexVBO;
 	delete gridVertexVBO;
+
+	for (int i = 0; i < NUM_SECTORS_2; ++i) {
+		delete pathers[i];
+		pathers[i] = 0;
+	}
 }
 
 
@@ -364,9 +369,9 @@ void WorldMap::Load( const char* filename )
 
 void WorldMap::PatherCacheHitMiss( const grinliz::Vector2I& sector, micropather::CacheData* data )
 {
-	const SectorData& sd = worldInfo->GetSectorData( sector );
-	if ( sd.pather ) {
-		sd.pather->GetCacheData( data );
+	MicroPather* pather = GetPather(sector, false);
+	if ( pather ) {
+		pather->GetCacheData( data );
 	}
 }
 
@@ -970,18 +975,18 @@ void WorldMap::GetWorldGrid(const grinliz::Vector2I&p, WorldGrid* arr, int count
 void WorldMap::ResetPather( int x, int y )
 {
 	Vector2I sector = ToSector(x, y);
-	micropather::MicroPather* pather = PushPather( sector );
-	pather->Reset();
+	micropather::MicroPather* pather = GetPather(sector, false);
+	if (pather)
+		pather->Reset();
 	zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT);
-	PopPather();
 }
 
 
-bool WorldMap::IsPassable( int x, int y ) const
+bool WorldMap::IsPassable( int x, int y, bool ignoreBuildings ) const
 {
 	int index = INDEX(x,y);
 	const WorldGrid& wg = grid[index];
-	return wg.IsPassable();
+	return ignoreBuildings ? wg.IsInternalPassable() : wg.IsPassable();
 }
 
 
@@ -1422,7 +1427,7 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 // Specifically this link: http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
 // Returns true if there is a straight line path between the start and end.
 // The line-walk can/should get moved to the utility package. (and the grid lookup replaced with visit() )
-bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p1 )
+bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p1, bool ignoreBuildings )
 {
 	if (ToWorld2I(p0) == ToWorld2I(p1))
 		return true;	// start-end same
@@ -1462,7 +1467,7 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
     for (; n > 0; --n) {
 		CalcZone( x,y );
 
-        if ( !IsPassable(x,y) )
+        if ( !IsPassable(x, y, ignoreBuildings) )
 			return false;
 
         if (error > 0) {
@@ -1541,10 +1546,10 @@ SectorPort WorldMap::NearestPort(const Vector2F& pos, const Vector2F* origin)
 }
 
 
-bool WorldMap::HasStraightPath( const Vector2F& start, const Vector2F& end )
+bool WorldMap::HasStraightPath(const Vector2F& start, const Vector2F& end, bool ignoreBuildings)
 {
 	// Try a straight line ray cast
-	return GridPath( start, end );
+	return GridPath(start, end, ignoreBuildings);
 }
 
 
@@ -1553,52 +1558,44 @@ bool WorldMap::HasStraightPathBeside(const Vector2F& start, const Rectangle2I& r
 	if (start.x < rect.min.x) {
 		for (int y = rect.min.y; y <= rect.max.y; ++y) {
 			Vector2I end2i = { rect.min.x - 1, y };
-			bool path = GridPath(start, ToWorld2F(end2i));
+			bool path = GridPath(start, ToWorld2F(end2i), false);
 			if (path) return true;
 		}
 	}
 	if (start.x > rect.max.x) {
 		for (int y = rect.min.y; y <= rect.max.y; ++y) {
 			Vector2I end2i = { rect.max.x + 1, y };
-			bool path = GridPath(start, ToWorld2F(end2i));
+			bool path = GridPath(start, ToWorld2F(end2i), false);
 			if (path) return true;
 		}
 	}
 	if (start.y < rect.min.y) {
 		for (int x = rect.min.x; x <= rect.max.x; ++x) {
 			Vector2I end2i = { x, rect.min.y - 1 };
-			GridPath(start, ToWorld2F(end2i));
+			GridPath(start, ToWorld2F(end2i), false);
 		}
 	}
 	if (start.y > rect.max.y) {
 		for (int x = rect.min.x; x <= rect.max.x; ++x) {
 			Vector2I end2i = { x, rect.max.y + 1 };
-			GridPath(start, ToWorld2F(end2i));
+			GridPath(start, ToWorld2F(end2i), false);
 		}
 	}
 	return false;
 }
 
 
-micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
+micropather::MicroPather* WorldMap::GetPather(const grinliz::Vector2I& sector, bool createIfNeeded)
 {
-	GLASSERT( currentPather == 0 );
 	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
 	GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
-	SectorData* sd = 0;
-	if ( this->UsingSectors() ) {
-		sd = worldInfo->SectorDataMemMutable() + sector.y*NUM_SECTORS+sector.x;
+	int index = sector.y * NUM_SECTORS + sector.x;
+
+	if (!pathers[index] && createIfNeeded) {
+		const SectorData& sd = this->GetSectorData(sector);
+		pathers[index] = new micropather::MicroPather( this, sd.area ? sd.area : 1000, 7, true );
 	}
-	else {
-		sd = worldInfo->SectorDataMemMutable();
-	}
-	if ( !sd->pather ) {
-		int area = sd->area ? sd->area : 1000;
-		sd->pather = new micropather::MicroPather( this, area, 7, true );
-	}
-	currentPather = sd->pather;
-	GLASSERT( currentPather );
-	return currentPather;
+	return pathers[index];
 }
 
 
@@ -1658,23 +1655,23 @@ bool WorldMap::CalcPathBeside(	const grinliz::Vector2F& start,
 }
 
 
-bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
-							const grinliz::Vector2F& end, 
-							CDynArray<grinliz::Vector2F> *path,
-							float *totalCost,
-							bool debugging )
+bool WorldMap::CalcPath(const grinliz::Vector2F& start,
+						const grinliz::Vector2F& end,
+						CDynArray<grinliz::Vector2F> *path,
+						float *totalCost,
+						bool debugging)
 {
 	debugPathVector.Clear();
-	if ( !path ) { 
+	if (!path) {
 		path = &pathCache;
 	}
 	path->Clear();
 	bool okay = false;
 	float dummyCost = 0;
-	if ( !totalCost ) totalCost = &dummyCost;	// prevent crash later.
+	if (!totalCost) totalCost = &dummyCost;	// prevent crash later.
 
 	Vector2I starti = { (int)start.x, (int)start.y };
-	Vector2I endi   = { (int)end.x,   (int)end.y };
+	Vector2I endi = { (int)end.x, (int)end.y };
 	Vector2I sector = ToSector(starti);
 
 	// Flush out regions that aren't valid.
@@ -1686,93 +1683,92 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	//}
 
 	// But do flush the current region.
-	CalcZone( starti.x, starti.y );
-	CalcZone( endi.x,   endi.y );
+	CalcZone(starti.x, starti.y);
+	CalcZone(endi.x, endi.y);
 
-	WorldGrid* wgStart = grid + INDEX( starti.x, starti.y );
-	WorldGrid* wgEnd   = grid + INDEX( endi.x, endi.y );
+	WorldGrid* wgStart = grid + INDEX(starti.x, starti.y);
+	WorldGrid* wgEnd = grid + INDEX(endi.x, endi.y);
 
-	if ( !IsPassable( starti.x, starti.y ) || !IsPassable( endi.x, endi.y ) ) {
+	if (!IsPassable(starti.x, starti.y) || !IsPassable(endi.x, endi.y)) {
 		return false;
 	}
 	GLASSERT(wgStart->ZoneSize());	// persistant bug: if passable, should have zone. (was a typo in the CalcZone call.)
 	GLASSERT(wgEnd->ZoneSize());	// persistant bug: if passable, should have zone.
 
 	// Regions are convex. If in the same region, it is passable.
-	if ( wgStart->ZoneOrigin( starti.x, starti.y ) == wgEnd->ZoneOrigin( endi.x, endi.y ) ) {
+	if (wgStart->ZoneOrigin(starti.x, starti.y) == wgEnd->ZoneOrigin(endi.x, endi.y)) {
 		okay = true;
-		path->Push( start );
-		path->Push( end );
-		*totalCost = (end-start).Length();
+		path->Push(start);
+		path->Push(end);
+		*totalCost = (end - start).Length();
 	}
 
 	// Try a straight line ray cast
-	if ( !okay ) {
-		okay = GridPath( start, end );
-		if ( okay ) {
-			path->Push( start );
-			path->Push( end );
-			*totalCost = (end-start).Length();
+	if (!okay) {
+		okay = GridPath(start, end, false);
+		if (okay) {
+			path->Push(start);
+			path->Push(end);
+			*totalCost = (end - start).Length();
 		}
 	}
 
 	// Use the region solver.
-	if ( !okay ) {
-		micropather::MicroPather* pather = PushPather( sector );
+	if (!okay) {
+		micropather::MicroPather* pather = GetPather(sector);
 
-		int result = pather->Solve( ToState( starti.x, starti.y ), ToState( endi.x, endi.y ), 
-								    &pathRegions, totalCost );
-		if ( result == micropather::MicroPather::SOLVED ) {
+		int result = pather->Solve(ToState(starti.x, starti.y), ToState(endi.x, endi.y),
+								   &pathRegions, totalCost);
+		if (result == micropather::MicroPather::SOLVED) {
 			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
-			path->Push( start );
+			path->Push(start);
 			okay = true;
 
 			// Walk each of the regions, and connect them with vectors.
-			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
+			for (unsigned i = 0; i < pathRegions.size() - 1; ++i) {
 				Vector2I originA, originB;
-				ToGrid( pathRegions[i], &originA );
-				ToGrid( pathRegions[i+1], &originB );
+				ToGrid(pathRegions[i], &originA);
+				ToGrid(pathRegions[i + 1], &originB);
 
-				Rectangle2F bA = ZoneBounds( originA.x, originA.y );
-				Rectangle2F bB = ZoneBounds( originB.x, originB.y );					
-				bA.DoIntersection( bB );
+				Rectangle2F bA = ZoneBounds(originA.x, originA.y);
+				Rectangle2F bB = ZoneBounds(originB.x, originB.y);
+				bA.DoIntersection(bB);
 
 				// Every point on a path needs to be obtainable,
 				// else the chit will get stuck. There inset
 				// away from the walls so we don't put points
 				// too close to walls to get to.
 				static const float INSET = MAX_BASE_RADIUS;
-				if ( bA.min.x + INSET*2.0f < bA.max.x ) {
+				if (bA.min.x + INSET*2.0f < bA.max.x) {
 					bA.min.x += INSET;
 					bA.max.x -= INSET;
 				}
-				if ( bA.min.y + INSET*2.0f < bA.max.y ) {
+				if (bA.min.y + INSET*2.0f < bA.max.y) {
 					bA.min.y += INSET;
 					bA.max.y -= INSET;
 				}
 
 				Vector2F v = bA.min;
-				if ( bA.min != bA.max ) {
-					int result = ClosestPointOnLine( bA.min, bA.max, from, &v, true );
-					GLASSERT( result == INTERSECT );
-					if ( result == REJECT ) {
+				if (bA.min != bA.max) {
+					int result = ClosestPointOnLine(bA.min, bA.max, from, &v, true);
+					GLASSERT(result == INTERSECT);
+					if (result == REJECT) {
 						okay = false;
 						break;
 					}
 				}
-				path->Push( v );
+				path->Push(v);
 				from = v;
 			}
-			path->Push( end );
+			path->Push(end);
 		}
-		PopPather();
 	}
 
-	if ( okay ) {
-		if ( debugging ) {
-			for( int i=0; i<path->Size(); ++i )
-				debugPathVector.Push( (*path)[i] );
+	if (okay) {
+		if (debugging) {
+			for (int i = 0; i < path->Size(); ++i)
+				debugPathVector.Push((*path)[i]);
 		}
 	}
 	else {
@@ -1803,7 +1799,7 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 	
 	if ( start && end ) {
 		float cost=0;
-		micropather::MicroPather* pather = PushPather( sector );
+		micropather::MicroPather* pather = GetPather( sector );
 		int result = pather->Solve( start, end, &pathRegions, &cost );
 
 		if ( result == micropather::MicroPather::SOLVED ) {
@@ -1812,7 +1808,6 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 				vp->SetDebugPath( true );
 			}
 		}
-		PopPather();
 	}
 }
 
