@@ -1457,6 +1457,7 @@ bool AIComponent::ThinkCollectNearFruit()
 
 	ItemComponent* ic = parentChit->GetItemComponent();
 	if (!ic) return false;
+	if (!ic->CanAddToInventory()) return false;
 
 	int count = ic->NumItems(ISC::fruit) + ic->NumItems(ISC::elixir);
 
@@ -2943,39 +2944,28 @@ int AIComponent::DoTick(U32 deltaTime)
 			CoreScript* cs = CoreScript::GetCore(ToSector(parentChit->Position()));
 			CoreScript* homeCore = CoreScript::GetCoreFromTeam(parentChit->Team());
 			bool atHomeCore = cs && (cs == homeCore);
+			static const double LOW_MORALE = 0.25;
+
+			if (parentChit->PlayerControlled())
+				needs.SetFull();
+			if (!(gameItem->flags & GameItem::HAS_NEEDS))
+				needs.SetMorale(1);
 
 			// Squaddies, on missions, don't have needs. Keeps them 
 			// from running off or falling apart in the middle.
 			// But for the other denizens:
-			if (!homeCore || !homeCore->IsSquaddieOnMission(parentChit->ID(), 0, 0)) {
-				static const double LOW_MORALE = 0.25;
-
-				if (AtFriendlyOrNeutralCore()) {
-					needs.DoTick(needsTicker.Period(), aiMode == AIMode::BATTLE_MODE, false, &gameItem->GetPersonality());
-
-					if (parentChit->PlayerControlled()) {
-						needs.SetFull();
-					}
-					else if (!(gameItem->flags & GameItem::HAS_NEEDS)) {
-						needs.SetMorale(1.0);	// no needs, so morale doesn't change.
-					}
-					else if (atHomeCore && needs.Morale() == 0) {
-						DoMoraleZero();
-					}
-					else if (!atHomeCore && needs.Morale() < LOW_MORALE) {
-						bool okay = TravelHome(true);
-						if (!okay) needs.SetMorale(1.0);
-					}
+			if (atHomeCore) {
+				needs.DoTick(needsTicker.Period(), aiMode == AIMode::BATTLE_MODE, false, &gameItem->GetPersonality());
+				if (needs.Morale() == 0)
+					DoMoraleZero();
+			}
+			else if (homeCore) {
+				if (!homeCore->IsSquaddieOnMission(parentChit->ID(), 0, 0)) {
+					needs.DoTravelTick(deltaTime);
 				}
-				else {
-					// We are wandering the world.
-					if ((gameItem->flags & GameItem::HAS_NEEDS) && !parentChit->PlayerControlled()) {
-						needs.DoTravelTick(deltaTime);
-						if (needs.Morale() == 0) {
-							bool okay = TravelHome(true);
-							if (!okay) needs.SetMorale(1.0);
-						}
-					}
+				if (needs.Morale() < LOW_MORALE) {
+					bool okay = TravelHome(true);
+					if (!okay) needs.SetMorale(1.0);
 				}
 			}
 		}

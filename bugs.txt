@@ -12,10 +12,11 @@ x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to s
 	- R1K
 	- QCore
 	- MotherCore
+- icon for squad dragging
+- always accept elixir; exchange for gold if full
 
 - rework fonts on title screen
 - more announcement when core taken over - popup!
-
 
 - Better world gen:
 	- feature: canyon
