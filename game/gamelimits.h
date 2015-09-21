@@ -45,6 +45,7 @@ static const int FARM_GROW_RAD		= 2;	// grid squares affected by farm. total reg
 static const int TECH_MAX			= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
 static const int MAX_WILD_FRUIT		= 300;
 static const int GOLD_XFER_TAKEOVER = 500;
+static const int GOLD_PER_ELIXIR	= 5;	// Gold paid for elixir delivery, if tavern is full.
 
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.

@@ -1878,7 +1878,8 @@ bool AIComponent::ThinkDelivery()
 				Chit* building = Context()->chitBag->FindBuilding(iBuilding, sector,
 																  &pos,
 																  LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
-				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
+
+				if (building && building->GetItemComponent()) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 					GLASSERT(msc);
 					CoreScript* coreScript = CoreScript::GetCore(sector);

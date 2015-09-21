@@ -482,8 +482,22 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 		return;
 	}
 	if (buildingName == ISC::bar) {
+		// Transfer elixir to the bar (tavern.) If overflow, elixir is consumed
+		// and payment is generated.
 		int nTransfer = ic->TransferInventory(chit->GetItemComponent(), false, ISC::elixir);
 		building->SetTickNeeded();
+
+		const GameItem* elixir = 0;
+		while ((elixir = chit->GetItemComponent()->FindItem(ISC::elixir)) != nullptr) {
+			GameItem* item = chit->GetItemComponent()->RemoveFromInventory(elixir);
+			delete item;
+			chit->GetWallet()->Deposit(ReserveBank::GetWallet(), GOLD_PER_ELIXIR);
+			RenderComponent* rc = chit->GetRenderComponent();
+			if (rc) {
+				rc->AddDeco("loot");
+			}
+		}
+
 		if (nTransfer) {
 			return;	// only return on transfer. else use the bar!
 		}
