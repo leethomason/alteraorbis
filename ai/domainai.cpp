@@ -38,6 +38,7 @@ DomainAI* DomainAI::Factory(int team)
 
 		case DEITY_Q:
 		case DEITY_R1K:
+		case DEITY_KALA:
 		case DEITY_TRUULGA:
 		return new ForgeDomainAI();
 
@@ -773,7 +774,7 @@ int ForgeDomainAI::DoTick(U32 delta)
 			ForgeScript::ForgeData forgeData;
 			forgeData.type = parentChit->random.Rand(ForgeScript::NUM_ITEM_TYPES);
 			forgeData.subType = 0;
-			forgeData.tech = (group == DEITY_R1K) ? 1 : 0;
+			forgeData.tech = (group == DEITY_R1K || group == DEITY_KALA) ? 1 : 0;
 			forgeData.level = (group == DEITY_Q) ? 0 : 3;
 			forgeData.team = parentChit->Team();
 

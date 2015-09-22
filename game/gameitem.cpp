@@ -1009,7 +1009,8 @@ int GameItem::Deity() const
 		case TEAM_GOB:
 		return DEITY_Q;
 
-		// FIXME: no kamakiri deity
+		case TEAM_KAMAKIRI:
+		return DEITY_KALA;
 	}
 	return 0;
 }

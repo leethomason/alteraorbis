@@ -38,10 +38,11 @@ enum {
 	TEAM_KAMAKIRI,
 	TEAM_VISITOR,
 
-	DEITY_MOTHER_CORE,
-	DEITY_Q,
-	DEITY_R1K,
-	DEITY_TRUULGA,
+	DEITY_MOTHER_CORE,	// The creator
+	DEITY_Q,			// Logistics core; cheap weapons; Gobmen
+	DEITY_R1K,			// Adventure core; Human
+	DEITY_KALA,			// Battle core; Kamakiri
+	DEITY_TRUULGA,		// Weapon supplier; moderate weapons; Troll
 
 	NUM_TEAMS,
 	NUM_MOB_TEAMS = DEITY_MOTHER_CORE,

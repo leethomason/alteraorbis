@@ -474,6 +474,7 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		case DEITY_MOTHER_CORE:
 		case DEITY_Q:
 		case DEITY_R1K:
+		case DEITY_KALA:
 		colors = NEUTRAL_COLORS;
 		nColors = GL_C_ARRAY_SIZE(NEUTRAL_COLORS) / 3;
 		break;

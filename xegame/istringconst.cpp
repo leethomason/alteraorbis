@@ -123,6 +123,7 @@ IString IStringConst::MotherCore;
 IString IStringConst::QCore;
 IString IStringConst::R1k;
 IString IStringConst::Truulga;
+IString IStringConst::Kala;
 IString IStringConst::Director;
 IString IStringConst::Camera;
 IString IStringConst::need__food;
@@ -252,6 +253,7 @@ void IStringConst::Init()
 	QCore = StringPool::Intern( "QCore", true );
 	R1k = StringPool::Intern( "R1k", true );
 	Truulga = StringPool::Intern( "Truulga", true );
+	Kala = StringPool::Intern( "Kala", true );
 	Director = StringPool::Intern( "Director", true );
 	Camera = StringPool::Intern( "Camera", true );
 	need__food = StringPool::Intern( "need.food", true );

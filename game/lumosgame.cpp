@@ -190,6 +190,7 @@ RenderAtom LumosGame::CalcDeityAtom(int team)
 		case DEITY_MOTHER_CORE:		return CalcUIIconAtom("motherCore");
 		case DEITY_Q:				return CalcUIIconAtom("qcore");
 		case DEITY_R1K:				return CalcUIIconAtom("r1kcore");
+		case DEITY_KALA:			return CalcUIIconAtom("kamakiri");
 		case DEITY_TRUULGA:			return CalcUIIconAtom("truulgacore");
 		default: GLASSERT(0); break;
 	}

@@ -483,7 +483,7 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 	}
 	if (buildingName == ISC::bar) {
 		// Transfer elixir to the bar (tavern.) If overflow, elixir is consumed
-		// and payment is generated.
+		// and payment is generated. Keeps the world from "filling up" with elixir.
 		int nTransfer = ic->TransferInventory(chit->GetItemComponent(), false, ISC::elixir);
 		building->SetTickNeeded();
 

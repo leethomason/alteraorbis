@@ -7,13 +7,14 @@ x Cap core spawns to global population limits
 x reorder squad units
 x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to set correct limit values.
   Not sure it is working. (Doesn't save...move to non-serialized code.)
+x always accept elixir; exchange for gold if full
 - Kamakiri deity
 - Art
 	- R1K
 	- QCore
 	- MotherCore
 - icon for squad dragging
-- always accept elixir; exchange for gold if full
+- icon for Kala: CalcDeityAtom
 
 - rework fonts on title screen
 - more announcement when core taken over - popup!
