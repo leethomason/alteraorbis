@@ -8,11 +8,14 @@ x reorder squad units
 x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to set correct limit values.
   Not sure it is working. (Doesn't save...move to non-serialized code.)
 x always accept elixir; exchange for gold if full
-- Kamakiri deity
+x Kamakiri deity
+x no control flags in water
+x damage: items seem to get blown away...crystal not dropped
 - Art
 	- R1K
 	- QCore
 	- MotherCore
+	- Kala
 - icon for squad dragging
 - icon for Kala: CalcDeityAtom
 
@@ -23,13 +26,11 @@ x always accept elixir; exchange for gold if full
 	- feature: canyon
 	- feature: add terrain displacement.
 - Squads won't "tunnel" through blocked paths.
-- damage: items seem to get blown away...crystal not dropped
 - how do deity cores get crystal??
 - "avatar is off the chase"
 - destination icons - still a lingering mark 
 - troll vs. goblin icons too similar
 - change xp -> effective level cap to 10-12?
-- no control flags in water
 - more ability to track units from census screens
 - starting denizens at deities, without weapons??
 - mouse size buttons vs. touch size buttons

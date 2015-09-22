@@ -40,7 +40,7 @@ static const double TECH_DECAY_1 = 0.0016;
 
 using namespace grinliz;
 
-CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+CoreScript* CoreScript::coreArr[NUM_SECTORS*NUM_SECTORS];
 HashTable<int, int>* CoreScript::teamToCoreInfo = 0;
 grinliz::CArray<CoreScript*, NUM_SECTORS*NUM_SECTORS> CoreScript::coreList;
 
@@ -162,8 +162,8 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(index);
-	GLASSERT(coreInfoArr[index].coreScript == 0);
-	coreInfoArr[index].coreScript = this;
+	GLASSERT(coreArr[index] == 0);
+	coreArr[index] = this;
 	coreList.Push(this);
 
 	aiTicker.Randomize(parentChit->random.Rand());
@@ -174,8 +174,8 @@ void CoreScript::OnAdd(Chit* chit, bool init)
 void CoreScript::OnRemove()
 {
 	int index = sector.y*NUM_SECTORS + sector.x;
-	GLASSERT(coreInfoArr[index].coreScript == this);
-	coreInfoArr[index].coreScript = 0;
+	GLASSERT(coreArr[index] == this);
+	coreArr[index] = 0;
 
 	int idx = coreList.Find(this);
 	GLASSERT(idx >= 0);
@@ -526,6 +526,7 @@ int CoreScript::Citizens(CChitArray* arr)
 void CoreScript::AddFlag(const Vector2I& _pos)
 {
 	Vector2I pos = _pos;
+
 	// A little UI fixup: set the flag to a porch
 	// if we click on the switch.
 	Chit* building = Context()->chitBag->QueryBuilding(IString(), pos, 0);
@@ -535,6 +536,9 @@ void CoreScript::AddFlag(const Vector2I& _pos)
 			pos = msc->PorchPos().min;
 		}
 	}
+
+	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(ToSector(pos));
+	if (wg.IsWater()) return;
 
 	Flag f = { pos, 0 };
 	if (flags.Find(f) < 0) {
@@ -610,9 +614,7 @@ void CoreScript::UpdateAI()
 		return;
 	}
 	int index = sector.y*NUM_SECTORS + sector.x;
-	CoreInfo* info = &coreInfoArr[index];
-	GLASSERT(info->coreScript == this);
-	(void)info;
+	GLASSERT(coreArr[index] == this);
 }
 
 
@@ -924,7 +926,7 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 	if (teamToCoreInfo->Query(team, &index)) {
 		// Make sure it is current:
 		GLASSERT(index >= 0 && index < NUM_SECTORS*NUM_SECTORS);
-		CoreScript* cs = coreInfoArr[index].coreScript;
+		CoreScript* cs = coreArr[index];
 //		GLASSERT(cs);	// cores get destroyed at odd times.
 		if (cs && cs->ParentChit()->Team() == team) {
 			return cs;
@@ -932,9 +934,9 @@ CoreScript* CoreScript::GetCoreFromTeam(int team)
 	}
 
 	for (int i = 0; i < NUM_SECTORS*NUM_SECTORS; ++i) {
-		if (coreInfoArr[i].coreScript && coreInfoArr[i].coreScript->ParentChit()->Team() == team) {
+		if (coreArr[i] && coreArr[i]->ParentChit()->Team() == team) {
 			teamToCoreInfo->Add(team, i);
-			return coreInfoArr[i].coreScript;
+			return coreArr[i];
 		}
 	}
 	return 0;

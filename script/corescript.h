@@ -32,16 +32,6 @@ class ChitContext;
 
 #define CCoreArray grinliz::CArray<CoreScript*, 32 >
 
-struct CoreInfo
-{
-	CoreScript* coreScript;	
-
-	// these are value for ai - so they are only updated every couple of seconds.
-	//int approxTeam;
-	//int approxMaxTech;	// 1-4
-};
-
-
 struct CoreAchievement
 {
 	void Clear() { techLevel = 0; gold = 0; population = 0; civTechScore = 0; }
@@ -148,13 +138,12 @@ public:
 	void RemoveTask(const grinliz::Vector2I& pos2i);
 	bool HasTask(const grinliz::Vector2I& pos2i);
 
-	static const CoreInfo& GetCoreInfo(const grinliz::Vector2I& sector) { 
+	static CoreScript* GetCore(const grinliz::Vector2I& sector) { 
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS);
 		GLASSERT(sector.y >= 0 && sector.y < NUM_SECTORS);
-		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
+		return coreArr[sector.y*NUM_SECTORS + sector.x]; 
 	}
 
-	static CoreScript*  GetCore(const grinliz::Vector2I& sector) { return GetCoreInfo(sector).coreScript; }
 	static CoreScript*  GetCoreFromTeam(int team);
 	static CoreScript** GetCoreList(int *n);
 	static CoreScript*  CreateCore(const grinliz::Vector2I& sector, int team, const ChitContext* context);
@@ -206,7 +195,7 @@ private:
 
 	grinliz::CDynArray<grinliz::Vector2I> waypoints[MAX_SQUADS];
 
-	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+	static CoreScript* coreArr[NUM_SECTORS*NUM_SECTORS];
 	static grinliz::HashTable<int, int>* teamToCoreInfo;
 	static grinliz::CArray<CoreScript*, NUM_SECTORS*NUM_SECTORS> coreList;
 };
