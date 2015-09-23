@@ -156,7 +156,7 @@ public:
 	static grinliz::IString QCore;
 	static grinliz::IString R1k;
 	static grinliz::IString Truulga;
-	static grinliz::IString Kala;
+	static grinliz::IString Kaxa;
 
 	static grinliz::IString Director;
 	static grinliz::IString Camera;

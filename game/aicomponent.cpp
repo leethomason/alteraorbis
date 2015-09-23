@@ -1014,8 +1014,15 @@ void AIComponent::ThinkRampage()
 		return;
 	}
 
-	// FIXME how to handle buildings?
-	if (wg1.RockHeight() || wg1.BlockingPlant()) {
+	Chit* building = Context()->chitBag->QueryBuilding(IString(), next, nullptr);
+	if (building) {
+		// Cancels rampage. Maybe not the best plan,
+		// hard to know what to do. (Destroy own buildings??)
+		rampage = NO_RAMPAGE;
+		aiMode = AIMode::NORMAL_MODE;
+		currentAction = AIAction::NO_ACTION;
+	}
+	else if (wg1.RockHeight() || wg1.BlockingPlant()) {
 		this->Target(next, false);
 		GLASSERT(thisIC->SelectWeapon(ItemComponent::SELECT_MELEE));
 	}
@@ -2085,15 +2092,16 @@ bool AIComponent::ThinkLoot()
 	// Is there stuff around to pick up?
 	const GameItem* gameItem = parentChit->GetItem();
 	if (!gameItem) return false;
+	int flags = gameItem->flags;
+	if ((flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP)) == 0) return false;
+	if (parentChit->PlayerControlled()) return false;
+
 	ItemComponent* thisIC = parentChit->GetItemComponent();
 	if (!thisIC) return false;
 
-	int flags = gameItem->flags;
 	const ChitContext* context = Context();
 	Vector2I sector = ToSector(parentChit->Position());
 
-	if (parentChit->PlayerControlled()) return false;
-	if ((flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP)) == 0) return false;
 	// RULE: If there isn't a Vault, then the workers shouldn't loot.
 	if (gameItem->IsWorker() && !Context()->chitBag->QueryBuilding(ISC::vault, SectorBounds(sector), 0)) return false;
 

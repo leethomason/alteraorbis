@@ -1010,7 +1010,7 @@ int GameItem::Deity() const
 		return DEITY_Q;
 
 		case TEAM_KAMAKIRI:
-		return DEITY_KALA;
+		return DEITY_KAXA;
 	}
 	return 0;
 }

@@ -163,8 +163,8 @@ grinliz::IString Team::TeamName(int team)
 		name = ISC::R1k;
 		break;
 
-		case DEITY_KALA:
-		name = ISC::Kala;
+		case DEITY_KAXA:
+		name = ISC::Kaxa;
 		break;
 
 		case DEITY_TRUULGA:
@@ -210,8 +210,8 @@ int Team::GetTeam( const grinliz::IString& itemName )
 	else if (itemName == ISC::R1k) {
 		return DEITY_R1K;
 	}
-	else if (itemName == ISC::Kala) {
-		return DEITY_KALA;
+	else if (itemName == ISC::Kaxa) {
+		return DEITY_KAXA;
 	}
 	else if (itemName == ISC::Truulga) {
 		return DEITY_TRUULGA;

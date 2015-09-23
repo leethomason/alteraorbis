@@ -11,13 +11,14 @@ x always accept elixir; exchange for gold if full
 x Kamakiri deity
 x no control flags in water
 x damage: items seem to get blown away...crystal not dropped
+x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - Art
 	- R1K
 	- QCore
 	- MotherCore
-	- Kala
+	- Kaxa
 - icon for squad dragging
-- icon for Kala: CalcDeityAtom
+- icon for Kaxa: CalcDeityAtom
 
 - rework fonts on title screen
 - more announcement when core taken over - popup!
@@ -44,7 +45,6 @@ x damage: items seem to get blown away...crystal not dropped
 	x pseudo-selected and can't sell things
 	- use: click the building. indicator that building is clickable
 	- "Can't click on front porth in top down"
-
 - core should transfer crystal to facilities / units
 - rules for sub-teams (must be adjacent? near?)
 - DOMAIN_TAKEOVER message not correct
@@ -73,7 +73,6 @@ x damage: items seem to get blown away...crystal not dropped
 - selection and face isn't consistent
 - face is glowing in asset preview
 - tune mouse wheel with real mouse
-- rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 - hide abandom domain somewhere...
 - evalBuildingScript too slow
 - deal with fruit overflow
