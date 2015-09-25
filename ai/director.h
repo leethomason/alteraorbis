@@ -23,11 +23,27 @@ public:
 	virtual int DoTick(U32 delta);
 
 	grinliz::Vector2I ShouldSendHerd(Chit* herd);
+	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
 
 private:
+	enum class EPlot {
+		NONE,
+		SWARM
+	};
+
+	void AdvancePlot();
+
 	CTicker attackTicker;
 	bool attractLesser = false;
 	bool attractGreater = false;
+
+	EPlot plot = EPlot::NONE;
+	static const int SWARM_TIME = 60 * 1000;
+
+	// Plot data:
+	CTicker plotTicker;
+	grinliz::Vector2I plotStart, plotEnd, plotCurrent;
+	grinliz::IString  plotCritter;
 };
 
 #endif // DIRECTOR_INCLUDED

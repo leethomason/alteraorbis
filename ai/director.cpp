@@ -34,9 +34,17 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 	static const Vector2I ZERO = { 0, 0 };
 	GLASSERT(herd->GetItem());
 	if (!herd->GetItem()) return ZERO;
+	const GameItem* gameItem = herd->GetItem();
 
-	bool greater = (herd->GetItem()->MOB() == ISC::greater);
-	bool denizen = (herd->GetItem()->MOB() == ISC::denizen);
+	if (   plot == EPlot::SWARM 
+		&& gameItem->IName() == plotCritter
+		&& CoreScript::GetCore(plotCurrent)) 
+	{
+		return plotCurrent;
+	}
+
+	bool greater = (gameItem->MOB() == ISC::greater);
+	bool denizen = (gameItem->MOB() == ISC::denizen);
 
 	if (greater && !attractGreater) 
 		return ZERO;
@@ -100,6 +108,13 @@ int Director::DoTick(U32 delta)
 {
 	CoreScript* coreScript = Context()->chitBag->GetHomeCore();
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
+
+	// Plot motion:
+	if (plot != EPlot::NONE && plotTicker.Delta(delta)) {
+		AdvancePlot();
+	}
+
+	// Basic player ticker motion:
 	if (playerSector.IsZero()) {
 		attackTicker.SetPeriod(5 * 1000 * 60);
 		attackTicker.Reset();
@@ -116,4 +131,41 @@ int Director::DoTick(U32 delta)
 		attractGreater = nTemples > 2;
 	}
 	return VERY_LONG_TICK;
+}
+
+
+void Director::Swarm(const IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end)
+{
+	plot = EPlot::SWARM;
+	plotCritter = critter;
+	plotStart = start;
+	plotEnd = end;
+	plotCurrent = start;
+	plotTicker.SetPeriod(SWARM_TIME);
+	plotTicker.Reset();
+}
+
+
+void Director::AdvancePlot()
+{
+	GLASSERT(plot == EPlot::SWARM);
+	if (plotCurrent != plotEnd) {
+		if (abs(plotCurrent.x - plotEnd.x) > abs(plotCurrent.y - plotEnd.y)) {
+			if (plotCurrent.x < plotEnd.x)
+				plotCurrent.x++;
+			else if (plotCurrent.x > plotEnd.x)
+				plotCurrent.x--;
+		}
+		else {
+			if (plotCurrent.y < plotEnd.y)
+				plotCurrent.y++;
+			else if (plotCurrent.y > plotEnd.y)
+				plotCurrent.y--;
+		}
+		plotTicker.SetPeriod(plotCurrent == plotEnd ? SWARM_TIME * 2 : SWARM_TIME);
+		plotTicker.Reset();
+	}
+	else {
+		plot = EPlot::NONE;
+	}
 }

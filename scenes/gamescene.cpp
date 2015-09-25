@@ -30,6 +30,7 @@
 #include "../game/fluidsim.h"
 #include "../game/gridmovecomponent.h"
 #include "../game/physicssims.h"
+#include "../ai/director.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -1430,27 +1431,21 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1
+#if 0
 		sim->GetChitBag()->NewMonsterChit(at, "shockCyclops", TEAM_CHAOS);
+#endif
+#if 1
+		Chit* directorChit = sim->GetChitBag()->GetNamedChit(ISC::Director);
+		if (directorChit) {
+			Director* director = (Director*)directorChit->GetComponent("Director");
+			Vector2I start = { 2, 2 };
+			director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
+		}
 #endif
 #if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
-		}
-#endif
-#if 0	// Look at pools.
-		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
-		if (loc.IsZero()) {
-			poolView = 0;
-		}
-		++poolView;
-		Vector2F lookAt = ToWorld2F(loc);
-		sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.y);
-#endif
-#if 0	// Summon Greaters
-		if (playerChit) {
-			sim->GetChitBag()->AddSummoning(playerChit->GetSector(), LumosChitBag::SUMMON_TECH);
 		}
 #endif
 #endif	// DEBUG
