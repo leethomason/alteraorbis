@@ -303,6 +303,14 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		str->Format("%.2f: %s sees %s as an enemy.", age, firstName.safe_str(), secondName.safe_str());
 		break;
 
+		case PLOT_SWARM_START:
+		str->Format("%.2f: Swarm is starting at %s.", age, domain.c_str());
+		break;
+
+		case PLOT_SWARM_END:
+		str->Format("%.2f: Swarm is ending at %s.", age, domain.c_str());
+		break;
+
 		default:
 		GLASSERT(0);
 	}

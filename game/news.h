@@ -39,8 +39,8 @@ public:
 		FORGED,						//	item		maker
 		UN_FORGED,					//  item		killer
 
-		DOMAIN_TAKEOVER,			//	domain		conqueror
-		DOMAIN_CONQUER,				//	domain		conquerer
+		DOMAIN_TAKEOVER,			//	domain		conqueror		// neutral takeover
+		DOMAIN_CONQUER,				//	domain		conquerer		// sub-super
 		SUPERTEAM_DELETED,			//  domain
 		SUBTEAM_DELETED,			//  subTeam		superTeam
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
@@ -55,6 +55,9 @@ public:
 		ATTITUDE_NEUTRAL,
 		ATTITUDE_ENEMY,
 
+		PLOT_SWARM_START,			// ---
+		PLOT_SWARM_END,
+
 		NUM_WHAT
 	};
 
@@ -65,7 +68,7 @@ public:
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
 
-	int What() const			{ return what; }
+	int What() const						{ return what; }
 	const grinliz::Vector2F& Pos() const	{ return pos; }
 	grinliz::Vector2I	Sector() const		{ return ToSector( ToWorld2I( pos )); }
 

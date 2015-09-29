@@ -143,6 +143,9 @@ void Director::Swarm(const IString& critter, const grinliz::Vector2I& start, con
 	plotCurrent = start;
 	plotTicker.SetPeriod(SWARM_TIME);
 	plotTicker.Reset();
+
+	NewsEvent newsEvent(NewsEvent::PLOT_SWARM_START, ToWorld2F(SectorBounds(plotStart).Center()), 0, 0);
+	Context()->chitBag->GetNewsHistory()->Add(newsEvent);
 }
 
 

@@ -23,6 +23,7 @@ public:
 	virtual int DoTick(U32 delta);
 
 	grinliz::Vector2I ShouldSendHerd(Chit* herd);
+
 	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
 
 private:
@@ -38,7 +39,7 @@ private:
 	bool attractGreater = false;
 
 	EPlot plot = EPlot::NONE;
-	static const int SWARM_TIME = 60 * 1000;
+	static const int SWARM_TIME = 2 * (60 * 1000);	// Minutes per sector. Needs tuning.
 
 	// Plot data:
 	CTicker plotTicker;

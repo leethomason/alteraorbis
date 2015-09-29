@@ -20,6 +20,14 @@ x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet
 - icon for squad dragging
 - icon for Kaxa: CalcDeityAtom
 
+Plots:
+- factor out plot logic from director
+- kaiju battle plot
+- start plots: involve vs. avoid player
+- news event
+- news event highlights
+- directed swarm: evil sub-deities?
+
 - rework fonts on title screen
 - more announcement when core taken over - popup!
 
