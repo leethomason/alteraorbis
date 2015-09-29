@@ -169,6 +169,8 @@ void Director::AdvancePlot()
 		plotTicker.Reset();
 	}
 	else {
+		NewsEvent newsEvent(NewsEvent::PLOT_SWARM_END, ToWorld2F(SectorBounds(plotStart).Center()), 0, 0);
+		Context()->chitBag->GetNewsHistory()->Add(newsEvent);
 		plot = EPlot::NONE;
 	}
 }

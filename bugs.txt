@@ -24,8 +24,8 @@ Plots:
 - factor out plot logic from director
 - kaiju battle plot
 - start plots: involve vs. avoid player
-- news event
-- news event highlights
+x news event
+x news event highlights
 - directed swarm: evil sub-deities?
 
 - rework fonts on title screen
