@@ -13,6 +13,7 @@ private:
 	typedef Component super;
 
 public:
+	Director();
 	virtual ~Director();
 
 	virtual const char* Name() const { return "Director"; }
@@ -32,6 +33,7 @@ public:
 private:
 	Plot* plot = 0;
 
+	CTicker plotTicker;
 	CTicker attackTicker;
 	bool attractLesser = false;
 	bool attractGreater = false;

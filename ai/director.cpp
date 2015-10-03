@@ -8,6 +8,11 @@
 
 using namespace grinliz;
 
+Director::Director()
+{
+	plotTicker.SetPeriod(AGE_IN_MSEC / 2);
+}
+
 Director::~Director()
 {
 	delete plot;
@@ -20,6 +25,7 @@ void Director::Serialize(XStream* xs)
 	XARC_SER(xs, attractLesser);
 	XARC_SER(xs, attractGreater);
 	attackTicker.Serialize(xs, "attackTicker");
+	plotTicker.Serialize(xs, "plotTicker");
 	if (xs->Saving()) {
 		if (plot) {
 			plot->Serialize(xs);
@@ -143,6 +149,25 @@ int Director::DoTick(U32 delta)
 		if (done) {
 			delete plot; plot = 0;
 		}
+	}
+	if (!plot && plotTicker.Delta(delta)) {
+		int green = Context()->chitBag->census.NumCoresOfTeam(TEAM_GREEN_MANTIS);
+		int red   = Context()->chitBag->census.NumCoresOfTeam(TEAM_RED_MANTIS);
+
+		IString critter = ISC::mantis;
+		if (red > green)
+			critter == ISC::redMantis;
+
+		Vector2I start = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
+		Vector2I end   = { 0, 0 };
+		if (coreScript && coreScript->NumTemples() >= MAX_HUMAN_TEMPLES) {
+			end = playerSector;
+		}
+		else {
+			end.Set(parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS));
+		}
+		Swarm(critter, start, end);
+		plotTicker.Reset();
 	}
 
 	// Basic player ticker motion:
