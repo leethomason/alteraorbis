@@ -445,6 +445,9 @@
     <ClCompile Include="..\ai\director.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\plot.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -880,6 +883,9 @@
       <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\ai\director.h">
+      <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\plot.h">
       <Filter>Source Files\ai</Filter>
     </ClInclude>
   </ItemGroup>

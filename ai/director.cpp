@@ -1,4 +1,5 @@
 #include "director.h"
+#include "plot.h"
 #include "../game/team.h"
 #include "../game/gameitem.h"
 #include "../xegame/chitcontext.h"
@@ -7,12 +8,38 @@
 
 using namespace grinliz;
 
+Director::~Director()
+{
+	delete plot;
+}
+
+
 void Director::Serialize(XStream* xs)
 {
 	BeginSerialize(xs, Name());
 	XARC_SER(xs, attractLesser);
 	XARC_SER(xs, attractGreater);
 	attackTicker.Serialize(xs, "attackTicker");
+	if (xs->Saving()) {
+		if (plot) {
+			plot->Serialize(xs);
+		}
+		else {
+			XarcOpen(xs, "null");
+			XarcClose(xs);
+		}
+	}
+	else {
+		const char* peek = xs->Loading()->PeekElement();
+		plot = Plot::Factory(peek);
+		if (plot) {
+			plot->Serialize(xs);
+		}
+		else {
+			XarcOpen(xs, "null");
+			XarcClose(xs);
+		}
+	}
 	EndSerialize(xs);
 }
 
@@ -21,6 +48,9 @@ void Director::OnAdd(Chit* chit, bool init)
 	super::OnAdd(chit, init);
 	Context()->chitBag->SetNamedChit(StringPool::Intern("Director"), parentChit);
 	Context()->chitBag->AddListener(this);
+	if (plot) {
+		plot->SetContext(Context());
+	}
 }
 
 void Director::OnRemove()
@@ -36,11 +66,9 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 	if (!herd->GetItem()) return ZERO;
 	const GameItem* gameItem = herd->GetItem();
 
-	if (   plot == EPlot::SWARM 
-		&& gameItem->IName() == plotCritter
-		&& CoreScript::GetCore(plotCurrent)) 
-	{
-		return plotCurrent;
+	Vector2I plotHerd = plot ? plot->ShouldSendHerd(herd) : ZERO;
+	if (!plotHerd.IsZero()) {
+		return plotHerd;
 	}
 
 	bool greater = (gameItem->MOB() == ISC::greater);
@@ -110,8 +138,11 @@ int Director::DoTick(U32 delta)
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
 
 	// Plot motion:
-	if (plot != EPlot::NONE && plotTicker.Delta(delta)) {
-		AdvancePlot();
+	if (plot) {
+		bool done = plot->DoTick(delta);
+		if (done) {
+			delete plot; plot = 0;
+		}
 	}
 
 	// Basic player ticker motion:
@@ -136,41 +167,12 @@ int Director::DoTick(U32 delta)
 
 void Director::Swarm(const IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end)
 {
-	plot = EPlot::SWARM;
-	plotCritter = critter;
-	plotStart = start;
-	plotEnd = end;
-	plotCurrent = start;
-	plotTicker.SetPeriod(SWARM_TIME);
-	plotTicker.Reset();
+	GLASSERT(!plot);
+	if (plot) return;
 
-	NewsEvent newsEvent(NewsEvent::PLOT_SWARM_START, ToWorld2F(SectorBounds(plotStart).Center()), 0, 0);
-	Context()->chitBag->GetNewsHistory()->Add(newsEvent);
+	SwarmPlot* swarmPlot = new SwarmPlot();
+	swarmPlot->Init(Context(), critter, start, end);
+	plot = swarmPlot;
 }
 
 
-void Director::AdvancePlot()
-{
-	GLASSERT(plot == EPlot::SWARM);
-	if (plotCurrent != plotEnd) {
-		if (abs(plotCurrent.x - plotEnd.x) > abs(plotCurrent.y - plotEnd.y)) {
-			if (plotCurrent.x < plotEnd.x)
-				plotCurrent.x++;
-			else if (plotCurrent.x > plotEnd.x)
-				plotCurrent.x--;
-		}
-		else {
-			if (plotCurrent.y < plotEnd.y)
-				plotCurrent.y++;
-			else if (plotCurrent.y > plotEnd.y)
-				plotCurrent.y--;
-		}
-		plotTicker.SetPeriod(plotCurrent == plotEnd ? SWARM_TIME * 2 : SWARM_TIME);
-		plotTicker.Reset();
-	}
-	else {
-		NewsEvent newsEvent(NewsEvent::PLOT_SWARM_END, ToWorld2F(SectorBounds(plotStart).Center()), 0, 0);
-		Context()->chitBag->GetNewsHistory()->Add(newsEvent);
-		plot = EPlot::NONE;
-	}
-}

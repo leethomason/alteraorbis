@@ -5,12 +5,15 @@
 #include "../xegame/chit.h"
 #include "../xegame/cticker.h"
 
+class Plot;
+
 class Director : public Component, public IChitListener
 {
 private:
 	typedef Component super;
 
 public:
+	virtual ~Director();
 
 	virtual const char* Name() const { return "Director"; }
 
@@ -27,24 +30,11 @@ public:
 	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
 
 private:
-	enum class EPlot {
-		NONE,
-		SWARM
-	};
-
-	void AdvancePlot();
+	Plot* plot = 0;
 
 	CTicker attackTicker;
 	bool attractLesser = false;
 	bool attractGreater = false;
-
-	EPlot plot = EPlot::NONE;
-	static const int SWARM_TIME = 2 * (60 * 1000);	// Minutes per sector. Needs tuning.
-
-	// Plot data:
-	CTicker plotTicker;
-	grinliz::Vector2I plotStart, plotEnd, plotCurrent;
-	grinliz::IString  plotCritter;
 };
 
 #endif // DIRECTOR_INCLUDED
