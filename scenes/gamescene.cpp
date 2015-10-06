@@ -600,7 +600,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	}
 
 	Chit* playerChit = GetPlayerChit();
-	if (uiMode == GameSceneMenu::UI_AVATAR && (worldGrid.PlantStage() >= 2 || worldGrid.RockHeight())) {
+	if (uiMode == GameSceneMenu::UI_AVATAR && (worldGrid.PlantStage() >= PLANT_BLOCKING_STAGE || worldGrid.RockHeight())) {
 		// clicked on a rock. Melt away!
 		if (playerChit && playerChit->GetAIComponent()) {
 			playerChit->GetAIComponent()->Target(plane2i, false);
@@ -1891,7 +1891,7 @@ void GameScene::CheckGameStage(U32 delta)
 					int bioFlora = 0;
 					for (Rectangle2IIterator pit(bi); !pit.Done(); pit.Next()) {
 						const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(pit.Pos().x, pit.Pos().y);
-						if (wg.Plant() && wg.PlantStage() >= 2) {	// only count the grown ones??
+						if (wg.Plant() && wg.PlantStage() >= PLANT_BLOCKING_STAGE) {	// only count the grown ones??
 							++bioFlora;
 						}
 					}
@@ -2024,12 +2024,6 @@ void GameScene::DrawDebugText()
 
 	int lesser = 0, greater = 0, denizen = 0;
 	chitBag->census.NumByType(&lesser, &greater, &denizen);
-
-	//ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: lesser=%d greater=%d denizen=%d", 
-	//								typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-	//								stageCount[0], stageCount[1], stageCount[2], stageCount[3],
-	//								lesser, greater, denizen );
-	//y += 16;
 
 	CoreScript* cs = CoreScript::GetCore(ToSector(at));
 	int teamID = 0, teamGroup = 0;

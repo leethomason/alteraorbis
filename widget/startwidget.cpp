@@ -105,7 +105,7 @@ void StartGameWidget::SetBodyText()
 	Rectangle2I bi = sd->InnerBounds();
 	for (Rectangle2IIterator it(bi); !it.Done(); it.Next()) {
 		const WorldGrid& wg = worldMap->GetWorldGrid(it.Pos().x, it.Pos().y);
-		if (wg.Plant() >= 7) {
+		if (wg.Plant() >= (PLANT_FLOWER+1)) {
 			flowers++;
 		}
 		else if (wg.Plant()) {

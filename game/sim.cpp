@@ -103,8 +103,6 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 
 	random.SetSeedFromTime();
 	plantScript = new PlantScript(context.chitBag->Context());
-
-	DumpModel();
 }
 
 
@@ -134,46 +132,6 @@ Sim::~Sim()
 int    Sim::AgeI() const { return context.chitBag->AbsTime() / AGE_IN_MSEC; }
 double Sim::AgeD() const { return double(context.chitBag->AbsTime()) / double(AGE_IN_MSEC); }
 float  Sim::AgeF() const { return float(AgeD()); }
-
-void Sim::DumpModel()
-{
-	GLString path;
-	GetSystemPath(GAME_SAVE_DIR,"gamemodel.txt", &path);
-	FILE* fp = fopen( path.c_str(), "w" );
-	GLASSERT( fp );
-
-	for( int plantStage=2; plantStage<4; ++plantStage ) {
-		for( int tech=0; tech<4; ++tech ) {
-
-			// assume field at 50%
-			double growTime   = double(FarmScript::GrowFruitTime( plantStage, 10 )) / 1000.0;
-			double distilTime = double( DistilleryScript::ElixirTime( tech )) / 1000.0;
-			double elixirTime = growTime + distilTime;
-			double timePerFruit = elixirTime / double(DistilleryScript::ELIXIR_PER_FRUIT);
-
-			double depleteTime = ai::Needs::DecayTime();
-
-			double idealPopulation = depleteTime / timePerFruit;
-
-			fprintf( fp, "Ideal Population per plant. PlantStage=%d (0-3) Tech=%d (0-%d)\n",
-					 plantStage,
-					 tech,
-					 TECH_MAX-1 );
-
-			fprintf( fp, "    growTime=%.1f distilTime=%.1f totalTime=%.1f\n",
-					 growTime, distilTime, elixirTime );
-			fprintf( fp, "    ELIXIR_PER_FRUIT=%d timePerFruit=%.1f\n", DistilleryScript::ELIXIR_PER_FRUIT, timePerFruit );
-			fprintf( fp, "    depleteTime=%.1f\n", depleteTime );
-
-			if ( plantStage == 3 && tech == 1 ) 
-				fprintf( fp, "idealPopulation=%.1f <------ \n\n", idealPopulation );
-			else
-				fprintf( fp, "idealPopulation=%.1f\n\n", idealPopulation );
-		}
-	}
-	fclose( fp );
-}
-
 
 void Sim::Load(const char* mapDAT, const char* gameDAT)
 {
@@ -907,14 +865,6 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 		return false;
 	}
 
-	// About 50,000 plants seems about right.
-	// This doesn't seem to matter - it isn't getting
-	// overwhelmed in tests.
-//	int count = context.worldMap->CountPlants();
-//	if (count > TYPICAL_PLANTS) {
-//		return false;
-//	}
-
 	Vector2I sector = ToSector(x, y);
 	CoreScript* cs = CoreScript::GetCore(sector);
 	bool paveBlocks = false;
@@ -958,8 +908,7 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 			}
 			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
-		// FIXME: magic plant #s
-		if (type == 6 || type == 7) {
+		if (type >= PLANT_FLOWER) {
 			stage = Min(1, stage);
 		}
 		context.worldMap->SetPave(x, y, 0);

@@ -198,7 +198,7 @@ void PlantScript::DoTick(U32 delta)
 			worldMap->VoxelHit(pos2i, heal);
 
 			// Grow
-			int nStage = wg.Plant() < 7 ? 4 : 2;
+			int nStage = wg.Plant() <= PLANT_FLOWER ? MAX_PLANT_STAGES : PLANT_BLOCKING_STAGE;
 
 			if (wg.HPFraction() > 0.8f) {
 				if (wg.PlantStage() < (nStage - 1)) {
