@@ -29,8 +29,11 @@ public:
 	grinliz::Vector2I ShouldSendHerd(Chit* herd);
 
 	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
+	void GreatBattle(const grinliz::Vector2I& pos);
 
 private:
+	void StartRandomPlot();
+
 	Plot* plot = 0;
 
 	CTicker plotTicker;

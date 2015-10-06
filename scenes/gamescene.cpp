@@ -1439,7 +1439,9 @@ void GameScene::HandleHotKey( int mask )
 		if (directorChit) {
 			Director* director = (Director*)directorChit->GetComponent("Director");
 			Vector2I start = { 2, 2 };
-			director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
+			Vector2I wh = { 3, 3 };
+			//director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
+			director->GreatBattle(wh);
 		}
 #endif
 #if 0	// Monster swarm

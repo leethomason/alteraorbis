@@ -10,7 +10,8 @@ using namespace grinliz;
 
 Director::Director()
 {
-	plotTicker.SetPeriod(AGE_IN_MSEC / 2);
+	plotTicker.SetPeriod(AGE_IN_MSEC * 4 / 7);
+	plotTicker.Reset();
 }
 
 Director::~Director()
@@ -151,22 +152,7 @@ int Director::DoTick(U32 delta)
 		}
 	}
 	if (!plot && plotTicker.Delta(delta)) {
-		int green = Context()->chitBag->census.NumCoresOfTeam(TEAM_GREEN_MANTIS);
-		int red   = Context()->chitBag->census.NumCoresOfTeam(TEAM_RED_MANTIS);
-
-		IString critter = ISC::mantis;
-		if (red > green)
-			critter == ISC::redMantis;
-
-		Vector2I start = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
-		Vector2I end   = { 0, 0 };
-		if (coreScript && coreScript->NumTemples() >= MAX_HUMAN_TEMPLES) {
-			end = playerSector;
-		}
-		else {
-			end.Set(parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS));
-		}
-		Swarm(critter, start, end);
+		StartRandomPlot();
 		plotTicker.Reset();
 	}
 
@@ -190,6 +176,58 @@ int Director::DoTick(U32 delta)
 }
 
 
+void Director::StartRandomPlot()
+{
+	GLASSERT(!plot);
+	if (plot) return;
+
+	CoreScript* coreScript = Context()->chitBag->GetHomeCore();
+	Vector2I playerSector = Context()->chitBag->GetHomeSector();
+	int nTemples = coreScript ? coreScript->NumTemples() : 0;
+	const Census& census = Context()->chitBag->census;
+	
+	int lesser = 0, greater = 0, denizen = 0;
+	census.NumByType(&lesser, &greater, &denizen);
+
+	enum {
+		SWARM,
+		GREAT_BATTLE,
+		NPLOTS
+	};
+	float odds[NPLOTS] = { 0 };
+
+	odds[SWARM] = 1.0;
+	if (greater == TYPICAL_GREATER) {
+		odds[GREAT_BATTLE] = 1.0;
+	}
+	int plotIndex = parentChit->random.Select(odds, NPLOTS);
+	if (odds[plotIndex] == 0) return;	// nothing to select
+
+	Vector2I start = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
+	Vector2I end   = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
+
+	bool target = coreScript && parentChit->random.Bit() && (nTemples >= MAX_HUMAN_TEMPLES - 1);
+
+	if (plotIndex == SWARM) {
+		int green = Context()->chitBag->census.NumCoresOfTeam(TEAM_GREEN_MANTIS);
+		int red = Context()->chitBag->census.NumCoresOfTeam(TEAM_RED_MANTIS);
+		IString critter = red > green ? ISC::redMantis : ISC::mantis;
+
+		if (target) {
+			end = playerSector;
+		}
+		Swarm(critter, start, end);
+	}
+	else if (plotIndex == GREAT_BATTLE) {
+		if (target) {
+			start = playerSector;
+		}
+		GreatBattle(start);
+	}
+}
+
+
+
 void Director::Swarm(const IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end)
 {
 	GLASSERT(!plot);
@@ -201,3 +239,14 @@ void Director::Swarm(const IString& critter, const grinliz::Vector2I& start, con
 }
 
 
+void Director::GreatBattle(const grinliz::Vector2I& pos) {
+	GLASSERT(!plot);
+	if (plot) return;
+
+	CoreScript* cs = CoreScript::GetCore(pos);
+	if (!cs) return;
+
+	GreatBattlePlot* greatBattlePlot = new GreatBattlePlot();
+	greatBattlePlot->Init(Context(), pos);
+	plot = greatBattlePlot;
+}

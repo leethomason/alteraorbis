@@ -31,7 +31,8 @@ void SwarmPlot::Init(const ChitContext* c, const IString& _critter, const Vector
 	ticker.SetPeriod(SWARM_TIME);
 	ticker.Reset();
 
-	NewsEvent newsEvent(NewsEvent::PLOT_SWARM_START, ToWorld2F(SectorBounds(start).Center()), 0, 0);
+	IString text = StringPool::Intern("A Swarm is beginning.", true);
+	NewsEvent newsEvent(NewsEvent::PLOT_START, ToWorld2F(SectorBounds(start).Center()), 0, 0, &text);
 	context->chitBag->GetNewsHistory()->Add(newsEvent);
 }
 
@@ -86,10 +87,52 @@ bool SwarmPlot::AdvancePlot()
 		ticker.Reset();
 	}
 	else {
-		NewsEvent newsEvent(NewsEvent::PLOT_SWARM_END, ToWorld2F(SectorBounds(start).Center()), 0, 0);
+		IString text = StringPool::Intern("The Swarm is over.");
+		NewsEvent newsEvent(NewsEvent::PLOT_END, ToWorld2F(SectorBounds(end).Center()), 0, 0, &text);
 		context->chitBag->GetNewsHistory()->Add(newsEvent);
 		return true;
 	}
 	return false;
 }
 
+
+void GreatBattlePlot::Init(const ChitContext* _context, const grinliz::Vector2I& _dest)
+{
+	dest = _dest;
+	ticker.SetPeriod(BATTLE_TIME);
+	ticker.Reset();
+	context = _context;
+
+	IString text = StringPool::Intern("The Great Battle begins.");
+	NewsEvent newsEvent(NewsEvent::PLOT_START, ToWorld2F(SectorBounds(dest).Center()), 0, 0, &text);
+	context->chitBag->GetNewsHistory()->Add(newsEvent);
+}
+
+
+grinliz::Vector2I GreatBattlePlot::ShouldSendHerd(Chit* chit)
+{
+	if (chit->GetItem()->MOB() == ISC::greater) {
+		return dest;
+	}
+	static const Vector2I ZERO = { 0, 0 };
+	return ZERO;
+}
+
+void GreatBattlePlot::Serialize(XStream* xs) 
+{
+	XarcOpen(xs, "GreatBattlePlot");
+	XARC_SER(xs, dest);
+	ticker.Serialize(xs, "ticker");
+	XarcClose(xs);
+}
+
+bool GreatBattlePlot::DoTick(U32 time)
+{
+	if (ticker.Delta(time)) {
+		IString text = StringPool::Intern("The Great Battle is over.");
+		NewsEvent newsEvent(NewsEvent::PLOT_END, ToWorld2F(SectorBounds(dest).Center()), 0, 0, &text);
+		context->chitBag->GetNewsHistory()->Add(newsEvent);
+		return true;
+	}
+	return false;
+}

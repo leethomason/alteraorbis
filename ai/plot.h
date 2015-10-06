@@ -11,6 +11,21 @@ class Chit;
 class ChitContext;
 class XStream;
 
+/*
+	- Foo the beast master (Shrogshriff flunky leading a "swarm" quest for destruction)
+		- mantis, red-mantis, trilo
+		- Truulga flunky for trolls
+		- turn to chaos at the end
+	- Ring forge
+		- cursed rings forged; given to lesser
+		- once enough in denizen hands, become chaos uber-weapons
+		- transform owner?
+		- occupy mother core?
+	- Golem King / Dragon Queen 
+		- battle across domains
+		- establish home base w/ enough gold
+*/
+
 class Plot
 {
 public:
@@ -38,7 +53,7 @@ public:
 		current.Zero();
 	}
 		
-	void Init(const ChitContext* _context, 
+	void Init(const ChitContext* context, 
 			  const grinliz::IString& critter, 
 			  const grinliz::Vector2I& start, 
 			  const grinliz::Vector2I& end);
@@ -54,6 +69,28 @@ private:
 	CTicker ticker;
 	grinliz::Vector2I start, end, current;
 	grinliz::IString  critter;
+};
+
+
+class GreatBattlePlot : public Plot
+{
+public:
+	GreatBattlePlot()	{
+		dest.Zero();
+	}
+		
+	void Init(const ChitContext* _context, const grinliz::Vector2I& _dest);
+
+	virtual grinliz::Vector2I ShouldSendHerd(Chit* chit);
+	virtual void Serialize(XStream*);
+	virtual bool DoTick(U32 time);
+
+private:
+	bool AdvancePlot();
+	static const int BATTLE_TIME = 4 * (60 * 1000);	// Minutes to summon. Needs tuning.
+
+	CTicker ticker;
+	grinliz::Vector2I dest;
 };
 
 #endif // ALTERA_PLOT_INCLUDED

@@ -97,13 +97,16 @@ const NewsEvent** NewsHistory::FindItem( int firstItemID, int secondItemID, int*
 
 
 
-NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, int firstID, int secondID)
+NewsEvent::NewsEvent(U32 what, const grinliz::Vector2F& pos, int firstID, int secondID, const IString* _text)
 {
 	Clear();
 	this->what = what;
 	this->pos = pos;
 	this->firstItemID = firstID;
 	this->secondItemID = secondID;
+	if (_text) {
+		text = *_text;
+	}
 
 	const GameItem* first  = ItemDB::Instance()->Active(firstID);
 	const GameItem* second = ItemDB::Instance()->Active(secondID);
@@ -303,12 +306,10 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		str->Format("%.2f: %s sees %s as an enemy.", age, firstName.safe_str(), secondName.safe_str());
 		break;
 
-		case PLOT_SWARM_START:
-		str->Format("%.2f: Swarm is starting at %s.", age, domain.c_str());
-		break;
-
-		case PLOT_SWARM_END:
-		str->Format("%.2f: Swarm is ending at %s.", age, domain.c_str());
+		case PLOT_START:
+		case PLOT_EVENT:
+		case PLOT_END:
+		str->Format("%.2f: %s At %s.", age, this->text.safe_str(), domain.c_str());
 		break;
 
 		default:
@@ -327,6 +328,7 @@ void NewsEvent::Serialize(XStream* xs)
 	XARC_SER(xs, date);
 	XARC_SER(xs, firstTeam);
 	XARC_SER(xs, secondTeam);
+	XARC_SER(xs, text);
 	XarcClose(xs);
 }
 
