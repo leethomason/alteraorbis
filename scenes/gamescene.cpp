@@ -1438,10 +1438,11 @@ void GameScene::HandleHotKey( int mask )
 		Chit* directorChit = sim->GetChitBag()->GetNamedChit(ISC::Director);
 		if (directorChit) {
 			Director* director = (Director*)directorChit->GetComponent("Director");
-			Vector2I start = { 2, 2 };
-			Vector2I wh = { 3, 3 };
+			Vector2I start = ToSector(at);
+			director->DeletePlot();
 			//director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
-			director->GreatBattle(wh);
+			//director->GreatBattle(wh);
+			director->EvilRising(start);
 		}
 #endif
 #if 0	// Monster swarm
@@ -2007,8 +2008,8 @@ void GameScene::DrawDebugText()
 				  w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3));
 	y += 16;
 
-	int typeCount[NUM_PLANT_TYPES];
-	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+	int typeCount[NUM_EXTENDED_PLANT_TYPES];
+	for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
 		typeCount[i] = 0;
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			typeCount[i] += worldMap->plantCount[i][j];
@@ -2017,7 +2018,7 @@ void GameScene::DrawDebugText()
 	int stageCount[MAX_PLANT_STAGES];
 	for (int i = 0; i < MAX_PLANT_STAGES; ++i) {
 		stageCount[i] = 0;
-		for (int j = 0; j < NUM_PLANT_TYPES; ++j) {
+		for (int j = 0; j < NUM_EXTENDED_PLANT_TYPES; ++j) {
 			stageCount[i] += worldMap->plantCount[j][i];
 		}
 	}

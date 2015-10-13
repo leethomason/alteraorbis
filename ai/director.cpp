@@ -66,6 +66,16 @@ void Director::OnRemove()
 }
 
 
+Vector2I Director::PrioritySendHerd(Chit* herd)
+{
+	if (plot) {
+		return plot->PrioritySendHerd(herd);
+	}
+	static const Vector2I ZERO = { 0, 0 };
+	return ZERO;
+}
+
+
 Vector2I Director::ShouldSendHerd(Chit* herd)
 {
 	static const Vector2I ZERO = { 0, 0 };
@@ -110,6 +120,15 @@ Vector2I Director::ShouldSendHerd(Chit* herd)
 		return playerSector;
 	}
 	return ZERO;
+}
+
+
+bool Director::SectorIsEvil(const grinliz::Vector2I& sector)
+{
+	if (plot) {
+		return plot->SectorIsEvil(sector);
+	}
+	return false;
 }
 
 
@@ -243,10 +262,26 @@ void Director::GreatBattle(const grinliz::Vector2I& pos) {
 	GLASSERT(!plot);
 	if (plot) return;
 
-	CoreScript* cs = CoreScript::GetCore(pos);
+	CoreScript* cs = CoreScript::GetCore(pos);	// can't target some place we can't go
 	if (!cs) return;
 
 	GreatBattlePlot* greatBattlePlot = new GreatBattlePlot();
 	greatBattlePlot->Init(Context(), pos);
 	plot = greatBattlePlot;
+}
+
+void Director::EvilRising(const grinliz::Vector2I& pos)
+{
+	GLASSERT(!plot);
+	if (plot) return;
+
+	EvilRisingPlot* evilRisingPlot = new EvilRisingPlot();
+	evilRisingPlot->Init(Context(), pos);
+	plot = evilRisingPlot;
+}
+
+void Director::DeletePlot()
+{
+	delete plot;
+	plot = 0;
 }

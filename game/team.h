@@ -28,7 +28,7 @@ enum {
 	TEAM_NEUTRAL,	// neutral to all teams. Does NOT have an id: value should be truly 0.
 	TEAM_CHAOS,
 
-	TEAM_RAT,
+	TEAM_TRILOBYTE,
 	TEAM_GREEN_MANTIS,
 	TEAM_RED_MANTIS,
 	TEAM_TROLL,
@@ -50,6 +50,12 @@ enum {
 	DEITY_END = DEITY_TRUULGA + 1
 };
 
+/*	In the queue, so to speak:
+	Shogshriff
+
+	Krogda (fire / red mantis)
+	Vyllis (green mantis)
+*/
 enum {
 	TEAM_ID_LEFT  = 0x1fffff,
 	TEAM_ID_RIGHT = 0x2fffff,

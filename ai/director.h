@@ -26,10 +26,14 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual int DoTick(U32 delta);
 
+	grinliz::Vector2I PrioritySendHerd(Chit* herd);
 	grinliz::Vector2I ShouldSendHerd(Chit* herd);
+	bool SectorIsEvil(const grinliz::Vector2I& sector);
 
 	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
 	void GreatBattle(const grinliz::Vector2I& pos);
+	void EvilRising(const grinliz::Vector2I& pos);
+	void DeletePlot();
 
 private:
 	void StartRandomPlot();

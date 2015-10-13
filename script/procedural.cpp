@@ -408,6 +408,18 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		{ PAL_GRAY * 2, PAL_GREEN }, { PAL_RED * 2, PAL_GREEN }, { PAL_TANGERINE * 2, PAL_GREEN }
 	};
 
+	static const Vector2I GREEN_MANTIS_COLORS[] = {
+		{ PAL_GREEN * 2, PAL_GREEN }, { PAL_TANGERINE * 2, PAL_TANGERINE }, { PAL_TANGERINE * 2, PAL_TANGERINE }
+	};
+
+	static const Vector2I RED_MANTIS_COLORS[] = {
+		{ PAL_RED * 2, PAL_RED }, { PAL_TANGERINE * 2, PAL_TANGERINE }, {PAL_TANGERINE*2, PAL_TANGERINE}
+	};
+
+	static const Vector2I TRILOBYTE_COLORS[] = {
+		{ PAL_TANGERINE * 2 + 1, PAL_PURPLE }, { PAL_BLUE * 2, PAL_GREEN }, { PAL_BLUE * 2, PAL_GREEN }
+	};
+
 	static const Vector2I GOB_COLORS[] = {
 		{ PAL_GRAY * 2, PAL_PURPLE }, { PAL_RED * 2, PAL_PURPLE }, { PAL_GRAY * 2, PAL_PURPLE }
 	};
@@ -457,6 +469,21 @@ void TeamGen::TeamBuildColors(int team, grinliz::Vector2I* base, grinliz::Vector
 		case DEITY_TRUULGA:
 		colors = TROLL_COLORS;
 		nColors = GL_C_ARRAY_SIZE(TROLL_COLORS) / 3;
+		break;
+
+		case TEAM_GREEN_MANTIS:
+		colors = GREEN_MANTIS_COLORS;
+		nColors = GL_C_ARRAY_SIZE(GREEN_MANTIS_COLORS) / 3;
+		break;
+
+		case TEAM_RED_MANTIS:
+		colors = RED_MANTIS_COLORS;
+		nColors = GL_C_ARRAY_SIZE(RED_MANTIS_COLORS) / 3;
+		break;
+
+		case TEAM_TRILOBYTE:
+		colors = TRILOBYTE_COLORS;
+		nColors = GL_C_ARRAY_SIZE(TRILOBYTE_COLORS) / 3;
 		break;
 
 		case TEAM_GOB:

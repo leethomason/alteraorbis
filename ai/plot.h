@@ -34,15 +34,21 @@ class Plot
 public:
 	Plot()	{}
 
+	virtual grinliz::Vector2I PrioritySendHerd(Chit* chit) { grinliz::Vector2I zero = { 0, 0 }; return zero; }
 	virtual grinliz::Vector2I ShouldSendHerd(Chit* chit) = 0;
+
+
 	virtual void Serialize(XStream*) = 0;
 	virtual bool DoTick(U32 time) = 0;
 
 	static Plot* Factory(const char*);
 
 	void SetContext(const ChitContext* _context) { context = _context; }
+	virtual bool SectorIsEvil(const grinliz::Vector2I& sector) { return false;  }
 
 protected:
+	Chit* SpawnBadGuy(const char* name, const grinliz::IString& type, int team, int level);
+
 	const ChitContext* context = 0;
 };
 
@@ -94,6 +100,38 @@ private:
 
 	CTicker ticker;
 	grinliz::Vector2I dest;
+};
+
+
+class EvilRisingPlot : public Plot
+{
+public:
+	EvilRisingPlot() :badGuyID(0), stage(0)	{
+		destSector.Zero();
+	}
+		
+	void Init(const ChitContext* _context, const grinliz::Vector2I& _destSector);
+
+	virtual grinliz::Vector2I PrioritySendHerd(Chit* chit);
+	virtual grinliz::Vector2I ShouldSendHerd(Chit* chit);
+	virtual void Serialize(XStream*);
+	virtual bool DoTick(U32 time);
+
+	virtual bool SectorIsEvil(const grinliz::Vector2I& sector);
+
+private:
+	enum {
+		GROWTH_STAGE,
+		SWARM_STAGE
+	};
+	static const U32 MAX_PLOT_TIME = 10 * 60 * 1000;
+	static const int SWARM_TIME = 2 * (60 * 1000);	// Minutes per sector. Needs tuning.
+
+	int stage;
+	int badGuyID;
+	CTicker overTime;
+	CTicker eventTime;
+	grinliz::Vector2I destSector;
 };
 
 #endif // ALTERA_PLOT_INCLUDED

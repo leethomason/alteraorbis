@@ -35,10 +35,15 @@ static const int NUM_SECTORS_2		= NUM_SECTORS * NUM_SECTORS;
 static const float METERS_PER_GRID	= 2.0f;
 static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
-static const int NUM_PLANT_TYPES	= 8;
-static const int MAX_PLANT_STAGES	= 4;
-static const int PLANT_BLOCKING_STAGE = 2;
-static const int PLANT_FLOWER		= 6;
+
+static const int NUM_BASE_PLANT_TYPES		= 8;		// basic, random plants
+static const int NUM_EXTENDED_PLANT_TYPES	= 9;	// special purpose, spooky, weird, created plants
+static const int MAX_PLANT_STAGES			= 4;
+static const int PLANT_BLOCKING_STAGE		= 2;
+static const int PLANT_FLOWER_MASK			= 0xc0;	// plants 6 & 7 are flowers.
+inline bool PlantIsFlower(int i) { return ((1 << i) & PLANT_FLOWER_MASK) != 0; }
+static const int EVIL_PLANT					= 8;
+
 static const int LEVEL_OF_NAMING	= 3;
 static const int VALUE_OF_NAMING	= 50;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
@@ -47,6 +52,7 @@ static const int TECH_MAX			= 4;	// Tech must be less than this: 0-3 in int, 0-3
 static const int MAX_WILD_FRUIT		= 300;
 static const int GOLD_XFER_TAKEOVER = 500;
 static const int GOLD_PER_ELIXIR	= 5;	// Gold paid for elixir delivery, if tavern is full.
+static const int LESSER_DEITY_LEVEL = 5;
 
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.

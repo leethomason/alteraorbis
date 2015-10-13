@@ -243,13 +243,14 @@ public:
 
 	// 1-based plant interpretation
 	int Plant() const { return plant; }
+	bool IsFlower() const { return plant && PlantIsFlower(plant - 1); }
 	bool BlockingPlant() const { return plant && stage >= PLANT_BLOCKING_STAGE; }
 	// 0-based
 	int PlantStage() const { return stage;  }
 
 	void SetPlant(int _type1based, int _stage)	{
 		GLASSERT(_type1based == 0 || rockHeight == 0);
-		GLASSERT(_type1based >= 0 && _type1based <= (NUM_PLANT_TYPES));	// 0 removes the plant
+		GLASSERT(_type1based >= 0 && _type1based <= NUM_EXTENDED_PLANT_TYPES);	// 0 removes the plant
 		plant = _type1based;
 		stage = _stage;
 	}

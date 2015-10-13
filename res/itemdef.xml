@@ -795,6 +795,17 @@
         nStage="2"
         />
 
+  <GameItem name="plant8"
+      desc="Spooky"
+      resource="plant8"
+      flags="FLAMMABLE SHOCKABLE CLICK_THROUGH"
+      mass="8"
+      baseHP="8"
+      sun="0.4"
+      rain="0.7"
+      temperature="0.3"
+      />
+
   <GameItem name="fruit"
         desc="Fruit"
         resource="fruit"

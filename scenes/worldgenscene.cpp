@@ -388,8 +388,8 @@ void WorldGenScene::DoTick(U32 delta)
 				plantsSeeded = true;
 			}
 
-			int typeCount[NUM_PLANT_TYPES];
-			for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+			int typeCount[NUM_EXTENDED_PLANT_TYPES];
+			for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
 				typeCount[i] = 0;
 				for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 					typeCount[i] += sim->GetWorldMap()->plantCount[i][j];
@@ -413,7 +413,9 @@ void WorldGenScene::DoTick(U32 delta)
 							  "Bamboo=%d\t\t[%d, %d, %d, %d]\n"
 							  "Shroom=%d\t\t[%d, %d, %d, %d]\n"
 							  "SunBloom=%d\t\t[%d, %d]\n"
-							  "MoonBloom=%d\t\t[%d, %d]\n\n",
+							  "MoonBloom=%d\t\t[%d, %d]\n"
+							  "Spooky=%d\t\t[%d, %d, %d, %d]\n"
+							  "\n",
 							  swm->CountPlants(),
 							  pools, waterfalls, census.wildFruit,
 							  typeCount[0], swm->plantCount[0][0], swm->plantCount[0][1], swm->plantCount[0][2], swm->plantCount[0][3],
@@ -423,7 +425,8 @@ void WorldGenScene::DoTick(U32 delta)
 							  typeCount[4], swm->plantCount[4][0], swm->plantCount[4][1], swm->plantCount[4][2], swm->plantCount[4][3],
 							  typeCount[5], swm->plantCount[5][0], swm->plantCount[5][1], swm->plantCount[5][2], swm->plantCount[5][3],
 							  typeCount[6], swm->plantCount[6][0], swm->plantCount[6][1],
-							  typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1]);
+							  typeCount[7], swm->plantCount[7][0], swm->plantCount[7][1],
+							  typeCount[8], swm->plantCount[8][0], swm->plantCount[8][1], swm->plantCount[8][2], swm->plantCount[8][3]);
 			}
 			simStr.AppendFormat("MOBs:\n");
 			for (int i = 0; i < census.MOBItems().Size(); ++i) {

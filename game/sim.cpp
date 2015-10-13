@@ -633,7 +633,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 		for (int i = 0; i < 5; ++i) {
 			int x = random.Rand(context.worldMap->Width());
 			int y = random.Rand(context.worldMap->Height());
-			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_PLANT_TYPES) : -1;
+			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_BASE_PLANT_TYPES) : -1;
 			CreatePlant(x, y, type);
 		}
 	}
@@ -842,7 +842,7 @@ void Sim::SeedPlants()
 		int x = bounds.min.x + random.Rand(bounds.Width());
 		int y = bounds.min.y + random.Rand(bounds.Height());
 
-		int type = random.Rand(NUM_PLANT_TYPES);
+		int type = random.Rand(NUM_BASE_PLANT_TYPES);
 		int stage = random.Rand(MAX_PLANT_STAGES);
 
 		CreatePlant(x, y, type, stage);
@@ -867,16 +867,16 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 
 	Vector2I sector = ToSector(x, y);
 	CoreScript* cs = CoreScript::GetCore(sector);
-	bool paveBlocks = false;
+	bool paveIsBlocking = false;
 	if (cs && cs->ParentChit()->Team()) {
-		paveBlocks = true;
+		paveIsBlocking = true;
 	}
 
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if (paveBlocks && wg.Pave()) {
+	if (paveIsBlocking && wg.Pave()) {
 		return false;
 	}
-	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
+	if ((paveIsBlocking && wg.Porch()) || wg.IsGrid() || wg.IsPort() || wg.IsWater()) {
 		return false;
 	}
 
@@ -886,14 +886,23 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 		 && wg.Land() == WorldGrid::LAND 
 		 && !context.chitBag->MapGridBlocked(x,y) ) 
 	{
+		Director* director = 0;
+		Chit* directorChit = Context()->chitBag->GetNamedChit(ISC::Director);
+		if (directorChit) {
+			director = (Director*)directorChit->GetComponent("Director");
+		}
+		if (type < 0 && director && director->SectorIsEvil(sector)) {
+			type = EVIL_PLANT;
+		}
+
 		if ( type < 0 ) {
 			// Scan for a good type!
 			Rectangle2I r;
 			r.Set(x, y, x, y);
 			r.Outset(3);
 
-			float chance[NUM_PLANT_TYPES];
-			for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+			float chance[NUM_BASE_PLANT_TYPES];
+			for( int i=0; i<NUM_BASE_PLANT_TYPES; ++i ) {
 				chance[i] = 1.0f;
 			}
 
@@ -906,10 +915,10 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 					chance[wgScan.Plant() - 1] += (float)(wgScan.PlantStage()*wgScan.PlantStage());
 				}
 			}
-			type = random.Select( chance, NUM_PLANT_TYPES );
+			type = random.Select( chance, NUM_BASE_PLANT_TYPES );
 		}
-		if (type >= PLANT_FLOWER) {
-			stage = Min(1, stage);
+		if (PlantIsFlower(type)) {
+			stage = Min(PLANT_BLOCKING_STAGE-1, stage);
 		}
 		context.worldMap->SetPave(x, y, 0);
 		context.worldMap->SetPlant(x, y, type + 1, stage);
