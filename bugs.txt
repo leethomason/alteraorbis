@@ -34,6 +34,8 @@ x news event highlights
 	- deity variation
 	- swarm in before spawning
 	- swarm + deity motion
+	- colors of demis
+	- different models for demis
 
 - Better world gen:
 	- feature: canyon

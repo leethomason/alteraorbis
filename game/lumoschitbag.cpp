@@ -462,7 +462,7 @@ Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, const char* name, co
 
 	chit->Add( new RenderComponent(root.ResourceName()));
 	chit->Add( new PathMoveComponent());
-	AddItem(root.Name(), chit, context->engine, team, level, 0, 0);
+	AddItem(root.Name(), chit, context->engine, team, level, 0, "human");
 
 	ReserveBank::Instance()->WithdrawMonster(chit->GetWallet(), true);
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
