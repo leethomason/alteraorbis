@@ -309,7 +309,7 @@ void NewsEvent::Console(GLString* str, ChitBag* chitBag, int shortNameID) const
 		case PLOT_START:
 		case PLOT_EVENT:
 		case PLOT_END:
-		str->Format("%.2f: %s At %s.", age, this->text.safe_str(), domain.c_str());
+		str->Format("%.2f: %s %s.", age, this->text.safe_str(), domain.c_str());
 		break;
 
 		default:
