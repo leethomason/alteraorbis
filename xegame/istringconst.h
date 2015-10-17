@@ -151,12 +151,18 @@ public:
 	static grinliz::IString gate;
 	static grinliz::IString timedGate;
 
+	// Deities
 	static grinliz::IString deity;
 	static grinliz::IString MotherCore;
 	static grinliz::IString QCore;
 	static grinliz::IString R1k;
 	static grinliz::IString Truulga;
 	static grinliz::IString Kaxa;
+
+	// Flaws
+	static grinliz::IString Vyllis;
+	static grinliz::IString Rava;
+	static grinliz::IString Oggar;
 
 	static grinliz::IString Director;
 	static grinliz::IString Camera;

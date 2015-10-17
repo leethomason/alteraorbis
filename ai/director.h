@@ -32,7 +32,7 @@ public:
 
 	void Swarm(const grinliz::IString& critter, const grinliz::Vector2I& start, const grinliz::Vector2I& end);
 	void GreatBattle(const grinliz::Vector2I& pos);
-	void EvilRising(const grinliz::Vector2I& pos);
+	void EvilRising(const grinliz::Vector2I& pos, const grinliz::IString& critter, int critterTeam, const grinliz::IString& demiName, bool demiIsFemale);
 	void DeletePlot();
 
 private:

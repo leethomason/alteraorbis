@@ -204,6 +204,7 @@ void Director::StartRandomPlot()
 	Vector2I playerSector = Context()->chitBag->GetHomeSector();
 	int nTemples = coreScript ? coreScript->NumTemples() : 0;
 	const Census& census = Context()->chitBag->census;
+	bool target = coreScript && parentChit->random.Bit() && (nTemples >= MAX_HUMAN_TEMPLES - 1);
 	
 	int lesser = 0, greater = 0, denizen = 0;
 	census.NumByType(&lesser, &greater, &denizen);
@@ -211,21 +212,22 @@ void Director::StartRandomPlot()
 	enum {
 		SWARM,
 		GREAT_BATTLE,
+		EVIL_RISING,
 		NPLOTS
 	};
 	float odds[NPLOTS] = { 0 };
 
 	odds[SWARM] = 1.0;
-	if (greater == TYPICAL_GREATER) {
-		odds[GREAT_BATTLE] = 1.0;
+	odds[GREAT_BATTLE] = (greater >= TYPICAL_GREATER) ? 1.f : 0.f;	
+	if (lesser > TYPICAL_LESSER / 2) {
+		odds[EVIL_RISING] = target ? 1.f : 0.5f;
 	}
+
 	int plotIndex = parentChit->random.Select(odds, NPLOTS);
 	if (odds[plotIndex] == 0) return;	// nothing to select
 
 	Vector2I start = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
 	Vector2I end   = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
-
-	bool target = coreScript && parentChit->random.Bit() && (nTemples >= MAX_HUMAN_TEMPLES - 1);
 
 	if (plotIndex == SWARM) {
 		int green = Context()->chitBag->census.NumCoresOfTeam(TEAM_GREEN_MANTIS);
@@ -242,6 +244,41 @@ void Director::StartRandomPlot()
 			start = playerSector;
 		}
 		GreatBattle(start);
+	}
+	else if (plotIndex == EVIL_RISING) {
+		enum { GREEN, RED, TROLL, N};
+		int typical[N] = { 0 };
+		int pop[N] = { 0 };
+		float fraction[N] = { 0 };
+
+		pop[GREEN]	= Context()->chitBag->census.NumOf(ISC::mantis, &typical[GREEN]);
+		pop[RED]	= Context()->chitBag->census.NumOf(ISC::redMantis, &typical[RED]);
+		pop[TROLL]	= Context()->chitBag->census.NumOf(ISC::troll, &typical[TROLL]);
+		for (int i = 0; i < N; ++i) {
+			fraction[i] = float(pop[i]) / float(typical[i]);
+		}
+		IString critter = ISC::mantis;
+		int critterTeam = TEAM_GREEN_MANTIS;
+		IString demi    = ISC::Vyllis;
+		bool female		= true;
+		
+		int idx = ArrayFindMax(fraction, N, 0, [](int, float score) { return score; });
+		if (idx == RED) {
+			critter = ISC::redMantis;
+			critterTeam = TEAM_RED_MANTIS;
+			demi = ISC::Rava;
+			female = false;
+		}
+		else if (idx == TROLL) {
+			critter = ISC::troll;
+			critterTeam = TEAM_TROLL;
+			demi = ISC::Oggar;
+			female = false;
+		}
+		EvilRising(start, critter, critterTeam, demi, female);
+	}
+	else {
+		GLASSERT(false);
 	}
 }
 
@@ -270,13 +307,13 @@ void Director::GreatBattle(const grinliz::Vector2I& pos) {
 	plot = greatBattlePlot;
 }
 
-void Director::EvilRising(const grinliz::Vector2I& pos)
+void Director::EvilRising(const grinliz::Vector2I& pos, const IString& critter, int critterTeam, const IString& demiName, bool demiIsFemale)
 {
 	GLASSERT(!plot);
 	if (plot) return;
 
 	EvilRisingPlot* evilRisingPlot = new EvilRisingPlot();
-	evilRisingPlot->Init(Context(), pos);
+	evilRisingPlot->Init(Context(), pos, critter, critterTeam, demiName, demiIsFemale);
 	plot = evilRisingPlot;
 }
 

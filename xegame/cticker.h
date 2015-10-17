@@ -24,40 +24,38 @@ class CTicker
 {
 public:
 	CTicker() : period(1000), time(1000) {}
-	explicit CTicker( int _period ) : period(_period), time(_period) {}
+	explicit CTicker(int _period) : period(_period), time(_period) {}
 
 	// Sets time passed. Returns the number of times
 	// that this ticker fired.
-	int Delta( U32 d ) {
+	int Delta(U32 d) {
 		int n = 0;
 		time -= int(d);
-		while ( time <= 0 ) {
+		while (time <= 0) {
 			++n;
 			time += period;
 		}
 		return n;
 	}
 
-	int Next() const { return time; }
-	void Reset() { time = period; }
-	void SetReady() { time = 0; }
+	int  Next() const				{ return time; }
+	void Reset()					{ time = period; }
+	void SetReady()					{ time = 0; }
+	float FractionRemaining() const { return float(time) / float(period); }
 
-	void Randomize( int seed ) {
+	void Randomize(int seed) {
 		grinliz::Random r(seed);
 		r.Rand();
-		time = r.Rand( period );
-	}
-	void Within( int t ) { 
-		if ( t < time ) time = t;
+		time = r.Rand(period);
 	}
 	// Remember it counts *down*
-	void SetTime( int t ) {
+	void SetTime(int t) {
 		time = t;
 	}
-	int Period() const { return period; }
-	void SetPeriod( int t ) { period = t; }
+	int Period() const				{ return period; }
+	void SetPeriod(int t)			{ period = t; }
 
-	void Serialize( XStream* xs, const char* name );
+	void Serialize(XStream* xs, const char* name);
 
 private:
 	int period;

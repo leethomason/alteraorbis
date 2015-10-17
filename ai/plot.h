@@ -110,7 +110,12 @@ public:
 		destSector.Zero();
 	}
 		
-	void Init(const ChitContext* _context, const grinliz::Vector2I& _destSector);
+	void Init(const ChitContext* _context, 
+			  const grinliz::Vector2I& _destSector, 
+			  const grinliz::IString& _critter,
+			  int _critterTeam,
+			  const grinliz::IString& _demiName,
+			  bool _demiIsFemale);
 
 	virtual grinliz::Vector2I PrioritySendHerd(Chit* chit);
 	virtual grinliz::Vector2I ShouldSendHerd(Chit* chit);
@@ -127,11 +132,15 @@ private:
 	static const U32 MAX_PLOT_TIME = 10 * 60 * 1000;
 	static const int SWARM_TIME = 2 * (60 * 1000);	// Minutes per sector. Needs tuning.
 
-	int stage;
-	int badGuyID;
-	CTicker overTime;
-	CTicker eventTime;
-	grinliz::Vector2I destSector;
+	int					stage;
+	int					badGuyID;
+	CTicker				overTime;
+	CTicker				eventTime;
+	grinliz::Vector2I	destSector;
+	grinliz::IString	critter;
+	int					critterTeam;
+	grinliz::IString	demiName;
+	bool				demiIsFemale;
 };
 
 #endif // ALTERA_PLOT_INCLUDED

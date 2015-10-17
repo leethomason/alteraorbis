@@ -1442,7 +1442,7 @@ void GameScene::HandleHotKey( int mask )
 			director->DeletePlot();
 			//director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
 			//director->GreatBattle(wh);
-			director->EvilRising(start);
+			director->EvilRising(start, ISC::mantis, TEAM_GREEN_MANTIS, ISC::Vyllis, true);
 		}
 #endif
 #if 0	// Monster swarm

@@ -4,8 +4,9 @@
 #include "../game/news.h"
 #include "../game/lumoschitbag.h"
 #include "../game/gameitem.h"
-#include "../script/corescript.h"
 #include "../game/worldmap.h"
+#include "../game/worldinfo.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 
@@ -145,10 +146,19 @@ bool GreatBattlePlot::DoTick(U32 time)
 }
 
 
-void EvilRisingPlot::Init(const ChitContext* _context, const grinliz::Vector2I& _dest)
+void EvilRisingPlot::Init(const ChitContext* _context, 
+			  const grinliz::Vector2I& _destSector, 
+			  const grinliz::IString& _critter,
+			  int _critterTeam,
+			  const grinliz::IString& _demiName,
+			  bool _demiIsFemale)
 {
-	context = _context;
-	destSector = _dest;
+	context			= _context;
+	destSector		= _destSector;
+	critter			= _critter;
+	critterTeam		= _critterTeam;
+	demiName		= _demiName;
+	demiIsFemale	= _demiIsFemale;
 	overTime.SetPeriod(MAX_PLOT_TIME);
 	overTime.Reset();
 	eventTime.SetPeriod(1000);
@@ -158,14 +168,30 @@ void EvilRisingPlot::Init(const ChitContext* _context, const grinliz::Vector2I& 
 }
 
 
+void EvilRisingPlot::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "EvilRisingPlot");
+	XARC_SER(xs, stage);
+	XARC_SER(xs, badGuyID);
+	XARC_SER(xs, destSector);
+	XARC_SER(xs, critter);
+	XARC_SER(xs, critterTeam);
+	XARC_SER(xs, demiName);
+	XARC_SER(xs, demiIsFemale);
+	overTime.Serialize(xs, "overTime");
+	eventTime.Serialize(xs, "eventTime");
+	XarcClose(xs);
+}
+
+
 grinliz::Vector2I EvilRisingPlot::ShouldSendHerd(Chit* chit)
 {
 	static const Vector2I ZERO = { 0, 0 };
 	if (stage == SWARM_STAGE) {
-		if (chit->ID() == badGuyID && ToSector(chit->Position()) != destSector) {
+		if ((chit->ID() == badGuyID) && (ToSector(chit->Position()) != destSector)) {
 			return destSector;
 		}
-		if (chit->GetItem()->IName() == ISC::mantis && ToSector(chit->Position()) != destSector) {
+		if ((chit->GetItem()->IName() == critter) && (ToSector(chit->Position()) != destSector)) {
 			return destSector;
 		}
 	}
@@ -178,34 +204,25 @@ grinliz::Vector2I EvilRisingPlot::PrioritySendHerd(Chit* chit)
 	if (chit->ID() == badGuyID 
 		&& stage == SWARM_STAGE 
 		&& ToSector(chit->Position()) != destSector
-		&& eventTime.Next() < eventTime.Period() / 2) 
+		&& eventTime.FractionRemaining() < 0.5f) 
 	{
 		return destSector;
 	}
 	static const Vector2I ZERO = { 0, 0 };
 	return ZERO;
 }
-
-
-void EvilRisingPlot::Serialize(XStream* xs)
-{
-	XarcOpen(xs, "EvilRisingPlot");
-	XARC_SER(xs, stage);
-	XARC_SER(xs, badGuyID);
-	XARC_SER(xs, destSector);
-	overTime.Serialize(xs, "overTime");
-	eventTime.Serialize(xs, "eventTime");
-	XarcClose(xs);
-}
-
+ 
 
 bool EvilRisingPlot::DoTick(U32 time)
 {
 	CoreScript* coreScript = CoreScript::GetCore(destSector);
-	if (!coreScript) {
-		return true;	// bad start?
-	}
 	Chit* badGuy = context->chitBag->GetChit(badGuyID);
+	CStr<128> str;
+
+	const SectorData& sd = context->worldMap->GetSectorData(destSector);
+	if (!sd.HasCore()) {
+		return true;	// how did we get somewhere without a core??
+	}
 
 	if (stage == GROWTH_STAGE) {
 		if (!coreScript->InUse() && eventTime.Delta(time)) {
@@ -219,15 +236,21 @@ bool EvilRisingPlot::DoTick(U32 time)
 					totalEvil += wg.PlantStage() + 1;
 				}
 			}
-			if (totalEvil >= 0) { // # needs tuning
+			// FIXME 0 is testing value!!!
+			if (totalEvil >= 0) {
 				badGuy = context->chitBag->NewBadGuy(ToWorld2I(coreScript->ParentChit()->Position()),
-														   "Vyllis",
+														   demiName,
 														   ISC::humanFemale,
-														   TEAM_GREEN_MANTIS,
+														   critterTeam,
 														   LESSER_DEITY_LEVEL);
 				badGuyID = badGuy->ID();
 
-				IString text = StringPool::Intern("Lesser deity Vyllis has gained entry to the Cores.");
+				str.Format("The Flaw %s has gained entry to the Cores. %s commands the %s.", 
+						   demiName.safe_str(),
+						   demiIsFemale ? "She" : "He",
+						   critter.safe_str());
+
+				IString text = StringPool::Intern(str.c_str());
 				NewsEvent newsEvent(NewsEvent::PLOT_START, ToWorld2F(SectorBounds(destSector).Center()), badGuy->GetItemID(), 0, &text);
 				context->chitBag->GetNewsHistory()->Add(newsEvent);
 				stage = SWARM_STAGE;
@@ -241,15 +264,19 @@ bool EvilRisingPlot::DoTick(U32 time)
 		Rectangle2I bounds, mapBounds;
 		bounds.min = bounds.max = destSector;
 		bounds.Outset(2);
-		mapBounds.Set(1, 1, NUM_SECTORS - 3, NUM_SECTORS - 3);
+		mapBounds.Set(1, 1, NUM_SECTORS - 2, NUM_SECTORS - 2);
 
 		CArray<Vector2I, 10> sector;
 		CArray<float, 10> score;
+		CoreScript* playerCore = context->chitBag->GetHomeCore();
 
 		for (Rectangle2IIterator it(bounds); !it.Done(); it.Next()) {
 			if (mapBounds.Contains(it.Pos()) && it.Pos() != destSector) {
 				CoreScript* targetCore = CoreScript::GetCore(it.Pos());
-				if (targetCore && Team::Instance()->GetRelationship(badGuy, targetCore->ParentChit()) == ERelate::ENEMY) {
+				if (   targetCore 
+					&& Team::Instance()->GetRelationship(badGuy, targetCore->ParentChit()) == ERelate::ENEMY
+					&& ((targetCore != playerCore) || (playerCore->NumTemples() > TEMPLES_REPELS_GREATER)))
+				{
 					sector.PushIfCap(it.Pos());
 					score.PushIfCap(float(NUM_SECTORS_2) - (it.Pos() - mapBounds.Center()).LengthSquared());
 				}
@@ -258,7 +285,11 @@ bool EvilRisingPlot::DoTick(U32 time)
 		if (sector.Size()) {
 			int idx = badGuy->random.Select(score.Mem(), score.Size());
 			destSector = sector[idx];
-			IString text = StringPool::Intern("The reighn of Vyllis continues.");
+
+			str.Format("The Flaw %s and swarm of %s is moving.",
+					   demiName.safe_str(),
+					   critter.safe_str());
+			IString text = StringPool::Intern(str.c_str());
 			NewsEvent newsEvent(NewsEvent::PLOT_EVENT, ToWorld2F(SectorBounds(destSector).Center()), 0, 0, &text);
 			context->chitBag->GetNewsHistory()->Add(newsEvent);
 		}
@@ -267,10 +298,15 @@ bool EvilRisingPlot::DoTick(U32 time)
 
 	if (stage == GROWTH_STAGE && overTime.Delta(time)) {
 		// Don't need a PLOT_END because no PLOT_START was sent.
+		GLOUTPUT(("EvilRisingPlot out of time.\n"));
 		return true;
 	}
 	if (stage != GROWTH_STAGE && !badGuy) {
-		IString text = StringPool::Intern("Vyllis is deleted and the Emerald Swarm is defeated.");
+		str.Format("The Flaw %s is deleted. The %s swarm is over.",
+				   demiName.safe_str(),
+				   critter.safe_str());
+		IString text = StringPool::Intern(str.c_str());
+
 		NewsEvent newsEvent(NewsEvent::PLOT_END, ToWorld2F(SectorBounds(destSector).Center()), 0, 0, &text);
 		context->chitBag->GetNewsHistory()->Add(newsEvent);
 		return true;

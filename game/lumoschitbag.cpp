@@ -454,7 +454,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, const char* name, const grinliz::IString& type, int team, int level )
+Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, const IString& name, const grinliz::IString& type, int team, int level )
 {
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
