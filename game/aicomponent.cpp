@@ -2233,7 +2233,7 @@ void AIComponent::ThinkNormal()
 //			if (wanderFlags & GameItem::AI_WANDER_CIRCLE)
 //				dest = ThinkWanderCircle();
 //			else 
-			dest = ThinkWanderHerd();
+			dest = (pmc && pmc->ForceCountHigh()) ? ThinkWanderRandom() : ThinkWanderHerd();
 		}
 	}
 	if (!dest.IsZero()) {

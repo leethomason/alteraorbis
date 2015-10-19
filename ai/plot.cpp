@@ -93,6 +93,9 @@ bool SwarmPlot::AdvancePlot()
 		}
 		ticker.SetPeriod(current == end ? SWARM_TIME * 2 : SWARM_TIME);
 		ticker.Reset();
+		IString text = StringPool::Intern("The Swarm is moving.");
+		NewsEvent newsEvent(NewsEvent::PLOT_EVENT, ToWorld2F(SectorBounds(current).Center()), 0, 0, &text);
+		context->chitBag->GetNewsHistory()->Add(newsEvent);
 	}
 	else {
 		IString text = StringPool::Intern("The Swarm is over.");

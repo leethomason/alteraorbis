@@ -21,6 +21,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcolor.h"
+#include "gamelimits.h"
 
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this

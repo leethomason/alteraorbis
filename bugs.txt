@@ -13,6 +13,7 @@ x no control flags in water
 x damage: items seem to get blown away...crystal not dropped
 x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
 x more announcement when core taken over - popup!
+x if super-crowded, should wander more (swarms)
 - How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
 - Art
 	- R1K
