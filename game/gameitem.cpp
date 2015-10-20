@@ -985,7 +985,7 @@ void GameItem::SetTeam(int newTeam)
 
 	GLASSERT(    (Team::IsDenizen(team) && Team::IsDenizen(newTeam))
 			  || (!Team::IsDenizen(team) && !Team::IsDenizen(newTeam))
-			  || (Team::IsDeity(team)));
+			  || (Team::IsDeity(newTeam)));
 
 	if (IsDenizen()) {
 		GLASSERT(Team::IsDenizen(team));
