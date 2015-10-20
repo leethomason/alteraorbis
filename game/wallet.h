@@ -43,6 +43,7 @@ public:
 	// Only set true for the reserve bank.
 	// NOT serialized.
 	void SetCanBeUnderwater(bool under) { canGoUnderwater = under; }
+	bool CanBeUnderwater() const		{ return canGoUnderwater; }
 
 	int Gold() const				{ return gold; }
 	bool HasGold(int g) const		{ return gold >= g; }

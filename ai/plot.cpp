@@ -239,11 +239,11 @@ bool EvilRisingPlot::DoTick(U32 time)
 					totalEvil += wg.PlantStage() + 1;
 				}
 			}
-			// FIXME 0 is testing value!!!
-			if (totalEvil >= 0) {
+			// 24 is a guess; needs tuning.
+			if (totalEvil >= 24) {
 				badGuy = context->chitBag->NewBadGuy(ToWorld2I(coreScript->ParentChit()->Position()),
 														   demiName,
-														   ISC::humanFemale,
+														   demiIsFemale ? ISC::humanFemale : ISC::humanMale,
 														   critterTeam,
 														   LESSER_DEITY_LEVEL);
 				badGuyID = badGuy->ID();

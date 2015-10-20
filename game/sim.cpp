@@ -382,11 +382,9 @@ void Sim::SpawnDenizens()
 					forgeData.team = DEITY_Q;
 
 					TransactAmt cost;
-					GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, random.Rand());
+					GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, random.Rand(), ReserveBank::GetWallet());
 					if (item) {
-						item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 						chit->GetItemComponent()->AddToInventory(item);
-
 						// Mark this item as important with a destroyMsg:
 						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, qCore->ParentChit()->GetItem());
 					}

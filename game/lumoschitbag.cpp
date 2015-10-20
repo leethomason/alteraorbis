@@ -454,7 +454,10 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, const IString& name, const grinliz::IString& type, int team, int level )
+Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, 
+							  const IString& name, 
+							  const grinliz::IString& type, 
+							  int team, int level )
 {
 	const ChitContext* context = Context();
 	Chit* chit = NewChit();
@@ -487,15 +490,17 @@ Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, const IString& name,
 		int seed = random.Rand();
 		ForgeScript::BestSubItem(&forgeData, seed);
 
-		// FIXME? no cost of this item.
 		TransactAmt cost;
 		TransactAmt freeCreate;
 		static const int CRYSTAL[NUM_CRYSTAL_TYPES] = { 3, 2, 1, 1 };
 		freeCreate.Set(0, CRYSTAL);
 
-		GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, freeCreate, &cost, seed);
+		GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, freeCreate, &cost, seed, ReserveBank::GetWallet());
 		if (loot) {
 			chit->GetItemComponent()->AddToInventory(loot);
+			loot->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
+								 ToWorld2F(chit->Position()),
+								 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		}
 	}
 

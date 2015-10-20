@@ -28,6 +28,7 @@ distribution.
 
 #include "gldebug.h"
 #include "gltypes.h"
+#include "glutil.h"
 
 namespace grinliz {
 
@@ -151,13 +152,24 @@ class Random
 	/// Fast hash that returns an 8-bit result
 	static U8 Hash8( U32 data );
 
+	/// Shuffle an array
 	template< class T >
 	void ShuffleArray( T* mem, int size ) {
 		for( int i=0; i<size; ++i ) {
 			int j = Rand(size);
-			T temp = mem[i];
-			mem[i] = mem[j];
-			mem[j] = temp;
+			Swap(&mem[i], &mem[j]);
+		}
+	}
+
+	// Shuffle an array, but tends to
+	// be generally small moves.
+	template< class T >
+	void SmallShuffle(T* mem, int size) {
+		for (int i = 0; i < size; ++i) {
+			int j = i - 1 + Rand(3);
+			if (j >= 0 && j < size) {
+				Swap(&mem[i], &mem[j]);
+			}
 		}
 	}
 

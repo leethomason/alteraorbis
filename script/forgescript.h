@@ -54,7 +54,11 @@ public:
 	static void BestSubItem(ForgeData* data, int seed);
 
 	// seed=0 is special! creates the "average" weapon
-	static GameItem* ForgeRandomItem(const ForgeData& forgeData, const Wallet& availabe, TransactAmt* cost, int seed);
+	static GameItem* ForgeRandomItem(const ForgeData& forgeData, 
+									 const Wallet& availabe, 
+									 TransactAmt* cost, 
+									 int seed,
+									 Wallet* payer);		// payer is optional; if provided, will actually pay for transaction.
 
 	static GameItem* Build(const ForgeData& forgeData,
 						   TransactAmt* required,

@@ -784,12 +784,9 @@ int ForgeDomainAI::DoTick(U32 delta)
 			ForgeScript::BestSubItem(&forgeData, seed);
 
 			TransactAmt cost;
-			GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, mainItem->wallet, &cost, seed);
+			GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, mainItem->wallet, &cost, seed, &mainItem->wallet);
 			if (loot) {
-				GLASSERT(mainItem->wallet.CanWithdraw(cost));
-				ReserveBank::GetWallet()->Deposit(&mainItem->wallet, cost);
 				market->GetItemComponent()->AddToInventory(loot);
-
 				// Mark this item as important with a destroyMsg:
 				loot->SetSignificant(Context()->chitBag->GetNewsHistory(), pos, NewsEvent::FORGED, NewsEvent::UN_FORGED, parentChit->GetItem());
 			}

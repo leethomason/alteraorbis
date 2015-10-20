@@ -727,26 +727,23 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 	ForgeScript::TeamLimitForgeData(&forgeData);
 	ForgeScript::BestSubItem(&forgeData, seed);
 
-	GameItem* item = ForgeScript::ForgeRandomItem(forgeData, gameItem->wallet, &cost, seed);
-
-	if (item) {
-		if (Team::Group(forgeData.team) == TEAM_KAMAKIRI && item->IName() == ISC::beamgun) {
-			item->SetResource("kamabeamgun");
+	GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, gameItem->wallet, &cost, seed, &gameItem->wallet);
+	if (loot) {
+		if (Team::Group(forgeData.team) == TEAM_KAMAKIRI && loot->IName() == ISC::beamgun) {
+			loot->SetResource("kamabeamgun");
 		}
-
-		item->wallet.Deposit(&gameItem->wallet, cost);
-		thisIC->AddToInventory(item);
+		thisIC->AddToInventory(loot);
 		thisIC->AddCraftXP(cost.NumCrystals());
 		gameItem->historyDB.Increment("Crafted");
 
 		Vector2I sector = ToSector(chit->Position());
 		GLOUTPUT(("'%s' forged the item '%s' at sector=%x,%x\n",
 			gameItem->BestName(),
-			item->BestName(),
+			loot->BestName(),
 			sector.x, sector.y));
 		(void)sector;
 
-		item->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
+		loot->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
 							 ToWorld2F(chit->Position()),
 							 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
 		return true;
