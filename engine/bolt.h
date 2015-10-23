@@ -69,9 +69,6 @@ struct Bolt {
 	int		effect;
 
 	static void TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler );
-
-private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 };
 
 

@@ -42,8 +42,6 @@ distribution.
 #include <time.h>
 #include "glstringutil.h"
 
-#define GRINLIZ_STACKTRACE
-
 bool gDebugging = true;
 std::recursive_mutex allocatorMutex;
 

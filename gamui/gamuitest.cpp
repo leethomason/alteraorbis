@@ -23,25 +23,14 @@
 
 #define BRIDGE 1
 
-#include "glew.h"
-#if defined(_MSC_VER)
-#include "../libs/SDL2/include/SDL.h"
-#else
-#include "SDL.h"
-#endif
+#include "sdl.h"
+#include "../engine/platformgl.h"
 
 #include "gamui.h"
 #include "gamuifreetype.h"
 
 #include <stdio.h>
 #include <math.h>
-
-#define TESTGLERR()	{	GLenum err = glGetError();				\
-						if ( err != GL_NO_ERROR ) {				\
-							printf( "GL ERR=0x%x\n", err );		\
-							GAMUIASSERT( 0 );					\
-						}										\
-					}
 
 using namespace gamui;
 
@@ -66,7 +55,7 @@ class Renderer : public IGamuiRenderer
 public:
 	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
 	{
-		TESTGLERR();
+		CHECK_GL_ERROR;
 
 		m_index = index;
 		m_vertex = vertex;
@@ -86,18 +75,18 @@ public:
 
 		glEnableClientState( GL_VERTEX_ARRAY );
 		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-		TESTGLERR();
+		CHECK_GL_ERROR;
 	}
 
 	virtual void EndRender() 
 	{
-		TESTGLERR();
+		CHECK_GL_ERROR;
 
 	}
 
 	virtual void BeginRenderState( const void* _renderState )
 	{
-		TESTGLERR();
+		CHECK_GL_ERROR;
 		intptr_t renderState = (intptr_t)(_renderState);
 
 #if 0
@@ -122,25 +111,25 @@ public:
 				GAMUIASSERT( 0 );
 				break;
 		}
-		TESTGLERR();
+		CHECK_GL_ERROR;
 	}
 
 	virtual void BeginTexture( const void* _textureHandle )
 	{
-		TESTGLERR();
+		CHECK_GL_ERROR;
 		intptr_t textureHandle = (intptr_t)_textureHandle;
 		glBindTexture( GL_TEXTURE_2D, (GLuint)textureHandle );
-		TESTGLERR();
+		CHECK_GL_ERROR;
 	}
 
 
 	virtual void Render( const void* renderState, const void* textureHandle, int start, int count )
 	{
-		TESTGLERR();
+		CHECK_GL_ERROR;
 		glVertexPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->x );
 		glTexCoordPointer( 2, GL_FLOAT, sizeof(Gamui::Vertex), &m_vertex->tx );
 		glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_SHORT, m_index + start );
-		TESTGLERR();
+		CHECK_GL_ERROR;
 	}
 };
 
@@ -210,7 +199,7 @@ int main( int argc, char **argv )
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
 
-	TESTGLERR();
+	CHECK_GL_ERROR;
 	GLuint textTextureID;
 	glGenTextures( 1, &textTextureID );
 	glBindTexture( GL_TEXTURE_2D, textTextureID );
@@ -219,7 +208,7 @@ int main( int argc, char **argv )
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_ALPHA, textSurface->w, textSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, textSurface->pixels );
-	TESTGLERR();
+	CHECK_GL_ERROR;
 
 	// Load a bitmap
 	SDL_Surface* imageSurface = SDL_LoadBMP( "./gamui/buttons.bmp" );
@@ -241,7 +230,7 @@ int main( int argc, char **argv )
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
 	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSurface->pixels );
-	TESTGLERR();
+	CHECK_GL_ERROR;
 	SDL_FreeSurface( imageSurface );
 
 	RenderAtom nullAtom;
@@ -265,7 +254,7 @@ int main( int argc, char **argv )
 	TextMetrics textMetrics;
 	Renderer renderer;
 
-	TESTGLERR();
+	CHECK_GL_ERROR;
 	Gamui gamui;
 	gamui.Init(&renderer);
 #if BRIDGE == 0
@@ -286,7 +275,7 @@ int main( int argc, char **argv )
 	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
 
 #if BRIDGE == 1
-	TESTGLERR();
+	CHECK_GL_ERROR;
 	GLuint textTextureID2;
 	glGenTextures(1, &textTextureID2);
 	glBindTexture(GL_TEXTURE_2D, textTextureID2);
@@ -294,7 +283,7 @@ int main( int argc, char **argv )
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
-	TESTGLERR();
+	CHECK_GL_ERROR;
 
 	textAtom.textureHandle = (const void*)textTextureID2;
 	textAtomD.textureHandle = textAtom.textureHandle;
@@ -435,10 +424,10 @@ int main( int argc, char **argv )
 					int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
 					bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h, true);
 					SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
-					TESTGLERR();
+					CHECK_GL_ERROR;
 					glBindTexture(GL_TEXTURE_2D, textTextureID2);
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
-					TESTGLERR();
+					CHECK_GL_ERROR;
 					gamui.SetText(textAtom, textAtomD, bridge);
 #endif
 				}

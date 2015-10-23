@@ -20,7 +20,6 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glgeometry.h"
-#include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
 
 class Texture;

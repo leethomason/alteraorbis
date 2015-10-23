@@ -65,6 +65,7 @@ public:
 		RENDERSTATE_UI_TEXT_DISABLED,
 		RENDERSTATE_UI_DECO,			// a=0.7,deco rendering
 		RENDERSTATE_UI_DECO_DISABLED,	// a=0.2
+
 		// Giant hack: renderstates for up to 4 faces in the UI.
 		RENDERSTATE_UI_CLIP_XFORM_MAP_0,	// special rendering for faces.
 		RENDERSTATE_UI_CLIP_XFORM_MAP_1,	// special rendering for faces.
@@ -73,21 +74,17 @@ public:
 		RENDERSTATE_COUNT
 	};
 
-	UIRenderer( int _layer ) : layer(_layer), shader(BLEND_NORMAL), textRed(1), textGreen(1), textBlue(1), texture(0), vbo(0), ibo() {}
+	UIRenderer(int _layer) : layer(_layer), shader(BLEND_NORMAL), texture(0), vbo(0), ibo() {}
 
-	void SetTextColor( float r, float g, float b )		{ textRed = r; textGreen = g; textBlue = b; }
-
-	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
+	virtual void BeginRender(int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex);
 	virtual void EndRender();
 
-	virtual void BeginRenderState( const void* renderState );
-	virtual void BeginTexture( const void* textureHandle );
-	virtual void Render( const void* renderState, const void* textureHandle, int start, int count ) ;
+	virtual void BeginRenderState(const void* renderState);
+	virtual void BeginTexture(const void* textureHandle);
+	virtual void Render(const void* renderState, const void* textureHandle, int start, int count);
 
-	static void SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, gamui::RenderAtom* );
-	//static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );
-	//virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
-	
+	static void SetAtomCoordFromPixel(int x0, int y0, int x1, int y1, int w, int h, gamui::RenderAtom*);
+
 	// Rendering parameters:
 	grinliz::Vector4F uv[NUM_DATA];
 	grinliz::Vector4F uvClip[NUM_DATA];
@@ -96,7 +93,6 @@ public:
 private:
 	int layer;
 	CompositingShader shader;
-	float textRed, textGreen, textBlue;
 	Texture* texture;
 	GPUVertexBuffer* vbo;
 	GPUIndexBuffer*  ibo;

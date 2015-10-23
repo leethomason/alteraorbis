@@ -146,12 +146,10 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		break;
 
 	case RENDERSTATE_UI_TEXT:
-		shader.SetColor( textRed, textGreen, textBlue, 1 );
 		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT_DISABLED:
-		shader.SetColor( textRed, textGreen, textBlue, 0.5f );
 		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 

@@ -26,8 +26,6 @@
 #include "../grinliz/glrandom.h"
 
 #include "vertex.h"
-#include "enginelimits.h"
-
 
 class Texture;
 class Particle;
