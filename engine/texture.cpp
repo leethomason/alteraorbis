@@ -359,14 +359,12 @@ void Texture::Upload( const void* pixels, int size )
 
 	if ( glID == 0 ) {
 		// Make sure we have on OpenGL ID
-		TextureManager* manager = TextureManager::Instance();
-		glID = manager->CreateGLTexture( w, h, format, flags );
+		glID = TextureManager::CreateGLTexture( w, h, format, flags );
 		GLASSERT( glID );
-		//this->GLID();
 	}
 
 	int glFormat, glType;
-	TextureManager::Instance()->CalcOpenGL( format, &glFormat, &glType );
+	TextureManager::CalcOpenGL( format, &glFormat, &glType );
 	glBindTexture( GL_TEXTURE_2D, glID );
 
 #if defined( UFO_WIN32_SDL ) && defined( DEBUG )
@@ -423,9 +421,29 @@ void Texture::Upload( const void* pixels, int size )
 }
 
 
+/*
 void Texture::Upload( const Surface& surface )
 {
 	Upload( surface.Pixels(), surface.BytesInImage() );
+}
+*/
+
+
+void Texture::UploadAlphaToRGBA16(const uint8_t* mem, int size)
+{
+	GLASSERT(w * h == size);
+	uint16_t* d16 = new uint16_t[w*h];
+
+	for (int j = 0; j < h; ++j) {
+		for (int i = 0; i < w; ++i) {
+			uint8_t c8 = mem[j*w + i];
+			Color4U8 color4u8 = { 255, 255, 255, c8 };
+			uint16_t c16 = Surface::CalcRGBA16(color4u8);
+			d16[j*w + i] = c16;
+		}
+	}
+	Upload(d16, sizeof(U16)*w*h);
+	delete[] d16;
 }
 
 
@@ -494,7 +512,7 @@ void Texture::GetTableEntry( const char* name, TableEntry* te ) const
 
 void Texture::GetTE( const gamedb::Item* child, TableEntry* te ) const
 {
-	te->name = StringPool::Intern( child->Name() );
+	te->name = StringPool::Intern(child->Name());
 
 	float x = child->GetFloat( "x" );
 	float y = child->GetFloat( "y" );

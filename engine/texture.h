@@ -18,7 +18,6 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-#include "../grinliz/glstringutil.h"
 #include "../grinliz/glcontainer.h"
 #include "../shared/gamedbreader.h"
 #include "ufoutil.h"
@@ -43,15 +42,15 @@ public:
 	enum { MAX_TEXTURE_NAME = 24 };
 
 	enum {
-		PARAM_NONE		= 0,
-		PARAM_NEAREST	= 0x01,
-		PARAM_LINEAR	= 0x02,
-		PARAM_EMISSIVE	= 0x04,
+		PARAM_NONE = 0,
+		PARAM_NEAREST = 0x01,
+		PARAM_LINEAR = 0x02,
+		PARAM_EMISSIVE = 0x04,
 		PARAM_SOFTWARE_MIP = 0x08,	// work around driver bug.
-		PARAM_COLORMAP	= 0x10		// supports color mapping
+		PARAM_COLORMAP = 0x10		// supports color mapping
 	};
 
-	Texture()					{ creator = 0; } 
+	Texture()					{ creator = 0; }
 
 	const char* Name() const	{ return name.c_str(); }
 	// Is there an alpha channel? (Emissive or transparent.)
@@ -67,8 +66,10 @@ public:
 	int Width() const			{ return w; }
 	int Height() const			{ return h; }
 
-	void Upload( const void* mem, int size );
-	void Upload( const Surface& surface );
+	void Upload(const void* mem, int size);
+	//void Upload(const Surface& surface);
+	void UploadAlphaToRGBA16(const uint8_t* mem, int size);
+
 	bool Empty() const			{ return creator == 0 && item == 0 && glID == 0 && name.empty(); }
 
 	int BytesInImage() const	{ return w*h*BytesPerPixel(); }
@@ -76,18 +77,20 @@ public:
 
 	U32 GLID();
 
-	void SetEmissive( bool on )	{ if ( on ) 
-									flags |= PARAM_EMISSIVE;
-								  else
-									flags &= (~PARAM_EMISSIVE);
-								}
-	void SetSoftwareMip( bool on )	{	if ( on )
-											flags |= PARAM_SOFTWARE_MIP;
-										else
-											flags &= (~PARAM_SOFTWARE_MIP);
-										}
+	void SetEmissive(bool on)	{
+		if (on)
+			flags |= PARAM_EMISSIVE;
+		else
+			flags &= (~PARAM_EMISSIVE);
+	}
+	void SetSoftwareMip(bool on)	{
+		if (on)
+			flags |= PARAM_SOFTWARE_MIP;
+		else
+			flags &= (~PARAM_SOFTWARE_MIP);
+	}
 	struct TableEntry {
-		TableEntry() { uv.Set( 0, 0, 1, 1 ); clip.Set( 0, 0, 1, 1 ); uvXForm.Set( 1, 1, 0, 0 ); }
+		TableEntry() { uv.Set(0, 0, 1, 1); clip.Set(0, 0, 1, 1); uvXForm.Set(1, 1, 0, 0); }
 
 		grinliz::IString	name;
 		grinliz::Vector4F	uv;				// x0, y0, x1, y1
@@ -97,12 +100,14 @@ public:
 	};
 	int NumTableEntries() const;
 	bool HasTableEntry(const char* name) const;
-	void GetTableEntry( int i, TableEntry* te ) const;
-	void GetTableEntry( const char* name, TableEntry* te ) const;
+	void GetTableEntry(int i, TableEntry* te) const;
+	void GetTableEntry(const char* name, TableEntry* te) const;
+
+	// The TextureManager calls this for you, if in use.
+	void Set(const char* name, int w, int h, TextureType format, int flags);
 
 private:
-	void GetTE( const gamedb::Item* item, TableEntry* te ) const;
-	void Set( const char* name, int w, int h, TextureType format, int flags );
+	void GetTE(const gamedb::Item* item, TableEntry* te) const;
 
 	grinliz::CStr< MAX_TEXTURE_NAME > name;
 	int w, h;
@@ -144,8 +149,8 @@ private:
 	~TextureManager();
 
 	// called by the texture
-	void CalcOpenGL( int format, int* glFormat, int* glType );
-	U32 CreateGLTexture( int w, int h, int format, int flags );
+	static void CalcOpenGL( int format, int* glFormat, int* glType );
+	static U32 CreateGLTexture( int w, int h, int format, int flags );
 
 	enum {
 		MAX_TEXTURES = 100		// increase as needed

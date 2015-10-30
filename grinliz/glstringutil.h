@@ -243,6 +243,7 @@ public:
 	void append( const char* p, int n );
 	int compare( const char* str ) const			{ return strcmp( m_buf, str ); }
 	bool empty() const								{ return m_size == 0; }
+	void clear()									{ init(""); }
 
 	unsigned size() const							{ return m_size; }
 	const char* c_str() const						{ return m_buf; }

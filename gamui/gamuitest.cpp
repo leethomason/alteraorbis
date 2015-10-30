@@ -25,6 +25,7 @@
 
 #include "sdl.h"
 #include "../engine/platformgl.h"
+#include "../engine/texture.h"
 
 #include "gamui.h"
 #include "gamuifreetype.h"
@@ -175,12 +176,14 @@ public:
 int main( int argc, char **argv )
 {    
 	printf("GamuiTest started.\n");
+
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
 	{
 	    printf( "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
+
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
@@ -193,11 +196,15 @@ int main( int argc, char **argv )
 											screenX, screenY,
 											SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	SDL_GL_CreateContext( screen );
+	glewInit();
 	glViewport(0, 0, screenX, screenY);
 	printf("Window created.\n");
 
 	// Load text texture
 	SDL_Surface* textSurface = SDL_LoadBMP( "./gamui/stdfont2.bmp" );
+	Texture* textTexture = new Texture();
+	textTexture->Set("text", textSurface->w, textSurface->h, TextureType::TEX_RGBA16, Texture::PARAM_NEAREST);
+	textTexture->UploadAlphaToRGBA16((const uint8_t*) textSurface->pixels, textSurface->pitch * textSurface->h);
 
 	CHECK_GL_ERROR;
 	GLuint textTextureID;
@@ -477,6 +484,7 @@ int main( int argc, char **argv )
 
 		SDL_GL_SwapWindow( screen );
 	}
+	delete textTexture;
 	SDL_FreeSurface(textSurface);
 	SDL_FreeSurface(fontSurface);
 

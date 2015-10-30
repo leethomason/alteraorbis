@@ -54,23 +54,11 @@ void FontSingleton::CreateTexture(Texture* t)
 		const int h = t->Height();
 
 		uint8_t* d8 = new uint8_t[w*h];
-		uint16_t* d16 = new uint16_t[w*h];
-
 		Generate(fontHeight, d8, w, h, true);
-		for (int j = 0; j < h; ++j) {
-			for (int i = 0; i < w; ++i) {
-				uint8_t c8 = d8[j*w + i];
-				Color4U8 color4u8 = { 255, 255, 255, c8 };
-				uint16_t c16 = Surface::CalcRGBA16(color4u8);
-				//d16[(h - 1 - j)*w + i] = c16;
-				d16[j*w + i] = c16;
-			}
-		}
-		t->Upload(d16, sizeof(U16)*w*h);
+		t->UploadAlphaToRGBA16(d8, w * h);
 		GLOUTPUT(("FontSingleton::CreateTexture %d pixels\n", fontHeight));
 
 		delete[] d8;
-		delete[] d16;
 	}
 	else {
 		GLASSERT(0);

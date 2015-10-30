@@ -84,7 +84,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\src\alteraorbis\libs\SDL2\include;C:\src\alteraorbis\freetype\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -151,16 +151,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\engine\surface.h" />
+    <ClInclude Include="..\engine\texture.h" />
+    <ClInclude Include="..\FastLZ\fastlz.h" />
     <ClInclude Include="..\grinliz\gldebug.h" />
+    <ClInclude Include="..\grinliz\glrandom.h" />
+    <ClInclude Include="..\grinliz\glstringutil.h" />
+    <ClInclude Include="..\shared\gamedbreader.h" />
     <ClInclude Include="gamui.h" />
     <ClInclude Include="gamuifreetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\engine\surface.cpp" />
+    <ClCompile Include="..\engine\texture.cpp" />
+    <ClCompile Include="..\FastLZ\fastlz.c" />
+    <ClCompile Include="..\glew\src\glew.c" />
     <ClCompile Include="..\grinliz\gldebug.cpp" />
+    <ClCompile Include="..\grinliz\glrandom.cpp" />
+    <ClCompile Include="..\grinliz\glstringutil.cpp" />
+    <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="gamui.cpp" />
     <ClCompile Include="gamuifreetype.cpp" />
     <ClCompile Include="gamuitest.cpp" />
-    <ClCompile Include="glew.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\freetype\builds\windows\vc2010\freetype.vcxproj">
