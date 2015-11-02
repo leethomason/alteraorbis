@@ -210,28 +210,19 @@ int main( int argc, char **argv )
 	}
 	CHECK_GL_ERROR;
 
-	// Load a bitmap
-	SDL_Surface* imageSurface = SDL_LoadBMP( "./gamui/buttons.bmp" );
-	for (int j = 0; j < imageSurface->h; ++j) {
-		for (int i = 0; i < imageSurface->w; ++i) {
-			uint8_t* p0 = (uint8_t*)imageSurface->pixels + j * imageSurface->pitch + i * 3;
-			uint8_t* p1 = p0 + 2;
-			uint8_t t = *p0;
-			*p0 = *p1;
-			*p1 = t;
-		}
+	Texture* imageTexture = new Texture();
+	{
+		// Load a bitmap, and flip the R-B byte order.
+		SDL_Surface* surface = SDL_LoadBMP("./gamui/buttons.bmp");
+		SDL_Surface* imageSurface = SDL_CreateRGBSurface(0, surface->w, surface->h, 24, 0xff, 0xff00, 0xff0000, 0);
+		SDL_BlitSurface(surface, 0, imageSurface, 0);
+
+		imageTexture->Set("image", imageSurface->w, imageSurface->h, TextureType::TEX_RGB24, 0);
+		imageTexture->Upload((const uint8_t*)imageSurface->pixels, imageSurface->pitch * imageSurface->h);
+
+		SDL_FreeSurface(surface);
+		SDL_FreeSurface(imageSurface);
 	}
-
-	GLuint imageTextureID;
-	glGenTextures( 1, &imageTextureID );
-	glBindTexture( GL_TEXTURE_2D, imageTextureID );
-
-	glTexParameteri(	GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri(	GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-	glTexImage2D( GL_TEXTURE_2D, 0,	GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, imageSurface->pixels );
-	CHECK_GL_ERROR;
-	SDL_FreeSurface( imageSurface );
 
 	RenderAtom nullAtom;
 
@@ -240,10 +231,10 @@ int main( int argc, char **argv )
 	RenderAtom textAtomD = textAtom;
 	textAtomD.renderState = (const void*) RENDERSTATE_TEXT_DISABLED;
 
-	RenderAtom whiteAtom((const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.1f, 0.4f, 0.2f, 0.45f);
+	RenderAtom whiteAtom((const void*)RENDERSTATE_NORMAL, (const void*)imageTexture->GLID(), 0.1f, 0.4f, 0.2f, 0.45f);
 
 	// 100x100
-	RenderAtom imageAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0.5f, 0.5f, 228.f/256.f, 28.f/256.f );
+	RenderAtom imageAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTexture->GLID(), 0.5f, 0.5f, 228.f/256.f, 28.f/256.f );
 
 	// 50x50
 	//RenderAtom decoAtom( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.25f, 0.25f, 0.f );
@@ -342,12 +333,12 @@ int main( int argc, char **argv )
 	canvas.DrawRectangleOutline(10, 10, 80, 80, 4, 10);
 
 	// 50x50
-	RenderAtom up( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 1, (52.f/256.f), (204.f/256.f) );
+	RenderAtom up( (const void*)RENDERSTATE_NORMAL, (const void*)imageTexture->GLID(), 0, 1, (52.f/256.f), (204.f/256.f) );
 	RenderAtom upD = up;
 	upD.renderState = (const void*) RENDERSTATE_DISABLED;
 
 	// 50x50
-	RenderAtom down( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0.75f, (52.f/256.f), (140.f/256.f) );
+	RenderAtom down( (const void*)RENDERSTATE_NORMAL, (const void*)imageTexture->GLID(), 0, 0.75f, (52.f/256.f), (140.f/256.f) );
 	RenderAtom downD( down, (const void*)RENDERSTATE_DISABLED );
 
 	PushButton button0( &gamui, up, upD, down, downD, decoAtom, decoAtomD );
@@ -385,7 +376,7 @@ int main( int argc, char **argv )
 	toggle0.AddToToggleGroup( &toggle2 );
 
 	// 15x30
-	RenderAtom tick0( (const void*)RENDERSTATE_NORMAL, (const void*)imageTextureID, 0, 0, 0, 0 );
+	RenderAtom tick0( (const void*)RENDERSTATE_NORMAL, (const void*)imageTexture->GLID(), 0, 0, 0, 0 );
 	RenderAtom tick1=tick0, tick2=tick0;
 	tick0.SetCoord( 190.f/256.f, 225.f/256.f, 205.f/256.f, 1 );
 	tick2.SetCoord( 190.f/256.f, 180.f/256.f, 205.f/256.f, 210.f/256.f );
