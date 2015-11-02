@@ -106,9 +106,7 @@ void UIRenderer::EndRender()
 void UIRenderer::BeginRenderState( const void* renderState )
 {
 	int state = int(intptr_t(renderState)) & 0xffff;
-	//int data  = int(intptr_t(renderState)) >> 16;
 	shader = CompositingShader();
-	//GPUDevice* device = GPUDevice::Instance();
 
 	switch ( state )
 	{
