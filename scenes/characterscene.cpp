@@ -122,7 +122,7 @@ void CharacterScene::Resize()
 {
 	// Dowside of a local Engine: need to resize it.
 	const Screenport& port = game->GetScreenport();
-	engine->GetScreenportMutable()->Resize( port.PhysicalWidth(), port.PhysicalHeight() );
+	engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight(), GPUDevice::Instance());
 
 	PositionStd( &okay, 0 );
 	LayoutCalculator layout = DefaultLayout();
@@ -437,9 +437,9 @@ void CharacterScene::DoTick( U32 deltaTime )
 void CharacterScene::Draw3D( U32 deltaTime )
 {
 	// we use our own screenport
-	screenport.SetPerspective();
+	screenport.SetPerspective(GPUDevice::Instance());
 	engine->Draw( deltaTime, 0, 0 );
-	screenport.SetUI();
+	screenport.SetUI(GPUDevice::Instance());
 }
 
 

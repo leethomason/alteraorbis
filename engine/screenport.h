@@ -23,6 +23,7 @@
 #include "../grinliz/glgeometry.h"
 
 namespace gamui { class Gamui; };
+class GPUDevice;
 
 struct Frustum
 {
@@ -37,12 +38,12 @@ struct Frustum
 class Screenport
 {
 public:
-	Screenport( int width, int height, int virtualHeight ); 
+	Screenport( int width, int height ); 
 
 	// Needs to be set before engine is set up
 	void SetNearFar( float n, float f ) { near = n; far = f; GLASSERT( far > near ); }
 
-	void Resize( int w, int h );
+	void Resize(int w, int h, GPUDevice* device);
 
 	bool ViewToWorld( const grinliz::Vector2F& view, const grinliz::Matrix4* mvpi, grinliz::Ray* world ) const;
 	void WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F* view ) const;
@@ -74,10 +75,10 @@ public:
 	// The clip is interpreted as the location where the UI can be.
 	// FIXME: render to texture uses weird coordinates. Once clip is cleaned up (or removed)
 	// it would be nice to be able to have a lower left origin.
-	void SetUI();
+	void SetUI(GPUDevice* device);
 
 	// Set the perspective PROJECTION.
-	void SetPerspective();
+	void SetPerspective(GPUDevice* device);
 	float Near() const { return near; }
 	float Far() const { return far; }
 
@@ -86,7 +87,7 @@ public:
 	void SetOrthoCamera( bool ortho, float w, float h )				{ orthoCamera = ortho; orthoWidth = w; orthoHeight = h; }
 
 	// Set the MODELVIEW from the camera.
-	void SetView( const grinliz::Matrix4& view );
+	void SetView( const grinliz::Matrix4& view, GPUDevice* );
 	void SetViewMatrices( const grinliz::Matrix4& _view )			{ view3D = _view; }
 
 	const grinliz::Matrix4& ProjectionMatrix3D() const				{ return projection3D; }
@@ -100,23 +101,14 @@ public:
 
 	const Frustum&	GetFrustum()		{ GLASSERT( uiMode == false ); return frustum; }
 
-	//float UIWidth() const									{ return screenWidth; }
-	//float UIHeight() const									{ return screenHeight; }
 	int PhysicalWidth() const								{ return (int)physicalWidth; }
 	int PhysicalHeight() const								{ return (int)physicalHeight; }
 
-//	const grinliz::Rectangle2F UIBoundsClipped3D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
-//	const grinliz::Rectangle2F UIBoundsClipped2D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
-
 	bool UIMode() const										{ return uiMode; }
 
-private:
-	//void UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const;
-	void CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean );
+	//void StreamToGPUDevice(GPUDevice* target);
 
-	//float screenWidth; 
-	//float screenHeight;		// if rotation==0, 320
-	//float virtualHeight;	// used to be 320. Used for UI layout.
+private:
 	float near;
 	float far;
 

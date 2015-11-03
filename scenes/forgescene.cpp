@@ -300,9 +300,9 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 void ForgeScene::Draw3D( U32 deltaTime )
 {
 	// we use our own screenport
-	screenport.SetPerspective();
+	screenport.SetPerspective(GPUDevice::Instance());
 	engine->Draw( deltaTime, 0, 0 );
-	screenport.SetUI();
+	screenport.SetUI(GPUDevice::Instance());
 }
 
 

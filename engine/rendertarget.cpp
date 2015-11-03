@@ -85,11 +85,11 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 {
 	if ( active ) {
 		if ( !screenport ) {
-			screenport = new Screenport( texture.w, texture.h, texture.h );
+			screenport = new Screenport( texture.w, texture.h);
 		}
 		savedScreenport = engine->GetScreenportMutable();
 		engine->SetScreenport( screenport );
-		screenport->Resize( texture.w, texture.h );
+		screenport->Resize(texture.w, texture.h, GPUDevice::Instance());
 
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBufferID );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);
@@ -105,7 +105,7 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 	}
 	else {
 		engine->SetScreenport( savedScreenport );
-		savedScreenport->Resize( 0, 0 );
+		savedScreenport->Resize(0, 0, GPUDevice::Instance());
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 	}
 }

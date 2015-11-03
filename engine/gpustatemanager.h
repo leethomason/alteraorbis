@@ -233,9 +233,6 @@ public:
 		PROJECTION_MATRIX,
 	};
 
-
-	enum { STATE_BITS = 9 };
-
 	static GPUDevice* Instance()	{ if ( !instance ) instance = new GPUDevice(); return instance; }
 	~GPUDevice();
 
@@ -260,12 +257,11 @@ public:
 
 	void ResetTriCount()	{ trianglesDrawn = 0; drawCalls = 0; }
 	int TrianglesDrawn()	{ return trianglesDrawn; }
-	//int QuadsDrawn()		{ return quadsDrawn; }
 	int DrawCalls()			{ return drawCalls; }
 
-	grinliz::Color4F		ambient;
+	grinliz::Color4F	ambient;
 	grinliz::Vector4F	directionWC;
-	grinliz::Color4F		diffuse;
+	grinliz::Color4F	diffuse;
 
 	// Draws indexed triangles.
 	void Draw(		const GPUState& state, 
@@ -309,13 +305,9 @@ private:
 	GPUIndexBuffer*	 indexBuffer[NUM_UI_LAYERS];
 	GPUVertexBuffer* quadBuffer[NUM_QUAD_BUFFERS];
 
-protected:
-
 	// Sets up the shader.
 	void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
 	int Upload( const GPUState&, const GPUStream&, const GPUStreamData&, int start, int instances );
-
-private:
 
 	void SwitchMatrixMode( MatrixType type );	
 	static const void* PTR( const void* base, int offset ) {

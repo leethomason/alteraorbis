@@ -61,7 +61,7 @@ const Game::Palette* Game::mainPalette = 0;
 
 
 Game::Game( int width, int height, int rotation, int uiHeight ) :
-	screenport( width, height, uiHeight ),
+	screenport( width, height ),
 	aiDebugLog(false),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
@@ -444,19 +444,6 @@ const char* Game::GamePath( const char* type, int slot, const char* extension ) 
 }
 
 
-/*
-void Game::PrintPerf( int depth, const PerfData& data )
-{
-	static const int X = 350;
-	static const int Y = 100;
-
-	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw( X + 15*depth, Y+perfY, "%s", data.name );
-	ufoText->Draw( X+280,		 Y+perfY, "%6.2f  %4d", data.inclusiveMSec, data.callCount );
-	perfY += 20;
-}
-*/
-
 void Game::PrintPerf()
 {
 	++perfFrameCount;
@@ -492,6 +479,7 @@ void Game::PrintPerf()
 void Game::DoTick( U32 _currentTime )
 {
 	GPUDevice* device = GPUDevice::Instance();
+	screenport.Resize(0, 0, device);
 	{
 		//GRINLIZ_PERFTRACK
 		PROFILE_FUNC();
@@ -534,7 +522,7 @@ void Game::DoTick( U32 _currentTime )
 			//GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
 			PROFILE_BLOCK( DoTick3D );
 
-			screenport.SetPerspective();
+			screenport.SetPerspective(GPUDevice::Instance());
 			scene->Draw3D( deltaTime );
 		}
 
@@ -544,10 +532,10 @@ void Game::DoTick( U32 _currentTime )
 			GLASSERT( scene );
 
 			// UI Pass
-			screenport.SetUI(); 
+			screenport.SetUI(GPUDevice::Instance()); 
 
 			if ( renderUI ) {
-				screenport.SetUI();
+				screenport.SetUI(GPUDevice::Instance());
 				scene->RenderGamui2D();
 			}
 		}
@@ -593,7 +581,7 @@ void Game::DoTick( U32 _currentTime )
 		PrintPerf();
 	}
 #endif
-	screenport.SetUI();
+	screenport.SetUI(GPUDevice::Instance());
 	UFOText::Instance()->FinalDraw();
 
 	device->ResetTriCount();
@@ -716,7 +704,7 @@ void Game::DeviceLoss()
 
 void Game::Resize( int width, int height, int rotation ) 
 {
-	screenport.Resize( width, height );
+	screenport.Resize( width, height, GPUDevice::Instance() );
 	sceneStack.Top()->scene->ResizeGamui(width, height);
 	sceneStack.Top()->scene->Resize();
 }

@@ -242,7 +242,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 	}
 
 	// -------- Camera & Frustum -------- //
-	screenport->SetView(camera.ViewMatrix());	// Draw the camera
+	screenport->SetView(camera.ViewMatrix(), GPUDevice::Instance());	// Draw the camera
 
 	Rectangle3F particleClip;
 	particleClip.Set(camera.PosWC().x - EL_FAR, -10.0f, camera.PosWC().z - EL_FAR,
@@ -335,7 +335,8 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		}
 		renderTarget[RT_LIGHTS]->SetActive(true, this);
 		renderTarget[RT_LIGHTS]->Clear();
-		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
+		renderTarget[RT_LIGHTS]->screenport->SetPerspective(GPUDevice::Instance());
+
 		// ---------- Pass 1 -----------
 		{
 			// Tweak the shaders for glow-only rendering.
@@ -441,7 +442,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		ENGINE_DETAILED_PROFILE(CompositeGlow);
 		Blur();
 
-		screenport->SetUI();
+		screenport->SetUI(GPUDevice::Instance());
 
 	#endif
 
@@ -475,8 +476,8 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		shader.DrawQuad( p0, p1 );
 	#endif
 #endif
-		screenport->SetPerspective();
-		screenport->SetView( camera.ViewMatrix() );	// Draw the camera
+		screenport->SetPerspective(GPUDevice::Instance());
+		screenport->SetView( camera.ViewMatrix(), GPUDevice::Instance() );	// Draw the camera
 	}
 
 	// ------ Particle system ------------- //
@@ -499,9 +500,9 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 		tracker->UpdateUIElements(trackedModels.Mem(), trackedModels.Size());
 	}
 
-	screenport->SetUI();
+	screenport->SetUI(GPUDevice::Instance());
 	overlay.Render();
-	screenport->SetPerspective();
+	screenport->SetPerspective(GPUDevice::Instance());
 }
 
 
@@ -520,7 +521,7 @@ void Engine::Blur()
 	for( int i=0; i<BLUR_COUNT; ++i ) {
 		renderTarget[i+RT_BLUR_0]->SetActive( true, this );
 		renderTarget[i + RT_BLUR_0]->Clear();
-		renderTarget[i+RT_BLUR_0]->screenport->SetUI();
+		renderTarget[i+RT_BLUR_0]->screenport->SetUI(GPUDevice::Instance());
 		//int shift = i+1;
 
 		FlatShader shader;

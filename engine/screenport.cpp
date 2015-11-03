@@ -25,18 +25,18 @@
 
 using namespace grinliz;
 
-Screenport::Screenport( int w, int h, int virtualHeight )
+Screenport::Screenport(int w, int h)
 {
-//	this->virtualHeight = (float)virtualHeight;
 	this->near = EL_NEAR;
-	this->far  = EL_FAR;
-	Resize( w, h );
+	this->far = EL_FAR;
+	physicalWidth = float(w);
+	physicalHeight = float(h);
 	uiMode = false;
 	orthoCamera = false;
 }
 
 
-void Screenport::Resize( int w, int h )
+void Screenport::Resize(int w, int h, GPUDevice* device)
 {
 	if (w > 0 && h > 0) {
 		physicalWidth = (float)w;
@@ -47,28 +47,28 @@ void Screenport::Resize( int w, int h )
 		h = (int)physicalHeight;
 	}
 
-	GPUDevice::Instance()->SetViewport(w, h);
+	device->SetViewport(w, h);
 }
 
 
-void Screenport::SetUI()	
+void Screenport::SetUI(GPUDevice* device)
 {
 	projection2D.SetIdentity();
 	projection2D.SetOrtho(0, physicalWidth, physicalHeight, 0, -1, 1);
-	GPUDevice::Instance()->SetOrthoTransform((int)physicalWidth, (int)physicalHeight);
+	device->SetOrthoTransform((int)physicalWidth, (int)physicalHeight);
 	uiMode = true;
 }
 
 
-void Screenport::SetView( const Matrix4& _view )
+void Screenport::SetView(const Matrix4& _view, GPUDevice* device)
 {
-	GLASSERT( uiMode == false );
+	GLASSERT(uiMode == false);
 	view3D = _view;
-	GPUDevice::Instance()->SetCameraTransform( view3D );
+	device->SetCameraTransform(view3D);
 }
 
 
-void Screenport::SetPerspective()
+void Screenport::SetPerspective(GPUDevice* device)
 {
 	uiMode = false;
 
@@ -111,11 +111,11 @@ void Screenport::SetPerspective()
 			h = orthoHeight;
 		}
 		projection3D.SetOrtho( -w/2, w/2, -h/2, h/2, frustum.zNear, frustum.zFar );
-		GPUDevice::Instance()->SetPerspectiveTransform( projection3D );
+		device->SetPerspectiveTransform( projection3D );
 	}
 	else {
 		projection3D.SetFrustum( frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.zNear, frustum.zFar );
-		GPUDevice::Instance()->SetPerspectiveTransform( projection3D );
+		device->SetPerspectiveTransform( projection3D );
 	}
 }
 
@@ -187,57 +187,3 @@ void Screenport::WorldToView( const grinliz::Vector3F& world, grinliz::Vector2F*
 						r.y/r.w );
 }
 
-
-/*
-void Screenport::ViewToWindow( const Vector2F& view, Vector2F* window ) const
-{
-	GLASSERT(0);	// not correct
-	window->x = view.x * physicalWidth;	// / screenWidth;
-	window->y = view.y * physicalHeight;	// / screenHeight;
-}
-
-
-void Screenport::WindowToView( const Vector2F& window, Vector2F* view ) const
-{
-	GLASSERT(0);	// not correct
-	view->x = window.x;	// *screenWidth / physicalWidth;
-	view->y = window.y; // *screenHeight / physicalHeight;
-}
-*/
-
-
-/*
-void Screenport::UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const
-{	
-	Vector2F v;
-	Vector2F w;
-	
-	UIToView( ui.min, &v );
-	ViewToWindow( v, &w );
-	clip->min = clip->max = w;
-
-	UIToView( ui.max, &v );
-	ViewToWindow( v, &w );
-	clip->DoUnion( w );
-}
-*/
-
-void Screenport::CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean )
-{
-	if ( scissor.min.x == 0 && scissor.min.y == 0 && scissor.max.x == physicalWidth && scissor.max.y == physicalHeight ) {
-		clean->min.Set( 0, 0 );
-		clean->max.Set( (int)physicalWidth, (int)physicalHeight );
-		return;
-	}
-
-	clean->min.x = (int)scissor.min.x;
-	clean->max.x = (int)scissor.max.x;
-	if ( abs( clean->max.x - physicalWidth ) < 4 ) {
-		clean->max.x = (int)physicalWidth;
-	}
-	clean->min.y = (int)scissor.min.y;
-	clean->max.y = (int)scissor.max.y;
-	if ( abs( clean->max.y - physicalHeight ) < 4 ) {
-		clean->max.y = (int)physicalHeight;
-	}
-}

@@ -187,7 +187,7 @@ void TitleScene::Resize()
 
 	// Dowside of a local Engine: need to resize it.
 	if (engine) {
-		engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
+		engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight(), GPUDevice::Instance());
 		for (int i = 0; i < NUM_MODELS; ++i) {
 			if (model[i])
 				model[i]->SetFlag(Model::MODEL_INVISIBLE);
@@ -385,9 +385,9 @@ void TitleScene::Draw3D(U32 deltaTime)
 	if (!engine) return;
 
 	// we use our own screenport
-	screenport.SetPerspective();
+	screenport.SetPerspective(GPUDevice::Instance());
 	engine->Draw(deltaTime, 0, 0);
-	screenport.SetUI();
+	screenport.SetUI(GPUDevice::Instance());
 }
 
 
