@@ -12,6 +12,7 @@
 #include "../xegame/componentfactory.h"
 #include "../xegame/cameracomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/platformpath.h"
 
 #include "../script/itemscript.h"
 #include "../script/volcanoscript.h"

@@ -20,6 +20,7 @@
 #include "../xegame/xegamelimits.h"
 #include "../xegame/chitevent.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/platformpath.h"
 
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"

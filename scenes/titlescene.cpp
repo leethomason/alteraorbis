@@ -24,6 +24,7 @@
 #include "../engine/engine.h"
 
 #include "../xegame/testmap.h"
+#include "../xegame/platformpath.h"
 #include "../xarchive/glstreamer.h"
 
 #include "../game/lumosgame.h"

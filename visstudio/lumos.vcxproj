@@ -294,6 +294,7 @@
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\istringconst.cpp" />
     <ClCompile Include="..\xegame\itemcomponent.cpp" />
+    <ClCompile Include="..\xegame\platformpath.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
     <ClCompile Include="..\xegame\spatialcomponent.cpp" />

@@ -773,7 +773,7 @@ void Matrix4::Test()
 		GLASSERT(Equal(m0, m2));
 
 		vPrime = m0 * v;
-		answer.Set(0, 1.4142, 1);
+		answer.Set(0, 1.4142f, 1);
 		GLASSERT(Equal(vPrime, answer));
 
 		Matrix4 m0Inv;

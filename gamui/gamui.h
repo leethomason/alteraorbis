@@ -40,6 +40,7 @@
 #	define GAMUIASSERT( x ) {}
 #endif
 
+class Texture;
 
 namespace gamui
 {
@@ -52,7 +53,6 @@ class TextLabel;
 class PushButton;
 class ToggleButton;
 class Image;
-
 
 template < class T >
 class PODArray
@@ -200,9 +200,17 @@ struct RenderAtom
 	RenderAtom( const void* _renderState, const void* _textureHandle, float _tx0, float _ty0, float _tx1, float _ty1 ) {
 		Init( _renderState, _textureHandle, _tx0, _ty0, _tx1, _ty1 );
 	}
+
+	RenderAtom(int state, Texture* texture, float _tx0, float _ty0, float _tx1, float _ty1) {
+		Init((const void*)state, (const void*)texture, _tx0, _ty0, _tx1, _ty1);
+	}
 	
 	RenderAtom( const RenderAtom& rhs, const void* _renderState ) {
 		Init( _renderState, rhs.textureHandle, rhs.tx0, rhs.ty0, rhs.tx1, rhs.ty1 );
+	}
+
+	RenderAtom( const RenderAtom& rhs, int _renderState ) {
+		Init( (const void*)_renderState, rhs.textureHandle, rhs.tx0, rhs.ty0, rhs.tx1, rhs.ty1 );
 	}
 
 	void Init( const void* _renderState, const void* _textureHandle, float _tx0, float _ty0, float _tx1, float _ty1 ) {

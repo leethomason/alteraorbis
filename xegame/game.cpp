@@ -16,6 +16,7 @@
 #include "game.h"
 #include "cgame.h"
 #include "scene.h"
+#include "platformpath.h"
 
 #include "../engine/text.h"
 #include "../engine/model.h"

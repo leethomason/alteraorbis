@@ -162,14 +162,20 @@
     <ClInclude Include="gamuifreetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\engine\gpustatemanager.cpp" />
+    <ClCompile Include="..\engine\screenport.cpp" />
+    <ClCompile Include="..\engine\shadermanager.cpp" />
     <ClCompile Include="..\engine\surface.cpp" />
     <ClCompile Include="..\engine\texture.cpp" />
+    <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\FastLZ\fastlz.c" />
     <ClCompile Include="..\glew\src\glew.c" />
     <ClCompile Include="..\grinliz\gldebug.cpp" />
+    <ClCompile Include="..\grinliz\glmatrix.cpp" />
     <ClCompile Include="..\grinliz\glrandom.cpp" />
     <ClCompile Include="..\grinliz\glstringutil.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
+    <ClCompile Include="..\xegame\platformpath.cpp" />
     <ClCompile Include="gamui.cpp" />
     <ClCompile Include="gamuifreetype.cpp" />
     <ClCompile Include="gamuitest.cpp" />

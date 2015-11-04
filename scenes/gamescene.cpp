@@ -13,6 +13,8 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/platformpath.h"
+
 #include "../engine/settings.h"
 
 #include "../game/lumosgame.h"

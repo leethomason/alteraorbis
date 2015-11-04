@@ -445,6 +445,9 @@
     <ClCompile Include="..\ai\director.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\platformpath.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">

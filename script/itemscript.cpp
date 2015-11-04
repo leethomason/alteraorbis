@@ -23,6 +23,7 @@
 #include "../game/news.h"
 #include "../xarchive/glstreamer.h"
 #include "../xegame/cgame.h"
+#include "../xegame/platformpath.h"
 #include "corescript.h"
 
 using namespace tinyxml2;

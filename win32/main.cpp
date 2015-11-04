@@ -29,6 +29,7 @@
 #include "../Shiny/include/Shiny.h"
 
 #include "../xegame/cgame.h"
+#include "../xegame/platformpath.h"
 #include "../engine/platformgl.h"
 
 #include "../shared/lodepng.h"

@@ -39,6 +39,8 @@
 #include "../scenes/creditsscene.h"
 #include "../scenes/fluidtestscene.h"
 
+#include "../xegame/platformpath.h"
+
 using namespace grinliz;
 using namespace gamui;
 

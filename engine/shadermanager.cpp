@@ -18,6 +18,7 @@
 #include "texture.h"
 #include "../grinliz/glrandom.h"
 #include "../xegame/cgame.h"
+#include "../xegame/platformpath.h"
 #include "../grinliz/glperformance.h"
 
 #define DEBUG_OUTPUT
