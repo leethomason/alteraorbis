@@ -408,27 +408,6 @@ void Game::LoadPalettes()
 }
 
 
-/*
-const gamui::RenderAtom& Game::GetRenderAtom( int id )
-{
-	GLASSERT( id >= 0 && id < ATOM_COUNT );
-	GLASSERT( renderAtoms[id].textureHandle );
-	return renderAtoms[id];
-}
-*/
-
-/*
-RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float x0, float y0, float x1, float y1 )
-{
-	GLASSERT( uiRendering >= 0 && uiRendering < UIRenderer::RENDERSTATE_COUNT );
-	TextureManager* tm = TextureManager::Instance();
-	return RenderAtom(	(const void*)uiRendering,
-						tm->GetTexture( assetName ),
-						x0, y0, x1, y1 );
-}
-*/
-
-
 const char* Game::GamePath( const char* type, int slot, const char* extension ) const
 {	
 	CStr<256> str;

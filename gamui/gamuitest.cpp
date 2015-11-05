@@ -81,6 +81,17 @@ public:
 	}
 };
 
+static const int TEXT_TEXTURE_SIZE = 512;
+
+void GenerateTextTexture(int textHeightInPixels, GamuiFreetypeBridge* bridge, Texture* textTexture)
+{
+	uint8_t* pixels = new uint8_t[TEXT_TEXTURE_SIZE*TEXT_TEXTURE_SIZE];
+	bridge->Generate(textHeightInPixels, pixels, TEXT_TEXTURE_SIZE, TEXT_TEXTURE_SIZE, true);
+	textTexture->UploadAlphaToRGBA16(pixels, TEXT_TEXTURE_SIZE * TEXT_TEXTURE_SIZE);
+	delete[] pixels;
+}
+
+
 
 int main(int argc, char **argv)
 {
@@ -113,10 +124,14 @@ int main(int argc, char **argv)
 	// Load text texture
 	Texture* textTexture = new Texture();
 	{
+#if BRIDGE == 0
 		SDL_Surface* textSurface = SDL_LoadBMP("./gamui/stdfont2.bmp");
 		textTexture->Set("text", textSurface->w, textSurface->h, TextureType::TEX_RGBA16, Texture::PARAM_NEAREST);
 		textTexture->UploadAlphaToRGBA16((const uint8_t*)textSurface->pixels, textSurface->pitch * textSurface->h);
 		SDL_FreeSurface(textSurface);
+#else
+		textTexture->Set("text", TEXT_TEXTURE_SIZE, TEXT_TEXTURE_SIZE, TextureType::TEX_RGBA16, Texture::PARAM_NEAREST);
+#endif
 	}
 	CHECK_GL_ERROR;
 
@@ -167,27 +182,11 @@ int main(int argc, char **argv)
 	GamuiFreetypeBridge* bridge = new GamuiFreetypeBridge();
 	//bridge->Init("./gamui/OpenSans-Regular.ttf");
 	bridge->Init("./gamui/DidactGothic.ttf");
-	SDL_Surface* fontSurface = SDL_CreateRGBSurface(0, 256, 256, 8, 0, 0, 0, 0);
-	GAMUIASSERT(fontSurface->w == fontSurface->pitch);
-	SDL_SetSurfacePalette(fontSurface, textSurface->format->palette);
-
 	int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
-	bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h, true);
-	SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
-	SDL_SaveBMP(textSurface, "testtextsurface.bmp");
+	GenerateTextTexture(textHeightInPixels, bridge, textTexture);
 
-	CHECK_GL_ERROR;
-	GLuint textTextureID2;
-	glGenTextures(1, &textTextureID2);
-	glBindTexture(GL_TEXTURE_2D, textTextureID2);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
-	CHECK_GL_ERROR;
-
-	textAtom.textureHandle = (const void*)textTextureID2;
-	textAtomD.textureHandle = textAtom.textureHandle;
+	textAtom.textureHandle  = textTexture;
+	textAtomD.textureHandle = textTexture;
 	gamui.SetText(textAtom, textAtomD, bridge);
 #endif
 
@@ -323,12 +322,9 @@ int main(int argc, char **argv)
 					gamui.SetText(textAtom, textAtomD, &textMetrics);
 #else	
 					int textHeightInPixels = (int)gamui.TransformVirtualToPhysical(16);
-					bridge->Generate(textHeightInPixels, (uint8_t*)fontSurface->pixels, fontSurface->w, fontSurface->h, true);
-					SDL_SaveBMP(fontSurface, "testfontsurface.bmp");
-					CHECK_GL_ERROR;
-					glBindTexture(GL_TEXTURE_2D, textTextureID2);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, fontSurface->w, fontSurface->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, fontSurface->pixels);
-					CHECK_GL_ERROR;
+					GenerateTextTexture(textHeightInPixels, bridge, textTexture);
+					textAtom.textureHandle  = textTexture;
+					textAtomD.textureHandle = textTexture;
 					gamui.SetText(textAtom, textAtomD, bridge);
 #endif
 				}
@@ -372,13 +368,14 @@ int main(int argc, char **argv)
 		image2b.SetRotationX(rotation);
 		image2c.SetRotationY(rotation);
 		image2d.SetRotationZ(rotation);
+
+		screenport.SetUI(GPUDevice::Instance());
 		gamui.Render();
 
 		SDL_GL_SwapWindow(screen);
 	}
 	delete textTexture;
 #if BRIDGE == 1
-	SDL_FreeSurface(fontSurface);
 	delete bridge; bridge = 0;
 #endif
 	gamui.SetText(textAtom, textAtomD, 0);
