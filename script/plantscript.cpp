@@ -22,37 +22,41 @@ static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
 static const int	TIME_TO_SPORE = 3 * (1000 * 60); 
 static const float	HP_PER_SECOND = 1.0f;
 
-const GameItem* PlantScript::plantDef[NUM_PLANT_TYPES];
-const ModelResource* PlantScript::plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+const GameItem* PlantScript::plantDef[NUM_EXTENDED_PLANT_TYPES];
+const ModelResource* PlantScript::plantResource[NUM_EXTENDED_PLANT_TYPES][MAX_PLANT_STAGES];
 
 const GameItem* PlantScript::PlantDef(int plant0Based)
 {
-	GLASSERT(plant0Based >= 0 && plant0Based < NUM_PLANT_TYPES);
+	GLASSERT(plant0Based >= 0 && plant0Based < NUM_EXTENDED_PLANT_TYPES);
 	if (plantDef[0] == 0) {
-		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+		for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
 			CStr<32> str;
 			str.Format("plant%d", i);
 			plantDef[i] = &ItemDefDB::Instance()->Get(str.c_str());
 		}
 	}
+	GLASSERT(plantDef[plant0Based]);
 	return plantDef[plant0Based];
 }
 
 
 const ModelResource* PlantScript::PlantRes(int plant0Based, int stage)
 {
-	GLASSERT(plant0Based >= 0 && plant0Based < NUM_PLANT_TYPES);
+	GLASSERT(plant0Based >= 0 && plant0Based < NUM_EXTENDED_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < MAX_PLANT_STAGES);
 
 	if (plantResource[0][0] == 0) {
-		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
-			for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
+		for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
+			const int nStage = PlantIsFlower(i) ? PLANT_BLOCKING_STAGE : MAX_PLANT_STAGES;
+			for (int j = 0; j < nStage; ++j) {
 				CStr<32> str;
 				str.Format("plant%d.%d", i, j);
 				plantResource[i][j] = ModelResourceManager::Instance()->GetModelResource(str.c_str(), false);
+				GLASSERT(plantResource[i][j]);
 			}
 		}
 	}
+	GLASSERT(plantResource[plant0Based][stage]);
 	return plantResource[plant0Based][stage];
 }
 
@@ -198,7 +202,7 @@ void PlantScript::DoTick(U32 delta)
 			worldMap->VoxelHit(pos2i, heal);
 
 			// Grow
-			int nStage = wg.Plant() < 7 ? 4 : 2;
+			int nStage = wg.IsFlower() ? PLANT_BLOCKING_STAGE : MAX_PLANT_STAGES;
 
 			if (wg.HPFraction() > 0.8f) {
 				if (wg.PlantStage() < (nStage - 1)) {

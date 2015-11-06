@@ -32,6 +32,7 @@
 #include "../game/fluidsim.h"
 #include "../game/gridmovecomponent.h"
 #include "../game/physicssims.h"
+#include "../ai/director.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -601,7 +602,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	}
 
 	Chit* playerChit = GetPlayerChit();
-	if (uiMode == GameSceneMenu::UI_AVATAR && (worldGrid.PlantStage() >= 2 || worldGrid.RockHeight())) {
+	if (uiMode == GameSceneMenu::UI_AVATAR && (worldGrid.PlantStage() >= PLANT_BLOCKING_STAGE || worldGrid.RockHeight())) {
 		// clicked on a rock. Melt away!
 		if (playerChit && playerChit->GetAIComponent()) {
 			playerChit->GetAIComponent()->Target(plane2i, false);
@@ -1432,27 +1433,24 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
-#if 1
+#if 0
 		sim->GetChitBag()->NewMonsterChit(at, "shockCyclops", TEAM_CHAOS);
+#endif
+#if 1
+		Chit* directorChit = sim->GetChitBag()->GetNamedChit(ISC::Director);
+		if (directorChit) {
+			Director* director = (Director*)directorChit->GetComponent("Director");
+			Vector2I start = ToSector(at);
+			director->DeletePlot();
+			//director->Swarm(ISC::mantis, start, sim->GetChitBag()->GetHomeSector());
+			//director->GreatBattle(wh);
+			director->EvilRising(start, ISC::mantis, TEAM_GREEN_MANTIS, ISC::Vyllis, true);
+		}
 #endif
 #if 0	// Monster swarm
 		for (int i = 0; i<5; ++i) {
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
-		}
-#endif
-#if 0	// Look at pools.
-		Vector2I loc = sim->GetWorldMap()->GetPoolLocation(poolView);
-		if (loc.IsZero()) {
-			poolView = 0;
-		}
-		++poolView;
-		Vector2F lookAt = ToWorld2F(loc);
-		sim->GetEngine()->CameraLookAt(lookAt.x, lookAt.y);
-#endif
-#if 0	// Summon Greaters
-		if (playerChit) {
-			sim->GetChitBag()->AddSummoning(playerChit->GetSector(), LumosChitBag::SUMMON_TECH);
 		}
 #endif
 #endif	// DEBUG
@@ -1896,7 +1894,7 @@ void GameScene::CheckGameStage(U32 delta)
 					int bioFlora = 0;
 					for (Rectangle2IIterator pit(bi); !pit.Done(); pit.Next()) {
 						const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid(pit.Pos().x, pit.Pos().y);
-						if (wg.Plant() && wg.PlantStage() >= 2) {	// only count the grown ones??
+						if (wg.Plant() && wg.PlantStage() >= PLANT_BLOCKING_STAGE) {	// only count the grown ones??
 							++bioFlora;
 						}
 					}
@@ -2012,8 +2010,8 @@ void GameScene::DrawDebugText()
 				  w.Gold(), w.Crystal(0), w.Crystal(1), w.Crystal(2), w.Crystal(3));
 	y += 16;
 
-	int typeCount[NUM_PLANT_TYPES];
-	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+	int typeCount[NUM_EXTENDED_PLANT_TYPES];
+	for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
 		typeCount[i] = 0;
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			typeCount[i] += worldMap->plantCount[i][j];
@@ -2022,19 +2020,13 @@ void GameScene::DrawDebugText()
 	int stageCount[MAX_PLANT_STAGES];
 	for (int i = 0; i < MAX_PLANT_STAGES; ++i) {
 		stageCount[i] = 0;
-		for (int j = 0; j < NUM_PLANT_TYPES; ++j) {
+		for (int j = 0; j < NUM_EXTENDED_PLANT_TYPES; ++j) {
 			stageCount[i] += worldMap->plantCount[j][i];
 		}
 	}
 
 	int lesser = 0, greater = 0, denizen = 0;
 	chitBag->census.NumByType(&lesser, &greater, &denizen);
-
-	//ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: lesser=%d greater=%d denizen=%d", 
-	//								typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-	//								stageCount[0], stageCount[1], stageCount[2], stageCount[3],
-	//								lesser, greater, denizen );
-	//y += 16;
 
 	CoreScript* cs = CoreScript::GetCore(ToSector(at));
 	int teamID = 0, teamGroup = 0;

@@ -134,7 +134,7 @@ WorldMap::WorldMap(int width, int height) : Map(width, height)
 	memset(grid, 0, sizeof(WorldGrid)*MAX_MAP_SIZE*MAX_MAP_SIZE);
 	memset(pathers, 0, sizeof(pathers[0]) * NUM_SECTORS_2);
 
-	for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+	for (int i = 0; i < NUM_EXTENDED_PLANT_TYPES; ++i) {
 		for (int j = 0; j < MAX_PLANT_STAGES; ++j) {
 			plantCount[i][j] = 0;
 		}
@@ -1970,7 +1970,7 @@ float WorldMap::IndexToRotation360(int index)
 
 Model* WorldMap::PushTree(int x, int y, int type0Based, int stage, float hpFraction)
 {
-	GLASSERT(type0Based >= 0 && type0Based < NUM_PLANT_TYPES);
+	GLASSERT(type0Based >= 0 && type0Based < NUM_EXTENDED_PLANT_TYPES);
 	GLASSERT(stage >= 0 && stage < 4);
 
 	const ModelResource* res = PlantScript::PlantRes( type0Based, stage );

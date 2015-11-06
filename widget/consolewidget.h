@@ -20,12 +20,11 @@ public:
 	virtual void SetPos(float x, float y);
 
 	virtual void SetSize(float w, float h);
-//	void SetBounds( float w, float h );
 	virtual bool Visible() const					{ return lines[0].text.Visible(); }
 	virtual void SetVisible(bool vis);
 
 	void Push( const grinliz::GLString &str );
-	void Push( const grinliz::GLString &str, gamui::RenderAtom icon, const grinliz::Vector2F& pos );
+	void Push( const grinliz::GLString &str, const gamui::RenderAtom& icon, const grinliz::Vector2F& pos, const gamui::RenderAtom& background );
 	void DoTick( U32 delta );
 	bool IsItem(const gamui::UIItem* item, grinliz::Vector2F* pos);
 
@@ -36,11 +35,13 @@ private:
 
 	struct Line {
 		Line() { age = 0; pos.Zero(); }
+		void SetHighLightSize();
 
 		gamui::TextLabel	text;
 		int					age;
 		gamui::PushButton	button;
 		grinliz::Vector2F	pos;
+		gamui::Image		highLight;
 	};
 
 	enum { 

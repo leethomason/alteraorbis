@@ -21,7 +21,7 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem );
+	NewsEvent( U32 what, const grinliz::Vector2F& pos, int firstItem, int secondItem, const grinliz::IString* text = 0 );
 
 	void Serialize( XStream* xs );
 
@@ -39,8 +39,8 @@ public:
 		FORGED,						//	item		maker
 		UN_FORGED,					//  item		killer
 
-		DOMAIN_TAKEOVER,			//	domain		conqueror
-		DOMAIN_CONQUER,				//	domain		conquerer
+		DOMAIN_TAKEOVER,			//	domain		conqueror		// neutral takeover
+		DOMAIN_CONQUER,				//	domain		conquerer		// sub-super
 		SUPERTEAM_DELETED,			//  domain
 		SUBTEAM_DELETED,			//  subTeam		superTeam
 		ROGUE_DENIZEN_JOINS_TEAM,	//  denizen	
@@ -55,17 +55,22 @@ public:
 		ATTITUDE_NEUTRAL,
 		ATTITUDE_ENEMY,
 
+		PLOT_START,					
+		PLOT_EVENT,
+		PLOT_END,
+
 		NUM_WHAT
 	};
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
 												|| what == DOMAIN_CREATED
-												|| what == FORGED; }
+												|| what == FORGED
+												|| what == PLOT_START; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
 
-	int What() const			{ return what; }
+	int What() const						{ return what; }
 	const grinliz::Vector2F& Pos() const	{ return pos; }
 	grinliz::Vector2I	Sector() const		{ return ToSector( ToWorld2I( pos )); }
 
@@ -87,6 +92,7 @@ private:
 	int					firstTeam;		// teams change; the team info needs to be stored separate from the item.
 	int					secondTeam;
 	U32					date;			// when it happened, in msec
+	grinliz::IString	text;
 
 	void Clear() {
 		what = 0;
@@ -96,6 +102,7 @@ private:
 		firstTeam = 0;
 		secondTeam = 0;
 		date = 0;
+		text = grinliz::IString();
 	}
 };
 

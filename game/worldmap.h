@@ -288,11 +288,11 @@ public:
 
 	virtual void CreateTexture( Texture* t );
 
-	int plantCount[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+	int plantCount[NUM_EXTENDED_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	int CountPlants() const {
 		int c = 0;
-		for (int i = 0; i<NUM_PLANT_TYPES; ++i)
+		for (int i = 0; i<NUM_EXTENDED_PLANT_TYPES; ++i)
 			for (int j = 0; j<MAX_PLANT_STAGES; ++j)
 				c += plantCount[i][j];
 		return c;

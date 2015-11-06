@@ -56,7 +56,7 @@ const char* ForgeScript::Effect( int effect )
 }
 
 
-GameItem* ForgeScript::ForgeRandomItem(const ForgeData& forgeData, const Wallet& avail, TransactAmt* cost, int seed)
+GameItem* ForgeScript::ForgeRandomItem(const ForgeData& forgeData, const Wallet& avail, TransactAmt* cost, int seed, Wallet* payer)
 {
 	// Guarentee we can build something:
 	if (avail.Crystal(0) == 0) {
@@ -81,8 +81,9 @@ GameItem* ForgeScript::ForgeRandomItem(const ForgeData& forgeData, const Wallet&
 	partsArr.Push(0);
 
 	// Mix up the equivalent values.
-	random.ShuffleArray(&partsArr[1], 3);
-	random.ShuffleArray(&partsArr[4], 3);
+//	random.ShuffleArray(&partsArr[1], 3);
+//	random.ShuffleArray(&partsArr[4], 3);
+	random.SmallShuffle(partsArr.Mem(), partsArr.Size());
 
 	effectsArr.Push(GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK);
 	effectsArr.Push(GameItem::EFFECT_SHOCK);
@@ -105,6 +106,15 @@ GameItem* ForgeScript::ForgeRandomItem(const ForgeData& forgeData, const Wallet&
 			int tech = 0;
 			item = ForgeScript::Build(fd, cost, &tech, seed);
 			if (item && avail.CanWithdraw(*cost) && tech <= forgeData.tech) {
+				if (payer) {
+					if (payer->CanWithdraw(*cost) || payer->CanBeUnderwater()) {
+						item->wallet.Deposit(payer, *cost);
+					}
+					else {
+						delete item; 
+						item = 0;
+					}
+				}
 				return item; // success!
 			}
 			delete item;

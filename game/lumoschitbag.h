@@ -237,6 +237,7 @@ public:
 	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
 	Chit* NewVisitor( int visitorIndex, const Web& web );
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
+	Chit* NewBadGuy(const grinliz::Vector2I& pos, const grinliz::IString& name, const grinliz::IString& type, int team, int level);
 	Chit* NewWildFruit(const grinliz::Vector2I& pos);
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.

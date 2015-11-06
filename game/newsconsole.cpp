@@ -1,10 +1,12 @@
 #include "newsconsole.h"
-#include "../widget/consolewidget.h"
 #include "news.h"
-#include "../xegame/spatialcomponent.h"
-#include "../script/corescript.h"
 #include "lumoschitbag.h"
 #include "lumosgame.h"
+#include "../engine/uirendering.h"
+#include "../xegame/spatialcomponent.h"
+#include "../widget/consolewidget.h"
+#include "../script/corescript.h"
+#include "../script/procedural.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -46,14 +48,12 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 		homeCoreTeam = homeCore->ParentChit()->Team();
 	}
 
-	// Check if news sector is 1)current avatar sector, or 2)domain sector
-
-	RenderAtom atom;
-
 	for (; currentNews < history->NumNews(); ++currentNews) {
 		const NewsEvent& ne = history->News(currentNews);
 		Vector2I sector = ne.Sector();
 		Vector2F pos2 = ne.Pos();
+		RenderAtom atom;
+		RenderAtom background;
 
 		str = "";
 
@@ -98,13 +98,21 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			atom = LumosGame::CalcUIIconAtom("greeninfo");
 			break;
 
-			case NewsEvent::DOMAIN_CREATED:
 			case NewsEvent::DOMAIN_DESTROYED:
 			case NewsEvent::GREATER_SUMMON_TECH:
 			case NewsEvent::DOMAIN_CONQUER:
-			case NewsEvent::DOMAIN_TAKEOVER:
 			case NewsEvent::SUPERTEAM_DELETED:
 			case NewsEvent::SUBTEAM_DELETED:
+			case NewsEvent::PLOT_START:
+			case NewsEvent::PLOT_EVENT:
+			case NewsEvent::PLOT_END:
+			background = LumosGame::CalcPaletteAtom(PAL_TANGERINE * 2, PAL_TANGERINE);
+			background.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+			ne.Console(&str, chitBag, 0);
+			break;
+
+			case NewsEvent::DOMAIN_CREATED:
+			case NewsEvent::DOMAIN_TAKEOVER:
 			ne.Console(&str, chitBag, 0);
 			break;
 
@@ -121,7 +129,7 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			break;
 		}
 		if (!str.empty()) {
-			consoleWidget.Push(str, atom, pos2);
+			consoleWidget.Push(str, atom, pos2, background);
 		}
 	}
 }

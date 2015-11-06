@@ -2199,6 +2199,15 @@ void AIComponent::ThinkNormal()
 			currentAction = AIAction::NO_ACTION;
 			return;
 		}
+		Chit* directorChit = Context()->chitBag->GetNamedChit(ISC::Director);
+		if (directorChit) {
+			Director* director = (Director*)directorChit->GetComponent("Director");
+			Vector2I destSector = director->PrioritySendHerd(parentChit);
+			if (!destSector.IsZero() && DoSectorHerd(false, destSector)) {
+				return;
+			}
+		}
+
 		PathMoveComponent* pmc = GET_SUB_COMPONENT(parentChit, MoveComponent, PathMoveComponent);
 
 		// Denizens DO sector herd until they are members of a core.
@@ -2224,7 +2233,7 @@ void AIComponent::ThinkNormal()
 //			if (wanderFlags & GameItem::AI_WANDER_CIRCLE)
 //				dest = ThinkWanderCircle();
 //			else 
-			dest = ThinkWanderHerd();
+			dest = (pmc && pmc->ForceCountHigh()) ? ThinkWanderRandom() : ThinkWanderHerd();
 		}
 	}
 	if (!dest.IsZero()) {

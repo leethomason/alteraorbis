@@ -21,6 +21,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcolor.h"
+#include "gamelimits.h"
 
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
@@ -93,7 +94,7 @@ private:
 
 public:
 	bool IsBlocked() const			{ return    extBlock || (land == WATER) || (land == GRID) || rockHeight 
-											 || (plant && stage >= 2); }
+											 || (plant && stage >= PLANT_BLOCKING_STAGE); }
 	bool IsPassable() const			{ return !IsBlocked(); }
 
 	bool IsInternalBlocked() const { return (land == WATER) || (land == GRID) || rockHeight || (plant && stage >= 2); }
@@ -243,13 +244,14 @@ public:
 
 	// 1-based plant interpretation
 	int Plant() const { return plant; }
-	bool BlockingPlant() const { return plant && stage >= 2; }
+	bool IsFlower() const { return plant && PlantIsFlower(plant - 1); }
+	bool BlockingPlant() const { return plant && stage >= PLANT_BLOCKING_STAGE; }
 	// 0-based
 	int PlantStage() const { return stage;  }
 
 	void SetPlant(int _type1based, int _stage)	{
 		GLASSERT(_type1based == 0 || rockHeight == 0);
-		GLASSERT(_type1based >= 0 && _type1based <= 8);	// 0 removes the plant
+		GLASSERT(_type1based >= 0 && _type1based <= NUM_EXTENDED_PLANT_TYPES);	// 0 removes the plant
 		plant = _type1based;
 		stage = _stage;
 	}

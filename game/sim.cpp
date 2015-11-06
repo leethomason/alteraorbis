@@ -104,8 +104,6 @@ Sim::Sim(LumosGame* g) : minuteClock(60 * 1000), secondClock(1000), volcTimer(10
 
 	random.SetSeedFromTime();
 	plantScript = new PlantScript(context.chitBag->Context());
-
-	DumpModel();
 }
 
 
@@ -135,46 +133,6 @@ Sim::~Sim()
 int    Sim::AgeI() const { return context.chitBag->AbsTime() / AGE_IN_MSEC; }
 double Sim::AgeD() const { return double(context.chitBag->AbsTime()) / double(AGE_IN_MSEC); }
 float  Sim::AgeF() const { return float(AgeD()); }
-
-void Sim::DumpModel()
-{
-	GLString path;
-	GetSystemPath(GAME_SAVE_DIR,"gamemodel.txt", &path);
-	FILE* fp = fopen( path.c_str(), "w" );
-	GLASSERT( fp );
-
-	for( int plantStage=2; plantStage<4; ++plantStage ) {
-		for( int tech=0; tech<4; ++tech ) {
-
-			// assume field at 50%
-			double growTime   = double(FarmScript::GrowFruitTime( plantStage, 10 )) / 1000.0;
-			double distilTime = double( DistilleryScript::ElixirTime( tech )) / 1000.0;
-			double elixirTime = growTime + distilTime;
-			double timePerFruit = elixirTime / double(DistilleryScript::ELIXIR_PER_FRUIT);
-
-			double depleteTime = ai::Needs::DecayTime();
-
-			double idealPopulation = depleteTime / timePerFruit;
-
-			fprintf( fp, "Ideal Population per plant. PlantStage=%d (0-3) Tech=%d (0-%d)\n",
-					 plantStage,
-					 tech,
-					 TECH_MAX-1 );
-
-			fprintf( fp, "    growTime=%.1f distilTime=%.1f totalTime=%.1f\n",
-					 growTime, distilTime, elixirTime );
-			fprintf( fp, "    ELIXIR_PER_FRUIT=%d timePerFruit=%.1f\n", DistilleryScript::ELIXIR_PER_FRUIT, timePerFruit );
-			fprintf( fp, "    depleteTime=%.1f\n", depleteTime );
-
-			if ( plantStage == 3 && tech == 1 ) 
-				fprintf( fp, "idealPopulation=%.1f <------ \n\n", idealPopulation );
-			else
-				fprintf( fp, "idealPopulation=%.1f\n\n", idealPopulation );
-		}
-	}
-	fclose( fp );
-}
-
 
 void Sim::Load(const char* mapDAT, const char* gameDAT)
 {
@@ -425,11 +383,9 @@ void Sim::SpawnDenizens()
 					forgeData.team = DEITY_Q;
 
 					TransactAmt cost;
-					GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, random.Rand());
+					GameItem* item = ForgeScript::ForgeRandomItem(forgeData, ReserveBank::Instance()->wallet, &cost, random.Rand(), ReserveBank::GetWallet());
 					if (item) {
-						item->wallet.Deposit(ReserveBank::GetWallet(), cost);
 						chit->GetItemComponent()->AddToInventory(item);
-
 						// Mark this item as important with a destroyMsg:
 						item->SetSignificant(Context()->chitBag->GetNewsHistory(), ToWorld2F(pos), NewsEvent::FORGED, NewsEvent::UN_FORGED, qCore->ParentChit()->GetItem());
 					}
@@ -676,7 +632,7 @@ void Sim::DoTick( U32 delta, bool useAreaOfInterest )
 		for (int i = 0; i < 5; ++i) {
 			int x = random.Rand(context.worldMap->Width());
 			int y = random.Rand(context.worldMap->Height());
-			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_PLANT_TYPES) : -1;
+			int type = plantCount < TYPICAL_PLANTS / 4 ? random.Rand(NUM_BASE_PLANT_TYPES) : -1;
 			CreatePlant(x, y, type);
 		}
 	}
@@ -885,7 +841,7 @@ void Sim::SeedPlants()
 		int x = bounds.min.x + random.Rand(bounds.Width());
 		int y = bounds.min.y + random.Rand(bounds.Height());
 
-		int type = random.Rand(NUM_PLANT_TYPES);
+		int type = random.Rand(NUM_BASE_PLANT_TYPES);
 		int stage = random.Rand(MAX_PLANT_STAGES);
 
 		CreatePlant(x, y, type, stage);
@@ -908,26 +864,18 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 		return false;
 	}
 
-	// About 50,000 plants seems about right.
-	// This doesn't seem to matter - it isn't getting
-	// overwhelmed in tests.
-//	int count = context.worldMap->CountPlants();
-//	if (count > TYPICAL_PLANTS) {
-//		return false;
-//	}
-
 	Vector2I sector = ToSector(x, y);
 	CoreScript* cs = CoreScript::GetCore(sector);
-	bool paveBlocks = false;
+	bool paveIsBlocking = false;
 	if (cs && cs->ParentChit()->Team()) {
-		paveBlocks = true;
+		paveIsBlocking = true;
 	}
 
 	const WorldGrid& wg = context.worldMap->GetWorldGrid( x, y );
-	if (paveBlocks && wg.Pave()) {
+	if (paveIsBlocking && wg.Pave()) {
 		return false;
 	}
-	if ( wg.Porch() || wg.IsGrid() || wg.IsPort() || wg.IsWater() ) {
+	if ((paveIsBlocking && wg.Porch()) || wg.IsGrid() || wg.IsPort() || wg.IsWater()) {
 		return false;
 	}
 
@@ -937,14 +885,23 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 		 && wg.Land() == WorldGrid::LAND 
 		 && !context.chitBag->MapGridBlocked(x,y) ) 
 	{
+		Director* director = 0;
+		Chit* directorChit = Context()->chitBag->GetNamedChit(ISC::Director);
+		if (directorChit) {
+			director = (Director*)directorChit->GetComponent("Director");
+		}
+		if (type < 0 && director && director->SectorIsEvil(sector)) {
+			type = EVIL_PLANT;
+		}
+
 		if ( type < 0 ) {
 			// Scan for a good type!
 			Rectangle2I r;
 			r.Set(x, y, x, y);
 			r.Outset(3);
 
-			float chance[NUM_PLANT_TYPES];
-			for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+			float chance[NUM_BASE_PLANT_TYPES];
+			for( int i=0; i<NUM_BASE_PLANT_TYPES; ++i ) {
 				chance[i] = 1.0f;
 			}
 
@@ -957,11 +914,10 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 					chance[wgScan.Plant() - 1] += (float)(wgScan.PlantStage()*wgScan.PlantStage());
 				}
 			}
-			type = random.Select( chance, NUM_PLANT_TYPES );
+			type = random.Select( chance, NUM_BASE_PLANT_TYPES );
 		}
-		// FIXME: magic plant #s
-		if (type == 6 || type == 7) {
-			stage = Min(1, stage);
+		if (PlantIsFlower(type)) {
+			stage = Min(PLANT_BLOCKING_STAGE-1, stage);
 		}
 		context.worldMap->SetPave(x, y, 0);
 		context.worldMap->SetPlant(x, y, type + 1, stage);

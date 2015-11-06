@@ -35,8 +35,8 @@ public:
 	static const ModelResource* PlantRes(int plant0Based, int stage);
 
 private:
-	static const GameItem*		plantDef[NUM_PLANT_TYPES];
-	static const ModelResource*	plantResource[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+	static const GameItem*		plantDef[NUM_EXTENDED_PLANT_TYPES];
+	static const ModelResource*	plantResource[NUM_EXTENDED_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	U32 index;
 	const ChitContext* context;

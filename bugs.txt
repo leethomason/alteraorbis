@@ -12,16 +12,31 @@ x Kamakiri deity
 x no control flags in water
 x damage: items seem to get blown away...crystal not dropped
 x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
+x more announcement when core taken over - popup!
+x if super-crowded, should wander more (swarms)
+x How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
 - Art
 	- R1K
 	- QCore
 	- MotherCore
 	- Kaxa
-- icon for squad dragging
-- icon for Kaxa: CalcDeityAtom
+	- icon for squad dragging
+	- icon for Kaxa: CalcDeityAtom
+	- rework fonts on title screen
 
-- rework fonts on title screen
-- more announcement when core taken over - popup!
+Plots:
+x factor out plot logic from director
+x kaiju battle plot
+x start plots: involve vs. avoid player
+x news event
+x news event highlights
+- directed swarm: evil sub-deities?
+	- items for sub-deity
+	- deity variation
+	- swarm in before spawning
+	- swarm + deity motion
+	- colors of demis
+	- different models for demis
 
 - Better world gen:
 	- feature: canyon

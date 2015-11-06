@@ -113,7 +113,7 @@ grinliz::IString Team::TeamName(int team)
 	switch (group) {
 		case TEAM_NEUTRAL:			name = StringPool::Intern("neutral");		break;
 		case TEAM_CHAOS:			name = StringPool::Intern("chaos");			break;
-		case TEAM_RAT:				name = ISC::trilobyte;						break;
+		case TEAM_TRILOBYTE:		name = ISC::trilobyte;						break;
 		case TEAM_GREEN_MANTIS:		name = ISC::mantis;							break;
 		case TEAM_RED_MANTIS:		name = ISC::redMantis;						break;
 
@@ -184,7 +184,7 @@ grinliz::IString Team::TeamName(int team)
 int Team::GetTeam( const grinliz::IString& itemName )
 {
 	if (itemName == ISC::trilobyte) {
-		return TEAM_RAT;
+		return TEAM_TRILOBYTE;
 	}
 	else if ( itemName == ISC::mantis ) {
 		return TEAM_GREEN_MANTIS;
@@ -258,13 +258,13 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 	if (t1 >= DEITY_MOTHER_CORE)
 		return ERelate::NEUTRAL;
 
-	GLASSERT(t0 >= TEAM_RAT && t0 < NUM_TEAMS);
-	GLASSERT(t1 >= TEAM_RAT && t1 < NUM_TEAMS);
+	GLASSERT(t0 >= TEAM_TRILOBYTE && t0 < NUM_TEAMS);
+	GLASSERT(t1 >= TEAM_TRILOBYTE && t1 < NUM_TEAMS);
 
 	static const int F = int(ERelate::FRIEND);
 	static const int E = int(ERelate::ENEMY);
 	static const int N = int(ERelate::NEUTRAL);
-	static const int OFFSET = TEAM_RAT;
+	static const int OFFSET = TEAM_TRILOBYTE;
 	static const int NUM = NUM_MOB_TEAMS - OFFSET;
 
 	static const int relate[NUM][NUM] = {

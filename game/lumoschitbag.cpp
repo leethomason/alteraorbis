@@ -46,6 +46,8 @@
 #include "../script/countdownscript.h"
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
+#include "../script/forgescript.h"
+
 #include "../markov/markov.h"
 
 #include "../xarchive/glstreamer.h"
@@ -389,6 +391,7 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 		chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::GREATER_MOB_CREATED, NewsEvent::GREATER_MOB_KILLED, 0);
 	}
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
+	chit->GetItem()->FullHeal();
 
 	if (XenoAudio::Instance()) {
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos);
@@ -424,6 +427,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	ReserveBank::Instance()->WithdrawDenizen(chit->GetWallet());
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
+	chit->GetItem()->FullHeal();
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
@@ -446,6 +450,66 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
 	}
 
+	return chit;
+}
+
+
+Chit* LumosChitBag::NewBadGuy(const grinliz::Vector2I& pos, 
+							  const IString& name, 
+							  const grinliz::IString& type, 
+							  int team, int level )
+{
+	const ChitContext* context = Context();
+	Chit* chit = NewChit();
+	const GameItem& root = ItemDefDB::Instance()->Get(type.safe_str());
+
+	chit->Add( new RenderComponent(root.ResourceName()));
+	chit->Add( new PathMoveComponent());
+	AddItem(root.Name(), chit, context->engine, team, level, 0, "human");
+
+	ReserveBank::Instance()->WithdrawMonster(chit->GetWallet(), true);
+	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
+	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
+	chit->GetItem()->FullHeal();
+
+	chit->GetItem()->SetProperName(name);
+
+	AIComponent* ai = new AIComponent();
+	chit->Add( ai );
+
+	chit->Add( new HealthComponent());
+	chit->SetPosition( (float)pos.x+0.5f, 0, (float)pos.y+0.5f );
+
+	for (int i = 0; i < ForgeScript::NUM_ITEM_TYPES; ++i) {
+		ForgeScript::ForgeData forgeData;
+		forgeData.type = i;
+		forgeData.subType = 0;
+		forgeData.tech = 3;
+		forgeData.level = level;
+		forgeData.team = team;
+		int seed = random.Rand();
+		ForgeScript::BestSubItem(&forgeData, seed);
+
+		TransactAmt cost;
+		TransactAmt freeCreate;
+		static const int CRYSTAL[NUM_CRYSTAL_TYPES] = { 3, 2, 1, 1 };
+		freeCreate.Set(0, CRYSTAL);
+
+		GameItem* loot = ForgeScript::ForgeRandomItem(forgeData, freeCreate, &cost, seed, ReserveBank::GetWallet());
+		if (loot) {
+			chit->GetItemComponent()->AddToInventory(loot);
+			loot->SetSignificant(chit->Context()->chitBag->GetNewsHistory(), 
+								 ToWorld2F(chit->Position()),
+								 NewsEvent::FORGED, NewsEvent::UN_FORGED, chit->GetItem());
+		}
+	}
+
+	chit->GetItem()->SetSignificant(GetNewsHistory(), ToWorld2F(pos), NewsEvent::DENIZEN_CREATED, NewsEvent::DENIZEN_KILLED, 0);
+
+	if (XenoAudio::Instance()) {
+		Vector3F pos3 = ToWorld3F(pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos3);
+	}
 	return chit;
 }
 
@@ -797,6 +861,7 @@ GameItem* LumosChitBag::AddItem(const char* name, Chit* chit, Engine* engine, in
 	}
 	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->FullHeal();
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );
@@ -818,6 +883,7 @@ GameItem* LumosChitBag::AddItem(GameItem* item, Chit* chit, Engine* engine, int 
 {
 	item->Roll(team, item->Traits().Get());
 	item->GetTraitsMutable()->SetExpFromLevel( level );
+	item->FullHeal();
 
 	if ( !chit->GetItemComponent() ) {
 		ItemComponent* ic = new ItemComponent( item );

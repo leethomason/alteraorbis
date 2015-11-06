@@ -327,6 +327,12 @@
   <model filename="plant7.ac" modelName="plant7.0"    origin="-3 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="plant7.ac" modelName="plant7.1"    origin="0 0 0"   shading="smooth" polyRemoval="pre" />
 
+  <!-- spooky tree -->
+  <model filename="plant8.ac" modelName="plant8.0"    origin="-7 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant8.ac" modelName="plant8.1"    origin="-5 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant8.ac" modelName="plant8.2"    origin="-3 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant8.ac" modelName="plant8.3"    origin="0 0 0"   shading="flat" polyRemoval="pre" />
+
   <model filename="weapons2.ac"         modelName="blaster"     origin="0 0.5 -1"   shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="beamgun"     origin="0 0.5 0"    shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="kamabeamgun" origin="0 0.5 1"    shadowCaster="true" bones="true"/>
