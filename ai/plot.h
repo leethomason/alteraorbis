@@ -47,7 +47,7 @@ public:
 	virtual bool SectorIsEvil(const grinliz::Vector2I& sector) { return false;  }
 
 protected:
-	Chit* SpawnBadGuy(const char* name, const grinliz::IString& type, int team, int level);
+	void ToChaos(const grinliz::Vector2I& sector, const grinliz::IString& critter);
 
 	const ChitContext* context = 0;
 };

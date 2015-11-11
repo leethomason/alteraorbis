@@ -29,6 +29,19 @@ Plot* Plot::Factory(const char* n)
 }
 
 
+void Plot::ToChaos(const grinliz::Vector2I& sector, const grinliz::IString& critter)
+{
+	Rectangle2I bounds = InnerSectorBounds(sector);
+	CDynArray<Chit*> arr;
+	ItemNameFilter filter(critter);
+	context->chitBag->QuerySpatialHash(&arr, bounds, 0, &filter);
+	for (Chit* c : arr) {
+		c->GetItem()->SetTeam(TEAM_CHAOS);
+	}
+}
+
+
+
 void SwarmPlot::Init(const ChitContext* c, const IString& _critter, const Vector2I& _start, const Vector2I& _end)
 {
 	context = c;
@@ -98,9 +111,10 @@ bool SwarmPlot::AdvancePlot()
 		context->chitBag->GetNewsHistory()->Add(newsEvent);
 	}
 	else {
-		IString text = StringPool::Intern("The Swarm is over.");
+		IString text = StringPool::Intern("Chaos takes the Swarm; the Swarm is over.");
 		NewsEvent newsEvent(NewsEvent::PLOT_END, ToWorld2F(SectorBounds(end).Center()), 0, 0, &text);
 		context->chitBag->GetNewsHistory()->Add(newsEvent);
+		ToChaos(end, critter);
 		return true;
 	}
 	return false;
@@ -309,6 +323,7 @@ bool EvilRisingPlot::DoTick(U32 time)
 				   demiName.safe_str(),
 				   critter.safe_str());
 		IString text = StringPool::Intern(str.c_str());
+		ToChaos(destSector, critter);
 
 		NewsEvent newsEvent(NewsEvent::PLOT_END, ToWorld2F(SectorBounds(destSector).Center()), 0, 0, &text);
 		context->chitBag->GetNewsHistory()->Add(newsEvent);
