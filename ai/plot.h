@@ -12,10 +12,10 @@ class ChitContext;
 class XStream;
 
 /*
-	- Evil rising
-		- evil/corrupt flora
-		- appearance, leads to beast master plot
-	- Foo the beast master (Shrogshriff flunky leading a "swarm" quest for destruction)
+	x Evil rising
+		x evil/corrupt flora
+		x appearance, leads to beast master plot
+	x Foo the beast master (Shrogshriff flunky leading a "swarm" quest for destruction)
 		- mantis, red-mantis, trilo
 		- Truulga flunky for trolls
 		- turn to chaos at the end

@@ -285,7 +285,7 @@ void BattleMechanics::Shoot(ChitBag* bag, Chit* src, const grinliz::Vector3F& _t
 	GLASSERT(src->GetRenderComponent());
 	src->GetRenderComponent()->CalcTrigger(&p0, 0);
 	GLASSERT(p0.y > 0);
-	GLASSERT((p0 - src->Position()).Length() < 1.5f);
+	GLASSERT((p0 - src->Position()).Length() < 3.0);	// sanity check something hasn't gone way wrong
 
 	IString sound = weapon->keyValues.GetIString(ISC::sound);
 	if (!sound.empty() && XenoAudio::Instance()) {

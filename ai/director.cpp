@@ -217,11 +217,11 @@ void Director::StartRandomPlot()
 	};
 	float odds[NPLOTS] = { 0 };
 
-	odds[SWARM] = 1.0;
-	odds[GREAT_BATTLE] = (greater >= TYPICAL_GREATER) ? 1.f : 0.f;	
-	if (lesser > TYPICAL_LESSER / 2) {
-		odds[EVIL_RISING] = target ? 1.f : 0.5f;
-	}
+	float fractionLesser = float(lesser) / float(TYPICAL_LESSER);
+	odds[SWARM] = fractionLesser * fractionLesser;
+	float fractionGreater = float(greater) / float(TYPICAL_GREATER);
+	odds[GREAT_BATTLE] = fractionGreater * fractionGreater;
+	odds[EVIL_RISING] = fractionLesser * fractionLesser * (target ? 1.0f : 0.5f);
 
 	int plotIndex = parentChit->random.Select(odds, NPLOTS);
 	if (odds[plotIndex] == 0) return;	// nothing to select
@@ -230,9 +230,13 @@ void Director::StartRandomPlot()
 	Vector2I end   = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
 
 	if (plotIndex == SWARM) {
-		int green = Context()->chitBag->census.NumCoresOfTeam(TEAM_GREEN_MANTIS);
-		int red = Context()->chitBag->census.NumCoresOfTeam(TEAM_RED_MANTIS);
-		IString critter = red > green ? ISC::redMantis : ISC::mantis;
+		int green	  = Context()->chitBag->census.NumOf(ISC::mantis, 0);
+		int red		  = Context()->chitBag->census.NumOf(ISC::redMantis, 0);
+		int trilobyte = Context()->chitBag->census.NumOf(ISC::trilobyte, 0);
+		float score[3] = { float(green), float(red), float(trilobyte) };
+		int idx = parentChit->random.Select(score, 3);
+		const IString critterArr[3] = { ISC::mantis, ISC::redMantis, ISC::trilobyte };
+		IString critter = critterArr[idx];
 
 		if (target) {
 			end = playerSector;

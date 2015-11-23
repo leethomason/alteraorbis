@@ -31,10 +31,10 @@ x start plots: involve vs. avoid player
 x news event
 x news event highlights
 - directed swarm: evil sub-deities?
-	- items for sub-deity
+	x items for sub-deity
 	- deity variation
-	- swarm in before spawning
-	- swarm + deity motion
+	d swarm in before spawning
+	x swarm + deity motion
 	- colors of demis
 	- different models for demis
 

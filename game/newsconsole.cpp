@@ -103,12 +103,18 @@ void NewsConsole::ProcessNewsToConsole(CoreScript* homeCore)
 			case NewsEvent::DOMAIN_CONQUER:
 			case NewsEvent::SUPERTEAM_DELETED:
 			case NewsEvent::SUBTEAM_DELETED:
+			background = LumosGame::CalcPaletteAtom(PAL_TANGERINE * 2, PAL_TANGERINE);
+			background.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+			ne.Console(&str, chitBag, 0);
+			break;
+
 			case NewsEvent::PLOT_START:
 			case NewsEvent::PLOT_EVENT:
 			case NewsEvent::PLOT_END:
 			background = LumosGame::CalcPaletteAtom(PAL_TANGERINE * 2, PAL_TANGERINE);
 			background.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
 			ne.Console(&str, chitBag, 0);
+			atom = LumosGame::CalcUIIconAtom("warning");
 			break;
 
 			case NewsEvent::DOMAIN_CREATED:

@@ -1517,6 +1517,8 @@ SectorPort WorldMap::NearestPort(const Vector2F& pos, const Vector2F* origin)
 	int   bestPort = 0;
 	float bestCost = FLT_MAX;
 
+	// The first loop finds the best port assuming we want to go to 'pos'.
+	// If that fails (which is unusual) drop back to finding the nearest port.
 	for (int i = 0; i < 4; ++i) {
 		int port = (1 << i);
 		if (sd.ports & port) {
@@ -1538,6 +1540,21 @@ SectorPort WorldMap::NearestPort(const Vector2F& pos, const Vector2F* origin)
 			}
 		}
 	}
+	if (!bestPort) {
+		for (int i = 0; i < 4; ++i) {
+			int port = (1 << i);
+			if (sd.ports & port) {
+				Vector2I desti = sd.GetPortLoc(port).Center();
+				Vector2F dest = { (float)desti.x, (float)desti.y };
+				float cost = (pos - dest).Length();
+				if (cost < bestCost) {
+					bestCost = cost;
+					bestPort = port;
+				}
+			}
+		}
+	}
+
 	SectorPort result;
 	if (bestPort) {
 		result.port = bestPort;

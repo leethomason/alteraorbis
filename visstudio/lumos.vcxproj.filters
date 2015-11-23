@@ -448,6 +448,9 @@
     <ClCompile Include="..\xegame\platformpath.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\plot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -884,6 +887,9 @@
     </ClInclude>
     <ClInclude Include="..\ai\director.h">
       <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\plot.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
