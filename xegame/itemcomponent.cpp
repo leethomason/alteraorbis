@@ -37,6 +37,8 @@
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
 
+#include "../ai/marketai.h"
+
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
@@ -914,6 +916,20 @@ GameItem* ItemComponent::RemoveFromInventory( const GameItem* citem )
 	}
 	Validate();
 	return item;
+}
+
+
+void ItemComponent::MakeRoomInInventory()
+{
+	if (!CanAddToInventory()) {
+		// Make room in the inventory. Give the crystal to the exchange
+		// if there is one, else the reserve bank.
+		const GameItem* sell = ItemToSell();
+		GLASSERT(sell);
+		if (!sell) return;
+		GameItem* sold = RemoveFromInventory(sell);
+		MarketAI::RecoupAndDeleteOverflowItem(sold, ParentChit());
+	}
 }
 
 

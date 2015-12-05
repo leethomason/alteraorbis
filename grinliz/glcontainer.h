@@ -365,6 +365,8 @@ public:
 	const T* Mem() const	{ return mem; }
 	T* Mem()				{ return mem; }
 	const T* End() const	{ return mem + size; }	// mem never 0, because of cache
+	const T& Front() const	{ GLASSERT(size);  return mem[0]; }
+	const T& Back() const	{ GLASSERT(size);  return mem[size-1]; }
 
 	void Reserve(int n) { EnsureCap(n); }
 

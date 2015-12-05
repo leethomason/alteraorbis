@@ -333,7 +333,20 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 }
 
 
-bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID, Vector2I* wantToConquer)
+bool CoreScript::WantToConquer(const grinliz::Vector2I& sector)
+{
+	for (int i = 0; i < MAX_SQUADS; ++i) {
+		if (   !waypoints[i].Empty() 
+			&& ToSector(waypoints[i].Back()) == sector) 
+		{
+			return true;
+		}
+	}
+	return  false;
+}
+
+
+bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID)
 {
 	if (!CitizenFilter(chitID)) {
 		return false;
@@ -342,17 +355,6 @@ bool CoreScript::IsSquaddieOnMission(int chitID, int* squadID, Vector2I* wantToC
 		if (squads[i].Find(chitID) >= 0) {
 			if (squadID) {
 				*squadID = i;
-			}
-			if (wantToConquer) {
-				wantToConquer->Zero();
-				if (!waypoints[i].Empty()) {
-					Vector2I waypoint2i = waypoints[i][waypoints[i].Size() - 1];
-					Vector2I waypointSector = ToSector(waypoint2i);
-					const SectorData& sd = Context()->worldMap->GetSectorData(waypointSector);
-					if (sd.CoreLoc() == waypoint2i) {
-						*wantToConquer = waypointSector;
-					}
-				}
 			}
 			Chit* chit = Context()->chitBag->GetChit(chitID);
 			return !waypoints[i].Empty() || (ToSector(chit->Position()) != ToSector(ParentChit()->Position()));

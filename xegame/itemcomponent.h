@@ -99,6 +99,8 @@ public:
 	void AddToInventory( ItemComponent* ic );
 	// Move from one inventory to another. Return count of items moved.
 	int TransferInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems );
+	// Sell, if possible, to make room.
+	void MakeRoomInInventory();
 
 	// Removes an item from the inventory. Returns
 	// null if that item cannot be removed.

@@ -1116,7 +1116,7 @@ Vector2F AIComponent::ThinkWanderHerd()
 	int nRandom = friendList2.Size() >= 4 ? 2 : 1;
 
 	CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
-	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID, nullptr)) {
+	if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), &squadID)) {
 		// Friends are other squaddies.
 		CChitArray arr;
 		myCore->Squaddies(squadID, &arr);
@@ -2728,7 +2728,6 @@ void AIComponent::EnterNewGrid()
 		&& ToWorld2I(coreScript->ParentChit()->Position()) == pos2i)
 	{
 		bool success = false;
-		Vector2I conquer = { 0, 0 };
 		// Wandering denizens can takeover a neutral core, OR
 		// A squad can takeover a neutral core
 		CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
@@ -2746,7 +2745,7 @@ void AIComponent::EnterNewGrid()
 			});
 			success = arr.Size() > 3;
 		}
-		else if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), nullptr, &conquer) && (conquer == sector)) {
+		else if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), nullptr) && myCore->WantToConquer(sector)) {
 			success = true;
 		}
 
@@ -2978,7 +2977,7 @@ int AIComponent::DoTick(U32 deltaTime)
 					DoMoraleZero();
 			}
 			else if (homeCore) {
-				if (!homeCore->IsSquaddieOnMission(parentChit->ID(), 0, 0)) {
+				if (!homeCore->IsSquaddieOnMission(parentChit->ID(), 0)) {
 					needs.DoTravelTick(deltaTime);
 				}
 				if (needs.Morale() < LOW_MORALE) {

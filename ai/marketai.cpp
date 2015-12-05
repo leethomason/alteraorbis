@@ -69,15 +69,7 @@ const GameItem* MarketAI::Has( int flag, int maxAuCost, int minAuValue )
 	if (buyer->GetItem()->wallet.Gold() >= cost)
 	{
 		if (doTrade) {
-			if (!buyer->CanAddToInventory()) {
-				// Make room in the inventory. Give the crystal to the exchange
-				// if there is one, else the reserve bank.
-				const GameItem* sell = buyer->ItemToSell();
-				GLASSERT(sell);
-				if (!sell) return 0;
-				GameItem* sold = buyer->RemoveFromInventory(sell);
-				RecoupAndDeleteOverflowItem(sold, buyer->ParentChit());
-			}
+			buyer->MakeRoomInInventory();
 			GLASSERT(buyer->CanAddToInventory());
 
 			GameItem* gi = seller->RemoveFromInventory(item);

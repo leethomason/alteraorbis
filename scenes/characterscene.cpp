@@ -501,6 +501,11 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		if (startIC && endIC		// move between storage
 			&& startIndex)			// is actually something selected in the start?
 		{
+			// The market always accepts goods (even from the player)
+			if (!endIC->CanAddToInventory() && endIC == data->storageIC) {
+				data->storageIC->MakeRoomInInventory();
+			}
+
 			const GameItem* startItem = startIC->GetItem(startIndex);
 			int value = startItem->GetValue();
 			GLASSERT(value);
