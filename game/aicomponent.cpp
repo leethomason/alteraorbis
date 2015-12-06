@@ -365,6 +365,10 @@ void AIComponent::ProcessFriendEnemyLists(bool tick)
 			//			 is blocking the path. So the return value of 'path' needs
 			//			 to keep that in mind.
 
+			// REMEMBER: if we try to path to something we can't get to, that
+			//			 confuses the AI. Particular critical if we are chasing
+			//			 enemies.
+
 			bool path = fullSectorAware
 				|| Context()->worldMap->HasStraightPath(center, ToWorld2F(chit->Position()), true);
 						
