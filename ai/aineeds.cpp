@@ -232,6 +232,14 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 	else if (buildingName == ISC::bar) {
 		if (building->GetItemComponent()->FindItem(ISC::elixir) == 0) needs.Zero();
 	}
+	else if (buildingName == ISC::academy) {
+		if (visitor->GetWallet()->Gold() > ACADEMY_COST_PER_XP * 2) {
+			*functional = true;
+		}
+		else {
+			needs.Zero();
+		}
+	}
 	else if (buildingName == ISC::kiosk) {
 		// randomly on porch?
 		needs.Zero();

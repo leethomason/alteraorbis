@@ -134,6 +134,7 @@
   <model assetName="exchange" filename="exchange.ac"                       shading="flat" polyRemoval="pre" />
   <model assetName="kamaStatue" filename="kamaStatue.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="gobmanStatue" filename="gobmanStatue.ac"               shading="flat" polyRemoval="pre" />
+  <model assetName="academy" filename="academy.ac"                         shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />

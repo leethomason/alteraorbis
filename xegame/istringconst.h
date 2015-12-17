@@ -101,6 +101,7 @@ public:
 	static grinliz::IString market;
 	static grinliz::IString bar;
 	static grinliz::IString guardpost;
+	static grinliz::IString academy;
 	static grinliz::IString farm;
 	static grinliz::IString distillery;
 	static grinliz::IString exchange;

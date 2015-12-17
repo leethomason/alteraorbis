@@ -216,6 +216,7 @@ void Director::StartRandomPlot()
 		NPLOTS
 	};
 	float odds[NPLOTS] = { 0 };
+	const char* plotName[NPLOTS] = { "SWARM", "GREAT_BATTLE", "EVIL_RISING" };
 
 	float fractionLesser = float(lesser) / float(TYPICAL_LESSER);
 	odds[SWARM] = fractionLesser * fractionLesser;
@@ -225,6 +226,10 @@ void Director::StartRandomPlot()
 
 	int plotIndex = parentChit->random.Select(odds, NPLOTS);
 	if (odds[plotIndex] == 0) return;	// nothing to select
+
+	for (int i = 0; i < NPLOTS; ++i) {
+		GLOUTPUT(("Director: %s %f\n", plotName[i], odds[i]));
+	}
 
 	Vector2I start = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
 	Vector2I end   = { parentChit->random.Rand(NUM_SECTORS), parentChit->random.Rand(NUM_SECTORS) };
@@ -241,12 +246,14 @@ void Director::StartRandomPlot()
 		if (target) {
 			end = playerSector;
 		}
+		GLOUTPUT(("Director Swarm %d,%d -> %d,%d", start.x, start.y, end.x, end.y));
 		Swarm(critter, start, end);
 	}
 	else if (plotIndex == GREAT_BATTLE) {
 		if (target) {
 			start = playerSector;
 		}
+		GLOUTPUT(("Director Great Battle %d,%d", start.x, start.y));
 		GreatBattle(start);
 	}
 	else if (plotIndex == EVIL_RISING) {
@@ -279,6 +286,7 @@ void Director::StartRandomPlot()
 			demi = ISC::Oggar;
 			female = false;
 		}
+		GLOUTPUT(("Director Evil Rising %d,%d %s %s", start.x, start.y, critter.safe_str(), demi.safe_str()));
 		EvilRising(start, critter, critterTeam, demi, female);
 	}
 	else {

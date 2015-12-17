@@ -52,6 +52,7 @@ public:
 		SLEEPTUBE,
 		TEMPLE,
 		GUARDPOST,
+		ACADEMY,
 
 		FARM,
 		DISTILLERY,

@@ -538,6 +538,14 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 				delete item;
 			}
 		}
+		else if (buildingName == ISC::academy) {
+			int nUse = (chit->GetWallet()->Gold() - ACADEMY_COST_PER_XP) / ACADEMY_COST_PER_XP;
+			if (nUse > 0) {
+				ReserveBank::GetWallet()->Deposit(chit->GetWallet(), ACADEMY_COST_PER_XP);
+				chit->GetItemComponent()->AddCraftXP(1);
+			}
+		}
+
 		if (chit->GetAIComponent()) {
 			chit->GetAIComponent()->GetNeedsMutable()->Add(buildingNeeds);
 		}

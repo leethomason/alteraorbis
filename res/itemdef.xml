@@ -239,6 +239,21 @@
         need.fun="1.0"
         />
 
+  <GameItem name="academy"
+        resource="academy"
+        flags="DAMAGE_UNDER_WATER"
+        porch="1"
+        procedural="team"
+        size="1"
+        mass="100"
+        baseHP="150"
+        cost="200"
+        zone="industrial"
+        
+		    need.time="2.0"
+        need.fun="1.0"
+        />
+
   <GameItem name="temple"
         resource="pyramid0"
         flags="DAMAGE_UNDER_WATER"

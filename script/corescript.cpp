@@ -230,14 +230,15 @@ void CoreScript::OnChitMsg(Chit* chit, const ChitMsg& msg)
 		}
 
 		if (chit->Team() != TEAM_NEUTRAL) {
-			if (superTeam) {
-				LumosChitBag::CreateCoreData data = { sector, true, chit->Team(), deleter ? deleter->Team() : 0 };
-				Context()->chitBag->coreCreateList.Push(data);
-			}
-			else {
-				LumosChitBag::CreateCoreData data = { sector, false, chit->Team(), deleter ? deleter->Team() : 0 };
-				Context()->chitBag->coreCreateList.Push(data);
-			}
+			CoreScript* superCore = CoreScript::GetCoreFromTeam(superTeam);
+
+			LumosChitBag::CreateCoreData data = { 
+				sector, 
+				superCore && superCore->WantsToConquer(sector), 
+				chit->Team(), 
+				deleter ? deleter->Team() : 0 
+			};
+			Context()->chitBag->coreCreateList.Push(data);
 		}
 		else {
 			// Neutral cores are taken over by wandering over them
@@ -333,13 +334,22 @@ int CoreScript::Squaddies(int id, CChitArray* arr)
 }
 
 
-bool CoreScript::WantToConquer(const grinliz::Vector2I& sector)
+bool CoreScript::WantsToConquer(const grinliz::Vector2I& sector)
 {
+	CoreScript* playerCore = Context()->chitBag->GetHomeCore();
+	if (playerCore != this) {
+		return true;	// AI always conquers. Player needs a flag on target.
+	}
+	CoreScript* targetCore = CoreScript::GetCore(sector);
+	GLASSERT(targetCore);
+	if (!targetCore) return false;
+
 	for (int i = 0; i < MAX_SQUADS; ++i) {
-		if (   !waypoints[i].Empty() 
-			&& ToSector(waypoints[i].Back()) == sector) 
-		{
-			return true;
+		if (!waypoints[i].Empty()) {
+			Vector2I pos = waypoints[i].Back();
+			if (ToWorld2I(targetCore->ParentChit()->Position()) == pos) {
+				return true;
+			}
 		}
 	}
 	return  false;
@@ -539,7 +549,7 @@ void CoreScript::AddFlag(const Vector2I& _pos)
 		}
 	}
 
-	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(ToSector(pos));
+	const WorldGrid& wg = Context()->worldMap->GetWorldGrid(pos);
 	if (wg.IsWater()) return;
 
 	Flag f = { pos, 0 };

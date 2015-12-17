@@ -75,6 +75,7 @@ IString IStringConst::bed;
 IString IStringConst::market;
 IString IStringConst::bar;
 IString IStringConst::guardpost;
+IString IStringConst::academy;
 IString IStringConst::farm;
 IString IStringConst::distillery;
 IString IStringConst::exchange;
@@ -208,6 +209,7 @@ void IStringConst::Init()
 	market = StringPool::Intern( "market", true );
 	bar = StringPool::Intern( "bar", true );
 	guardpost = StringPool::Intern( "guardpost", true );
+	academy = StringPool::Intern( "academy", true );
 	farm = StringPool::Intern( "farm", true );
 	distillery = StringPool::Intern( "distillery", true );
 	exchange = StringPool::Intern( "exchange", true );

@@ -1996,7 +1996,6 @@ bool AIComponent::ThinkNeeds()
 	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
 	BuildScript			buildScript;
-//	int					bestIndex = -1;
 	double				bestScore = 0;
 	const BuildData*	bestBD = 0;
 	Vector2I			bestPorch = { 0, 0 };
@@ -2009,13 +2008,6 @@ bool AIComponent::ThinkNeeds()
 		myNeeds.X(Needs::FOOD) = 0;
 	}
 
-	/*
-	bool logNeeds = thisComp.item->IProperName() == "Tria";
-	if (logNeeds) {
-	GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
-	}
-	*/
-	
 	bool debugBuildingOutput[BuildScript::NUM_TOTAL_OPTIONS] = { false };
 
 	for (int i = 0; i < chitArr.Size(); ++i) {
@@ -2062,7 +2054,7 @@ bool AIComponent::ThinkNeeds()
 			if (!debugBuildingOutput[buildDataID]) {
 				GLASSERT(buildDataID >= 0 && buildDataID < int(GL_C_ARRAY_SIZE(debugBuildingOutput)));
 				debugBuildingOutput[buildDataID] = true;
-				GLOUTPUT(("  %.2f %s %s\n", score, building->GetItem()->Name(), functional ? "func" : "norm" ));
+				GLOUTPUT(("  %.2f %s %s\n", score, building->GetItem()->Name(), functional ? "func" : "norm"));
 			}
 		}
 
@@ -2070,13 +2062,12 @@ bool AIComponent::ThinkNeeds()
 			&& score > bestScore)
 		{
 			bestScore = score;
-//			bestIndex = i;
 			bestBD = bd;
 			bestPorch = porch;
 		}
 	}
 
-	if (bestScore >0) {
+	if (bestScore > 0) {
 		GLASSERT(bestPorch.x > 0);
 		if (Log()) {
 			GLOUTPUT(("  --> %s\n", bestBD->structure.c_str()));
@@ -2731,7 +2722,6 @@ void AIComponent::EnterNewGrid()
 		&& !coreScript->InUse()
 		&& ToWorld2I(coreScript->ParentChit()->Position()) == pos2i)
 	{
-		bool success = false;
 		// Wandering denizens can takeover a neutral core, OR
 		// A squad can takeover a neutral core
 		CoreScript* myCore = CoreScript::GetCoreFromTeam(parentChit->Team());
@@ -2747,14 +2737,9 @@ void AIComponent::EnterNewGrid()
 			arr.Filter(parentChit, [](Chit* parent, Chit* ele) {
 				return Team::IsRogue(ele->Team()) && (Team::Instance()->GetRelationship(ele, parent) != ERelate::ENEMY);
 			});
-			success = arr.Size() > 3;
-		}
-		else if (myCore && myCore->IsSquaddieOnMission(parentChit->ID(), nullptr) && myCore->WantToConquer(sector)) {
-			success = true;
-		}
-
-		if (success) {
-			Context()->chitBag->TakeOverCore(sector, parentChit);
+			if (arr.Size() > 3) {
+				Context()->chitBag->TakeOverCore(sector, parentChit);
+			}
 		}
 	}
 #endif

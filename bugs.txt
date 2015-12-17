@@ -15,6 +15,13 @@ x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet
 x more announcement when core taken over - popup!
 x if super-crowded, should wander more (swarms)
 x How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
+x local placeflag not working
+x conquering when shouldn't
+- expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
+  training facility! Just keep spending cash??
+- ThinkNeeds() - statistical distribution? (Odds are the square of the need?)
+- AI should build academys
+- advisor: academy
 - Art
 	- R1K
 	- QCore

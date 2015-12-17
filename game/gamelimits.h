@@ -53,6 +53,7 @@ static const int MAX_WILD_FRUIT		= 300;
 static const int GOLD_XFER_TAKEOVER = 500;
 static const int GOLD_PER_ELIXIR	= 5;	// Gold paid for elixir delivery, if tavern is full.
 static const int LESSER_DEITY_LEVEL = 5;
+static const int ACADEMY_COST_PER_XP = 400;	// Remember this is craft XP!
 
 // This is in terms of MAX_TECH (not number of temples)
 // See CoreScript.cpp for rules.
