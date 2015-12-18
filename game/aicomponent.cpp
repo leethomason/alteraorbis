@@ -1995,10 +1995,11 @@ bool AIComponent::ThinkNeeds()
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
+	static const int MAX_SCORES = 64;
 	BuildScript			buildScript;
-	double				bestScore = 0;
-	const BuildData*	bestBD = 0;
-	Vector2I			bestPorch = { 0, 0 };
+	CArray<float, MAX_SCORES>	scoreArr;
+	CArray<const BuildData*, MAX_SCORES> bdArr;
+	CArray<Vector2I, MAX_SCORES> porchArr;
 
 	Vector3<double> myNeeds = this->GetNeeds().GetOneMinus();
 	double myMorale = this->GetNeeds().Morale();
@@ -2058,23 +2059,24 @@ bool AIComponent::ThinkNeeds()
 			}
 		}
 
-		if ((score > 0.4 || (score > 0.1 && functional))
-			&& score > bestScore)
+		if (score > 0.4 || (score > 0.1 && functional))
 		{
-			bestScore = score;
-			bestBD = bd;
-			bestPorch = porch;
+			scoreArr.PushIfCap(float(score * score));
+			bdArr.PushIfCap(bd);
+			porchArr.PushIfCap(porch);
 		}
 	}
 
-	if (bestScore > 0) {
-		GLASSERT(bestPorch.x > 0);
+	if (!scoreArr.Empty()) {
+		int idx = parentChit->random.Select(scoreArr.Mem(), scoreArr.Size());
+
+		GLASSERT(porchArr[idx].x > 0);
 		if (Log()) {
-			GLOUTPUT(("  --> %s\n", bestBD->structure.c_str()));
+			GLOUTPUT(("  --> %s\n", bdArr[idx]->structure.c_str()));
 		}
 
-		taskList.Push(Task::MoveTask(bestPorch));
-		taskList.Push(Task::StandTask(bestBD->standTime));
+		taskList.Push(Task::MoveTask(porchArr[idx]));
+		taskList.Push(Task::StandTask(bdArr[idx]->standTime));
 		taskList.Push(Task::UseBuildingTask());
 		return true;
 	}

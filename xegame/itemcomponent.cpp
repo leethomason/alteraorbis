@@ -54,6 +54,7 @@ ItemComponent::ItemComponent( GameItem* item ) :
 	debugEnabled(false), 
 	hardpointsComputed(false)
 {
+	maxCarriedItems = MAX_CARRIED_ITEMS;
 	for (int i = 0; i < EL_NUM_METADATA; ++i) {
 		hasHardpoint[i] = false;
 		hardpoint.Push(0);
@@ -830,7 +831,7 @@ const GameItem* ItemComponent::ItemToSell() const
 
 bool ItemComponent::CanAddToInventory()
 {
-	return NumCarriedItems() < MAX_CARRIED_ITEMS;
+	return NumCarriedItems() < maxCarriedItems;
 }
 
 

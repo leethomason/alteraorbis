@@ -247,7 +247,6 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 			default:item->SetResource("kiosk.c");	break;
 		}
 	}
-
 	int size = 1;
 	rootItem.keyValues.Get(ISC::size, &size);
 	int porch = 0;
@@ -275,6 +274,9 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	chit->Add(new RenderComponent(item->ResourceName()));
 	chit->Add(new HealthComponent());
 	AddItem(item, chit, context->engine, team, 0);
+	if (item->IResourceName() == ISC::distillery) {
+		chit->GetItemComponent()->SetMaxCarried(6);
+	}
 
 	IString script = rootItem.keyValues.GetIString("script");
 	if (!script.empty()) {

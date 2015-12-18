@@ -235,6 +235,7 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 	else if (buildingName == ISC::academy) {
 		if (visitor->GetWallet()->Gold() > ACADEMY_COST_PER_XP * 2) {
 			*functional = true;
+			needs = needs * LIKE_BOOST;	// everyone likes training
 		}
 		else {
 			needs.Zero();

@@ -17,11 +17,16 @@ x if super-crowded, should wander more (swarms)
 x How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
 x local placeflag not working
 x conquering when shouldn't
-- expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
+x expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
   training facility! Just keep spending cash??
-- ThinkNeeds() - statistical distribution? (Odds are the square of the need?)
+x ThinkNeeds() - statistical distribution? (Odds are the square of the 
+x should track academy visits in history
+x distillery max store 5
 - AI should build academys
-- advisor: academy
+- advisor: academy- AI update
+	- essential:  sleepTube, tavern, or fun (drop through)
+	- functional: market, exchange, academy, factory (drop through)
+	- guard
 - Art
 	- R1K
 	- QCore

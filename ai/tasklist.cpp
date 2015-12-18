@@ -543,6 +543,7 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 			if (nUse > 0) {
 				ReserveBank::GetWallet()->Deposit(chit->GetWallet(), ACADEMY_COST_PER_XP);
 				chit->GetItemComponent()->AddCraftXP(1);
+				chit->GetItem()->historyDB.Increment( "Academy" );
 			}
 		}
 

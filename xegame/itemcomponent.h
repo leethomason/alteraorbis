@@ -32,42 +32,42 @@ private:
 
 public:
 	// Moves the item to this component
-	ItemComponent( GameItem* item );
+	ItemComponent(GameItem* item);
 	virtual ~ItemComponent();
 	void InitFrom(const GameItem* items[], int nItems);
 
 	virtual const char* Name() const { return "ItemComponent"; }
 	virtual ItemComponent* ToItemComponent() { return this; }
 
-	virtual void DebugStr( grinliz::GLString* str );
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	virtual void OnAdd( Chit* chit, bool init );
+	virtual void DebugStr(grinliz::GLString* str);
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
+	virtual void OnAdd(Chit* chit, bool init);
 	virtual void OnRemove();
 
-	virtual void Serialize( XStream* xs );
+	virtual void Serialize(XStream* xs);
 
-	virtual int DoTick( U32 delta );
-	virtual void OnChitEvent( const ChitEvent& event );
+	virtual int DoTick(U32 delta);
+	virtual void OnChitEvent(const ChitEvent& event);
 
 	int NumItems() const							{ return itemArr.Size(); }
 	int NumItems(const grinliz::IString& istr);
 	GameItem* GetItem()								{ return itemArr[0]; }
-	const GameItem* GetItem( int index=0 ) const	{ return ( index < itemArr.Size()) ? itemArr[index] : 0; }
+	const GameItem* GetItem(int index = 0) const	{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
 
-	const GameItem* FindItem( const GameItem* item ) const { 
-		for( int i=0; i<itemArr.Size(); ++i ) {
+	const GameItem* FindItem(const GameItem* item) const {
+		for (int i = 0; i < itemArr.Size(); ++i) {
 			if (itemArr[i] == item) return item;
 		}
 		return 0;
 	}
-	const GameItem* FindItem( const grinliz::IString& name ) const {
-		for( int i=0; i<itemArr.Size(); ++i ) {
+	const GameItem* FindItem(const grinliz::IString& name) const {
+		for (int i = 0; i < itemArr.Size(); ++i) {
 			if (itemArr[i]->IName() == name) return itemArr[i];
 		}
 		return 0;
 	}
 
-	enum { SELECT_MELEE, SELECT_RANGED};
+	enum { SELECT_MELEE, SELECT_RANGED };
 	const GameItem* SelectWeapon(int type);
 	const GameItem* QuerySelectWeapon(int type) const;	// queries what will be swapped to, but doesn't swap
 	const RangedWeapon* QuerySelectRanged() const;		// queries ranged, but doesn't swap
@@ -75,18 +75,19 @@ public:
 
 	bool IsBetterItem(const GameItem* item) const;		// return true if 'item' is better than the one this has
 
-	bool Swap( int i, int j );	// swap 2 slots 
+	bool Swap(int i, int j);	// swap 2 slots 
 
-	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents
+	static bool Swap2(ItemComponent* a, int aIndex, ItemComponent* b, int bIndex);	// swap 2 slots, in 2 (possibly) different inventoryComponents
 
 	/*	Weapon queries. Seems simple to do...but wow I have re-written this code.
 		Gets the *active* weapon. Can be Intrinsic or Held.
 		Can be null.
-	*/
-	RangedWeapon*	GetRangedWeapon( grinliz::Vector3F* trigger ) const;	// optionally returns trigger
+		*/
+	RangedWeapon*	GetRangedWeapon(grinliz::Vector3F* trigger) const;	// optionally returns trigger
 	MeleeWeapon*	GetMeleeWeapon() const;
 	Shield*			GetShield() const;
 
+	void SetMaxCarried(int maxInventory) { maxCarriedItems = maxInventory; }
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
 	int  NumCarriedItems(const grinliz::IString& str) const;
@@ -145,6 +146,7 @@ private:
 	int			lastDamageID;
 	bool		debugEnabled;
 	bool		hardpointsComputed;
+	int			maxCarriedItems;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	grinliz::CDynArray< GameItem* > itemArr;
