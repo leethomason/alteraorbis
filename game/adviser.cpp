@@ -76,6 +76,7 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 		BuildScript::GUARDPOST,
 		BuildScript::EXCHANGE,
 		BuildScript::VAULT,
+		BuildScript::ACADEMY
 	};
 
 	static const int NUM_BUILD_ADVISORS = GL_C_ARRAY_SIZE(BUILD_ADVISOR);
@@ -93,17 +94,6 @@ void Adviser::DoTick(int delta, CoreScript* cs, int nWorkers, const int* buildCo
 
 				bool need = id < nBuildCounts && buildCounts[id] == 0;
 				
-				// special cases. causing trouble: build sleeptube when there is no Bar, for example.
-				/*
-				if (id == BuildScript::SLEEPTUBE) {
-					// Check again after one temple to remind to
-					// make more seeptubes.
-					if (buildCounts[BuildScript::TEMPLE] == 1 && buildCounts[BuildScript::SLEEPTUBE] < 8) {
-						need = true;
-					}
-				}
-				*/
-
 				if (need) {
 					BuildScript buildScript;
 					const BuildData& data = buildScript.GetData(id);

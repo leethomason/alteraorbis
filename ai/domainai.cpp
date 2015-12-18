@@ -821,7 +821,8 @@ void ForgeDomainAI::DoBuild()
 		if (!arr[BuildScript::TEMPLE] && BuildBuilding(BuildScript::TEMPLE))		break;
 		if (!arr[BuildScript::KIOSK] && BuildBuilding(BuildScript::KIOSK))			break;
 		if (!arr[BuildScript::EXCHANGE] && BuildBuilding(BuildScript::EXCHANGE))	break;
-		if (!arr[BuildScript::FORGE] && BuildBuilding(BuildScript::FORGE))	break;
+		if (!arr[BuildScript::FORGE] && BuildBuilding(BuildScript::FORGE))			break;
+		if (!arr[BuildScript::ACADEMY] && BuildBuilding(BuildScript::ACADEMY))		break;
 		if (BuildRoad()) break;	// will return true until all roads are built.
 	} while (false);
 }
