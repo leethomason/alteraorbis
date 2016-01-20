@@ -201,12 +201,21 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 }
 
 
+double EvalBuildingScript::Efficiency()
+{
+
+	double eff = 0.65 + 0.35 * EvalIndustrial(false);
+	GLASSERT(eff > 0);
+	if (Reachable())
+		return eff;
+	return 0;
+}
+
 int EvalBuildingScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
 		// Regular update to change the porch.
 		parentChit->SendMessage(ChitMsg(ChitMsg::CHIT_POS_CHANGE));
-		//timer.SetTime(timer.Period() + parentChit->random.Rand(1000));	// space these out. cause framerate hitch
 	}
 	return timer.Next();
 }

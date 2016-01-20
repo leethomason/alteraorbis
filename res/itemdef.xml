@@ -361,7 +361,6 @@
         mass="150"
         baseHP="150"
         cost="50"
-        zone="natural"
         
 	      need.time="1.5"
         need.fun="1.0"

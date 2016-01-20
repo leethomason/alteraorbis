@@ -926,11 +926,20 @@ void ItemComponent::MakeRoomInInventory()
 		// Make room in the inventory. Give the crystal to the exchange
 		// if there is one, else the reserve bank.
 		const GameItem* sell = ItemToSell();
+		if (!sell) {
+			for (int i = itemArr.Size() - 1; i > 0; --i) {
+				const GameItem* item = itemArr[i];
+				if (item && !item->Intrinsic()) {
+					sell = item;
+					break;
+				}
+			}
+		}
 		GLASSERT(sell);
-		if (!sell) return;
 		GameItem* sold = RemoveFromInventory(sell);
 		MarketAI::RecoupAndDeleteOverflowItem(sold, ParentChit());
 	}
+	GLASSERT(CanAddToInventory());
 }
 
 

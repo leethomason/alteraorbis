@@ -99,7 +99,7 @@ public:
 
 	static double DecayTime();
 
-	static grinliz::Vector3<double> CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor, bool* functionalBuilding);
+	static grinliz::Vector3<double> CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor);
 
 private:
 	void ClampNeeds();

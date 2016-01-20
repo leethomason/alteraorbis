@@ -473,21 +473,6 @@ bool CoreScript::SquadAtRest(int squadID)
 }
 
 
-Chit* CoreScript::PrimeCitizen()
-{
-	for (int i = 0; i < citizens.Size(); ++i) {
-		int id = citizens[i];
-		Chit* chit = CitizenFilter(id);
-		if (chit && chit->GetItem()) {
-			if (chit->GetItem()->keyValues.Has(ISC::prime)) {
-				return chit;
-			}
-		}
-	}
-	return 0;
-}
-
-
 Chit* CoreScript::CitizenFilter(int chitID)
 {
 	Chit* chit = Context()->chitBag->GetChit(chitID);
@@ -1204,12 +1189,11 @@ int CoreScript::CorePower()
 int CoreScript::CoreWealth()
 {
 	int gold = 0;
-	const int* value = ReserveBank::Instance()->CrystalValue();
 	const Wallet* wallet = ParentChit()->GetWallet();
 	if (wallet) {
 		gold += wallet->Gold();
 		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
-			gold += value[i] * wallet->Crystal(i);
+			gold += ReserveBank::Instance()->CrystalValue(i) * wallet->Crystal(i);
 		}
 	}
 	return gold;

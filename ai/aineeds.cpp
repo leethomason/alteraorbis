@@ -139,11 +139,11 @@ void Needs::Serialize(XStream* xs)
 }
 
 
-grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor, bool *functional)
+grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Chit* visitor)
 {
 	static const Vector3<double> ZERO = { 0, 0, 0 };
-	static const double LIKE_BOOST = 1.5;
-	*functional = false;
+	static const double LIKE = 1.5;
+	static const double DISLIKE = 0.7;
 
 	GLASSERT(Needs::NUM_NEEDS == 3);		// use a Vector3
 	const GameItem* buildingItem = building->GetItem();
@@ -153,50 +153,27 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 	if (!visitorItem || !buildingItem) return ZERO;
 
 	GLASSERT(Needs::FOOD == 0 && Needs::ENERGY == 1 && Needs::FUN == 2);
-	Vector3F needsF = { 0, 0, 0 };
-	buildingItem->keyValues.Get(ISC::need__food, &needsF.x);
-	buildingItem->keyValues.Get(ISC::need__energy, &needsF.y);
-	buildingItem->keyValues.Get(ISC::need__fun, &needsF.z);
-	Vector3<double> needs = { needsF.x, needsF.y, needsF.z };
+	Vector3<double> needs = { 0, 0, 0 };
 
 	int likesCrafting = visitorItem->GetPersonality().Crafting();
 	const IString& buildingName = buildingItem->IName();
-	const GameItem* sell = visitor->GetItemComponent()->ItemToSell();
-
-	EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
-	if (evalScript) {
-		if (!evalScript->Reachable()) return ZERO;
-
-		double industry = building->GetItem()->GetBuildingIndustrial();
-		double score = evalScript->EvalIndustrial(false);
-		double dot = score * industry;	// -1 to 1
-		double scale = 0.55 + 0.45 * dot;
-		needs = needs * scale;
-	}
 
 	if (buildingName == ISC::factory) {
 		if (visitorItem->wallet.Crystal(0) == 0)					needs.Zero();	// can't use.
-
-		// Not sure this should be here: likes/dislikes of 
-		// crafting is accounted for in buying/selling crystal.
-		// Adjusted down to small effect because of the crystal.
-		// On the other hand, hard to get out of the sleep - bar loop.
-		if (likesCrafting == Personality::LIKES)					needs.X(Needs::FUN) *= LIKE_BOOST;
-		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) *= 0.9;
-		*functional = true;
+		else if (likesCrafting == Personality::LIKES)				needs.X(Needs::FUN) = LIKE;
+		else if (likesCrafting == Personality::DISLIKES)			needs.X(Needs::FUN) = DISLIKE;
 	}
 	else if (buildingName == ISC::bed) {
 		// Beds always work for energy. Up importance if wounded.
-		needs.X(Needs::ENERGY) = Max(needs.X(Needs::ENERGY), 1.0 - visitorItem->HPFraction());
+		needs.X(Needs::ENERGY) = 1.0;
 	}
 	else if (buildingName == ISC::market) {
 		// Can always sell; if we have something to sell a market is interesting.
+		needs.X(Needs::FUN) = 1.0;
+		const GameItem* sell = visitor->GetItemComponent()->ItemToSell();
 		if (!sell) {
 			if (visitorItem->wallet.Gold() == 0)						needs.Zero();	// broke
 			if (building->GetItemComponent()->NumCarriedItems() == 0)	needs.Zero();	// market empty
-		}
-		if (sell || !needs.IsZero()) {
-			*functional = true;
 		}
 	}
 	else if (buildingName == ISC::exchange) {
@@ -211,34 +188,28 @@ grinliz::Vector3<double> Needs::CalcNeedsFullfilledByBuilding(Chit* building, Ch
 			}
 			int cost = INT_MAX;
 			if (cheapest >= 0) {
-				cost = *(ReserveBank::Instance()->CrystalValue() + cheapest);
+				cost = ReserveBank::Instance()->CrystalValue(cheapest);
 			}
-			if (visitorItem->wallet.Gold() < cost) {
-				needs.Zero();
+			if (visitorItem->wallet.Gold() >= cost) {
+				needs.X(Needs::FUN) = likesCrafting ? LIKE : 1.0;
 			}
 		}
 		else {
 			// DISLIKES. only uses to sell.
-			if (visitorItem->wallet.NumCrystals() == 0) {
-				needs.Zero();
+			if (visitorItem->wallet.NumCrystals()) {
+				needs.X(Needs::FUN) = 1.0;
 			}
 		}
-
-		if (likesCrafting) {
-			needs = needs * LIKE_BOOST;
-		}
-		*functional = true;
 	}
 	else if (buildingName == ISC::bar) {
-		if (building->GetItemComponent()->FindItem(ISC::elixir) == 0) needs.Zero();
+		if (building->GetItemComponent()->FindItem(ISC::elixir)) {
+			needs.X(Needs::FOOD) = 1.0;
+			needs.X(Needs::FUN)  = 0.2;
+		}
 	}
 	else if (buildingName == ISC::academy) {
 		if (visitor->GetWallet()->Gold() > ACADEMY_COST_PER_XP * 2) {
-			*functional = true;
-			needs = needs * LIKE_BOOST;	// everyone likes training
-		}
-		else {
-			needs.Zero();
+			needs.X(Needs::FUN) = 1.0;
 		}
 	}
 	else if (buildingName == ISC::kiosk) {

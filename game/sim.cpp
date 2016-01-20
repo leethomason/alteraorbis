@@ -471,7 +471,7 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
 	CoreScript* homeCore = context.chitBag->GetHomeCore();
 	GLASSERT(homeCore);
-	GLASSERT(!homeCore->PrimeCitizen());
+	GLASSERT(!context.chitBag->GetAvatar());
 
 	Chit* chit = context.chitBag->NewDenizen(pos, TEAM_HOUSE);	// real team assigned with AddCitizen
 	homeCore->AddCitizen( chit );
@@ -500,13 +500,13 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	chit->GetItem()->keyValues.Set( "speed", DEFAULT_MOVE_SPEED*boost );
 	chit->GetRenderComponent()->SetAnimationRate(boost);
 	chit->GetItem()->hpRegen = 1.0f;
-	chit->GetItem()->keyValues.Set("prime", 1);
+	//chit->GetItem()->keyValues.Set("prime", 1);
+	context.chitBag->SetAvatar(chit);
 
 	// For an avatar, we don't get money, since all the Au goes to the core anyway.
 	if (ReserveBank::Instance()) {
 		ReserveBank::GetWallet()->Deposit(chit->GetWallet(), *(chit->GetWallet()));
 	}
-	GLASSERT(chit == homeCore->PrimeCitizen());
 }
 
 

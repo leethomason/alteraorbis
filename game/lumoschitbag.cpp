@@ -60,8 +60,8 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-1), sceneData(0), sim(s)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
-	//memset(deityID, 0, sizeof(deityID[0])*NUM_DEITY);
 	homeTeam = 0;
+	avatarID = 0;
 }
 
 
@@ -80,6 +80,7 @@ void LumosChitBag::Serialize( XStream* xs )
 
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeTeam );
+	XARC_SER(xs, avatarID);
 	XARC_SER_CARRAY(xs, namePool);
 	XarcClose( xs );
 }
@@ -922,14 +923,21 @@ CoreScript* LumosChitBag::GetHomeCore()	const
 }
 
 
-Chit* LumosChitBag::GetAvatar() const
+void LumosChitBag::SetAvatar(Chit* chit) 
 {
-	CoreScript* cs = GetHomeCore();
-	if (cs) {
-		Chit* prime = cs->PrimeCitizen();
-		return prime;	// The prime citizen of the home domain is the Avatar.
+	avatarID = 0;
+	if (chit) {
+		avatarID = chit->ID();
 	}
-	return 0;
+}
+
+Chit* LumosChitBag::GetAvatar()
+{
+	Chit* avatar = GetChit(avatarID);
+	if (!avatar) {
+		avatarID = 0; // fairly significant optimization
+	}
+	return avatar;
 }
 
 

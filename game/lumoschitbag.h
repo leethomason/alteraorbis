@@ -271,7 +271,8 @@ public:
 
 	CoreScript* GetHomeCore() const;
 	grinliz::Vector2I GetHomeSector() const;
-	Chit* GetAvatar() const;
+	Chit* GetAvatar();
+	void SetAvatar(Chit* chit);
 
 	CameraComponent* GetCamera() const;
 
@@ -317,6 +318,7 @@ private:
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	int							homeTeam;	
 	Sim*						sim;	// if part of a simulation. can be null.
+	int							avatarID;
 
 	struct NamePoolID {
 		grinliz::IString dataset;

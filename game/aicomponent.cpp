@@ -1991,23 +1991,23 @@ bool AIComponent::ThinkNeeds()
 
 	if (!coreScript) return false;
 	if (Team::Instance()->GetRelationship(parentChit, coreScript->ParentChit()) == ERelate::ENEMY) return false;
+	Vector3<double> myNeeds = this->GetNeeds().GetOneMinus();
+	if (myNeeds.IsZero()) return false;
 
 	BuildingFilter filter;
 	Context()->chitBag->FindBuilding(IString(), sector, 0, LumosChitBag::EFindMode::NEAREST, &chitArr, &filter);
 
-	static const int MAX_SCORES = 64;
-	BuildScript			buildScript;
-	CArray<float, MAX_SCORES>	scoreArr;
-	CArray<const BuildData*, MAX_SCORES> bdArr;
-	CArray<Vector2I, MAX_SCORES> porchArr;
+	BuildScript	buildScript;
+	float				score2Arr[BuildScript::NUM_TOTAL_OPTIONS] = { 0 };
+	const BuildData*	bdArr[BuildScript::NUM_TOTAL_OPTIONS]     = { 0 };
+	Vector2I			porchArr[BuildScript::NUM_TOTAL_OPTIONS];
 
-	Vector3<double> myNeeds = this->GetNeeds().GetOneMinus();
+	// Cheat a bit, so the denizen just doesn't go after food and sleep all the time.
+	if (myNeeds.X(Needs::ENERGY) < 0.5 && gameItem->HPFraction() >= 0.9) myNeeds.X(Needs::ENERGY) = 0;
+	if (myNeeds.X(Needs::FOOD) < 0.5) myNeeds.X(Needs::FOOD) = 0;
+
 	double myMorale = this->GetNeeds().Morale();
-
-	// Don't eat when not hungry; depletes food.
-	if (myNeeds.X(Needs::FOOD) < 0.5) {
-		myNeeds.X(Needs::FOOD) = 0;
-	}
+	int hits = 0;
 
 	bool debugBuildingOutput[BuildScript::NUM_TOTAL_OPTIONS] = { false };
 
@@ -2017,10 +2017,12 @@ bool AIComponent::ThinkNeeds()
 		int buildDataID = 0;
 		const BuildData* bd = buildScript.GetDataFromStructure(building->GetItem()->IName(), &buildDataID);
 		if (!bd || bd->needs.IsZero()) continue;
+		GLASSERT(buildDataID >= 0 && buildDataID < BuildScript::NUM_TOTAL_OPTIONS);
 
 		MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 		GLASSERT(msc);
 
+		// Check to make sure a task isn't reserved at this location:
 		Vector2I porch = { 0, 0 };
 		Rectangle2I porchRect = msc->PorchPos();
 		for (Rectangle2IIterator it(porchRect); !it.Done(); it.Next()) {
@@ -2031,15 +2033,13 @@ bool AIComponent::ThinkNeeds()
 		}
 		if (porch.IsZero())	continue;
 
-		bool functional = false;
-		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, parentChit, &functional);
+		// It's viable: now eval needs.
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, parentChit);
 		if (buildingNeeds.IsZero()) continue;
 
-		// The needs match.
 		double score = DotProduct(buildingNeeds, myNeeds);
-		// Small wiggle to use different markets, sleep tubes, etc.
-		static const double INV = 1.0 / 255.0;
-		score += 0.05 * double(Random::Hash8(building->ID() ^ parentChit->ID())) * INV;
+		if (score == 0) continue;
+
 		// Variation - is this the last building visited?
 		// This is here to break up the bar-sleep loop. But only if we have full morale.
 		if (myMorale > 0.99) {
@@ -2050,35 +2050,40 @@ bool AIComponent::ThinkNeeds()
 				}
 			}
 		}
+		// Wobble - slight preference.
+		score = score + 0.0001 * parentChit->random.Hash8(building->ID() + parentChit->ID());
 
 		if (Log()) {
 			if (!debugBuildingOutput[buildDataID]) {
 				GLASSERT(buildDataID >= 0 && buildDataID < int(GL_C_ARRAY_SIZE(debugBuildingOutput)));
 				debugBuildingOutput[buildDataID] = true;
-				GLOUTPUT(("  %.2f %s %s\n", score, building->GetItem()->Name(), functional ? "func" : "norm"));
+				GLOUTPUT(("  %.2f %s\n", score, building->GetItem()->Name()));
 			}
 		}
 
-		if (score > 0.4 || (score > 0.1 && functional))
-		{
-			scoreArr.PushIfCap(float(score * score));
-			bdArr.PushIfCap(bd);
-			porchArr.PushIfCap(porch);
+		float score2 = float(score * score);
+
+		if ((score > 0.1) && (score2 > score2Arr[buildDataID])) {
+			score2Arr[buildDataID] = score2;
+			bdArr[buildDataID] = bd;
+			porchArr[buildDataID] = porch;
+			++hits;
 		}
 	}
 
-	if (!scoreArr.Empty()) {
-		int idx = parentChit->random.Select(scoreArr.Mem(), scoreArr.Size());
+	if (hits) {
+		int idx = parentChit->random.Select(score2Arr, BuildScript::NUM_TOTAL_OPTIONS);
+		if (bdArr[idx]) {
+			GLASSERT(porchArr[idx].x > 0);
+			if (Log()) {
+				GLOUTPUT(("  --> %s\n", bdArr[idx]->structure.c_str()));
+			}
 
-		GLASSERT(porchArr[idx].x > 0);
-		if (Log()) {
-			GLOUTPUT(("  --> %s\n", bdArr[idx]->structure.c_str()));
+			taskList.Push(Task::MoveTask(porchArr[idx]));
+			taskList.Push(Task::StandTask(bdArr[idx]->standTime));
+			taskList.Push(Task::UseBuildingTask());
+			return true;
 		}
-
-		taskList.Push(Task::MoveTask(porchArr[idx]));
-		taskList.Push(Task::StandTask(bdArr[idx]->standTime));
-		taskList.Push(Task::UseBuildingTask());
-		return true;
 	}
 	return false;
 }

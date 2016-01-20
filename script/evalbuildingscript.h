@@ -41,6 +41,7 @@ public:
 	virtual EvalBuildingScript* ToEvalBuildingScript() { return this; }
 	double EvalIndustrial(bool debugLog);
 	bool Reachable() const { return reachable; }
+	double Efficiency();
 
 private:
 	CTicker timer;

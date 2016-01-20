@@ -37,7 +37,6 @@ public:
 	void WithdrawDenizen(Wallet* dst);
 	void WithdrawMonster(Wallet* dst, bool greater);
 
-	const int* CrystalValue();
 	int CrystalValue(int type) {
 		GLASSERT(type >= 0 && type < NUM_CRYSTAL_TYPES);
 		return *(CrystalValue() + type);
@@ -67,6 +66,7 @@ public:
 	static Wallet* GetWallet() { return instance ? &Instance()->wallet : 0; }
 
 private:
+	const int* CrystalValue();
 	void Withdraw(Wallet* dst, int gold, const int* crystal);
 	int RandomCrystal();
 

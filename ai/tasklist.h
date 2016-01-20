@@ -150,8 +150,8 @@ private:
 	void VisitorUseKiosk(Chit* kiosk);
 
 	void GoShopping(Chit* market);
-	void GoExchange(Chit* market);
-	bool UseFactory(Chit* factory, int tech );
+	void GoExchange(Chit* market, double costMult);
+	bool UseFactory(Chit* factory, double eff, int tech );
 	bool DoStanding(int time );
 
 	// chat, basically, between denizens

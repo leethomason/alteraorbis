@@ -71,13 +71,6 @@ public:
 	bool IsCitizenItemID(int id);
 	int  Citizens(CChitArray* arr);
 
-	// A prime citizen is:
-	// - never a squaddie
-	// - has the speed boost
-	// - has the 'prime' key set in the microdb
-	// - if the player domain, also the avatar
-	Chit* PrimeCitizen();
-
 	// 0-3, -1 if not in squad
 	int SquadID(int chitID);
 	int Squaddies(int squadID, CChitArray* arr);

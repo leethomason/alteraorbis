@@ -58,7 +58,6 @@ public:
 	static grinliz::IString control;
 	static grinliz::IString power;
 	static grinliz::IString selfDestruct;
-	static grinliz::IString prime;
 
 	static grinliz::IString human;
 	static grinliz::IString humanFemale;

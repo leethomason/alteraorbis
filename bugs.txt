@@ -19,15 +19,17 @@ x local placeflag not working
 x conquering when shouldn't
 x expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
   training facility! Just keep spending cash??
-x ThinkNeeds() - statistical distribution? (Odds are the square of the 
+x ThinkNeeds() - statistical distribution? (Odds are the square of the score)	
 x should track academy visits in history
 x distillery max store 5
 x AI should build academys
 x advisor: academy
 - AI update
-	- essential:  sleepTube, tavern, or fun (drop through)
-	- functional: market, exchange, academy, factory (drop through)
+	- energy, food, social, duty-creative-work. first try by always using 'functional' to satisfy fun
+	- essential:  sleepTube, tavern, or guard (energy, food+fun, fun from talking, work(not crit - hidden?))
+	- functional: market, exchange, academy, factory (work)
 	- guard
+
 - switch to "grant" model for denizens: granted denizens over time? with success? but then need some sort
   of repro...
 - Art
@@ -38,6 +40,7 @@ x advisor: academy
 	- icon for squad dragging
 	- icon for Kaxa: CalcDeityAtom
 	- rework fonts on title screen
+	- better flag model
 
 Plots:
 x factor out plot logic from director

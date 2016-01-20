@@ -30,6 +30,7 @@
 #include "../script/forgescript.h"
 #include "../script/procedural.h"
 #include "../script/plantscript.h"
+#include "../script/evalbuildingscript.h"
 
 #include "../engine/particle.h"
 
@@ -505,29 +506,32 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 
 	if (chit->GetItem()->flags & GameItem::AI_USES_BUILDINGS) {
 		// Need based.
-		bool functional = false;
-		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, chit, &functional);
+		Vector3<double> buildingNeeds = ai::Needs::CalcNeedsFullfilledByBuilding(building, chit);
 		if (buildingNeeds.IsZero()) {
 			// doesn't have what is needed, etc.
 			return;
 		}
-
-		//int nElixir = ic->NumCarriedItems(ISC::elixir);
+		double eff = 1.0;
+		EvalBuildingScript* evalScript = (EvalBuildingScript*) building->GetComponent("EvalBuildingScript");
+		if (evalScript) {
+			eff = evalScript->Efficiency();
+		}
+		double costMult = 1.0 / (eff < 0.4 ? 0.4 : eff);
 
 		if (buildingName == ISC::market) {
 			GoShopping(building);
 		}
 		else if (buildingName == ISC::exchange) {
-			GoExchange(building);
+			GoExchange(building, costMult);
 		}
 		else if (buildingName == ISC::factory) {
-			UseFactory(building, int(coreScript->GetTech()));
-		}
+			UseFactory(building, eff, int(coreScript->GetTech()));
+		}	
 		else if (buildingName == ISC::bed) {
 			// Also heal.
 			GameItem* item = chit->GetItem();
 			GLASSERT(item);
-			item->Heal(buildingNeeds.X(Needs::ENERGY) * item->TotalHP());
+			item->Heal(buildingNeeds.X(Needs::ENERGY) * item->TotalHP() * eff);
 		}
 		else if (buildingName == ISC::bar) {
 			// Apply the needs as is...if there is Elixir.
@@ -554,17 +558,21 @@ void TaskList::UseBuilding(Chit* building, const grinliz::IString& buildingName)
 }
 
 
-void TaskList::GoExchange(Chit* exchange)
+void TaskList::GoExchange(Chit* exchange, double costMult)
 {
 	GameItem* gameItem = chit->GetItem();
 	if (!gameItem) return;
 
 	const Personality& personality = gameItem->GetPersonality();
-	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
+	int crystalValue[NUM_CRYSTAL_TYPES];
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		crystalValue[i] = ReserveBank::Instance()->CrystalValue(i);
+	}
 	bool usedExchange = false;
 	ReserveBank* bank = ReserveBank::Instance();
 
 	if (personality.Crafting() == Personality::DISLIKES) {
+		// SELL
 		// Sell all the crystal
 		int value = 0;
 		int crystal[NUM_CRYSTAL_TYPES] = { 0 };
@@ -581,6 +589,11 @@ void TaskList::GoExchange(Chit* exchange)
 		}
 	}
 	else {
+		// BUY
+		// Adjust value for building efficiency.
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			crystalValue[i] = int(ReserveBank::Instance()->CrystalValue(i) * costMult);
+		}
 		const int nPass = (personality.Crafting() == Personality::LIKES) ? 3 : 1;
 		for (int pass = 0; pass < nPass; ++pass) {
 			for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
@@ -700,7 +713,7 @@ void TaskList::GoShopping(Chit* market)
 }
 
 
-bool TaskList::UseFactory( Chit* factory, int tech )
+bool TaskList::UseFactory( Chit* factory, double eff, int tech )
 {
 	ItemComponent* thisIC = chit->GetItemComponent();
 	if (!thisIC) return false;
@@ -728,7 +741,7 @@ bool TaskList::UseFactory( Chit* factory, int tech )
 	ForgeScript::ForgeData forgeData;
 	forgeData.type = itemType;
 	forgeData.subType = 0;
-	forgeData.tech = tech;
+	forgeData.tech = int(double(tech) * eff + 0.5);
 	forgeData.level = gameItem->Traits().Level();
 	forgeData.team = chit->Team();
 
