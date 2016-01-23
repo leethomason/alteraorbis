@@ -1890,7 +1890,7 @@ bool AIComponent::ThinkDelivery()
 																  &pos,
 																  LumosChitBag::EFindMode::RANDOM_NEAR, 0, 0);
 
-				if (building && building->GetItemComponent()) {
+				if (building && building->GetItemComponent() && building->GetItemComponent()->CanAddToInventory()) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
 					GLASSERT(msc);
 					CoreScript* coreScript = CoreScript::GetCore(sector);

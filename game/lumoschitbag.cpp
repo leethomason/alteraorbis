@@ -931,6 +931,7 @@ void LumosChitBag::SetAvatar(Chit* chit)
 	}
 }
 
+
 Chit* LumosChitBag::GetAvatar()
 {
 	Chit* avatar = GetChit(avatarID);
@@ -939,7 +940,6 @@ Chit* LumosChitBag::GetAvatar()
 	}
 	return avatar;
 }
-
 
 
 Vector2I LumosChitBag::GetHomeSector()	const

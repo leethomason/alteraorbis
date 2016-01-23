@@ -24,11 +24,11 @@ x should track academy visits in history
 x distillery max store 5
 x AI should build academys
 x advisor: academy
-- AI update
-	- energy, food, social, duty-creative-work. first try by always using 'functional' to satisfy fun
-	- essential:  sleepTube, tavern, or guard (energy, food+fun, fun from talking, work(not crit - hidden?))
-	- functional: market, exchange, academy, factory (work)
-	- guard
+x AI update
+	x energy, food, social, duty-creative-work. first try by always using 'functional' to satisfy fun
+	x essential:  sleepTube, tavern, or guard (energy, food+fun, fun from talking, work(not crit - hidden?))
+	x functional: market, exchange, academy, factory (work)
+	x guard
 
 - switch to "grant" model for denizens: granted denizens over time? with success? but then need some sort
   of repro...
@@ -41,6 +41,8 @@ x advisor: academy
 	- icon for Kaxa: CalcDeityAtom
 	- rework fonts on title screen
 	- better flag model
+	- acadamy should be 2x2
+	- icons for plot?
 
 Plots:
 x factor out plot logic from director

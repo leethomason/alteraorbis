@@ -102,17 +102,18 @@ void ItemComponent::DebugStr(grinliz::GLString* str)
 }
 
 
-void ItemComponent::Serialize( XStream* xs )
+void ItemComponent::Serialize(XStream* xs)
 {
-	this->BeginSerialize( xs, "ItemComponent" );
+	this->BeginSerialize(xs, "ItemComponent");
 	int nItems = itemArr.Size();
-	XARC_SER( xs, nItems );
+	XARC_SER(xs, nItems);
+	XARC_SER(xs, maxCarriedItems);
 
-	if ( xs->Loading() ) {
-		for ( int i=0; i<nItems; ++i  ) {
+	if (xs->Loading()) {
+		for (int i = 0; i < nItems; ++i) {
 			GameItem* pItem = GameItem::Factory(xs->Loading()->PeekElement());
 			pItem->Serialize(xs);
-			itemArr.Push( pItem );
+			itemArr.Push(pItem);
 			// Needs to be fully loaded before we can track.
 			pItem->Track();
 		}
@@ -124,7 +125,7 @@ void ItemComponent::Serialize( XStream* xs )
 		}
 	}
 
-	this->EndSerialize( xs );
+	this->EndSerialize(xs);
 	UseBestItems();
 }
 
