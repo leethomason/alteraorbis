@@ -112,8 +112,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	censusButton.SetText( "Census" );
 	viewButton.Init(&gamui2D, game->GetButtonLook(0));
 	viewButton.SetText("Camera");
+	viewButton.SetVisible(false);
+
 	pauseButton.Init(&gamui2D, game->GetButtonLook(0));
 	pauseButton.SetText("Pause");
+	pauseButton.SetVisible(false);
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );

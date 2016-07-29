@@ -590,7 +590,7 @@ void Canvas::Queue( PODArray< uint16_t > *indexBuf, PODArray< Gamui::Vertex > *v
 				float half = cmd.thickness * 0.5f;
 				float nX = cmd.w;
 				float nY = cmd.h;
-				float len = sqrt(nX*nX + nY*nY);
+				float len = sqrtf(nX*nX + nY*nY);
 				nX /= len;
 				nY /= len;
 
@@ -1877,7 +1877,7 @@ void Gamui::MoveFocus( float x, float y )
 
 		float score = dx*x + dy*y;
 		if ( score > 0 ) {
-			float dist = sqrt( dx*dx + dy*dy );
+			float dist = sqrtf( dx*dx + dy*dy );
 			if ( dist < bestDist ) {
 				bestDist = dist;
 				bestIndex = i;

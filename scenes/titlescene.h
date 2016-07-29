@@ -65,7 +65,6 @@ private:
 	Engine*				engine;
 	TestMap*			testMap;
 	Model* model[NUM_MODELS];
-	//Model* temple;
 	int					seed;
 	CTicker				ticker;
 
@@ -93,7 +92,7 @@ private:
 	gamui::PushButton		testScene[NUM_TESTS];
 	gamui::PushButton		gameScene[NUM_GAME];
 	gamui::ToggleButton		audioButton;
-	gamui::ToggleButton		mouseTouchButton;
+	//gamui::ToggleButton		mouseTouchButton;
 	gamui::PushButton		creditsButton;
 	gamui::TextLabel		note;
 	gamui::Canvas			testCanvas;

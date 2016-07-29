@@ -80,7 +80,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	SetAudioButton();
 
-	mouseTouchButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
+//	mouseTouchButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	SetMouseTouchButton();
 
 	RenderAtom gray = LumosGame::CalcPaletteAtom(PAL_GRAY * 2, PAL_GRAY);
@@ -242,8 +242,8 @@ void TitleScene::Resize()
 	note.SetBounds( gamui2D.Width() -(layout.GutterX() * 2.0f), 0 );
 
 	layout.PosAbs(&audioButton, -1, 0);
-	layout.PosAbs(&mouseTouchButton, -2, 0);
-	layout.PosAbs(&creditsButton, -3, 0);
+//	layout.PosAbs(&mouseTouchButton, -2, 0);
+	layout.PosAbs(&creditsButton, -2, 0);
 
 	testCanvas.SetPos(gamui2D.Width() - 100, gamui2D.Height() - 100);
 	testCanvas.SetVisible(false);
@@ -265,14 +265,16 @@ void TitleScene::SetAudioButton()
 
 void TitleScene::SetMouseTouchButton()
 {
-	if (SettingsManager::Instance()->TouchOn()) {
-		mouseTouchButton.SetText("Touch");
-		mouseTouchButton.SetDown();
-	}
-	else {
-		mouseTouchButton.SetText("Keyboard\n&Mouse");
-		mouseTouchButton.SetUp();
-	}
+	/*
+		if (SettingsManager::Instance()->TouchOn()) {
+			mouseTouchButton.SetText("Touch");
+			mouseTouchButton.SetDown();
+		}
+		else {
+			mouseTouchButton.SetText("Keyboard\n&Mouse");
+			mouseTouchButton.SetUp();
+		}
+	*/
 }
 
 
@@ -322,10 +324,10 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
 		SetAudioButton();
 	}
-	else if (item == &mouseTouchButton) {
-		SettingsManager::Instance()->SetTouchOn(mouseTouchButton.Down());
-		SetMouseTouchButton();
-	}
+//	else if (item == &mouseTouchButton) {
+//		SettingsManager::Instance()->SetTouchOn(mouseTouchButton.Down());
+//		SetMouseTouchButton();
+//	}
 	else if (item == &creditsButton) {
 		game->PushScene(LumosGame::SCENE_CREDITS, 0);
 	}

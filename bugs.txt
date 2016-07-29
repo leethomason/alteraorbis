@@ -1,3 +1,8 @@
+- first person mode
+- better domain distribution when choosing
+- procedural trees
+- only abandon domain if paused
+
 x Not honoring nearest port when choosing domains
 x 'end' key switches to avatar mode
 x character scene: show team affiliation, hostile to core?

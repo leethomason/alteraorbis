@@ -89,7 +89,7 @@ bool GamuiFreetypeBridge::Generate(int _height, uint8_t* pixels, int w, int h, b
 					height += slot->metrics.height;
 				}
 				height = (height/NTEST) >> 6;
-				float error = fabs(float(height) - float(fontHeight) * 8.0f / 11.0f);
+				float error = fabsf(float(height) - float(fontHeight) * 8.0f / 11.0f);
 				int delta = abs(height - fontHeight);
 				if ((error < bestError) || (error == bestError && delta < bestDelta)) {
 					bestError = error;

@@ -1,6 +1,8 @@
 #ifndef GRINLIZ_STREAMER_INCLUDED
 #define GRINLIZ_STREAMER_INCLUDED
 
+#pragma warning(disable:4577)
+
 #include <stdlib.h>
 #include <stdio.h>
 
