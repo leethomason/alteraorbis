@@ -1,42 +1,10 @@
 - first person mode
-- better domain distribution when choosing
+- better domain distribution when choosing initial domain
 - procedural trees
 - only abandon domain if paused
-
-x Not honoring nearest port when choosing domains
-x 'end' key switches to avatar mode
-x character scene: show team affiliation, hostile to core?
-x teleport should work during grid travel
-x core needs to target the center of model, as do some plants
-x Cap core spawns to global population limits
-x reorder squad units
-x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to set correct limit values.
-  Not sure it is working. (Doesn't save...move to non-serialized code.)
-x always accept elixir; exchange for gold if full
-x Kamakiri deity
-x no control flags in water
-x damage: items seem to get blown away...crystal not dropped
-x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
-x more announcement when core taken over - popup!
-x if super-crowded, should wander more (swarms)
-x How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
-x local placeflag not working
-x conquering when shouldn't
-x expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
-  training facility! Just keep spending cash??
-x ThinkNeeds() - statistical distribution? (Odds are the square of the score)	
-x should track academy visits in history
-x distillery max store 5
-x AI should build academys
-x advisor: academy
-x AI update
-	x energy, food, social, duty-creative-work. first try by always using 'functional' to satisfy fun
-	x essential:  sleepTube, tavern, or guard (energy, food+fun, fun from talking, work(not crit - hidden?))
-	x functional: market, exchange, academy, factory (work)
-	x guard
-
-- switch to "grant" model for denizens: granted denizens over time? with success? but then need some sort
-  of repro...
+- do acadamies work?
+- redist install?
+- automatic turrets
 - Art
 	- R1K
 	- QCore
@@ -348,7 +316,37 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
-
+x Not honoring nearest port when choosing domains
+x 'end' key switches to avatar mode
+x character scene: show team affiliation, hostile to core?
+x teleport should work during grid travel
+x core needs to target the center of model, as do some plants
+x Cap core spawns to global population limits
+x reorder squad units
+x no testing of pop cap for lesser spawns (from CoreScript). Needs new game to set correct limit values.
+  Not sure it is working. (Doesn't save...move to non-serialized code.)
+x always accept elixir; exchange for gold if full
+x Kamakiri deity
+x no control flags in water
+x damage: items seem to get blown away...crystal not dropped
+x rampage gets stuck on buildings. AIComponent::ThinkRampage( const ComponentSet& thisComp )
+x more announcement when core taken over - popup!
+x if super-crowded, should wander more (swarms)
+x How does money move when an item is forged? Gems should go to item from somewhere. Are there free items?
+x local placeflag not working
+x conquering when shouldn't
+x expensive statue? knowledge temple? training ground? named dojo? Need something for rich denizens to spend money on.
+  training facility! Just keep spending cash??
+x ThinkNeeds() - statistical distribution? (Odds are the square of the score)	
+x should track academy visits in history
+x distillery max store 5
+x AI should build academys
+x advisor: academy
+x AI update
+	x energy, food, social, duty-creative-work. first try by always using 'functional' to satisfy fun
+	x essential:  sleepTube, tavern, or guard (energy, food+fun, fun from talking, work(not crit - hidden?))
+	x functional: market, exchange, academy, factory (work)
+	x guard
 x Census
     d re-do visitor likes to account for the grids they pass through
 	x name / level / health display

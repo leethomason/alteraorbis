@@ -45,7 +45,7 @@ Section "AlteraOrbis (required)"
   
   ; Put file there
   File /r Altera\*.*
-  ;File vc_redist.x86.exe
+  File vc_redist.x86.exe
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_AlteraOrbis "Install_Dir" "$INSTDIR"
@@ -57,11 +57,10 @@ Section "AlteraOrbis (required)"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\AlteraOrbis" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
-;;   ExecWait "$INSTDIR\vc_redist.x86.exe"
-;  MessageBox MB_YESNO "Install Microsoft 2015 Redistributables (required if not installed)?" /SD IDYES IDNO endRedist
-;    ExecWait "$INSTDIR\vc_redist.x86.exe"
-;    Goto endRedist
-;  endRedist:
+  MessageBox MB_YESNO "Install Microsoft 2015 Redistributables (required if not installed)?" /SD IDYES IDNO endRedist
+    ExecWait "$INSTDIR\vc_redist.x86.exe"
+    Goto endRedist
+  endRedist:
 
 SectionEnd
 
@@ -92,7 +91,7 @@ Section "Uninstall"
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\SDL2.dll
   Delete $INSTDIR\SDL2_mixer.dll
-  ;Delete $INSTDIR\vc_redist.x86.exe
+  Delete $INSTDIR\vc_redist.x86.exe
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any
