@@ -1726,12 +1726,17 @@ void GameScene::DoTick(U32 delta)
 		str.Format("Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience(stat.Level() + 1));
 	}
 
-	bool abandonVisible = (menu->UIMode() == GameSceneMenu::UI_BUILD) && homeCoreScript;
-	abandonButton.SetVisible(abandonVisible);
-	if (!abandonVisible) {
+	if (paused) {
+		bool abandonVisible = (homeCoreScript != nullptr);
+		abandonButton.SetVisible(abandonVisible);
+		if (!abandonVisible) {
+			abandonConfirmButton.SetVisible(false);
+		}
+	}
+	else {
+		abandonButton.SetVisible(false);
 		abandonConfirmButton.SetVisible(false);
 	}
-
 	str.Clear();
 
 	if (homeCoreScript) {

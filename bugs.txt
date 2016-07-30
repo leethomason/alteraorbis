@@ -1,15 +1,17 @@
 - first person mode
-- turn fps back on
+x turn fps back on
 - better domain distribution when choosing initial domain
 - procedural trees
 - only abandon domain if paused
-- do acadamies work?
 - redist install?
 - automatic turrets
 	- give deities turrets
 - at r1k: can't forge (avatar doesn't have crystal / gold)
 	- didn't have anything in market
-- avatar should be able to use Academy
+- academies
+	- avatar should be able to use Academy
+	- do acadamies work?
+
 - Art
 	- R1K
 	- QCore
