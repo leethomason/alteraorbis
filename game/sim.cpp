@@ -930,16 +930,16 @@ bool Sim::CreatePlant( int x, int y, int type, int stage )
 void Sim::UseBuilding()
 {
 	Chit* player = context.chitBag->GetAvatar();
-	if ( !player ) return;
+	if (!player) return;
 
 	Vector2I pos2i = ToWorld2I(player->Position());
-	Vector2I sector = ToSector( pos2i );
+	Vector2I sector = ToSector(pos2i);
 
-	Chit* building = context.chitBag->QueryPorch( pos2i );
-	if ( building && building->GetItem() ) {
+	Chit* building = context.chitBag->QueryPorch(pos2i);
+	if (building && building->GetItem()) {
 		IString name = building->GetItem()->IName();
 		ItemComponent* ic = player->GetItemComponent();
-		CoreScript* cs	= CoreScript::GetCore( sector );
+		CoreScript* cs = CoreScript::GetCore(sector);
 		Chit* core = cs->ParentChit();
 
 		// Messy:
@@ -949,25 +949,25 @@ void Sim::UseBuilding()
 		//ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
 		ic->GetItem()->wallet.Deposit(core->GetWallet(), *(core->GetWallet()));
 
-		if ( cs && ic ) {
-			if ( name == ISC::vault ) {
-				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0, 0 ));
+		if (cs && ic) {
+			if (name == ISC::vault) {
+				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::VAULT, 0, 0));
 			}
-			else if ( name == ISC::market ) {
+			else if (name == ISC::market) {
 				// The avatar doesn't pay sales tax.
-				context.chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0, 0 ));
+				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::MARKET, 0, 0));
 			}
 			else if (name == ISC::exchange) {
 				context.chitBag->PushScene(LumosGame::SCENE_CHARACTER,
 					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE, 0, 0));
 			}
-			else if ( name == ISC::factory ) {
+			else if (name == ISC::factory) {
 				ForgeSceneData* data = new ForgeSceneData();
 				data->tech = int(cs->GetTech());
 				data->itemComponent = ic;
-				context.chitBag->PushScene( LumosGame::SCENE_FORGE, data );
+				context.chitBag->PushScene(LumosGame::SCENE_FORGE, data);
 			}
 			else if (name == ISC::switchOn || name == ISC::switchOff) {
 				CircuitSim* circuitSim = context.physicsSims->GetCircuitSim(sector);
