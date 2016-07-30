@@ -546,6 +546,13 @@ public:
 		return temp;
 	}
 
+	void Crop(int maxSize) {
+		GLASSERT(maxSize >= 0);
+		if (size > maxSize) {
+			size = maxSize;
+		}
+	}
+
 	int Find( const T& key ) const { 
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == key )

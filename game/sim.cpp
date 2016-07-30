@@ -235,7 +235,7 @@ void Sim::CreateCores()
 			Vector2I sector = { i, j };
 
 			int team = TEAM_NEUTRAL;
-			if (i == NUM_SECTORS / 2 && j == NUM_SECTORS / 2) {
+			if (i == MOTHER_CORE_SECTOR_X && j == MOTHER_CORE_SECTOR_Y) {
 				// Mother Core. Always at the center: spawn point of the Visitors.
 				team = DEITY_MOTHER_CORE;
 			}
@@ -1037,4 +1037,3 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, g
 		}
 	}
 }
-

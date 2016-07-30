@@ -106,6 +106,7 @@ private:
 	void SetSquadDisplay(bool squadVisible);
 	void OpenEndGame();
 	void SetSelectionModel(const grinliz::Vector2F& view);
+	void TeleportAllEnemies(const grinliz::Vector2I& sector, int team);
 
 	void DoCameraHome();
 	void DoAvatarButton();

@@ -21,6 +21,7 @@
 #include "../xegame/chitevent.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/platformpath.h"
+#include "../xegame/spatialcomponent.h"
 
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
@@ -51,6 +52,7 @@
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
 #include "../script/plantscript.h"
+
 
 using namespace grinliz;
 using namespace micropather;
@@ -1563,6 +1565,22 @@ SectorPort WorldMap::NearestPort(const Vector2F& pos, const Vector2F* origin)
 	return result;
 }
 
+
+bool WorldMap::TeleportToSector(const Vector2I& sector, Chit* chit)
+{
+	Rectangle2I inner = InnerSectorBounds(sector);
+	for (int r = 0; r < INNER_SECTOR_SIZE; ++r) {
+		Rectangle2I edge;
+		edge.Set(inner.Center().x - r, inner.Center().y - r, inner.Center().x + 1 + r, inner.Center().x + 1 + r);
+		for (Rectangle2IEdgeIterator edgeIt(edge); !edgeIt.Done(); edgeIt.Next()) {
+			if (this->IsPassable(edgeIt.Pos().x, edgeIt.Pos().y)) {
+				SpatialComponent::Teleport(chit, ToWorld3F(edgeIt.Pos()));
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 bool WorldMap::HasStraightPath(const Vector2F& start, const Vector2F& end, bool ignoreBuildings)
 {

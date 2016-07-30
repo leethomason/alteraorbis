@@ -2,7 +2,7 @@
 x turn fps back on
 - better domain distribution when choosing initial domain
 - procedural trees
-- only abandon domain if paused
+x only abandon domain if paused
 - redist install?
 - automatic turrets
 	- give deities turrets

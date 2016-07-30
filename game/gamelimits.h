@@ -32,6 +32,10 @@ static const int INNER_SECTOR_SIZE	= (SECTOR_SIZE-2);
 static const int NUM_SECTORS		= MAX_MAP_SIZE / SECTOR_SIZE;
 static const int NUM_SECTORS_2		= NUM_SECTORS * NUM_SECTORS;
 
+static const int START_SECTOR_CHOICES = 16;
+static const int MOTHER_CORE_SECTOR_X = NUM_SECTORS / 2;
+static const int MOTHER_CORE_SECTOR_Y = NUM_SECTORS / 2;
+
 static const float METERS_PER_GRID	= 2.0f;
 static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;

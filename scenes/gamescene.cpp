@@ -302,12 +302,6 @@ void GameScene::Resize()
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs(&newsConsole.consoleWidget, 0, -1 - CONSOLE_HEIGHT, 1, CONSOLE_HEIGHT);
 
-#if 0
-	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
-		layout.PosAbs( &pickupButton[i], 0, i+3 );
-	}
-#endif
-
 	layout.PosAbs(&startGameWidget, 2, 2, 5, 5);
 	layout.PosAbs(&endGameWidget, 2, 2, 5, 5);
 
@@ -1544,57 +1538,22 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector, int team)
 	}
 }
 
-
-#if 0
-void GameScene::SetBuildButtons(const int* arr)
+void GameScene::TeleportAllEnemies(const grinliz::Vector2I& sector, int team)
 {
-	// Went back and forth a bit on whether this should be
-	// BuildScript. But in the end, the enable/disbale is 
-	// actually for helping the player and clarifying the
-	// UI, not core game logic.
+	CDynArray<Chit*> arr;
+	MOBKeyFilter filter;
+	Rectangle2F bounds = ToWorld2F(InnerSectorBounds(sector));
+	sim->GetChitBag()->QuerySpatialHash(&arr, bounds, 0, &filter);
 
-	int nBeds = arr[BuildScript::SLEEPTUBE];
-	int nTemples = arr[BuildScript::TEMPLE];
-	int nFarms = arr[BuildScript::FARM];
-	int nDistilleries = arr[BuildScript::DISTILLERY];
-	int nMarkets = arr[BuildScript::MARKET];
-	int nCircuitFab = arr[BuildScript::CIRCUITFAB];
+	static const Vector2I MC_SECTOR = { MOTHER_CORE_SECTOR_X, MOTHER_CORE_SECTOR_Y };
 
-	// Enforce the sleep tube limit.
-	CStr<32> str;
-	int techLevel = Min(nTemples, 3);
-	int maxTubes = CoreScript::MaxCitizens(nTemples);
-
-	BuildScript buildScript;
-	const BuildData* sleepTubeData = buildScript.GetDataFromStructure(ISC::bed, 0);
-	GLASSERT(sleepTubeData);
-
-	str.Format( "SleepTube\n%d %d/%d", sleepTubeData->cost, nBeds, maxTubes );
-	buildButton[BuildScript::SLEEPTUBE].SetText( str.c_str() ); 
-	buildButton[BuildScript::SLEEPTUBE].SetEnabled(nBeds < maxTubes);
-
-	buildButton[BuildScript::TEMPLE].SetEnabled(nBeds > 0);
-	buildButton[BuildScript::GUARDPOST].SetEnabled(nTemples > 0);
-	buildButton[BuildScript::BAR].SetEnabled(nDistilleries > 0);
-	buildButton[BuildScript::DISTILLERY].SetEnabled(nFarms > 0);
-	buildButton[BuildScript::FORGE].SetEnabled(nMarkets > 0);
-	buildButton[BuildScript::EXCHANGE].SetEnabled(nMarkets > 0);
-	buildButton[BuildScript::VAULT].SetEnabled(nMarkets > 0);
-	buildButton[BuildScript::KIOSK].SetEnabled(nTemples > 0);
-
-	buildButton[BuildScript::BATTERY].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::TURRET].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_SWITCH].SetEnabled(nCircuitFab > 0);
-//	buildButton[BuildScript::BUILD_CIRCUIT_ZAPPER].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_BEND].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUTI_FORK_2].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_ICE].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_STOP].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_DETECT_ENEMY].SetEnabled(nCircuitFab > 0);
-	buildButton[BuildScript::BUILD_CIRCUIT_TRANSISTOR].SetEnabled(nCircuitFab > 0);
+	for (int i = 0; i<arr.Size(); ++i) {
+		IString mob = arr[i]->GetItem()->keyValues.GetIString(ISC::mob);
+		if (!mob.empty() && Team::Instance()->GetRelationship(team, arr[i]->Team()) == ERelate::ENEMY) {
+			sim->GetWorldMap()->TeleportToSector(MC_SECTOR, arr[i]);
+		}
+	}
 }
-#endif
-
 
 void GameScene::DoTick(U32 delta)
 {
@@ -1884,17 +1843,22 @@ void GameScene::CheckGameStage(U32 delta)
 	}
 	else if (!cs && !startVisible && !endVisible && !tutorial->Visible()) {
 		// Try to find a suitable starting location.
+		// Used to really worry about bioflora, etc.
+		// But more choices seem better. So go with a random
+		// distrobution.
 		Rectangle2I b;
 		Random random;
 		random.SetSeedFromTime();
 
-		b.min.y = b.min.x = (NUM_SECTORS / 2) - NUM_SECTORS / 4;
-		b.max.y = b.max.x = (NUM_SECTORS / 2) + NUM_SECTORS / 4;
+		b.min.y = b.min.x = 0;
+		b.max.y = b.max.x = NUM_SECTORS - 1;
 
-		CArray<SectorInfo, NUM_SECTORS * NUM_SECTORS> arr;
-		for (Rectangle2IIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
+		CArray<SectorInfo, NUM_SECTORS_2> arr;
+
+		for (Rectangle2IIterator it(b); !it.Done(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSectorData(it.Pos());
-			if (sd->HasCore() && arr.HasCap()) {
+			if (sd->HasCore()) {
+
 				Vector2I sector = sd->sector;
 				CoreScript* cs = CoreScript::GetCore(sector);
 				if (cs && cs->ParentChit()->Team() == TEAM_NEUTRAL) {
@@ -1913,12 +1877,12 @@ void GameScene::CheckGameStage(U32 delta)
 			}
 		}
 		if (arr.Size()) {
+			// sorts for the best bioflora.
 			arr.Sort();
-			// Randomize the first 16 - it isn't all about bioflora
-			random.ShuffleArray(arr.Mem(), Min(arr.Size(), 16));
+			arr.Crop(START_SECTOR_CHOICES * 2);
+			random.ShuffleArray(arr.Mem(), arr.Size());
 
-			// FIXME all needlessly complicated
-			CArray<const SectorData*, 16> sdarr;
+			CArray<const SectorData*, START_SECTOR_CHOICES> sdarr;
 			for (int i = 0; i < arr.Size() && sdarr.HasCap(); ++i) {
 				sdarr.Push(arr[i].sectorData);
 			}
@@ -1939,12 +1903,11 @@ void GameScene::DialogResult(const char* name, void* data)
 		GLOUTPUT(("Selected scene.\n"));
 
 		const SectorData* sd = (const SectorData*)data;
-		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
-		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		int team = Team::Instance()->GenTeam(TEAM_HOUSE);
 		sim->GetChitBag()->SetHomeTeam(team);
 		CoreScript::CreateCore(sd->sector, team, sim->Context());
-		ForceHerd(sd->sector, team);
+
+		TeleportAllEnemies(sd->sector, team);
 
 		ReserveBank* bank = ReserveBank::Instance();
 		if (bank) {

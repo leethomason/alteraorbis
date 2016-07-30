@@ -3,6 +3,7 @@
 
 #include "../gamui/gamui.h"
 #include "../grinliz/glcontainer.h"
+#include "../game/gamelimits.h"
 
 class SectorData;
 class Engine;
@@ -51,7 +52,7 @@ private:
 	gamui::PushButton	prevDomain, nextDomain;
 	gamui::PushButton	okay;
 
-	grinliz::CArray<const SectorData*, 8> sectors;
+	grinliz::CArray<const SectorData*, START_SECTOR_CHOICES> sectors;
 	grinliz::CDynArray<Chit*> queryArr;
 };
 

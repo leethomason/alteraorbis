@@ -48,6 +48,7 @@ class NewsHistory;
 class GameItem;
 class ChitContext;
 class PhysicsSims;
+class Chit;
 
 #define WORLDMAP_THREADS
 
@@ -187,6 +188,8 @@ public:
 	SectorPort RandomPort( grinliz::Random* random );
 	// Debugging. Makes the 'RandomPort' not random.
 	void SetRandomPort( SectorPort sp ) { randomPortDebug = sp; }
+
+	bool TeleportToSector(const grinliz::Vector2I& sector, Chit* chit);
 
 	enum BlockResult {
 		NO_EFFECT,

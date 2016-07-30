@@ -199,10 +199,7 @@ void StartGameWidget::ItemTapped(const gamui::UIItem* item)
 		const SectorData* sd = sectors[currentSector];
 		Vector2I pos2i = sd->CoreLoc();
 		Vector3F pos = ToWorld3F(pos2i);
-		//pos.y = 10.0f;	// FIXME...and fix camera handling
-	
+
 		engine->CameraLookAt(pos.x, pos.z);
-		//CameraComponent* cc = chitBag->GetCamera(engine);
-		//cc->SetPanTo(pos);
 	}
 }
