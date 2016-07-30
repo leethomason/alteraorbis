@@ -1,6 +1,6 @@
 - first person mode
 x turn fps back on
-- better domain distribution when choosing initial domain
+x better domain distribution when choosing initial domain
 - procedural trees
 x only abandon domain if paused
 - redist install?

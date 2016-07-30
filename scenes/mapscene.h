@@ -80,7 +80,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel, viewButton;
-	gamui::PushButton	warButton, peaceButton;
+	//gamui::PushButton	warButton, peaceButton;
 	gamui::Image		mapImage;
 	gamui::Image		mapImage2;
 

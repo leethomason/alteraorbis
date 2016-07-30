@@ -29,6 +29,7 @@ Team::~Team()
 
 void Team::DoTick(int delta)
 {
+/*
 	for (int i = 0; i < treaties.Size(); ++i) {
 		treaties[i].peaceTimer -= delta;
 		treaties[i].warTimer -= delta;
@@ -40,8 +41,10 @@ void Team::DoTick(int delta)
 			--i;
 		}
 	}
+*/
 }
 
+/*
 void Team::SymmetricTK::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "SymmetricTK");
@@ -51,6 +54,7 @@ void Team::SymmetricTK::Serialize(XStream* xs)
 	XARC_SER(xs, peaceTimer);
 	XarcClose(xs);
 }
+*/
 
 void Team::Control::Serialize(XStream* xs)
 {
@@ -65,9 +69,10 @@ void Team::Serialize(XStream* xs)
 {
 	XarcOpen(xs,"Team");
 	XARC_SER(xs, idPool);
-	XARC_SER_CARRAY(xs, treaties);
+//	XARC_SER_CARRAY(xs, treaties);
 	XARC_SER_CARRAY(xs, control);
 
+	/*
 	XarcOpen(xs, "attitude");
 	if (xs->Saving()) {
 		int size = hashTable.Size();
@@ -100,6 +105,7 @@ void Team::Serialize(XStream* xs)
 		}
 	}
 	XarcClose(xs);	// attitude
+	*/
 	XarcClose(xs);	// team
 }
 
@@ -231,15 +237,16 @@ int Team::GetTeam( const grinliz::IString& itemName )
 }
 
 
-ERelate Team::BaseRelationship( int _t0, int _t1 )
+
+ERelate Team::GetRelationship(int _t0, int _t1)
 {
 	int t0 = 0, t1 = 0;
-	int g0 = 0, g1  =0 ;
+	int g0 = 0, g1 = 0;
 	SplitID(_t0, &t0, &g0);
 	SplitID(_t1, &t1, &g1);
 
 	// t0 <= t1 to keep the logic simple.
-	if ( t0 > t1 ) Swap( &t0, &t1 );
+	if (t0 > t1) Swap(&t0, &t1);
 
 	// Neutral is just neutral. Else Chaos units
 	// keep attacking neutral cores. Very annoying.
@@ -247,12 +254,12 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 		return ERelate::NEUTRAL;
 
 	// CHAOS hates all - even each other.
-	if ( t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
+	if (t0 == TEAM_CHAOS || t1 == TEAM_CHAOS)
 		return ERelate::ENEMY;
 
 	// Deity exception:
 	if (t1 == DEITY_TRUULGA)
-		return BaseRelationship(t0, TEAM_TROLL);
+		return GetRelationship(t0, TEAM_TROLL);
 
 	// Other deities neutral:
 	if (t1 >= DEITY_MOTHER_CORE)
@@ -282,12 +289,12 @@ ERelate Team::BaseRelationship( int _t0, int _t1 )
 	GLASSERT(t1 >= t0);
 
 	// Special handling for left/right battle scene matchups:
-	if (   t0 == t1 
-		&& ((g0 == TEAM_ID_LEFT && g1 == TEAM_ID_RIGHT) || (g0 == TEAM_ID_RIGHT && g1 == TEAM_ID_LEFT))) 
+	if (t0 == t1
+		&& ((g0 == TEAM_ID_LEFT && g1 == TEAM_ID_RIGHT) || (g0 == TEAM_ID_RIGHT && g1 == TEAM_ID_LEFT)))
 	{
 		return ERelate::ENEMY;
 	}
-	return ERelate(relate[t0-OFFSET][t1-OFFSET]);
+	return ERelate(relate[t0 - OFFSET][t1 - OFFSET]);
 }
 
 
@@ -308,7 +315,7 @@ ERelate Team::GetRelationship(Chit* chit0, Chit* chit1)
 	return ERelate::NEUTRAL;
 }
 
-
+/*
 ERelate Team::GetRelationship(int t0, int t1)
 {
 	if (t0 == t1) {
@@ -330,8 +337,9 @@ ERelate Team::GetRelationship(int t0, int t1)
 	ERelate r = AttitudeToRelationship(d);
 	return r;
 }
+*/
 
-
+/*
 int Team::Attitude(CoreScript* center, CoreScript* eval)
 {
 	int t0 = center->ParentChit()->Team();
@@ -499,7 +507,7 @@ int Team::Peace(CoreScript* c0, CoreScript* c1, bool commit, const Web* web)
 	}
 	return 0;
 }
-
+*/
 
 bool Team::AddSubteam(int super, int sub)
 {
@@ -509,10 +517,10 @@ bool Team::AddSubteam(int super, int sub)
 	GLASSERT(Team::IsDenizen(sub));
 
 	// Removes all existing treaties:
-	SymmetricTK stk(super, sub);
-	treaties.Filter(stk, [](const SymmetricTK& stk, const SymmetricTK& item) {
-		return stk != item;
-	});
+//	SymmetricTK stk(super, sub);
+//	treaties.Filter(stk, [](const SymmetricTK& stk, const SymmetricTK& item) {
+//		return stk != item;
+//	});
 
 	// Run the array; make sure that 'sub' isn't a super.
 	// Do nothing if exists, etc.

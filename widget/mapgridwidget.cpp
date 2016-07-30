@@ -277,7 +277,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 
 	image[GOLD_IMAGE].SetAtom(goldAtom);
 
-	RenderAtom attitudeAtom;
+	//RenderAtom attitudeAtom;
 
 	if (coreScript && home && coreScript->InUse() && home->InUse() && !Team::IsDeity(coreScript->ParentChit()->Team())) {
 		RenderAtom atom;
@@ -288,7 +288,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 		else if (relate == ERelate::ENEMY) atom   = LumosGame::CalcUIIconAtom("enemy");
 
 		image[DIPLOMACY_IMAGE].SetAtom(atom);
-
+/*
 		if (web && (home != coreScript) && !compact) {
 			// Print out how THEY feel about US.
 			int attitude = Team::Instance()->Attitude(coreScript, home);
@@ -302,6 +302,7 @@ void MapGridWidget::Set(const ChitContext* context, CoreScript* coreScript, Core
 			else if (attitude == 3)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus3");
 			else if (attitude >= 4)  attitudeAtom = LumosGame::CalcUIIconAtom("attPlus4");
 		}
+*/
 	}
-	image[ATTITUDE_IMAGE].SetAtom(attitudeAtom);
+	//image[ATTITUDE_IMAGE].SetAtom(attitudeAtom);
 }

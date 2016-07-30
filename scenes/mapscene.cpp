@@ -32,10 +32,10 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	viewButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
 	viewButton.SetText("View");
 
-	warButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
-	warButton.SetText("War!");
-	peaceButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
-	peaceButton.SetText("Peace\nTreaty");
+	//warButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	//warButton.SetText("War!");
+	//peaceButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	//peaceButton.SetText("Peace\nTreaty");
 
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
 	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_GRAYSCALE_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
@@ -150,8 +150,8 @@ void MapScene::Resize()
 	
 	layout.PosAbs( &gridTravel, 1, -1, 2, 1 );
 	layout.PosAbs( &viewButton, 3, -1, 2, 1 );
-	layout.PosAbs(&warButton, -4, -1, 2, 1);
-	layout.PosAbs(&peaceButton, -2, -1, 2, 1);
+	//layout.PosAbs(&warButton, -4, -1, 2, 1);
+	//layout.PosAbs(&peaceButton, -2, -1, 2, 1);
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -225,7 +225,7 @@ void MapScene::EnableButtons()
 	Vector2I v = data->destSector;
 	CoreScript* cs = CoreScript::GetCore(v);
 	CoreScript* homeCore = lumosChitBag->GetHomeCore();
-
+/*
 	if (!homeCore) {
 		warButton.SetEnabled(false);
 		peaceButton.SetEnabled(false);
@@ -247,6 +247,7 @@ void MapScene::EnableButtons()
 		peaceButton.SetEnabled(false);
 		peaceButton.SetText("Peace Treaty");
 	}
+	*/
 }
 
 void MapScene::DrawMap()
@@ -456,6 +457,7 @@ void MapScene::ItemTapped(const gamui::UIItem* item)
 		DrawMap();
 		EnableButtons();
 	}
+/*
 	else if (item == &warButton) {
 		Team::Instance()->War(cs, homeCore, true, &lumosChitBag->GetSim()->GetCachedWeb());
 		DrawMap();
@@ -471,6 +473,7 @@ void MapScene::ItemTapped(const gamui::UIItem* item)
 			EnableButtons();
 		}
 	}
+	*/
 }
 
 

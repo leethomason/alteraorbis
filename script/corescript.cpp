@@ -1266,8 +1266,8 @@ void CoreScript::DoStrategicTick()
 		if (cs->NumTemples() == 0)		// Ignore starting out domains so it isn't a complete wasteland out there.
 			continue;
 
-		if (   Team::Instance()->GetRelationship(cs->ParentChit(), this->ParentChit()) == ERelate::ENEMY		// Are we enemies at the diplomatic level
-			&& Team::Instance()->Attitude(this, cs) < 0)														// Does 'this' have a negative attitude to the other?
+		if (   Team::Instance()->GetRelationship(cs->ParentChit(), this->ParentChit()) == ERelate::ENEMY)		// Are we enemies at the diplomatic level
+//			&& Team::Instance()->Attitude(this, cs) < 0)														// Does 'this' have a negative attitude to the other?
 		{
 			int power = cs->CorePower();
 			if (power < myPower * 0.75f) {

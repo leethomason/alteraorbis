@@ -1020,7 +1020,7 @@ void Sim::CalcStrategicRelationships(const grinliz::Vector2I& sector, int rad, g
 			&& stateArr->HasCap())
 		{
 			ERelate previousRelate = Team::Instance()->GetRelationship(originCore->ParentChit(), cs->ParentChit());
-			Team::Instance()->CalcAttitude(originCore, cs, &web);
+			//Team::Instance()->CalcAttitude(originCore, cs, &web);
 			ERelate newRelate = Team::Instance()->GetRelationship(originCore->ParentChit(), cs->ParentChit());
 
 			if (previousRelate != newRelate) {
