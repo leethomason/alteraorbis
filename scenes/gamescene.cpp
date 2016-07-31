@@ -758,26 +758,32 @@ void GameScene::DrawBuildMarks(const WorkItem& workItem)
 
 void GameScene::DoCameraToggle()
 {
+	int oldCameraMode = cameraMode;
+	cameraMode = (cameraMode + 1) % CAMERA_COUNT;
+
 	Vector3F at = V3F_ZERO;
 	sim->GetEngine()->CameraLookingAt(&at);
 
-	// Toggle high/low.
 	Camera* camera = &sim->GetEngine()->camera;
 
-	if (camera->EyeDir3()->y < -0.90f) {
-		// currently high
+	// Save the iso state to return to:
+	if (oldCameraMode == CAMERA_ISO) {
+		savedCameraRotation = camera->Quat();
+		savedCameraHeight = camera->PosWC().y;
+	}
+
+	if (cameraMode == CAMERA_ISO) {
 		camera->SetQuat(savedCameraRotation);
 		camera->SetPosWC(camera->PosWC().x, savedCameraHeight, camera->PosWC().z);
 		sim->GetEngine()->CameraLookAt(at.x, at.z);
 	}
-	else {
-		// currently low
-		savedCameraRotation = camera->Quat();
-		savedCameraHeight = camera->PosWC().y;
+	else if (cameraMode == CAMERA_TOP) {
 		camera->TiltRotationToQuat(-80, 0);
 		camera->SetPosWC(camera->PosWC().x, Min(EL_CAMERA_MAX, savedCameraHeight*2.0f), camera->PosWC().z);
 		sim->GetEngine()->CameraLookAt(at.x, at.z);
 	}
+	// If the camera mode is 3rd person, do nothing.
+	// It will get set in the tick()
 }
 
 
@@ -1564,7 +1570,6 @@ void GameScene::DoTick(U32 delta)
 		sim->DoTick(delta);
 	}
 	menu->DoTick(GetHomeCore(), buildingCounts, BuildScript::NUM_PLAYER_OPTIONS);
-	//	SetPickupButtons();
 
 	for (int i = 0; i < NUM_NEWS_BUTTONS; ++i) {
 		const auto& current = sim->GetChitBag()->GetCurrentNews();
@@ -1582,6 +1587,49 @@ void GameScene::DoTick(U32 delta)
 		}
 	}
 
+	Chit* playerChit = GetPlayerChit();
+	if (playerChit && cameraMode == CAMERA_THIRD_PERSON) {
+		CameraComponent* cc = sim->GetChitBag()->GetCamera();
+		cc->SetTrack(0);
+		Engine* engine = sim->GetEngine();
+
+		Vector3F posV = playerChit->Position();
+		Matrix4 pos;
+		pos.SetTranslation(posV);
+		Quaternion rotQ = playerChit->Rotation();
+		Matrix4 rot;
+		rotQ.ToMatrix(&rot);
+
+		Matrix4 xform = pos * rot;
+
+//		Vector3F cameraOffset = { 0, 4.f, -9.0f };	// {0, up, back}
+		Vector3F cameraOffset = { 0, 4.f, -9.0f };	// {0, up, back}
+		Vector3F cameraPos = xform * cameraOffset;
+
+		engine->camera.SetPosWC(cameraPos);
+
+//		Vector3F cameraTargetOffset = { 0, 0, 6.0f };
+		Vector3F cameraTargetOffset = { 0, 0, 8.0f };
+		Vector3F cameraTarget = xform * cameraTargetOffset;
+		Vector3F dir = cameraTarget - cameraPos;
+		dir.Normalize();
+		engine->camera.SetDir(dir, V3F_UP);
+
+		/*
+		Matrix4 r;
+		Vector3F axis = { 0, 0, 1 };
+		r.SetAxisAngle(axis, -20);
+		Quaternion rQ;
+		rQ.FromRotationMatrix(r);
+
+		Quaternion cameraRot;
+		Quaternion::Multiply(rot, rQ, &cameraRot);
+
+		engine->camera.SetPosWC(cameraPos);
+		engine->camera.SetQuat(cameraRot);
+		*/
+	}
+
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt(&lookAt);
 	Vector2I viewingSector = ToSector(lookAt.x, lookAt.z);
@@ -1591,7 +1639,6 @@ void GameScene::DoTick(U32 delta)
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
-	Chit* playerChit = GetPlayerChit();
 	menu->EnableBuildAndControl(homeCoreScript != 0);
 
 	Chit* track = sim->GetChitBag()->GetChit(chitTracking);

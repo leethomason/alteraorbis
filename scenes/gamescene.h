@@ -145,6 +145,13 @@ private:
 		bool operator<( const PickupData& rhs ) const { return distance < rhs.distance; }
 	};
 
+	enum {
+		CAMERA_ISO,
+		CAMERA_TOP,
+		CAMERA_THIRD_PERSON,
+		CAMERA_COUNT
+	};
+
 	enum class EDragMode
 	{
 		NONE,
@@ -179,6 +186,7 @@ private:
 	grinliz::Vector2F	tapView, tapDown;
 	Adviser*			adviser;
 	TutorialWidget*		tutorial;
+	int					cameraMode = CAMERA_ISO;
 
 	// Shows what is being built or removed.
 	gamui::Image		selectionTile;
@@ -211,8 +219,6 @@ private:
 	NewsConsole			newsConsole;
 	StartGameWidget		startGameWidget;
 	EndGameWidget		endGameWidget;
-
-	//gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 
 	grinliz::CDynArray< Chit* >			chitQuery;
 	grinliz::CDynArray< PickupData >	pickupData;

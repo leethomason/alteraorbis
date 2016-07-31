@@ -1,4 +1,5 @@
 - first person mode
+- cameraLookAt does 2 different things....
 x turn fps back on
 x better domain distribution when choosing initial domain
 - procedural trees
