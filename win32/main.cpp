@@ -72,11 +72,6 @@ grinliz::GLString* databases[GAME_MAX_MOD_DATABASES];
 void ScreenCapture();
 void PostCurrentGame();
 
-bool PlatformHasMouseSupport() {
-	return true;
-}
-
-
 int main(int argc, char **argv)
 {
 	MemStartCheck();

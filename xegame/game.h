@@ -147,8 +147,8 @@ public:
 
 	void PrintPerf();
 
-	static bool MouseMode();
-	static bool TabletMode() { return !Game::MouseMode(); }
+	//static bool MouseMode();
+	//static bool TabletMode() { return !Game::MouseMode(); }
 
 protected:
 	void PushPopScene();
@@ -179,7 +179,7 @@ protected:
 	bool perfText;
 	int perfFrameCount;
 	bool renderUI;
-	bool alsoPan;
+	//bool alsoPan;
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database

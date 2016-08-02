@@ -428,7 +428,7 @@ void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 	RenderAtom atom;
 
 	int buildActive = menu->BuildActive();
-	if (buildActive && Game::MouseMode()) {
+	if (buildActive) {
 		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 		{
 			//name = "clearMarker1";
@@ -1604,12 +1604,14 @@ void GameScene::DoTick(U32 delta)
 
 //		Vector3F cameraOffset = { 0, 4.f, -9.0f };	// {0, up, back}
 		Vector3F cameraOffset = { 0, 4.f, -9.0f };	// {0, up, back}
+		//Vector3F cameraOffset = { 0, 2.f, 0.0f };	// {0, up, back}
 		Vector3F cameraPos = xform * cameraOffset;
 
 		engine->camera.SetPosWC(cameraPos);
 
 //		Vector3F cameraTargetOffset = { 0, 0, 6.0f };
 		Vector3F cameraTargetOffset = { 0, 0, 8.0f };
+		//Vector3F cameraTargetOffset = { 0, 0, 10.0f };
 		Vector3F cameraTarget = xform * cameraTargetOffset;
 		Vector3F dir = cameraTarget - cameraPos;
 		dir.Normalize();
