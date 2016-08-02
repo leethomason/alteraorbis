@@ -72,6 +72,7 @@ public:
 	void Pan(int action, float x, float y);
 	void MoveCamera(float dx, float dy);
 	void CancelInput();
+	void FPSMove(float forward, float right, float rotate);
 
 	virtual Scene* CreateScene( int id, SceneData* data ) = 0;
 	

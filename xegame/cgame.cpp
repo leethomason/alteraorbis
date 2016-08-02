@@ -167,6 +167,14 @@ void GameDoTick( void* handle, unsigned int timeInMSec )
 	game->DoTick( timeInMSec );
 }
 
+void GameFPSMove(void* handle, float forward, float right, float rotate)
+{
+	CheckThread check;
+
+	Game* game = (Game*)handle;
+	game->FPSMove(forward, right, rotate);
+}
+
 
 void GameHotKey( void* handle, int mask )
 {

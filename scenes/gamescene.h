@@ -63,6 +63,7 @@ public:
 	virtual void ItemTapped(const gamui::UIItem* item);
 	virtual void HandleHotKey( int mask );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
+	virtual void FPSMove(float forward, float right, float rotate);
 
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();

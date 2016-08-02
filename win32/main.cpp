@@ -301,14 +301,14 @@ int main(int argc, char **argv)
 							//case SDLK_d: reserved
 						case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);			break;
 						case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);		break;
-						case SDL_SCANCODE_I:	GameHotKey(game, GAME_HK_TOGGLE_AI_DEBUG);		break;
-						case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);		break;
+						//case SDL_SCANCODE_I:	GameHotKey(game, GAME_HK_TOGGLE_AI_DEBUG);		break;
+						//case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);		break;
 						case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);					break;
 						case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);			break;
 						case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);			break;
 							//case SDLK_s: reserved
 						case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);			break;
-						case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);			break;
+						//case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);			break;
 							//case SDLK_w: reserved
 
 						case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);			break;
@@ -553,6 +553,16 @@ int main(int argc, char **argv)
 		float keyMoveSpeed = KEY_MOVE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
 		float keyZoomSpeed = KEY_ZOOM_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
 		float keyRotatepeed = KEY_ROTATE_SPEED * float(tickDelta) / float(TIME_BETWEEN_FRAMES);
+		float fpsForward = 0;
+		float fpsRight = 0;
+		float fpsRotate = 0;
+
+		if (keys[SDL_SCANCODE_J]) fpsRight = -1;
+		if (keys[SDL_SCANCODE_L]) fpsRight = 1;
+		if (keys[SDL_SCANCODE_I]) fpsForward = 1;
+		if (keys[SDL_SCANCODE_K]) fpsForward = -1;
+		if (keys[SDL_SCANCODE_U]) fpsRotate = 1;
+		if (keys[SDL_SCANCODE_O]) fpsRotate = -1;
 
 		if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]) {
 			if (modKeys & KMOD_CTRL)
@@ -580,6 +590,9 @@ int main(int argc, char **argv)
 		}
 
 		if (game) {
+			if (fpsForward || fpsRight || fpsRotate) {
+				GameFPSMove(game, fpsForward, fpsRight, fpsRotate);
+			}
 			lastTick = thisTick;
 			thisTick = SDL_GetTicks();
 			PROFILE_BLOCK(GameDoTick);

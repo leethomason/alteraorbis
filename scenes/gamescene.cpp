@@ -418,6 +418,12 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 }
 
 
+void GameScene::FPSMove(float forward, float right, float rotate)
+{
+
+}
+
+
 void GameScene::SetSelectionModel(const grinliz::Vector2F& view)
 {
 	Vector3F at = { 0, 0, 0 };

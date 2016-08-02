@@ -74,6 +74,7 @@ public:
 	virtual void CancelInput()									{}
 	virtual void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)	{}
 	virtual void MoveCamera(float dx, float dy)					{}
+	virtual void FPSMove(float forward, float right, float rotate) {}
 
 	// Only with mouse/kbd input.
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}

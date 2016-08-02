@@ -53,6 +53,8 @@ void GameCameraMove(void* handle, float dx, float dy);
 
 void GameDoTick( void* handle, unsigned int timeInMSec );
 
+void GameFPSMove(void* handle, float forward, float right, float rotate);
+
 #define GAME_HK_TOGGLE_UI				1
 #define GAME_HK_TOGGLE_DEBUG_TEXT		2
 #define GAME_HK_TOGGLE_DEBUG_UI			3

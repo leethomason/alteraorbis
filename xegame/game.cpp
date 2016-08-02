@@ -636,6 +636,12 @@ void Game::MoveCamera(float dx, float dy)
 }
 
 
+void Game::FPSMove(float forward, float right, float rotate)
+{
+	sceneStack.Top()->scene->FPSMove(forward, right, rotate);
+}
+
+
 void Game::CancelInput()
 {
 	isDragging = false;
